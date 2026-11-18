@@ -1782,12 +1782,20 @@
                 const out = [];
                 nestedArr.forEach((sub, idx) => {
                     if (sub && typeof sub === 'object') {
+                        const subConj = pickField(sub, ['conjunto', 'Conjunto', 'CONJUNTO']) || '';
+                        const subSubc = pickField(sub, ['subconjunto', 'Subconjunto', 'SUBCONJUNTO']) || '';
                         out.push({
                             id: `${docId}_${idx}`,
                             area: pickField(sub, ['setor', 'area']) || baseArea || 'Geral',
                             maquina: pickField(sub, ['maquina', 'linha', 'nome']) || baseMaq || 'Linha Geral',
                             equipamento: pickField(sub, ['equipamento', 'nome']) || 'Equipamento',
-                            conjunto: pickField(sub, ['conjunto', 'subconjunto']) || 'Conjunto Geral',
+                            conjunto: subConj || subSubc || 'Conjunto Geral',
+                            subconjunto: subConj ? subSubc : '',
+                            tag: pickField(sub, ['tag', 'TAG', 'codigo_ativo']) || pickField(raw, ['tag', 'TAG', 'codigo_ativo']),
+                            criticidade: pickField(sub, ['criticidade', 'Criticidade']) || pickField(raw, ['criticidade', 'Criticidade']),
+                            periodicidade_preventiva: pickField(sub, ['periodicidade_preventiva', 'periodicidade']) || pickField(raw, ['periodicidade_preventiva', 'periodicidade']),
+                            disciplina: pickField(sub, ['disciplina', 'Disciplina']) || pickField(raw, ['disciplina', 'Disciplina']),
+                            status_ativo: pickField(sub, ['status_ativo', 'status']) || pickField(raw, ['status_ativo', 'status']),
                             modelo: pickField(sub, ['modelo']),
                             serie: pickField(sub, ['serie', 'n_serie', 'numero_serie'])
                         });
@@ -1799,7 +1807,15 @@
             const area = pickField(raw, ['setor', 'Setor', 'SETOR', 'area', 'Area', 'AREA', 'área', 'Área', 'ÁREA']);
             const maquina = pickField(raw, ['maquina', 'Maquina', 'MAQUINA', 'máquina', 'Máquina', 'MÁQUINA', 'linha', 'Linha', 'LINHA']);
             const equipamento = pickField(raw, ['equipamento', 'Equipamento', 'EQUIPAMENTO']);
-            const conjunto = pickField(raw, ['conjunto', 'Conjunto', 'CONJUNTO', 'subconjunto', 'Subconjunto', 'SUBCONJUNTO']);
+            const conjRaw = pickField(raw, ['conjunto', 'Conjunto', 'CONJUNTO']);
+            const subconjRaw = pickField(raw, ['subconjunto', 'Subconjunto', 'SUBCONJUNTO']);
+            const conjunto = conjRaw || subconjRaw;
+            const subconjunto = conjRaw ? subconjRaw : '';
+            const tag = pickField(raw, ['tag', 'TAG', 'codigo_ativo']);
+            const criticidade = pickField(raw, ['criticidade', 'Criticidade']);
+            const periodicidade_preventiva = pickField(raw, ['periodicidade_preventiva', 'periodicidade']);
+            const disciplina = pickField(raw, ['disciplina', 'Disciplina']);
+            const status_ativo = pickField(raw, ['status_ativo', 'status']);
             const modelo = pickField(raw, ['modelo', 'Modelo', 'MODELO']);
             const serie = pickField(raw, ['serie', 'Serie', 'SERIE', 'série', 'Série', 'n_serie', 'num_serie', 'numero_serie']);
 
@@ -1809,13 +1825,22 @@
                 maquina,
                 equipamento,
                 conjunto,
+                subconjunto,
+                tag,
+                criticidade,
+                periodicidade_preventiva,
+                disciplina,
+                status_ativo,
                 modelo,
                 serie
             }];
         }
 
         function getNomeConjunto(item) {
-            return (item.conjunto && item.conjunto.trim()) || 'Conjunto Geral';
+            const c = (item.conjunto && item.conjunto.trim()) || '';
+            const s = (item.subconjunto && item.subconjunto.trim()) || '';
+            if (c && s && c.toLowerCase() !== s.toLowerCase()) return `${c} › ${s}`;
+            return c || s || 'Conjunto Geral';
         }
 
         function atualizarBadgesArvore() {
@@ -3088,6 +3113,18 @@
                        </div>`
                     : '';
 
+                const critLetra = String(node.criticidade || '').trim().toUpperCase().replace(/^CLASSE\s*/i, '').charAt(0);
+                const critClass = critLetra === 'A'
+                    ? 'bg-rose-50 text-rose-700 border-rose-200'
+                    : (critLetra === 'B' ? 'bg-amber-50 text-amber-700 border-amber-200' : 'bg-emerald-50 text-emerald-700 border-emerald-200');
+                const badgesAtivoHtml = (node.tag || critLetra || node.periodicidade_preventiva)
+                    ? `<div class="flex flex-wrap items-center gap-1 mt-1">
+                        ${node.tag ? `<span class="text-[9px] font-mono font-extrabold px-1.5 py-0.5 rounded bg-slate-100 text-slate-700 border border-slate-200" title="TAG do Ativo">${escapeHtml(node.tag)}</span>` : ''}
+                        ${critLetra && ['A','B','C'].includes(critLetra) ? `<span class="text-[9px] font-extrabold px-1.5 py-0.5 rounded border ${critClass}" title="Criticidade do Ativo">Crit. ${critLetra}</span>` : ''}
+                        ${node.periodicidade_preventiva ? `<span class="text-[9px] font-extrabold px-1.5 py-0.5 rounded bg-teal-50 text-teal-800 border border-teal-200" title="Periodicidade Preventiva">${escapeHtml(node.periodicidade_preventiva)}</span>` : ''}
+                       </div>`
+                    : '';
+
                 tbody += `<tr>
                     <td style="min-width:320px; max-width:320px; position:sticky; left:0; z-index:20;" class="!text-left bg-white shadow-[3px_0_8px_-2px_rgba(15,23,42,0.08)] !py-2.5 !px-3.5">
                         <div class="flex items-start justify-between gap-2">
@@ -3108,6 +3145,7 @@
                                 </button>
                             </div>
                         </div>
+                        ${badgesAtivoHtml}
                         ${badgesPadrinhosHtml}
                     </td>`;
                 for (let w = 1; w <= 52; w++) {
@@ -6773,7 +6811,7 @@
             document.getElementById('arvInputEquipamento').value = node.equipamento || '';
             document.getElementById('arvInputModelo').value = node.modelo || '';
             document.getElementById('arvInputSerie').value = node.serie || '';
-            document.getElementById('arvInputConjuntos').value = getNomeConjunto(node);
+            document.getElementById('arvInputConjuntos').value = (node.conjunto && node.conjunto.trim()) || 'Conjunto Geral';
 
             atualizarDatalistsArvore();
             document.getElementById('modalGerenciarArvore').classList.remove('hidden');
