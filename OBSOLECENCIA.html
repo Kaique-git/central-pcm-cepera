@@ -4,10 +4,12 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0">
     <title>Gestão Integrada de Ativos & Obsolescência — PCM Cepêra</title>
+    <link rel="icon" type="image/png" href="CEPERA_LOGO.png">
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
     <style>
+        [hidden] { display: none !important; }
         :root {
             --primary: #0f172a;
             --accent: #0284c7;
@@ -276,7 +278,7 @@
             <!-- BARRA LATERAL DESKTOP -->
             <aside aria-label="Menu principal" class="hidden md:flex flex-col items-center justify-between py-5 px-2.5 glass-rail shrink-0 w-24">
                 <div class="flex flex-col items-center gap-3 w-full">
-                    <div class="w-11 h-11 rounded-2xl bg-red-600 text-white font-extrabold text-xs flex items-center justify-center shadow-md tracking-tighter">PCM</div>
+                    <img src="CEPERA_LOGO.png" alt="Cepêra" class="w-16 h-11 object-contain rounded-xl shadow-sm bg-white p-1 border border-slate-200">
                     <div class="h-px w-10 bg-slate-200/80 my-0.5"></div>
                     <nav id="desktopRailNav" class="flex flex-col items-center gap-2 w-full">
                         <button type="button" onclick="switchTab('dashboard')" id="rail-dashboard" class="rail-btn active">
@@ -323,9 +325,10 @@
                 <header class="px-5 sm:px-8 py-3.5 flex items-center justify-between border-b border-white/80 bg-white/45 shrink-0">
                     <div class="flex items-center gap-3">
                         <button type="button" onclick="voltarParaCentralPCM()" title="Voltar à Central de Aplicativos PCM" class="px-3 py-1.5 rounded-full bg-slate-900 hover:bg-slate-800 text-white text-xs font-extrabold flex items-center gap-1.5 shadow-sm">
-                            <span>⬅ Central</span>
+                            <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M10 19l-7-7m0 0l7-7m-7 7h18"/></svg>
+                            <span>Central</span>
                         </button>
-                        <span class="md:hidden bg-red-600 text-white font-extrabold px-2.5 py-1 rounded-lg text-xs tracking-wider">CEPÊRA</span>
+                        <img src="CEPERA_LOGO.png" alt="Cepêra" class="md:hidden h-8 w-auto object-contain rounded-lg shadow-sm bg-white px-1.5 py-0.5 border border-slate-200">
                         <div class="flex items-center gap-2 text-xs font-bold text-slate-500">
                             <span id="statusDot" class="w-2 h-2 rounded-full bg-amber-500 animate-pulse"></span>
                             <span id="statusText">Conectando...</span>
@@ -483,7 +486,8 @@
                                     <span>Relatório A4</span>
                                 </button>
                                 <button type="button" onclick="openModal('modalImportPecas')" class="btn-touch bg-sky-50 hover:bg-sky-100 border border-sky-200 text-sky-800 text-xs py-2.5 px-4">
-                                    <span>📥 Importar Peças em Massa</span>
+                                    <svg class="w-4 h-4 text-sky-700" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12"/></svg>
+                                    <span>Importar Peças em Massa</span>
                                 </button>
                                 <button type="button" onclick="openModal('modalItem', 'Preventiva')" class="btn-pill-dark text-xs">
                                     <span>+ Nova Preventiva</span>
@@ -538,7 +542,8 @@
                                         <span>Imprimir Inventário A4</span>
                                     </button>
                                     <button type="button" onclick="openModal('modalImportLinhas')" class="btn-pill-dark text-xs">
-                                        <span>📥 Importar Árvore</span>
+                                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12"/></svg>
+                                        <span>Importar Árvore</span>
                                     </button>
                                 </div>
                             </div>
@@ -1374,7 +1379,7 @@
                     <td class="py-3.5 px-5"><div class="font-extrabold text-sm text-slate-900">${i.componente} ${badgeCod}</div><div class="text-[10px] text-slate-400 font-bold uppercase mt-0.5">${i.area || 'Geral'} › ${i.maquina || ''} › ${i.equipamento || ''} ${i.conjunto ? '› ' + i.conjunto : ''}</div></td>
                     <td class="py-3.5 px-5 text-xs text-slate-600 font-semibold whitespace-normal max-w-xs">${i.acaoProposta || '<span class="text-slate-300 italic">Não definida</span>'}</td>
                     <td class="py-3.5 px-5 text-sm font-extrabold text-amber-600">R$ ${(Number(i.custoEstimado) || 0).toLocaleString('pt-BR')}</td>
-                    <td class="py-3.5 px-5 text-center"><select onchange="updateStatusAcao('${i.id}', this.value)" class="input-clean text-xs py-1.5 px-3 font-extrabold"><option value="Pendente" ${i.statusAcao === 'Pendente' ? 'selected' : ''}>⏳ Pendente</option><option value="Em Andamento" ${i.statusAcao === 'Em Andamento' ? 'selected' : ''}>⚙️ Em Andamento</option><option value="Concluído" ${i.statusAcao === 'Concluído' ? 'selected' : ''}>✅ Concluído</option></select></td>
+                    <td class="py-3.5 px-5 text-center"><select onchange="updateStatusAcao('${i.id}', this.value)" class="input-clean text-xs py-1.5 px-3 font-extrabold"><option value="Pendente" ${i.statusAcao === 'Pendente' ? 'selected' : ''}>Pendente</option><option value="Em Andamento" ${i.statusAcao === 'Em Andamento' ? 'selected' : ''}>Em Andamento</option><option value="Concluído" ${i.statusAcao === 'Concluído' ? 'selected' : ''}>Concluído</option></select></td>
                 </tr>`;
             }).join('');
         }
@@ -1623,7 +1628,6 @@
                 @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;800&display=swap');
                 body { font-family: 'Plus Jakarta Sans', sans-serif; font-size: 11px; color: #1e293b; margin: 0; padding: 25px; background: #fff; }
                 .header { border-bottom: 3px solid ${corTema}; padding-bottom: 12px; margin-bottom: 20px; display: flex; justify-content: space-between; align-items: flex-end; }
-                .logo-box { background: #dc2626; color: #fff; padding: 4px 10px; border-radius: 6px; font-weight: 800; font-size: 13px; letter-spacing: 1px; display: inline-block; margin-bottom: 8px;}
                 .header h1 { margin: 0; font-size: 19px; color: #0f172a; text-transform: uppercase; font-weight: 800;}
                 .header .meta { text-align: right; color: #64748b; font-size: 10px; line-height: 1.4; }
                 .kpis { display: flex; gap: 15px; margin-bottom: 25px; flex-wrap:wrap;}
@@ -1640,7 +1644,7 @@
                 @media print { body { padding: 0; -webkit-print-color-adjust: exact; print-color-adjust: exact; } @page { size: A4 portrait; margin: 1cm; } }
             </style></head><body>
                 <div class="header">
-                    <div><div class="logo-box">CEPÊRA</div><h1>${titulo}</h1></div>
+                    <div><img src="CEPERA_LOGO.png" alt="Cepêra" style="height:36px;width:auto;object-fit:contain;margin-bottom:6px;display:block;"><h1>${titulo}</h1></div>
                     <div class="meta"><strong>Gerado por:</strong> Planejamento e Controle de Manutenção (PCM)<br><strong>Data da Extração:</strong> ${dataHora}</div>
                 </div>
                 ${infoKpi}
@@ -1757,7 +1761,8 @@
                     return;
                 }
                 const sess = raw ? JSON.parse(raw) : { user: userStr, nome: userStr, role: 'Admin' };
-                if (sess && sess.role !== 'Admin' && Array.isArray(sess.apps_permitidos) && !sess.apps_permitidos.includes('obsolescencia')) {
+                const isAdminRole = sess && (sess.role === 'Admin' || sess.role === 'Gerente');
+                if (sess && !isAdminRole && Array.isArray(sess.apps_permitidos) && !sess.apps_permitidos.includes('obsolescencia')) {
                     if (window.parent && window.parent !== window) {
                         window.parent.postMessage({ type: 'CEPERA_VOLTAR_CENTRAL' }, '*');
                     } else {
