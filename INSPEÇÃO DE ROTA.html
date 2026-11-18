@@ -468,7 +468,7 @@
                                     <h2 class="text-lg font-extrabold text-slate-900 mt-0.5">Resumo das Rotas Agendadas na Semana <span id="dashResumoSemanaNum" class="text-sky-600"></span></h2>
                                     <p class="text-xs text-slate-500">Acompanhe rapidamente cada responsável escalado, equipamento completo e status sem precisar abrir a planilha de 52 semanas.</p>
                                 </div>
-                                <button type="button" onclick="switchTab('minharota')" class="btn-pill-dark text-xs py-2.5 px-5 shrink-0">
+                                <button type="button" onclick="abrirResumoRotaSemanaAdmin('')" class="btn-pill-dark text-xs py-2.5 px-5 shrink-0">
                                     <span>Abrir Acompanhamento da Semana</span>
                                     <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 5l7 7m0 0l-7 7m7-7H3"/></svg>
                                 </button>
@@ -500,32 +500,32 @@
 
                     <!-- ==================== PAGE 2: MINHA ROTA (TÉCNICO) & ROTAS DA SEMANA (ADMIN / GERENTE / SUPERVISOR) ==================== -->
                     <section id="view-minharota" aria-label="Rotas da Semana" class="hidden space-y-6 max-w-7xl mx-auto">
-                        <div class="flex flex-col lg:flex-row lg:items-end justify-between gap-4">
-                            <div>
+                        <div class="flex flex-col xl:flex-row xl:items-end justify-between gap-4">
+                            <div class="min-w-0">
                                 <p id="rotaSubtituloTopo" class="text-xs font-bold uppercase tracking-widest text-sky-600 mb-1">Execução & Acompanhamento em Campo</p>
                                 <h1 class="text-2xl sm:text-3xl font-extrabold text-slate-900">
                                     <span id="rotaTituloPrincipal">Minha Rota</span> — Semana <span id="lblSemanaAtual" class="text-sky-600"></span>
                                 </h1>
                                 <p id="rotaDescricaoTopo" class="text-sm text-slate-500 mt-1">Inspecione cada conjunto agendado seguindo os critérios técnicos ou acompanhe todas as rotas programadas com seus responsáveis e equipamentos.</p>
                             </div>
-                            <div class="flex flex-wrap items-center gap-2">
+                            <div class="flex flex-wrap items-center xl:justify-end gap-2 shrink-0">
                                 <!-- Seletor de Semana para Gestores (Admin / Gerente / Supervisor) -->
-                                <div id="rotaSeletorSemanaWrap" class="hidden items-center bg-white border border-slate-200/90 rounded-full p-1 shadow-sm">
-                                    <button type="button" onclick="mudarSemanaRotaResumo(-1)" class="w-8 h-8 rounded-full hover:bg-slate-100 flex items-center justify-center text-slate-700" title="Semana Anterior">
+                                <div id="rotaSeletorSemanaWrap" class="hidden flex-nowrap items-center gap-1 bg-white border border-slate-200/90 rounded-full p-1 shadow-sm shrink-0">
+                                    <button type="button" onclick="mudarSemanaRotaResumo(-1)" class="w-8 h-8 rounded-full hover:bg-slate-100 flex items-center justify-center text-slate-700 shrink-0" title="Semana Anterior">
                                         <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M15 19l-7-7 7-7"/></svg>
                                     </button>
-                                    <select id="selSemanaRotaResumo" onchange="selecionarSemanaRotaResumo(this.value)" class="bg-transparent font-extrabold text-xs px-2 py-1 text-slate-900 focus:outline-none"></select>
-                                    <button type="button" onclick="mudarSemanaRotaResumo(1)" class="w-8 h-8 rounded-full hover:bg-slate-100 flex items-center justify-center text-slate-700" title="Próxima Semana">
+                                    <select id="selSemanaRotaResumo" onchange="selecionarSemanaRotaResumo(this.value)" class="bg-transparent font-extrabold text-xs px-2 py-1 text-slate-900 focus:outline-none cursor-pointer whitespace-nowrap min-w-[120px] shrink-0"></select>
+                                    <button type="button" onclick="mudarSemanaRotaResumo(1)" class="w-8 h-8 rounded-full hover:bg-slate-100 flex items-center justify-center text-slate-700 shrink-0" title="Próxima Semana">
                                         <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M9 5l7 7-7 7"/></svg>
                                     </button>
-                                    <button type="button" onclick="irParaSemanaAtualRotaResumo()" class="px-3 py-1 rounded-full bg-sky-50 hover:bg-sky-100 text-[11px] font-extrabold text-sky-700 mr-0.5">Atual</button>
+                                    <button type="button" onclick="irParaSemanaAtualRotaResumo()" class="px-3 py-1 rounded-full bg-sky-50 hover:bg-sky-100 text-[11px] font-extrabold text-sky-700 mr-0.5 whitespace-nowrap shrink-0">Atual</button>
                                 </div>
 
-                                <button type="button" onclick="switchTab('fichas')" class="btn-touch bg-white hover:bg-slate-50 border border-slate-200 text-slate-800 rounded-full px-4 py-2 text-xs shadow-sm">
+                                <button type="button" onclick="switchTab('fichas')" class="btn-touch bg-white hover:bg-slate-50 border border-slate-200 text-slate-800 rounded-full px-4 py-2 text-xs shadow-sm whitespace-nowrap shrink-0">
                                     <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z"/></svg>
                                     <span>Imprimir Fichas</span>
                                 </button>
-                                <div class="flex items-center gap-1.5 bg-white/80 p-1.5 rounded-full border border-slate-200/80">
+                                <div class="flex items-center gap-1.5 bg-white/80 p-1.5 rounded-full border border-slate-200/80 shrink-0">
                                     <button type="button" id="btnRotaTodas" onclick="setFiltroRota('Todas')" class="px-3.5 py-1.5 rounded-full text-xs font-bold text-slate-600">Todas</button>
                                     <button type="button" id="btnRotaPend" onclick="setFiltroRota('Pendente')" class="px-3.5 py-1.5 rounded-full text-xs font-bold bg-slate-900 text-white">Pendentes</button>
                                     <button type="button" id="btnRotaConc" onclick="setFiltroRota('Concluído')" class="px-3.5 py-1.5 rounded-full text-xs font-bold text-slate-600">Concluídas</button>
@@ -2575,7 +2575,7 @@
                         const key = r.id_tecnico || r.nome_tecnico || 'Sem Responsável';
                         if (!porTec[key]) {
                             porTec[key] = {
-                                id: r.id_tecnico || '',
+                                id: r.id_tecnico || r.nome_tecnico || '',
                                 nome: r.nome_tecnico || 'Não atribuído',
                                 role: r.role_tecnico || 'Mecânica',
                                 total: 0,
@@ -2624,7 +2624,7 @@
                                     <svg class="w-3.5 h-3.5 text-slate-400 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"/></svg>
                                     <span class="text-[11px] font-extrabold text-slate-700 truncate">${escapeHtml(r.nome_tecnico || 'Não atribuído')}</span>
                                 </div>
-                                <button type="button" onclick="switchTab('minharota')" class="text-[11px] font-extrabold text-sky-600 hover:underline shrink-0">Detalhes →</button>
+                                <button type="button" onclick="abrirResumoRotaSemanaAdmin('')" class="text-[11px] font-extrabold text-sky-600 hover:underline shrink-0">Detalhes →</button>
                             </div>
                         </div>`;
                     }).join('');
@@ -4519,18 +4519,21 @@
             const lblSem = document.getElementById('lblSemanaAtual');
             if (lblSem) lblSem.innerText = semanaAlvo;
 
-            const tituloEl = document.getElementById('rotaViewTitulo');
-            const subEl = document.getElementById('rotaViewSubtitulo');
+            const eyebrowEl = document.getElementById('rotaSubtituloTopo');
+            const tituloEl = document.getElementById('rotaTituloPrincipal');
+            const subEl = document.getElementById('rotaDescricaoTopo');
             const selSemWrap = document.getElementById('rotaSeletorSemanaWrap');
             const btnTodas = document.getElementById('btnRotaTodas');
             const painelGestor = document.getElementById('painelGestorRotasSemana');
 
             if (gestor) {
+                if (eyebrowEl) eyebrowEl.innerText = 'Visão Consolidada PCM & Gestão';
                 if (tituloEl) tituloEl.innerText = 'Rotas Agendadas na Semana';
-                if (subEl) subEl.innerText = 'Visão consolidada PCM & Gestão: acompanhe todos os conjuntos agendados, responsáveis e progresso';
+                if (subEl) subEl.innerText = 'Acompanhe todos os conjuntos programados na semana com seu responsável, árvore completa de equipamento e progresso.';
                 if (selSemWrap) {
                     selSemWrap.classList.remove('hidden');
-                    const selSem = document.getElementById('rotaSelectSemana');
+                    selSemWrap.classList.add('inline-flex');
+                    const selSem = document.getElementById('selSemanaRotaResumo');
                     if (selSem) {
                         let opts = '';
                         for (let w = 1; w <= 52; w++) {
@@ -4542,9 +4545,13 @@
                 if (btnTodas) btnTodas.classList.remove('hidden');
                 if (painelGestor) painelGestor.classList.remove('hidden');
             } else {
+                if (eyebrowEl) eyebrowEl.innerText = 'Execução em Campo';
                 if (tituloEl) tituloEl.innerText = 'Minha Rota da Semana';
                 if (subEl) subEl.innerText = 'Inspeções atribuídas ao seu perfil técnico (no nível do conjunto)';
-                if (selSemWrap) selSemWrap.classList.add('hidden');
+                if (selSemWrap) {
+                    selSemWrap.classList.add('hidden');
+                    selSemWrap.classList.remove('inline-flex');
+                }
                 if (btnTodas) btnTodas.classList.add('hidden');
                 if (painelGestor) painelGestor.classList.add('hidden');
                 if (filtroRotaStatus === 'Todas') filtroRotaStatus = 'Pendente';
@@ -4562,8 +4569,8 @@
                 if (!item.el) return;
                 const isHidden = item.el.classList.contains('hidden');
                 item.el.className = (filtroRotaStatus === item.val
-                    ? 'px-4 py-1.5 rounded-full text-xs font-bold bg-slate-900 text-white'
-                    : 'px-4 py-1.5 rounded-full text-xs font-bold text-slate-600') + (isHidden ? ' hidden' : '');
+                    ? 'px-3.5 py-1.5 rounded-full text-xs font-bold bg-slate-900 text-white whitespace-nowrap'
+                    : 'px-3.5 py-1.5 rounded-full text-xs font-bold text-slate-600 whitespace-nowrap') + (isHidden ? ' hidden' : '');
             });
 
             let baseSemana = agendaRotas.filter(a => Number(a.semana) === Number(semanaAlvo));
@@ -4576,14 +4583,20 @@
                 const concSem = baseSemana.filter(a => a.status === 'Concluído').length;
                 const pendSem = totalSem - concSem;
                 const tecsUnicos = [...new Set(baseSemana.map(a => a.id_tecnico || a.nome_tecnico).filter(Boolean))];
+                const equipsUnicos = [...new Set(baseSemana.map(a => `${a.area || ''}|${a.maquina || ''}|${a.equipamento || ''}`).filter(v => v !== '||'))];
+                const taxaSem = totalSem > 0 ? Math.round((concSem / totalSem) * 100) : 0;
 
                 const elTot = document.getElementById('rotaKpiTotal');
+                const elEqCount = document.getElementById('rotaKpiEquipsCount');
                 const elPend = document.getElementById('rotaKpiPendentes');
                 const elConc = document.getElementById('rotaKpiConcluidas');
+                const elTaxa = document.getElementById('rotaKpiTaxa');
                 const elTecs = document.getElementById('rotaKpiTecnicos');
                 if (elTot) elTot.innerText = totalSem;
+                if (elEqCount) elEqCount.innerText = `${equipsUnicos.length} equipamento${equipsUnicos.length === 1 ? '' : 's'} distinto${equipsUnicos.length === 1 ? '' : 's'}`;
                 if (elPend) elPend.innerText = pendSem;
                 if (elConc) elConc.innerText = concSem;
+                if (elTaxa) elTaxa.innerText = `${taxaSem}%`;
                 if (elTecs) elTecs.innerText = tecsUnicos.length;
 
                 // Popula selects de filtro mantendo seleção
