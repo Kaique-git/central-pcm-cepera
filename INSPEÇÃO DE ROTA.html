@@ -4459,12 +4459,31 @@
         window.abrirResumoRotaSemanaAdmin = (idTecnico = '') => {
             rotaSemanaSelecionada = currentWeekNumber;
             filtroRotaStatus = 'Todas';
+            const fBusca = document.getElementById('rotaFiltroBusca');
+            const fArea = document.getElementById('rotaFiltroArea');
+            const fEsp = document.getElementById('rotaFiltroEsp');
+            if (fBusca) fBusca.value = '';
+            if (fArea) fArea.value = '';
+            if (fEsp) fEsp.value = '';
             switchTab('minharota');
             const selTec = document.getElementById('rotaFiltroTecnico');
             if (selTec) {
                 selTec.value = idTecnico || '';
                 renderMinhaRota();
             }
+        };
+
+        window.limparFiltrosRotasSemana = () => {
+            const fBusca = document.getElementById('rotaFiltroBusca');
+            const fTec = document.getElementById('rotaFiltroTecnico');
+            const fArea = document.getElementById('rotaFiltroArea');
+            const fEsp = document.getElementById('rotaFiltroEsp');
+            if (fBusca) fBusca.value = '';
+            if (fTec) fTec.value = '';
+            if (fArea) fArea.value = '';
+            if (fEsp) fEsp.value = '';
+            filtroRotaStatus = usuarioLogado && isPerfilGestor(usuarioLogado.role) ? 'Todas' : 'Pendente';
+            renderMinhaRota();
         };
 
         window.mudarSemanaRotaResumo = (delta) => {
@@ -4505,12 +4524,17 @@
                 if (!item.el) return;
                 const isHidden = item.el.classList.contains('hidden');
                 item.el.className = (st === item.val
-                    ? 'px-4 py-1.5 rounded-full text-xs font-bold bg-slate-900 text-white'
-                    : 'px-4 py-1.5 rounded-full text-xs font-bold text-slate-600') + (isHidden ? ' hidden' : '');
+                    ? 'px-3.5 py-1.5 rounded-full text-xs font-bold bg-slate-900 text-white whitespace-nowrap'
+                    : 'px-3.5 py-1.5 rounded-full text-xs font-bold text-slate-600 whitespace-nowrap') + (isHidden ? ' hidden' : '');
             });
             renderMinhaRota();
         };
 
+        function normTextoFiltro(str) {
+            return String(str || '').normalize('NFD').replace(/[\u0300-\u036f]/g, '').trim().toLowerCase();
+        }
+
+        window.renderMinhaRota = renderMinhaRota;
         function renderMinhaRota() {
             if (!usuarioLogado) return;
             const gestor = isPerfilGestor(usuarioLogado.role);
@@ -4540,6 +4564,7 @@
                             opts += `<option value="${w}" ${w === semanaAlvo ? 'selected' : ''}>Semana S${w < 10 ? '0' + w : w}${w === currentWeekNumber ? ' (Atual)' : ''}</option>`;
                         }
                         selSem.innerHTML = opts;
+                        selSem.value = String(semanaAlvo);
                     }
                 }
                 if (btnTodas) btnTodas.classList.remove('hidden');
@@ -4602,8 +4627,10 @@
                 // Popula selects de filtro mantendo seleção
                 const selTec = document.getElementById('rotaFiltroTecnico');
                 const selArea = document.getElementById('rotaFiltroArea');
+                const selEsp = document.getElementById('rotaFiltroEsp');
                 const prevTec = selTec ? selTec.value : '';
                 const prevArea = selArea ? selArea.value : '';
+                const prevEsp = selEsp ? selEsp.value : '';
 
                 const mapaResponsaveis = {};
                 baseSemana.forEach(r => {
@@ -4626,12 +4653,22 @@
                 if (selTec) {
                     const listaResp = Object.values(mapaResponsaveis).sort((a, b) => a.nome.localeCompare(b.nome));
                     selTec.innerHTML = '<option value="">Todos os Responsáveis</option>' +
-                        listaResp.map(t => `<option value="${escapeHtml(t.id)}" ${t.id === prevTec ? 'selected' : ''}>${escapeHtml(t.nome)} (${t.conc}/${t.total})</option>`).join('');
+                        listaResp.map(t => `<option value="${escapeHtml(t.id)}">${escapeHtml(t.nome)} (${t.conc}/${t.total})</option>`).join('');
+                    selTec.value = prevTec && [...selTec.options].some(o => o.value === prevTec) ? prevTec : '';
                 }
                 if (selArea) {
-                    const areasSem = [...new Set(baseSemana.map(a => a.area).filter(Boolean))].sort((a, b) => a.localeCompare(b));
+                    const areasSem = [...new Set(baseSemana.map(a => (a.area || '').trim()).filter(Boolean))].sort((a, b) => a.localeCompare(b));
                     selArea.innerHTML = '<option value="">Todos os Setores / Áreas</option>' +
-                        areasSem.map(ar => `<option value="${escapeHtml(ar)}" ${ar === prevArea ? 'selected' : ''}>${escapeHtml(ar)}</option>`).join('');
+                        areasSem.map(ar => `<option value="${escapeHtml(ar)}">${escapeHtml(ar)}</option>`).join('');
+                    selArea.value = prevArea && [...selArea.options].some(o => o.value === prevArea) ? prevArea : '';
+                }
+                if (selEsp) {
+                    const extrasEsp = [...new Set(baseSemana.map(a => (a.role_tecnico || '').trim()).filter(r => r && !normTextoFiltro(r).includes('mecanica') && !normTextoFiltro(r).includes('eletrica')))].sort((a, b) => a.localeCompare(b));
+                    selEsp.innerHTML = '<option value="">Todas as Especialidades</option>' +
+                        '<option value="Mecânica">Mecânica</option>' +
+                        '<option value="Elétrica">Elétrica</option>' +
+                        extrasEsp.map(sp => `<option value="${escapeHtml(sp)}">${escapeHtml(sp)}</option>`).join('');
+                    selEsp.value = prevEsp && [...selEsp.options].some(o => o.value === prevEsp) ? prevEsp : '';
                 }
 
                 // Renderiza cards de resumo por responsável
@@ -4687,21 +4724,29 @@
                 filtradas = filtradas.filter(a => a.status === 'Concluído');
             }
 
+            let temFiltroGestorAtivo = false;
             if (gestor) {
                 const fTec = document.getElementById('rotaFiltroTecnico')?.value || '';
                 const fArea = document.getElementById('rotaFiltroArea')?.value || '';
                 const fEsp = document.getElementById('rotaFiltroEsp')?.value || '';
-                const fBusca = (document.getElementById('rotaFiltroBusca')?.value || '').trim().toLowerCase();
+                const fBusca = normTextoFiltro(document.getElementById('rotaFiltroBusca')?.value || '');
+                temFiltroGestorAtivo = Boolean(fTec || fArea || fEsp || fBusca || filtroRotaStatus !== 'Todas');
 
-                if (fTec) filtradas = filtradas.filter(a => (a.id_tecnico || a.nome_tecnico) === fTec);
-                if (fArea) filtradas = filtradas.filter(a => a.area === fArea);
-                if (fEsp) filtradas = filtradas.filter(a => (a.role_tecnico || '').includes(fEsp));
+                if (fTec) filtradas = filtradas.filter(a => (a.id_tecnico || a.nome_tecnico || '') === fTec);
+                if (fArea) filtradas = filtradas.filter(a => (a.area || '').trim() === fArea);
+                if (fEsp) {
+                    const espNorm = normTextoFiltro(fEsp);
+                    filtradas = filtradas.filter(a => normTextoFiltro(a.role_tecnico || 'Mecânica').includes(espNorm));
+                }
                 if (fBusca) {
-                    filtradas = filtradas.filter(a =>
-                        `${a.area || ''} ${a.maquina || ''} ${a.equipamento || ''} ${a.conjunto || ''} ${a.nome_tecnico || ''} ${a.role_tecnico || ''}`
-                            .toLowerCase()
-                            .includes(fBusca)
-                    );
+                    filtradas = filtradas.filter(a => {
+                        const nodeRefBusca = arvLinhas.find(n => n.id === a.id_node);
+                        const padInfoBusca = mapaPadrinhosLinhas[a.id_node] || {};
+                        const padMecB = nodeRefBusca?.padrinho_mec || padInfoBusca.padrinho_mec || '';
+                        const padEleB = nodeRefBusca?.padrinho_ele || padInfoBusca.padrinho_ele || '';
+                        const textoCompleto = normTextoFiltro(`${a.area || ''} ${a.maquina || ''} ${a.equipamento || ''} ${a.conjunto || ''} ${a.nome_tecnico || ''} ${a.role_tecnico || ''} ${padMecB} ${padEleB}`);
+                        return textoCompleto.includes(fBusca);
+                    });
                 }
             }
 
@@ -4718,8 +4763,9 @@
 
             const container = document.getElementById('listaMinhasRotas');
             if (filtradas.length === 0) {
-                container.innerHTML = `<div class="col-span-full p-10 text-center text-slate-500 font-bold border-2 border-dashed border-slate-200 rounded-3xl bg-white/50">
-                    Nenhuma rota ${filtroRotaStatus === 'Concluído' ? 'concluída' : filtroRotaStatus === 'Pendente' ? 'pendente' : 'agendada'} encontrada para a Semana S${semanaAlvo}.
+                container.innerHTML = `<div class="col-span-full p-10 text-center text-slate-500 font-bold border-2 border-dashed border-slate-200 rounded-3xl bg-white/50 space-y-3">
+                    <div>Nenhuma rota ${filtroRotaStatus === 'Concluído' ? 'concluída' : filtroRotaStatus === 'Pendente' ? 'pendente' : 'agendada'} encontrada para a Semana S${semanaAlvo}.</div>
+                    ${temFiltroGestorAtivo ? `<button type="button" onclick="limparFiltrosRotasSemana()" class="btn-touch bg-white hover:bg-slate-100 border border-slate-300 text-slate-800 rounded-full px-4 py-1.5 text-xs shadow-sm">Limpar Filtros</button>` : ''}
                 </div>`;
                 return;
             }
