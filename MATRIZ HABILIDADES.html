@@ -4,10 +4,12 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0">
     <title>Matriz & Árvore de Habilidades — PCM Cepêra</title>
+    <link rel="icon" type="image/png" href="CEPERA_LOGO.png">
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
     <style>
+        [hidden] { display: none !important; }
         :root {
             --primary: #0f172a;
             --accent: #0284c7;
@@ -226,7 +228,7 @@
         <div class="frosted-shell rounded-[28px] w-full max-w-md p-7 sm:p-10 relative overflow-hidden">
             <div class="flex items-center justify-between mb-8">
                 <div class="flex items-center gap-2.5">
-                    <span class="bg-red-600 text-white font-extrabold px-3 py-1 rounded-lg text-xs tracking-widest uppercase shadow-sm">Cepêra</span>
+                    <img src="CEPERA_LOGO.png" alt="Cepêra" class="h-9 w-auto object-contain rounded-lg shadow-sm bg-white px-1.5 py-0.5 border border-slate-200">
                     <span id="loginSyncBadge" class="text-[11px] font-bold text-amber-600 flex items-center gap-1">
                         <span class="w-2 h-2 rounded-full bg-amber-500 animate-pulse"></span> Conectando...
                     </span>
@@ -272,7 +274,7 @@
             <!-- BARRA LATERAL DESKTOP -->
             <aside aria-label="Menu principal" class="hidden md:flex flex-col items-center justify-between py-5 px-2.5 glass-rail shrink-0 w-24">
                 <div class="flex flex-col items-center gap-3 w-full">
-                    <div class="w-11 h-11 rounded-2xl bg-red-600 text-white font-extrabold text-xs flex items-center justify-center shadow-md tracking-tighter">PCM</div>
+                    <img src="CEPERA_LOGO.png" alt="Cepêra" class="w-16 h-11 object-contain rounded-xl shadow-sm bg-white p-1 border border-slate-200">
                     <div class="h-px w-10 bg-slate-200/80 my-0.5"></div>
                     <nav id="desktopRailNav" class="flex flex-col items-center gap-2 w-full"></nav>
                 </div>
@@ -298,9 +300,10 @@
                 <header class="px-5 sm:px-8 py-3.5 flex items-center justify-between border-b border-white/80 bg-white/45 shrink-0">
                     <div class="flex items-center gap-3">
                         <button type="button" onclick="voltarParaCentralPCM()" title="Voltar à Central de Aplicativos PCM" class="px-3 py-1.5 rounded-full bg-slate-900 hover:bg-slate-800 text-white text-xs font-extrabold flex items-center gap-1.5 shadow-sm">
-                            <span>⬅ Central</span>
+                            <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M10 19l-7-7m0 0l7-7m-7 7h18"/></svg>
+                            <span>Central</span>
                         </button>
-                        <span class="md:hidden bg-red-600 text-white font-extrabold px-2.5 py-1 rounded-lg text-xs tracking-wider">CEPÊRA</span>
+                        <img src="CEPERA_LOGO.png" alt="Cepêra" class="md:hidden h-8 w-auto object-contain rounded-lg shadow-sm bg-white px-1.5 py-0.5 border border-slate-200">
                         <div class="flex items-center gap-2 text-xs font-bold text-slate-500">
                             <span id="headerSyncDot" class="w-2 h-2 rounded-full bg-amber-500 animate-pulse"></span>
                             <span id="headerSyncText">Conectando...</span>
@@ -927,6 +930,7 @@
                         <option value="Elétrica">Técnico Elétrica</option>
                         <option value="Supervisor Mecânica">Supervisor Mecânica</option>
                         <option value="Supervisor Elétrica">Supervisor Elétrica</option>
+                        <option value="Gerente">Gerente</option>
                         <option value="Admin">Administrador (PCM)</option>
                     </select>
                 </div>
@@ -1274,7 +1278,7 @@
             listaSkills = [...novoArraySkills];
             const docAlvo = (usuarioLogado && usuarioLogado.id !== 'default_admin')
                 ? usuarioLogado
-                : (listaFunc.find(function(f) { return f.id !== 'default_admin' && f.role === 'Admin'; }) || listaFunc.find(function(f) { return f.id !== 'default_admin'; }));
+                : (listaFunc.find(function(f) { return f.id !== 'default_admin' && isPerfilAdmin(f.role); }) || listaFunc.find(function(f) { return f.id !== 'default_admin'; }));
 
             if (docAlvo) {
                 await updateDoc(doc(db, "ir_funcionarios", docAlvo.id), {
@@ -1338,11 +1342,14 @@
         }
 
         // ================= LOGIN, PERMISSÕES (RBAC) & CONTROLE DE SESSÃO =================
+        function isPerfilAdmin(role) {
+            return role === 'Admin' || role === 'Gerente';
+        }
         function isSupervisor(role) {
             return role === 'Supervisor Mecânica' || role === 'Supervisor Elétrica';
         }
         function isGestor(role) {
-            return role === 'Admin' || isSupervisor(role);
+            return isPerfilAdmin(role) || isSupervisor(role);
         }
         function exigirPermissaoGestor() {
             if (!usuarioLogado || !isGestor(usuarioLogado.role)) {
@@ -1420,7 +1427,7 @@
             }
 
             if (u) {
-                if (u.role !== 'Admin' && Array.isArray(u.apps_permitidos) && !u.apps_permitidos.includes('matriz_habilidades')) {
+                if (!isPerfilAdmin(u.role) && Array.isArray(u.apps_permitidos) && !u.apps_permitidos.includes('matriz_habilidades')) {
                     showToast("Acesso não habilitado para Matriz de Habilidades no seu perfil RBAC.", "error");
                     setTimeout(function() { window.voltarParaCentralPCM(); }, 900);
                     return;
@@ -1481,7 +1488,7 @@
             const mob = document.getElementById('mobileTabNav');
 
             if (isGestor(u.role)) {
-                const btnEquipeRail = (u.role === 'Admin')
+                const btnEquipeRail = isPerfilAdmin(u.role)
                     ? '<button type="button" onclick="switchTab(\'equipe\')" id="rail-equipe" class="rail-btn">' +
                         '<svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0z"/></svg>' +
                         '<span>Equipe</span>' +
@@ -1522,7 +1529,7 @@
                     '<button type="button" onclick="switchTab(\'pdi\')" id="mob-pdi" class="mob-tab">PDI (GUT)</button>' +
                     '<button type="button" onclick="switchTab(\'catalogo\')" id="mob-catalogo" class="mob-tab">Árvore</button>' +
                     '<button type="button" onclick="switchTab(\'autoavaliacao\')" id="mob-autoavaliacao" class="mob-tab">Autoaval.</button>' +
-                    (u.role === 'Admin' ? '<button type="button" onclick="switchTab(\'equipe\')" id="mob-equipe" class="mob-tab">Equipe</button>' : '');
+                    (isPerfilAdmin(u.role) ? '<button type="button" onclick="switchTab(\'equipe\')" id="mob-equipe" class="mob-tab">Equipe</button>' : '');
 
                 switchTab('dashboard');
             } else {
@@ -1558,9 +1565,9 @@
             if (!isGestor(usuarioLogado.role) && ['matriz', 'calibracao', 'catalogo', 'equipe'].indexOf(t) !== -1) {
                 return;
             }
-            // Bloqueia Supervisor de acessar aba Equipe (exclusiva do Admin)
-            if (t === 'equipe' && usuarioLogado.role !== 'Admin') {
-                showToast("Acesso restrito ao Administrador PCM.", "error");
+            // Bloqueia Supervisor de acessar aba Equipe (exclusiva do Admin / Gerente)
+            if (t === 'equipe' && !isPerfilAdmin(usuarioLogado.role)) {
+                showToast("Acesso restrito ao Administrador / Gerente PCM.", "error");
                 return;
             }
 
@@ -2631,9 +2638,9 @@
             }
         };
 
-        // ================= PAGE 7: EQUIPE (EXCLUSIVA ADMIN) =================
+        // ================= PAGE 7: EQUIPE (EXCLUSIVA ADMIN / GERENTE) =================
         window.abrirModalFuncionario = function() {
-            if (!usuarioLogado || usuarioLogado.role !== 'Admin') return;
+            if (!usuarioLogado || !isPerfilAdmin(usuarioLogado.role)) return;
             document.getElementById('fEditId').value = '';
             document.getElementById('modalFuncTitulo').innerText = 'Adicionar Colaborador';
             document.getElementById('fNome').value = '';
@@ -2644,7 +2651,7 @@
         };
 
         window.abrirModalEditarFuncionario = function(id) {
-            if (!usuarioLogado || usuarioLogado.role !== 'Admin') return;
+            if (!usuarioLogado || !isPerfilAdmin(usuarioLogado.role)) return;
             const func = listaFunc.find(function(f) { return f.id === id; });
             if (!func) return;
             document.getElementById('fEditId').value = func.id;
@@ -2658,7 +2665,7 @@
 
         window.salvarFuncionario = async function(e) {
             e.preventDefault();
-            if (!usuarioLogado || usuarioLogado.role !== 'Admin') return;
+            if (!usuarioLogado || !isPerfilAdmin(usuarioLogado.role)) return;
             const editId = document.getElementById('fEditId').value.trim();
             const data = {
                 nome: document.getElementById('fNome').value.trim(),
@@ -2677,10 +2684,10 @@
         };
 
         function renderEquipe() {
-            if (!usuarioLogado || usuarioLogado.role !== 'Admin') return;
+            if (!usuarioLogado || !isPerfilAdmin(usuarioLogado.role)) return;
             const tbody = document.getElementById('tbodyEquipe');
             tbody.innerHTML = listaFunc.map(function(f) {
-                const badge = f.role === 'Admin'
+                const badge = isPerfilAdmin(f.role)
                     ? 'bg-slate-900 text-white'
                     : (f.role.includes('Supervisor')
                         ? 'bg-indigo-100 text-indigo-800'
@@ -2717,7 +2724,7 @@
                 '</tr>';
             }).join('');
 
-            const html = '<!DOCTYPE html><html lang="pt-BR"><head><meta charset="UTF-8"><title>Prontuario_Habilidades_' + escapeHtml(tec.nome) + '</title><style>body{font-family:sans-serif;font-size:11px;padding:24px;color:#0f172a}h1{margin:4px 0 0;font-size:17px;text-transform:uppercase}.header{border-bottom:2.5px solid #dc2626;padding-bottom:12px;margin-bottom:16px;display:flex;justify-content:space-between;align-items:flex-end}table{width:100%;border-collapse:collapse}th,td{border:1px solid #cbd5e1;padding:6px 8px;text-align:left}th{background:#f1f5f9;font-size:9.5px;text-transform:uppercase}@media print{body{-webkit-print-color-adjust:exact}}</style></head><body><div class="header"><div><span style="background:#dc2626;color:#fff;padding:3px 8px;font-weight:800;font-size:10px;border-radius:4px;">CEPÊRA</span><h1>Ficha Individual de Habilidades & Polivalência</h1><div style="font-size:12px;font-weight:700;margin-top:4px;color:#0284c7;">Colaborador: ' + escapeHtml(tec.nome) + ' (' + escapeHtml(tec.role) + ')</div></div><div style="font-size:10px;color:#64748b;text-align:right;">Emissão: ' + new Date().toLocaleDateString('pt-BR') + '<br>Pesos: 20% Auto | 50% Prática | 30% Teórica</div></div><table><thead><tr><th>Pilar / Habilidade</th><th>Meta (D)</th><th>Auto</th><th>Prática</th><th>Teórica</th><th>Atual (A)</th><th>GAP</th></tr></thead><tbody>' + rows + '</tbody></table></body></html>';
+            const html = '<!DOCTYPE html><html lang="pt-BR"><head><meta charset="UTF-8"><title>Prontuario_Habilidades_' + escapeHtml(tec.nome) + '</title><style>body{font-family:sans-serif;font-size:11px;padding:24px;color:#0f172a}h1{margin:4px 0 0;font-size:17px;text-transform:uppercase}.header{border-bottom:2.5px solid #dc2626;padding-bottom:12px;margin-bottom:16px;display:flex;justify-content:space-between;align-items:flex-end}table{width:100%;border-collapse:collapse}th,td{border:1px solid #cbd5e1;padding:6px 8px;text-align:left}th{background:#f1f5f9;font-size:9.5px;text-transform:uppercase}@media print{body{-webkit-print-color-adjust:exact}}</style></head><body><div class="header"><div><img src="CEPERA_LOGO.png" alt="Cepêra" style="height:36px;width:auto;object-fit:contain;margin-bottom:4px;"><h1>Ficha Individual de Habilidades & Polivalência</h1><div style="font-size:12px;font-weight:700;margin-top:4px;color:#0284c7;">Colaborador: ' + escapeHtml(tec.nome) + ' (' + escapeHtml(tec.role) + ')</div></div><div style="font-size:10px;color:#64748b;text-align:right;">Emissão: ' + new Date().toLocaleDateString('pt-BR') + '<br>Pesos: 20% Auto | 50% Prática | 30% Teórica</div></div><table><thead><tr><th>Pilar / Habilidade</th><th>Meta (D)</th><th>Auto</th><th>Prática</th><th>Teórica</th><th>Atual (A)</th><th>GAP</th></tr></thead><tbody>' + rows + '</tbody></table></body></html>';
             const win = window.open('', '_blank');
             win.document.write(html); win.document.close(); win.focus();
             setTimeout(function() { win.print(); }, 400);
@@ -2740,7 +2747,7 @@
                     '<td style="text-align:center;font-weight:800;">' + escapeHtml(p.status) + '</td>' +
                 '</tr>';
             }).join('');
-            const html = '<!DOCTYPE html><html lang="pt-BR"><head><meta charset="UTF-8"><title>Plano_Desenvolvimento_GUT_PCM</title><style>body{font-family:sans-serif;font-size:11px;padding:24px;color:#0f172a}h1{margin:4px 0 0;font-size:17px;text-transform:uppercase}.header{border-bottom:2.5px solid #dc2626;padding-bottom:12px;margin-bottom:16px;display:flex;justify-content:space-between;align-items:flex-end}table{width:100%;border-collapse:collapse}th,td{border:1px solid #cbd5e1;padding:6px 8px;text-align:left}th{background:#f1f5f9;font-size:9.5px;text-transform:uppercase}@media print{body{-webkit-print-color-adjust:exact}}</style></head><body><div class="header"><div><span style="background:#dc2626;color:#fff;padding:3px 8px;font-weight:800;font-size:10px;border-radius:4px;">CEPÊRA</span><h1>Plano de Desenvolvimento de Manutenção (Priorização GUT)</h1></div><div style="font-size:10px;color:#64748b;text-align:right;">Emissão: ' + new Date().toLocaleDateString('pt-BR') + '<br>Total de ações: ' + listaPdi.length + '</div></div><table><thead><tr><th>GUT</th><th>Técnico</th><th>Habilidade / Treinamento</th><th>Nível</th><th>Multiplicador</th><th>Prazo</th><th>Status</th></tr></thead><tbody>' + rows + '</tbody></table></body></html>';
+            const html = '<!DOCTYPE html><html lang="pt-BR"><head><meta charset="UTF-8"><title>Plano_Desenvolvimento_GUT_PCM</title><style>body{font-family:sans-serif;font-size:11px;padding:24px;color:#0f172a}h1{margin:4px 0 0;font-size:17px;text-transform:uppercase}.header{border-bottom:2.5px solid #dc2626;padding-bottom:12px;margin-bottom:16px;display:flex;justify-content:space-between;align-items:flex-end}table{width:100%;border-collapse:collapse}th,td{border:1px solid #cbd5e1;padding:6px 8px;text-align:left}th{background:#f1f5f9;font-size:9.5px;text-transform:uppercase}@media print{body{-webkit-print-color-adjust:exact}}</style></head><body><div class="header"><div><img src="CEPERA_LOGO.png" alt="Cepêra" style="height:36px;width:auto;object-fit:contain;margin-bottom:4px;"><h1>Plano de Desenvolvimento de Manutenção (Priorização GUT)</h1></div><div style="font-size:10px;color:#64748b;text-align:right;">Emissão: ' + new Date().toLocaleDateString('pt-BR') + '<br>Total de ações: ' + listaPdi.length + '</div></div><table><thead><tr><th>GUT</th><th>Técnico</th><th>Habilidade / Treinamento</th><th>Nível</th><th>Multiplicador</th><th>Prazo</th><th>Status</th></tr></thead><tbody>' + rows + '</tbody></table></body></html>';
             const win = window.open('', '_blank');
             win.document.write(html); win.document.close(); win.focus();
             setTimeout(function() { win.print(); }, 400);
