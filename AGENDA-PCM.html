@@ -26,6 +26,10 @@
             background: linear-gradient(135deg, #f1f5f9 0%, #f8fafc 50%, #e2e8f0 100%);
         }
 
+        [hidden] {
+            display: none !important;
+        }
+
         .frosted-shell {
             background: rgba(255, 255, 255, 0.94);
             backdrop-filter: blur(8px);
@@ -665,7 +669,7 @@
     </div>
 
     <!-- ================= MODAL DO DIA & NOVO LANÇAMENTO ================= -->
-    <div id="dayOverlay" role="dialog" aria-modal="true" hidden class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-50 flex items-end sm:items-center justify-center p-0 sm:p-4">
+    <div id="dayOverlay" role="dialog" aria-modal="true" hidden class="hidden fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-50 flex items-end sm:items-center justify-center p-0 sm:p-4">
         <div class="bg-white w-full max-w-2xl rounded-t-3xl sm:rounded-3xl p-6 sm:p-7 shadow-2xl border border-slate-200 max-h-[92vh] overflow-y-auto space-y-5">
             <div class="flex items-center justify-between border-b border-slate-100 pb-3">
                 <div>
@@ -754,10 +758,10 @@
                     <!-- Recorrência -->
                     <div class="p-3.5 bg-slate-50 border border-slate-200/80 rounded-2xl">
                         <label class="flex items-center gap-2 cursor-pointer text-xs font-extrabold text-slate-700">
-                            <input type="checkbox" id="fRecorrente" class="rounded" onchange="document.getElementById('recMenu').hidden = !this.checked">
+                            <input type="checkbox" id="fRecorrente" class="rounded" onchange="const rm=document.getElementById('recMenu'); rm.hidden = !this.checked; rm.classList.toggle('hidden', !this.checked);">
                             <span>🔄 Repetir esta manutenção periodicamente</span>
                         </label>
-                        <div id="recMenu" hidden class="mt-3 grid grid-cols-1 sm:grid-cols-2 gap-3">
+                        <div id="recMenu" hidden class="hidden mt-3 grid grid-cols-1 sm:grid-cols-2 gap-3">
                             <div>
                                 <label class="block text-[10px] font-bold text-slate-500 mb-1">Frequência</label>
                                 <select class="input-clean py-1.5 text-xs font-bold" id="fRecFreq">
@@ -786,7 +790,7 @@
     </div>
 
     <!-- Modal Edição -->
-    <div id="editOverlay" role="dialog" aria-modal="true" hidden class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-[60] flex items-end sm:items-center justify-center p-0 sm:p-4">
+    <div id="editOverlay" role="dialog" aria-modal="true" hidden class="hidden fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-[60] flex items-end sm:items-center justify-center p-0 sm:p-4">
         <div class="bg-white w-full max-w-lg rounded-t-3xl sm:rounded-3xl p-6 sm:p-7 shadow-2xl border border-slate-200 space-y-4">
             <div class="flex items-center justify-between border-b border-slate-100 pb-3">
                 <div>
@@ -831,7 +835,7 @@
     </div>
 
     <!-- Modal Exclusão -->
-    <div id="deleteOverlay" role="dialog" aria-modal="true" hidden class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-[70] flex items-center justify-center p-4">
+    <div id="deleteOverlay" role="dialog" aria-modal="true" hidden class="hidden fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-[70] flex items-center justify-center p-4">
         <div class="bg-white w-full max-w-sm rounded-3xl p-6 sm:p-7 text-center shadow-2xl border border-slate-200">
             <div class="mx-auto flex items-center justify-center h-12 w-12 rounded-2xl bg-rose-100 text-rose-600 mb-4">
                 <svg class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/></svg>
@@ -999,15 +1003,25 @@
 
         window.fecharModal = (id) => {
             const el = document.getElementById(id);
-            if (el) el.hidden = true;
+            if (el) {
+                el.hidden = true;
+                el.classList.add('hidden');
+            }
             atualizarTudo();
         };
         window.abrirModal = (id) => {
             const el = document.getElementById(id);
-            if (el) el.hidden = false;
+            if (el) {
+                el.hidden = false;
+                el.classList.remove('hidden');
+            }
         };
         window.fecharModalA11y = (id) => {
-            document.getElementById(id)?.classList.add('hidden');
+            const el = document.getElementById(id);
+            if (el) {
+                el.hidden = true;
+                el.classList.add('hidden');
+            }
         };
 
         // ================= ESPAÇO DO USUÁRIO & ATALHOS =================
@@ -1015,11 +1029,11 @@
 
         window.abrirEspacoUsuario = function() {
             atualizarUIPreferencias();
-            document.getElementById('modalEspacoUsuario').classList.remove('hidden');
+            abrirModal('modalEspacoUsuario');
         };
 
         window.abrirModalAtalhos = function() {
-            document.getElementById('modalAtalhos').classList.remove('hidden');
+            abrirModal('modalAtalhos');
         };
 
         function aplicarPreferenciasVisuais() {
@@ -1563,7 +1577,8 @@
                 const promises = datasParaSalvar.map(d => addDoc(colRef, { ...baseData, data: d }));
                 await Promise.all(promises);
                 document.getElementById('addForm').reset();
-                document.getElementById('recMenu').hidden = true;
+                const rm = document.getElementById('recMenu');
+                if (rm) { rm.hidden = true; rm.classList.add('hidden'); }
                 fecharModal('dayOverlay');
                 showToast(datasParaSalvar.length > 1 ? `${datasParaSalvar.length} lançamentos programados!` : "Lançamento salvo com sucesso!");
             } catch (err) { showToast("Erro ao salvar.", "error"); }
