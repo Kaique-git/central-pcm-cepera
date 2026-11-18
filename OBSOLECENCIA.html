@@ -1,0 +1,1183 @@
+<!DOCTYPE html>
+<html lang="pt-BR" data-theme="light">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Gestão Integrada de Ativos — PCM Cepêra</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <script>
+    (function () {
+        var pref = {}; try { pref = JSON.parse(localStorage.getItem("cepera-obs-prefs") || "{}"); } catch (e) { }
+        document.documentElement.setAttribute("data-theme", pref.theme || "light");
+    })();
+    </script>
+    <style>
+        :root {
+            --bg-main: #f8fafc; --surface: #ffffff; --surface-hover: #f1f5f9; --surface-alt: #f8fafc;
+            --border: #e2e8f0; --text-main: #0f172a; --text-muted: #64748b;
+            --primary: #0284c7; --primary-hover: #0369a1; --shadow: 0 4px 6px -1px rgba(0,0,0,0.05), 0 2px 4px -1px rgba(0,0,0,0.03);
+            --tree-line: #cbd5e1;
+        }
+        body { font-family: 'Inter', sans-serif; -webkit-tap-highlight-color: transparent; background-color: var(--bg-main); color: var(--text-main); }
+        ::-webkit-scrollbar { width: 8px; height: 8px; } ::-webkit-scrollbar-track { background: transparent; } ::-webkit-scrollbar-thumb { background: var(--border); border-radius: 4px; }
+        .glass-panel { background: var(--surface); border: 1px solid var(--border); box-shadow: var(--shadow); }
+        
+        .badge-critico { background: rgba(225, 29, 72, 0.1); color: #e11d48; border: 1px solid rgba(225, 29, 72, 0.2); }
+        .badge-alto { background: rgba(245, 158, 11, 0.1); color: #d97706; border: 1px solid rgba(245, 158, 11, 0.2); }
+        .badge-medio { background: rgba(234, 179, 8, 0.1); color: #ca8a04; border: 1px solid rgba(234, 179, 8, 0.2); }
+        .badge-baixo { background: rgba(16, 185, 129, 0.1); color: #059669; border: 1px solid rgba(16, 185, 129, 0.2); }
+
+        .input-touch { padding: 0.75rem 1rem; font-size: 0.95rem; border-radius: 0.5rem; background: var(--surface); border: 1px solid var(--border); color: var(--text-main); transition: all 0.2s; }
+        .input-touch:focus { outline: none; border-color: var(--primary); box-shadow: 0 0 0 3px rgba(2, 132, 199, 0.1); }
+        .tab-btn { padding: 0.875rem 1.25rem; font-size: 0.875rem; white-space: nowrap; cursor: pointer; font-weight: 600; border-bottom: 2px solid transparent; transition: all 0.2s; color: var(--text-muted); }
+        .tab-btn.active { color: var(--primary); border-bottom-color: var(--primary); background: var(--surface-hover); }
+        .tab-btn:hover:not(.active) { color: var(--text-main); }
+        
+        /* Árvore Corporativa */
+        .tree-area { margin-bottom: 24px; }
+        .tree-area-header { background: var(--text-main); color: var(--surface); padding: 10px 16px; border-radius: 6px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.05em; display: flex; align-items: center; gap: 8px; margin-bottom: 12px; font-size: 0.85rem; }
+        .tree-machine { background: var(--surface); border: 1px solid var(--border); border-radius: 8px; padding: 16px; margin-bottom: 12px; margin-left: 12px; box-shadow: var(--shadow); }
+        .tree-equip { margin-left: 20px; border-left: 2px solid var(--primary); padding-left: 16px; margin-top: 12px; padding-bottom: 8px;}
+        .tree-assembly { margin-left: 20px; border-left: 2px solid var(--tree-line); padding-left: 16px; margin-top: 10px; }
+        .tree-component { margin-left: 16px; padding: 12px 16px; background: var(--surface-alt); border: 1px solid var(--border); border-radius: 6px; margin-top: 8px; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 12px; }
+        
+        .gut-slider { height: 8px; border-radius: 4px; appearance: none; background: var(--tree-line); outline: none; }
+        .gut-slider::-webkit-slider-thumb { appearance: none; width: 24px; height: 24px; border-radius: 50%; background: var(--primary); cursor: pointer; border: 3px solid var(--surface); box-shadow: 0 2px 4px rgba(0,0,0,0.2); }
+    </style>
+</head>
+<body class="min-h-screen flex flex-col">
+
+    <!-- Header Principal -->
+    <header class="bg-white border-b border-[var(--border)] sticky top-0 z-40">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
+            <div class="flex items-center space-x-4">
+                <div class="bg-red-600 text-white font-black px-3 py-1.5 rounded tracking-widest text-sm shadow-sm">CEPÊRA</div>
+                <div class="h-6 w-px bg-[var(--border)] hidden sm:block"></div>
+                <h1 class="text-base font-bold text-slate-800 flex items-center gap-2">
+                    Gestão de Ativos <span class="bg-slate-100 text-slate-600 border border-slate-200 text-[10px] font-bold px-2 py-0.5 rounded">PCM</span>
+                </h1>
+            </div>
+            <div class="flex items-center space-x-3">
+                <div id="statusBadge" class="hidden md:flex items-center space-x-2 bg-slate-50 px-3 py-1.5 rounded-md border border-slate-200 text-xs">
+                    <span id="statusDot" class="w-2 h-2 rounded-full bg-amber-500 animate-pulse"></span>
+                    <span id="statusText" class="text-slate-500 font-semibold">Conectando...</span>
+                </div>
+                <div class="flex gap-2">
+                    <button onclick="openModal('modalItem', 'Preventiva')" class="hidden sm:flex bg-blue-50 text-blue-700 hover:bg-blue-100 border border-blue-200 text-xs font-bold px-4 py-2 rounded-md transition-all items-center gap-2">
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6"/></svg>
+                        Nova Preventiva
+                    </button>
+                    <button onclick="openModal('modalItem', 'Obsolescencia')" class="hidden sm:flex bg-rose-600 hover:bg-rose-700 text-white text-xs font-bold px-4 py-2 rounded-md transition-all items-center gap-2 shadow-sm">
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"/></svg>
+                        Risco de Obsolescência
+                    </button>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <!-- Sub-Header / Navegação -->
+    <div class="bg-white border-b border-[var(--border)]">
+        <div class="max-w-7xl mx-auto px-4 flex space-x-1 overflow-x-auto">
+            <button onclick="switchTab('dashboard')" id="tabBtn-dashboard" class="tab-btn active flex items-center gap-2">
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2V6zM14 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2V6zM4 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2v-2zM14 16a2 2 0 012-2h2a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2v-2z"/></svg>
+                Visão Geral
+            </button>
+            <button onclick="switchTab('obs')" id="tabBtn-obs" class="tab-btn flex items-center gap-2">
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"/></svg>
+                Obsolescência
+            </button>
+            <button onclick="switchTab('prev')" id="tabBtn-prev" class="tab-btn flex items-center gap-2">
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/></svg>
+                Preventiva & Desgaste
+            </button>
+            <button onclick="switchTab('acoes')" id="tabBtn-acoes" class="tab-btn flex items-center gap-2">
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4"/></svg>
+                Planos de Ação
+            </button>
+            <button onclick="switchTab('cadastros')" id="tabBtn-cadastros" class="tab-btn flex items-center gap-2">
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 7v10c0 2.21 3.582 4 8 4s8-1.79 8-4V7M4 7c0 2.21 3.582 4 8 4s8-1.79 8-4M4 7c0-2.21 3.582-4 8-4s8 1.79 8 4m0 5c0 2.21-3.582 4-8 4s-8-1.79-8-4"/></svg>
+                Estrutura & Atributos
+            </button>
+        </div>
+    </div>
+
+    <!-- MAIN CONTENT -->
+    <main class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 flex-1 w-full mb-20 sm:mb-6">
+
+        <!-- ================= TAB 1: DASHBOARD ================= -->
+        <div id="view-dashboard" class="space-y-6">
+            <div class="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-4">
+                <div class="glass-panel p-5 rounded-xl border-l-4 border-l-rose-500">
+                    <p class="text-xs font-bold uppercase text-slate-500 tracking-wider">Riscos de Obsolescência</p>
+                    <h3 id="kpiObsoletas" class="text-3xl font-black text-rose-600 mt-2">0</h3>
+                </div>
+                <div class="glass-panel p-5 rounded-xl border-l-4 border-l-blue-500">
+                    <p class="text-xs font-bold uppercase text-slate-500 tracking-wider">Peças Preventivas</p>
+                    <h3 id="kpiPreventivas" class="text-3xl font-black text-blue-600 mt-2">0</h3>
+                </div>
+                <div class="glass-panel p-5 rounded-xl border-l-4 border-l-emerald-500">
+                    <p class="text-xs font-bold uppercase text-slate-500 tracking-wider">Ações Concluídas / Total</p>
+                    <h3 id="kpiAcoesDone" class="text-2xl font-black text-emerald-600 mt-2">0 / 0</h3>
+                </div>
+                <div class="glass-panel p-5 rounded-xl border-l-4 border-l-amber-500">
+                    <p class="text-xs font-bold uppercase text-slate-500 tracking-wider">Custo Est. Mitigação</p>
+                    <h3 id="kpiCustoTotal" class="text-2xl font-black text-amber-600 mt-2">R$ 0</h3>
+                </div>
+            </div>
+            <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+                <div class="lg:col-span-2 glass-panel p-6 rounded-xl">
+                    <h3 class="text-sm font-bold uppercase tracking-wider text-slate-500 mb-6">Top 5 Riscos de Obsolescência (Matriz GUT)</h3>
+                    <div class="h-64 w-full relative"><canvas id="chartGutRank"></canvas></div>
+                </div>
+                <div class="glass-panel p-6 rounded-xl">
+                    <h3 class="text-sm font-bold uppercase tracking-wider text-slate-500 mb-6">Proporção de Cadastros</h3>
+                    <div class="h-48 w-full relative"><canvas id="chartTiposPie"></canvas></div>
+                </div>
+            </div>
+        </div>
+
+        <!-- ================= TAB 2: OBSOLESCÊNCIA ================= -->
+        <div id="view-obs" class="hidden space-y-4">
+            <div class="flex justify-between items-center bg-white p-5 rounded-xl border border-[var(--border)] shadow-sm flex-wrap gap-4">
+                <div>
+                    <h2 class="text-lg font-bold text-slate-800 flex items-center gap-2">
+                        <svg class="w-5 h-5 text-rose-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"/></svg>
+                        Mapeamento de Obsolescência
+                    </h2>
+                    <p class="text-xs text-slate-500 mt-1">Árvore de peças avaliadas pela matriz GUT para mitigação de risco de parada.</p>
+                </div>
+                <div class="flex gap-2 flex-wrap">
+                    <button onclick="openModalFiltroRelatorio('obs')" class="px-4 py-2 bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs font-bold rounded shadow-sm transition-colors flex items-center gap-2">
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z"/></svg> Gerar Relatório
+                    </button>
+                    <button onclick="openModal('modalItem', 'Obsolescencia')" class="px-4 py-2 bg-rose-600 hover:bg-rose-700 text-white text-xs font-bold rounded shadow-sm transition-colors">Adicionar Risco</button>
+                </div>
+            </div>
+            <div id="treeContainerObs" class="space-y-6 pb-8"></div>
+        </div>
+
+        <!-- ================= TAB 3: PREVENTIVAS ================= -->
+        <div id="view-prev" class="hidden space-y-4">
+            <div class="flex justify-between items-center bg-white p-5 rounded-xl border border-[var(--border)] shadow-sm flex-wrap gap-4">
+                <div>
+                    <h2 class="text-lg font-bold text-slate-800 flex items-center gap-2">
+                        <svg class="w-5 h-5 text-blue-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/></svg>
+                        Plano de Preventivas & Desgaste
+                    </h2>
+                    <p class="text-xs text-slate-500 mt-1">Árvore contendo peças rotineiras, controle de vida útil e planejamento de trocas.</p>
+                </div>
+                <div class="flex gap-2 flex-wrap">
+                    <button onclick="openModalFiltroRelatorio('prev')" class="px-4 py-2 bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs font-bold rounded shadow-sm transition-colors flex items-center gap-2">
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z"/></svg> Relatório
+                    </button>
+                    <button onclick="openModal('modalImportPecas')" class="px-4 py-2 bg-slate-100 hover:bg-slate-200 border border-slate-300 text-slate-700 text-xs font-bold rounded shadow-sm transition-colors flex items-center gap-2">
+                        📥 Importar Peças em Massa
+                    </button>
+                    <button onclick="openModal('modalItem', 'Preventiva')" class="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white text-xs font-bold rounded shadow-sm transition-colors">Nova Preventiva</button>
+                </div>
+            </div>
+            <div id="treeContainerPrev" class="space-y-6 pb-8"></div>
+        </div>
+
+        <!-- ================= TAB 4: AÇÕES ================= -->
+        <div id="view-acoes" class="hidden space-y-6 pb-12">
+            <div class="glass-panel rounded-xl overflow-hidden">
+                <div class="p-5 border-b border-[var(--border)] bg-slate-50 flex justify-between items-center flex-wrap gap-4">
+                    <h2 class="text-base font-bold text-slate-800">Planos de Ação (Obsolescência)</h2>
+                    <button onclick="openModalFiltroRelatorio('acoes')" class="px-4 py-2 bg-slate-800 hover:bg-slate-900 text-white text-xs font-bold rounded shadow-sm transition-colors flex items-center gap-2">
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z"/></svg> Relatório de Ações
+                    </button>
+                </div>
+                <div class="overflow-x-auto">
+                    <table class="w-full text-left text-sm whitespace-nowrap">
+                        <thead class="bg-white text-slate-500 uppercase font-bold text-[10px] border-b border-[var(--border)]">
+                            <tr><th class="py-3 px-5">Componente / Estrutura</th><th class="py-3 px-5">Ação Proposta (Retrofit/Troca)</th><th class="py-3 px-5">Custo (R$)</th><th class="py-3 px-5 text-center">Status de Execução</th></tr>
+                        </thead>
+                        <tbody id="tbodyAcoes" class="divide-y divide-[var(--border)] bg-white"></tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+        <!-- ================= TAB 5: ATRIBUTOS (ESTRUTURA) ================= -->
+        <div id="view-cadastros" class="hidden space-y-6 pb-12">
+            <div class="glass-panel rounded-xl p-6 space-y-6">
+                <div class="flex flex-col md:flex-row md:items-center justify-between gap-4">
+                    <div>
+                        <h2 class="text-base font-bold text-slate-800">Gerenciador de Estrutura</h2>
+                        <p class="text-xs text-slate-500 mt-1">A árvore é criada sozinha nos apontamentos. Gerencie aqui Modelos e SN das Máquinas.</p>
+                    </div>
+                    <div class="flex gap-2 flex-wrap">
+                        <button onclick="openModalFiltroRelatorio('arvore')" class="px-4 py-2 bg-slate-100 border border-slate-200 hover:bg-slate-200 text-slate-700 text-xs font-bold rounded shadow-sm transition-colors flex items-center gap-2">
+                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z"/></svg> Imprimir Inventário
+                        </button>
+                        <button onclick="openModal('modalImportLinhas')" class="px-4 py-2 bg-slate-100 hover:bg-slate-200 border border-slate-300 text-slate-700 text-xs font-bold rounded shadow-sm transition-colors">
+                            📥 Importar Árvore
+                        </button>
+                    </div>
+                </div>
+
+                <div class="bg-slate-50 p-4 rounded-lg border border-slate-200 flex flex-col sm:flex-row gap-4">
+                    <div class="flex-1">
+                        <label class="block text-[10px] font-bold uppercase text-slate-500 mb-1">Filtrar Setor / Área</label>
+                        <select id="exploraArea" class="input-touch w-full py-2 text-sm" onchange="renderExploradorMaquinas()"></select>
+                    </div>
+                    <div class="flex-1">
+                        <label class="block text-[10px] font-bold uppercase text-slate-500 mb-1">Filtrar Máquina / Linha</label>
+                        <select id="exploraMaquina" class="input-touch w-full py-2 text-sm" onchange="renderExploradorCards()"></select>
+                    </div>
+                </div>
+
+                <div id="estruturaCardsContainer" class="grid grid-cols-1 lg:grid-cols-2 gap-4 mt-4">
+                    <div class="p-8 text-center text-slate-400 text-sm">Selecione o Setor e a Máquina acima.</div>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <!-- ================= MODAL DE FILTRO PARA RELATÓRIOS ================= -->
+    <div id="modalFiltroRelatorio" class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-50 hidden flex items-center justify-center p-4">
+        <div class="glass-panel w-full max-w-md rounded-2xl p-6 shadow-2xl relative">
+            <div class="flex justify-between items-center border-b border-slate-200 pb-4 mb-5">
+                <div>
+                    <h3 class="text-lg font-bold text-slate-800">Filtros do Relatório</h3>
+                    <p class="text-xs text-slate-500 mt-1">Gere um documento específico limitando a extração.</p>
+                </div>
+                <button onclick="closeModal('modalFiltroRelatorio')" class="p-2 rounded-md hover:bg-slate-100 text-slate-500">✕</button>
+            </div>
+            
+            <input type="hidden" id="relatorioTipoAtivo">
+            
+            <div class="space-y-4">
+                <div>
+                    <label class="block text-[10px] font-bold uppercase text-slate-500 mb-1">Filtrar por Área/Setor</label>
+                    <select id="relArea" class="input-touch w-full text-sm" onchange="atualizaFiltrosRelatorio('area')"><option value="ALL">Todas as Áreas</option></select>
+                </div>
+                <div>
+                    <label class="block text-[10px] font-bold uppercase text-slate-500 mb-1">Filtrar por Máquina</label>
+                    <select id="relMaquina" class="input-touch w-full text-sm" onchange="atualizaFiltrosRelatorio('maquina')"><option value="ALL">Todas as Máquinas</option></select>
+                </div>
+                <div>
+                    <label class="block text-[10px] font-bold uppercase text-slate-500 mb-1">Filtrar por Equipamento</label>
+                    <select id="relEquipamento" class="input-touch w-full text-sm" onchange="atualizaFiltrosRelatorio('equipamento')"><option value="ALL">Todos os Equipamentos</option></select>
+                </div>
+                <div>
+                    <label class="block text-[10px] font-bold uppercase text-slate-500 mb-1">Filtrar por Conjunto</label>
+                    <select id="relConjunto" class="input-touch w-full text-sm"><option value="ALL">Todos os Conjuntos</option></select>
+                </div>
+            </div>
+
+            <div class="flex flex-col gap-2 mt-6 pt-4 border-t border-slate-200">
+                <button onclick="executarRelatorioFiltrado()" class="w-full py-3 bg-slate-800 hover:bg-slate-900 text-white font-bold rounded-lg text-sm shadow-md flex items-center justify-center gap-2">
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z"/></svg> Gerar Documento
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- ================= MODAL IMPORTAR PEÇAS (SMART IMPORT) ================= -->
+    <div id="modalImportPecas" class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-50 hidden flex items-center justify-center p-4">
+        <div class="glass-panel w-full max-w-3xl rounded-3xl p-6 sm:p-8 space-y-5 shadow-2xl relative">
+            <div class="flex justify-between items-center border-b border-[var(--border)] pb-4">
+                <div>
+                    <h3 class="text-xl font-bold">Importação em Massa de Peças (Preventiva)</h3>
+                    <p class="text-xs text-slate-500 mt-1">Selecione o destino e cole sua planilha do Excel.</p>
+                </div>
+                <button onclick="closeModal('modalImportPecas')" class="p-2 rounded-md hover:bg-slate-100 text-slate-500">✕</button>
+            </div>
+            
+            <div class="bg-blue-50 border border-blue-100 rounded-xl p-4">
+                <h4 class="font-bold text-xs uppercase text-blue-700 mb-2">1. Destino na Árvore (Onde as peças vão entrar?)</h4>
+                <div class="grid grid-cols-2 md:grid-cols-4 gap-3">
+                    <div><label class="block text-[10px] font-bold text-slate-500">Área *</label><input type="text" id="impPecaArea" list="dlAreas" class="input-touch py-1.5 text-sm w-full"></div>
+                    <div><label class="block text-[10px] font-bold text-slate-500">Máquina *</label><input type="text" id="impPecaMaq" list="dlMaquinas" class="input-touch py-1.5 text-sm w-full"></div>
+                    <div><label class="block text-[10px] font-bold text-slate-500">Equipamento *</label><input type="text" id="impPecaEq" list="dlEquipamentos" class="input-touch py-1.5 text-sm w-full"></div>
+                    <div><label class="block text-[10px] font-bold text-slate-500">Conjunto (Opc)</label><input type="text" id="impPecaCj" list="dlConjuntos" class="input-touch py-1.5 text-sm w-full"></div>
+                </div>
+            </div>
+
+            <div>
+                <h4 class="font-bold text-xs uppercase text-slate-700 mb-2 mt-2">2. Cole as colunas do Excel</h4>
+                <span class="font-mono font-bold bg-slate-100 px-3 py-1.5 rounded block text-[9px] text-slate-600 mb-2 border border-slate-200">
+                    NOME COMPONENTE | FABRICANTE (Opc) | QUANTIDADE (Opc) | GATILHO/VIDA (Opc) | CUSTO (Opc) | CÓDIGO ERP (Opc)
+                </span>
+                <textarea id="importPecasText" rows="6" class="input-touch w-full font-mono text-xs leading-tight whitespace-pre" placeholder="Ex:
+Filtro de Óleo	Parker	2	5000h	250	871239
+Rolamento 6205	SKF	4	1 ano	80	998122"></textarea>
+            </div>
+            <div class="flex justify-end gap-3 pt-3 border-t border-[var(--border)]">
+                <button type="button" onclick="closeModal('modalImportPecas')" class="px-5 py-2.5 bg-slate-100 text-slate-600 font-bold rounded-lg text-xs">Cancelar</button>
+                <button type="button" onclick="processarImportacaoPecas()" id="btnProcessImportPecas" class="px-6 py-2.5 bg-blue-600 text-white font-bold rounded-lg text-xs shadow-md">Importar Peças</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- ================= MODAL IMPORTAR ESTRUTURA (ARVORE) ================= -->
+    <div id="modalImportLinhas" class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-50 hidden flex items-center justify-center p-4">
+        <div class="glass-panel w-full max-w-2xl rounded-3xl p-6 sm:p-8 space-y-5 shadow-2xl relative">
+            <div class="flex justify-between items-center border-b border-[var(--border)] pb-4">
+                <h3 class="text-xl font-bold">Importar Árvore em Massa</h3>
+                <button onclick="closeModal('modalImportLinhas')" class="p-2 rounded-md hover:bg-slate-100 text-slate-500">✕</button>
+            </div>
+            <div class="bg-slate-50 p-4 rounded-xl text-xs border border-slate-200 leading-relaxed">
+                Cole a hierarquia respeitando as colunas (separadas por tabulação/Excel).<br>
+                <span class="font-mono font-bold bg-white px-3 py-1.5 rounded block mt-2 shadow-sm border border-slate-200">
+                    SETOR (Área) | LINHA (Máquina) | EQUIPAMENTO | CONJUNTO
+                </span>
+            </div>
+            <div>
+                <textarea id="importLinhasText" rows="6" class="input-touch w-full font-mono text-xs leading-tight whitespace-pre" placeholder="Ex:
+Sopro	Multipet 1	Sopradora	Cambotador"></textarea>
+            </div>
+            <div class="flex justify-end gap-3 pt-3 border-t border-[var(--border)]">
+                <button type="button" onclick="closeModal('modalImportLinhas')" class="px-5 py-2.5 bg-slate-100 text-slate-600 font-bold rounded-lg text-xs">Cancelar</button>
+                <button type="button" onclick="processarImportacaoPlanilha()" id="btnProcessImportArv" class="px-6 py-2.5 bg-slate-800 text-white font-bold rounded-lg text-xs shadow-md">Processar Hierarquia</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- ================= MODAL UNIFICADO (DINÂMICO) ================= -->
+    <div id="modalItem" class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-50 hidden flex items-center justify-center p-4 overflow-y-auto">
+        <div class="glass-panel w-full max-w-4xl rounded-2xl p-6 sm:p-8 my-auto space-y-5 shadow-2xl relative">
+            
+            <div class="flex justify-between items-center border-b border-[var(--border)] pb-4">
+                <div>
+                    <h3 id="modalItemTitle" class="text-xl font-bold text-slate-800">Mapear Componente</h3>
+                    <p class="text-xs text-slate-500 mt-1">Preencha a hierarquia e dados da peça para rastreabilidade.</p>
+                </div>
+                <button onclick="closeModal('modalItem')" class="p-2 rounded-md hover:bg-slate-100 text-slate-500"><svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg></button>
+            </div>
+
+            <form id="formItem" onsubmit="saveItem(event)" class="space-y-5">
+                <input type="hidden" id="itemId">
+                <input type="hidden" id="formTipoPeca">
+                
+                <!-- SEÇÃO 1: HIERARQUIA -->
+                <div class="bg-slate-50 p-4 rounded-xl border border-slate-200 relative">
+                    <h4 class="font-bold text-xs uppercase text-slate-500 mb-3">1. Árvore do Ativo</h4>
+                    <div class="grid grid-cols-1 md:grid-cols-4 gap-3">
+                        <div>
+                            <label class="block text-[10px] font-bold uppercase text-slate-500 mb-1">Setor / Área *</label>
+                            <input type="text" id="fArea" list="dlAreas" required placeholder="Ex: Envase" class="input-touch text-sm py-2 w-full" onblur="atualizarDatalistsDependentes()">
+                        </div>
+                        <div>
+                            <label class="block text-[10px] font-bold uppercase text-slate-500 mb-1">Máquina / Linha *</label>
+                            <input type="text" id="fMaquina" list="dlMaquinas" required placeholder="Ex: Boatopack 1" class="input-touch text-sm py-2 w-full" onblur="atualizarDatalistsDependentes()">
+                        </div>
+                        <div>
+                            <label class="block text-[10px] font-bold uppercase text-slate-500 mb-1">Equipamento *</label>
+                            <input type="text" id="fEquipamentoBusca" list="dlEquipamentos" required placeholder="Ex: Envasadora" class="input-touch text-sm py-2 w-full" onblur="atualizarDatalistsDependentes()">
+                        </div>
+                        <div>
+                            <label class="block text-[10px] font-bold uppercase text-slate-500 mb-1">Conjunto (Opcional)</label>
+                            <input type="text" id="fConjunto" list="dlConjuntos" placeholder="Ex: Dosador" class="input-touch text-sm py-2 w-full">
+                        </div>
+                    </div>
+                </div>
+
+                <!-- SEÇÃO 2: DADOS COMUNS DA PEÇA -->
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                    <div>
+                        <label class="block text-[10px] font-bold uppercase text-slate-500 mb-1">Nome do Componente / Peça *</label>
+                        <input type="text" id="fComponente" required placeholder="Ex: Inversor Micromaster" class="input-touch text-sm py-2 w-full">
+                    </div>
+                    <div>
+                        <label class="block text-[10px] font-bold uppercase text-slate-500 mb-1">Fabricante / Referência</label>
+                        <input type="text" id="fFabricante" placeholder="Ex: Siemens - MM440" class="input-touch text-sm py-2 w-full">
+                    </div>
+                    <div>
+                        <label class="block text-[10px] font-bold uppercase text-slate-500 mb-1 text-primary">Código Sistema / ERP</label>
+                        <input type="text" id="fCodigoSistema" placeholder="Ex: 819203" class="input-touch text-sm py-2 w-full border-blue-200 bg-blue-50 focus:bg-white">
+                    </div>
+                    
+                    <div>
+                        <label class="block text-[10px] font-bold uppercase text-slate-500 mb-1">Custo Estimado da Peça (R$)</label>
+                        <input type="number" id="fCusto" placeholder="Ex: 15000" class="input-touch text-sm py-2 w-full font-bold">
+                    </div>
+
+                    <!-- CAMPOS EXCLUSIVOS: OBSOLESCÊNCIA -->
+                    <div id="obsFields_Status" class="col-span-1">
+                        <label class="block text-[10px] font-bold uppercase text-slate-500 mb-1">Ciclo de Vida (Mercado)</label>
+                        <input type="text" id="fStatusCiclo" placeholder="Ex: Obsoleto sem Estoque" class="input-touch text-sm py-2 w-full border-rose-200 focus:border-rose-500">
+                    </div>
+                    <div id="obsFields_Acao" class="col-span-1">
+                        <label class="block text-[10px] font-bold uppercase text-slate-500 mb-1">Plano de Mitigação / Ação Proposta</label>
+                        <input type="text" id="fAcaoProposta" placeholder="Ex: Realizar retrofit do painel" class="input-touch text-sm py-2 w-full border-rose-200 focus:border-rose-500">
+                    </div>
+
+                    <!-- CAMPOS EXCLUSIVOS: PREVENTIVA -->
+                    <div id="prevFields_Qtd" class="col-span-1 hidden">
+                        <label class="block text-[10px] font-bold uppercase text-slate-500 mb-1">Quantidade Aplicada</label>
+                        <input type="number" id="fPrevQtd" placeholder="Ex: 4" class="input-touch text-sm py-2 w-full border-blue-200 focus:border-blue-500">
+                    </div>
+                    <div id="prevFields_Vida" class="col-span-1 hidden">
+                        <label class="block text-[10px] font-bold uppercase text-slate-500 mb-1">Gatilho de Troca / Vida Útil</label>
+                        <input type="text" id="fPrevVida" placeholder="Ex: Troca a cada 6 meses" class="input-touch text-sm py-2 w-full border-blue-200 focus:border-blue-500">
+                    </div>
+                </div>
+
+                <!-- SEÇÃO 3: MATRIZ GUT (EXCLUSIVO OBSOLESCÊNCIA) -->
+                <div id="gutSection" class="bg-rose-50 border border-rose-100 rounded-xl p-5 space-y-4">
+                    <div class="flex justify-between items-center border-b border-rose-200 pb-3">
+                        <h4 class="font-bold text-xs uppercase text-rose-700">Matriz GUT de Risco</h4>
+                        <div class="text-right">
+                            <span class="text-[9px] text-rose-500 block uppercase font-bold tracking-widest">Score GUT</span>
+                            <span id="gutCalcResult" class="text-2xl font-black text-rose-600 leading-none">125</span>
+                        </div>
+                    </div>
+                    <div class="space-y-5">
+                        <div>
+                            <div class="flex justify-between mb-1"><span class="font-bold text-xs text-rose-800">Gravidade: <span id="valG" class="text-rose-600 text-sm">5</span></span> <span id="descG" class="text-[10px] uppercase font-bold text-rose-500">Parada total</span></div>
+                            <input type="range" id="sliderG" min="1" max="5" value="5" oninput="updateGutCalc()" class="w-full gut-slider">
+                        </div>
+                        <div>
+                            <div class="flex justify-between mb-1"><span class="font-bold text-xs text-rose-800">Urgência: <span id="valU" class="text-rose-600 text-sm">5</span></span> <span id="descU" class="text-[10px] uppercase font-bold text-rose-500">Ação imediata</span></div>
+                            <input type="range" id="sliderU" min="1" max="5" value="5" oninput="updateGutCalc()" class="w-full gut-slider">
+                        </div>
+                        <div>
+                            <div class="flex justify-between mb-1"><span class="font-bold text-xs text-rose-800">Tendência: <span id="valT" class="text-rose-600 text-sm">5</span></span> <span id="descT" class="text-[10px] uppercase font-bold text-rose-500">Piora rápida</span></div>
+                            <input type="range" id="sliderT" min="1" max="5" value="5" oninput="updateGutCalc()" class="w-full gut-slider">
+                        </div>
+                    </div>
+                </div>
+
+                <div class="flex justify-end gap-2 pt-4 border-t border-[var(--border)]">
+                    <button type="button" onclick="closeModal('modalItem')" class="px-5 py-2.5 bg-slate-100 text-slate-600 hover:bg-slate-200 font-bold rounded-lg text-xs">Cancelar</button>
+                    <button type="submit" id="btnSaveItem" class="px-6 py-2.5 bg-slate-800 text-white font-bold rounded-lg text-xs shadow-md">Salvar Registro</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- MODAL EXCLUSÃO -->
+    <div id="modalDelete" class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-[60] hidden flex items-center justify-center p-4">
+        <div class="glass-panel w-full max-w-sm rounded-2xl p-6 text-center shadow-2xl">
+            <h3 class="text-lg font-bold text-rose-600 mb-2">Excluir Registro?</h3>
+            <p class="text-xs text-slate-500 mb-5">Esta ação não pode ser desfeita.</p>
+            <div class="flex flex-col gap-2">
+                <button onclick="confirmDelete()" id="btnConfirmDeleteExec" class="w-full py-2.5 bg-rose-600 text-white font-bold rounded-lg text-xs">Confirmar Exclusão</button>
+                <button onclick="closeModal('modalDelete')" class="w-full py-2.5 bg-slate-100 text-slate-600 font-bold rounded-lg text-xs">Cancelar</button>
+            </div>
+        </div>
+    </div>
+
+    <div id="toastStack" class="fixed bottom-6 right-6 z-[70] space-y-2 pointer-events-none"></div>
+
+    <!-- Datalists Global -->
+    <datalist id="dlAreas"></datalist><datalist id="dlMaquinas"></datalist><datalist id="dlEquipamentos"></datalist><datalist id="dlConjuntos"></datalist>
+
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
+        import { getAuth, signInAnonymously } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
+        import { getFirestore, collection, addDoc, onSnapshot, doc, deleteDoc, updateDoc } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
+
+        const firebaseConfig = { apiKey: "AIzaSyAGbFTTCgbqe9XFKFSb6ltB5lYj5O6QipE", authDomain: "pcm-cepera.firebaseapp.com", projectId: "pcm-cepera", storageBucket: "pcm-cepera.firebasestorage.app", messagingSenderId: "483278589909", appId: "1:483278589909:web:9f69f8a32f50e4e186f75c" };
+        const app = initializeApp(firebaseConfig);
+        const db = getFirestore(app); const auth = getAuth(app);
+        const colRef = collection(db, "ob_equipamentos"); const linhasColRef = collection(db, "ob_linhas");
+
+        let items = []; let estruturas = [];
+        let itemToDeleteId = null; let isDeletingLinha = false; let chartRankInstance = null; let chartPieInstance = null; let isFirebaseConnected = false;
+        
+        const descGMap = { 1: "Mínimo", 2: "Parada Curta", 3: "Redução de Vel.", 4: "Parada Considerável", 5: "Parada Total" };
+        const descUMap = { 1: "Longo Prazo", 2: "Médio Prazo", 3: "Curto Prazo", 4: "Escasso", 5: "Ação Imediata" };
+        const descTMap = { 1: "Estável", 2: "Piora Lenta", 3: "Piora Gradual", 4: "Fim Próximo", 5: "Descontinuada" };
+
+        window.padronizarTexto = (txt) => {
+            if(!txt) return '';
+            let s = txt.trim();
+            return s.replace(/\w\S*/g, (w) => (w.replace(/^\w/, (c) => c.toUpperCase())));
+        };
+
+        window.switchTab = (t) => {
+            ['dashboard', 'obs', 'prev', 'acoes', 'cadastros'].forEach(id => {
+                document.getElementById(`view-${id}`).classList.toggle('hidden', id !== t);
+                const b = document.getElementById(`tabBtn-${id}`);
+                if(b) { if (id === t) b.classList.add('active'); else b.classList.remove('active'); }
+            });
+            if(t === 'cadastros') renderExploradorAreas();
+        };
+
+        window.openModal = (id, tipoForm = 'Obsolescencia', isEdit = false) => {
+            if (id === 'modalItem') {
+                if (!isEdit) {
+                    document.getElementById('formItem').reset(); 
+                    document.getElementById('itemId').value = '';
+                    document.getElementById('sliderG').value = 5; document.getElementById('sliderU').value = 5; document.getElementById('sliderT').value = 5;
+                    updateGutCalc();
+                }
+                document.getElementById('formTipoPeca').value = tipoForm;
+                const btnSave = document.getElementById('btnSaveItem');
+
+                if (tipoForm === 'Preventiva') {
+                    document.getElementById('modalItemTitle').innerText = isEdit ? 'Editar Preventiva' : 'Mapear Nova Preventiva';
+                    document.getElementById('gutSection').classList.add('hidden');
+                    document.getElementById('obsFields_Status').classList.add('hidden');
+                    document.getElementById('obsFields_Acao').classList.add('hidden');
+                    document.getElementById('prevFields_Qtd').classList.remove('hidden');
+                    document.getElementById('prevFields_Vida').classList.remove('hidden');
+                    btnSave.className = "px-6 py-2.5 bg-blue-600 hover:bg-blue-700 text-white font-bold rounded-lg text-xs shadow-md transition-colors";
+                } else {
+                    document.getElementById('modalItemTitle').innerText = isEdit ? 'Editar Obsolescência' : 'Mapear Risco de Obsolescência';
+                    document.getElementById('gutSection').classList.remove('hidden');
+                    document.getElementById('obsFields_Status').classList.remove('hidden');
+                    document.getElementById('obsFields_Acao').classList.remove('hidden');
+                    document.getElementById('prevFields_Qtd').classList.add('hidden');
+                    document.getElementById('prevFields_Vida').classList.add('hidden');
+                    btnSave.className = "px-6 py-2.5 bg-rose-600 hover:bg-rose-700 text-white font-bold rounded-lg text-xs shadow-md transition-colors";
+                }
+                atualizarDatalistsDependentes();
+            }
+            document.getElementById(id).classList.remove('hidden');
+        };
+        
+        window.closeModal = (id) => document.getElementById(id).classList.add('hidden');
+
+        window.updateGutCalc = () => {
+            const g = parseInt(document.getElementById('sliderG').value), u = parseInt(document.getElementById('sliderU').value), t = parseInt(document.getElementById('sliderT').value), s = g*u*t;
+            document.getElementById('valG').innerText = g; document.getElementById('valU').innerText = u; document.getElementById('valT').innerText = t;
+            document.getElementById('descG').innerText = descGMap[g]; document.getElementById('descU').innerText = descUMap[u]; document.getElementById('descT').innerText = descTMap[t];
+            const r = document.getElementById('gutCalcResult'); r.innerText = s;
+            r.className = s >= 80 ? "text-2xl font-black text-rose-600 leading-none" : s >= 45 ? "text-2xl font-black text-amber-500 leading-none" : s >= 18 ? "text-2xl font-black text-yellow-500 leading-none" : "text-2xl font-black text-emerald-500 leading-none";
+        };
+
+        window.showToast = (msg, type = 'info') => {
+            const stack = document.getElementById('toastStack'), el = document.createElement('div');
+            el.className = `px-5 py-3 rounded-lg border text-xs font-bold shadow-lg transition-all ${type === 'error' ? 'bg-rose-600 text-white border-rose-800' : 'bg-slate-800 text-white border-slate-700'}`;
+            el.innerText = msg; stack.appendChild(el); setTimeout(() => el.remove(), 3000);
+        };
+
+        async function initFirebase() {
+            try {
+                await signInAnonymously(auth); isFirebaseConnected = true;
+                document.getElementById('statusDot').className = "w-2 h-2 rounded-full bg-emerald-500"; document.getElementById('statusText').innerText = "Online";
+                
+                onSnapshot(colRef, (snap) => { items = []; snap.forEach(d => items.push({ id: d.id, ...d.data() })); renderAll(); });
+                onSnapshot(linhasColRef, (snap) => { estruturas = []; snap.forEach(d => estruturas.push({ id: d.id, ...d.data() })); renderAll(); });
+            } catch (err) { renderAll(); }
+        }
+        function renderAll() { 
+            atualizarDatalistsDependentes(); renderKPIs(); renderCharts(); 
+            renderArvore('Obsolescencia', 'treeContainerObs');
+            renderArvore('Preventiva', 'treeContainerPrev');
+            renderTabelaAcoes(); 
+            if(!document.getElementById('view-cadastros').classList.contains('hidden')) renderExploradorAreas();
+        }
+
+        window.atualizarDatalistsDependentes = () => {
+            const a = document.getElementById('fArea')?.value||'', m = document.getElementById('fMaquina')?.value||'', e = document.getElementById('fEquipamentoBusca')?.value||'';
+            const areas = [...new Set(estruturas.map(x => x.area))].filter(Boolean).sort();
+            document.getElementById('dlAreas').innerHTML = areas.map(x => `<option value="${x}">`).join('');
+            const maquinas = [...new Set(estruturas.filter(x => !a || x.area === a).map(x => x.maquina))].filter(Boolean).sort();
+            document.getElementById('dlMaquinas').innerHTML = maquinas.map(x => `<option value="${x}">`).join('');
+            const equips = [...new Set(estruturas.filter(x => (!a || x.area === a) && (!m || x.maquina === m)).map(x => x.equipamento))].filter(Boolean).sort();
+            document.getElementById('dlEquipamentos').innerHTML = equips.map(x => `<option value="${x}">`).join('');
+            const obj = estruturas.find(x => x.area === a && x.maquina === m && x.equipamento === e);
+            if(obj && obj.conjuntos) document.getElementById('dlConjuntos').innerHTML = obj.conjuntos.map(x => `<option value="${x}">`).join('');
+            else document.getElementById('dlConjuntos').innerHTML = '';
+        };
+
+        // --- ABA 5: EXPLORADOR ---
+        window.renderExploradorAreas = () => {
+            const sel = document.getElementById('exploraArea'); const val = sel.value;
+            const areas = [...new Set(estruturas.map(e => e.area))].filter(Boolean).sort();
+            sel.innerHTML = '<option value="">-- Setor --</option>' + areas.map(a => `<option value="${a}">${a}</option>`).join('');
+            if(val && areas.includes(val)) sel.value = val; else if(areas.length>0) sel.value = areas[0];
+            renderExploradorMaquinas();
+        };
+        window.renderExploradorMaquinas = () => {
+            const area = document.getElementById('exploraArea').value;
+            const sel = document.getElementById('exploraMaquina'); const val = sel.value;
+            const maquinas = [...new Set(estruturas.filter(e => e.area === area).map(e => e.maquina))].filter(Boolean).sort();
+            sel.innerHTML = '<option value="">-- Máquina --</option>' + maquinas.map(m => `<option value="${m}">${m}</option>`).join('');
+            if(val && maquinas.includes(val)) sel.value = val; else if(maquinas.length>0) sel.value = maquinas[0];
+            renderExploradorCards();
+        };
+        window.renderExploradorCards = () => {
+            const area = document.getElementById('exploraArea').value, maq = document.getElementById('exploraMaquina').value;
+            const container = document.getElementById('estruturaCardsContainer');
+            if(!area || !maq) { container.innerHTML = `<div class="col-span-2 p-6 text-center text-slate-400 text-xs bg-white rounded-lg border border-slate-200">Selecione o Setor e a Máquina.</div>`; return; }
+            
+            const equips = estruturas.filter(e => e.area === area && e.maquina === maq).sort((a,b) => (a.equipamento||'').localeCompare(b.equipamento||''));
+            if(equips.length === 0) { container.innerHTML = `<div class="col-span-2 p-6 text-center text-slate-400 text-xs">Nenhum equipamento cadastrado.</div>`; return; }
+
+            container.innerHTML = equips.map(e => `
+                <div class="bg-white border border-slate-200 rounded-xl p-4 shadow-sm relative hover:border-slate-300 transition-colors">
+                    <button onclick="askDeleteLinha('${e.id}')" class="absolute top-3 right-3 p-1.5 text-rose-400 hover:text-rose-600 hover:bg-rose-50 rounded"><svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/></svg></button>
+                    <h4 class="font-bold text-sm text-slate-800 mb-3 pr-8">${e.equipamento}</h4>
+                    <div class="grid grid-cols-2 gap-3 mb-3">
+                        <div>
+                            <label class="block text-[9px] font-bold uppercase text-slate-500 mb-1">Modelo</label>
+                            <input type="text" value="${e.modelo||''}" onblur="salvarAtributoRapido('${e.id}', 'modelo', this.value)" placeholder="Vazio" class="w-full text-xs border-b border-slate-200 pb-1 bg-transparent focus:outline-none focus:border-blue-500 text-slate-700">
+                        </div>
+                        <div>
+                            <label class="block text-[9px] font-bold uppercase text-slate-500 mb-1">SN</label>
+                            <input type="text" value="${e.numeroSerie||''}" onblur="salvarAtributoRapido('${e.id}', 'numeroSerie', this.value)" placeholder="Vazio" class="w-full text-xs border-b border-slate-200 pb-1 bg-transparent focus:outline-none focus:border-blue-500 text-slate-700 font-mono">
+                        </div>
+                    </div>
+                    <div>
+                        <label class="block text-[9px] font-bold uppercase text-slate-500 mb-1">Conjuntos</label>
+                        <div class="flex flex-wrap gap-1">
+                            ${e.conjuntos && e.conjuntos.length ? e.conjuntos.map(c => `<span class="bg-slate-100 border border-slate-200 px-1.5 py-0.5 rounded text-[10px] text-slate-600">${c}</span>`).join('') : '<span class="text-[10px] text-slate-400 italic">Sem conjuntos.</span>'}
+                        </div>
+                    </div>
+                </div>
+            `).join('');
+        };
+        window.salvarAtributoRapido = async (id, campo, valor) => {
+            if(!isFirebaseConnected) return; const obj = estruturas.find(x => x.id === id); if(!obj) return;
+            if(obj[campo] === valor.trim()) return; 
+            try { await updateDoc(doc(db, "ob_linhas", id), { [campo]: valor.trim() }); showToast("Atributo atualizado!"); } catch(e) { showToast("Erro", "error"); }
+        };
+
+        // --- RENDERIZADORES DE ÁRVORE ---
+        function renderArvore(tipoDesejado, containerId) {
+            const container = document.getElementById(containerId);
+            const filteredItems = items.filter(i => {
+                const t = i.tipoPeca || 'Obsolescencia';
+                if(tipoDesejado === 'Preventiva') return t === 'Preventiva' || t === 'Preventiva / Desgaste';
+                return t === 'Obsolescencia' || t === 'Obsolescência';
+            });
+
+            if(!filteredItems.length) { 
+                container.innerHTML = `<div class="p-8 text-center bg-white rounded-xl text-slate-400 text-sm border border-slate-200 shadow-sm">Nenhuma peça mapeada. A árvore aparecerá aqui assim que houver dados.</div>`; 
+                return; 
+            }
+
+            const arv = {};
+            filteredItems.forEach(i => {
+                const area = i.area || 'Setor Geral', maq = i.maquina || 'Máquina Base', eq = i.equipamento || 'Equipamento', cj = i.conjunto || 'Conjunto Geral';
+                if(!arv[area]) arv[area] = {}; if(!arv[area][maq]) arv[area][maq] = {}; if(!arv[area][maq][eq]) arv[area][maq][eq] = {}; if(!arv[area][maq][eq][cj]) arv[area][maq][eq][cj] = [];
+                arv[area][maq][eq][cj].push({...i, _nome: i.componente || 'Peça sem nome' });
+            });
+
+            const isObs = (tipoDesejado === 'Obsolescencia');
+            const mainColor = isObs ? 'rose' : 'blue';
+
+            let h = '';
+            Object.keys(arv).sort().forEach(area => {
+                h += `<div class="tree-area">
+                        <div class="tree-area-header"><svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10"/></svg> Setor: ${area}</div>`;
+                Object.keys(arv[area]).sort().forEach(maq => {
+                    h += `<div class="tree-machine"><h3 class="text-sm font-bold uppercase tracking-wider text-${mainColor}-600 border-b border-slate-200 pb-2 mb-2 flex items-center gap-2"><svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4"/></svg> ${maq}</h3>`;
+                    Object.keys(arv[area][maq]).sort().forEach(eq => {
+                        const eqData = estruturas.find(x => x.area === area && x.maquina === maq && x.equipamento === eq);
+                        const sub = eqData && (eqData.modelo || eqData.numeroSerie) ? `<span class="text-[9px] bg-slate-100 text-slate-500 px-1.5 py-0.5 rounded border border-slate-200 ml-2 font-mono">Mod: ${eqData.modelo||'-'} | SN: ${eqData.numeroSerie||'-'}</span>` : '';
+                        
+                        h += `<div class="tree-equip text-slate-800"><h4 class="font-bold text-xs uppercase mb-1 flex items-center gap-1.5"><svg class="w-3.5 h-3.5 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/></svg> ${eq} ${sub}</h4>`;
+                        Object.keys(arv[area][maq][eq]).sort().forEach(cj => {
+                            h += `<div class="tree-assembly"><h5 class="font-bold text-[10px] text-slate-400 uppercase tracking-wider mb-2 flex items-center gap-1"><svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10"/></svg> Conj: ${cj}</h5>`;
+                            
+                            arv[area][maq][eq][cj].sort((a,b)=> (b.gutScore||0)-(a.gutScore||0)).forEach(item => {
+                                const s = item.gutScore || 0;
+                                const extraInfo = isObs 
+                                    ? `Status: ${item.statusCicloVida || '-'}` 
+                                    : `Gatilho: ${item.gatilhoVidaUtil || '-'} | Qtd: ${item.qtdAplicada || 1}`;
+                                
+                                const spanCodigo = item.codigoSistema ? `<span class="bg-blue-50 text-blue-600 px-1.5 py-0.5 rounded border border-blue-100 font-mono text-[9px] mr-1">Cod: ${item.codigoSistema}</span>` : '';
+                                
+                                const classeBadge = s >= 80 ? 'badge-critico' : s >= 45 ? 'badge-alto' : s >= 18 ? 'badge-medio' : 'badge-baixo';
+                                const gutBlock = isObs 
+                                    ? `<div class="text-center border-r border-slate-200 pr-3 mr-3"><div class="text-[9px] uppercase font-bold text-slate-400 mb-0.5">GUT</div><div class="px-2 py-0.5 rounded text-[10px] font-bold ${classeBadge}">${s}</div></div>` 
+                                    : '';
+
+                                h += `<div class="tree-component shadow-sm">
+                                        <div class="flex-1 min-w-[200px]">
+                                            <div class="font-bold text-sm mb-1 text-${mainColor}-700">${item._nome}</div>
+                                            <div class="text-[10px] text-slate-500 font-medium">${spanCodigo} Ref: ${item.fabricante || '-'} • ${extraInfo}</div>
+                                        </div>
+                                        <div class="flex items-center">
+                                            ${gutBlock}
+                                            <div class="flex gap-1.5">
+                                                <button onclick="editItem('${item.id}', '${tipoDesejado}')" class="p-1.5 bg-slate-100 text-slate-600 hover:bg-slate-200 rounded"><svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z"/></svg></button>
+                                                <button onclick="askDelete('${item.id}')" class="p-1.5 bg-rose-50 text-rose-500 hover:bg-rose-100 rounded"><svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/></svg></button>
+                                            </div>
+                                        </div>
+                                     </div>`;
+                            }); h += `</div>`;
+                        }); h += `</div>`;
+                    }); h += `</div>`;
+                }); h += `</div>`;
+            }); container.innerHTML = h;
+        }
+
+        window.saveItem = async (e) => {
+            e.preventDefault(); const id = document.getElementById('itemId').value;
+            const tipo = document.getElementById('formTipoPeca').value; 
+            
+            const btn = document.getElementById('btnSaveItem'); btn.disabled = true; btn.innerText = "Processando...";
+            
+            const area = padronizarTexto(document.getElementById('fArea').value);
+            const maq = padronizarTexto(document.getElementById('fMaquina').value);
+            const eq = padronizarTexto(document.getElementById('fEquipamentoBusca').value);
+            const cj = padronizarTexto(document.getElementById('fConjunto').value);
+
+            if(isFirebaseConnected) {
+                let node = estruturas.find(x => x.area === area && x.maquina === maq && x.equipamento === eq);
+                if(node) {
+                    if (cj && (!node.conjuntos || !node.conjuntos.includes(cj))) {
+                        const nc = node.conjuntos ? [...node.conjuntos, cj] : [cj];
+                        await updateDoc(doc(db, "ob_linhas", node.id), { conjuntos: nc });
+                    }
+                } else {
+                    await addDoc(linhasColRef, { area, maquina: maq, equipamento: eq, modelo: '', numeroSerie: '', conjuntos: cj ? [cj] : [], timestamp: Date.now() });
+                }
+            }
+
+            let data = {
+                area, maquina: maq, equipamento: eq, conjunto: cj, tipoPeca: tipo,
+                componente: padronizarTexto(document.getElementById('fComponente').value), 
+                fabricante: document.getElementById('fFabricante').value.trim(),
+                codigoSistema: document.getElementById('fCodigoSistema').value.trim(),
+                custoEstimado: Number(document.getElementById('fCusto').value)||0,
+                timestamp: Date.now()
+            };
+
+            if (tipo === 'Obsolescencia') {
+                const g = parseInt(document.getElementById('sliderG').value), u = parseInt(document.getElementById('sliderU').value), t = parseInt(document.getElementById('sliderT').value);
+                data.gravidade = g; data.urgencia = u; data.tendencia = t; data.gutScore = g*u*t;
+                data.statusCicloVida = document.getElementById('fStatusCiclo').value.trim() || '-';
+                data.acaoProposta = document.getElementById('fAcaoProposta').value.trim();
+                data.statusAcao = id ? (items.find(x=>x.id===id)?.statusAcao || 'Pendente') : 'Pendente';
+            } else {
+                data.gravidade = 0; data.urgencia = 0; data.tendencia = 0; data.gutScore = 0;
+                data.qtdAplicada = document.getElementById('fPrevQtd').value.trim() || '1';
+                data.gatilhoVidaUtil = document.getElementById('fPrevVida').value.trim();
+            }
+
+            try {
+                if (id) { if (isFirebaseConnected) await updateDoc(doc(db, "ob_equipamentos", id), data); showToast("Peça Atualizada!"); } 
+                else { if (isFirebaseConnected) await addDoc(colRef, data); showToast("Cadastrado na Árvore!"); }
+                closeModal('modalItem');
+            } catch (err) { showToast("Erro.", "error"); } finally { btn.disabled = false; btn.innerText = "Salvar Registro"; }
+        };
+
+        window.editItem = (id, tipoOriginal) => {
+            const i = items.find(x=>x.id===id); if(!i) return;
+            document.getElementById('itemId').value = i.id;
+            document.getElementById('fArea').value = i.area || ''; 
+            document.getElementById('fMaquina').value = i.maquina || ''; 
+            document.getElementById('fEquipamentoBusca').value = i.equipamento || ''; 
+            document.getElementById('fConjunto').value = i.conjunto || ''; 
+            document.getElementById('fComponente').value = i.componente || ''; 
+            document.getElementById('fFabricante').value = i.fabricante || '';
+            document.getElementById('fCodigoSistema').value = i.codigoSistema || '';
+            document.getElementById('fCusto').value = i.custoEstimado || '';
+            
+            if (tipoOriginal === 'Obsolescencia' || i.tipoPeca === 'Obsolescencia' || i.tipoPeca === 'Obsolescência') {
+                document.getElementById('fStatusCiclo').value = i.statusCicloVida || '';
+                document.getElementById('fAcaoProposta').value = i.acaoProposta || '';
+                document.getElementById('sliderG').value = i.gravidade||5; document.getElementById('sliderU').value = i.urgencia||5; document.getElementById('sliderT').value = i.tendencia||5;
+                updateGutCalc();
+                openModal('modalItem', 'Obsolescencia', true);
+            } else {
+                document.getElementById('fPrevQtd').value = i.qtdAplicada || '';
+                document.getElementById('fPrevVida').value = i.gatilhoVidaUtil || '';
+                openModal('modalItem', 'Preventiva', true);
+            }
+        };
+
+        function renderTabelaAcoes() {
+            const tbody = document.getElementById('tbodyAcoes'); 
+            const obsItems = items.filter(i => (i.tipoPeca === 'Obsolescencia' || i.tipoPeca === 'Obsolescência')).sort((a,b)=> (b.gutScore||0)-(a.gutScore||0));
+            
+            if (!obsItems.length) { tbody.innerHTML = `<tr><td colspan="4" class="py-6 px-6 text-center text-slate-400 font-medium">Nenhum risco apontado.</td></tr>`; return; }
+            tbody.innerHTML = obsItems.map(i => {
+                const badgeCod = i.codigoSistema ? `<span class="bg-blue-50 text-blue-600 px-1.5 py-0.5 rounded border border-blue-100 font-mono text-[9px] ml-2">Cod: ${i.codigoSistema}</span>` : '';
+                return `<tr class="hover:bg-slate-50">
+                    <td class="py-3 px-5"><div class="font-bold text-sm text-slate-800">${i.componente} ${badgeCod}</div><div class="text-[9px] text-slate-500 font-bold uppercase mt-1">${i.area||'Geral'} > ${i.maquina||''} > ${i.equipamento||''} ${i.conjunto?'> '+i.conjunto:''}</div></td>
+                    <td class="py-3 px-5 text-xs text-slate-600 font-medium whitespace-normal max-w-xs">${i.acaoProposta || '<span class="text-slate-300 italic">Não definida</span>'}</td>
+                    <td class="py-3 px-5 text-sm font-black text-amber-600">R$ ${(Number(i.custoEstimado)||0).toLocaleString('pt-BR')}</td>
+                    <td class="py-3 px-5 text-center"><select onchange="updateStatusAcao('${i.id}', this.value)" class="input-touch text-[10px] py-1.5 px-2 bg-white font-bold w-full"><option value="Pendente" ${i.statusAcao==='Pendente'?'selected':''}>⏳ Pendente</option><option value="Em Andamento" ${i.statusAcao==='Em Andamento'?'selected':''}>⚙️ Em Andamento</option><option value="Concluído" ${i.statusAcao==='Concluído'?'selected':''}>✅ Concluído</option></select></td>
+                </tr>`
+            }).join('');
+        }
+        window.updateStatusAcao = async (id, ns) => { if (isFirebaseConnected) { await updateDoc(doc(db, "ob_equipamentos", id), { statusAcao: ns }); showToast("Status atualizado!"); } };
+
+        window.askDeleteLinha = (id) => { itemToDeleteId = id; isDeletingLinha = true; document.getElementById('modalDelete').classList.remove('hidden'); };
+        window.askDelete = (id) => { itemToDeleteId = id; isDeletingLinha = false; document.getElementById('modalDelete').classList.remove('hidden'); };
+        window.confirmDelete = async () => {
+            if(!itemToDeleteId) return; const btn = document.getElementById('btnConfirmDeleteExec'); btn.innerText = "Excluindo..."; btn.disabled = true;
+            try {
+                if(isDeletingLinha) { if(isFirebaseConnected) await deleteDoc(doc(db,"ob_linhas",itemToDeleteId)); showToast("Estrutura removida."); }
+                else { if(isFirebaseConnected) await deleteDoc(doc(db,"ob_equipamentos",itemToDeleteId)); showToast("Peça excluída."); }
+                closeModal('modalDelete'); 
+            } catch(e) { showToast("Erro.", "error"); closeModal('modalDelete'); } finally { btn.innerText = "Confirmar Exclusão"; btn.disabled = false; }
+        };
+
+        function renderKPIs() {
+            const prevs = items.filter(i => i.tipoPeca === 'Preventiva' || i.tipoPeca === 'Preventiva / Desgaste').length;
+            const obsTotal = items.filter(i => i.tipoPeca === 'Obsolescencia' || i.tipoPeca === 'Obsolescência');
+            
+            const acoesDone = obsTotal.filter(i => i.statusAcao === 'Concluído').length;
+
+            document.getElementById('kpiPreventivas').innerText = prevs; 
+            document.getElementById('kpiObsoletas').innerText = obsTotal.length;
+            document.getElementById('kpiAcoesDone').innerText = `${acoesDone} / ${obsTotal.length}`;
+            document.getElementById('kpiCustoTotal').innerText = items.reduce((acc,i)=>acc+(Number(i.custoEstimado)||0),0).toLocaleString('pt-BR',{style:'currency',currency:'BRL',maximumFractionDigits:0});
+        }
+
+        function renderCharts() {
+            const top5 = items.filter(i=> i.tipoPeca === 'Obsolescencia' || i.tipoPeca === 'Obsolescência').sort((a,b)=> (b.gutScore||0)-(a.gutScore||0)).slice(0,5);
+            if(chartRankInstance) chartRankInstance.destroy();
+            chartRankInstance = new Chart(document.getElementById('chartGutRank').getContext('2d'), { type: 'bar', data: { labels: top5.map(i=> { const n = i.componente||''; return n.length>15?n.substring(0,15)+'...':n; }), datasets: [{ data: top5.map(i=>i.gutScore||0), backgroundColor: top5.map(i=> { const s=i.gutScore||0; return s>=80?'#e11d48':s>=45?'#d97706':s>=18?'#ca8a04':'#059669'; }), borderRadius:4 }] }, options: { responsive:true, maintainAspectRatio:false, scales: { y: { beginAtZero:true, max:125, grid: { color: '#f1f5f9' } }, x: { grid: { display: false } } }, plugins: { legend: { display:false } } } });
+            
+            const prevs = items.filter(i => i.tipoPeca === 'Preventiva' || i.tipoPeca === 'Preventiva / Desgaste').length;
+            const obs = items.filter(i => i.tipoPeca === 'Obsolescencia' || i.tipoPeca === 'Obsolescência').length;
+            if(chartPieInstance) chartPieInstance.destroy();
+            chartPieInstance = new Chart(document.getElementById('chartTiposPie').getContext('2d'), { type: 'doughnut', data: { labels: ['Obsolescência (Risco)', 'Preventiva/Desgaste'], datasets: [{ data: [obs, prevs], backgroundColor: ['#e11d48','#0284c7'], borderWidth:2, borderColor: '#ffffff' }] }, options: { responsive:true, maintainAspectRatio:false, plugins: { legend: { position: 'bottom', labels: { boxWidth: 12, font: { size: 10 } } } }, cutout:'65%' } });
+        }
+
+        // --- SISTEMA DE RELATÓRIOS FILTRADOS ---
+        window.openModalFiltroRelatorio = (tipo) => {
+            document.getElementById('relatorioTipoAtivo').value = tipo;
+            
+            const areas = [...new Set(estruturas.map(e => e.area))].filter(Boolean).sort();
+            document.getElementById('relArea').innerHTML = '<option value="ALL">Todas as Áreas</option>' + areas.map(a => `<option value="${a}">${a}</option>`).join('');
+            
+            atualizaFiltrosRelatorio('area');
+            openModal('modalFiltroRelatorio');
+        };
+
+        window.atualizaFiltrosRelatorio = (nivelAlterado) => {
+            const a = document.getElementById('relArea').value, m = document.getElementById('relMaquina').value, e = document.getElementById('relEquipamento').value;
+            
+            if (nivelAlterado === 'area') {
+                const maquinas = a === 'ALL' ? [...new Set(estruturas.map(x => x.maquina))].filter(Boolean).sort() : [...new Set(estruturas.filter(x => x.area === a).map(x => x.maquina))].filter(Boolean).sort();
+                document.getElementById('relMaquina').innerHTML = '<option value="ALL">Todas as Máquinas</option>' + maquinas.map(x => `<option value="${x}">${x}</option>`).join('');
+                document.getElementById('relEquipamento').innerHTML = '<option value="ALL">Todos os Equipamentos</option>';
+                document.getElementById('relConjunto').innerHTML = '<option value="ALL">Todos os Conjuntos</option>';
+            }
+            if (nivelAlterado === 'maquina' || nivelAlterado === 'area') {
+                const _m = document.getElementById('relMaquina').value;
+                const equips = _m === 'ALL' ? [] : [...new Set(estruturas.filter(x => (a==='ALL' || x.area === a) && x.maquina === _m).map(x => x.equipamento))].filter(Boolean).sort();
+                document.getElementById('relEquipamento').innerHTML = '<option value="ALL">Todos os Equipamentos</option>' + equips.map(x => `<option value="${x}">${x}</option>`).join('');
+                document.getElementById('relConjunto').innerHTML = '<option value="ALL">Todos os Conjuntos</option>';
+            }
+            if (nivelAlterado === 'equipamento' || nivelAlterado === 'maquina') {
+                const _e = document.getElementById('relEquipamento').value;
+                const _m = document.getElementById('relMaquina').value;
+                const obj = estruturas.find(x => x.area === a && x.maquina === _m && x.equipamento === _e);
+                if(obj && obj.conjuntos && obj.conjuntos.length > 0) {
+                    document.getElementById('relConjunto').innerHTML = '<option value="ALL">Todos os Conjuntos</option>' + obj.conjuntos.map(x => `<option value="${x}">${x}</option>`).join('');
+                } else {
+                    document.getElementById('relConjunto').innerHTML = '<option value="ALL">Todos os Conjuntos</option>';
+                }
+            }
+        };
+
+        window.executarRelatorioFiltrado = () => {
+            const tipo = document.getElementById('relatorioTipoAtivo').value;
+            const fa = document.getElementById('relArea').value, fm = document.getElementById('relMaquina').value;
+            const fe = document.getElementById('relEquipamento').value, fc = document.getElementById('relConjunto').value;
+            
+            closeModal('modalFiltroRelatorio');
+            
+            const dataHora = new Date().toLocaleString('pt-BR');
+            let titulo = "", corTema = "", conteudoHTML = "", infoKpi = "", totalItens = 0, custoEst = 0;
+
+            let txtFiltro = fa === 'ALL' ? 'Fábrica Inteira' : fa;
+            if(fm !== 'ALL') txtFiltro += ` > ${fm}`;
+            if(fe !== 'ALL') txtFiltro += ` > ${fe}`;
+            if(fc !== 'ALL') txtFiltro += ` > ${fc}`;
+
+            if (tipo === 'obs') {
+                titulo = "Relatório de Obsolescência & Riscos"; corTema = "#e11d48";
+                let dados = items.filter(i => (i.tipoPeca === 'Obsolescencia' || i.tipoPeca === 'Obsolescência'));
+                if(fa !== 'ALL') dados = dados.filter(i => i.area === fa);
+                if(fm !== 'ALL') dados = dados.filter(i => i.maquina === fm);
+                if(fe !== 'ALL') dados = dados.filter(i => i.equipamento === fe);
+                if(fc !== 'ALL') dados = dados.filter(i => i.conjunto === fc);
+                
+                dados.sort((a,b)=> (b.gutScore||0)-(a.gutScore||0));
+                totalItens = dados.length; custoEst = dados.reduce((a, b) => a + (Number(b.custoEstimado)||0), 0);
+                
+                infoKpi = `<div class="kpis">
+                    <div class="kpi"><span>Escopo do Filtro</span>${txtFiltro}</div>
+                    <div class="kpi"><span>Riscos no Filtro</span>${totalItens} peças</div>
+                    <div class="kpi"><span>Custo de Mitigação</span>R$ ${custoEst.toLocaleString('pt-BR')}</div>
+                </div>`;
+
+                conteudoHTML = `<table><thead><tr><th>Setor / Máquina / Equip.</th><th>Código</th><th>Componente (Ref)</th><th>Ação de Mitigação</th><th style="text-align:center;">GUT</th><th style="text-align:right;">Custo Est.</th></tr></thead><tbody>`;
+                dados.forEach(i => {
+                    const s = i.gutScore||0;
+                    let classeBadge = s >= 80 ? 'badge critico' : s >= 45 ? 'badge alto' : s >= 18 ? 'badge medio' : 'badge baixo';
+                    conteudoHTML += `<tr>
+                        <td><strong>${i.area} • ${i.maquina}</strong><br><span style="color:#64748b; font-size:10px;">${i.equipamento} ${i.conjunto?' > '+i.conjunto:''}</span></td>
+                        <td style="font-family:monospace; font-size:10px; font-weight:bold;">${i.codigoSistema || '-'}</td>
+                        <td><strong>${i.componente}</strong><br><span style="color:#64748b; font-size:10px;">Ref: ${i.fabricante || '-'} | Ciclo: ${i.statusCicloVida||'-'}</span></td>
+                        <td>${i.acaoProposta || '-'}</td>
+                        <td style="text-align:center;"><span class="${classeBadge}">${s}</span></td>
+                        <td style="text-align:right; font-weight:bold;">R$ ${(Number(i.custoEstimado)||0).toLocaleString('pt-BR')}</td>
+                    </tr>`;
+                });
+                conteudoHTML += `</tbody></table>`;
+
+            } else if (tipo === 'prev') {
+                titulo = "Plano de Preventiva & Desgaste"; corTema = "#0284c7";
+                let dados = items.filter(i => (i.tipoPeca === 'Preventiva' || i.tipoPeca === 'Preventiva / Desgaste'));
+                if(fa !== 'ALL') dados = dados.filter(i => i.area === fa);
+                if(fm !== 'ALL') dados = dados.filter(i => i.maquina === fm);
+                if(fe !== 'ALL') dados = dados.filter(i => i.equipamento === fe);
+                if(fc !== 'ALL') dados = dados.filter(i => i.conjunto === fc);
+
+                dados.sort((a,b)=> (a.area||'').localeCompare(b.area||''));
+                totalItens = dados.length; custoEst = dados.reduce((a, b) => a + (Number(b.custoEstimado)||0), 0);
+
+                infoKpi = `<div class="kpis">
+                    <div class="kpi"><span>Escopo do Filtro</span>${txtFiltro}</div>
+                    <div class="kpi"><span>Peças de Desgaste</span>${totalItens} peças exclusivas</div>
+                    <div class="kpi"><span>Custo Base</span>R$ ${custoEst.toLocaleString('pt-BR')}</div>
+                </div>`;
+
+                conteudoHTML = `<table><thead><tr><th>Setor / Máquina / Equip.</th><th>Código</th><th>Componente</th><th>Qtd.</th><th>Gatilho / Vida Útil</th><th style="text-align:right;">Custo Unitário</th></tr></thead><tbody>`;
+                dados.forEach(i => {
+                    conteudoHTML += `<tr>
+                        <td><strong>${i.area} • ${i.maquina}</strong><br><span style="color:#64748b; font-size:10px;">${i.equipamento} ${i.conjunto?' > '+i.conjunto:''}</span></td>
+                        <td style="font-family:monospace; font-size:10px; font-weight:bold;">${i.codigoSistema || '-'}</td>
+                        <td><strong>${i.componente}</strong><br><span style="color:#64748b; font-size:10px;">Ref: ${i.fabricante || '-'}</span></td>
+                        <td><strong>${i.qtdAplicada || 1}</strong></td>
+                        <td>${i.gatilhoVidaUtil || '-'}</td>
+                        <td style="text-align:right; font-weight:bold;">R$ ${(Number(i.custoEstimado)||0).toLocaleString('pt-BR')}</td>
+                    </tr>`;
+                });
+                conteudoHTML += `</tbody></table>`;
+
+            } else if (tipo === 'acoes') {
+                titulo = "Relatório de Planos de Ação (Acompanhamento)"; corTema = "#0f172a";
+                let dados = items.filter(i => (i.tipoPeca === 'Obsolescencia' || i.tipoPeca === 'Obsolescência'));
+                if(fa !== 'ALL') dados = dados.filter(i => i.area === fa);
+                if(fm !== 'ALL') dados = dados.filter(i => i.maquina === fm);
+                if(fe !== 'ALL') dados = dados.filter(i => i.equipamento === fe);
+                if(fc !== 'ALL') dados = dados.filter(i => i.conjunto === fc);
+
+                dados.sort((a,b)=> (b.gutScore||0)-(a.gutScore||0));
+                totalItens = dados.length; 
+                let concluidas = dados.filter(i => i.statusAcao === 'Concluído').length;
+                custoEst = dados.reduce((a, b) => a + (Number(b.custoEstimado)||0), 0);
+
+                infoKpi = `<div class="kpis">
+                    <div class="kpi"><span>Escopo do Filtro</span>${txtFiltro}</div>
+                    <div class="kpi"><span>Progresso</span>${concluidas} de ${totalItens} Concluídas</div>
+                    <div class="kpi"><span>Custo de Ações</span>R$ ${custoEst.toLocaleString('pt-BR')}</div>
+                </div>`;
+
+                conteudoHTML = `<table><thead><tr><th>Estrutura</th><th>Código ERP</th><th>Componente (Ref)</th><th>Ação Proposta</th><th style="text-align:center;">Status</th><th style="text-align:right;">Custo</th></tr></thead><tbody>`;
+                dados.forEach(i => {
+                    let corStatus = i.statusAcao === 'Concluído' ? '#059669' : i.statusAcao === 'Em Andamento' ? '#ca8a04' : '#e11d48';
+                    conteudoHTML += `<tr>
+                        <td><strong>${i.area} • ${i.maquina}</strong><br><span style="color:#64748b; font-size:10px;">${i.equipamento} ${i.conjunto?' > '+i.conjunto:''}</span></td>
+                        <td style="font-family:monospace; font-size:10px; font-weight:bold;">${i.codigoSistema || '-'}</td>
+                        <td><strong>${i.componente}</strong><br><span style="color:#64748b; font-size:10px;">Ref: ${i.fabricante || '-'}</span></td>
+                        <td>${i.acaoProposta || '-'}</td>
+                        <td style="text-align:center; font-weight:bold; font-size:10px; color:${corStatus}; text-transform:uppercase;">${i.statusAcao || 'Pendente'}</td>
+                        <td style="text-align:right; font-weight:bold;">R$ ${(Number(i.custoEstimado)||0).toLocaleString('pt-BR')}</td>
+                    </tr>`;
+                });
+                conteudoHTML += `</tbody></table>`;
+
+            } else if (tipo === 'arvore') {
+                titulo = "Inventário Estrutural Físico (Ativos)"; corTema = "#475569";
+                let dados = [...estruturas];
+                if(fa !== 'ALL') dados = dados.filter(i => i.area === fa);
+                if(fm !== 'ALL') dados = dados.filter(i => i.maquina === fm);
+                if(fe !== 'ALL') dados = dados.filter(i => i.equipamento === fe);
+                if(fc !== 'ALL') dados = dados.filter(i => i.conjuntos && i.conjuntos.includes(fc));
+
+                dados.sort((a,b) => (a.area||'').localeCompare(b.area||'') || (a.maquina||'').localeCompare(b.maquina||''));
+                totalItens = dados.length;
+
+                infoKpi = `<div class="kpis">
+                    <div class="kpi"><span>Escopo do Filtro</span>${txtFiltro}</div>
+                    <div class="kpi"><span>Equipamentos</span>${totalItens} registros estruturais</div>
+                </div>`;
+
+                conteudoHTML = `<table><thead><tr><th>Área / Setor</th><th>Máquina / Linha</th><th>Equipamento</th><th>Modelo</th><th>Número de Série (SN)</th><th>Conjuntos Subordinados</th></tr></thead><tbody>`;
+                dados.forEach(i => {
+                    const cjTexto = i.conjuntos && i.conjuntos.length ? i.conjuntos.join(', ') : '-';
+                    conteudoHTML += `<tr>
+                        <td style="text-transform:uppercase; font-size:10px; font-weight:bold; color:#64748b;">${i.area}</td>
+                        <td><strong>${i.maquina}</strong></td>
+                        <td style="color:#0f172a; font-weight:bold;">${i.equipamento}</td>
+                        <td>${i.modelo || '-'}</td>
+                        <td style="font-family:monospace; font-size:11px;">${i.numeroSerie || '-'}</td>
+                        <td style="font-size:10px; color:#64748b;">${cjTexto}</td>
+                    </tr>`;
+                });
+                conteudoHTML += `</tbody></table>`;
+            }
+
+            const html = `
+            <!DOCTYPE html>
+            <html lang="pt-BR">
+            <head>
+                <meta charset="UTF-8">
+                <title>${titulo}</title>
+                <style>
+                    @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800&display=swap');
+                    body { font-family: 'Inter', sans-serif; font-size: 11px; color: #1e293b; margin: 0; padding: 25px; background: #fff; }
+                    .header { border-bottom: 3px solid ${corTema}; padding-bottom: 12px; margin-bottom: 20px; display: flex; justify-content: space-between; align-items: flex-end; }
+                    .logo-box { background: #dc2626; color: #fff; padding: 4px 10px; border-radius: 4px; font-weight: 900; font-size: 14px; letter-spacing: 1px; display: inline-block; margin-bottom: 8px;}
+                    .header h1 { margin: 0; font-size: 20px; color: #0f172a; text-transform: uppercase; font-weight: 800;}
+                    .header .meta { text-align: right; color: #64748b; font-size: 10px; line-height: 1.4; }
+                    .kpis { display: flex; gap: 15px; margin-bottom: 25px; flex-wrap:wrap;}
+                    .kpi { padding: 12px 18px; border: 1px solid #e2e8f0; border-radius: 6px; background: #f8fafc; font-weight: 800; font-size: 14px; color: ${corTema}; min-width: 150px;}
+                    .kpi span { display: block; font-size: 9px; color: #64748b; text-transform: uppercase; font-weight: 600; margin-bottom: 4px; }
+                    table { width: 100%; border-collapse: collapse; margin-bottom: 30px; }
+                    th { background-color: #f1f5f9; color: #334155; font-weight: 800; text-align: left; padding: 10px; border-bottom: 2px solid #cbd5e1; font-size: 10px; text-transform: uppercase; }
+                    td { padding: 10px; border-bottom: 1px solid #e2e8f0; vertical-align: top; line-height: 1.4; }
+                    .badge { padding: 3px 8px; border-radius: 4px; font-weight: 800; font-size: 9px; }
+                    .badge.critico { background: #fee2e2; color: #b91c1c; border: 1px solid #fecaca; }
+                    .badge.alto { background: #fef3c7; color: #b45309; border: 1px solid #fde68a; }
+                    .badge.medio { background: #fef08a; color: #854d0e; border: 1px solid #fde047; }
+                    .badge.baixo { background: #d1fae5; color: #047857; border: 1px solid #a7f3d0; }
+                    @media print {
+                        body { padding: 0; -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+                        @page { size: A4 portrait; margin: 1cm; }
+                    }
+                </style>
+            </head>
+            <body>
+                <div class="header">
+                    <div>
+                        <div class="logo-box">CEPÊRA</div>
+                        <h1>${titulo}</h1>
+                    </div>
+                    <div class="meta">
+                        <strong>Gerado por:</strong> Planejamento e Controle de Manutenção (PCM)<br>
+                        <strong>Data da Extração:</strong> ${dataHora}
+                    </div>
+                </div>
+                ${infoKpi}
+                ${conteudoHTML}
+                <div style="text-align:center; font-size:9px; color:#94a3b8; margin-top:40px;">
+                    Relatório confidencial interno - Cepêra Alimentos
+                </div>
+            </body>
+            </html>
+            `;
+
+            const win = window.open('', '_blank');
+            win.document.write(html);
+            win.document.close();
+            win.focus();
+            setTimeout(() => { win.print(); }, 400);
+        };
+
+        // --- IMPORTADORES EM MASSA ---
+        window.processarImportacaoPlanilha = async () => {
+            const text = document.getElementById('importLinhasText').value; if(!text.trim()) return;
+            const btn = document.getElementById('btnProcessImportArv'); btn.disabled = true; btn.innerText = "Processando...";
+            const rows = text.split('\n');
+            try {
+                for (let r of rows) {
+                    if(!r.trim()) continue;
+                    const cols = r.split('\t').map(x=>padronizarTexto(x));
+                    if(cols.length < 3) continue; 
+                    const area = cols[0], maq = cols[1], eq = cols[2], cj = cols[3] || '';
+                    
+                    let node = estruturas.find(l => l.area === area && l.maquina === maq && l.equipamento === eq);
+                    if (node) {
+                        if(cj && (!node.conjuntos || !node.conjuntos.includes(cj))) {
+                            const nc = node.conjuntos ? [...node.conjuntos, cj] : [cj];
+                            if(isFirebaseConnected) await updateDoc(doc(db,"ob_linhas",node.id), { conjuntos: nc });
+                            node.conjuntos = nc;
+                        }
+                    } else {
+                        const nova = { area, maquina: maq, equipamento: eq, modelo: '', numeroSerie: '', conjuntos: cj ? [cj] : [] };
+                        if(isFirebaseConnected) { const ref = await addDoc(linhasColRef, {...nova, timestamp: Date.now()}); nova.id = ref.id; }
+                        estruturas.push(nova);
+                    }
+                }
+                showToast("Árvore de equipamentos importada!"); document.getElementById('importLinhasText').value=''; closeModal('modalImportLinhas'); 
+            } catch(e) { showToast("Erro ao importar.", "error"); } finally { btn.disabled = false; btn.innerText = "Processar Hierarquia"; }
+        };
+
+        window.processarImportacaoPecas = async () => {
+            const a = padronizarTexto(document.getElementById('impPecaArea').value);
+            const m = padronizarTexto(document.getElementById('impPecaMaq').value);
+            const e = padronizarTexto(document.getElementById('impPecaEq').value);
+            const c = padronizarTexto(document.getElementById('impPecaCj').value);
+            const text = document.getElementById('importPecasText').value;
+
+            if(!a || !m || !e || !text.trim()) { showToast("Preencha o Destino e os Dados!", "error"); return; }
+            const btn = document.getElementById('btnProcessImportPecas'); btn.disabled = true; btn.innerText = "Processando...";
+
+            if(isFirebaseConnected) {
+                let node = estruturas.find(x => x.area === a && x.maquina === m && x.equipamento === e);
+                if(node) {
+                    if (c && (!node.conjuntos || !node.conjuntos.includes(c))) {
+                        const nc = node.conjuntos ? [...node.conjuntos, c] : [c];
+                        await updateDoc(doc(db, "ob_linhas", node.id), { conjuntos: nc });
+                    }
+                } else {
+                    await addDoc(linhasColRef, { area: a, maquina: m, equipamento: e, modelo: '', numeroSerie: '', conjuntos: c ? [c] : [], timestamp: Date.now() });
+                }
+            }
+
+            const rows = text.split('\n');
+            let count = 0;
+            try {
+                for (let r of rows) {
+                    if(!r.trim()) continue;
+                    const cols = r.split('\t').map(x=>x.trim());
+                    if(!cols[0]) continue; 
+                    
+                    const dataPeca = {
+                        area: a, maquina: m, equipamento: e, conjunto: c, tipoPeca: 'Preventiva',
+                        componente: padronizarTexto(cols[0]),
+                        fabricante: cols[1] || '',
+                        qtdAplicada: cols[2] || '1',
+                        gatilhoVidaUtil: cols[3] || '',
+                        custoEstimado: Number(cols[4]) || 0,
+                        codigoSistema: cols[5] || '',
+                        gravidade: 0, urgencia: 0, tendencia: 0, gutScore: 0, timestamp: Date.now() + count
+                    };
+                    
+                    if (isFirebaseConnected) await addDoc(colRef, dataPeca);
+                    count++;
+                }
+                showToast(`${count} peças importadas com sucesso!`); 
+                document.getElementById('importPecasText').value=''; 
+                closeModal('modalImportPecas'); 
+            } catch(err) { showToast("Erro ao importar peças.", "error"); } finally { btn.disabled = false; btn.innerText = "Importar Peças"; }
+        };
+
+        document.addEventListener('DOMContentLoaded', () => { initFirebase(); });
+
+        // ================= GUARDA CENTRAL SSO & RBAC (PCM CEPÊRA) =================
+        (function verificarAcessoCentralSSO() {
+            try {
+                const raw = localStorage.getItem('cepera_central_session');
+                const userStr = localStorage.getItem('cepera_ir_user');
+                if (!raw && !userStr) {
+                    if (window.parent && window.parent !== window) {
+                        window.parent.postMessage({ type: 'CEPERA_LOGOUT_CENTRAL' }, '*');
+                    } else {
+                        window.location.href = 'index.html?app=obsolescencia';
+                    }
+                    return;
+                }
+                const sess = raw ? JSON.parse(raw) : null;
+                if (sess && sess.role !== 'Admin' && Array.isArray(sess.apps_permitidos) && !sess.apps_permitidos.includes('obsolescencia')) {
+                    if (window.parent && window.parent !== window) {
+                        window.parent.postMessage({ type: 'CEPERA_VOLTAR_CENTRAL' }, '*');
+                    } else {
+                        window.location.href = 'index.html';
+                    }
+                    return;
+                }
+                if (window.self === window.top && sess) {
+                    const bar = document.createElement('div');
+                    bar.style.cssText = 'position:fixed;bottom:14px;left:14px;z-index:9999;display:flex;align-items:center;gap:8px;background:#0f172a;color:#fff;padding:6px 12px;border-radius:9999px;font-family:sans-serif;font-size:11px;font-weight:700;box-shadow:0 8px 20px rgba(0,0,0,0.25);border:1px solid #334155;';
+                    bar.innerHTML = `<button type="button" onclick="window.location.href='index.html'" style="background:#0284c7;color:#fff;border:none;padding:4px 10px;border-radius:9999px;font-weight:800;font-size:11px;cursor:pointer;">⬅ Central PCM</button><span>${sess.nome || sess.user} (${sess.role || ''})</span>`;
+                    document.body.appendChild(bar);
+                }
+            } catch (_) {}
+        })();
+    </script>
+</body>
+</html>

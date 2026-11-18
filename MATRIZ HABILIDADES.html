@@ -1,0 +1,2753 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0">
+    <title>Matriz & Árvore de Habilidades — PCM Cepêra</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --primary: #0f172a;
+            --accent: #0284c7;
+            --cepera: #dc2626;
+        }
+
+        html, body {
+            margin: 0 !important;
+            padding: 0 !important;
+            width: 100% !important;
+            min-height: 100vh !important;
+            overflow-x: hidden;
+            font-family: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, sans-serif;
+            color: #0f172a;
+            -webkit-tap-highlight-color: transparent;
+            background: linear-gradient(135deg, #f1f5f9 0%, #f8fafc 50%, #e2e8f0 100%);
+        }
+
+        .frosted-shell {
+            background: rgba(255, 255, 255, 0.94);
+            backdrop-filter: blur(8px);
+            -webkit-backdrop-filter: blur(8px);
+            border: 1px solid #e2e8f0;
+            box-shadow: 0 12px 32px -12px rgba(15, 23, 42, 0.06);
+        }
+
+        .glass-card {
+            background: #ffffff;
+            border: 1px solid #e2e8f0;
+            box-shadow: 0 4px 12px -4px rgba(15, 23, 42, 0.04);
+            transition: transform 0.15s ease, box-shadow 0.15s ease;
+        }
+
+        .glass-card-hover:hover {
+            transform: translateY(-1px);
+            box-shadow: 0 10px 20px -8px rgba(15, 23, 42, 0.08);
+        }
+
+        .glass-rail {
+            background: rgba(255, 255, 255, 0.9);
+            border-right: 1px solid #e2e8f0;
+        }
+
+        .input-clean {
+            padding: 0.75rem 0.95rem;
+            font-size: 0.9rem;
+            border-radius: 0.85rem;
+            border: 1px solid #cbd5e1;
+            background: #ffffff;
+            transition: border-color 0.15s;
+            width: 100%;
+            color: #0f172a;
+        }
+        .input-clean:focus {
+            outline: none;
+            border-color: var(--accent);
+            box-shadow: 0 0 0 3px rgba(2, 132, 199, 0.12);
+        }
+
+        .btn-pill-dark {
+            background: var(--accent);
+            color: #ffffff;
+            font-weight: 700;
+            border-radius: 9999px;
+            padding: 0.7rem 1.35rem;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.5rem;
+            transition: opacity 0.15s ease, transform 0.15s ease;
+            cursor: pointer;
+            box-shadow: 0 6px 16px -4px rgba(15, 23, 42, 0.25);
+        }
+        .btn-pill-dark:hover { opacity: 0.92; transform: translateY(-1px); }
+        .btn-pill-dark:active { transform: scale(0.98); }
+
+        .btn-touch {
+            padding: 0.7rem 1.15rem;
+            font-weight: 700;
+            border-radius: 0.85rem;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.45rem;
+            transition: all 0.15s ease;
+            cursor: pointer;
+        }
+        .btn-touch:active { transform: scale(0.98); }
+
+        .rail-btn {
+            width: 100%;
+            padding: 0.65rem 0.4rem;
+            border-radius: 1rem;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            gap: 0.25rem;
+            color: #64748b;
+            background: #ffffff;
+            border: 1px solid #e2e8f0;
+            transition: all 0.15s;
+            cursor: pointer;
+            font-size: 10px;
+            font-weight: 800;
+            text-align: center;
+            line-height: 1.15;
+        }
+        .rail-btn:hover { color: #0f172a; border-color: #cbd5e1; }
+        .rail-btn.active {
+            background: var(--accent);
+            color: #ffffff;
+            border-color: var(--accent);
+            box-shadow: 0 4px 12px rgba(15, 23, 42, 0.2);
+        }
+
+        .mob-tab {
+            padding: 0.6rem 0.95rem;
+            border-radius: 9999px;
+            font-size: 0.78rem;
+            font-weight: 700;
+            color: #64748b;
+            white-space: nowrap;
+            transition: all 0.15s;
+        }
+        .mob-tab.active {
+            background: var(--accent);
+            color: #ffffff;
+        }
+
+        .skill-matrix-wrap { overflow-x: auto; border: 1px solid #e2e8f0; border-radius: 1rem; background: #ffffff; }
+        .skill-table { border-collapse: collapse; min-width: 100%; }
+        .skill-table th, .skill-table td { border: 1px solid #f1f5f9; padding: 0.5rem 0.55rem; text-align: center; font-size: 0.75rem; }
+        .skill-table th { background: #f8fafc; font-weight: 800; position: sticky; top: 0; z-index: 10; color: #475569; }
+        .lvl-badge {
+            width: 26px; height: 26px; border-radius: 0.55rem;
+            display: inline-flex; align-items: center; justify-content: center;
+            font-weight: 800; font-size: 11px;
+        }
+        .lvl-0 { background: #fee2e2; color: #b91c1c; border: 1px solid #fecaca; }
+        .lvl-1 { background: #ffedd5; color: #c2410c; border: 1px solid #fed7aa; }
+        .lvl-2 { background: #fef3c7; color: #b45309; border: 1px solid #fde68a; }
+        .lvl-3 { background: #dcfce7; color: #15803d; border: 1px solid #bbf7d0; }
+        .lvl-4 { background: #e0e7ff; color: #3730a3; border: 1px solid #c7d2fe; }
+        .lvl-na { background: #f1f5f9; color: #94a3b8; }
+
+        *:focus-visible { outline: 3px solid var(--accent) !important; outline-offset: 2px; }
+
+        body.theme-solid { background: #f8fafc !important; }
+        body.theme-solid .frosted-shell,
+        body.theme-solid .glass-card,
+        body.theme-solid .glass-rail {
+            background: #ffffff !important;
+            backdrop-filter: none !important;
+            box-shadow: none !important;
+            border: 1px solid #cbd5e1 !important;
+        }
+
+        body.theme-dark { background: #090d16 !important; color: #f1f5f9 !important; }
+        body.theme-dark .frosted-shell { background: #0f172a !important; border-color: #1e293b !important; backdrop-filter: none !important; }
+        body.theme-dark .glass-card,
+        body.theme-dark .glass-rail,
+        body.theme-dark .skill-matrix-wrap { background: #1e293b !important; border-color: #334155 !important; color: #f1f5f9 !important; backdrop-filter: none !important; }
+        body.theme-dark .text-slate-900,
+        body.theme-dark .text-slate-800,
+        body.theme-dark .text-slate-700 { color: #f8fafc !important; }
+        body.theme-dark .text-slate-600,
+        body.theme-dark .text-slate-500,
+        body.theme-dark .text-slate-400 { color: #94a3b8 !important; }
+        body.theme-dark .bg-white,
+        body.theme-dark .bg-slate-50,
+        body.theme-dark .bg-slate-50\/80,
+        body.theme-dark .bg-slate-50\/90,
+        body.theme-dark .bg-slate-100 { background-color: #0f172a !important; border-color: #334155 !important; color: #f1f5f9 !important; }
+        body.theme-dark .input-clean { background: #0f172a !important; border-color: #475569 !important; color: #ffffff !important; }
+        body.theme-dark .rail-btn { background: #0f172a !important; border-color: #334155 !important; color: #cbd5e1 !important; }
+        body.theme-dark .rail-btn.active { background: var(--accent) !important; color: #ffffff !important; }
+
+        body.high-contrast { background: #ffffff !important; color: #000000 !important; }
+        body.high-contrast .frosted-shell,
+        body.high-contrast .glass-card,
+        body.high-contrast .glass-rail {
+            background: #ffffff !important;
+            backdrop-filter: none !important;
+            border: 2px solid #000000 !important;
+            box-shadow: none !important;
+        }
+        body.high-contrast .input-clean { border: 2px solid #000000 !important; color: #000000 !important; }
+
+        body.tablet-mode *,
+        body.tablet-mode *::before,
+        body.tablet-mode *::after {
+            backdrop-filter: none !important;
+            transition: none !important;
+            animation: none !important;
+            box-shadow: none !important;
+        }
+        body.tablet-mode .btn-touch,
+        body.tablet-mode .btn-pill-dark,
+        body.tablet-mode .input-clean,
+        body.tablet-mode select,
+        body.tablet-mode .mob-tab {
+            min-height: 48px !important;
+            font-size: 0.95rem !important;
+        }
+
+        ::-webkit-scrollbar { width: 6px; height: 6px; }
+        ::-webkit-scrollbar-track { background: transparent; }
+        ::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 9999px; }
+    </style>
+</head>
+<body class="min-h-screen flex flex-col">
+
+    <!-- TELA DE LOGIN -->
+    <div id="loginView" class="hidden min-h-screen w-full flex items-center justify-center p-4 sm:p-6">
+        <div class="frosted-shell rounded-[28px] w-full max-w-md p-7 sm:p-10 relative overflow-hidden">
+            <div class="flex items-center justify-between mb-8">
+                <div class="flex items-center gap-2.5">
+                    <span class="bg-red-600 text-white font-extrabold px-3 py-1 rounded-lg text-xs tracking-widest uppercase shadow-sm">Cepêra</span>
+                    <span id="loginSyncBadge" class="text-[11px] font-bold text-amber-600 flex items-center gap-1">
+                        <span class="w-2 h-2 rounded-full bg-amber-500 animate-pulse"></span> Conectando...
+                    </span>
+                </div>
+                <button type="button" onclick="abrirEspacoUsuario()" class="px-3 py-1.5 rounded-full bg-white/80 hover:bg-white border border-slate-200 text-xs font-bold text-slate-700 flex items-center gap-1.5 shadow-sm">
+                    <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6V4m0 2a2 2 0 100 4m0-4a2 2 0 110 4m-6 8a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4m6 6v10m6-2a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4"/></svg>
+                    <span>Preferências</span>
+                </button>
+            </div>
+
+            <div class="mb-7">
+                <span class="text-[11px] font-extrabold uppercase tracking-widest text-sky-600">PCM • Gestão de Competências</span>
+                <h1 class="text-2xl sm:text-3xl font-extrabold text-slate-900 tracking-tight leading-tight mt-0.5">Matriz & Árvore de Habilidades</h1>
+                <p class="text-slate-500 text-sm mt-1.5">Use o mesmo login e senha do sistema de Inspeção de Rotas.</p>
+            </div>
+
+            <form id="formLogin" onsubmit="realizarLogin(event)" class="space-y-4">
+                <div>
+                    <label for="loginUser" class="block text-xs font-bold uppercase tracking-wider text-slate-500 mb-1.5">Usuário</label>
+                    <input type="text" id="loginUser" required autocomplete="username" class="input-clean" placeholder="Ex: kaique.pereira">
+                </div>
+                <div>
+                    <label for="loginPass" class="block text-xs font-bold uppercase tracking-wider text-slate-500 mb-1.5">Senha</label>
+                    <div class="relative">
+                        <input type="password" id="loginPass" required autocomplete="current-password" class="input-clean pr-12" placeholder="••••••••">
+                        <button type="button" onclick="toggleSenhaLogin()" class="absolute right-3 top-1/2 -translate-y-1/2 text-xs font-bold text-slate-400 hover:text-slate-700 px-2 py-1">Ver</button>
+                    </div>
+                </div>
+                <div class="pt-2">
+                    <button type="submit" class="btn-pill-dark w-full py-3.5 text-sm shadow-lg">
+                        <span>Entrar na Matriz</span>
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 5l7 7m0 0l-7 7m7-7H3"/></svg>
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- APP PRINCIPAL -->
+    <div id="mainApp" class="hidden min-h-screen w-full p-2 sm:p-4 md:p-5 flex flex-col">
+        <div class="frosted-shell rounded-[26px] flex-1 flex flex-col md:flex-row overflow-hidden min-h-[calc(100vh-2.5rem)]">
+            
+            <!-- BARRA LATERAL DESKTOP -->
+            <aside aria-label="Menu principal" class="hidden md:flex flex-col items-center justify-between py-5 px-2.5 glass-rail shrink-0 w-24">
+                <div class="flex flex-col items-center gap-3 w-full">
+                    <div class="w-11 h-11 rounded-2xl bg-red-600 text-white font-extrabold text-xs flex items-center justify-center shadow-md tracking-tighter">PCM</div>
+                    <div class="h-px w-10 bg-slate-200/80 my-0.5"></div>
+                    <nav id="desktopRailNav" class="flex flex-col items-center gap-2 w-full"></nav>
+                </div>
+                <div class="flex flex-col items-center gap-2 w-full">
+                    <button type="button" onclick="abrirEspacoUsuario()" title="Espaço do Usuário (Alt + U)" class="rail-btn">
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"/><circle cx="12" cy="12" r="3" stroke-width="2"/></svg>
+                        <span>Espaço</span>
+                    </button>
+                    <button type="button" onclick="abrirModalAtalhos()" title="Atalhos de Teclado (Ctrl + ?)" class="rail-btn">
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8.228 9c.549-1.165 2.03-2 3.772-2 2.21 0 4 1.343 4 3 0 1.4-1.278 2.575-3.006 2.907-.542.104-.994.54-.994 1.093m0 3h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+                        <span>Atalhos</span>
+                    </button>
+                    <button type="button" onclick="fazerLogout()" class="rail-btn hover:!bg-rose-50 hover:!text-rose-600 hover:!border-rose-200">
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"/></svg>
+                        <span>Sair</span>
+                    </button>
+                </div>
+            </aside>
+
+            <!-- ÁREA DE CONTEÚDO -->
+            <div class="flex-1 flex flex-col min-w-0">
+                <!-- HEADER SUPERIOR -->
+                <header class="px-5 sm:px-8 py-3.5 flex items-center justify-between border-b border-white/80 bg-white/45 shrink-0">
+                    <div class="flex items-center gap-3">
+                        <button type="button" onclick="voltarParaCentralPCM()" title="Voltar à Central de Aplicativos PCM" class="px-3 py-1.5 rounded-full bg-slate-900 hover:bg-slate-800 text-white text-xs font-extrabold flex items-center gap-1.5 shadow-sm">
+                            <span>⬅ Central</span>
+                        </button>
+                        <span class="md:hidden bg-red-600 text-white font-extrabold px-2.5 py-1 rounded-lg text-xs tracking-wider">CEPÊRA</span>
+                        <div class="flex items-center gap-2 text-xs font-bold text-slate-500">
+                            <span id="headerSyncDot" class="w-2 h-2 rounded-full bg-amber-500 animate-pulse"></span>
+                            <span id="headerSyncText">Conectando...</span>
+                            <span class="hidden sm:inline">• Matriz de Habilidades 360°</span>
+                        </div>
+                    </div>
+
+                    <div class="flex items-center gap-2">
+                        <button type="button" onclick="abrirModalAtalhos()" title="Atalhos (Ctrl + ?)" class="px-3 py-1.5 rounded-full bg-white/85 hover:bg-white border border-slate-200/80 text-xs font-bold text-slate-700 flex items-center gap-1.5 shadow-sm">
+                            <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8.228 9c.549-1.165 2.03-2 3.772-2 2.21 0 4 1.343 4 3 0 1.4-1.278 2.575-3.006 2.907-.542.104-.994.54-.994 1.093m0 3h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+                            <span class="hidden lg:inline">Atalhos (Ctrl+?)</span>
+                        </button>
+                        <button type="button" onclick="abrirEspacoUsuario()" class="px-3 py-1.5 rounded-full bg-white/85 hover:bg-white border border-slate-200/80 text-xs font-bold text-slate-700 flex items-center gap-1.5 shadow-sm">
+                            <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6V4m0 2a2 2 0 100 4m0-4a2 2 0 110 4m-6 8a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4m6 6v10m6-2a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4"/></svg>
+                            <span class="hidden sm:inline">Espaço do Usuário</span>
+                        </button>
+                        <div class="flex items-center gap-2.5 bg-white/85 border border-slate-200/80 rounded-full pl-3.5 pr-1.5 py-1 shadow-sm">
+                            <button type="button" onclick="abrirEspacoUsuario()" class="text-right leading-tight hover:opacity-80">
+                                <div id="loggedUserName" class="font-bold text-xs text-slate-900">Usuário</div>
+                                <div id="loggedUserRole" class="text-[10px] font-extrabold uppercase text-sky-600">Perfil</div>
+                            </button>
+                            <button type="button" onclick="fazerLogout()" title="Sair da conta" class="w-8 h-8 rounded-full bg-slate-900 hover:bg-rose-600 text-white flex items-center justify-center transition-colors">
+                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"/></svg>
+                            </button>
+                        </div>
+                    </div>
+                </header>
+
+                <!-- NAVEGAÇÃO MOBILE -->
+                <div id="mobileTabNav" class="md:hidden flex items-center gap-2 overflow-x-auto px-4 py-2.5 bg-white/55 border-b border-white/80 shrink-0"></div>
+
+                <!-- CONTAINER DAS PÁGINAS -->
+                <main id="viewContainer" class="flex-1 overflow-y-auto p-4 sm:p-7 space-y-6">
+
+                    <!-- ==================== PAGE 1: DASHBOARD & RADAR 360 ==================== -->
+                    <section id="view-dashboard" aria-label="Visão Geral da Matriz" class="hidden space-y-6 max-w-7xl mx-auto">
+                        <div class="flex flex-col lg:flex-row lg:items-end justify-between gap-4">
+                            <div>
+                                <p class="text-xs font-bold uppercase tracking-widest text-sky-600 mb-1">PCM • Polivalência & Capacitação Técnica</p>
+                                <h1 class="text-2xl sm:text-3xl font-extrabold text-slate-900 tracking-tight leading-tight">
+                                    Olá, <span id="dashGreetingName">Gestor</span>. Central de Habilidades
+                                </h1>
+                            </div>
+                            <div class="flex flex-wrap gap-2.5">
+                                <button type="button" onclick="switchTab('catalogo')" class="btn-touch bg-indigo-600 hover:bg-indigo-700 text-white rounded-full px-5 py-2.5 text-xs shadow-md">
+                                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16m-7 6h7"/></svg>
+                                    <span>Árvore de Habilidades</span>
+                                </button>
+                                <button type="button" onclick="switchTab('calibracao')" class="btn-touch bg-emerald-600 hover:bg-emerald-700 text-white rounded-full px-5 py-2.5 text-xs shadow-md">
+                                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+                                    <span>Calibrar Equipe</span>
+                                </button>
+                                <button type="button" onclick="switchTab('matriz')" class="btn-pill-dark text-xs">
+                                    <span>Ver Matriz Completa</span>
+                                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 5l7 7m0 0l-7 7m7-7H3"/></svg>
+                                </button>
+                            </div>
+                        </div>
+
+                        <div class="glass-card p-4 rounded-2xl flex flex-wrap items-center justify-between gap-3 text-xs">
+                            <span class="font-extrabold uppercase text-slate-500 text-[11px]">Régua Oficial de Proficiência (TPM):</span>
+                            <div class="flex flex-wrap items-center gap-3 font-bold">
+                                <span class="inline-flex items-center gap-1.5"><span class="lvl-badge lvl-0">0</span> Não conhece</span>
+                                <span class="inline-flex items-center gap-1.5"><span class="lvl-badge lvl-1">1</span> Conhece Teoria</span>
+                                <span class="inline-flex items-center gap-1.5"><span class="lvl-badge lvl-2">2</span> Faz Acompanhado</span>
+                                <span class="inline-flex items-center gap-1.5"><span class="lvl-badge lvl-3">3</span> Faz Sozinho (Autônomo)</span>
+                                <span class="inline-flex items-center gap-1.5"><span class="lvl-badge lvl-4">4</span> Multiplica / Ensina</span>
+                            </div>
+                        </div>
+
+                        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+                            <div onclick="switchTab('matriz')" class="glass-card glass-card-hover p-5 rounded-3xl cursor-pointer">
+                                <div class="w-10 h-10 rounded-2xl bg-sky-100 text-sky-600 flex items-center justify-center mb-3">
+                                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"/></svg>
+                                </div>
+                                <div class="text-3xl font-extrabold text-slate-900" id="kpiAtingimentoGeral">0%</div>
+                                <div class="text-sm font-bold text-slate-700 mt-1">Aderência à Meta (D)</div>
+                                <div class="text-xs text-slate-400 mt-0.5" id="kpiSubAvaliacoes">0 avaliações calibradas</div>
+                            </div>
+
+                            <div onclick="switchTab('pdi')" class="glass-card glass-card-hover p-5 rounded-3xl cursor-pointer">
+                                <div class="w-10 h-10 rounded-2xl bg-rose-100 text-rose-600 flex items-center justify-center mb-3">
+                                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"/></svg>
+                                </div>
+                                <div class="text-3xl font-extrabold text-rose-600" id="kpiTotalGaps">0</div>
+                                <div class="text-sm font-bold text-slate-700 mt-1">GAPs Identificados</div>
+                                <div class="text-xs text-slate-400 mt-0.5">Abaixo do nível desejado (D)</div>
+                            </div>
+
+                            <div onclick="switchTab('matriz')" class="glass-card glass-card-hover p-5 rounded-3xl cursor-pointer">
+                                <div class="w-10 h-10 rounded-2xl bg-indigo-100 text-indigo-600 flex items-center justify-center mb-3">
+                                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z"/></svg>
+                                </div>
+                                <div class="text-3xl font-extrabold text-indigo-700" id="kpiMultiplicadores">0</div>
+                                <div class="text-sm font-bold text-slate-700 mt-1">Multiplicadores (Nível 4)</div>
+                                <div class="text-xs text-slate-400 mt-0.5">Aptos a treinar a equipe</div>
+                            </div>
+
+                            <div onclick="switchTab('catalogo')" class="glass-card glass-card-hover p-5 rounded-3xl cursor-pointer">
+                                <div class="w-10 h-10 rounded-2xl bg-emerald-100 text-emerald-600 flex items-center justify-center mb-3">
+                                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10"/></svg>
+                                </div>
+                                <div class="text-3xl font-extrabold text-emerald-700" id="kpiTotalSkills">0</div>
+                                <div class="text-sm font-bold text-slate-700 mt-1">Habilidades na Árvore</div>
+                                <div class="text-xs text-sky-600 font-bold mt-0.5" id="kpiSubPdiAtivos">0 ações no PDI (GUT)</div>
+                            </div>
+                        </div>
+
+                        <div class="grid grid-cols-1 lg:grid-cols-12 gap-5">
+                            <div class="glass-card p-6 rounded-3xl lg:col-span-6 flex flex-col justify-between">
+                                <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-2 mb-3">
+                                    <div>
+                                        <h2 class="font-extrabold text-slate-800 text-sm">Radar de Competências (Auto × Supervisor × Meta)</h2>
+                                        <p class="text-xs text-slate-400">Comparativo por Pilar da Árvore de Habilidades</p>
+                                    </div>
+                                    <select id="dashSelectTecnicoRadar" onchange="renderDashboard()" class="input-clean py-1.5 px-3 text-xs font-bold sm:w-52"></select>
+                                </div>
+                                <div class="h-72 w-full"><canvas id="chartRadarSkills"></canvas></div>
+                            </div>
+
+                            <div class="glass-card p-6 rounded-3xl lg:col-span-6 flex flex-col justify-between space-y-4">
+                                <div>
+                                    <div class="flex items-center justify-between mb-3">
+                                        <div>
+                                            <h2 class="font-extrabold text-slate-800 text-sm">Diagnóstico da Árvore (Gargalos & Distorções)</h2>
+                                            <p class="text-xs text-slate-400">Habilidades sem especialista (Nível ≥ 3) ou superestimadas na autoavaliação</p>
+                                        </div>
+                                        <button type="button" onclick="switchTab('pdi')" class="text-xs font-bold text-sky-600 hover:underline">Abrir PDI (GUT)</button>
+                                    </div>
+                                    <div id="dashListaGargalos" class="space-y-2.5 max-h-64 overflow-y-auto pr-1"></div>
+                                </div>
+                            </div>
+                        </div>
+                    </section>
+
+                    <!-- ==================== PAGE 2: MATRIZ GERAL & MAPA DE CALOR ==================== -->
+                    <section id="view-matriz" aria-label="Matriz Geral de Habilidades" class="hidden space-y-5 max-w-7xl mx-auto">
+                        <div class="glass-card p-5 sm:p-6 rounded-3xl space-y-4">
+                            <div class="flex flex-col lg:flex-row lg:items-center justify-between gap-4">
+                                <div>
+                                    <p class="text-xs font-bold uppercase tracking-widest text-sky-600 mb-1">Cruzamento Oficial • D (Desejado) vs A (Atual)</p>
+                                    <h1 class="text-xl sm:text-2xl font-extrabold text-slate-900">Matriz de Habilidades e Polivalência</h1>
+                                    <p class="text-xs text-slate-500 mt-0.5">Clique em qualquer célula de um técnico para calibrar a nota ou gerar ação imediata no Plano de Desenvolvimento (GUT).</p>
+                                </div>
+                                <div class="flex flex-wrap items-center gap-2">
+                                    <button type="button" onclick="imprimirRelatorioMatrizGeral()" class="btn-pill-dark text-xs">
+                                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z"/></svg>
+                                        <span>Imprimir Matriz A4</span>
+                                    </button>
+                                </div>
+                            </div>
+
+                            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 bg-slate-50 p-4 rounded-2xl border border-slate-200/80">
+                                <div>
+                                    <label class="block text-[10px] font-extrabold uppercase text-slate-500 mb-1">1. Equipe / Especialidade</label>
+                                    <select id="matFiltroEsp" onchange="onMatFiltroEspChange()" class="input-clean py-2 text-xs font-bold">
+                                        <option value="Mecânica">Manutenção Mecânica</option>
+                                        <option value="Elétrica">Manutenção Elétrica</option>
+                                        <option value="Todas">Todas as Equipes</option>
+                                    </select>
+                                </div>
+                                <div>
+                                    <label class="block text-[10px] font-extrabold uppercase text-slate-500 mb-1">2. Pilar / Grupo da Árvore</label>
+                                    <select id="matFiltroGrupo" onchange="renderMatrizGeral()" class="input-clean py-2 text-xs font-bold"></select>
+                                </div>
+                                <div>
+                                    <label class="block text-[10px] font-extrabold uppercase text-slate-500 mb-1">3. Modo de Exibição</label>
+                                    <select id="matModoExibicao" onchange="renderMatrizGeral()" class="input-clean py-2 text-xs font-bold">
+                                        <option value="completo">D | Auto | Real (Completo)</option>
+                                        <option value="gap">Destacar GAPs (D - Real)</option>
+                                        <option value="distorcao">Distorção (Auto vs Real)</option>
+                                    </select>
+                                </div>
+                                <div>
+                                    <label class="block text-[10px] font-extrabold uppercase text-slate-500 mb-1">4. Busca Rápida</label>
+                                    <input type="text" id="matFiltroBusca" oninput="renderMatrizGeral()" class="input-clean py-2 text-xs" placeholder="Ex: Megômetro, Redutor, NR10...">
+                                </div>
+                            </div>
+
+                            <div class="skill-matrix-wrap" id="skillMatrixContainer">
+                                <table class="skill-table" id="skillMatrixTable"></table>
+                            </div>
+                        </div>
+                    </section>
+
+                    <!-- ==================== PAGE 3: MINHA AUTOAVALIAÇÃO (TÉCNICO) ==================== -->
+                    <section id="view-autoavaliacao" aria-label="Autoavaliação Técnica" class="hidden space-y-5 max-w-6xl mx-auto">
+                        <div class="glass-card p-6 rounded-3xl space-y-4">
+                            <div class="flex flex-col lg:flex-row lg:items-center justify-between gap-4">
+                                <div>
+                                    <p class="text-xs font-bold uppercase tracking-widest text-sky-600 mb-1">Etapa 1 • Peso 20% na Matriz Ponderada</p>
+                                    <h1 class="text-xl sm:text-2xl font-extrabold text-slate-900">Autoavaliação da Árvore de Habilidades</h1>
+                                    <p class="text-xs text-slate-500 mt-0.5">Avalie com sinceridade seu domínio atual (de 0 a 4) em cada competência. Seu supervisor calibrará junto com você em campo.</p>
+                                </div>
+                                <div class="flex flex-wrap items-center gap-2">
+                                    <div id="wrapSelectTecAutoAdmin" class="hidden">
+                                        <select id="selTecAutoAdmin" onchange="renderAutoavaliacao()" class="input-clean py-2 text-xs font-extrabold"></select>
+                                    </div>
+                                    <button type="button" onclick="imprimirProntuarioIndividual('auto')" class="btn-touch bg-slate-100 hover:bg-slate-200 text-slate-800 py-2 px-4 text-xs">
+                                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z"/></svg>
+                                        <span>Meu Prontuário A4</span>
+                                    </button>
+                                </div>
+                            </div>
+
+                            <div class="bg-slate-50 p-4 rounded-2xl border border-slate-200/80">
+                                <div class="flex items-center justify-between text-xs font-extrabold text-slate-700 mb-1.5">
+                                    <span>Progresso da Autoavaliação</span>
+                                    <span id="autoProgTexto" class="text-sky-600">0 / 0 respondidas</span>
+                                </div>
+                                <div class="w-full h-2.5 bg-slate-200 rounded-full overflow-hidden">
+                                    <div id="autoProgBarra" class="h-full bg-emerald-500 transition-all duration-300" style="width: 0%"></div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div id="listaBlocosAutoavaliacao" class="space-y-4"></div>
+                    </section>
+
+                    <!-- ==================== PAGE 4: CALIBRAÇÃO DO SUPERVISOR ==================== -->
+                    <section id="view-calibracao" aria-label="Calibração da Supervisão" class="hidden space-y-5 max-w-7xl mx-auto">
+                        <div class="glass-card p-6 rounded-3xl space-y-4">
+                            <div class="flex flex-col lg:flex-row lg:items-center justify-between gap-4">
+                                <div>
+                                    <p class="text-xs font-bold uppercase tracking-widest text-emerald-600 mb-1">Etapa 2 • Validação Técnica & Cálculo de GAP</p>
+                                    <h1 class="text-xl sm:text-2xl font-extrabold text-slate-900">Calibração da Supervisão (Auto × Prática × Teórica)</h1>
+                                    <p class="text-xs text-slate-500 mt-0.5">Peso oficial da Matriz: <strong>Autoavaliação (20%) + Avaliação Prática (50%) + Avaliação Teórica (30%)</strong>.</p>
+                                </div>
+                                <div class="flex flex-wrap items-center gap-2">
+                                    <button type="button" onclick="gerarPdiAutomaticoDoTecnico()" class="btn-touch bg-rose-600 hover:bg-rose-700 text-white py-2.5 px-4 text-xs shadow-sm">
+                                        <span>Gerar PDI (GUT) p/ Todos os GAPs</span>
+                                    </button>
+                                    <button type="button" onclick="imprimirProntuarioIndividual('calibracao')" class="btn-pill-dark text-xs">
+                                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z"/></svg>
+                                        <span>Imprimir Avaliação A4</span>
+                                    </button>
+                                </div>
+                            </div>
+
+                            <div class="grid grid-cols-1 sm:grid-cols-3 gap-3 bg-slate-50 p-4 rounded-2xl border border-slate-200/80">
+                                <div>
+                                    <label class="block text-[10px] font-extrabold uppercase text-slate-500 mb-1">1. Selecionar Técnico para Calibrar</label>
+                                    <select id="calSelectTecnico" onchange="renderCalibracaoSupervisor()" class="input-clean py-2 text-xs font-extrabold"></select>
+                                </div>
+                                <div>
+                                    <label class="block text-[10px] font-extrabold uppercase text-slate-500 mb-1">2. Filtrar Pilar / Grupo</label>
+                                    <select id="calFiltroGrupo" onchange="renderCalibracaoSupervisor()" class="input-clean py-2 text-xs font-bold"></select>
+                                </div>
+                                <div>
+                                    <label class="block text-[10px] font-extrabold uppercase text-slate-500 mb-1">3. Filtrar Situação</label>
+                                    <select id="calFiltroSituacao" onchange="renderCalibracaoSupervisor()" class="input-clean py-2 text-xs font-bold">
+                                        <option value="">Todas as Habilidades</option>
+                                        <option value="pendente">Aguardando Calibração do Supervisor</option>
+                                        <option value="gap">Com GAP (Abaixo da Meta D)</option>
+                                        <option value="distorcao">Distorção (Autoavaliação > Real)</option>
+                                    </select>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div id="listaCalibracaoContainer" class="space-y-4"></div>
+                    </section>
+
+                    <!-- ==================== PAGE 5: ÁRVORE DE DESENVOLVIMENTO & PDI (MATRIZ GUT) ==================== -->
+                    <section id="view-pdi" aria-label="Plano de Desenvolvimento Individual GUT" class="hidden space-y-5 max-w-7xl mx-auto">
+                        <div class="glass-card p-6 rounded-3xl space-y-4">
+                            <div class="flex flex-col lg:flex-row lg:items-center justify-between gap-4">
+                                <div>
+                                    <p class="text-xs font-bold uppercase tracking-widest text-rose-600 mb-1">Etapa 3 • Priorização GUT & Multiplicadores Internos</p>
+                                    <h1 class="text-xl sm:text-2xl font-extrabold text-slate-900">Plano de Desenvolvimento & Treinamentos (PDI)</h1>
+                                    <p class="text-xs text-slate-500 mt-0.5">Cruzamento automático dos GAPs com a Matriz GUT (Gravidade × Urgência × Tendência), sugestão de Multiplicador (Nível 4) e eficácia em 30 dias.</p>
+                                </div>
+                                <div class="flex flex-wrap items-center gap-2">
+                                    <button type="button" onclick="abrirModalNovoPdiManual()" class="btn-touch bg-slate-900 hover:bg-slate-800 text-white py-2.5 px-4 text-xs">
+                                        <span>+ Nova Ação de Treinamento</span>
+                                    </button>
+                                    <button type="button" onclick="imprimirRelatorioPdiGUT()" class="btn-pill-dark text-xs">
+                                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z"/></svg>
+                                        <span>Exportar Plano GUT (PDF)</span>
+                                    </button>
+                                </div>
+                            </div>
+
+                            <div class="grid grid-cols-1 sm:grid-cols-3 gap-3">
+                                <select id="pdiFiltroTecnico" onchange="renderListaPdi()" class="input-clean py-2 text-xs font-bold"></select>
+                                <select id="pdiFiltroStatus" onchange="renderListaPdi()" class="input-clean py-2 text-xs font-bold">
+                                    <option value="">Todos os Status</option>
+                                    <option value="Pendente">Pendente de Treinamento</option>
+                                    <option value="Em Treinamento">Em Treinamento / Prática</option>
+                                    <option value="Aguardando Eficácia 30d">Aguardando Avaliação 30 Dias</option>
+                                    <option value="Concluído">Concluído & Validado</option>
+                                </select>
+                                <input type="text" id="pdiFiltroBusca" oninput="renderListaPdi()" class="input-clean py-2 text-xs" placeholder="Buscar por habilidade, multiplicador ou código...">
+                            </div>
+                        </div>
+
+                        <div id="listaPdiContainer" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4"></div>
+                    </section>
+
+                    <!-- ==================== PAGE 6: CATÁLOGO & ÁRVORE DE HABILIDADES ==================== -->
+                    <section id="view-catalogo" aria-label="Catálogo da Árvore de Habilidades" class="hidden space-y-5 max-w-7xl mx-auto">
+                        <div class="glass-card p-6 rounded-3xl space-y-4">
+                            <div class="flex flex-col lg:flex-row lg:items-center justify-between gap-4">
+                                <div>
+                                    <p class="text-xs font-bold uppercase tracking-widest text-indigo-600 mb-1">Engenharia de Competências • PCM</p>
+                                    <h1 class="text-xl sm:text-2xl font-extrabold text-slate-900">Árvore de Conhecimentos & Habilidades</h1>
+                                    <p class="text-xs text-slate-500 mt-0.5">Gerencie os Pilares, Grupos, Metas Desejadas (`D`) e os Requisitos Práticos de Verificação em Campo.</p>
+                                </div>
+                                <div class="flex flex-wrap items-center gap-2">
+                                    <button type="button" onclick="carregarPacoteBaseHabilidades()" id="btnSeedSkills" class="btn-touch bg-emerald-50 hover:bg-emerald-100 border border-emerald-200 text-emerald-800 py-2.5 px-4 text-xs">
+                                        <span>Restaurar / Sincronizar Pacote Base</span>
+                                    </button>
+                                    <button type="button" onclick="abrirModalNovaHabilidade()" class="btn-pill-dark text-xs">
+                                        <span>+ Cadastrar Habilidade na Árvore</span>
+                                    </button>
+                                </div>
+                            </div>
+
+                            <div class="grid grid-cols-1 sm:grid-cols-3 gap-3 bg-slate-50 p-4 rounded-2xl border border-slate-200/80">
+                                <select id="catFiltroEsp" onchange="renderCatalogoArvore()" class="input-clean py-2 text-xs font-bold">
+                                    <option value="">Todas as Especialidades</option>
+                                    <option value="Mecânica">Mecânica</option>
+                                    <option value="Elétrica">Elétrica</option>
+                                    <option value="Geral">Geral / Segurança / TPM</option>
+                                </select>
+                                <select id="catFiltroGrupo" onchange="renderCatalogoArvore()" class="input-clean py-2 text-xs font-bold">
+                                    <option value="">Todos os Pilares / Grupos</option>
+                                </select>
+                                <input type="text" id="catFiltroBusca" oninput="renderCatalogoArvore()" class="input-clean py-2 text-xs" placeholder="Buscar por código, título ou requisito prático...">
+                            </div>
+                        </div>
+
+                        <div id="catalogoArvoreContainer" class="space-y-4"></div>
+                    </section>
+
+                    <!-- ==================== PAGE 7: EQUIPE ==================== -->
+                    <section id="view-equipe" aria-label="Gestão de Equipe" class="hidden space-y-6 max-w-5xl mx-auto">
+                        <div class="glass-card p-6 rounded-3xl">
+                            <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-6">
+                                <div>
+                                    <p class="text-xs font-bold uppercase tracking-widest text-sky-600 mb-1">Banco Compartilhado • ir_funcionarios</p>
+                                    <h1 class="text-xl sm:text-2xl font-extrabold text-slate-900">Equipe de Manutenção & Supervisão</h1>
+                                    <p class="text-xs text-slate-500 mt-0.5">Sincronizado em tempo real com o app de Inspeção de Rotas.</p>
+                                </div>
+                                <button type="button" onclick="abrirModalFuncionario()" class="btn-pill-dark text-xs">+ Novo Colaborador</button>
+                            </div>
+                            <div class="overflow-x-auto border border-slate-200/80 rounded-2xl bg-white">
+                                <table class="w-full text-left text-sm whitespace-nowrap">
+                                    <thead class="bg-slate-50 text-slate-500 uppercase font-extrabold text-[11px] border-b border-slate-200">
+                                        <tr>
+                                            <th class="p-4">Colaborador</th>
+                                            <th class="p-4">Especialidade / Perfil</th>
+                                            <th class="p-4">Usuário</th>
+                                            <th class="p-4 text-center">Ações</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody id="tbodyEquipe" class="divide-y divide-slate-100"></tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </section>
+
+                </main>
+            </div>
+        </div>
+    </div>
+
+    <!-- MODAL CADASTRAR / EDITAR HABILIDADE NA ÁRVORE -->
+    <div id="modalHabilidade" role="dialog" aria-modal="true" class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-50 hidden flex items-end sm:items-center justify-center p-0 sm:p-4">
+        <div class="bg-white w-full sm:max-w-2xl sm:rounded-3xl rounded-t-3xl p-6 shadow-2xl border border-slate-200 space-y-4 max-h-[92vh] overflow-y-auto">
+            <div class="flex items-center justify-between border-b border-slate-100 pb-3">
+                <div>
+                    <span class="text-[10px] font-extrabold uppercase tracking-widest text-indigo-600">Árvore de Competências</span>
+                    <h2 id="tituloModalSkill" class="text-lg font-extrabold text-slate-900">Cadastrar Habilidade Técnica</h2>
+                </div>
+                <button type="button" onclick="fecharModal('modalHabilidade')" class="w-8 h-8 rounded-full bg-slate-100 text-slate-600 font-bold">✕</button>
+            </div>
+
+            <form onsubmit="salvarHabilidadeArvore(event)" class="space-y-4 text-xs">
+                <input type="hidden" id="skEditId" value="">
+                <div class="grid grid-cols-1 sm:grid-cols-3 gap-3">
+                    <div>
+                        <label class="block text-[10px] font-extrabold uppercase text-slate-500 mb-1">1. Especialidade *</label>
+                        <select id="skEspecialidade" required class="input-clean py-2 text-xs font-bold">
+                            <option value="Mecânica">Mecânica</option>
+                            <option value="Elétrica">Elétrica</option>
+                            <option value="Geral">Geral (Ambos: Segurança / TPM / SAP)</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label class="block text-[10px] font-extrabold uppercase text-slate-500 mb-1">2. Pilar / Grupo da Árvore *</label>
+                        <input type="text" id="skGrupo" list="dlGruposSkill" required class="input-clean py-2 text-xs font-bold" placeholder="Ex: 1. Transmissão, Rolamentos & Rotativos">
+                        <datalist id="dlGruposSkill">
+                            <option value="1. Básico de Elétrica & Medições"></option>
+                            <option value="2. Comandos, Inversores & Automação"></option>
+                            <option value="3. Utilidades & Subestações (Elétrica)"></option>
+                            <option value="1. Transmissão, Rolamentos & Rotativos"></option>
+                            <option value="2. Pneumática, Hidráulica & Instrumentos"></option>
+                            <option value="3. Máquinas de Envase, Selagem & Transporte"></option>
+                            <option value="4. Segurança, NRs & Boas Práticas (BPF)"></option>
+                            <option value="5. Metodologia TPM, PCM & ERP"></option>
+                        </datalist>
+                    </div>
+                    <div>
+                        <label class="block text-[10px] font-extrabold uppercase text-slate-500 mb-1">Código & Classificação</label>
+                        <div class="grid grid-cols-2 gap-1.5">
+                            <input type="text" id="skCodigo" class="input-clean py-2 text-xs font-bold uppercase" placeholder="Ex: UE 12">
+                            <select id="skClassif" class="input-clean py-2 text-xs font-bold">
+                                <option value="C/H">C/H (Teoria+Prática)</option>
+                                <option value="C">C (Conhecimento)</option>
+                            </select>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="grid grid-cols-1 sm:grid-cols-4 gap-3">
+                    <div class="sm:col-span-3">
+                        <label class="block text-[10px] font-extrabold uppercase text-slate-500 mb-1">3. Nome do Conhecimento / Habilidade *</label>
+                        <input type="text" id="skTitulo" required class="input-clean py-2 text-xs font-bold" placeholder="Ex: Uso do megômetro em testes de isolação de motores AC">
+                    </div>
+                    <div>
+                        <label class="block text-[10px] font-extrabold uppercase text-slate-500 mb-1">Meta Desejada (D) *</label>
+                        <select id="skDesejado" required class="input-clean py-2 text-xs font-extrabold text-sky-700">
+                            <option value="1">Nível 1 (Conhece)</option>
+                            <option value="2">Nível 2 (Acompanhado)</option>
+                            <option value="3" selected>Nível 3 (Faz Sozinho)</option>
+                            <option value="4">Nível 4 (Multiplica)</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div>
+                    <label class="block text-[10px] font-extrabold uppercase text-slate-500 mb-1">4. Critério Prático de Verificação (Como o Supervisor avalia em campo) *</label>
+                    <textarea id="skRequisito" rows="2" required class="input-clean py-2 text-xs" placeholder="Ex: Verificar se o mantenedor sabe selecionar a tensão de teste no megômetro, medir isolação entre bobinas/carcaça e interpretar o índice em MΩ."></textarea>
+                </div>
+
+                <div>
+                    <label class="block text-[10px] font-extrabold uppercase text-slate-500 mb-1">Ativo / Linha Vinculada da Planta (Opcional — ob_linhas)</label>
+                    <input type="text" id="skAtivoVinculado" list="dlAtivosPlanta" class="input-clean py-2 text-xs" placeholder="Ex: Geral ou selecione uma máquina específica...">
+                    <datalist id="dlAtivosPlanta"></datalist>
+                </div>
+
+                <div class="flex gap-2 pt-3 border-t border-slate-100">
+                    <button type="button" onclick="fecharModal('modalHabilidade')" class="btn-touch bg-slate-100 text-slate-700 flex-1 text-xs">Cancelar</button>
+                    <button type="submit" id="btnSalvarSkill" class="btn-pill-dark flex-1 text-xs">Salvar na Árvore</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- MODAL CALIBRAÇÃO RÁPIDA AO CLICAR NA CÉLULA DA MATRIZ -->
+    <div id="modalCalibrarCelula" role="dialog" aria-modal="true" class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-50 hidden flex items-end sm:items-center justify-center p-0 sm:p-4">
+        <div class="bg-white w-full sm:max-w-lg sm:rounded-3xl rounded-t-3xl p-6 shadow-2xl border border-slate-200 space-y-4">
+            <div class="flex items-center justify-between border-b border-slate-100 pb-3">
+                <div>
+                    <span class="text-[10px] font-extrabold uppercase tracking-widest text-emerald-600">Avaliação 360° • Pesos 20% / 50% / 30%</span>
+                    <h2 id="celCalTituloTec" class="text-lg font-extrabold text-slate-900">Calibrar Habilidade</h2>
+                </div>
+                <button type="button" onclick="fecharModal('modalCalibrarCelula')" class="w-8 h-8 rounded-full bg-slate-100 text-slate-600 font-bold">✕</button>
+            </div>
+
+            <div id="celCalResumoSkill" class="p-3.5 rounded-2xl bg-slate-50 border border-slate-200 text-xs space-y-1"></div>
+
+            <form onsubmit="salvarCalibracaoCelulaModal(event)" class="space-y-4 text-xs">
+                <input type="hidden" id="celCalTecId" value="">
+                <input type="hidden" id="celCalSkillId" value="">
+
+                <div class="grid grid-cols-3 gap-2.5 text-center">
+                    <div class="p-3 rounded-2xl bg-slate-50 border border-slate-200">
+                        <label class="block text-[10px] font-extrabold uppercase text-slate-500 mb-1">Autoavaliação (20%)</label>
+                        <select id="celNotaAuto" onchange="recalcularPreviaModalCelula()" class="input-clean py-2 text-center font-extrabold text-sm">
+                            <option value="0">0 - Não conhece</option>
+                            <option value="1">1 - Conhece</option>
+                            <option value="2">2 - Acompanhado</option>
+                            <option value="3">3 - Faz Sozinho</option>
+                            <option value="4">4 - Multiplica</option>
+                        </select>
+                    </div>
+                    <div class="p-3 rounded-2xl bg-sky-50/70 border border-sky-200">
+                        <label class="block text-[10px] font-extrabold uppercase text-sky-800 mb-1">Aval. Prática (50%)</label>
+                        <select id="celNotaPratica" onchange="recalcularPreviaModalCelula()" class="input-clean py-2 text-center font-extrabold text-sm">
+                            <option value="0">0 - Não conhece</option>
+                            <option value="1">1 - Conhece</option>
+                            <option value="2">2 - Acompanhado</option>
+                            <option value="3">3 - Faz Sozinho</option>
+                            <option value="4">4 - Multiplica</option>
+                        </select>
+                    </div>
+                    <div class="p-3 rounded-2xl bg-indigo-50/70 border border-indigo-200">
+                        <label class="block text-[10px] font-extrabold uppercase text-indigo-800 mb-1">Aval. Teórica (30%)</label>
+                        <select id="celNotaTeorica" onchange="recalcularPreviaModalCelula()" class="input-clean py-2 text-center font-extrabold text-sm">
+                            <option value="0">0 - Não conhece</option>
+                            <option value="1">1 - Conhece</option>
+                            <option value="2">2 - Acompanhado</option>
+                            <option value="3">3 - Faz Sozinho</option>
+                            <option value="4">4 - Multiplica</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div id="celPreviaResultado" class="p-3.5 rounded-2xl bg-emerald-50 border border-emerald-200 flex items-center justify-between font-extrabold"></div>
+
+                <div>
+                    <label class="block text-[10px] font-extrabold uppercase text-slate-500 mb-1">Evidência / Observação da Avaliação (Opcional)</label>
+                    <input type="text" id="celObsAvaliacao" class="input-clean py-2 text-xs" placeholder="Ex: Realizou teste prático no painel do compressor com precisão...">
+                </div>
+
+                <div class="flex gap-2 pt-3 border-t border-slate-100">
+                    <button type="button" onclick="fecharModal('modalCalibrarCelula')" class="btn-touch bg-slate-100 text-slate-700 flex-1 text-xs">Cancelar</button>
+                    <button type="submit" class="btn-pill-dark flex-1 text-xs">Salvar Calibração</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- MODAL NOVO ITEM DE PDI (MATRIZ GUT) -->
+    <div id="modalPdiGUT" role="dialog" aria-modal="true" class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-50 hidden flex items-end sm:items-center justify-center p-0 sm:p-4">
+        <div class="bg-white w-full sm:max-w-lg sm:rounded-3xl rounded-t-3xl p-6 shadow-2xl border border-slate-200 space-y-4 max-h-[92vh] overflow-y-auto">
+            <div class="flex items-center justify-between border-b border-slate-100 pb-3">
+                <div>
+                    <span class="text-[10px] font-extrabold uppercase tracking-widest text-rose-600">Plano de Desenvolvimento • Matriz GUT</span>
+                    <h2 class="text-lg font-extrabold text-slate-900">Programar Capacitação / Treinamento</h2>
+                </div>
+                <button type="button" onclick="fecharModal('modalPdiGUT')" class="w-8 h-8 rounded-full bg-slate-100 text-slate-600 font-bold">✕</button>
+            </div>
+
+            <form onsubmit="salvarItemPdiGUT(event)" class="space-y-4 text-xs">
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                    <div>
+                        <label class="block text-[10px] font-extrabold uppercase text-slate-500 mb-1">Técnico Participante *</label>
+                        <select id="pdiInputTecnico" required class="input-clean py-2 text-xs font-bold"></select>
+                    </div>
+                    <div>
+                        <label class="block text-[10px] font-extrabold uppercase text-slate-500 mb-1">Habilidade Alvo *</label>
+                        <select id="pdiInputSkill" required onchange="sugerirMultiplicadorParaSkill()" class="input-clean py-2 text-xs font-bold"></select>
+                    </div>
+                </div>
+
+                <div class="p-3.5 rounded-2xl bg-rose-50/60 border border-rose-200 space-y-2">
+                    <div class="flex items-center justify-between">
+                        <span class="text-[10px] font-extrabold uppercase text-rose-800">Priorização Matriz GUT (1 a 5)</span>
+                        <span id="pdiPreviewGutScore" class="text-xs font-extrabold px-2.5 py-0.5 rounded-full bg-rose-600 text-white">GUT: 27</span>
+                    </div>
+                    <div class="grid grid-cols-3 gap-2">
+                        <div>
+                            <label class="block text-[10px] font-bold text-slate-600 mb-0.5">Gravidade (G)</label>
+                            <select id="pdiGutG" onchange="atualizarPreviewGutPdi()" class="input-clean py-1.5 text-xs font-bold">
+                                <option value="1">1 - Sem gravidade</option>
+                                <option value="2">2 - Pouco grave</option>
+                                <option value="3" selected>3 - Grave</option>
+                                <option value="4">4 - Muito grave</option>
+                                <option value="5">5 - Extremamente grave</option>
+                            </select>
+                        </div>
+                        <div>
+                            <label class="block text-[10px] font-bold text-slate-600 mb-0.5">Urgência (U)</label>
+                            <select id="pdiGutU" onchange="atualizarPreviewGutPdi()" class="input-clean py-1.5 text-xs font-bold">
+                                <option value="1">1 - Pode esperar</option>
+                                <option value="2">2 - Pouco urgente</option>
+                                <option value="3" selected>3 - Urgente</option>
+                                <option value="4">4 - Muito urgente</option>
+                                <option value="5">5 - Imediato</option>
+                            </select>
+                        </div>
+                        <div>
+                            <label class="block text-[10px] font-bold text-slate-600 mb-0.5">Tendência (T)</label>
+                            <select id="pdiGutT" onchange="atualizarPreviewGutPdi()" class="input-clean py-1.5 text-xs font-bold">
+                                <option value="1">1 - Não piora</option>
+                                <option value="2">2 - Piora a longo prazo</option>
+                                <option value="3" selected>3 - Piora a médio prazo</option>
+                                <option value="4">4 - Piora em curto prazo</option>
+                                <option value="5">5 - Piora rapidamente</option>
+                            </select>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                    <div>
+                        <label class="block text-[10px] font-extrabold uppercase text-slate-500 mb-1">Multiplicador Interno (Nível 4) / Fornecedor *</label>
+                        <input type="text" id="pdiInputMultiplicador" required class="input-clean py-2 text-xs font-bold" placeholder="Ex: Donizete / SENAI / Fabricante">
+                        <span id="pdiHintMultiplicador" class="text-[10px] font-bold text-indigo-600 block mt-0.5"></span>
+                    </div>
+                    <div>
+                        <label class="block text-[10px] font-extrabold uppercase text-slate-500 mb-1">Tipo (Interno / Externo) & Prazo *</label>
+                        <div class="grid grid-cols-2 gap-1.5">
+                            <select id="pdiInputTipoIE" class="input-clean py-2 text-xs font-bold">
+                                <option value="I - Interno (OJT)">Interno (OJT)</option>
+                                <option value="E - Externo">Externo</option>
+                            </select>
+                            <input type="date" id="pdiInputPrazo" required class="input-clean py-2 text-xs font-bold">
+                        </div>
+                    </div>
+                </div>
+
+                <div class="flex gap-2 pt-3 border-t border-slate-100">
+                    <button type="button" onclick="fecharModal('modalPdiGUT')" class="btn-touch bg-slate-100 text-slate-700 flex-1 text-xs">Cancelar</button>
+                    <button type="submit" class="btn-pill-dark flex-1 text-xs">Registrar no PDI</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- MODAL NOVO / EDITAR FUNCIONÁRIO -->
+    <div id="modalFunc" role="dialog" aria-modal="true" class="fixed inset-0 bg-slate-900/50 backdrop-blur-sm z-50 hidden flex items-end sm:items-center justify-center p-0 sm:p-4">
+        <div class="bg-white w-full sm:max-w-md sm:rounded-3xl rounded-t-3xl p-6 sm:p-7 shadow-2xl border border-slate-100">
+            <div class="flex items-center justify-between mb-4">
+                <div>
+                    <span id="modalFuncSub" class="text-[10px] font-extrabold uppercase tracking-widest text-sky-600">Controle de Acesso</span>
+                    <h2 id="modalFuncTitulo" class="text-lg font-extrabold text-slate-900">Adicionar Colaborador</h2>
+                </div>
+                <button type="button" onclick="fecharModal('modalFunc')" class="w-8 h-8 rounded-full bg-slate-100 hover:bg-slate-200 text-slate-600 font-bold flex items-center justify-center">✕</button>
+            </div>
+            <form onsubmit="salvarFuncionario(event)" class="space-y-4">
+                <input type="hidden" id="fEditId" value="">
+                <div>
+                    <label for="fNome" class="block text-[11px] font-extrabold uppercase text-slate-500 mb-1">Nome Completo *</label>
+                    <input type="text" id="fNome" required class="input-clean py-2.5 text-sm">
+                </div>
+                <div>
+                    <label for="fRole" class="block text-[11px] font-extrabold uppercase text-slate-500 mb-1">Especialidade / Perfil *</label>
+                    <select id="fRole" required class="input-clean py-2.5 text-sm font-bold">
+                        <option value="Mecânica">Técnico Mecânica</option>
+                        <option value="Elétrica">Técnico Elétrica</option>
+                        <option value="Supervisor Mecânica">Supervisor Mecânica</option>
+                        <option value="Supervisor Elétrica">Supervisor Elétrica</option>
+                        <option value="Admin">Administrador (PCM)</option>
+                    </select>
+                </div>
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                    <div>
+                        <label for="fUser" class="block text-[11px] font-extrabold uppercase text-slate-500 mb-1">Usuário *</label>
+                        <input type="text" id="fUser" required placeholder="ex: joao.silva" class="input-clean py-2.5 text-sm lowercase">
+                    </div>
+                    <div>
+                        <label for="fPass" class="block text-[11px] font-extrabold uppercase text-slate-500 mb-1">Senha *</label>
+                        <input type="text" id="fPass" required value="123456" class="input-clean py-2.5 text-sm font-mono">
+                    </div>
+                </div>
+                <div class="flex gap-2.5 pt-4 border-t border-slate-100">
+                    <button type="button" onclick="fecharModal('modalFunc')" class="btn-touch bg-slate-100 hover:bg-slate-200 text-slate-700 w-1/3 text-xs">Cancelar</button>
+                    <button type="submit" id="btnSalvarFunc" class="btn-pill-dark w-2/3 text-xs">Salvar Cadastro</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- MODAL ESPAÇO DO USUÁRIO -->
+    <div id="modalEspacoUsuario" role="dialog" aria-modal="true" class="fixed inset-0 bg-slate-900/60 z-50 hidden flex items-end sm:items-center justify-center p-0 sm:p-4">
+        <div class="bg-white w-full sm:max-w-xl sm:rounded-3xl rounded-t-3xl max-h-[92vh] flex flex-col shadow-2xl overflow-hidden border border-slate-200">
+            <div class="p-5 sm:px-7 border-b border-slate-200 bg-slate-50 flex items-center justify-between">
+                <div>
+                    <span class="text-[10px] font-extrabold uppercase tracking-widest text-sky-600">Preferências Sincronizadas</span>
+                    <h2 class="text-lg font-extrabold text-slate-900">Espaço do Usuário</h2>
+                </div>
+                <button type="button" onclick="fecharModal('modalEspacoUsuario')" class="w-9 h-9 rounded-full bg-white border border-slate-200 text-slate-600 font-bold flex items-center justify-center">✕</button>
+            </div>
+            <div class="p-5 sm:p-7 overflow-y-auto space-y-6 text-sm">
+                <div class="p-4 rounded-2xl bg-slate-50 border border-slate-200 flex items-center justify-between gap-4">
+                    <div>
+                        <div class="font-extrabold text-slate-900 text-sm">Modo Tablet (Alta Performance & Campo)</div>
+                        <p class="text-xs text-slate-500 mt-0.5">Desativa efeitos visuais e aumenta áreas de toque (Atalho: <strong>Alt + T</strong>).</p>
+                    </div>
+                    <button type="button" id="btnToggleTabletMode" onclick="toggleModoTablet()" class="px-4 py-2.5 rounded-xl font-extrabold text-xs bg-slate-200 text-slate-800 shrink-0">DESATIVADO</button>
+                </div>
+                <div>
+                    <label class="block text-xs font-extrabold uppercase tracking-wider text-slate-500 mb-2">Tema Visual</label>
+                    <div class="grid grid-cols-2 sm:grid-cols-4 gap-2">
+                        <button type="button" onclick="definirTemaUsuario('padrao')" id="btnTema_padrao" class="p-3 rounded-xl border border-slate-200 text-xs font-extrabold text-center">Claro Padrão</button>
+                        <button type="button" onclick="definirTemaUsuario('solido')" id="btnTema_solido" class="p-3 rounded-xl border border-slate-200 text-xs font-extrabold text-center">Branco Sólido</button>
+                        <button type="button" onclick="definirTemaUsuario('dark')" id="btnTema_dark" class="p-3 rounded-xl border border-slate-200 text-xs font-extrabold text-center">Escuro Industrial</button>
+                        <button type="button" onclick="definirTemaUsuario('contraste')" id="btnTema_contraste" class="p-3 rounded-xl border border-slate-200 text-xs font-extrabold text-center">Alto Contraste</button>
+                    </div>
+                </div>
+                <div>
+                    <label class="block text-xs font-extrabold uppercase tracking-wider text-slate-500 mb-2">Cor de Destaque (Accent Color)</label>
+                    <div class="grid grid-cols-5 gap-2">
+                        <button type="button" onclick="definirCorDestaque('#0284c7')" class="py-2.5 rounded-xl text-white font-extrabold text-[11px]" style="background:#0284c7">Azul</button>
+                        <button type="button" onclick="definirCorDestaque('#dc2626')" class="py-2.5 rounded-xl text-white font-extrabold text-[11px]" style="background:#dc2626">Cepêra</button>
+                        <button type="button" onclick="definirCorDestaque('#059669')" class="py-2.5 rounded-xl text-white font-extrabold text-[11px]" style="background:#059669">Esmeralda</button>
+                        <button type="button" onclick="definirCorDestaque('#4f46e5')" class="py-2.5 rounded-xl text-white font-extrabold text-[11px]" style="background:#4f46e5">Índigo</button>
+                        <button type="button" onclick="definirCorDestaque('#0f172a')" class="py-2.5 rounded-xl text-white font-extrabold text-[11px]" style="background:#0f172a">Grafite</button>
+                    </div>
+                </div>
+                <div class="pt-2 border-t border-slate-200 space-y-3">
+                    <span class="block text-xs font-extrabold uppercase tracking-wider text-slate-500">Acessibilidade e Leitura</span>
+                    <div class="grid grid-cols-3 gap-2">
+                        <button type="button" onclick="alterarFonte(-1)" class="py-2.5 rounded-xl bg-slate-100 hover:bg-slate-200 font-extrabold text-xs text-slate-800">Texto A-</button>
+                        <button type="button" onclick="alterarFonte(0)" class="py-2.5 rounded-xl bg-slate-100 hover:bg-slate-200 font-extrabold text-xs text-slate-800">Padrão</button>
+                        <button type="button" onclick="alterarFonte(1)" class="py-2.5 rounded-xl bg-slate-100 hover:bg-slate-200 font-extrabold text-xs text-slate-800">Texto A+</button>
+                    </div>
+                </div>
+            </div>
+            <div class="p-4 sm:px-7 border-t border-slate-200 bg-slate-50 flex items-center justify-between">
+                <span class="text-[11px] font-semibold text-slate-500">Sincronizado com seu usuário em ir_funcionarios.</span>
+                <button type="button" onclick="fecharModal('modalEspacoUsuario')" class="btn-pill-dark text-xs py-2 px-6">Concluir</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- MODAL ATALHOS DE TECLADO (CTRL + ?) -->
+    <div id="modalAtalhos" role="dialog" aria-modal="true" class="fixed inset-0 bg-slate-900/60 z-50 hidden flex items-end sm:items-center justify-center p-0 sm:p-4">
+        <div class="bg-white w-full sm:max-w-lg sm:rounded-3xl rounded-t-3xl p-6 shadow-2xl border border-slate-200 space-y-4">
+            <div class="flex items-center justify-between border-b border-slate-100 pb-3">
+                <div>
+                    <span class="text-[10px] font-extrabold uppercase tracking-widest text-sky-600">Navegação Rápida</span>
+                    <h2 class="text-lg font-extrabold text-slate-900">Teclas de Atalho do Sistema</h2>
+                </div>
+                <button type="button" onclick="fecharModal('modalAtalhos')" class="w-8 h-8 rounded-full bg-slate-100 text-slate-600 font-bold">✕</button>
+            </div>
+            <div class="space-y-2 text-xs">
+                <div class="flex justify-between py-2 border-b border-slate-100"><span>Abrir Central de Atalhos</span><kbd class="px-2 py-0.5 bg-slate-100 border border-slate-300 rounded font-mono font-bold">Ctrl + ?</kbd></div>
+                <div class="flex justify-between py-2 border-b border-slate-100"><span>Abrir Espaço do Usuário</span><kbd class="px-2 py-0.5 bg-slate-100 border border-slate-300 rounded font-mono font-bold">Alt + U</kbd></div>
+                <div class="flex justify-between py-2 border-b border-slate-100"><span>Alternar Modo Tablet</span><kbd class="px-2 py-0.5 bg-slate-100 border border-slate-300 rounded font-mono font-bold">Alt + T</kbd></div>
+                <div class="flex justify-between py-2 border-b border-slate-100"><span>Alternar entre Abas do Menu</span><kbd class="px-2 py-0.5 bg-slate-100 border border-slate-300 rounded font-mono font-bold">Alt + 1 até Alt + 6</kbd></div>
+                <div class="flex justify-between py-2"><span>Fechar qualquer modal</span><kbd class="px-2 py-0.5 bg-slate-100 border border-slate-300 rounded font-mono font-bold">Esc</kbd></div>
+            </div>
+        </div>
+    </div>
+
+    <!-- TOAST NOTIFICATIONS -->
+    <div id="toastStack" aria-live="polite" class="fixed bottom-4 right-4 z-[9999] space-y-2 pointer-events-none"></div>
+
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
+        import { getAuth, signInAnonymously } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
+        import { initializeFirestore, collection, addDoc, onSnapshot, doc, updateDoc } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
+
+        // ================= ARMAZENAMENTO SEGURO (IMUNE A SANDBOX DO GOOGLE SITES) =================
+        const memStore = {};
+        const safeStorage = {
+            get: function(k) { try { return window.localStorage.getItem(k); } catch (_) { return memStore[k] || null; } },
+            set: function(k, v) { memStore[k] = v; try { window.localStorage.setItem(k, v); } catch (_) {} },
+            remove: function(k) { delete memStore[k]; try { window.localStorage.removeItem(k); } catch (_) {} }
+        };
+
+        const firebaseConfig = {
+            apiKey: "AIzaSyAGbFTTCgbqe9XFKFSb6ltB5lYj5O6QipE",
+            authDomain: "pcm-cepera.firebaseapp.com",
+            projectId: "pcm-cepera",
+            storageBucket: "pcm-cepera.firebasestorage.app",
+            messagingSenderId: "483278589909",
+            appId: "1:483278589909:web:9f69f8a32f50e4e186f75c",
+            measurementId: "G-LW29TG8TJ4"
+        };
+
+        const app = initializeApp(firebaseConfig);
+        const db = initializeFirestore(app, { experimentalForceLongPolling: true });
+        const auth = getAuth(app);
+
+        const refLinhas = collection(db, "ob_linhas");
+        const refFunc = collection(db, "ir_funcionarios");
+
+        const DEFAULT_ADMIN = { id: 'default_admin', nome: 'Administrador PCM', user: 'admin', pass: 'admin', role: 'Admin' };
+
+        const PACOTE_BASE_SKILLS = [
+            { id: 'sk_ele_01', especialidade: 'Elétrica', grupo: '1. Básico de Elétrica & Medições', codigo: 'UE 12', classif: 'C/H', desejado: 3, titulo: 'Uso do megômetro e teste de isolação de motores', requisito: 'Verificar se o eletricista sabe utilizar o megômetro na megagem de motores AC e interpretar a resistência de isolamento.' },
+            { id: 'sk_ele_02', especialidade: 'Elétrica', grupo: '1. Básico de Elétrica & Medições', codigo: 'UE 13', classif: 'C/H', desejado: 3, titulo: 'Leitura e interpretação de diagramas e simbologia elétrica', requisito: 'Verificar se o eletricista identifica circuitos de potência e comando e localiza defeitos pelo esquema elétrico.' },
+            { id: 'sk_ele_03', especialidade: 'Elétrica', grupo: '1. Básico de Elétrica & Medições', codigo: 'UE 14', classif: 'C/H', desejado: 3, titulo: 'Dimensionamento de circuitos, corrente, potência e relés térmicos', requisito: 'Verificar se o eletricista mede corrente com alicate amperímetro e ajusta/dimensiona disjuntores e relés de proteção.' },
+            { id: 'sk_ele_04', especialidade: 'Elétrica', grupo: '2. Comandos, Inversores & Automação', codigo: 'AUT 01', classif: 'C/H', desejado: 3, titulo: 'Parametrização e diagnóstico de falhas em Inversores de Frequência e Soft-Starters', requisito: 'Verificar se o eletricista identifica códigos de alarme, substitui e parametriza rampa/corrente/frequência no inversor.' },
+            { id: 'sk_ele_05', especialidade: 'Elétrica', grupo: '2. Comandos, Inversores & Automação', codigo: 'AUT 02', classif: 'C/H', desejado: 3, titulo: 'Diagnóstico de CLP, IHM e Redes Industriais', requisito: 'Verificar se o mantenedor identifica status de I/O no CLP, falhas de comunicação e realiza diagnóstico na IHM.' },
+            { id: 'sk_ele_06', especialidade: 'Elétrica', grupo: '2. Comandos, Inversores & Automação', codigo: 'AUT 03', classif: 'C/H', desejado: 3, titulo: 'Sensores industriais (Indutivo, Capacitivo, Óptico, PT-100, Termopar e Encoder)', requisito: 'Verificar se o eletricista testa, alinha e substitui sensores de presença, temperatura e encoders de rotação.' },
+            { id: 'sk_ele_07', especialidade: 'Elétrica', grupo: '3. Utilidades & Subestações (Elétrica)', codigo: 'UE 22', classif: 'C/H', desejado: 3, titulo: 'Painéis elétricos de Compressores, Bombas, Caldeiras e Secadores de Ar', requisito: 'Verificar domínio dos quadros de comando de utilidades, rearme seguro e diagnóstico de intertravamentos.' },
+            { id: 'sk_mec_01', especialidade: 'Mecânica', grupo: '1. Transmissão, Rolamentos & Rotativos', codigo: 'MEC 01', classif: 'C/H', desejado: 3, titulo: 'Montagem, desmontagem e ajuste de Rolamentos e Mancais', requisito: 'Verificar uso correto de saca-polias, aquecedor indutivo, ajuste de folga radial/axial e lubrificação.' },
+            { id: 'sk_mec_02', especialidade: 'Mecânica', grupo: '1. Transmissão, Rolamentos & Rotativos', codigo: 'MEC 02', classif: 'C/H', desejado: 3, titulo: 'Manutenção de Redutores, Engrenagens, Correntes e Correias', requisito: 'Verificar alinhamento de polias/acoplamentos, tensão de correias/correntes e análise de desgaste ou vazamento em redutores.' },
+            { id: 'sk_mec_03', especialidade: 'Mecânica', grupo: '1. Transmissão, Rolamentos & Rotativos', codigo: 'MEC 03', classif: 'C/H', desejado: 3, titulo: 'Manutenção de Bombas Centrífugas/Positivas e Selos Mecânicos', requisito: 'Verificar substituição de selo mecânico, gaxetas, rotores e alinhamento do conjunto moto-bomba.' },
+            { id: 'sk_mec_04', especialidade: 'Mecânica', grupo: '2. Pneumática, Hidráulica & Instrumentos', codigo: 'MEC 04', classif: 'C/H', desejado: 3, titulo: 'Sistemas Pneumáticos e Hidráulicos (Cilindros, Válvulas Direcionais e FRL)', requisito: 'Verificar diagnóstico de fuga de ar, reparo de atuadores pneumáticos, reguladoras de pressão e eletroválvulas.' },
+            { id: 'sk_mec_05', especialidade: 'Mecânica', grupo: '2. Pneumática, Hidráulica & Instrumentos', codigo: 'MEC 05', classif: 'C/H', desejado: 3, titulo: 'Metrologia Básica e Inspeção Sensitiva (Vibração, Ruído e Temperatura)', requisito: 'Verificar uso de paquímetro, micrômetro, relógio comparador e detecção de anomalias em rota de inspeção.' },
+            { id: 'sk_mec_06', especialidade: 'Mecânica', grupo: '3. Máquinas de Envase, Selagem & Transporte', codigo: 'MEC 06', classif: 'C/H', desejado: 3, titulo: 'Ajuste mecânico e sincronismo de Envasadoras, Posicionadores e Rotuladoras', requisito: 'Verificar ajuste fino de mordentes de selagem, dosadores volumétricos, esteiras transportadoras e guias.' },
+            { id: 'sk_ger_01', especialidade: 'Geral', grupo: '4. Segurança, NRs & Boas Práticas (BPF)', codigo: 'SEG 01', classif: 'C/H', desejado: 3, titulo: 'Bloqueio e Etiquetagem de Energias Perigosas (LOTO) & NR-12', requisito: 'Verificar se aplica cadeado de bloqueio elétrico/pneumático antes da intervenção e confere proteções NR-12.' },
+            { id: 'sk_ger_02', especialidade: 'Geral', grupo: '4. Segurança, NRs & Boas Práticas (BPF)', codigo: 'SEG 02', classif: 'C', desejado: 3, titulo: 'Normas Regulamentadoras Aplicáveis (NR-10, NR-33 Espaço Confinado, NR-35 Altura)', requisito: 'Verificar reciclagem em dia e aplicação dos protocolos de Permissão de Trabalho (PT) e BPF na indústria alimentícia.' },
+            { id: 'sk_ger_03', especialidade: 'Geral', grupo: '5. Metodologia TPM, PCM & ERP', codigo: 'TPM 01', classif: 'C/H', desejado: 3, titulo: 'Apontamento de Ordens de Serviço (ERP Sankhya / Rotas de Inspeção)', requisito: 'Verificar preenchimento técnico correto de OS, requisição de peças, apontamento de horas e registro de anomalias.' },
+            { id: 'sk_ger_04', especialidade: 'Geral', grupo: '5. Metodologia TPM, PCM & ERP', codigo: 'TPM 02', classif: 'C/H', desejado: 3, titulo: 'Análise de Causa Raiz de Quebras (5 Porquês, 5W1H e Ishikawa)', requisito: 'Verificar participação ativa na eliminação de quebras reincidentes e execução de Manutenção Planejada / 5S.' }
+        ];
+
+        let listaFunc = [DEFAULT_ADMIN];
+        let arvLinhas = [];
+        let listaSkills = [...PACOTE_BASE_SKILLS];
+        let mapaAvaliacoes = {};
+        let listaPdi = [];
+        let bancoConectado = false;
+        let usuarioLogado = null;
+        let chartRadarInstance = null;
+
+        // Escape seguro contra decodificação acidental no copiador
+        function escapeHtml(str) {
+            return String(str || '')
+                .replace(/&/g, '&' + 'amp;')
+                .replace(/</g, '&' + 'lt;')
+                .replace(/>/g, '&' + 'gt;')
+                .replace(/"/g, '&' + 'quot;')
+                .replace(/'/g, '&' + '#39;');
+        }
+
+        window.showToast = function(msg, type) {
+            const stack = document.getElementById('toastStack');
+            if (!stack) return;
+            const el = document.createElement('div');
+            const cor = (type === 'error') ? 'bg-rose-600 text-white' : 'bg-slate-900 text-white';
+            el.className = 'px-4 py-3 rounded-2xl text-xs font-bold shadow-xl transition-all flex items-center gap-2 ' + cor;
+            el.innerHTML = msg;
+            stack.appendChild(el);
+            setTimeout(function() { el.remove(); }, 3200);
+        };
+
+        window.fecharModal = function(id) {
+            const el = document.getElementById(id);
+            if (el) el.classList.add('hidden');
+        };
+
+        window.toggleSenhaLogin = function() {
+            const inp = document.getElementById('loginPass');
+            if (inp) inp.type = (inp.type === 'password') ? 'text' : 'password';
+        };
+
+        // ================= ESPAÇO DO USUÁRIO & ATALHOS =================
+        let userPrefs = { tema: 'padrao', accent: '#0284c7', tabletMode: false, fontLevel: 0 };
+
+        window.abrirEspacoUsuario = function() {
+            atualizarUIPreferencias();
+            document.getElementById('modalEspacoUsuario').classList.remove('hidden');
+        };
+
+        window.abrirModalAtalhos = function() {
+            document.getElementById('modalAtalhos').classList.remove('hidden');
+        };
+
+        function aplicarPreferenciasVisuais() {
+            document.body.classList.remove('theme-solid', 'theme-dark', 'high-contrast', 'tablet-mode');
+            if (userPrefs.tema === 'solido') document.body.classList.add('theme-solid');
+            if (userPrefs.tema === 'dark') document.body.classList.add('theme-dark');
+            if (userPrefs.tema === 'contraste') document.body.classList.add('high-contrast');
+            if (userPrefs.tabletMode) document.body.classList.add('tablet-mode');
+            document.documentElement.style.setProperty('--accent', userPrefs.accent || '#0284c7');
+            const sizes = { '-1': '14px', '0': '16px', '1': '18px', '2': '20px', '3': '22px' };
+            document.documentElement.style.fontSize = sizes[String(userPrefs.fontLevel || 0)] || '16px';
+            atualizarUIPreferencias();
+        }
+
+        function atualizarUIPreferencias() {
+            const btnTab = document.getElementById('btnToggleTabletMode');
+            if (btnTab) {
+                btnTab.innerText = userPrefs.tabletMode ? 'ATIVADO' : 'DESATIVADO';
+                btnTab.className = userPrefs.tabletMode
+                    ? 'px-4 py-2.5 rounded-xl font-extrabold text-xs bg-emerald-600 text-white shrink-0'
+                    : 'px-4 py-2.5 rounded-xl font-extrabold text-xs bg-slate-200 text-slate-800 shrink-0';
+            }
+            ['padrao', 'solido', 'dark', 'contraste'].forEach(function(t) {
+                const b = document.getElementById('btnTema_' + t);
+                if (b) {
+                    b.className = (userPrefs.tema === t)
+                        ? 'p-3 rounded-xl border-2 border-sky-600 bg-sky-50 text-sky-900 text-xs font-extrabold text-center'
+                        : 'p-3 rounded-xl border border-slate-200 text-xs font-extrabold text-center';
+                }
+            });
+        }
+
+        async function persistirPreferenciasUsuario() {
+            const chaveLocal = usuarioLogado ? ('cepera_prefs_' + usuarioLogado.user) : 'cepera_prefs_guest';
+            safeStorage.set(chaveLocal, JSON.stringify(userPrefs));
+            if (usuarioLogado && usuarioLogado.id && usuarioLogado.id !== 'default_admin') {
+                try { await updateDoc(doc(db, "ir_funcionarios", usuarioLogado.id), { preferencias: userPrefs }); } catch (_) {}
+            }
+        }
+
+        function carregarPreferenciasUsuario(u) {
+            let carregado = (u && u.preferencias && typeof u.preferencias === 'object') ? u.preferencias : null;
+            if (!carregado) {
+                const salvoLocal = safeStorage.get(u ? ('cepera_prefs_' + u.user) : 'cepera_prefs_guest');
+                if (salvoLocal) { try { carregado = JSON.parse(salvoLocal); } catch (_) {} }
+            }
+            userPrefs = {
+                tema: (carregado && carregado.tema) || 'padrao',
+                accent: (carregado && carregado.accent) || '#0284c7',
+                tabletMode: Boolean(carregado && carregado.tabletMode),
+                fontLevel: Number((carregado && carregado.fontLevel) || 0)
+            };
+            aplicarPreferenciasVisuais();
+        }
+
+        window.toggleModoTablet = function() { userPrefs.tabletMode = !userPrefs.tabletMode; aplicarPreferenciasVisuais(); persistirPreferenciasUsuario(); };
+        window.definirTemaUsuario = function(tema) { userPrefs.tema = tema; aplicarPreferenciasVisuais(); persistirPreferenciasUsuario(); };
+        window.definirCorDestaque = function(cor) { userPrefs.accent = cor; aplicarPreferenciasVisuais(); persistirPreferenciasUsuario(); };
+        window.alterarFonte = function(dir) {
+            userPrefs.fontLevel = (dir === 0) ? 0 : Math.max(-1, Math.min(3, (userPrefs.fontLevel || 0) + dir));
+            aplicarPreferenciasVisuais();
+            persistirPreferenciasUsuario();
+        };
+
+        document.addEventListener('keydown', function(e) {
+            if (e.key === 'Escape') {
+                ['modalHabilidade', 'modalCalibrarCelula', 'modalPdiGUT', 'modalFunc', 'modalEspacoUsuario', 'modalAtalhos'].forEach(fecharModal);
+                return;
+            }
+            if ((e.ctrlKey || e.metaKey) && (e.key === '?' || e.key === '/')) {
+                e.preventDefault();
+                abrirModalAtalhos();
+                return;
+            }
+            const tag = (document.activeElement && document.activeElement.tagName ? document.activeElement.tagName : '').toUpperCase();
+            if (['INPUT', 'TEXTAREA', 'SELECT'].indexOf(tag) !== -1) return;
+            if (e.altKey) {
+                const k = e.key.toLowerCase();
+                if (k === 't') { e.preventDefault(); toggleModoTablet(); return; }
+                if (k === 'u') { e.preventDefault(); abrirEspacoUsuario(); return; }
+            }
+        });
+
+        function atualizarStatusConexao(estado, detalhe) {
+            const badge = document.getElementById('loginSyncBadge');
+            const dot = document.getElementById('headerSyncDot');
+            const txt = document.getElementById('headerSyncText');
+            if (estado === 'online') {
+                bancoConectado = true;
+                if (badge) {
+                    badge.className = 'text-[11px] font-bold text-emerald-600 flex items-center gap-1';
+                    badge.innerHTML = '<span class="w-2 h-2 rounded-full bg-emerald-500"></span> PCM • Online';
+                }
+                if (dot) dot.className = 'w-2 h-2 rounded-full bg-emerald-500';
+                if (txt) txt.innerText = 'Banco Sincronizado (Online)';
+            } else if (estado === 'erro') {
+                if (badge) {
+                    badge.className = 'text-[11px] font-bold text-rose-600 flex items-center gap-1';
+                    badge.innerHTML = '<span class="w-2 h-2 rounded-full bg-rose-500"></span> Falha: ' + escapeHtml(detalhe || '');
+                }
+                if (dot) dot.className = 'w-2 h-2 rounded-full bg-rose-500';
+                if (txt) txt.innerText = 'Erro (' + (detalhe || '') + ')';
+            }
+        }
+
+        // ================= SINCRONIZAÇÃO DOS DADOS DA MATRIZ DENTRO DE ir_funcionarios =================
+        function reconstruirDadosMatrizDosFuncionarios(funcs) {
+            let catalogoMaisRecente = null;
+            let maiorTs = 0;
+            funcs.forEach(function(f) {
+                if (Array.isArray(f.mh_catalogo_skills) && f.mh_catalogo_skills.length > 0) {
+                    const ts = Number(f.mh_catalogo_ts || 1);
+                    if (ts >= maiorTs) {
+                        maiorTs = ts;
+                        catalogoMaisRecente = f.mh_catalogo_skills;
+                    }
+                }
+            });
+            listaSkills = catalogoMaisRecente ? [...catalogoMaisRecente] : [...PACOTE_BASE_SKILLS];
+            listaSkills.sort(function(a, b) {
+                return (a.grupo || '').localeCompare(b.grupo || '') || (a.codigo || '').localeCompare(b.codigo || '') || (a.titulo || '').localeCompare(b.titulo || '');
+            });
+
+            const novoMapaAv = {};
+            const novoPdi = [];
+            funcs.forEach(function(f) {
+                if (f.mh_avaliacoes && typeof f.mh_avaliacoes === 'object') {
+                    Object.entries(f.mh_avaliacoes).forEach(function(entry) {
+                        const skillId = entry[0];
+                        const dadosAv = entry[1];
+                        novoMapaAv[f.id + '_' + skillId] = { id_tecnico: f.id, id_skill: skillId, ...dadosAv };
+                    });
+                }
+                if (Array.isArray(f.mh_pdi)) {
+                    f.mh_pdi.forEach(function(item) {
+                        novoPdi.push({ ...item, id_tecnico: f.id, nome_tecnico: f.nome, role_tecnico: f.role });
+                    });
+                }
+            });
+            mapaAvaliacoes = novoMapaAv;
+            novoPdi.sort(function(a, b) { return (b.gut_score || 0) - (a.gut_score || 0); });
+            listaPdi = novoPdi;
+        }
+
+        async function salvarCatalogoSkillsNoBanco(novoArraySkills) {
+            listaSkills = [...novoArraySkills];
+            const docAlvo = (usuarioLogado && usuarioLogado.id !== 'default_admin')
+                ? usuarioLogado
+                : (listaFunc.find(function(f) { return f.id !== 'default_admin' && f.role === 'Admin'; }) || listaFunc.find(function(f) { return f.id !== 'default_admin'; }));
+
+            if (docAlvo) {
+                await updateDoc(doc(db, "ir_funcionarios", docAlvo.id), {
+                    mh_catalogo_skills: novoArraySkills,
+                    mh_catalogo_ts: Date.now()
+                });
+            }
+        }
+
+        // ================= INICIALIZAÇÃO IDÊNTICA AO APP DE INSPEÇÃO =================
+        async function initApp() {
+            verificarSessao();
+
+            try {
+                await Promise.race([
+                    signInAnonymously(auth),
+                    new Promise(function(resolve) { setTimeout(resolve, 1500); })
+                ]);
+            } catch (_) {}
+
+            setTimeout(function() {
+                if (!bancoConectado) {
+                    atualizarStatusConexao('erro', 'tempo esgotado / bloqueio de rede');
+                }
+            }, 8000);
+
+            onSnapshot(refLinhas, function(snap) {
+                const temp = [];
+                snap.forEach(function(d) {
+                    const raw = d.data();
+                    const maq = raw.maquina || raw.Maquina || raw.linha || '';
+                    const eq = raw.equipamento || raw.Equipamento || '';
+                    if (maq || eq) temp.push(maq + ' › ' + eq);
+                });
+                arvLinhas = [...new Set(temp)].sort();
+                atualizarStatusConexao('online');
+                const dl = document.getElementById('dlAtivosPlanta');
+                if (dl) {
+                    dl.innerHTML = arvLinhas.map(function(a) { return '<option value="' + escapeHtml(a) + '">'; }).join('');
+                }
+            }, function(err) {
+                atualizarStatusConexao('erro', (err && err.code) || 'permissão em ob_linhas');
+            });
+
+            onSnapshot(refFunc, function(snap) {
+                const temp = [];
+                snap.forEach(function(d) { temp.push({ id: d.id, ...d.data() }); });
+                listaFunc = temp.length > 0 ? temp : [DEFAULT_ADMIN];
+                reconstruirDadosMatrizDosFuncionarios(listaFunc);
+                atualizarStatusConexao('online');
+                if (usuarioLogado) {
+                    const atualizado = listaFunc.find(function(x) { return x.user === usuarioLogado.user; });
+                    if (atualizado) usuarioLogado = atualizado;
+                    rotearTelas();
+                } else {
+                    verificarSessao();
+                }
+            }, function(err) {
+                atualizarStatusConexao('erro', (err && err.code) || 'permissão');
+            });
+        }
+
+        // ================= LOGIN, PERMISSÕES (RBAC) & CONTROLE DE SESSÃO =================
+        function isSupervisor(role) {
+            return role === 'Supervisor Mecânica' || role === 'Supervisor Elétrica';
+        }
+        function isGestor(role) {
+            return role === 'Admin' || isSupervisor(role);
+        }
+        function exigirPermissaoGestor() {
+            if (!usuarioLogado || !isGestor(usuarioLogado.role)) {
+                showToast("Acesso negado: ação exclusiva da Supervisão e PCM.", "error");
+                return false;
+            }
+            return true;
+        }
+        function getEspecialidadeRestritaSupervisor() {
+            if (!usuarioLogado) return 'Todas';
+            if (usuarioLogado.role === 'Supervisor Mecânica') return 'Mecânica';
+            if (usuarioLogado.role === 'Supervisor Elétrica') return 'Elétrica';
+            return 'Todas';
+        }
+        function getTecnicosManutencao(espFiltro) {
+            return listaFunc.filter(function(f) {
+                const isTec = f.role === 'Mecânica' || f.role === 'Elétrica';
+                if (!isTec) return false;
+                if (espFiltro && espFiltro !== 'Todas' && espFiltro !== 'Geral') {
+                    return f.role === espFiltro;
+                }
+                return true;
+            }).sort(function(a, b) { return a.nome.localeCompare(b.nome); });
+        }
+
+        // Oculta/exibe botões administrativos do HTML automaticamente conforme o perfil logado
+        function aplicarTravasVisuaisDeSeguranca() {
+            if (!usuarioLogado) return;
+            const gestor = isGestor(usuarioLogado.role);
+
+            // 1. Esconde botões de gestão no topo do Dashboard/Radar e tira clique dos KPIs para técnicos
+            const seletoresGestor = [
+                'button[onclick="switchTab(\'catalogo\')"]',
+                'button[onclick="switchTab(\'calibracao\')"]',
+                'button[onclick="switchTab(\'matriz\')"]',
+                'button[onclick="abrirModalNovoPdiManual()"]',
+                'button[onclick="imprimirRelatorioPdiGUT()"]',
+                'button[onclick="gerarPdiAutomaticoDoTecnico()"]',
+                'button[onclick="abrirModalNovaHabilidade()"]',
+                '#btnSeedSkills'
+            ];
+            seletoresGestor.forEach(function(sel) {
+                document.querySelectorAll(sel).forEach(function(el) {
+                    if (gestor) el.classList.remove('hidden');
+                    else el.classList.add('hidden');
+                });
+            });
+
+            // 2. Trava o filtro de técnico no PDI para manutentor ver apenas o próprio nome
+            const selPdiTec = document.getElementById('pdiFiltroTecnico');
+            if (selPdiTec) {
+                selPdiTec.disabled = !gestor;
+            }
+        }
+
+        window.voltarParaCentralPCM = function() {
+            if (window.parent && window.parent !== window) {
+                window.parent.postMessage({ type: 'CEPERA_VOLTAR_CENTRAL' }, '*');
+            } else {
+                window.location.href = 'index.html';
+            }
+        };
+
+        window.verificarSessao = function() {
+            const s = safeStorage.get('cepera_ir_user');
+            let u = s ? listaFunc.find(function(x) { return (x.user || '').toLowerCase() === s.toLowerCase(); }) : null;
+
+            if (!u && s) {
+                try {
+                    const cached = JSON.parse(safeStorage.get('cepera_central_session') || 'null');
+                    if (cached && (cached.user || '').toLowerCase() === s.toLowerCase()) {
+                        u = cached;
+                    }
+                } catch (_) {}
+            }
+
+            if (u) {
+                if (u.role !== 'Admin' && Array.isArray(u.apps_permitidos) && !u.apps_permitidos.includes('matriz_habilidades')) {
+                    showToast("Acesso não habilitado para Matriz de Habilidades no seu perfil RBAC.", "error");
+                    setTimeout(function() { window.voltarParaCentralPCM(); }, 900);
+                    return;
+                }
+                setUsuarioLogado(u);
+                return;
+            }
+
+            if (window.parent && window.parent !== window) {
+                window.parent.postMessage({ type: 'CEPERA_LOGOUT_CENTRAL' }, '*');
+            } else {
+                window.location.href = 'index.html?app=matriz_habilidades';
+            }
+        };
+
+        window.realizarLogin = function(e) {
+            e.preventDefault();
+            const usr = document.getElementById('loginUser').value.trim().toLowerCase();
+            const pass = document.getElementById('loginPass').value;
+            const userObj = listaFunc.find(function(x) { return x.user === usr && x.pass === pass; });
+            if (userObj) {
+                safeStorage.set('cepera_ir_user', userObj.user);
+                safeStorage.set('cepera_central_session', JSON.stringify(userObj));
+                setUsuarioLogado(userObj);
+                showToast('Bem-vindo à Matriz de Habilidades, ' + userObj.nome + '!');
+            } else {
+                showToast("Usuário ou senha incorretos.", "error");
+            }
+        };
+
+        window.fazerLogout = function() {
+            safeStorage.remove('cepera_ir_user');
+            safeStorage.remove('cepera_central_session');
+            usuarioLogado = null;
+            if (window.parent && window.parent !== window) {
+                window.parent.postMessage({ type: 'CEPERA_LOGOUT_CENTRAL' }, '*');
+            } else {
+                window.location.href = 'index.html';
+            }
+        };
+
+        function setUsuarioLogado(u) {
+            usuarioLogado = u;
+            carregarPreferenciasUsuario(u);
+            document.getElementById('loginView').classList.add('hidden');
+            document.getElementById('mainApp').classList.remove('hidden');
+            document.getElementById('loggedUserName').innerText = u.nome;
+            document.getElementById('loggedUserRole').innerText = u.role;
+            const greet = document.getElementById('dashGreetingName');
+            if (greet) greet.innerText = u.nome.split(' ')[0];
+
+            if (u.role === 'Supervisor Elétrica') document.getElementById('matFiltroEsp').value = 'Elétrica';
+            else if (u.role === 'Supervisor Mecânica') document.getElementById('matFiltroEsp').value = 'Mecânica';
+
+            aplicarTravasVisuaisDeSeguranca();
+
+            const rail = document.getElementById('desktopRailNav');
+            const mob = document.getElementById('mobileTabNav');
+
+            if (isGestor(u.role)) {
+                const btnEquipeRail = (u.role === 'Admin')
+                    ? '<button type="button" onclick="switchTab(\'equipe\')" id="rail-equipe" class="rail-btn">' +
+                        '<svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0z"/></svg>' +
+                        '<span>Equipe</span>' +
+                      '</button>'
+                    : '';
+
+                rail.innerHTML =
+                    '<button type="button" onclick="switchTab(\'dashboard\')" id="rail-dashboard" class="rail-btn active">' +
+                        '<svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2V6zM14 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2V6zM4 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2v-2zM14 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2v-2z"/></svg>' +
+                        '<span>Painel</span>' +
+                    '</button>' +
+                    '<button type="button" onclick="switchTab(\'matriz\')" id="rail-matriz" class="rail-btn">' +
+                        '<svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 10h18M3 14h18m-9-4v8m-7 0h14a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v8a2 2 0 002 2z"/></svg>' +
+                        '<span>Matriz</span>' +
+                    '</button>' +
+                    '<button type="button" onclick="switchTab(\'calibracao\')" id="rail-calibracao" class="rail-btn">' +
+                        '<svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>' +
+                        '<span>Calibrar</span>' +
+                    '</button>' +
+                    '<button type="button" onclick="switchTab(\'pdi\')" id="rail-pdi" class="rail-btn">' +
+                        '<svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6"/></svg>' +
+                        '<span>PDI (GUT)</span>' +
+                    '</button>' +
+                    '<button type="button" onclick="switchTab(\'catalogo\')" id="rail-catalogo" class="rail-btn">' +
+                        '<svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10"/></svg>' +
+                        '<span>Árvore</span>' +
+                    '</button>' +
+                    '<button type="button" onclick="switchTab(\'autoavaliacao\')" id="rail-autoavaliacao" class="rail-btn">' +
+                        '<svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"/></svg>' +
+                        '<span>Autoaval.</span>' +
+                    '</button>' +
+                    btnEquipeRail;
+
+                mob.innerHTML =
+                    '<button type="button" onclick="switchTab(\'dashboard\')" id="mob-dashboard" class="mob-tab active">Painel</button>' +
+                    '<button type="button" onclick="switchTab(\'matriz\')" id="mob-matriz" class="mob-tab">Matriz</button>' +
+                    '<button type="button" onclick="switchTab(\'calibracao\')" id="mob-calibracao" class="mob-tab">Calibrar</button>' +
+                    '<button type="button" onclick="switchTab(\'pdi\')" id="mob-pdi" class="mob-tab">PDI (GUT)</button>' +
+                    '<button type="button" onclick="switchTab(\'catalogo\')" id="mob-catalogo" class="mob-tab">Árvore</button>' +
+                    '<button type="button" onclick="switchTab(\'autoavaliacao\')" id="mob-autoavaliacao" class="mob-tab">Autoaval.</button>' +
+                    (u.role === 'Admin' ? '<button type="button" onclick="switchTab(\'equipe\')" id="mob-equipe" class="mob-tab">Equipe</button>' : '');
+
+                switchTab('dashboard');
+            } else {
+                rail.innerHTML =
+                    '<button type="button" onclick="switchTab(\'autoavaliacao\')" id="rail-autoavaliacao" class="rail-btn active">' +
+                        '<svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4"/></svg>' +
+                        '<span>Autoaval.</span>' +
+                    '</button>' +
+                    '<button type="button" onclick="switchTab(\'pdi\')" id="rail-pdi" class="rail-btn">' +
+                        '<svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6"/></svg>' +
+                        '<span>Meu PDI</span>' +
+                    '</button>' +
+                    '<button type="button" onclick="switchTab(\'dashboard\')" id="rail-dashboard" class="rail-btn">' +
+                        '<svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 3.055A9.001 9.001 0 1020.945 13H11V3.055z"/></svg>' +
+                        '<span>Meu Radar</span>' +
+                    '</button>';
+
+                mob.innerHTML =
+                    '<button type="button" onclick="switchTab(\'autoavaliacao\')" id="mob-autoavaliacao" class="mob-tab active">Minha Autoavaliação</button>' +
+                    '<button type="button" onclick="switchTab(\'pdi\')" id="mob-pdi" class="mob-tab">Meu PDI</button>' +
+                    '<button type="button" onclick="switchTab(\'dashboard\')" id="mob-dashboard" class="mob-tab">Meu Radar 360°</button>';
+
+                switchTab('autoavaliacao');
+            }
+            rotearTelas();
+        }
+
+        // TRAVA RÍGIDA DE ROTEAMENTO ENTRE TELAS
+        window.switchTab = function(t) {
+            if (!usuarioLogado) return;
+
+            // Bloqueia Manutentor de acessar abas de gestão/calibração/catálogo/matriz/equipe
+            if (!isGestor(usuarioLogado.role) && ['matriz', 'calibracao', 'catalogo', 'equipe'].indexOf(t) !== -1) {
+                return;
+            }
+            // Bloqueia Supervisor de acessar aba Equipe (exclusiva do Admin)
+            if (t === 'equipe' && usuarioLogado.role !== 'Admin') {
+                showToast("Acesso restrito ao Administrador PCM.", "error");
+                return;
+            }
+
+            aplicarTravasVisuaisDeSeguranca();
+
+            ['dashboard', 'matriz', 'autoavaliacao', 'calibracao', 'pdi', 'catalogo', 'equipe'].forEach(function(id) {
+                const el = document.getElementById('view-' + id);
+                if (el) el.classList.add('hidden');
+                const rb = document.getElementById('rail-' + id);
+                if (rb) rb.classList.remove('active');
+                const mb = document.getElementById('mob-' + id);
+                if (mb) mb.classList.remove('active');
+            });
+            const target = document.getElementById('view-' + t);
+            if (target) target.classList.remove('hidden');
+            const activeRail = document.getElementById('rail-' + t);
+            if (activeRail) activeRail.classList.add('active');
+            const activeMob = document.getElementById('mob-' + t);
+            if (activeMob) activeMob.classList.add('active');
+
+            if (t === 'dashboard') renderDashboard();
+            if (t === 'matriz') initMatrizView();
+            if (t === 'autoavaliacao') initAutoavaliacaoView();
+            if (t === 'calibracao') initCalibracaoView();
+            if (t === 'pdi') initPdiView();
+            if (t === 'catalogo') renderCatalogoArvore();
+            if (t === 'equipe') renderEquipe();
+        };
+
+        function rotearTelas() {
+            if (!usuarioLogado) return;
+            aplicarTravasVisuaisDeSeguranca();
+            if (!document.getElementById('view-dashboard').classList.contains('hidden')) renderDashboard();
+            if (!document.getElementById('view-matriz').classList.contains('hidden')) initMatrizView();
+            if (!document.getElementById('view-autoavaliacao').classList.contains('hidden')) initAutoavaliacaoView();
+            if (!document.getElementById('view-calibracao').classList.contains('hidden')) initCalibracaoView();
+            if (!document.getElementById('view-pdi').classList.contains('hidden')) initPdiView();
+            if (!document.getElementById('view-catalogo').classList.contains('hidden')) renderCatalogoArvore();
+            if (!document.getElementById('view-equipe').classList.contains('hidden')) renderEquipe();
+        }
+
+        // ================= MOTOR DE CÁLCULO DA MATRIZ (PESOS 20% AUTO / 50% PRÁTICA / 30% TEÓRICA) =================
+        function getSkillsParaEspecialidade(roleTec) {
+            return listaSkills.filter(function(s) { return s.especialidade === 'Geral' || s.especialidade === roleTec; });
+        }
+
+        function obterAvaliacaoConsolidada(idTec, skill) {
+            const av = mapaAvaliacoes[idTec + '_' + skill.id];
+            const desejado = Number(skill.desejado || 3);
+            if (!av) {
+                return { temAuto: false, temCalibracao: false, auto: null, pratica: null, teorica: null, real: null, desejado: desejado, gap: desejado, distorcao: 0 };
+            }
+            const temAuto = av.nota_auto !== undefined && av.nota_auto !== null;
+            const temCalibracao = av.nota_pratica !== undefined && av.nota_pratica !== null;
+
+            const auto = temAuto ? Number(av.nota_auto) : 0;
+            const pratica = temCalibracao ? Number(av.nota_pratica) : auto;
+            const teorica = (av.nota_teorica !== undefined && av.nota_teorica !== null) ? Number(av.nota_teorica) : pratica;
+
+            const notaPonderada = temCalibracao
+                ? Number(((auto * 0.2) + (pratica * 0.5) + (teorica * 0.3)).toFixed(1))
+                : (temAuto ? auto : null);
+
+            const gap = notaPonderada !== null ? Number(Math.max(0, desejado - notaPonderada).toFixed(1)) : desejado;
+            const distorcao = (temAuto && temCalibracao) ? Number((auto - pratica).toFixed(1)) : 0;
+
+            return {
+                temAuto: temAuto,
+                temCalibracao: temCalibracao,
+                auto: temAuto ? auto : null,
+                pratica: temCalibracao ? pratica : null,
+                teorica: temCalibracao ? teorica : null,
+                real: notaPonderada,
+                desejado: desejado,
+                gap: gap,
+                distorcao: distorcao,
+                obs: av.obs || ''
+            };
+        }
+
+        function getBadgeNivelClass(val) {
+            if (val === null || val === undefined) return 'lvl-na';
+            const n = Math.floor(Number(val));
+            if (n <= 0) return 'lvl-0';
+            if (n === 1) return 'lvl-1';
+            if (n === 2) return 'lvl-2';
+            if (n === 3) return 'lvl-3';
+            return 'lvl-4';
+        }
+
+        // ================= PAGE 1: DASHBOARD & GRÁFICO RADAR =================
+        function renderDashboard() {
+            aplicarTravasVisuaisDeSeguranca();
+            const espSup = getEspecialidadeRestritaSupervisor();
+            const tecnicos = !isGestor(usuarioLogado.role)
+                ? [usuarioLogado]
+                : getTecnicosManutencao(espSup);
+
+            const selRadar = document.getElementById('dashSelectTecnicoRadar');
+            const prevRadar = selRadar.value;
+            if (!isGestor(usuarioLogado.role)) {
+                selRadar.innerHTML = '<option value="' + usuarioLogado.id + '">Meu Radar (' + escapeHtml(usuarioLogado.nome) + ')</option>';
+                selRadar.disabled = true;
+            } else {
+                selRadar.disabled = false;
+                selRadar.innerHTML = '<option value="EQUIPE">Média da Equipe (' + tecnicos.length + ' téc.)</option>' +
+                    tecnicos.map(function(t) {
+                        return '<option value="' + t.id + '" ' + (t.id === prevRadar ? 'selected' : '') + '>' + escapeHtml(t.nome) + ' (' + t.role + ')</option>';
+                    }).join('');
+            }
+
+            let somaDesejado = 0, somaReal = 0, totalGaps = 0, totalCalibradas = 0, totalMult = 0;
+            const gargalos = [];
+
+            tecnicos.forEach(function(t) {
+                const skillsTec = getSkillsParaEspecialidade(t.role);
+                skillsTec.forEach(function(sk) {
+                    const res = obterAvaliacaoConsolidada(t.id, sk);
+                    if (res.real !== null) {
+                        somaDesejado += res.desejado;
+                        somaReal += Math.min(res.real, res.desejado);
+                        if (res.temCalibracao) totalCalibradas++;
+                        if (res.gap > 0) totalGaps++;
+                        if (res.pratica === 4 || res.real >= 3.8) totalMult++;
+                        if (res.distorcao >= 1.5) {
+                            gargalos.push({
+                                tipo: 'Distorção (Auto > Prática)',
+                                cor: 'bg-amber-100 text-amber-800',
+                                titulo: t.nome + ': ' + sk.titulo,
+                                detalhe: 'Autoavaliou ' + res.auto + ', mas prática foi ' + res.pratica + ' (Meta D=' + res.desejado + ')'
+                            });
+                        }
+                    }
+                });
+            });
+
+            if (isGestor(usuarioLogado.role)) {
+                listaSkills.forEach(function(sk) {
+                    const tecsCompativeis = tecnicos.filter(function(t) {
+                        return sk.especialidade === 'Geral' || t.role === sk.especialidade;
+                    });
+                    if (tecsCompativeis.length > 0) {
+                        const autonomos = tecsCompativeis.filter(function(t) {
+                            const r = obterAvaliacaoConsolidada(t.id, sk);
+                            return (r.real !== null && r.real >= 3);
+                        });
+                        if (autonomos.length === 0) {
+                            gargalos.unshift({
+                                tipo: 'Risco Crítico (Zero Autônomos)',
+                                cor: 'bg-rose-100 text-rose-800',
+                                titulo: sk.grupo + ' › ' + sk.titulo,
+                                detalhe: 'Nenhum técnico avaliado com nível >= 3 (' + sk.especialidade + ')'
+                            });
+                        }
+                    }
+                });
+            }
+
+            const pctAting = somaDesejado > 0 ? Math.round((somaReal / somaDesejado) * 100) : 0;
+            document.getElementById('kpiAtingimentoGeral').innerText = pctAting + '%';
+            document.getElementById('kpiSubAvaliacoes').innerText = totalCalibradas + ' avaliações calibradas';
+            document.getElementById('kpiTotalGaps').innerText = totalGaps;
+            document.getElementById('kpiMultiplicadores').innerText = totalMult;
+            document.getElementById('kpiTotalSkills').innerText = isGestor(usuarioLogado.role) ? listaSkills.length : getSkillsParaEspecialidade(usuarioLogado.role).length;
+            const pdiBaseKpi = isGestor(usuarioLogado.role) ? listaPdi : listaPdi.filter(function(p) { return p.id_tecnico === usuarioLogado.id; });
+            document.getElementById('kpiSubPdiAtivos').innerText = pdiBaseKpi.filter(function(p) { return p.status !== 'Concluído'; }).length + ' ações ativas no PDI';
+
+            const boxGargalos = document.getElementById('dashListaGargalos');
+            if (gargalos.length === 0) {
+                boxGargalos.innerHTML = '<div class="p-6 text-center text-xs text-slate-400 font-bold border border-dashed border-slate-200 rounded-2xl">Todas as habilidades avaliadas possuem cobertura técnica adequada.</div>';
+            } else {
+                boxGargalos.innerHTML = gargalos.slice(0, 8).map(function(g) {
+                    return '<div class="p-3 rounded-2xl bg-slate-50 border border-slate-200/80 flex items-center justify-between gap-3">' +
+                        '<div class="min-w-0">' +
+                            '<div class="text-xs font-extrabold text-slate-900 truncate">' + escapeHtml(g.titulo) + '</div>' +
+                            '<div class="text-[11px] text-slate-500 truncate">' + escapeHtml(g.detalhe) + '</div>' +
+                        '</div>' +
+                        '<span class="text-[10px] font-extrabold px-2.5 py-1 rounded-full shrink-0 ' + g.cor + '">' + escapeHtml(g.tipo) + '</span>' +
+                    '</div>';
+                }).join('');
+            }
+
+            const alvoRadar = selRadar.value || 'EQUIPE';
+            const tecsRadar = alvoRadar === 'EQUIPE' ? tecnicos : tecnicos.filter(function(t) { return t.id === alvoRadar; });
+            const skillsBaseRadar = !isGestor(usuarioLogado.role) ? getSkillsParaEspecialidade(usuarioLogado.role) : listaSkills;
+            const grupos = [...new Set(skillsBaseRadar.map(function(s) { return s.grupo; }))].filter(Boolean).slice(0, 8);
+
+            const dataAuto = [], dataReal = [], dataMeta = [];
+            grupos.forEach(function(gr) {
+                const skillsGr = skillsBaseRadar.filter(function(s) { return s.grupo === gr; });
+                let sA = 0, cA = 0, sR = 0, cR = 0, sM = 0, cM = 0;
+                tecsRadar.forEach(function(t) {
+                    skillsGr.forEach(function(sk) {
+                        if (sk.especialidade !== 'Geral' && sk.especialidade !== t.role) return;
+                        const r = obterAvaliacaoConsolidada(t.id, sk);
+                        sM += r.desejado; cM++;
+                        if (r.auto !== null) { sA += r.auto; cA++; }
+                        if (r.real !== null) { sR += r.real; cR++; }
+                    });
+                });
+                dataMeta.push(cM > 0 ? Number((sM / cM).toFixed(1)) : 3);
+                dataAuto.push(cA > 0 ? Number((sA / cA).toFixed(1)) : 0);
+                dataReal.push(cR > 0 ? Number((sR / cR).toFixed(1)) : 0);
+            });
+
+            const ctx = document.getElementById('chartRadarSkills');
+            if (chartRadarInstance) chartRadarInstance.destroy();
+            chartRadarInstance = new Chart(ctx.getContext('2d'), {
+                type: 'radar',
+                data: {
+                    labels: grupos.length > 0 ? grupos : ['Sem Pilares'],
+                    datasets: [
+                        { label: 'Meta Desejada (D)', data: grupos.length > 0 ? dataMeta : [3], borderColor: '#64748b', backgroundColor: 'rgba(100,116,139,0.08)', borderDash: [4, 4], borderWidth: 2 },
+                        { label: 'Autoavaliação (Técnico)', data: grupos.length > 0 ? dataAuto : [0], borderColor: '#0284c7', backgroundColor: 'rgba(2,132,199,0.15)', borderWidth: 2 },
+                        { label: 'Nota Calibrada (Supervisor)', data: grupos.length > 0 ? dataReal : [0], borderColor: '#10b981', backgroundColor: 'rgba(16,185,129,0.22)', borderWidth: 2.5 }
+                    ]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    scales: { r: { min: 0, max: 4, ticks: { stepSize: 1 } } },
+                    plugins: { legend: { position: 'bottom', labels: { font: { family: 'Plus Jakarta Sans', size: 11, weight: 'bold' } } } }
+                }
+            });
+        }
+
+        // ================= PAGE 2: MATRIZ GERAL DE HABILIDADES (EXCLUSIVA GESTOR) =================
+        window.initMatrizView = function() {
+            if (!exigirPermissaoGestor()) return;
+            const espRestrita = getEspecialidadeRestritaSupervisor();
+            const selEsp = document.getElementById('matFiltroEsp');
+            if (espRestrita !== 'Todas') {
+                selEsp.value = espRestrita;
+                selEsp.disabled = true;
+            } else {
+                selEsp.disabled = false;
+            }
+            onMatFiltroEspChange(true);
+        };
+
+        window.onMatFiltroEspChange = function(keep) {
+            const esp = document.getElementById('matFiltroEsp').value;
+            const selGr = document.getElementById('matFiltroGrupo');
+            const prev = keep ? selGr.value : '';
+            const base = esp === 'Todas' ? listaSkills : listaSkills.filter(function(s) { return s.especialidade === esp || s.especialidade === 'Geral'; });
+            const grupos = [...new Set(base.map(function(s) { return s.grupo; }))].filter(Boolean).sort();
+            selGr.innerHTML = '<option value="">Todos os Pilares / Grupos</option>' + grupos.map(function(g) {
+                return '<option value="' + escapeHtml(g) + '" ' + (g === prev ? 'selected' : '') + '>' + escapeHtml(g) + '</option>';
+            }).join('');
+            renderMatrizGeral();
+        };
+
+        window.renderMatrizGeral = function() {
+            if (!isGestor(usuarioLogado.role)) return;
+            const esp = document.getElementById('matFiltroEsp').value;
+            const grupo = document.getElementById('matFiltroGrupo').value;
+            const modo = document.getElementById('matModoExibicao').value;
+            const busca = (document.getElementById('matFiltroBusca').value || '').trim().toLowerCase();
+
+            const tecnicos = getTecnicosManutencao(esp);
+            let skills = esp === 'Todas' ? [...listaSkills] : listaSkills.filter(function(s) { return s.especialidade === esp || s.especialidade === 'Geral'; });
+            if (grupo) skills = skills.filter(function(s) { return s.grupo === grupo; });
+            if (busca) {
+                skills = skills.filter(function(s) {
+                    return ((s.codigo || '') + ' ' + (s.grupo || '') + ' ' + (s.titulo || '') + ' ' + (s.requisito || '')).toLowerCase().includes(busca);
+                });
+            }
+
+            const table = document.getElementById('skillMatrixTable');
+            if (skills.length === 0 || tecnicos.length === 0) {
+                table.innerHTML = '<tbody><tr><td class="p-10 text-center text-slate-400 font-bold">Nenhum técnico ou habilidade encontrada para este filtro.</td></tr></tbody>';
+                return;
+            }
+
+            let thead = '<tr>' +
+                '<th class="text-left min-w-[270px] sticky left-0 bg-slate-50 z-20 shadow-[2px_0_6px_-2px_rgba(0,0,0,0.08)]">Pilar / Habilidade Técnica</th>' +
+                '<th class="w-14" title="Classificação">Class.</th>' +
+                '<th class="w-14 !bg-slate-200/70 !text-slate-900" title="Nível Desejado (Meta)">Meta (D)</th>';
+
+            tecnicos.forEach(function(t) {
+                let sD = 0, sR = 0;
+                skills.forEach(function(sk) {
+                    const r = obterAvaliacaoConsolidada(t.id, sk);
+                    if (r.real !== null) { sD += r.desejado; sR += Math.min(r.real, r.desejado); }
+                });
+                const pct = sD > 0 ? Math.round((sR / sD) * 100) : 0;
+                const nomeCurto = t.nome.split(' ').slice(0, 2).join(' ');
+                thead += '<th class="min-w-[115px]">' +
+                    '<div class="text-xs font-extrabold text-slate-900 truncate">' + escapeHtml(nomeCurto) + '</div>' +
+                    '<div class="text-[9px] font-extrabold uppercase text-sky-700">' + escapeHtml(t.role) + ' &bull; ' + pct + '%</div>' +
+                '</th>';
+            });
+            thead += '</tr>';
+
+            let tbody = '';
+            skills.forEach(function(sk) {
+                tbody += '<tr class="hover:bg-slate-50/80">' +
+                    '<td class="text-left sticky left-0 bg-white z-10 shadow-[2px_0_6px_-2px_rgba(0,0,0,0.08)] py-2.5 px-3">' +
+                        '<div class="flex items-center justify-between gap-1">' +
+                            '<span class="text-[9px] font-extrabold uppercase text-indigo-600">' + escapeHtml(sk.grupo) + '</span>' +
+                            (sk.codigo ? '<span class="text-[9px] font-mono font-bold px-1.5 py-0.5 rounded bg-slate-100 text-slate-600">' + escapeHtml(sk.codigo) + '</span>' : '') +
+                        '</div>' +
+                        '<div class="text-xs font-extrabold text-slate-900 leading-snug mt-0.5">' + escapeHtml(sk.titulo) + '</div>' +
+                    '</td>' +
+                    '<td class="font-bold text-[10px] text-slate-500">' + escapeHtml(sk.classif || 'C/H') + '</td>' +
+                    '<td class="font-extrabold text-xs bg-slate-50"><span class="lvl-badge lvl-3">' + (sk.desejado || 3) + '</span></td>';
+
+                tecnicos.forEach(function(t) {
+                    const r = obterAvaliacaoConsolidada(t.id, sk);
+                    let cellHtml = '';
+                    if (modo === 'completo') {
+                        const clsReal = getBadgeNivelClass(r.real);
+                        cellHtml = '<div class="inline-flex items-center gap-1">' +
+                            '<span class="text-[10px] font-bold text-slate-400" title="Autoavaliação">A:' + (r.auto !== null ? r.auto : '-') + '</span>' +
+                            '<span class="lvl-badge ' + clsReal + '" title="Nota Consolidada">' + (r.real !== null ? r.real : '-') + '</span>' +
+                        '</div>';
+                    } else if (modo === 'gap') {
+                        cellHtml = r.real === null
+                            ? '<span class="text-[10px] text-slate-300 font-bold">Pendente</span>'
+                            : (r.gap > 0
+                                ? '<span class="px-2 py-0.5 rounded-full bg-rose-100 text-rose-700 font-extrabold text-[11px]">GAP -' + r.gap + '</span>'
+                                : '<span class="px-2 py-0.5 rounded-full bg-emerald-100 text-emerald-700 font-extrabold text-[10px]">OK (' + r.real + ')</span>');
+                    } else {
+                        cellHtml = (!r.temAuto || !r.temCalibracao)
+                            ? '<span class="text-[10px] text-slate-300 font-bold">Incompleto</span>'
+                            : (r.distorcao > 0
+                                ? '<span class="px-2 py-0.5 rounded-full bg-amber-100 text-amber-800 font-extrabold text-[10px]">Auto +' + r.distorcao + '</span>'
+                                : '<span class="text-[10px] font-bold text-emerald-700">Alinhado</span>');
+                    }
+
+                    tbody += '<td class="cursor-pointer hover:bg-sky-50/60 transition-colors" onclick="abrirModalCalibrarCelula(\'' + t.id + '\', \'' + sk.id + '\')" title="Clique para calibrar ' + escapeHtml(t.nome) + '">' + cellHtml + '</td>';
+                });
+
+                tbody += '</tr>';
+            });
+
+            table.innerHTML = '<thead>' + thead + '</thead><tbody>' + tbody + '</tbody>';
+        };
+
+        window.abrirModalCalibrarCelula = function(idTec, idSkill) {
+            if (!exigirPermissaoGestor()) return;
+            const tec = listaFunc.find(function(f) { return f.id === idTec; });
+            const sk = listaSkills.find(function(s) { return s.id === idSkill; });
+            if (!tec || !sk) return;
+
+            const espRestrita = getEspecialidadeRestritaSupervisor();
+            if (espRestrita !== 'Todas' && tec.role !== espRestrita) {
+                showToast("Você só pode calibrar técnicos da sua especialidade (" + espRestrita + ").", "error");
+                return;
+            }
+
+            const r = obterAvaliacaoConsolidada(idTec, sk);
+            document.getElementById('celCalTecId').value = idTec;
+            document.getElementById('celCalSkillId').value = idSkill;
+            document.getElementById('celCalTituloTec').innerText = tec.nome + ' (' + tec.role + ')';
+
+            document.getElementById('celCalResumoSkill').innerHTML =
+                '<div class="font-extrabold text-slate-900">' + escapeHtml(sk.grupo) + ' &rsaquo; ' + escapeHtml(sk.titulo) + ' (Meta D = ' + (sk.desejado || 3) + ')</div>' +
+                '<div class="text-sky-800 font-semibold mt-1"><strong>Como avaliar em campo:</strong> ' + escapeHtml(sk.requisito || 'Verificar execução prática autônoma.') + '</div>';
+
+            document.getElementById('celNotaAuto').value = r.auto !== null ? r.auto : 1;
+            document.getElementById('celNotaPratica').value = r.pratica !== null ? r.pratica : (r.auto !== null ? r.auto : 1);
+            document.getElementById('celNotaTeorica').value = r.teorica !== null ? r.teorica : (r.auto !== null ? r.auto : 1);
+            document.getElementById('celObsAvaliacao').value = r.obs || '';
+
+            recalcularPreviaModalCelula();
+            document.getElementById('modalCalibrarCelula').classList.remove('hidden');
+        };
+
+        window.recalcularPreviaModalCelula = function() {
+            const idSkill = document.getElementById('celCalSkillId').value;
+            const sk = listaSkills.find(function(s) { return s.id === idSkill; });
+            const desejado = Number((sk && sk.desejado) || 3);
+            const a = Number(document.getElementById('celNotaAuto').value);
+            const p = Number(document.getElementById('celNotaPratica').value);
+            const t = Number(document.getElementById('celNotaTeorica').value);
+            const final = Number(((a * 0.2) + (p * 0.5) + (t * 0.3)).toFixed(1));
+            const gap = Number(Math.max(0, desejado - final).toFixed(1));
+
+            const box = document.getElementById('celPreviaResultado');
+            box.innerHTML =
+                '<span>Nota Ponderada (Atual): <strong class="text-base">' + final + '</strong> / Meta D: ' + desejado + '</span>' +
+                '<span class="' + (gap > 0 ? 'text-rose-600' : 'text-emerald-700') + '">' + (gap > 0 ? 'GAP: -' + gap + ' (Requer PDI)' : '✓ Meta Atingida') + '</span>';
+        };
+
+        window.salvarCalibracaoCelulaModal = async function(e) {
+            e.preventDefault();
+            if (!exigirPermissaoGestor()) return;
+            const idTec = document.getElementById('celCalTecId').value;
+            const idSkill = document.getElementById('celCalSkillId').value;
+            const nota_auto = Number(document.getElementById('celNotaAuto').value);
+            const nota_pratica = Number(document.getElementById('celNotaPratica').value);
+            const nota_teorica = Number(document.getElementById('celNotaTeorica').value);
+            const obs = document.getElementById('celObsAvaliacao').value.trim();
+
+            const payload = {};
+            payload['mh_avaliacoes.' + idSkill] = {
+                nota_auto: nota_auto,
+                nota_pratica: nota_pratica,
+                nota_teorica: nota_teorica,
+                obs: obs,
+                calibrado_por: usuarioLogado.nome,
+                timestamp: Date.now()
+            };
+
+            try {
+                await updateDoc(doc(db, "ir_funcionarios", idTec), payload);
+                fecharModal('modalCalibrarCelula');
+                showToast("Avaliação calibrada com sucesso!");
+            } catch (err) {
+                showToast("Erro ao salvar calibração.", "error");
+            }
+        };
+
+        // ================= PAGE 3: AUTOAVALIAÇÃO DO TÉCNICO =================
+        window.initAutoavaliacaoView = function() {
+            const wrapSel = document.getElementById('wrapSelectTecAutoAdmin');
+            const selTec = document.getElementById('selTecAutoAdmin');
+            if (isGestor(usuarioLogado.role)) {
+                wrapSel.classList.remove('hidden');
+                const tecs = getTecnicosManutencao(getEspecialidadeRestritaSupervisor());
+                const prev = selTec.value;
+                selTec.innerHTML = tecs.map(function(t) {
+                    return '<option value="' + t.id + '" ' + (t.id === prev ? 'selected' : '') + '>Visualizando Autoaval.: ' + escapeHtml(t.nome) + ' (' + t.role + ')</option>';
+                }).join('');
+            } else {
+                wrapSel.classList.add('hidden');
+            }
+            renderAutoavaliacao();
+        };
+
+        window.renderAutoavaliacao = function() {
+            const selId = document.getElementById('selTecAutoAdmin').value;
+            const gestor = isGestor(usuarioLogado.role);
+            const tecAlvo = gestor
+                ? (listaFunc.find(function(f) { return f.id === selId; }) || getTecnicosManutencao(getEspecialidadeRestritaSupervisor())[0])
+                : usuarioLogado;
+
+            const container = document.getElementById('listaBlocosAutoavaliacao');
+            if (!tecAlvo) {
+                container.innerHTML = '<div class="p-8 text-center text-slate-400 font-bold">Nenhum técnico selecionado.</div>';
+                return;
+            }
+
+            const skills = getSkillsParaEspecialidade(tecAlvo.role);
+            let respondidas = 0;
+            skills.forEach(function(sk) {
+                if (obterAvaliacaoConsolidada(tecAlvo.id, sk).temAuto) respondidas++;
+            });
+
+            const pct = skills.length > 0 ? Math.round((respondidas / skills.length) * 100) : 0;
+            document.getElementById('autoProgTexto').innerText = respondidas + ' / ' + skills.length + ' respondidas (' + pct + '%)';
+            document.getElementById('autoProgBarra').style.width = pct + '%';
+
+            const grupos = [...new Set(skills.map(function(s) { return s.grupo; }))].filter(Boolean);
+            container.innerHTML = grupos.map(function(gr) {
+                const itens = skills.filter(function(s) { return s.grupo === gr; });
+                const rows = itens.map(function(sk) {
+                    const r = obterAvaliacaoConsolidada(tecAlvo.id, sk);
+                    const bloqueadoParaTecnico = (!gestor && r.temCalibracao);
+
+                    const opcoes = [
+                        { n: 0, lbl: '0 • Não conheço' },
+                        { n: 1, lbl: '1 • Conheço Teoria' },
+                        { n: 2, lbl: '2 • Faço Acompanhado' },
+                        { n: 3, lbl: '3 • Faço Sozinho' },
+                        { n: 4, lbl: '4 • Multiplico/Ensino' }
+                    ];
+
+                    const botoes = opcoes.map(function(b) {
+                        const ativo = r.auto === b.n;
+                        const estadoCss = ativo
+                            ? 'bg-slate-900 text-white border-slate-900 shadow-sm'
+                            : (bloqueadoParaTecnico ? 'bg-slate-100 text-slate-400 border-slate-200 cursor-not-allowed opacity-60' : 'bg-slate-50 text-slate-600 border-slate-200 hover:bg-slate-100');
+                        const acaoClick = bloqueadoParaTecnico
+                            ? ''
+                            : 'onclick="salvarNotaAutoRapida(\'' + tecAlvo.id + '\', \'' + sk.id + '\', ' + b.n + ')"';
+                        return '<button type="button" ' + (bloqueadoParaTecnico ? 'disabled' : '') + ' ' + acaoClick + ' class="px-3 py-2 rounded-xl text-[11px] font-extrabold border transition-all ' + estadoCss + '">' +
+                            b.lbl + '</button>';
+                    }).join('');
+
+                    // Para Gestor mostra Meta D e Nota; para Manutentor mostra apenas o código e se já foi validada
+                    const badgesTopo = gestor
+                        ? (sk.codigo ? '<span class="text-[10px] font-mono font-extrabold px-2 py-0.5 rounded bg-slate-100 text-slate-700">' + escapeHtml(sk.codigo) + '</span>' : '') +
+                          '<span class="text-[10px] font-extrabold px-2 py-0.5 rounded bg-sky-50 text-sky-700">Meta D = ' + (sk.desejado || 3) + '</span>' +
+                          (r.temCalibracao ? '<span class="text-[10px] font-extrabold px-2 py-0.5 rounded bg-emerald-50 text-emerald-700">Calibrada pelo Supervisor: ' + r.real + '</span>' : '')
+                        : (sk.codigo ? '<span class="text-[10px] font-mono font-extrabold px-2 py-0.5 rounded bg-slate-100 text-slate-700">' + escapeHtml(sk.codigo) + '</span>' : '') +
+                          (r.temCalibracao ? '<span class="text-[10px] font-extrabold px-2.5 py-0.5 rounded-full bg-emerald-50 text-emerald-700 border border-emerald-200">✓ Avaliada pela Supervisão (Bloqueada)</span>' : '');
+
+                    return '<div class="p-4 rounded-2xl bg-white border border-slate-200/90 flex flex-col lg:flex-row lg:items-center justify-between gap-3">' +
+                        '<div class="space-y-1">' +
+                            '<div class="flex items-center gap-2">' + badgesTopo + '</div>' +
+                            '<div class="text-sm font-extrabold text-slate-900">' + escapeHtml(sk.titulo) + '</div>' +
+                            '<div class="text-xs text-slate-500"><strong>O que é avaliado:</strong> ' + escapeHtml(sk.requisito || '') + '</div>' +
+                        '</div>' +
+                        '<div class="flex flex-wrap items-center gap-1.5 shrink-0">' + botoes + '</div>' +
+                    '</div>';
+                }).join('');
+
+                return '<div class="glass-card p-5 rounded-3xl space-y-3">' +
+                    '<h3 class="text-xs font-extrabold uppercase tracking-wider text-indigo-700">' + escapeHtml(gr) + ' (' + itens.length + ' competências)</h3>' +
+                    '<div class="space-y-2.5">' + rows + '</div>' +
+                '</div>';
+            }).join('');
+        };
+
+        window.salvarNotaAutoRapida = async function(idTec, idSkill, valor) {
+            if (!usuarioLogado) return;
+            const gestor = isGestor(usuarioLogado.role);
+            if (!gestor && idTec !== usuarioLogado.id) {
+                showToast("Acesso negado: você só pode registrar sua própria autoavaliação.", "error");
+                return;
+            }
+            const atual = mapaAvaliacoes[idTec + '_' + idSkill] || {};
+            if (!gestor && atual.nota_pratica !== undefined && atual.nota_pratica !== null) {
+                showToast("Esta competência já foi validada pelo supervisor e está bloqueada.", "error");
+                return;
+            }
+            const payload = {};
+            payload['mh_avaliacoes.' + idSkill] = {
+                ...atual,
+                nota_auto: Number(valor),
+                timestamp_auto: Date.now()
+            };
+            try {
+                await updateDoc(doc(db, "ir_funcionarios", idTec), payload);
+                showToast('Autoavaliação salva (Nível ' + valor + ')!');
+            } catch (err) {
+                showToast("Erro ao salvar autoavaliação.", "error");
+            }
+        };
+
+        // ================= PAGE 4: CALIBRAÇÃO EM LOTE PELO SUPERVISOR (EXCLUSIVA GESTOR) =================
+        window.initCalibracaoView = function() {
+            if (!exigirPermissaoGestor()) return;
+            const espSup = getEspecialidadeRestritaSupervisor();
+            const tecs = getTecnicosManutencao(espSup);
+            const selTec = document.getElementById('calSelectTecnico');
+            const prev = selTec.value;
+            selTec.innerHTML = tecs.map(function(t) {
+                return '<option value="' + t.id + '" ' + (t.id === prev ? 'selected' : '') + '>' + escapeHtml(t.nome) + ' (' + t.role + ')</option>';
+            }).join('');
+
+            const grupos = [...new Set(listaSkills.map(function(s) { return s.grupo; }))].filter(Boolean).sort();
+            const selGr = document.getElementById('calFiltroGrupo');
+            const prevGr = selGr.value;
+            selGr.innerHTML = '<option value="">Todos os Pilares / Grupos</option>' + grupos.map(function(g) {
+                return '<option value="' + escapeHtml(g) + '" ' + (g === prevGr ? 'selected' : '') + '>' + escapeHtml(g) + '</option>';
+            }).join('');
+
+            renderCalibracaoSupervisor();
+        };
+
+        window.renderCalibracaoSupervisor = function() {
+            if (!isGestor(usuarioLogado.role)) return;
+            const idTec = document.getElementById('calSelectTecnico').value;
+            const tec = listaFunc.find(function(f) { return f.id === idTec; });
+            const container = document.getElementById('listaCalibracaoContainer');
+            if (!tec) {
+                container.innerHTML = '<div class="p-8 text-center text-slate-400 font-bold">Selecione um técnico acima.</div>';
+                return;
+            }
+
+            const escalaPadrao = [
+                { n: 0, lbl: '0 - Não conhece' },
+                { n: 1, lbl: '1 - Conhece Teoria' },
+                { n: 2, lbl: '2 - Faz Acompanhado' },
+                { n: 3, lbl: '3 - Faz Sozinho' },
+                { n: 4, lbl: '4 - Multiplica' }
+            ];
+
+            const grupoFiltro = document.getElementById('calFiltroGrupo').value;
+            const sitFiltro = document.getElementById('calFiltroSituacao').value;
+
+            let skills = getSkillsParaEspecialidade(tec.role);
+            if (grupoFiltro) skills = skills.filter(function(s) { return s.grupo === grupoFiltro; });
+            if (sitFiltro === 'pendente') skills = skills.filter(function(s) { return !obterAvaliacaoConsolidada(tec.id, s).temCalibracao; });
+            if (sitFiltro === 'gap') skills = skills.filter(function(s) { return obterAvaliacaoConsolidada(tec.id, s).gap > 0; });
+            if (sitFiltro === 'distorcao') skills = skills.filter(function(s) { return obterAvaliacaoConsolidada(tec.id, s).distorcao >= 1; });
+
+            if (skills.length === 0) {
+                container.innerHTML = '<div class="glass-card p-8 text-center text-slate-400 font-bold rounded-3xl">Nenhuma habilidade encontrada para este filtro.</div>';
+                return;
+            }
+
+            container.innerHTML = skills.map(function(sk) {
+                const r = obterAvaliacaoConsolidada(tec.id, sk);
+                const valP = r.pratica !== null ? r.pratica : (r.auto !== null ? r.auto : 1);
+                const valT = r.teorica !== null ? r.teorica : (r.auto !== null ? r.auto : 1);
+
+                const optsP = escalaPadrao.map(function(item) {
+                    return '<option value="' + item.n + '" ' + (valP === item.n ? 'selected' : '') + '>' + item.lbl + '</option>';
+                }).join('');
+
+                const optsT = escalaPadrao.map(function(item) {
+                    return '<option value="' + item.n + '" ' + (valT === item.n ? 'selected' : '') + '>' + item.lbl + '</option>';
+                }).join('');
+
+                const itemAuto = escalaPadrao.find(function(i) { return i.n === r.auto; });
+                const txtAuto = itemAuto ? itemAuto.lbl : 'Não fez';
+
+                return '<div class="glass-card p-5 rounded-3xl flex flex-col lg:flex-row lg:items-center justify-between gap-4">' +
+                    '<div class="space-y-1 flex-1">' +
+                        '<div class="flex flex-wrap items-center gap-2">' +
+                            '<span class="text-[10px] font-extrabold uppercase px-2.5 py-0.5 rounded-full bg-indigo-50 text-indigo-700">' + escapeHtml(sk.grupo) + '</span>' +
+                            '<span class="text-[10px] font-extrabold px-2 py-0.5 rounded bg-slate-100 text-slate-700">Meta D = ' + r.desejado + '</span>' +
+                            '<span class="text-[10px] font-extrabold px-2 py-0.5 rounded bg-sky-100 text-sky-800">Autoavaliação: ' + txtAuto + '</span>' +
+                            (r.real !== null ? '<span class="text-[10px] font-extrabold px-2 py-0.5 rounded ' + (r.gap > 0 ? 'bg-rose-100 text-rose-700' : 'bg-emerald-100 text-emerald-700') + '">Consolidada: ' + r.real + ' (GAP: ' + r.gap + ')</span>' : '') +
+                        '</div>' +
+                        '<h3 class="text-sm font-extrabold text-slate-900">' + escapeHtml(sk.titulo) + '</h3>' +
+                        '<p class="text-xs text-sky-800 bg-sky-50/70 p-2 rounded-xl border border-sky-100"><strong>Como verificar em campo:</strong> ' + escapeHtml(sk.requisito || '') + '</p>' +
+                    '</div>' +
+                    '<div class="flex flex-wrap sm:flex-nowrap items-end gap-2.5 shrink-0">' +
+                        '<div>' +
+                            '<label class="block text-[9px] font-extrabold uppercase text-slate-500 mb-1">Prática (50%)</label>' +
+                            '<select id="calP_' + sk.id + '" class="input-clean py-2 px-2.5 text-xs font-extrabold w-44">' + optsP + '</select>' +
+                        '</div>' +
+                        '<div>' +
+                            '<label class="block text-[9px] font-extrabold uppercase text-slate-500 mb-1">Teórica (30%)</label>' +
+                            '<select id="calT_' + sk.id + '" class="input-clean py-2 px-2.5 text-xs font-extrabold w-44">' + optsT + '</select>' +
+                        '</div>' +
+                        '<button type="button" onclick="salvarLinhaCalibracao(\'' + tec.id + '\', \'' + sk.id + '\', ' + (r.auto !== null ? r.auto : 1) + ')" class="btn-pill-dark py-2.5 px-4 text-xs">' +
+                            '✓ Validar' +
+                        '</button>' +
+                    '</div>' +
+                '</div>';
+            }).join('');
+        };
+
+        window.salvarLinhaCalibracao = async function(idTec, idSkill, autoFallback) {
+            if (!exigirPermissaoGestor()) return;
+            const nota_pratica = Number(document.getElementById('calP_' + idSkill).value);
+            const nota_teorica = Number(document.getElementById('calT_' + idSkill).value);
+            const avAtual = mapaAvaliacoes[idTec + '_' + idSkill];
+            const nota_auto = (avAtual && avAtual.nota_auto !== undefined) ? Number(avAtual.nota_auto) : Number(autoFallback);
+
+            const payload = {};
+            payload['mh_avaliacoes.' + idSkill] = {
+                nota_auto: nota_auto,
+                nota_pratica: nota_pratica,
+                nota_teorica: nota_teorica,
+                calibrado_por: usuarioLogado.nome,
+                timestamp: Date.now()
+            };
+
+            try {
+                await updateDoc(doc(db, "ir_funcionarios", idTec), payload);
+                showToast("Habilidade calibrada e ponderada!");
+            } catch (err) {
+                showToast("Erro ao calibrar habilidade.", "error");
+            }
+        };
+
+        window.gerarPdiAutomaticoDoTecnico = async function() {
+            if (!exigirPermissaoGestor()) return;
+            const idTec = document.getElementById('calSelectTecnico').value;
+            const tec = listaFunc.find(function(f) { return f.id === idTec; });
+            if (!tec) return;
+
+            const skills = getSkillsParaEspecialidade(tec.role);
+            const pdiAtualTec = Array.isArray(tec.mh_pdi) ? [...tec.mh_pdi] : [];
+            let criados = 0;
+
+            for (const sk of skills) {
+                const r = obterAvaliacaoConsolidada(tec.id, sk);
+                if (r.gap <= 0) continue;
+
+                const jaExiste = pdiAtualTec.some(function(p) { return p.id_skill === sk.id && p.status !== 'Concluído'; });
+                if (jaExiste) continue;
+
+                const mults = getTecnicosManutencao().filter(function(outro) {
+                    const avO = obterAvaliacaoConsolidada(outro.id, sk);
+                    return avO.pratica === 4 || (avO.real !== null && avO.real >= 3.8);
+                });
+                const nomeMult = mults.length > 0 ? (mults[0].nome + ' (Multiplicador Nível 4)') : ('Supervisor ' + tec.role);
+
+                const g = r.desejado >= 3 ? 4 : 3;
+                const u = r.gap >= 2 ? 4 : 3;
+                const t = 3;
+                const prazoDate = new Date(Date.now() + 30 * 86400000).toISOString().slice(0, 10);
+
+                pdiAtualTec.push({
+                    id: 'pdi_' + Date.now() + '_' + Math.random().toString(36).slice(2, 7),
+                    id_tecnico: tec.id,
+                    nome_tecnico: tec.nome,
+                    role_tecnico: tec.role,
+                    id_skill: sk.id,
+                    codigo_skill: sk.codigo || '',
+                    grupo_skill: sk.grupo || '',
+                    titulo_skill: sk.titulo,
+                    nivel_atual: r.real !== null ? r.real : 0,
+                    nivel_desejado: r.desejado,
+                    gap: r.gap,
+                    gravidade: g,
+                    urgencia: u,
+                    tendencia: t,
+                    gut_score: g * u * t,
+                    multiplicador: nomeMult,
+                    tipo_ie: 'I - Interno (OJT)',
+                    prazo: prazoDate,
+                    status: 'Pendente',
+                    criado_por: usuarioLogado.nome,
+                    timestamp: Date.now()
+                });
+                criados++;
+            }
+
+            if (criados > 0) {
+                try {
+                    await updateDoc(doc(db, "ir_funcionarios", tec.id), { mh_pdi: pdiAtualTec });
+                    showToast(criados + ' ação(ões) gerada(s) no PDI com priorização GUT!');
+                    switchTab('pdi');
+                } catch (err) {
+                    showToast("Erro ao gerar PDI.", "error");
+                }
+            } else {
+                showToast("Todos os GAPs deste técnico já estão no PDI (ou não há GAPs).");
+            }
+        };
+
+        // ================= PAGE 5: ÁRVORE DE DESENVOLVIMENTO & PDI (GUT) =================
+        window.initPdiView = function() {
+            aplicarTravasVisuaisDeSeguranca();
+            const selTec = document.getElementById('pdiFiltroTecnico');
+            if (!isGestor(usuarioLogado.role)) {
+                selTec.innerHTML = '<option value="' + usuarioLogado.id + '">Meu PDI (' + escapeHtml(usuarioLogado.nome) + ')</option>';
+                selTec.disabled = true;
+            } else {
+                selTec.disabled = false;
+                const prev = selTec.value;
+                const tecs = getTecnicosManutencao(getEspecialidadeRestritaSupervisor());
+                selTec.innerHTML = '<option value="">Todos os Técnicos</option>' + tecs.map(function(t) {
+                    return '<option value="' + t.id + '" ' + (t.id === prev ? 'selected' : '') + '>' + escapeHtml(t.nome) + ' (' + t.role + ')</option>';
+                }).join('');
+            }
+            renderListaPdi();
+        };
+
+        window.renderListaPdi = function() {
+            const fTec = document.getElementById('pdiFiltroTecnico').value;
+            const fSt = document.getElementById('pdiFiltroStatus').value;
+            const busca = (document.getElementById('pdiFiltroBusca').value || '').trim().toLowerCase();
+
+            let itens = [...listaPdi];
+            const espRestrita = getEspecialidadeRestritaSupervisor();
+
+            if (!isGestor(usuarioLogado.role)) {
+                itens = itens.filter(function(p) { return p.id_tecnico === usuarioLogado.id; });
+            } else {
+                if (espRestrita !== 'Todas') {
+                    itens = itens.filter(function(p) { return p.role_tecnico === espRestrita; });
+                }
+                if (fTec) {
+                    itens = itens.filter(function(p) { return p.id_tecnico === fTec; });
+                }
+            }
+            if (fSt) itens = itens.filter(function(p) { return p.status === fSt; });
+            if (busca) {
+                itens = itens.filter(function(p) {
+                    return ((p.nome_tecnico || '') + ' ' + (p.titulo_skill || '') + ' ' + (p.grupo_skill || '') + ' ' + (p.multiplicador || '')).toLowerCase().includes(busca);
+                });
+            }
+
+            const container = document.getElementById('listaPdiContainer');
+            if (itens.length === 0) {
+                container.innerHTML = '<div class="col-span-full p-10 text-center text-slate-400 font-bold border-2 border-dashed border-slate-200 rounded-3xl bg-white/50">Nenhuma ação de desenvolvimento encontrada para este filtro.</div>';
+                return;
+            }
+
+            container.innerHTML = itens.map(function(p) {
+                const gutClass = p.gut_score >= 36 ? 'bg-rose-600 text-white' : (p.gut_score >= 18 ? 'bg-amber-500 text-white' : 'bg-sky-600 text-white');
+                const stClass = p.status === 'Concluído' ? 'bg-emerald-100 text-emerald-800' : 'bg-amber-100 text-amber-800';
+                const nvAtual = (p.nivel_atual !== undefined && p.nivel_atual !== null) ? p.nivel_atual : 0;
+
+                const blocoGestor = isGestor(usuarioLogado.role)
+                    ? '<div class="pt-3 border-t border-slate-100 space-y-2">' +
+                        '<select onchange="atualizarStatusPdi(\'' + p.id_tecnico + '\', \'' + p.id + '\', this.value)" class="input-clean py-2 text-xs font-extrabold">' +
+                            '<option value="Pendente" ' + (p.status === 'Pendente' ? 'selected' : '') + '>Status: Pendente</option>' +
+                            '<option value="Em Treinamento" ' + (p.status === 'Em Treinamento' ? 'selected' : '') + '>Status: Em Treinamento</option>' +
+                            '<option value="Aguardando Eficácia 30d" ' + (p.status === 'Aguardando Eficácia 30d' ? 'selected' : '') + '>Status: Aguardando Eficácia (30 dias)</option>' +
+                            '<option value="Concluído" ' + (p.status === 'Concluído' ? 'selected' : '') + '>Status: Concluído (Subir Nível p/ Meta D)</option>' +
+                        '</select>' +
+                      '</div>'
+                    : '';
+
+                return '<article class="glass-card p-5 rounded-3xl flex flex-col justify-between space-y-4">' +
+                    '<div>' +
+                        '<div class="flex items-center justify-between gap-2 mb-2">' +
+                            '<span class="text-[10px] font-extrabold px-2.5 py-0.5 rounded-full ' + gutClass + '">GUT: ' + (p.gut_score || 27) + ' (' + p.gravidade + 'x' + p.urgencia + 'x' + p.tendencia + ')</span>' +
+                            '<span class="text-[10px] font-extrabold uppercase px-2.5 py-0.5 rounded-full ' + stClass + '">' + escapeHtml(p.status) + '</span>' +
+                        '</div>' +
+                        '<p class="text-[10px] font-extrabold uppercase text-indigo-600">' + escapeHtml(p.grupo_skill) + '</p>' +
+                        '<h3 class="text-sm font-extrabold text-slate-900 leading-snug mt-0.5">' + escapeHtml(p.titulo_skill) + '</h3>' +
+                        '<div class="p-3 rounded-2xl bg-slate-50 border border-slate-200/80 text-xs space-y-1 mt-3">' +
+                            '<div><strong>Treinando:</strong> ' + escapeHtml(p.nome_tecnico) + ' (' + escapeHtml(p.role_tecnico || '') + ')</div>' +
+                            '<div><strong>Evolução Alvo:</strong> Nível ' + nvAtual + ' &rarr; <strong class="text-emerald-700">Meta D = ' + (p.nivel_desejado || 3) + '</strong></div>' +
+                            '<div><strong>Multiplicador / Instrutor:</strong> ' + escapeHtml(p.multiplicador || '-') + '</div>' +
+                            '<div><strong>Escopo:</strong> ' + escapeHtml(p.tipo_ie || 'Interno') + ' &bull; <strong>Prazo:</strong> ' + escapeHtml(p.prazo || '-') + '</div>' +
+                        '</div>' +
+                    '</div>' +
+                    blocoGestor +
+                '</article>';
+            }).join('');
+        };
+
+        window.atualizarStatusPdi = async function(idTec, idPdi, novoSt) {
+            if (!exigirPermissaoGestor()) return;
+            const tec = listaFunc.find(function(f) { return f.id === idTec; });
+            if (!tec || !Array.isArray(tec.mh_pdi)) return;
+
+            const novaLista = tec.mh_pdi.map(function(item) {
+                return item.id === idPdi ? { ...item, status: novoSt } : item;
+            });
+            const itemAlvo = novaLista.find(function(item) { return item.id === idPdi; });
+
+            try {
+                const payload = { mh_pdi: novaLista };
+                if (novoSt === 'Concluído' && itemAlvo && itemAlvo.id_skill) {
+                    const meta = Number(itemAlvo.nivel_desejado || 3);
+                    payload['mh_avaliacoes.' + itemAlvo.id_skill] = {
+                        nota_auto: meta,
+                        nota_pratica: meta,
+                        nota_teorica: meta,
+                        calibrado_por: usuarioLogado.nome + ' (PDI Concluído)',
+                        timestamp: Date.now()
+                    };
+                }
+                await updateDoc(doc(db, "ir_funcionarios", idTec), payload);
+                showToast(novoSt === 'Concluído' ? "Treinamento concluído e nível atualizado na Matriz!" : "Status do PDI atualizado!");
+            } catch (err) {
+                showToast("Erro ao atualizar PDI.", "error");
+            }
+        };
+
+        window.abrirModalNovoPdiManual = function() {
+            if (!exigirPermissaoGestor()) return;
+            const tecs = getTecnicosManutencao(getEspecialidadeRestritaSupervisor());
+            document.getElementById('pdiInputTecnico').innerHTML = tecs.map(function(t) {
+                return '<option value="' + t.id + '">' + escapeHtml(t.nome) + ' (' + t.role + ')</option>';
+            }).join('');
+            document.getElementById('pdiInputSkill').innerHTML = listaSkills.map(function(s) {
+                return '<option value="' + s.id + '">[' + escapeHtml(s.especialidade) + '] ' + escapeHtml(s.titulo) + '</option>';
+            }).join('');
+            document.getElementById('pdiInputPrazo').value = new Date(Date.now() + 30 * 86400000).toISOString().slice(0, 10);
+            atualizarPreviewGutPdi();
+            sugerirMultiplicadorParaSkill();
+            document.getElementById('modalPdiGUT').classList.remove('hidden');
+        };
+
+        window.atualizarPreviewGutPdi = function() {
+            const g = Number(document.getElementById('pdiGutG').value || 3);
+            const u = Number(document.getElementById('pdiGutU').value || 3);
+            const t = Number(document.getElementById('pdiGutT').value || 3);
+            document.getElementById('pdiPreviewGutScore').innerText = 'GUT: ' + (g * u * t);
+        };
+
+        window.sugerirMultiplicadorParaSkill = function() {
+            const idSkill = document.getElementById('pdiInputSkill').value;
+            const sk = listaSkills.find(function(s) { return s.id === idSkill; });
+            const hint = document.getElementById('pdiHintMultiplicador');
+            const inp = document.getElementById('pdiInputMultiplicador');
+            if (!sk) return;
+
+            const mults = getTecnicosManutencao().filter(function(t) {
+                const r = obterAvaliacaoConsolidada(t.id, sk);
+                return r.pratica === 4 || (r.real !== null && r.real >= 3.8);
+            });
+            if (mults.length > 0) {
+                const nomes = mults.map(function(m) { return m.nome; }).join(', ');
+                hint.innerText = 'Multiplicador(es) Nível 4 na equipe: ' + nomes;
+                inp.value = mults[0].nome;
+            } else {
+                hint.innerText = 'Nenhum técnico Nível 4 ainda nesta habilidade (Sugerido: Supervisor ou Treinamento Externo).';
+                inp.value = 'Supervisor ' + sk.especialidade;
+            }
+        };
+
+        window.salvarItemPdiGUT = async function(e) {
+            e.preventDefault();
+            if (!exigirPermissaoGestor()) return;
+            const idTec = document.getElementById('pdiInputTecnico').value;
+            const idSkill = document.getElementById('pdiInputSkill').value;
+            const tec = listaFunc.find(function(f) { return f.id === idTec; });
+            const sk = listaSkills.find(function(s) { return s.id === idSkill; });
+            if (!tec || !sk) return;
+
+            const r = obterAvaliacaoConsolidada(tec.id, sk);
+            const g = Number(document.getElementById('pdiGutG').value);
+            const u = Number(document.getElementById('pdiGutU').value);
+            const t = Number(document.getElementById('pdiGutT').value);
+
+            const pdiAtualTec = Array.isArray(tec.mh_pdi) ? [...tec.mh_pdi] : [];
+            pdiAtualTec.push({
+                id: 'pdi_' + Date.now() + '_' + Math.random().toString(36).slice(2, 7),
+                id_tecnico: tec.id,
+                nome_tecnico: tec.nome,
+                role_tecnico: tec.role,
+                id_skill: sk.id,
+                codigo_skill: sk.codigo || '',
+                grupo_skill: sk.grupo || '',
+                titulo_skill: sk.titulo,
+                nivel_atual: r.real !== null ? r.real : 0,
+                nivel_desejado: r.desejado,
+                gap: r.gap,
+                gravidade: g,
+                urgencia: u,
+                tendencia: t,
+                gut_score: g * u * t,
+                multiplicador: document.getElementById('pdiInputMultiplicador').value.trim(),
+                tipo_ie: document.getElementById('pdiInputTipoIE').value,
+                prazo: document.getElementById('pdiInputPrazo').value,
+                status: 'Pendente',
+                criado_por: usuarioLogado.nome,
+                timestamp: Date.now()
+            });
+
+            try {
+                await updateDoc(doc(db, "ir_funcionarios", tec.id), { mh_pdi: pdiAtualTec });
+                fecharModal('modalPdiGUT');
+                showToast("Capacitação adicionada ao PDI!");
+            } catch (err) {
+                showToast("Erro ao registrar no PDI.", "error");
+            }
+        };
+
+        // ================= PAGE 6: CATÁLOGO & ÁRVORE DE HABILIDADES (EXCLUSIVA GESTOR) =================
+        window.abrirModalNovaHabilidade = function() {
+            if (!exigirPermissaoGestor()) return;
+            document.getElementById('skEditId').value = '';
+            document.getElementById('tituloModalSkill').innerText = 'Cadastrar Habilidade na Árvore';
+            document.getElementById('skCodigo').value = '';
+            document.getElementById('skTitulo').value = '';
+            document.getElementById('skRequisito').value = '';
+            document.getElementById('skAtivoVinculado').value = '';
+            document.getElementById('modalHabilidade').classList.remove('hidden');
+        };
+
+        window.editarHabilidadeArvore = function(id) {
+            if (!exigirPermissaoGestor()) return;
+            const sk = listaSkills.find(function(s) { return s.id === id; });
+            if (!sk) return;
+            document.getElementById('skEditId').value = sk.id;
+            document.getElementById('tituloModalSkill').innerText = 'Editar Habilidade da Árvore';
+            document.getElementById('skEspecialidade').value = sk.especialidade || 'Mecânica';
+            document.getElementById('skGrupo').value = sk.grupo || '';
+            document.getElementById('skCodigo').value = sk.codigo || '';
+            document.getElementById('skClassif').value = sk.classif || 'C/H';
+            document.getElementById('skTitulo').value = sk.titulo || '';
+            document.getElementById('skDesejado').value = String(sk.desejado || 3);
+            document.getElementById('skRequisito').value = sk.requisito || '';
+            document.getElementById('skAtivoVinculado').value = sk.ativo || '';
+            document.getElementById('modalHabilidade').classList.remove('hidden');
+        };
+
+        window.salvarHabilidadeArvore = async function(e) {
+            e.preventDefault();
+            if (!exigirPermissaoGestor()) return;
+            const editId = document.getElementById('skEditId').value;
+            const novoItem = {
+                id: editId || ('sk_' + Date.now() + '_' + Math.random().toString(36).slice(2, 6)),
+                especialidade: document.getElementById('skEspecialidade').value,
+                grupo: document.getElementById('skGrupo').value.trim(),
+                codigo: document.getElementById('skCodigo').value.trim().toUpperCase(),
+                classif: document.getElementById('skClassif').value,
+                titulo: document.getElementById('skTitulo').value.trim(),
+                desejado: Number(document.getElementById('skDesejado').value),
+                requisito: document.getElementById('skRequisito').value.trim(),
+                ativo: document.getElementById('skAtivoVinculado').value.trim()
+            };
+
+            const novaLista = editId
+                ? listaSkills.map(function(s) { return s.id === editId ? novoItem : s; })
+                : [...listaSkills, novoItem];
+
+            try {
+                await salvarCatalogoSkillsNoBanco(novaLista);
+                fecharModal('modalHabilidade');
+                showToast("Habilidade salva na árvore!");
+            } catch (err) {
+                showToast("Erro ao salvar habilidade.", "error");
+            }
+        };
+
+        window.excluirHabilidadeArvore = async function(id) {
+            if (!exigirPermissaoGestor()) return;
+            const novaLista = listaSkills.filter(function(s) { return s.id !== id; });
+            try {
+                await salvarCatalogoSkillsNoBanco(novaLista);
+                showToast("Habilidade removida da árvore.");
+            } catch (err) {
+                showToast("Erro ao excluir.", "error");
+            }
+        };
+
+        window.renderCatalogoArvore = function() {
+            if (!isGestor(usuarioLogado.role)) return;
+            const esp = document.getElementById('catFiltroEsp').value;
+            const grFiltro = document.getElementById('catFiltroGrupo').value;
+            const busca = (document.getElementById('catFiltroBusca').value || '').trim().toLowerCase();
+
+            const todosGrupos = [...new Set(listaSkills.map(function(s) { return s.grupo; }))].filter(Boolean).sort();
+            const selGr = document.getElementById('catFiltroGrupo');
+            selGr.innerHTML = '<option value="">Todos os Pilares / Grupos</option>' + todosGrupos.map(function(g) {
+                return '<option value="' + escapeHtml(g) + '" ' + (g === grFiltro ? 'selected' : '') + '>' + escapeHtml(g) + '</option>';
+            }).join('');
+
+            let filtradas = [...listaSkills];
+            if (esp) filtradas = filtradas.filter(function(s) { return s.especialidade === esp; });
+            if (grFiltro) filtradas = filtradas.filter(function(s) { return s.grupo === grFiltro; });
+            if (busca) {
+                filtradas = filtradas.filter(function(s) {
+                    return ((s.codigo || '') + ' ' + (s.grupo || '') + ' ' + (s.titulo || '') + ' ' + (s.requisito || '')).toLowerCase().includes(busca);
+                });
+            }
+
+            const container = document.getElementById('catalogoArvoreContainer');
+            if (filtradas.length === 0) {
+                container.innerHTML = '<div class="p-10 text-center text-slate-400 font-bold border-2 border-dashed border-slate-200 rounded-3xl bg-white/50">Nenhuma habilidade encontrada para este filtro.</div>';
+                return;
+            }
+
+            const grupos = [...new Set(filtradas.map(function(s) { return s.grupo; }))].filter(Boolean);
+            container.innerHTML = grupos.map(function(gr) {
+                const itens = filtradas.filter(function(s) { return s.grupo === gr; });
+                const cardsHtml = itens.map(function(sk) {
+                    const corEsp = sk.especialidade === 'Elétrica' ? 'bg-amber-100 text-amber-800' : (sk.especialidade === 'Mecânica' ? 'bg-sky-100 text-sky-800' : 'bg-emerald-100 text-emerald-800');
+                    return '<div class="p-3.5 rounded-2xl bg-slate-50 border border-slate-200/90 flex flex-col justify-between gap-2">' +
+                        '<div>' +
+                            '<div class="flex items-center justify-between gap-2 mb-1">' +
+                                '<div class="flex items-center gap-1.5">' +
+                                    '<span class="text-[10px] font-extrabold uppercase px-2 py-0.5 rounded-full ' + corEsp + '">' + escapeHtml(sk.especialidade) + '</span>' +
+                                    (sk.codigo ? '<span class="text-[10px] font-mono font-bold px-2 py-0.5 rounded bg-white border border-slate-200">' + escapeHtml(sk.codigo) + '</span>' : '') +
+                                    '<span class="text-[10px] font-extrabold px-2 py-0.5 rounded bg-slate-200 text-slate-800">Meta D = ' + (sk.desejado || 3) + '</span>' +
+                                '</div>' +
+                                '<div class="flex items-center gap-1">' +
+                                    '<button type="button" onclick="editarHabilidadeArvore(\'' + sk.id + '\')" class="text-xs font-bold text-sky-700 hover:underline px-1.5">Editar</button>' +
+                                    '<button type="button" onclick="excluirHabilidadeArvore(\'' + sk.id + '\')" class="text-xs font-bold text-rose-600 hover:underline px-1.5">Excluir</button>' +
+                                '</div>' +
+                            '</div>' +
+                            '<div class="text-xs font-extrabold text-slate-900">' + escapeHtml(sk.titulo) + '</div>' +
+                            '<div class="text-[11px] text-slate-500 mt-1"><strong>Como avaliar:</strong> ' + escapeHtml(sk.requisito) + '</div>' +
+                        '</div>' +
+                    '</div>';
+                }).join('');
+
+                return '<div class="glass-card p-5 rounded-3xl space-y-3">' +
+                    '<div class="flex items-center justify-between border-b border-slate-100 pb-2">' +
+                        '<h3 class="text-xs font-extrabold uppercase tracking-wider text-indigo-700">' + escapeHtml(gr) + '</h3>' +
+                        '<span class="text-[11px] font-bold text-slate-400">' + itens.length + ' item(ns)</span>' +
+                    '</div>' +
+                    '<div class="grid grid-cols-1 md:grid-cols-2 gap-3">' + cardsHtml + '</div>' +
+                '</div>';
+            }).join('');
+        };
+
+        window.carregarPacoteBaseHabilidades = async function() {
+            if (!exigirPermissaoGestor()) return;
+            const mapaIds = new Set(listaSkills.map(function(s) { return s.titulo.toLowerCase(); }));
+            const mescladas = [...listaSkills];
+            PACOTE_BASE_SKILLS.forEach(function(item) {
+                if (!mapaIds.has(item.titulo.toLowerCase())) mescladas.push(item);
+            });
+            try {
+                await salvarCatalogoSkillsNoBanco(mescladas);
+                showToast("Pacote Base sincronizado na árvore de habilidades!");
+            } catch (err) {
+                showToast("Erro ao sincronizar pacote base.", "error");
+            }
+        };
+
+        // ================= PAGE 7: EQUIPE (EXCLUSIVA ADMIN) =================
+        window.abrirModalFuncionario = function() {
+            if (!usuarioLogado || usuarioLogado.role !== 'Admin') return;
+            document.getElementById('fEditId').value = '';
+            document.getElementById('modalFuncTitulo').innerText = 'Adicionar Colaborador';
+            document.getElementById('fNome').value = '';
+            document.getElementById('fRole').value = 'Mecânica';
+            document.getElementById('fUser').value = '';
+            document.getElementById('fPass').value = '123456';
+            document.getElementById('modalFunc').classList.remove('hidden');
+        };
+
+        window.abrirModalEditarFuncionario = function(id) {
+            if (!usuarioLogado || usuarioLogado.role !== 'Admin') return;
+            const func = listaFunc.find(function(f) { return f.id === id; });
+            if (!func) return;
+            document.getElementById('fEditId').value = func.id;
+            document.getElementById('modalFuncTitulo').innerText = 'Editar Colaborador';
+            document.getElementById('fNome').value = func.nome || '';
+            document.getElementById('fRole').value = func.role || 'Mecânica';
+            document.getElementById('fUser').value = func.user || '';
+            document.getElementById('fPass').value = func.pass || '';
+            document.getElementById('modalFunc').classList.remove('hidden');
+        };
+
+        window.salvarFuncionario = async function(e) {
+            e.preventDefault();
+            if (!usuarioLogado || usuarioLogado.role !== 'Admin') return;
+            const editId = document.getElementById('fEditId').value.trim();
+            const data = {
+                nome: document.getElementById('fNome').value.trim(),
+                role: document.getElementById('fRole').value,
+                user: document.getElementById('fUser').value.trim().toLowerCase(),
+                pass: document.getElementById('fPass').value.trim()
+            };
+            try {
+                if (editId && editId !== 'default_admin') await updateDoc(doc(db, "ir_funcionarios", editId), data);
+                else await addDoc(refFunc, data);
+                fecharModal('modalFunc');
+                showToast("Colaborador salvo com sucesso!");
+            } catch (err) {
+                showToast("Erro ao salvar colaborador.", "error");
+            }
+        };
+
+        function renderEquipe() {
+            if (!usuarioLogado || usuarioLogado.role !== 'Admin') return;
+            const tbody = document.getElementById('tbodyEquipe');
+            tbody.innerHTML = listaFunc.map(function(f) {
+                const badge = f.role === 'Admin'
+                    ? 'bg-slate-900 text-white'
+                    : (f.role.includes('Supervisor')
+                        ? 'bg-indigo-100 text-indigo-800'
+                        : (f.role === 'Elétrica' ? 'bg-amber-100 text-amber-800' : 'bg-sky-100 text-sky-800'));
+                return '<tr class="hover:bg-slate-50/80">' +
+                    '<td class="p-4 font-bold text-slate-900">' + escapeHtml(f.nome) + '</td>' +
+                    '<td class="p-4"><span class="text-[10px] font-extrabold uppercase px-2.5 py-1 rounded-full ' + badge + '">' + escapeHtml(f.role) + '</span></td>' +
+                    '<td class="p-4 font-mono text-xs text-slate-600">' + escapeHtml(f.user) + '</td>' +
+                    '<td class="p-4 text-center">' +
+                        '<button type="button" onclick="abrirModalEditarFuncionario(\'' + f.id + '\')" class="text-sky-700 font-bold text-xs bg-sky-50 hover:bg-sky-100 px-3 py-1.5 rounded-full">Editar</button>' +
+                    '</td>' +
+                '</tr>';
+            }).join('');
+        }
+
+        // ================= IMPRESSÃO A4 =================
+        window.imprimirProntuarioIndividual = function(origem) {
+            const idTec = origem === 'calibracao'
+                ? document.getElementById('calSelectTecnico').value
+                : (isGestor(usuarioLogado.role) ? document.getElementById('selTecAutoAdmin').value : usuarioLogado.id);
+            const tec = listaFunc.find(function(f) { return f.id === idTec; }) || usuarioLogado;
+            const skills = getSkillsParaEspecialidade(tec.role);
+
+            const rows = skills.map(function(sk) {
+                const r = obterAvaliacaoConsolidada(tec.id, sk);
+                return '<tr>' +
+                    '<td><strong>' + escapeHtml(sk.grupo) + '</strong><br>' + escapeHtml(sk.titulo) + '</td>' +
+                    '<td style="text-align:center;">' + r.desejado + '</td>' +
+                    '<td style="text-align:center;">' + (r.auto !== null ? r.auto : '-') + '</td>' +
+                    '<td style="text-align:center;">' + (r.pratica !== null ? r.pratica : '-') + '</td>' +
+                    '<td style="text-align:center;">' + (r.teorica !== null ? r.teorica : '-') + '</td>' +
+                    '<td style="text-align:center; font-weight:800;">' + (r.real !== null ? r.real : '-') + '</td>' +
+                    '<td style="text-align:center; font-weight:800; color:' + (r.gap > 0 ? '#dc2626' : '#059669') + ';">' + (r.gap > 0 ? ('-' + r.gap) : 'OK') + '</td>' +
+                '</tr>';
+            }).join('');
+
+            const html = '<!DOCTYPE html><html lang="pt-BR"><head><meta charset="UTF-8"><title>Prontuario_Habilidades_' + escapeHtml(tec.nome) + '</title><style>body{font-family:sans-serif;font-size:11px;padding:24px;color:#0f172a}h1{margin:4px 0 0;font-size:17px;text-transform:uppercase}.header{border-bottom:2.5px solid #dc2626;padding-bottom:12px;margin-bottom:16px;display:flex;justify-content:space-between;align-items:flex-end}table{width:100%;border-collapse:collapse}th,td{border:1px solid #cbd5e1;padding:6px 8px;text-align:left}th{background:#f1f5f9;font-size:9.5px;text-transform:uppercase}@media print{body{-webkit-print-color-adjust:exact}}</style></head><body><div class="header"><div><span style="background:#dc2626;color:#fff;padding:3px 8px;font-weight:800;font-size:10px;border-radius:4px;">CEPÊRA</span><h1>Ficha Individual de Habilidades & Polivalência</h1><div style="font-size:12px;font-weight:700;margin-top:4px;color:#0284c7;">Colaborador: ' + escapeHtml(tec.nome) + ' (' + escapeHtml(tec.role) + ')</div></div><div style="font-size:10px;color:#64748b;text-align:right;">Emissão: ' + new Date().toLocaleDateString('pt-BR') + '<br>Pesos: 20% Auto | 50% Prática | 30% Teórica</div></div><table><thead><tr><th>Pilar / Habilidade</th><th>Meta (D)</th><th>Auto</th><th>Prática</th><th>Teórica</th><th>Atual (A)</th><th>GAP</th></tr></thead><tbody>' + rows + '</tbody></table></body></html>';
+            const win = window.open('', '_blank');
+            win.document.write(html); win.document.close(); win.focus();
+            setTimeout(function() { win.print(); }, 400);
+        };
+
+        window.imprimirRelatorioMatrizGeral = function() {
+            window.print();
+        };
+
+        window.imprimirRelatorioPdiGUT = function() {
+            const rows = listaPdi.map(function(p) {
+                const nvAt = (p.nivel_atual !== undefined && p.nivel_atual !== null) ? p.nivel_atual : 0;
+                return '<tr>' +
+                    '<td style="text-align:center;font-weight:800;color:#dc2626;">' + (p.gut_score || 27) + '</td>' +
+                    '<td><strong>' + escapeHtml(p.nome_tecnico) + '</strong><br><span style="font-size:9px;color:#64748b;">' + escapeHtml(p.role_tecnico || '') + '</span></td>' +
+                    '<td><strong>' + escapeHtml(p.grupo_skill) + '</strong><br>' + escapeHtml(p.titulo_skill) + '</td>' +
+                    '<td style="text-align:center;">' + nvAt + ' → <strong>' + (p.nivel_desejado || 3) + '</strong></td>' +
+                    '<td>' + escapeHtml(p.multiplicador || '-') + ' (' + escapeHtml(p.tipo_ie || 'I') + ')</td>' +
+                    '<td style="text-align:center;">' + escapeHtml(p.prazo || '-') + '</td>' +
+                    '<td style="text-align:center;font-weight:800;">' + escapeHtml(p.status) + '</td>' +
+                '</tr>';
+            }).join('');
+            const html = '<!DOCTYPE html><html lang="pt-BR"><head><meta charset="UTF-8"><title>Plano_Desenvolvimento_GUT_PCM</title><style>body{font-family:sans-serif;font-size:11px;padding:24px;color:#0f172a}h1{margin:4px 0 0;font-size:17px;text-transform:uppercase}.header{border-bottom:2.5px solid #dc2626;padding-bottom:12px;margin-bottom:16px;display:flex;justify-content:space-between;align-items:flex-end}table{width:100%;border-collapse:collapse}th,td{border:1px solid #cbd5e1;padding:6px 8px;text-align:left}th{background:#f1f5f9;font-size:9.5px;text-transform:uppercase}@media print{body{-webkit-print-color-adjust:exact}}</style></head><body><div class="header"><div><span style="background:#dc2626;color:#fff;padding:3px 8px;font-weight:800;font-size:10px;border-radius:4px;">CEPÊRA</span><h1>Plano de Desenvolvimento de Manutenção (Priorização GUT)</h1></div><div style="font-size:10px;color:#64748b;text-align:right;">Emissão: ' + new Date().toLocaleDateString('pt-BR') + '<br>Total de ações: ' + listaPdi.length + '</div></div><table><thead><tr><th>GUT</th><th>Técnico</th><th>Habilidade / Treinamento</th><th>Nível</th><th>Multiplicador</th><th>Prazo</th><th>Status</th></tr></thead><tbody>' + rows + '</tbody></table></body></html>';
+            const win = window.open('', '_blank');
+            win.document.write(html); win.document.close(); win.focus();
+            setTimeout(function() { win.print(); }, 400);
+        };
+
+        initApp();
+    </script>
+</body>
+</html>
+        

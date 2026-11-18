@@ -1,0 +1,687 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dashboard Cepêra - Multipets</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        body { font-family: 'Inter', sans-serif; }
+    </style>
+</head>
+<body class="bg-[#F5F7F9] text-slate-800 antialiased h-screen flex overflow-hidden">
+
+    <!-- Sidebar Navigation -->
+    <aside class="w-64 bg-white border-r border-gray-100 flex flex-col py-8 flex-shrink-0 z-10">
+        <div class="px-8 mb-10">
+            <h1 class="text-red-600 font-bold text-2xl tracking-widest uppercase">Cepêra</h1>
+        </div>
+        
+        <div class="px-4 space-y-1">
+            <p class="px-4 text-xs font-bold text-gray-400 uppercase tracking-wider mb-3 mt-4">Menu</p>
+            <button id="navDashboard" onclick="switchTab('dashboard')" class="w-full flex items-center gap-3 px-4 py-3 bg-blue-50 text-blue-600 rounded-xl font-semibold transition-all">
+                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"></path></svg>
+                Visão Geral
+            </button>
+            <button id="navLancamentos" onclick="switchTab('lancamentos')" class="w-full flex items-center gap-3 px-4 py-3 text-gray-500 hover:bg-gray-50 hover:text-gray-900 rounded-xl font-medium transition-all">
+                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path></svg>
+                Lançamentos
+            </button>
+        </div>
+    </aside>
+
+    <!-- Main Content -->
+    <main class="flex-1 flex flex-col h-screen overflow-y-auto relative p-8">
+        
+        <header class="mb-8 flex flex-col md:flex-row md:items-center justify-between gap-4">
+            <h2 id="pageTitle" class="text-3xl font-bold text-slate-800">Visão Geral</h2>
+            <div class="text-sm text-slate-500 font-medium bg-white px-4 py-2 rounded-full shadow-sm border border-gray-100">
+                Base de Cálculo: <span class="font-bold text-slate-700">20,1 Horas</span>
+            </div>
+        </header>
+
+        <!-- ========================================== -->
+        <!-- ABA: DASHBOARD -->
+        <!-- ========================================== -->
+        <div id="sectionDashboard" class="space-y-8 block pb-12">
+            
+            <!-- Cards de Capacidade Nominal -->
+            <section class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                <!-- Multipet 1 -->
+                <div class="bg-white rounded-2xl shadow-sm border border-gray-100 p-6 flex flex-col justify-between">
+                    <div>
+                        <p class="text-sm font-semibold text-gray-400 uppercase tracking-wider mb-1">Acumulado Multipet 1</p>
+                        <p class="text-4xl font-bold text-slate-800 mt-2"><span id="total-mp1">0</span></p>
+                    </div>
+                    <div class="mt-4 h-1 w-full bg-gray-100 rounded-full overflow-hidden">
+                        <div class="h-full bg-[#1F4E78] w-1/3"></div>
+                    </div>
+                </div>
+                <!-- Multipet 2/5 -->
+                <div class="bg-white rounded-2xl shadow-sm border border-gray-100 p-6 flex flex-col justify-between">
+                    <div>
+                        <p class="text-sm font-semibold text-gray-400 uppercase tracking-wider mb-1">Acumulado Multipet 2/5</p>
+                        <p class="text-4xl font-bold text-slate-800 mt-2"><span id="total-mp2">0</span></p>
+                    </div>
+                    <div class="mt-4 h-1 w-full bg-gray-100 rounded-full overflow-hidden">
+                        <div class="h-full bg-[#C00000] w-1/3"></div>
+                    </div>
+                </div>
+                <!-- Multipet 3 -->
+                <div class="bg-white rounded-2xl shadow-sm border border-gray-100 p-6 flex flex-col justify-between">
+                    <div>
+                        <p class="text-sm font-semibold text-gray-400 uppercase tracking-wider mb-1">Acumulado Multipet 3</p>
+                        <p class="text-4xl font-bold text-slate-800 mt-2"><span id="total-mp3">0</span></p>
+                    </div>
+                    <div class="mt-4 h-1 w-full bg-gray-100 rounded-full overflow-hidden">
+                        <div class="h-full bg-[#70AD47] w-1/3"></div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Gráficos -->
+            <section class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                <!-- Gráfico de Eficiência -->
+                <div class="bg-white rounded-2xl shadow-sm border border-gray-100 p-6">
+                    <h3 class="text-sm font-semibold text-gray-400 uppercase tracking-wider mb-4">Eficiência Diária (%)</h3>
+                    <div class="relative h-72 w-full">
+                        <canvas id="efficiencyChart"></canvas>
+                    </div>
+                </div>
+
+                <!-- Gráfico de Produção -->
+                <div class="bg-white rounded-2xl shadow-sm border border-gray-100 p-6">
+                    <h3 class="text-sm font-semibold text-gray-400 uppercase tracking-wider mb-4">Produção (Frascos)</h3>
+                    <div class="relative h-72 w-full">
+                        <canvas id="productionChart"></canvas>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Tabela de Dados -->
+            <section class="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden p-6">
+                <h3 class="text-sm font-semibold text-gray-400 uppercase tracking-wider mb-4">Análise Detalhada</h3>
+                <div class="overflow-x-auto">
+                    <table class="w-full text-left min-w-[600px]">
+                        <thead id="tableHead">
+                            <!-- Gerado via JS -->
+                        </thead>
+                        <tbody id="tableBody" class="text-slate-700">
+                            <!-- Gerado via JS -->
+                        </tbody>
+                    </table>
+                </div>
+            </section>
+        </div>
+
+        <!-- ========================================== -->
+        <!-- ABA: LANÇAMENTOS -->
+        <!-- ========================================== -->
+        <div id="sectionLancamentos" class="hidden space-y-6 pb-12">
+            <section class="bg-white rounded-2xl shadow-sm border border-gray-100 p-8 max-w-4xl mx-auto">
+                <div class="mb-8">
+                    <h3 class="text-xl font-bold text-slate-800 mb-1">Registrar Apontamento</h3>
+                    <p class="text-sm text-slate-500">Insira a produção consolidada. Entradas no mesmo dia/máquina serão somadas.</p>
+                </div>
+
+                <form id="addProductionForm" onsubmit="event.preventDefault();" class="space-y-6">
+                    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+                        <div>
+                            <label class="block text-sm font-semibold text-slate-700 mb-2">Data</label>
+                            <input type="date" id="dateInput" required class="w-full border-gray-200 rounded-xl focus:ring-blue-500 focus:border-blue-500 px-4 py-3 border bg-slate-50 transition-colors">
+                        </div>
+                        <div>
+                            <label class="block text-sm font-semibold text-slate-700 mb-2">Máquina</label>
+                            <select id="machineInput" required class="w-full border-gray-200 rounded-xl focus:ring-blue-500 focus:border-blue-500 px-4 py-3 border bg-slate-50 transition-colors">
+                                <option value="Multipet 1">Multipet 1</option>
+                                <option value="Multipet 2/5">Multipet 2/5</option>
+                                <option value="Multipet 3">Multipet 3</option>
+                            </select>
+                        </div>
+                        <div>
+                            <label class="block text-sm font-semibold text-slate-700 mb-2">Turno</label>
+                            <select id="shiftInput" required class="w-full border-gray-200 rounded-xl focus:ring-blue-500 focus:border-blue-500 px-4 py-3 border bg-slate-50 transition-colors">
+                                <option value="1">1º Turno</option>
+                                <option value="2">2º Turno</option>
+                                <option value="3">3º Turno</option>
+                            </select>
+                        </div>
+                        <div>
+                            <label class="block text-sm font-semibold text-slate-700 mb-2">Produção (un)</label>
+                            <input type="number" id="prodInput" required min="1" placeholder="Ex: 12500" class="w-full border-gray-200 rounded-xl focus:ring-blue-500 focus:border-blue-500 px-4 py-3 border bg-slate-50 font-bold transition-colors">
+                        </div>
+                    </div>
+                    
+                    <div class="pt-2">
+                        <button type="submit" id="submitBtn" class="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 px-6 rounded-xl shadow-sm transition-colors">
+                            Salvar Apontamento
+                        </button>
+                    </div>
+                </form>
+            </section>
+
+            <!-- Histórico -->
+            <section class="max-w-4xl mx-auto mt-8">
+                <h3 class="text-xl font-bold text-slate-800 mb-6">Histórico Recente</h3>
+                <div id="historyContainer" class="space-y-6">
+                    <!-- Gerado via JS dinamicamente -->
+                </div>
+            </section>
+        </div>
+
+        <!-- Modal de Edição -->
+        <div id="editModal" class="hidden fixed inset-0 bg-slate-900/40 backdrop-blur-sm flex items-center justify-center z-50 transition-opacity">
+            <div class="bg-white rounded-2xl shadow-2xl w-full max-w-md mx-4 p-8">
+                <h3 class="text-xl font-bold text-slate-800 mb-6">Editar Apontamento</h3>
+                <form id="editProductionForm" class="space-y-5">
+                    <input type="hidden" id="modalEditId">
+                    <div class="grid grid-cols-2 gap-4">
+                        <div>
+                            <label class="block text-sm font-semibold text-slate-700 mb-2">Data</label>
+                            <input type="date" id="modalDate" required class="w-full border-gray-200 rounded-xl px-4 py-3 border bg-slate-50">
+                        </div>
+                        <div>
+                            <label class="block text-sm font-semibold text-slate-700 mb-2">Turno</label>
+                            <select id="modalShift" required class="w-full border-gray-200 rounded-xl px-4 py-3 border bg-slate-50">
+                                <option value="1">1º Turno</option>
+                                <option value="2">2º Turno</option>
+                                <option value="3">3º Turno</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div>
+                        <label class="block text-sm font-semibold text-slate-700 mb-2">Linha</label>
+                        <select id="modalMachine" required class="w-full border-gray-200 rounded-xl px-4 py-3 border bg-slate-50">
+                            <option value="Multipet 1">Multipet 1</option>
+                            <option value="Multipet 2/5">Multipet 2/5</option>
+                            <option value="Multipet 3">Multipet 3</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label class="block text-sm font-semibold text-slate-700 mb-2">Produção (un)</label>
+                        <input type="number" id="modalProd" required min="1" class="w-full border-gray-200 rounded-xl px-4 py-3 border bg-slate-50 font-bold">
+                    </div>
+                    <div class="flex justify-end gap-3 mt-8">
+                        <button type="button" onclick="window.closeEditModal()" class="px-5 py-2.5 bg-gray-100 hover:bg-gray-200 text-slate-700 font-semibold rounded-xl transition-colors">Cancelar</button>
+                        <button type="submit" id="modalSubmitBtn" class="px-5 py-2.5 bg-blue-600 hover:bg-blue-700 text-white font-semibold rounded-xl transition-colors">Salvar</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+
+        <!-- Modal de Confirmação de Exclusão -->
+        <div id="deleteModal" class="hidden fixed inset-0 bg-slate-900/40 backdrop-blur-sm flex items-center justify-center z-50 transition-opacity">
+            <div class="bg-white rounded-2xl shadow-2xl w-full max-w-sm mx-4 p-8 text-center">
+                <div class="mx-auto flex items-center justify-center h-12 w-12 rounded-full bg-red-100 mb-4">
+                    <svg class="h-6 w-6 text-red-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+                    </svg>
+                </div>
+                <h3 class="text-xl font-bold text-slate-800 mb-2">Excluir Apontamento?</h3>
+                <p class="text-sm text-slate-500 mb-8">Esta ação não pode ser desfeita. Os gráficos serão recalculados imediatamente.</p>
+                
+                <div class="flex flex-col gap-3">
+                    <button id="confirmDeleteBtn" class="w-full px-5 py-3 bg-red-600 hover:bg-red-700 text-white font-bold rounded-xl transition-colors">
+                        Sim, Excluir
+                    </button>
+                    <button onclick="window.closeDeleteModal()" class="w-full px-5 py-3 bg-gray-100 hover:bg-gray-200 text-slate-700 font-bold rounded-xl transition-colors">
+                        Cancelar
+                    </button>
+                </div>
+            </div>
+        </div>
+
+    </main>
+
+    <!-- Script de Inicialização e Banco de Dados -->
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
+        import { getAuth, signInAnonymously } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
+        import { getFirestore, collection, addDoc, onSnapshot, doc, deleteDoc, updateDoc } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
+
+        // Configuração do Firebase
+        const firebaseConfig = {
+            apiKey: "AIzaSyAGbFTTCgbqe9XFKFSb6ltB5lYj5O6QipE",
+            authDomain: "pcm-cepera.firebaseapp.com",
+            projectId: "pcm-cepera",
+            storageBucket: "pcm-cepera.firebasestorage.app",
+            messagingSenderId: "483278589909",
+            appId: "1:483278589909:web:9f69f8a32f50e4e186f75c",
+            measurementId: "G-LW29TG8TJ4"
+        };
+
+        const app = initializeApp(firebaseConfig);
+        const db = getFirestore(app);
+        const auth = getAuth(app);
+
+        // Configurações Fixas
+        const BASE_HOURS = 20.1;
+        const CAPACITIES = {
+            'Multipet 1': 4284 * BASE_HOURS,
+            'Multipet 2/5': 1803 * BASE_HOURS,
+            'Multipet 3': 3268 * BASE_HOURS
+        };
+
+        const configVisual = [
+            { id: 'Multipet 1', nameClass: 'text-[#1F4E78]', bgClass: 'bg-blue-50/30', textClass: 'text-blue-800', hex: '#1F4E78' },
+            { id: 'Multipet 2/5', nameClass: 'text-[#C00000]', bgClass: 'bg-red-50/30', textClass: 'text-red-700', hex: '#C00000' },
+            { id: 'Multipet 3', nameClass: 'text-[#70AD47]', bgClass: 'bg-green-50/30', textClass: 'text-green-700', hex: '#70AD47' }
+        ];
+
+        let currentUser = null;
+        let chartEffInstance = null;
+        let chartProdInstance = null;
+        let itemToDeleteId = null;
+
+        // Navegação Lateral
+        window.switchTab = (tab) => {
+            const navDash = document.getElementById('navDashboard');
+            const navLanc = document.getElementById('navLancamentos');
+            const secDash = document.getElementById('sectionDashboard');
+            const secLanc = document.getElementById('sectionLancamentos');
+            const pageTitle = document.getElementById('pageTitle');
+
+            const activeClass = ['bg-blue-50', 'text-blue-600', 'font-semibold'];
+            const inactiveClass = ['text-gray-500', 'hover:bg-gray-50', 'hover:text-gray-900', 'font-medium'];
+
+            if (tab === 'dashboard') {
+                secDash.classList.remove('hidden');
+                secLanc.classList.add('hidden');
+                pageTitle.innerText = "Visão Geral";
+                
+                navDash.classList.add(...activeClass);
+                navDash.classList.remove(...inactiveClass);
+                navLanc.classList.remove(...activeClass);
+                navLanc.classList.add(...inactiveClass);
+            } else {
+                secLanc.classList.remove('hidden');
+                secDash.classList.add('hidden');
+                pageTitle.innerText = "Lançamentos Diários";
+
+                navLanc.classList.add(...activeClass);
+                navLanc.classList.remove(...inactiveClass);
+                navDash.classList.remove(...activeClass);
+                navDash.classList.add(...inactiveClass);
+            }
+        };
+
+        // Processamento e Renderização Visual
+        function processAndRender(rawData) {
+            // 0. Calcular Totais Acumulados
+            const totals = { 'Multipet 1': 0, 'Multipet 2/5': 0, 'Multipet 3': 0 };
+            rawData.forEach(item => {
+                if (totals[item.machine] !== undefined) {
+                    totals[item.machine] += Number(item.production) || 0;
+                }
+            });
+            document.getElementById('total-mp1').innerText = totals['Multipet 1'].toLocaleString('pt-BR');
+            document.getElementById('total-mp2').innerText = totals['Multipet 2/5'].toLocaleString('pt-BR');
+            document.getElementById('total-mp3').innerText = totals['Multipet 3'].toLocaleString('pt-BR');
+
+            // 1. Agrupar produção e somar por dia e máquina
+            const aggregated = {};
+            rawData.forEach(item => {
+                if (!aggregated[item.date]) {
+                    aggregated[item.date] = { 'Multipet 1': 0, 'Multipet 2/5': 0, 'Multipet 3': 0 };
+                }
+                aggregated[item.date][item.machine] += item.production || 0;
+            });
+
+            // Ordenar as datas cronologicamente
+            const sortedDates = Object.keys(aggregated).sort();
+            
+            // 2. Preparar dados para os gráficos
+            const effData = { 'Multipet 1': [], 'Multipet 2/5': [], 'Multipet 3': [] };
+            const prodData = { 'Multipet 1': [], 'Multipet 2/5': [], 'Multipet 3': [] };
+
+            sortedDates.forEach(date => {
+                configVisual.forEach(machineConfig => {
+                    const m = machineConfig.id;
+                    const prod = aggregated[date][m];
+                    prodData[m].push(prod);
+                    const eff = (prod / CAPACITIES[m]) * 100;
+                    effData[m].push(eff.toFixed(1));
+                });
+            });
+
+            // 3. Desenhar
+            renderCharts(sortedDates, effData, prodData);
+            renderTable(sortedDates, aggregated);
+            renderHistory(rawData);
+        }
+
+        // Formatador de datas (Ex: 2026-10-29 -> 29/10)
+        function formatDate(dateStr) {
+            if(!dateStr) return '';
+            const [y, m, d] = dateStr.split('-');
+            return `${d}/${m}`;
+        }
+
+        // Gráficos (Chart.js)
+        function renderCharts(dates, effData, prodData) {
+            const labels = dates.map(formatDate);
+
+            // Função helper para montar os datasets baseado no configVisual
+            const getDatasets = (dataObj, isEff) => {
+                return configVisual.map(config => ({
+                    label: config.id,
+                    data: dataObj[config.id],
+                    backgroundColor: isEff ? config.hex : config.hex + 'CC', // Leve transparência na barra
+                    borderColor: config.hex,
+                    borderWidth: 2,
+                    tension: 0.2, // Curva suave na linha
+                    fill: false,
+                    type: isEff ? 'line' : 'bar'
+                }));
+            };
+
+            // Gráfico Eficiência
+            if (chartEffInstance) chartEffInstance.destroy();
+            const ctxEff = document.getElementById('efficiencyChart').getContext('2d');
+            chartEffInstance = new Chart(ctxEff, {
+                type: 'line',
+                data: { labels: labels, datasets: getDatasets(effData, true) },
+                options: {
+                    responsive: true, maintainAspectRatio: false,
+                    scales: { y: { beginAtZero: true, suggestedMax: 100, title: { display: true, text: 'Eficiência (%)' } } },
+                    plugins: { tooltip: { callbacks: { label: (ctx) => ` ${ctx.dataset.label}: ${ctx.raw}%` } } }
+                }
+            });
+
+            // Gráfico Produção
+            if (chartProdInstance) chartProdInstance.destroy();
+            const ctxProd = document.getElementById('productionChart').getContext('2d');
+            chartProdInstance = new Chart(ctxProd, {
+                type: 'bar',
+                data: { labels: labels, datasets: getDatasets(prodData, false) },
+                options: {
+                    responsive: true, maintainAspectRatio: false,
+                    scales: { y: { beginAtZero: true, title: { display: true, text: 'Frascos Produzidos' } } }
+                }
+            });
+        }
+
+        // Tabela Dinâmica
+        function renderTable(dates, aggregated) {
+            const thead = document.getElementById('tableHead');
+            const tbody = document.getElementById('tableBody');
+            
+            let trHead = `<tr class="border-b border-gray-100 text-xs font-semibold text-gray-400 uppercase tracking-wider">
+                <th class="py-4 px-4 font-semibold">Linha</th>`;
+            dates.forEach(d => {
+                trHead += `<th class="py-4 px-4 font-semibold text-center min-w-[120px]">${formatDate(d)}</th>`;
+            });
+            trHead += `</tr>`;
+            thead.innerHTML = trHead;
+
+            tbody.innerHTML = '';
+            configVisual.forEach(config => {
+                let tr = `<tr class="border-b border-gray-50 hover:bg-gray-50/50 transition-colors">
+                    <td class="py-4 px-4 font-bold ${config.nameClass}">${config.id}</td>`;
+                
+                dates.forEach(date => {
+                    const prod = aggregated[date][config.id];
+                    const eff = ((prod / CAPACITIES[config.id]) * 100).toFixed(1);
+                    
+                    let effColor = 'text-red-500';
+                    if (eff >= 80) effColor = 'text-green-500';
+                    else if (eff >= 50) effColor = 'text-yellow-500';
+
+                    tr += `<td class="py-4 px-4 text-center">
+                        <div class="font-bold text-slate-700">${prod.toLocaleString('pt-BR')}</div>
+                        <div class="text-xs ${effColor} font-semibold mt-1">${eff}% ef.</div>
+                    </td>`;
+                });
+                tr += `</tr>`;
+                tbody.innerHTML += tr;
+            });
+        }
+
+        // Histórico e CRUD
+        function renderHistory(rawData) {
+            const container = document.getElementById('historyContainer');
+            container.innerHTML = '';
+            
+            const sortedData = [...rawData].sort((a, b) => (b.timestamp || 0) - (a.timestamp || 0));
+
+            if (sortedData.length === 0) {
+                container.innerHTML = `<div class="py-12 text-center text-gray-400 font-medium bg-white rounded-2xl border border-gray-100 shadow-sm">Nenhum lançamento registrado.</div>`;
+                return;
+            }
+
+            configVisual.forEach(config => {
+                const macData = sortedData.filter(d => d.machine === config.id);
+                if (macData.length === 0) return;
+
+                let tableHtml = `
+                <div class="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
+                    <div class="px-6 py-4 border-b border-gray-100 font-bold ${config.nameClass} bg-gray-50/50">
+                        ${config.id}
+                    </div>
+                    <div class="overflow-x-auto">
+                        <table class="w-full text-left">
+                            <thead class="text-xs text-gray-400 uppercase tracking-wider border-b border-gray-50">
+                                <tr>
+                                    <th class="py-3 px-6 font-semibold">Data</th>
+                                    <th class="py-3 px-6 font-semibold">Turno</th>
+                                    <th class="py-3 px-6 font-semibold">Produção</th>
+                                    <th class="py-3 px-6 font-semibold text-right">Ações</th>
+                                </tr>
+                            </thead>
+                            <tbody class="text-sm text-slate-600">
+                `;
+
+                macData.forEach(item => {
+                    const parts = item.date ? item.date.split('-') : [];
+                    const displayDate = parts.length === 3 ? `${parts[2]}/${parts[1]}/${parts[0]}` : item.date;
+                    const shiftDisplay = item.shift ? `${item.shift}º Turno` : '-';
+
+                    tableHtml += `
+                        <tr class="border-b border-gray-50 last:border-0 hover:bg-gray-50/50 transition-colors">
+                            <td class="py-3 px-6">${displayDate}</td>
+                            <td class="py-3 px-6 font-medium text-slate-500">${shiftDisplay}</td>
+                            <td class="py-3 px-6 font-bold text-slate-800">${Number(item.production).toLocaleString('pt-BR')} un</td>
+                            <td class="py-3 px-6 text-right space-x-2">
+                                <button onclick="window.openEditModal('${item.id}', '${item.date}', '${item.machine}', ${item.production}, '${item.shift || '1'}')" class="px-3 py-1.5 bg-blue-50 text-blue-600 hover:bg-blue-100 rounded-lg font-semibold text-xs transition-colors">Editar</button>
+                                <button onclick="window.confirmDelete('${item.id}')" class="px-3 py-1.5 bg-red-50 text-red-600 hover:bg-red-100 rounded-lg font-semibold text-xs transition-colors">Excluir</button>
+                            </td>
+                        </tr>
+                    `;
+                });
+
+                tableHtml += `</tbody></table></div></div>`;
+                container.innerHTML += tableHtml;
+            });
+        }
+
+        // Lógica dos Modais
+        window.openEditModal = (id, date, machine, production, shift) => {
+            document.getElementById('modalEditId').value = id;
+            document.getElementById('modalDate').value = date;
+            document.getElementById('modalShift').value = shift;
+            document.getElementById('modalMachine').value = machine;
+            document.getElementById('modalProd').value = production;
+            document.getElementById('editModal').classList.remove('hidden');
+        };
+
+        window.closeEditModal = () => {
+            document.getElementById('editModal').classList.add('hidden');
+        };
+
+        // Lógica Segura de Exclusão (Substituindo o confirm() padrão)
+        window.confirmDelete = (id) => {
+            itemToDeleteId = id;
+            document.getElementById('deleteModal').classList.remove('hidden');
+        };
+
+        window.closeDeleteModal = () => {
+            itemToDeleteId = null;
+            document.getElementById('deleteModal').classList.add('hidden');
+        };
+
+        document.getElementById('confirmDeleteBtn').addEventListener('click', async () => {
+            if (!itemToDeleteId) return;
+            const btn = document.getElementById('confirmDeleteBtn');
+            btn.innerText = 'Excluindo...';
+            btn.disabled = true;
+
+            try {
+                await deleteDoc(doc(db, 'mp_producao', itemToDeleteId));
+                window.closeDeleteModal();
+            } catch (error) {
+                console.error("Erro ao excluir:", error);
+                alert("Erro ao excluir: " + error.message);
+            } finally {
+                btn.innerText = 'Sim, Excluir';
+                btn.disabled = false;
+            }
+        });
+
+        // Inicia Autenticação
+        async function initAuth() {
+            try {
+                const cred = await signInAnonymously(auth);
+                currentUser = cred.user;
+                startDataListener();
+            } catch (error) {
+                console.error("Erro na autenticação:", error);
+                if (error.code === 'auth/api-key-not-valid') {
+                    alert("⚠️ Erro de Firebase: A API Key fornecida é inválida. Por favor, insira a sua API Key real na variável firebaseConfig do código.");
+                } else {
+                    alert("⚠️ Falha ao conectar ao banco de dados: " + error.message);
+                }
+            }
+        }
+
+        // Listener Banco de Dados ao Vivo
+        function startDataListener() {
+            if (!currentUser) return;
+            
+            // Usando uma coleção EXCLUSIVA para a linha Multipets
+            const path = `mp_producao`;
+            const colRef = collection(db, path);
+
+            onSnapshot(colRef, (snapshot) => {
+                const rawData = [];
+                snapshot.forEach(doc => rawData.push({ id: doc.id, ...doc.data() }));
+                processAndRender(rawData);
+            }, (error) => {
+                console.error("Erro ao ler dados:", error);
+                if (error.code === 'permission-denied' || error.message.includes('permissions')) {
+                    alert("⚠️ ACESSO NEGADO: Vá ao Firebase Console > Firestore Database > Regras (Rules) e libere o acesso para a coleção 'mp_producao'.");
+                }
+            });
+        }
+
+        // Submissão do Formulário
+        document.getElementById('addProductionForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            if (!currentUser) return;
+
+            const btn = document.getElementById('submitBtn');
+            const dateVal = document.getElementById('dateInput').value;
+            const machineVal = document.getElementById('machineInput').value;
+            const shiftVal = document.getElementById('shiftInput').value;
+            const prodVal = document.getElementById('prodInput').value;
+
+            btn.disabled = true;
+            btn.innerText = 'Salvando...';
+
+            try {
+                // Coleção exclusiva mp_producao
+                const path = `mp_producao`;
+                const colRef = collection(db, path);
+                
+                await addDoc(colRef, {
+                    date: dateVal,
+                    machine: machineVal,
+                    shift: shiftVal,
+                    production: Number(prodVal),
+                    timestamp: new Date().getTime()
+                });
+                
+                document.getElementById('prodInput').value = '';
+                // Mantém a data e máquina selecionadas para agilizar envios contínuos
+                
+            } catch (error) {
+                console.error("Erro ao salvar:", error);
+                if (error.code === 'permission-denied' || error.message.includes('permissions')) {
+                    alert("⚠️ ERRO AO SALVAR: Permissão Negada no Firestore. Ajuste as Regras de Segurança (Rules).");
+                } else {
+                    alert("Erro ao salvar: " + error.message);
+                }
+            } finally {
+                btn.disabled = false;
+                btn.innerText = 'Salvar Apontamento';
+            }
+        });
+
+        // Submissão do Modal de Edição
+        document.getElementById('editProductionForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const btn = document.getElementById('modalSubmitBtn');
+            const id = document.getElementById('modalEditId').value;
+            const dateVal = document.getElementById('modalDate').value;
+            const machineVal = document.getElementById('modalMachine').value;
+            const shiftVal = document.getElementById('modalShift').value;
+            const prodVal = document.getElementById('modalProd').value;
+
+            btn.disabled = true;
+            btn.innerText = 'Salvando...';
+
+            try {
+                const docRef = doc(db, 'mp_producao', id);
+                await updateDoc(docRef, {
+                    date: dateVal,
+                    machine: machineVal,
+                    shift: shiftVal,
+                    production: Number(prodVal)
+                });
+                window.closeEditModal();
+            } catch (error) {
+                console.error("Erro ao atualizar:", error);
+                alert("Erro ao atualizar: " + error.message);
+            } finally {
+                btn.disabled = false;
+                btn.innerText = 'Salvar Alterações';
+            }
+        });
+
+        // Inicializa
+        initAuth();
+
+        // ================= GUARDA CENTRAL SSO & RBAC (PCM CEPÊRA) =================
+        (function verificarAcessoCentralSSO() {
+            try {
+                const raw = localStorage.getItem('cepera_central_session');
+                const userStr = localStorage.getItem('cepera_ir_user');
+                if (!raw && !userStr) {
+                    if (window.parent && window.parent !== window) {
+                        window.parent.postMessage({ type: 'CEPERA_LOGOUT_CENTRAL' }, '*');
+                    } else {
+                        window.location.href = 'index.html?app=dashboard_multipet';
+                    }
+                    return;
+                }
+                const sess = raw ? JSON.parse(raw) : null;
+                if (sess && sess.role !== 'Admin' && Array.isArray(sess.apps_permitidos) && !sess.apps_permitidos.includes('dashboard_multipet')) {
+                    if (window.parent && window.parent !== window) {
+                        window.parent.postMessage({ type: 'CEPERA_VOLTAR_CENTRAL' }, '*');
+                    } else {
+                        window.location.href = 'index.html';
+                    }
+                    return;
+                }
+                if (window.self === window.top && sess) {
+                    const bar = document.createElement('div');
+                    bar.style.cssText = 'position:fixed;bottom:14px;left:14px;z-index:9999;display:flex;align-items:center;gap:8px;background:#0f172a;color:#fff;padding:6px 12px;border-radius:9999px;font-family:sans-serif;font-size:11px;font-weight:700;box-shadow:0 8px 20px rgba(0,0,0,0.25);border:1px solid #334155;';
+                    bar.innerHTML = `<button type="button" onclick="window.location.href='index.html'" style="background:#0284c7;color:#fff;border:none;padding:4px 10px;border-radius:9999px;font-weight:800;font-size:11px;cursor:pointer;">⬅ Central PCM</button><span>${sess.nome || sess.user} (${sess.role || ''})</span>`;
+                    document.body.appendChild(bar);
+                }
+            } catch (_) {}
+        })();
+    </script>
+</body>
+</html>

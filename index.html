@@ -1,0 +1,1262 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0">
+    <title>Central de Sistemas — PCM Cepêra</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --primary: #0f172a;
+            --accent: #0284c7;
+            --cepera: #dc2626;
+        }
+
+        html, body {
+            margin: 0 !important;
+            padding: 0 !important;
+            width: 100% !important;
+            min-height: 100vh !important;
+            overflow-x: hidden;
+            font-family: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, sans-serif;
+            color: #0f172a;
+            -webkit-tap-highlight-color: transparent;
+            background: linear-gradient(135deg, #f1f5f9 0%, #f8fafc 50%, #e2e8f0 100%);
+        }
+
+        .frosted-shell {
+            background: rgba(255, 255, 255, 0.94);
+            backdrop-filter: blur(8px);
+            -webkit-backdrop-filter: blur(8px);
+            border: 1px solid #e2e8f0;
+            box-shadow: 0 12px 32px -12px rgba(15, 23, 42, 0.06);
+        }
+
+        .glass-card {
+            background: #ffffff;
+            border: 1px solid #e2e8f0;
+            box-shadow: 0 4px 12px -4px rgba(15, 23, 42, 0.04);
+            transition: transform 0.15s ease, box-shadow 0.15s ease, border-color 0.15s ease;
+        }
+
+        .glass-card-hover:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 14px 28px -10px rgba(15, 23, 42, 0.1);
+            border-color: #cbd5e1;
+        }
+
+        .input-clean {
+            padding: 0.75rem 0.95rem;
+            font-size: 0.9rem;
+            border-radius: 0.85rem;
+            border: 1px solid #cbd5e1;
+            background: #ffffff;
+            transition: border-color 0.15s;
+            width: 100%;
+            color: #0f172a;
+        }
+        .input-clean:focus {
+            outline: none;
+            border-color: var(--accent);
+            box-shadow: 0 0 0 3px rgba(2, 132, 199, 0.12);
+        }
+
+        .btn-pill-dark {
+            background: var(--accent);
+            color: #ffffff;
+            font-weight: 700;
+            border-radius: 9999px;
+            padding: 0.7rem 1.35rem;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.5rem;
+            transition: opacity 0.15s ease, transform 0.15s ease;
+            cursor: pointer;
+            box-shadow: 0 6px 16px -4px rgba(15, 23, 42, 0.25);
+        }
+        .btn-pill-dark:hover { opacity: 0.92; transform: translateY(-1px); }
+        .btn-pill-dark:active { transform: scale(0.98); }
+
+        .btn-touch {
+            padding: 0.7rem 1.15rem;
+            font-weight: 700;
+            border-radius: 0.85rem;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.45rem;
+            transition: all 0.15s ease;
+            cursor: pointer;
+        }
+        .btn-touch:active { transform: scale(0.98); }
+
+        /* Toggle Switch RBAC */
+        .rbac-toggle {
+            position: relative;
+            display: inline-flex;
+            align-items: center;
+            cursor: pointer;
+        }
+        .rbac-toggle input {
+            sr-only: true;
+            position: absolute;
+            opacity: 0;
+            width: 0;
+            height: 0;
+        }
+        .rbac-slider {
+            width: 40px;
+            height: 22px;
+            background-color: #cbd5e1;
+            border-radius: 9999px;
+            transition: background-color 0.2s;
+            position: relative;
+        }
+        .rbac-slider::after {
+            content: '';
+            position: absolute;
+            top: 2px;
+            left: 2px;
+            width: 18px;
+            height: 18px;
+            background-color: #ffffff;
+            border-radius: 9999px;
+            transition: transform 0.2s;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.2);
+        }
+        .rbac-toggle input:checked + .rbac-slider {
+            background-color: #10b981;
+        }
+        .rbac-toggle input:checked + .rbac-slider::after {
+            transform: translateX(18px);
+        }
+        .rbac-toggle input:disabled + .rbac-slider {
+            opacity: 0.55;
+            cursor: not-allowed;
+        }
+
+        /* Tema Escuro */
+        body.theme-dark { background: #090d16 !important; color: #f1f5f9 !important; }
+        body.theme-dark .frosted-shell { background: #0f172a !important; border-color: #1e293b !important; backdrop-filter: none !important; }
+        body.theme-dark .glass-card { background: #1e293b !important; border-color: #334155 !important; color: #f1f5f9 !important; }
+        body.theme-dark .text-slate-900, body.theme-dark .text-slate-800, body.theme-dark .text-slate-700 { color: #f8fafc !important; }
+        body.theme-dark .text-slate-600, body.theme-dark .text-slate-500, body.theme-dark .text-slate-400 { color: #94a3b8 !important; }
+        body.theme-dark .bg-white, body.theme-dark .bg-slate-50, body.theme-dark .bg-slate-100 { background-color: #0f172a !important; border-color: #334155 !important; color: #f1f5f9 !important; }
+        body.theme-dark .input-clean { background: #0f172a !important; border-color: #475569 !important; color: #ffffff !important; }
+
+        *:focus-visible { outline: 3px solid var(--accent) !important; outline-offset: 2px; }
+        ::-webkit-scrollbar { width: 6px; height: 6px; }
+        ::-webkit-scrollbar-track { background: transparent; }
+        ::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 9999px; }
+    </style>
+</head>
+<body class="min-h-screen flex flex-col">
+
+    <!-- ==================== 1. TELA DE LOGIN UNIFICADA (SSO PCM CEPÊRA) ==================== -->
+    <div id="loginView" class="min-h-screen w-full flex items-center justify-center p-4 sm:p-6">
+        <div class="frosted-shell rounded-[28px] w-full max-w-md p-7 sm:p-10 relative overflow-hidden">
+            <div class="flex items-center justify-between mb-7">
+                <div class="flex items-center gap-2.5">
+                    <span class="bg-red-600 text-white font-extrabold px-3 py-1 rounded-lg text-xs tracking-widest uppercase shadow-sm">Cepêra</span>
+                    <span id="loginSyncBadge" class="text-[11px] font-bold text-amber-600 flex items-center gap-1.5">
+                        <span class="w-2 h-2 rounded-full bg-amber-500 animate-pulse"></span> Conectando ao Firebase...
+                    </span>
+                </div>
+                <button type="button" onclick="toggleTemaEscuro()" class="px-3 py-1.5 rounded-full bg-white/80 hover:bg-white border border-slate-200 text-xs font-bold text-slate-700 flex items-center gap-1.5 shadow-sm" title="Alternar tema claro/escuro">
+                    <span id="lblTemaBtnLogin">🌙 Tema</span>
+                </button>
+            </div>
+
+            <div class="mb-7">
+                <div class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-sky-50 border border-sky-200 text-sky-700 text-[10px] font-extrabold uppercase tracking-wider mb-2">
+                    <span>Portal Unificado • SSO & RBAC</span>
+                </div>
+                <h1 class="text-2xl sm:text-3xl font-extrabold text-slate-900 tracking-tight leading-tight">Central PCM Cepêra</h1>
+                <p class="text-slate-500 text-sm mt-1.5">Entre com sua conta única para acessar os sistemas liberados para o seu perfil.</p>
+            </div>
+
+            <form id="formLoginCentral" onsubmit="realizarLoginCentral(event)" class="space-y-4">
+                <div>
+                    <label for="loginUser" class="block text-xs font-bold uppercase tracking-wider text-slate-500 mb-1.5">Usuário</label>
+                    <input type="text" id="loginUser" required autocomplete="username" class="input-clean" placeholder="Ex: admin ou nome.sobrenome">
+                </div>
+                <div>
+                    <label for="loginPass" class="block text-xs font-bold uppercase tracking-wider text-slate-500 mb-1.5">Senha</label>
+                    <div class="relative">
+                        <input type="password" id="loginPass" required autocomplete="current-password" class="input-clean pr-14" placeholder="••••••••">
+                        <button type="button" onclick="toggleSenhaLogin()" class="absolute right-3 top-1/2 -translate-y-1/2 text-xs font-bold text-slate-400 hover:text-slate-700 px-2 py-1">Ver</button>
+                    </div>
+                </div>
+                <div class="pt-2">
+                    <button type="submit" id="btnSubmitLogin" class="btn-pill-dark w-full py-3.5 text-sm shadow-lg">
+                        <span>Acessar Central PCM</span>
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 5l7 7m0 0l-7 7m7-7H3"/></svg>
+                    </button>
+                </div>
+            </form>
+
+            <div class="mt-6 pt-5 border-t border-slate-200/80 flex items-center justify-between text-[11px] text-slate-400 font-semibold">
+                <span>5 Sistemas Integrados</span>
+                <span>Banco: pcm-cepera (ir_funcionarios)</span>
+            </div>
+        </div>
+    </div>
+
+    <!-- ==================== 2. PORTAL CENTRAL (HUB DE APLICATIVOS + GESTÃO RBAC) ==================== -->
+    <div id="portalView" class="hidden min-h-screen w-full p-2 sm:p-4 md:p-6 flex flex-col">
+        <div class="frosted-shell rounded-[26px] flex-1 flex flex-col overflow-hidden max-w-7xl w-full mx-auto">
+
+            <!-- HEADER SUPERIOR DO PORTAL -->
+            <header class="px-5 sm:px-8 py-4 flex flex-wrap items-center justify-between gap-4 border-b border-slate-200/80 bg-white/60">
+                <div class="flex items-center gap-3.5">
+                    <div class="w-11 h-11 rounded-2xl bg-red-600 text-white font-extrabold text-xs flex items-center justify-center shadow-md tracking-tighter shrink-0">PCM</div>
+                    <div>
+                        <div class="flex items-center gap-2">
+                            <span class="font-extrabold text-base sm:text-lg text-slate-900 tracking-tight">Central de Aplicativos PCM</span>
+                            <span class="hidden sm:inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[10px] font-extrabold bg-emerald-50 text-emerald-700 border border-emerald-200">
+                                <span id="headerSyncDot" class="w-1.5 h-1.5 rounded-full bg-emerald-500"></span>
+                                <span id="headerSyncText">SSO Ativo</span>
+                            </span>
+                        </div>
+                        <p class="text-xs text-slate-500 font-medium">Cepera Alimentos • Semana <strong id="headerSemanaAtual" class="text-slate-800">1</strong></p>
+                    </div>
+                </div>
+
+                <!-- NAVEGAÇÃO CENTRAL (APLICATIVOS vs RBAC ADMIN) -->
+                <div class="flex items-center gap-2 flex-wrap">
+                    <div id="adminNavTabs" class="hidden items-center bg-slate-100 p-1 rounded-full border border-slate-200/80 mr-1">
+                        <button type="button" id="tabBtnApps" onclick="switchPortalTab('apps')" class="px-4 py-1.5 rounded-full text-xs font-extrabold bg-sky-600 text-white shadow-sm transition-all">
+                            🚀 Meus Aplicativos
+                        </button>
+                        <button type="button" id="tabBtnRbac" onclick="switchPortalTab('rbac')" class="px-4 py-1.5 rounded-full text-xs font-extrabold text-slate-600 hover:text-slate-900 transition-all flex items-center gap-1.5">
+                            <span>🔐 Controle RBAC & Usuários</span>
+                            <span id="badgeCountUsers" class="px-1.5 py-0.2 rounded-full bg-slate-200 text-slate-800 text-[10px]">0</span>
+                        </button>
+                    </div>
+
+                    <button type="button" onclick="toggleTemaEscuro()" class="px-3 py-2 rounded-full bg-white hover:bg-slate-50 border border-slate-200 text-xs font-bold text-slate-700 shadow-sm" title="Alternar Tema">
+                        <span id="lblTemaBtnPortal">🌙</span>
+                    </button>
+
+                    <div class="flex items-center gap-2.5 bg-white border border-slate-200 rounded-full pl-3.5 pr-1.5 py-1 shadow-sm">
+                        <div class="text-right leading-tight">
+                            <div id="loggedUserName" class="font-extrabold text-xs text-slate-900">Usuário</div>
+                            <div id="loggedUserRole" class="text-[10px] font-extrabold uppercase text-sky-600">Perfil</div>
+                        </div>
+                        <button type="button" onclick="fazerLogoutCentral()" title="Sair da Central PCM" class="w-8 h-8 rounded-full bg-slate-900 hover:bg-rose-600 text-white flex items-center justify-center transition-colors">
+                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"/></svg>
+                        </button>
+                    </div>
+                </div>
+            </header>
+
+            <!-- CORPO DO PORTAL -->
+            <main class="flex-1 overflow-y-auto p-5 sm:p-8 space-y-6">
+
+                <!-- ==================== ABA 1: CATÁLOGO DE APLICATIVOS (FILTRADO POR RBAC) ==================== -->
+                <section id="portalSecApps" class="space-y-6">
+                    <div class="flex flex-col lg:flex-row lg:items-end justify-between gap-4">
+                        <div>
+                            <p class="text-xs font-extrabold uppercase tracking-widest text-sky-600 mb-1">Ambiente Unificado • Single Sign-On</p>
+                            <h2 class="text-2xl sm:text-3xl font-extrabold text-slate-900 tracking-tight">
+                                Olá, <span id="greetUserName">Colaborador</span>! Selecione o módulo de trabalho
+                            </h2>
+                            <p class="text-sm text-slate-500 mt-1">
+                                Seu login já está autenticado automaticamente em todos os aplicativos habilitados para o seu perfil.
+                            </p>
+                        </div>
+
+                        <div class="flex flex-wrap items-center gap-2.5">
+                            <div class="relative w-full sm:w-64">
+                                <input type="text" id="inpBuscaApp" oninput="renderizarCardsApps()" placeholder="Buscar aplicativo..." class="input-clean py-2 pl-9 pr-3 text-xs font-semibold">
+                                <svg class="w-4 h-4 text-slate-400 absolute left-3 top-1/2 -translate-y-1/2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/></svg>
+                            </div>
+                            <span id="badgeAppsLiberados" class="px-3.5 py-2 rounded-xl bg-sky-50 border border-sky-200 text-sky-800 font-extrabold text-xs">
+                                0 módulos liberados
+                            </span>
+                        </div>
+                    </div>
+
+                    <!-- GRADE DOS 5 APPS -->
+                    <div id="gridAppsContainer" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5"></div>
+                </section>
+
+                <!-- ==================== ABA 2: CONTROLE RBAC & DELEGAÇÃO DE ACESSOS (ADMIN) ==================== -->
+                <section id="portalSecRbac" class="hidden space-y-6">
+                    <div class="flex flex-col lg:flex-row lg:items-end justify-between gap-4">
+                        <div>
+                            <p class="text-xs font-extrabold uppercase tracking-widest text-indigo-600 mb-1">Segurança & Governança • ir_funcionarios</p>
+                            <h2 class="text-2xl sm:text-3xl font-extrabold text-slate-900 tracking-tight">
+                                Controle de Acesso RBAC por Usuário e Aplicativo
+                            </h2>
+                            <p class="text-sm text-slate-500 mt-1">
+                                Delegue exatamente quais aplicativos cada usuário pode visualizar e acessar na Central PCM. As alterações entram em vigor em tempo real.
+                            </p>
+                        </div>
+                        <div class="flex flex-wrap items-center gap-2">
+                            <button type="button" onclick="aplicarPadraoCargoTodos()" class="btn-touch bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs py-2.5 px-4 border border-slate-200" title="Preenche permissões padrão para usuários que ainda não foram customizados">
+                                <span>⚡ Sincronizar Padrões de Cargo</span>
+                            </button>
+                            <button type="button" onclick="abrirModalUsuarioRbac()" class="btn-pill-dark text-xs py-2.5 px-5">
+                                <span>+ Novo Usuário / Senha</span>
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- KPIs RBAC -->
+                    <div class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-3.5" id="rbacKpiRow"></div>
+
+                    <!-- FILTROS DA MATRIZ RBAC -->
+                    <div class="glass-card p-5 rounded-3xl space-y-4">
+                        <div class="flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-3">
+                            <div class="flex flex-wrap items-center gap-2.5 flex-1">
+                                <div class="relative flex-1 min-w-[220px] max-w-sm">
+                                    <input type="text" id="rbacFiltroBusca" oninput="renderizarMatrizRbac()" placeholder="Filtrar por nome ou login..." class="input-clean py-2 pl-9 pr-3 text-xs font-bold">
+                                    <svg class="w-4 h-4 text-slate-400 absolute left-3 top-1/2 -translate-y-1/2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/></svg>
+                                </div>
+                                <select id="rbacFiltroRole" onchange="renderizarMatrizRbac()" class="input-clean py-2 px-3 text-xs font-extrabold w-auto">
+                                    <option value="">Todos os Perfis / Cargos</option>
+                                    <option value="Admin">Admin (PCM)</option>
+                                    <option value="Supervisor Mecânica">Supervisor Mecânica</option>
+                                    <option value="Supervisor Elétrica">Supervisor Elétrica</option>
+                                    <option value="Mecânica">Técnico Mecânica</option>
+                                    <option value="Elétrica">Técnico Elétrica</option>
+                                    <option value="Automação">Automação</option>
+                                    <option value="Utilidades">Utilidades</option>
+                                </select>
+                            </div>
+                            <div class="text-[11px] font-bold text-slate-500">
+                                💡 Clique nas chaves verdes para liberar ou bloquear um App instantaneamente para o colaborador.
+                            </div>
+                        </div>
+
+                        <!-- TABELA MATRIZ DE ACESSOS (USUÁRIOS x 5 APPS) -->
+                        <div class="overflow-x-auto rounded-2xl border border-slate-200">
+                            <table class="w-full border-collapse text-left min-w-[920px]">
+                                <thead>
+                                    <tr class="bg-slate-50 border-b border-slate-200 text-[11px] font-extrabold uppercase text-slate-600">
+                                        <th class="py-3.5 px-4">Colaborador / Login</th>
+                                        <th class="py-3.5 px-3">Perfil (Cargo)</th>
+                                        <th class="py-3.5 px-3 text-center">📋 Inspeção de Rota</th>
+                                        <th class="py-3.5 px-3 text-center">🎯 Matriz Habilidades</th>
+                                        <th class="py-3.5 px-3 text-center">📅 Agenda PCM</th>
+                                        <th class="py-3.5 px-3 text-center">⚙️ Obsolescência</th>
+                                        <th class="py-3.5 px-3 text-center">📊 Multipet</th>
+                                        <th class="py-3.5 px-4 text-right">Ações Rápidas</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="tbodyMatrizRbac" class="divide-y divide-slate-100 text-xs"></tbody>
+                            </table>
+                        </div>
+                    </div>
+                </section>
+
+            </main>
+        </div>
+    </div>
+
+    <!-- ==================== 3. WORKSPACE INTEGRADO (EXECUÇÃO DE APP COM BARRA DE ALTERNÂNCIA) ==================== -->
+    <div id="workspaceView" class="hidden fixed inset-0 z-50 bg-slate-900 flex flex-col">
+        <!-- BARRA SUPERIOR COMPACTA DA CENTRAL -->
+        <div id="workspaceTopBar" class="h-12 bg-slate-900 text-white px-3 sm:px-5 flex items-center justify-between gap-2 border-b border-slate-800 shrink-0">
+            <div class="flex items-center gap-2 min-w-0">
+                <button type="button" onclick="fecharAppWorkspace()" class="px-3 py-1.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-white font-extrabold text-xs flex items-center gap-1.5 border border-slate-700 transition-colors shrink-0">
+                    <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M10 19l-7-7m0 0l7-7m-7 7h18"/></svg>
+                    <span>Central PCM</span>
+                </button>
+                <div class="h-4 w-px bg-slate-700 mx-1 hidden sm:block"></div>
+                <!-- PÍLULAS DE ALTERNÂNCIA RÁPIDA ENTRE APPS LIBERADOS -->
+                <div id="workspaceAppSwitcher" class="flex items-center gap-1.5 overflow-x-auto py-1"></div>
+            </div>
+
+            <div class="flex items-center gap-2 shrink-0">
+                <span id="workspaceUserBadge" class="hidden md:inline-block text-[11px] font-bold text-slate-300 px-2.5 py-1 rounded-lg bg-slate-800/90 border border-slate-700"></span>
+                <button type="button" onclick="abrirAppAtualNovaGuia()" title="Abrir este aplicativo em uma nova guia" class="px-2.5 py-1.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-200 text-xs font-bold border border-slate-700 flex items-center gap-1">
+                    <span>Nova Guia ↗</span>
+                </button>
+                <button type="button" onclick="fazerLogoutCentral()" title="Encerrar sessão em todos os apps" class="px-2.5 py-1.5 rounded-xl bg-rose-600 hover:bg-rose-700 text-white text-xs font-extrabold flex items-center gap-1">
+                    <span>Sair</span>
+                </button>
+            </div>
+        </div>
+
+        <!-- IFRAME DO SPA SELECIONADO -->
+        <iframe id="centralAppFrame" src="about:blank" class="flex-1 w-full border-0 bg-white" title="Aplicativo PCM Cepêra"></iframe>
+    </div>
+
+    <!-- ==================== MODAL CRIAR / EDITAR USUÁRIO & ACESSOS RBAC ==================== -->
+    <div id="modalUsuarioRbac" role="dialog" aria-modal="true" class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-[80] hidden flex items-end sm:items-center justify-center p-0 sm:p-4">
+        <div class="bg-white w-full sm:max-w-lg sm:rounded-3xl rounded-t-3xl p-6 shadow-2xl border border-slate-200 space-y-4 max-h-[92vh] overflow-y-auto">
+            <div class="flex items-center justify-between border-b border-slate-100 pb-3">
+                <div>
+                    <span id="modalUserSub" class="text-[10px] font-extrabold uppercase tracking-widest text-sky-600">Cadastro Unificado & RBAC</span>
+                    <h3 id="modalUserTitulo" class="text-lg font-extrabold text-slate-900">Adicionar Colaborador</h3>
+                </div>
+                <button type="button" onclick="fecharModal('modalUsuarioRbac')" class="w-8 h-8 rounded-full bg-slate-100 hover:bg-slate-200 text-slate-600 font-bold">✕</button>
+            </div>
+
+            <form onsubmit="salvarUsuarioRbacModal(event)" class="space-y-4 text-xs">
+                <input type="hidden" id="uEditId">
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                    <div class="sm:col-span-2">
+                        <label class="block text-[10px] font-extrabold uppercase text-slate-500 mb-1">Nome Completo *</label>
+                        <input type="text" id="uNome" required class="input-clean py-2 text-xs font-bold" placeholder="Ex: Kaique Pereira">
+                    </div>
+                    <div>
+                        <label class="block text-[10px] font-extrabold uppercase text-slate-500 mb-1">Usuário de Login *</label>
+                        <input type="text" id="uUser" required class="input-clean py-2 text-xs font-mono font-bold" placeholder="Ex: kaique.pereira">
+                    </div>
+                    <div>
+                        <label class="block text-[10px] font-extrabold uppercase text-slate-500 mb-1">Senha de Acesso *</label>
+                        <div class="relative">
+                            <input type="text" id="uPass" required class="input-clean py-2 pr-12 text-xs font-mono font-bold" placeholder="123456">
+                            <button type="button" onclick="const p=document.getElementById('uPass'); p.type=p.type==='password'?'text':'password';" class="absolute right-2.5 top-1/2 -translate-y-1/2 text-[10px] font-extrabold uppercase text-slate-400 hover:text-slate-700">Ver</button>
+                        </div>
+                    </div>
+                    <div class="sm:col-span-2">
+                        <label class="block text-[10px] font-extrabold uppercase text-slate-500 mb-1">Perfil / Cargo nos Sistemas *</label>
+                        <select id="uRole" onchange="preencherAppsPadraoNoModal(this.value)" class="input-clean py-2 text-xs font-extrabold">
+                            <option value="Mecânica">Mecânica (Técnico)</option>
+                            <option value="Elétrica">Elétrica (Técnico)</option>
+                            <option value="Supervisor Mecânica">Supervisor Mecânica</option>
+                            <option value="Supervisor Elétrica">Supervisor Elétrica</option>
+                            <option value="Automação">Automação</option>
+                            <option value="Utilidades">Utilidades</option>
+                            <option value="Operação">Operação / Produção</option>
+                            <option value="Admin">Admin (Gestor PCM)</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div>
+                    <div class="flex items-center justify-between mb-2">
+                        <label class="text-[10px] font-extrabold uppercase text-slate-500">Aplicativos Liberados para este Usuário (RBAC):</label>
+                        <div class="flex items-center gap-2">
+                            <button type="button" onclick="marcarTodosAppsModal(true)" class="text-[10px] font-extrabold text-sky-600 hover:underline">Marcar Todos</button>
+                            <span class="text-slate-300">|</span>
+                            <button type="button" onclick="preencherAppsPadraoNoModal(document.getElementById('uRole').value)" class="text-[10px] font-extrabold text-slate-500 hover:underline">Padrão do Cargo</button>
+                        </div>
+                    </div>
+                    <div id="modalListaCheckApps" class="space-y-2 p-3 rounded-2xl bg-slate-50 border border-slate-200/80"></div>
+                </div>
+
+                <div class="flex gap-2 pt-3 border-t border-slate-100">
+                    <button type="button" onclick="fecharModal('modalUsuarioRbac')" class="btn-touch bg-slate-100 text-slate-700 flex-1 text-xs">Cancelar</button>
+                    <button type="submit" id="btnSalvarUsuarioRbac" class="btn-pill-dark flex-1 text-xs">Salvar Usuário & Permissões</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- TOAST NOTIFICATIONS -->
+    <div id="toastStack" aria-live="polite" class="fixed bottom-5 right-5 z-[100] space-y-2 max-w-sm"></div>
+
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
+        import { getAuth, signInAnonymously } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
+        import { initializeFirestore, collection, addDoc, onSnapshot, doc, updateDoc, deleteDoc } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
+
+        // ================= CATÁLOGO OFICIAL DOS 5 APLICATIVOS DA CENTRAL =================
+        const APPS_CATALOG = [
+            {
+                id: 'inspecao_rota',
+                shortTitle: 'Inspeção de Rota',
+                title: 'Rotas & Inspeções — 52 Semanas',
+                file: 'INSPEÇÃO DE ROTA.html',
+                category: 'Preventiva & Campo',
+                badgeClass: 'bg-sky-100 text-sky-800 border-sky-200',
+                accentColor: '#0284c7',
+                iconHtml: '<svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4"/></svg>',
+                description: 'Cronograma anual de 52 semanas, planos cirúrgicos por subconjunto, impressão de fichas A4, escala de turnos e gestão de anomalias.',
+                collections: ['ob_linhas', 'ir_agenda', 'ir_checklists', 'ir_anomalias'],
+                defaultRoles: ['Admin', 'Supervisor Mecânica', 'Supervisor Elétrica', 'Mecânica', 'Elétrica', 'Automação', 'Utilidades']
+            },
+            {
+                id: 'matriz_habilidades',
+                shortTitle: 'Matriz Habilidades',
+                title: 'Matriz & Árvore de Habilidades',
+                file: 'MATRIZ HABILIDADES.html',
+                category: 'Gestão Técnica & PDI',
+                badgeClass: 'bg-indigo-100 text-indigo-800 border-indigo-200',
+                accentColor: '#4f46e5',
+                iconHtml: '<svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6"/></svg>',
+                description: 'Avaliação ponderada de polivalência técnica (20% Auto / 50% Prática / 30% Teórica), calibração de supervisão, radar 360° e PDI GUT.',
+                collections: ['ir_funcionarios', 'ob_linhas'],
+                defaultRoles: ['Admin', 'Supervisor Mecânica', 'Supervisor Elétrica', 'Mecânica', 'Elétrica', 'Automação', 'Utilidades']
+            },
+            {
+                id: 'agenda_pcm',
+                shortTitle: 'Agenda PCM',
+                title: 'Agenda de Manutenção PCM',
+                file: 'AGENDA-PCM.html',
+                category: 'Programação & Ordens',
+                badgeClass: 'bg-emerald-100 text-emerald-800 border-emerald-200',
+                accentColor: '#059669',
+                iconHtml: '<svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/></svg>',
+                description: 'Controle de atividades programadas da manutenção, alocação por equipes, responsáveis técnicos, setores produtivos e status.',
+                collections: ['ag_manutencao', 'ag_responsaveis', 'ag_equipes', 'ag_setores'],
+                defaultRoles: ['Admin', 'Supervisor Mecânica', 'Supervisor Elétrica']
+            },
+            {
+                id: 'obsolescencia',
+                shortTitle: 'Obsolescência',
+                title: 'Gestão Integrada de Ativos & Obsolescência',
+                file: 'OBSOLECENCIA.html',
+                category: 'Engenharia & Confiabilidade',
+                badgeClass: 'bg-amber-100 text-amber-800 border-amber-200',
+                accentColor: '#d97706',
+                iconHtml: '<svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"/><circle cx="12" cy="12" r="3" stroke-width="2"/></svg>',
+                description: 'Árvore estrutural de ativos, monitoramento de vida útil de peças críticas, matriz de obsolescência e planos de substituição.',
+                collections: ['ob_equipamentos', 'ob_linhas'],
+                defaultRoles: ['Admin', 'Supervisor Mecânica', 'Supervisor Elétrica']
+            },
+            {
+                id: 'dashboard_multipet',
+                shortTitle: 'Multipet',
+                title: 'Dashboard de Produção — Multipets',
+                file: 'DASHBOARD - MULTIPET.html',
+                category: 'Indicadores & Eficiência',
+                badgeClass: 'bg-rose-100 text-rose-800 border-rose-200',
+                accentColor: '#e11d48',
+                iconHtml: '<svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"/></svg>',
+                description: 'Acompanhamento diário de volume produzido e eficiência de linha (Multipet 1, Multipet 2/5 e Multipet 3) por turno.',
+                collections: ['mp_producao'],
+                defaultRoles: ['Admin', 'Supervisor Mecânica', 'Supervisor Elétrica', 'Operação']
+            }
+        ];
+
+        // ================= STORAGE SEGURO =================
+        const memStore = {};
+        const safeStorage = {
+            get(k) { try { return window.localStorage.getItem(k); } catch (_) { return memStore[k] || null; } },
+            set(k, v) { memStore[k] = v; try { window.localStorage.setItem(k, v); } catch (_) {} },
+            remove(k) { delete memStore[k]; try { window.localStorage.removeItem(k); } catch (_) {} }
+        };
+
+        // ================= FIREBASE CONFIG (pcm-cepera) =================
+        const firebaseConfig = {
+            apiKey: "AIzaSyAGbFTTCgbqe9XFKFSb6ltB5lYj5O6QipE",
+            authDomain: "pcm-cepera.firebaseapp.com",
+            projectId: "pcm-cepera",
+            storageBucket: "pcm-cepera.firebasestorage.app",
+            messagingSenderId: "483278589909",
+            appId: "1:483278589909:web:9f69f8a32f50e4e186f75c",
+            measurementId: "G-LW29TG8TJ4"
+        };
+
+        const app = initializeApp(firebaseConfig);
+        const db = initializeFirestore(app, { experimentalForceLongPolling: true });
+        const auth = getAuth(app);
+        const refFunc = collection(db, "ir_funcionarios");
+
+        const DEFAULT_ADMIN = {
+            id: 'default_admin',
+            nome: 'Administrador PCM',
+            user: 'admin',
+            pass: 'admin',
+            role: 'Admin',
+            apps_permitidos: APPS_CATALOG.map(a => a.id)
+        };
+
+        let listaFunc = [DEFAULT_ADMIN];
+        let usuarioLogado = null;
+        let appAtualWorkspace = null;
+        let bancoConectado = false;
+
+        // ================= HELPERS =================
+        function escapeHtml(str) {
+            return String(str || '')
+                .replace(/&/g, '&amp;')
+                .replace(/</g, '&lt;')
+                .replace(/>/g, '&gt;')
+                .replace(/"/g, '&quot;')
+                .replace(/'/g, '&#39;');
+        }
+
+        function getWeekNumber(d) {
+            d = new Date(Date.UTC(d.getFullYear(), d.getMonth(), d.getDate()));
+            d.setUTCDate(d.getUTCDate() + 4 - (d.getUTCDay() || 7));
+            const yearStart = new Date(Date.UTC(d.getUTCFullYear(), 0, 1));
+            return Math.ceil((((d - yearStart) / 86400000) + 1) / 7);
+        }
+
+        window.showToast = (msg, type = 'info') => {
+            const stack = document.getElementById('toastStack');
+            const el = document.createElement('div');
+            el.className = `px-4 py-3 rounded-2xl text-xs font-bold shadow-xl transition-all flex items-center gap-2 ${
+                type === 'error' ? 'bg-rose-600 text-white' : 'bg-slate-900 text-white'
+            }`;
+            el.innerHTML = msg;
+            stack.appendChild(el);
+            setTimeout(() => el.remove(), 3200);
+        };
+
+        window.fecharModal = (id) => document.getElementById(id)?.classList.add('hidden');
+
+        window.toggleSenhaLogin = () => {
+            const inp = document.getElementById('loginPass');
+            inp.type = inp.type === 'password' ? 'text' : 'password';
+        };
+
+        window.toggleTemaEscuro = () => {
+            const isDark = document.body.classList.toggle('theme-dark');
+            safeStorage.set('cepera_central_theme', isDark ? 'dark' : 'light');
+            const l1 = document.getElementById('lblTemaBtnLogin');
+            const l2 = document.getElementById('lblTemaBtnPortal');
+            if (l1) l1.innerText = isDark ? '☀️ Claro' : '🌙 Escuro';
+            if (l2) l2.innerText = isDark ? '☀️' : '🌙';
+        };
+
+        // ================= MOTOR DE PERMISSÕES RBAC =================
+        export function getAppsPadraoPorRole(role) {
+            const r = String(role || 'Mecânica').trim();
+            if (r === 'Admin') return APPS_CATALOG.map(a => a.id);
+            return APPS_CATALOG.filter(a => a.defaultRoles.includes(r)).map(a => a.id);
+        }
+
+        export function getAppsPermitidosUsuario(userObj) {
+            if (!userObj) return [];
+            // Admin tem sempre acesso total garantido à Central e aos 5 apps
+            if (userObj.role === 'Admin') {
+                return APPS_CATALOG.map(a => a.id);
+            }
+            if (Array.isArray(userObj.apps_permitidos)) {
+                return userObj.apps_permitidos;
+            }
+            return getAppsPadraoPorRole(userObj.role);
+        }
+
+        export function usuarioPodeAcessarApp(userObj, appId) {
+            const permitidos = getAppsPermitidosUsuario(userObj);
+            return permitidos.includes(appId);
+        }
+
+        function sincronizarSessaoSSO(userObj) {
+            if (!userObj) {
+                safeStorage.remove('cepera_ir_user');
+                safeStorage.remove('cepera_central_session');
+                return;
+            }
+            const appsPermitidos = getAppsPermitidosUsuario(userObj);
+            const payload = {
+                id: userObj.id,
+                nome: userObj.nome,
+                user: userObj.user,
+                role: userObj.role,
+                apps_permitidos: appsPermitidos,
+                ts: Date.now()
+            };
+            safeStorage.set('cepera_ir_user', userObj.user);
+            safeStorage.set('cepera_central_session', JSON.stringify(payload));
+        }
+
+        // ================= INICIALIZAÇÃO E REALTIME FIREBASE =================
+        async function initCentral() {
+            if (safeStorage.get('cepera_central_theme') === 'dark') {
+                document.body.classList.add('theme-dark');
+                const l1 = document.getElementById('lblTemaBtnLogin');
+                const l2 = document.getElementById('lblTemaBtnPortal');
+                if (l1) l1.innerText = '☀️ Claro';
+                if (l2) l2.innerText = '☀️';
+            }
+
+            document.getElementById('headerSemanaAtual').innerText = getWeekNumber(new Date());
+
+            // Hidrata sessão imediata se já estiver logado
+            const cachedStr = safeStorage.get('cepera_central_session');
+            if (cachedStr) {
+                try {
+                    const cached = JSON.parse(cachedStr);
+                    if (cached && cached.user) {
+                        entrarNoPortal(cached, true);
+                    }
+                } catch (_) {}
+            }
+
+            try {
+                await Promise.race([
+                    signInAnonymously(auth),
+                    new Promise(resolve => setTimeout(resolve, 1500))
+                ]);
+            } catch (_) {}
+
+            onSnapshot(refFunc, (snap) => {
+                const temp = [];
+                snap.forEach(d => temp.push({ id: d.id, ...d.data() }));
+                listaFunc = temp.length > 0 ? temp : [DEFAULT_ADMIN];
+                bancoConectado = true;
+
+                const badge = document.getElementById('loginSyncBadge');
+                if (badge) {
+                    badge.className = 'text-[11px] font-bold text-emerald-600 flex items-center gap-1.5';
+                    badge.innerHTML = '<span class="w-2 h-2 rounded-full bg-emerald-500"></span> PCM • Online (' + listaFunc.length + ' usuários)';
+                }
+
+                const countBadge = document.getElementById('badgeCountUsers');
+                if (countBadge) countBadge.innerText = listaFunc.length;
+
+                if (usuarioLogado) {
+                    const atualizado = listaFunc.find(x => x.user.toLowerCase() === usuarioLogado.user.toLowerCase());
+                    if (atualizado) {
+                        usuarioLogado = atualizado;
+                        sincronizarSessaoSSO(usuarioLogado);
+                        atualizarHeaderUsuario();
+                        renderizarCardsApps();
+                        if (usuarioLogado.role === 'Admin') {
+                            renderizarMatrizRbac();
+                        }
+                        if (appAtualWorkspace) {
+                            renderizarBarraWorkspace();
+                        }
+                    }
+                } else {
+                    const savedUser = safeStorage.get('cepera_ir_user');
+                    if (savedUser) {
+                        const achou = listaFunc.find(x => x.user.toLowerCase() === savedUser.toLowerCase());
+                        if (achou) entrarNoPortal(achou, true);
+                    }
+                }
+            }, (err) => {
+                const badge = document.getElementById('loginSyncBadge');
+                if (badge) {
+                    badge.className = 'text-[11px] font-bold text-rose-600 flex items-center gap-1.5';
+                    badge.innerHTML = '<span class="w-2 h-2 rounded-full bg-rose-500"></span> Erro de conexão';
+                }
+            });
+        }
+
+        // ================= LOGIN E LOGOUT UNIFICADO =================
+        window.realizarLoginCentral = (e) => {
+            e.preventDefault();
+            const usr = document.getElementById('loginUser').value.trim().toLowerCase();
+            const pass = document.getElementById('loginPass').value;
+
+            const userObj = listaFunc.find(x => (x.user || '').toLowerCase() === usr && x.pass === pass);
+            if (!userObj) {
+                showToast("Usuário ou senha incorretos.", "error");
+                return;
+            }
+
+            entrarNoPortal(userObj, false);
+            showToast(`Bem-vindo à Central PCM, ${userObj.nome}!`);
+        };
+
+        function entrarNoPortal(userObj, silencioso = false) {
+            usuarioLogado = userObj;
+            sincronizarSessaoSSO(userObj);
+
+            document.getElementById('loginView').classList.add('hidden');
+            document.getElementById('portalView').classList.remove('hidden');
+
+            atualizarHeaderUsuario();
+            renderizarCardsApps();
+
+            if (userObj.role === 'Admin') {
+                renderizarMatrizRbac();
+            } else {
+                switchPortalTab('apps');
+            }
+
+            // Verifica se veio redirecionado para abrir um app específico (?app=...)
+            const params = new URLSearchParams(window.location.search);
+            const targetApp = params.get('app');
+            if (targetApp && usuarioPodeAcessarApp(userObj, targetApp)) {
+                abrirAppWorkspace(targetApp);
+            }
+        }
+
+        function atualizarHeaderUsuario() {
+            if (!usuarioLogado) return;
+            document.getElementById('loggedUserName').innerText = usuarioLogado.nome || usuarioLogado.user;
+            document.getElementById('loggedUserRole').innerText = usuarioLogado.role || 'Colaborador';
+            document.getElementById('greetUserName').innerText = (usuarioLogado.nome || 'Colaborador').split(' ')[0];
+
+            const adminTabs = document.getElementById('adminNavTabs');
+            if (usuarioLogado.role === 'Admin') {
+                adminTabs.classList.remove('hidden');
+                adminTabs.classList.add('inline-flex');
+            } else {
+                adminTabs.classList.add('hidden');
+                adminTabs.classList.remove('inline-flex');
+            }
+        }
+
+        window.fazerLogoutCentral = () => {
+            sincronizarSessaoSSO(null);
+            usuarioLogado = null;
+            appAtualWorkspace = null;
+
+            const frame = document.getElementById('centralAppFrame');
+            if (frame) frame.src = 'about:blank';
+
+            document.getElementById('workspaceView').classList.add('hidden');
+            document.getElementById('portalView').classList.add('hidden');
+            document.getElementById('loginView').classList.remove('hidden');
+            document.getElementById('formLoginCentral')?.reset();
+            showToast("Sessão encerrada com segurança.");
+        };
+
+        window.switchPortalTab = (tab) => {
+            const secApps = document.getElementById('portalSecApps');
+            const secRbac = document.getElementById('portalSecRbac');
+            const btnApps = document.getElementById('tabBtnApps');
+            const btnRbac = document.getElementById('tabBtnRbac');
+
+            if (tab === 'rbac' && usuarioLogado?.role === 'Admin') {
+                secApps.classList.add('hidden');
+                secRbac.classList.remove('hidden');
+                btnRbac.className = 'px-4 py-1.5 rounded-full text-xs font-extrabold bg-indigo-600 text-white shadow-sm transition-all flex items-center gap-1.5';
+                btnApps.className = 'px-4 py-1.5 rounded-full text-xs font-extrabold text-slate-600 hover:text-slate-900 transition-all';
+                renderizarMatrizRbac();
+            } else {
+                secRbac.classList.add('hidden');
+                secApps.classList.remove('hidden');
+                btnApps.className = 'px-4 py-1.5 rounded-full text-xs font-extrabold bg-sky-600 text-white shadow-sm transition-all';
+                btnRbac.className = 'px-4 py-1.5 rounded-full text-xs font-extrabold text-slate-600 hover:text-slate-900 transition-all flex items-center gap-1.5';
+                renderizarCardsApps();
+            }
+        };
+
+        // ================= RENDERIZAR CATÁLOGO DE APLICATIVOS (FILTRADO POR RBAC) =================
+        window.renderizarCardsApps = () => {
+            if (!usuarioLogado) return;
+            const container = document.getElementById('gridAppsContainer');
+            const busca = (document.getElementById('inpBuscaApp')?.value || '').trim().toLowerCase();
+
+            const idsPermitidos = getAppsPermitidosUsuario(usuarioLogado);
+            const appsVisiveis = APPS_CATALOG.filter(app => {
+                if (!idsPermitidos.includes(app.id)) return false;
+                if (!busca) return true;
+                return (app.title + ' ' + app.description + ' ' + app.category).toLowerCase().includes(busca);
+            });
+
+            const badge = document.getElementById('badgeAppsLiberados');
+            if (badge) {
+                badge.innerText = `${idsPermitidos.length} de ${APPS_CATALOG.length} módulos liberados`;
+            }
+
+            if (appsVisiveis.length === 0) {
+                container.innerHTML = `
+                    <div class="col-span-full glass-card p-12 rounded-3xl text-center space-y-2">
+                        <div class="text-lg font-extrabold text-slate-800">Nenhum aplicativo encontrado para o seu acesso</div>
+                        <p class="text-xs text-slate-500">Solicite ao Administrador PCM a liberação de módulos no painel RBAC.</p>
+                    </div>
+                `;
+                return;
+            }
+
+            container.innerHTML = appsVisiveis.map(app => {
+                const qtdUsuariosComAcesso = listaFunc.filter(u => usuarioPodeAcessarApp(u, app.id)).length;
+                const tagsCols = app.collections.map(c => `<span class="text-[10px] font-mono font-bold px-2 py-0.5 rounded-md bg-slate-100 text-slate-600 border border-slate-200/80">${escapeHtml(c)}</span>`).join('');
+
+                return `
+                <div class="glass-card glass-card-hover rounded-3xl p-6 flex flex-col justify-between gap-5 relative overflow-hidden">
+                    <div class="space-y-3.5">
+                        <div class="flex items-start justify-between gap-3">
+                            <div class="w-12 h-12 rounded-2xl flex items-center justify-center text-white shadow-md shrink-0" style="background:${app.accentColor}">
+                                ${app.iconHtml}
+                            </div>
+                            <div class="flex flex-col items-end gap-1">
+                                <span class="text-[10px] font-extrabold uppercase px-2.5 py-1 rounded-full border ${app.badgeClass}">
+                                    ${escapeHtml(app.category)}
+                                </span>
+                                ${usuarioLogado.role === 'Admin' ? `<span class="text-[10px] font-bold text-slate-400">${qtdUsuariosComAcesso} usuário(s) com acesso</span>` : ''}
+                            </div>
+                        </div>
+
+                        <div>
+                            <h3 class="text-lg font-extrabold text-slate-900 leading-snug">${escapeHtml(app.title)}</h3>
+                            <p class="text-xs text-slate-500 leading-relaxed mt-1.5">${escapeHtml(app.description)}</p>
+                        </div>
+
+                        <div class="flex flex-wrap items-center gap-1.5 pt-1">
+                            ${tagsCols}
+                        </div>
+                    </div>
+
+                    <div class="pt-4 border-t border-slate-100 flex items-center gap-2">
+                        <button type="button" onclick="abrirAppWorkspace('${app.id}')" class="btn-pill-dark flex-1 py-2.5 text-xs" style="background:${app.accentColor}">
+                            <span>Abrir Sistema</span>
+                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 5l7 7m0 0l-7 7m7-7H3"/></svg>
+                        </button>
+                        <button type="button" onclick="abrirAppNovaGuia('${app.id}')" title="Abrir em nova guia do navegador" class="btn-touch bg-slate-100 hover:bg-slate-200 text-slate-700 py-2.5 px-3 text-xs border border-slate-200">
+                            <span>↗</span>
+                        </button>
+                    </div>
+                </div>`;
+            }).join('');
+        };
+
+        // ================= WORKSPACE INTEGRADO (SSO + IFRAME) =================
+        window.abrirAppWorkspace = (appId) => {
+            if (!usuarioLogado) return;
+            if (!usuarioPodeAcessarApp(usuarioLogado, appId)) {
+                showToast("Acesso negado pelo controle RBAC para este aplicativo.", "error");
+                return;
+            }
+            const appObj = APPS_CATALOG.find(a => a.id === appId);
+            if (!appObj) return;
+
+            sincronizarSessaoSSO(usuarioLogado);
+            appAtualWorkspace = appObj;
+
+            renderizarBarraWorkspace();
+
+            const frame = document.getElementById('centralAppFrame');
+            frame.src = encodeURI(appObj.file);
+            document.getElementById('workspaceView').classList.remove('hidden');
+        };
+
+        function renderizarBarraWorkspace() {
+            const switcher = document.getElementById('workspaceAppSwitcher');
+            const badge = document.getElementById('workspaceUserBadge');
+            if (badge && usuarioLogado) {
+                badge.innerText = `${usuarioLogado.nome} • ${usuarioLogado.role}`;
+            }
+
+            const idsPermitidos = getAppsPermitidosUsuario(usuarioLogado);
+            const appsPermitidos = APPS_CATALOG.filter(a => idsPermitidos.includes(a.id));
+
+            switcher.innerHTML = appsPermitidos.map(a => {
+                const ativo = appAtualWorkspace && appAtualWorkspace.id === a.id;
+                return `
+                    <button type="button" onclick="abrirAppWorkspace('${a.id}')" class="px-3 py-1 rounded-xl text-xs font-extrabold whitespace-nowrap transition-all ${
+                        ativo
+                            ? 'bg-sky-600 text-white shadow-sm'
+                            : 'bg-slate-800/80 text-slate-300 hover:bg-slate-800 hover:text-white'
+                    }">
+                        ${escapeHtml(a.shortTitle)}
+                    </button>
+                `;
+            }).join('');
+        }
+
+        window.fecharAppWorkspace = () => {
+            const frame = document.getElementById('centralAppFrame');
+            if (frame) frame.src = 'about:blank';
+            appAtualWorkspace = null;
+            document.getElementById('workspaceView').classList.add('hidden');
+            // Limpa query param ?app= se houver
+            if (window.location.search.includes('app=')) {
+                window.history.replaceState({}, document.title, window.location.pathname);
+            }
+        };
+
+        window.abrirAppNovaGuia = (appId) => {
+            if (!usuarioLogado || !usuarioPodeAcessarApp(usuarioLogado, appId)) {
+                showToast("Sem permissão para acessar este módulo.", "error");
+                return;
+            }
+            const appObj = APPS_CATALOG.find(a => a.id === appId);
+            if (!appObj) return;
+            sincronizarSessaoSSO(usuarioLogado);
+            window.open(encodeURI(appObj.file), '_blank');
+        };
+
+        window.abrirAppAtualNovaGuia = () => {
+            if (appAtualWorkspace) {
+                abrirAppNovaGuia(appAtualWorkspace.id);
+            }
+        };
+
+        // ================= GESTÃO DE RBAC & USUÁRIOS (EXCLUSIVO ADMIN) =================
+        window.renderizarMatrizRbac = () => {
+            if (!usuarioLogado || usuarioLogado.role !== 'Admin') return;
+
+            // 1. Renderiza KPIs
+            const kpiRow = document.getElementById('rbacKpiRow');
+            if (kpiRow) {
+                const cardsKpi = [
+                    { label: 'Total Usuários', val: listaFunc.length, cor: 'text-slate-900' },
+                    ...APPS_CATALOG.map(a => ({
+                        label: a.shortTitle,
+                        val: listaFunc.filter(u => usuarioPodeAcessarApp(u, a.id)).length + ' liberados',
+                        cor: 'text-sky-700'
+                    }))
+                ];
+                kpiRow.innerHTML = cardsKpi.map(k => `
+                    <div class="glass-card p-3.5 rounded-2xl">
+                        <div class="text-[10px] font-extrabold uppercase text-slate-400 truncate">${escapeHtml(k.label)}</div>
+                        <div class="text-base font-extrabold ${k.cor} mt-0.5">${escapeHtml(k.val)}</div>
+                    </div>
+                `).join('');
+            }
+
+            // 2. Filtra lista de colaboradores
+            const busca = (document.getElementById('rbacFiltroBusca')?.value || '').trim().toLowerCase();
+            const roleFiltro = document.getElementById('rbacFiltroRole')?.value || '';
+
+            const filtrados = listaFunc.filter(u => {
+                if (roleFiltro && u.role !== roleFiltro) return false;
+                if (busca) {
+                    const txt = `${u.nome || ''} ${u.user || ''} ${u.role || ''}`.toLowerCase();
+                    if (!txt.includes(busca)) return false;
+                }
+                return true;
+            }).sort((a, b) => (a.nome || '').localeCompare(b.nome || ''));
+
+            const tbody = document.getElementById('tbodyMatrizRbac');
+            if (filtrados.length === 0) {
+                tbody.innerHTML = `<tr><td colspan="8" class="p-8 text-center text-slate-400 font-bold">Nenhum colaborador encontrado para este filtro.</td></tr>`;
+                return;
+            }
+
+            tbody.innerHTML = filtrados.map(u => {
+                const isAdmin = u.role === 'Admin';
+                const appsUser = getAppsPermitidosUsuario(u);
+                const badgeRole = isAdmin
+                    ? 'bg-slate-900 text-white'
+                    : (String(u.role).includes('Supervisor')
+                        ? 'bg-indigo-100 text-indigo-800'
+                        : (u.role === 'Elétrica' ? 'bg-amber-100 text-amber-800' : 'bg-sky-100 text-sky-800'));
+
+                const colSwitches = APPS_CATALOG.map(app => {
+                    const checked = appsUser.includes(app.id);
+                    return `
+                        <td class="py-3 px-3 text-center align-middle">
+                            <label class="rbac-toggle" title="${checked ? 'Acesso Liberado' : 'Acesso Bloqueado'} (${escapeHtml(app.shortTitle)})">
+                                <input type="checkbox" ${checked ? 'checked' : ''} ${isAdmin ? 'disabled' : ''} onchange="alternarPermissaoAppUsuario('${u.id}', '${app.id}', this.checked)">
+                                <span class="rbac-slider"></span>
+                            </label>
+                        </td>
+                    `;
+                }).join('');
+
+                return `
+                    <tr class="hover:bg-slate-50/80 transition-colors">
+                        <td class="py-3 px-4">
+                            <div class="font-extrabold text-slate-900">${escapeHtml(u.nome)}</div>
+                            <div class="font-mono text-[11px] text-slate-500">Login: <strong>${escapeHtml(u.user)}</strong> • Senha: ${escapeHtml(u.pass || '••••')}</div>
+                        </td>
+                        <td class="py-3 px-3">
+                            <span class="text-[10px] font-extrabold uppercase px-2.5 py-1 rounded-full ${badgeRole}">
+                                ${escapeHtml(u.role)}
+                            </span>
+                        </td>
+                        ${colSwitches}
+                        <td class="py-3 px-4 text-right whitespace-nowrap">
+                            <div class="inline-flex items-center gap-1.5">
+                                ${!isAdmin ? `
+                                    <button type="button" onclick="definirTodosAppsUsuario('${u.id}', true)" title="Liberar todos os 5 apps" class="px-2 py-1 rounded-lg bg-emerald-50 hover:bg-emerald-100 text-emerald-700 font-extrabold text-[10px] border border-emerald-200">Todos</button>
+                                    <button type="button" onclick="resetarAppsPadraoUsuario('${u.id}')" title="Restaurar apps padrão do cargo" class="px-2 py-1 rounded-lg bg-slate-100 hover:bg-slate-200 text-slate-600 font-extrabold text-[10px]">Padrão</button>
+                                ` : ''}
+                                <button type="button" onclick="abrirModalEditarUsuarioRbac('${u.id}')" class="px-2.5 py-1 rounded-lg bg-sky-50 hover:bg-sky-100 text-sky-700 font-extrabold text-[11px] border border-sky-200">Editar</button>
+                                ${u.id !== 'default_admin' ? `
+                                    <button type="button" onclick="excluirUsuarioRbac('${u.id}')" class="px-2 py-1 rounded-lg bg-rose-50 hover:bg-rose-100 text-rose-600 font-extrabold text-[11px] border border-rose-200">✕</button>
+                                ` : ''}
+                            </div>
+                        </td>
+                    </tr>
+                `;
+            }).join('');
+        };
+
+        window.alternarPermissaoAppUsuario = async (userId, appId, liberar) => {
+            if (!usuarioLogado || usuarioLogado.role !== 'Admin') return;
+            const alvo = listaFunc.find(u => u.id === userId);
+            if (!alvo || alvo.role === 'Admin') return;
+
+            const atuais = new Set(getAppsPermitidosUsuario(alvo));
+            if (liberar) atuais.add(appId);
+            else atuais.delete(appId);
+
+            const novoArray = Array.from(atuais);
+            try {
+                await updateDoc(doc(db, "ir_funcionarios", userId), {
+                    apps_permitidos: novoArray
+                });
+                const appNome = APPS_CATALOG.find(a => a.id === appId)?.shortTitle || appId;
+                showToast(`${liberar ? 'Liberado' : 'Bloqueado'} "${appNome}" para ${alvo.nome}.`);
+            } catch (err) {
+                showToast("Erro ao salvar permissão no banco.", "error");
+            }
+        };
+
+        window.definirTodosAppsUsuario = async (userId, todos) => {
+            if (!usuarioLogado || usuarioLogado.role !== 'Admin') return;
+            const alvo = listaFunc.find(u => u.id === userId);
+            if (!alvo) return;
+            const novoArray = todos ? APPS_CATALOG.map(a => a.id) : [];
+            try {
+                await updateDoc(doc(db, "ir_funcionarios", userId), {
+                    apps_permitidos: novoArray
+                });
+                showToast(`Todos os 5 aplicativos liberados para ${alvo.nome}!`);
+            } catch (err) {
+                showToast("Erro ao atualizar permissões.", "error");
+            }
+        };
+
+        window.resetarAppsPadraoUsuario = async (userId) => {
+            if (!usuarioLogado || usuarioLogado.role !== 'Admin') return;
+            const alvo = listaFunc.find(u => u.id === userId);
+            if (!alvo) return;
+            const padrao = getAppsPadraoPorRole(alvo.role);
+            try {
+                await updateDoc(doc(db, "ir_funcionarios", userId), {
+                    apps_permitidos: padrao
+                });
+                showToast(`Permissões padrão de ${alvo.role} aplicadas para ${alvo.nome}.`);
+            } catch (err) {
+                showToast("Erro ao restaurar padrão.", "error");
+            }
+        };
+
+        window.aplicarPadraoCargoTodos = async () => {
+            if (!usuarioLogado || usuarioLogado.role !== 'Admin') return;
+            let atualizados = 0;
+            try {
+                for (const u of listaFunc) {
+                    if (u.id === 'default_admin') continue;
+                    if (!Array.isArray(u.apps_permitidos)) {
+                        await updateDoc(doc(db, "ir_funcionarios", u.id), {
+                            apps_permitidos: getAppsPadraoPorRole(u.role)
+                        });
+                        atualizados++;
+                    }
+                }
+                showToast(atualizados > 0
+                    ? `${atualizados} usuário(s) sincronizados com o RBAC padrão de seus cargos!`
+                    : `Todos os usuários já possuem permissões RBAC configuradas.`);
+            } catch (err) {
+                showToast("Erro ao sincronizar padrões.", "error");
+            }
+        };
+
+        // ================= MODAL DE CADASTRO / EDIÇÃO DE USUÁRIO + RBAC =================
+        function renderCheckboxesAppsNoModal(selecionados = []) {
+            const container = document.getElementById('modalListaCheckApps');
+            const setSel = new Set(selecionados);
+            container.innerHTML = APPS_CATALOG.map(app => `
+                <label class="flex items-center justify-between p-2.5 rounded-xl bg-white border border-slate-200 cursor-pointer hover:bg-slate-50">
+                    <div class="flex items-center gap-2.5 min-w-0">
+                        <input type="checkbox" name="chkModalAppRbac" value="${app.id}" ${setSel.has(app.id) ? 'checked' : ''} class="w-4 h-4 accent-sky-600 rounded">
+                        <div class="min-w-0">
+                            <div class="text-xs font-extrabold text-slate-900 truncate">${escapeHtml(app.title)}</div>
+                            <div class="text-[10px] text-slate-500">${escapeHtml(app.category)}</div>
+                        </div>
+                    </div>
+                    <span class="text-[10px] font-extrabold px-2 py-0.5 rounded-full border ${app.badgeClass} shrink-0">${escapeHtml(app.shortTitle)}</span>
+                </label>
+            `).join('');
+        }
+
+        window.preencherAppsPadraoNoModal = (role) => {
+            const padrao = getAppsPadraoPorRole(role);
+            renderCheckboxesAppsNoModal(padrao);
+        };
+
+        window.marcarTodosAppsModal = (todos) => {
+            renderCheckboxesAppsNoModal(todos ? APPS_CATALOG.map(a => a.id) : []);
+        };
+
+        window.abrirModalUsuarioRbac = () => {
+            if (!usuarioLogado || usuarioLogado.role !== 'Admin') return;
+            document.getElementById('uEditId').value = '';
+            document.getElementById('modalUserTitulo').innerText = 'Novo Colaborador & Permissões';
+            document.getElementById('uNome').value = '';
+            document.getElementById('uUser').value = '';
+            document.getElementById('uPass').value = '123456';
+            document.getElementById('uRole').value = 'Mecânica';
+            preencherAppsPadraoNoModal('Mecânica');
+            document.getElementById('modalUsuarioRbac').classList.remove('hidden');
+        };
+
+        window.abrirModalEditarUsuarioRbac = (id) => {
+            if (!usuarioLogado || usuarioLogado.role !== 'Admin') return;
+            const u = listaFunc.find(x => x.id === id);
+            if (!u) return;
+
+            document.getElementById('uEditId').value = u.id;
+            document.getElementById('modalUserTitulo').innerText = `Editar: ${u.nome}`;
+            document.getElementById('uNome').value = u.nome || '';
+            document.getElementById('uUser').value = u.user || '';
+            document.getElementById('uPass').value = u.pass || '';
+            document.getElementById('uRole').value = u.role || 'Mecânica';
+            renderCheckboxesAppsNoModal(getAppsPermitidosUsuario(u));
+            document.getElementById('modalUsuarioRbac').classList.remove('hidden');
+        };
+
+        window.salvarUsuarioRbacModal = async (e) => {
+            e.preventDefault();
+            if (!usuarioLogado || usuarioLogado.role !== 'Admin') return;
+
+            const editId = document.getElementById('uEditId').value.trim();
+            const nome = document.getElementById('uNome').value.trim();
+            const user = document.getElementById('uUser').value.trim().toLowerCase();
+            const pass = document.getElementById('uPass').value.trim();
+            const role = document.getElementById('uRole').value;
+
+            const duplicado = listaFunc.find(f => (f.user || '').toLowerCase() === user && f.id !== editId);
+            if (duplicado) {
+                showToast(`O login "${user}" já está em uso por ${duplicado.nome}.`, "error");
+                return;
+            }
+
+            const appsMarcados = role === 'Admin'
+                ? APPS_CATALOG.map(a => a.id)
+                : Array.from(document.querySelectorAll('input[name="chkModalAppRbac"]:checked')).map(el => el.value);
+
+            const btn = document.getElementById('btnSalvarUsuarioRbac');
+            btn.disabled = true;
+            btn.innerText = 'Salvando...';
+
+            const payload = {
+                nome,
+                user,
+                pass,
+                role,
+                apps_permitidos: appsMarcados
+            };
+
+            try {
+                if (editId && editId !== 'default_admin') {
+                    await updateDoc(doc(db, "ir_funcionarios", editId), payload);
+                    showToast(`Acesso de "${nome}" atualizado!`);
+                } else {
+                    await addDoc(refFunc, payload);
+                    showToast(`Colaborador "${nome}" cadastrado com sucesso!`);
+                }
+                fecharModal('modalUsuarioRbac');
+            } catch (err) {
+                showToast("Erro ao salvar usuário no Firestore.", "error");
+            } finally {
+                btn.disabled = false;
+                btn.innerText = 'Salvar Usuário & Permissões';
+            }
+        };
+
+        window.excluirUsuarioRbac = async (id) => {
+            if (!usuarioLogado || usuarioLogado.role !== 'Admin') return;
+            const alvo = listaFunc.find(f => f.id === id);
+            if (!alvo) return;
+            const qtdAdmins = listaFunc.filter(f => f.role === 'Admin').length;
+            if (alvo.role === 'Admin' && qtdAdmins <= 1) {
+                showToast("Não é permitido excluir o único Administrador.", "error");
+                return;
+            }
+            if (!confirm(`Confirma remover o acesso de "${alvo.nome}" (${alvo.user})?`)) return;
+            try {
+                await deleteDoc(doc(db, "ir_funcionarios", id));
+                showToast(`Colaborador "${alvo.nome}" removido.`);
+            } catch (err) {
+                showToast("Erro ao remover colaborador.", "error");
+            }
+        };
+
+        // Escuta mensagens dos SPAs filhos (ex: pedido para voltar à Central ou fazer Logout)
+        window.addEventListener('message', (ev) => {
+            if (!ev.data || typeof ev.data !== 'object') return;
+            if (ev.data.type === 'CEPERA_VOLTAR_CENTRAL') {
+                fecharAppWorkspace();
+            } else if (ev.data.type === 'CEPERA_LOGOUT_CENTRAL') {
+                fazerLogoutCentral();
+            }
+        });
+
+        initCentral();
+    </script>
+</body>
+</html>
