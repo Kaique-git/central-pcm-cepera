@@ -1,1315 +1,1732 @@
 <!DOCTYPE html>
-<html lang="pt-BR" data-theme="dark">
+<html lang="pt-BR">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Agenda de Manutenção — Cepera Alimentos</title>
-<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-<script>
-(function () {
-    var pref = {};
-    try { pref = JSON.parse(localStorage.getItem("cepera-agenda-prefs") || "{}"); } catch (e) { }
-    var root = document.documentElement;
-    root.setAttribute("data-theme", pref.theme === "light" ? "light" : "dark");
-    if (pref.contrast) root.setAttribute("data-contrast", "1");
-    if (pref.transparency === false) root.setAttribute("data-solid", "1");
-    if (pref.reduceMotion) root.setAttribute("data-reduce", "1");
-    if (pref.fontScale) root.style.fontSize = pref.fontScale + "%";
-    
-    if (pref.accentColor) {
-        root.style.setProperty('--action', pref.accentColor.main);
-        root.style.setProperty('--action-hover', pref.accentColor.hover);
-        root.style.setProperty('--tint', pref.accentColor.tint);
-    }
-})();
-</script>
-<style>
-:root {
-  color-scheme: light dark;
-  --bg-1: #0b1220; --bg-2: #101c38;
-  --surface: rgba(255,255,255,.07);
-  --surface-strong: rgba(255,255,255,.10);
-  --border: rgba(255,255,255,.14);
-  --text: #e9eef7; --text-2: #b4c0d3; --text-3: #8593a9;
-  --action: #4d8df6; --action-hover: #5b9bff;
-  --tint: rgba(77,141,246,.10);
-  --weekend: rgba(255,255,255,.03);
-  --danger: #ff7b7b;
-  --success: #3ccf8e;
-  --shadow: 0 10px 30px rgba(0,0,0,.25);
-  --blur: blur(18px) saturate(1.4);
-}
-:root[data-theme="light"] {
-  --bg-1: #e6ecf7; --bg-2: #dde6f2;
-  --surface: rgba(255,255,255,.72);
-  --surface-strong: rgba(255,255,255,.86);
-  --border: rgba(20,32,55,.14);
-  --text: #16233a; --text-2: #3d4d66; --text-3: #5b6a84;
-  --action: #2f6fe0; --action-hover: #245fca;
-  --tint: rgba(47,111,224,.08);
-  --weekend: rgba(20,32,55,.03);
-  --danger: #b42323;
-  --success: #0a7a35;
-  --shadow: 0 10px 30px rgba(20,32,55,.10);
-  --blur: blur(14px) saturate(1.2);
-}
-:root[data-contrast="1"] {
-  --border: rgba(255,255,255,.55);
-  --text-2: #ffffff; --text-3: #e0e7f3;
-}
-:root[data-contrast="1"][data-theme="light"] {
-  --border: rgba(0,0,0,.6);
-  --text-2: #000000; --text-3: #1f2a3c;
-}
-:root[data-solid="1"] .panel,
-:root[data-solid="1"] .modal,
-:root[data-solid="1"] .glass-bar,
-:root[data-solid="1"] .fab { background: var(--surface-strong) !important; backdrop-filter: none !important; -webkit-backdrop-filter: none !important; }
-:root[data-solid="1"][data-theme="dark"] { --surface: #101a34; --surface-strong: #101a34; }
-:root[data-solid="1"][data-theme="light"] { --surface: #ffffff; --surface-strong: #ffffff; }
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0">
+    <title>Agenda de Manutenção — PCM Cepêra</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --primary: #0f172a;
+            --accent: #0284c7;
+            --cepera: #dc2626;
+        }
 
-*, *::before, *::after { box-sizing: border-box; }
-html, body { margin: 0; }
-body {
-  font-family: -apple-system, "Segoe UI", Roboto, Arial, sans-serif;
-  color: var(--text);
-  background: linear-gradient(135deg, var(--bg-1), var(--bg-2)) fixed;
-  min-height: 100vh;
-}
+        html, body {
+            margin: 0 !important;
+            padding: 0 !important;
+            width: 100% !important;
+            min-height: 100vh !important;
+            overflow-x: hidden;
+            font-family: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, sans-serif;
+            color: #0f172a;
+            -webkit-tap-highlight-color: transparent;
+            background: linear-gradient(135deg, #f1f5f9 0%, #f8fafc 50%, #e2e8f0 100%);
+        }
 
-/* Base UI Elements */
-.wrap { max-width: 1280px; margin: 0 auto; padding: 16px; }
-.glass-bar, .panel {
-  background: var(--surface);
-  backdrop-filter: var(--blur); -webkit-backdrop-filter: var(--blur);
-  border: 1px solid var(--border);
-  border-radius: 14px;
-}
-.panel { box-shadow: var(--shadow); }
-.glass-bar { padding: 16px; }
+        .frosted-shell {
+            background: rgba(255, 255, 255, 0.94);
+            backdrop-filter: blur(8px);
+            -webkit-backdrop-filter: blur(8px);
+            border: 1px solid #e2e8f0;
+            box-shadow: 0 12px 32px -12px rgba(15, 23, 42, 0.06);
+        }
 
-/* SVG Icons */
-.svg-icon { width: 1.1em; height: 1.1em; vertical-align: text-bottom; fill: none; stroke: currentColor; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; display: inline-block; }
-.btn .svg-icon { margin-right: 6px; margin-top: -1px; }
-.btn-icon .svg-icon { margin: 0; vertical-align: middle; }
+        .glass-card {
+            background: #ffffff;
+            border: 1px solid #e2e8f0;
+            box-shadow: 0 4px 12px -4px rgba(15, 23, 42, 0.04);
+            transition: transform 0.15s ease, box-shadow 0.15s ease;
+        }
 
-/* Header & Nav */
-.header { display: flex; flex-wrap: wrap; gap: 16px; align-items: center; justify-content: space-between; }
-.eyebrow { display: inline-block; font-size: 12px; padding: 4px 10px; border-radius: 999px; border: 1px solid var(--border); color: var(--text-2); }
-h1 { font-size: 22px; margin: 8px 0 0; }
-.sub { margin: 4px 0 0; color: var(--text-2); font-size: 14px; }
-.nav { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
-.month-label { font-weight: 600; min-width: 170px; text-align: center; }
+        .glass-card-hover:hover {
+            transform: translateY(-1px);
+            box-shadow: 0 10px 20px -8px rgba(15, 23, 42, 0.08);
+        }
 
-/* Buttons */
-.btn {
-  display: inline-flex; align-items: center; justify-content: center;
-  height: 36px; padding: 0 14px; border-radius: 10px; border: 1px solid var(--border);
-  background: var(--surface-strong); color: var(--text); cursor: pointer; font-size: 14px; white-space: nowrap;
-  transition: all 0.15s ease;
-}
-.btn:hover { border-color: var(--action); }
-.btn-primary { background: var(--action); border-color: var(--action); color: #fff; font-weight: 600; }
-.btn-primary:hover { background: var(--action-hover); border-color: var(--action-hover); }
-.btn-ghost { background: transparent; border-color: transparent; color: var(--text-2); }
-.btn-ghost:hover { color: var(--text); border-color: var(--border); }
-.btn-danger { background: var(--danger); border-color: var(--danger); color: #fff; font-weight: 600; }
-.btn-icon { width: 36px; padding: 0; font-size: 18px; }
+        .glass-rail {
+            background: rgba(255, 255, 255, 0.9);
+            border-right: 1px solid #e2e8f0;
+        }
 
-/* Status Badges */
-.status { display: inline-flex; align-items: center; gap: 8px; font-size: 13px; color: var(--text-2); padding: 6px 10px; border: 1px solid var(--border); border-radius: 999px; }
-.dot { width: 8px; height: 8px; border-radius: 50%; display: inline-block; flex: none; }
-.dot-ok { background: var(--success); }
-.dot-err { background: var(--danger); }
-.dot-wait { background: #f0b429; }
+        .input-clean {
+            padding: 0.75rem 0.95rem;
+            font-size: 0.9rem;
+            border-radius: 0.85rem;
+            border: 1px solid #cbd5e1;
+            background: #ffffff;
+            transition: border-color 0.15s;
+            width: 100%;
+            color: #0f172a;
+        }
+        .input-clean:focus {
+            outline: none;
+            border-color: var(--accent);
+            box-shadow: 0 0 0 3px rgba(2, 132, 199, 0.12);
+        }
 
-/* Tabs */
-.nav-tabs { display: flex; gap: 8px; margin-top: 16px; border-bottom: 1px solid var(--border); padding-bottom: 12px; overflow-x: auto; }
-.nav-tab-btn { display: inline-flex; align-items: center; background: var(--surface); border: 1px solid var(--border); color: var(--text-2); padding: 8px 16px; border-radius: 8px; font-weight: 600; cursor: pointer; font-size: 14px; white-space: nowrap; transition: all 0.15s; }
-.nav-tab-btn.active { background: var(--action); color: #fff; border-color: var(--action); }
-.nav-tab-btn .svg-icon { margin-right: 8px; }
+        .btn-pill-dark {
+            background: var(--accent);
+            color: #ffffff;
+            font-weight: 700;
+            border-radius: 9999px;
+            padding: 0.7rem 1.35rem;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.5rem;
+            transition: opacity 0.15s ease, transform 0.15s ease;
+            cursor: pointer;
+            box-shadow: 0 6px 16px -4px rgba(15, 23, 42, 0.25);
+        }
+        .btn-pill-dark:hover { opacity: 0.92; transform: translateY(-1px); }
+        .btn-pill-dark:active { transform: scale(0.98); }
 
-/* Dashboard */
-.mini-dash { display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 12px; margin-top: 16px; }
-.dash-card { background: var(--surface); border: 1px solid var(--border); border-radius: 12px; padding: 16px; display: flex; flex-direction: column; justify-content: center; }
-.dash-label { font-size: 12px; font-weight: 600; text-transform: uppercase; color: var(--text-3); }
-.dash-val { font-size: 26px; font-weight: 700; margin-top: 4px; }
+        .btn-touch {
+            padding: 0.7rem 1.15rem;
+            font-weight: 700;
+            border-radius: 0.85rem;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.45rem;
+            transition: all 0.15s ease;
+            cursor: pointer;
+        }
+        .btn-touch:active { transform: scale(0.98); }
 
-/* Filters */
-.filters { margin-top: 16px; display: flex; flex-wrap: wrap; gap: 12px; align-items: center; justify-content: space-between; }
-.pill {
-  display: inline-flex; align-items: center; gap: 8px; height: 32px; padding: 0 12px;
-  border-radius: 999px; border: 1px solid var(--border); background: transparent; color: var(--text-2);
-  cursor: pointer; font-size: 13px; white-space: nowrap; transition: all 0.15s ease;
-}
-.pill[aria-pressed="true"], .pill.active { border-color: var(--action); color: var(--text); background: var(--tint); }
+        .rail-btn {
+            width: 100%;
+            padding: 0.65rem 0.4rem;
+            border-radius: 1rem;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            gap: 0.25rem;
+            color: #64748b;
+            background: #ffffff;
+            border: 1px solid #e2e8f0;
+            transition: all 0.15s;
+            cursor: pointer;
+            font-size: 10px;
+            font-weight: 800;
+            text-align: center;
+            line-height: 1.15;
+        }
+        .rail-btn:hover { color: #0f172a; border-color: #cbd5e1; }
+        .rail-btn.active {
+            background: var(--accent);
+            color: #ffffff;
+            border-color: var(--accent);
+            box-shadow: 0 4px 12px rgba(15, 23, 42, 0.2);
+        }
 
-/* Calendar */
-.cal-panel { margin-top: 16px; padding: 16px; }
-.cal-head, .cal-grid { display: grid; grid-template-columns: repeat(7, minmax(0, 1fr)); gap: 8px; }
-.cal-head div { text-align: center; font-size: 12px; color: var(--text-3); padding: 4px 0; text-transform: uppercase; }
-.cal-grid { margin-top: 8px; }
-.cell {
-  position: relative; min-height: 7rem; border: 1px solid var(--border); border-radius: 10px;
-  background: var(--surface); padding: 10px; display: flex; flex-direction: column; gap: 4px; cursor: pointer; text-align: left;
-}
-.cell:hover { border-color: var(--action); }
-.cell.empty { border: 0; background: transparent; cursor: default; }
-.cell.weekend { background: var(--weekend); color: var(--text-2); }
-.cell.today { border: 2px solid var(--action); background: var(--tint); }
-.daynum { display: block; font-size: 14px; font-weight: 600; padding-right: 28px; }
-.badge-count {
-  position: absolute; top: 8px; right: 8px; min-width: 22px; height: 22px; padding: 0 6px; border-radius: 999px;
-  background: var(--action); color: #fff; font-size: 12px; font-weight: 600; display: flex; align-items: center; justify-content: center;
-}
-.chip {
-  display: flex; align-items: center; gap: 6px; font-size: 12px; padding: 3px 6px; border-radius: 6px;
-  background: var(--surface-strong); white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
-}
-.chip.done { opacity: 0.5; text-decoration: line-through; }
-.chip b { font-weight: 700; }
-.chip span.t { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-.dot-sm { width: 7px; height: 7px; border-radius: 50%; flex: none; }
+        .mob-tab {
+            padding: 0.6rem 0.95rem;
+            border-radius: 9999px;
+            font-size: 0.78rem;
+            font-weight: 700;
+            color: #64748b;
+            white-space: nowrap;
+            transition: all 0.15s;
+        }
+        .mob-tab.active {
+            background: var(--accent);
+            color: #ffffff;
+        }
 
-/* Modal & Forms */
-.overlay {
-  position: fixed; inset: 0; display: flex; align-items: center; justify-content: center; padding: 16px;
-  background: rgba(5,10,20,.6); backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px); z-index: 100;
-}
-.overlay[hidden] { display: none; }
-.modal {
-  width: 100%; max-width: 650px; max-height: calc(100vh - 32px); overflow-y: auto; padding: 24px;
-  background: var(--surface); backdrop-filter: var(--blur); -webkit-backdrop-filter: var(--blur);
-  border: 1px solid var(--border); border-radius: 16px; box-shadow: var(--shadow);
-}
-.modal-head { display: flex; justify-content: space-between; align-items: flex-start; gap: 16px; margin-bottom: 16px; }
-.modal-sec { margin-top: 20px; padding-top: 16px; border-top: 1px solid var(--border); }
+        /* Pílulas de Filtro */
+        .pill {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.4rem;
+            padding: 0.45rem 0.9rem;
+            border-radius: 9999px;
+            border: 1px solid #e2e8f0;
+            background: #ffffff;
+            color: #64748b;
+            cursor: pointer;
+            font-size: 0.75rem;
+            font-weight: 700;
+            white-space: nowrap;
+            transition: all 0.15s ease;
+        }
+        .pill:hover { border-color: #cbd5e1; color: #0f172a; }
+        .pill[aria-pressed="true"], .pill.active {
+            background: var(--accent);
+            color: #ffffff;
+            border-color: var(--accent);
+            box-shadow: 0 4px 10px -2px rgba(2, 132, 199, 0.25);
+        }
 
-.entry { display: grid; grid-template-columns: 4px 1fr; gap: 12px; padding: 12px 0; border-bottom: 1px solid var(--border); }
-.entry:last-child { border-bottom: 0; }
-.entry-bar { border-radius: 4px; }
-.entry-top { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; }
-.entry-title { font-weight: 600; margin: 6px 0 0; }
-.entry-meta { font-size: 13px; color: var(--text-2); margin: 4px 0 0; }
-.entry-desc { font-size: 13px; color: var(--text-2); margin: 6px 0 0; background: rgba(0,0,0,0.04); padding: 6px; border-radius: 6px; }
-.entry-actions { display: flex; gap: 8px; margin-top: 8px; }
+        /* Calendário */
+        .cal-head, .cal-grid {
+            display: grid;
+            grid-template-columns: repeat(7, minmax(0, 1fr));
+            gap: 0.5rem;
+        }
+        .cal-head div {
+            text-align: center;
+            font-size: 0.7rem;
+            font-weight: 800;
+            color: #64748b;
+            padding: 0.35rem 0;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+        }
+        .cal-grid { margin-top: 0.35rem; }
+        .cell {
+            position: relative;
+            min-height: 7.25rem;
+            border: 1px solid #e2e8f0;
+            border-radius: 1.1rem;
+            background: #ffffff;
+            padding: 0.65rem;
+            display: flex;
+            flex-direction: column;
+            gap: 0.3rem;
+            cursor: pointer;
+            text-align: left;
+            transition: transform 0.12s ease, border-color 0.12s ease, box-shadow 0.12s ease;
+        }
+        .cell:hover {
+            border-color: var(--accent);
+            transform: translateY(-1px);
+            box-shadow: 0 8px 16px -8px rgba(15, 23, 42, 0.08);
+        }
+        .cell.empty {
+            border: 1px dashed #e2e8f0;
+            background: rgba(248, 250, 252, 0.45);
+            cursor: default;
+        }
+        .cell.empty:hover { transform: none; box-shadow: none; border-color: #e2e8f0; }
+        .cell.weekend { background: #f8fafc; }
+        .cell.today {
+            border: 2px solid var(--accent);
+            background: rgba(2, 132, 199, 0.04);
+        }
+        .daynum {
+            display: block;
+            font-size: 0.82rem;
+            font-weight: 800;
+            color: #0f172a;
+            padding-right: 1.75rem;
+        }
+        .badge-count {
+            position: absolute;
+            top: 0.5rem;
+            right: 0.5rem;
+            min-width: 20px;
+            height: 20px;
+            padding: 0 5px;
+            border-radius: 9999px;
+            background: var(--accent);
+            color: #ffffff;
+            font-size: 10px;
+            font-weight: 800;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        .chip {
+            display: flex;
+            align-items: center;
+            gap: 5px;
+            font-size: 11px;
+            font-weight: 700;
+            padding: 3px 6px;
+            border-radius: 0.5rem;
+            background: #f1f5f9;
+            color: #1e293b;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+        .chip.done { opacity: 0.5; text-decoration: line-through; }
+        .chip span.t { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+        .dot-sm { width: 7px; height: 7px; border-radius: 50%; flex: none; }
 
-.form-grid { display: grid; gap: 12px; }
-.row2 { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
-.row3 { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 12px; }
-@media (max-width: 640px) { .row2, .row3 { grid-template-columns: 1fr; } }
-label.lbl { display: block; font-size: 13px; color: var(--text-2); margin-bottom: 4px; }
-.input {
-  width: 100%; height: 40px; padding: 0 12px; border-radius: 10px; border: 1px solid var(--border);
-  background: var(--surface-strong); color: var(--text); font-size: 14px;
-}
-textarea.input { height: auto; min-height: 80px; padding: 10px 12px; resize: vertical; }
+        /* Badges de Status */
+        .st-badge {
+            font-size: 11px;
+            padding: 2px 9px;
+            border-radius: 9999px;
+            border: 1px solid;
+            display: inline-flex;
+            align-items: center;
+            font-weight: 800;
+        }
+        .st-pendente { background: #fef3c7; color: #b45309; border-color: #fde68a; }
+        .st-andamento { background: #e0f2fe; color: #0369a1; border-color: #bae6fd; }
+        .st-concluido { background: #dcfce7; color: #15803d; border-color: #bbf7d0; }
+        .st-cancelado { background: #fee2e2; color: #b91c1c; border-color: #fecaca; }
+        .st-select { cursor: pointer; appearance: none; -webkit-appearance: none; text-align: center; }
 
-/* FIX CRÍTICO PARA SELECTS NO MODO ESCURO/CLARO */
-select.input {
-    appearance: none;
-    -webkit-appearance: none;
-    background-image: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="none" stroke="%238593a9" viewBox="0 0 24 24" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 9l6 6 6-6"/></svg>');
-    background-repeat: no-repeat;
-    background-position: right 12px center;
-    padding-right: 36px;
-}
-select.input option {
-    background-color: var(--bg-1); /* Força a cor de fundo do tema */
-    color: var(--text);
-    font-weight: 500;
-}
-select.input:focus { outline: 2px solid var(--action); border-color: transparent; }
+        .svg-icon { width: 1.1em; height: 1.1em; vertical-align: text-bottom; fill: none; stroke: currentColor; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; display: inline-block; }
 
-.st-badge { font-size: 11px; padding: 2px 8px; border-radius: 999px; border: 1px solid; display: inline-block; font-weight: 600; }
-.st-pendente { background: rgba(240,180,41,.15); color: #f0b429; border-color: rgba(240,180,41,.3); }
-.st-andamento { background: rgba(77,141,246,.15); color: #4d8df6; border-color: rgba(77,141,246,.3); }
-.st-concluido { background: rgba(60,207,142,.15); color: #3ccf8e; border-color: rgba(60,207,142,.3); }
-.st-cancelado { background: rgba(255,123,123,.15); color: #ff7b7b; border-color: rgba(255,123,123,.3); }
-.st-select { background: transparent; cursor: pointer; padding: 2px 6px; border-radius: 6px; font-size: 11px; font-weight: 600; appearance: none; -webkit-appearance: none; text-align: center; }
-.st-select option { background-color: var(--bg-1); color: var(--text); }
+        *:focus-visible { outline: 3px solid var(--accent) !important; outline-offset: 2px; }
 
-.fab {
-  position: fixed; right: 20px; bottom: 20px; height: 42px; padding: 0 16px; border-radius: 999px;
-  border: 1px solid var(--border); background: var(--surface); backdrop-filter: var(--blur);
-  color: var(--text); cursor: pointer; font-size: 13px; z-index: 50; display: flex; align-items: center; gap: 8px;
-  box-shadow: 0 4px 12px rgba(0,0,0,0.15); font-weight: 600;
-}
-.fab:hover { border-color: var(--action); }
+        /* TEMA BRANCO SÓLIDO */
+        body.theme-solid { background: #f8fafc !important; }
+        body.theme-solid .frosted-shell,
+        body.theme-solid .glass-card,
+        body.theme-solid .glass-rail,
+        body.theme-solid .cell {
+            background: #ffffff !important;
+            backdrop-filter: none !important;
+            box-shadow: none !important;
+            border: 1px solid #cbd5e1 !important;
+        }
 
-.toast-stack { position: fixed; left: 50%; transform: translateX(-50%); bottom: 74px; display: grid; gap: 8px; z-index: 200; width: min(92vw, 360px); }
-.toast { padding: 12px 16px; border-radius: 12px; background: var(--surface-strong); border: 1px solid var(--border); font-size: 14px; color: var(--text); text-align: center; box-shadow: var(--shadow); }
+        /* TEMA ESCURO INDUSTRIAL */
+        body.theme-dark { background: #090d16 !important; color: #f1f5f9 !important; }
+        body.theme-dark .frosted-shell { background: #0f172a !important; border-color: #1e293b !important; backdrop-filter: none !important; }
+        body.theme-dark .glass-card,
+        body.theme-dark .glass-rail { background: #1e293b !important; border-color: #334155 !important; color: #f1f5f9 !important; backdrop-filter: none !important; }
+        body.theme-dark .cell { background: #0f172a !important; border-color: #334155 !important; color: #f1f5f9 !important; }
+        body.theme-dark .cell.weekend { background: #131c2e !important; }
+        body.theme-dark .cell.empty { background: rgba(15, 23, 42, 0.35) !important; border-color: #1e293b !important; }
+        body.theme-dark .daynum { color: #f8fafc !important; }
+        body.theme-dark .chip { background: #1e293b !important; color: #e2e8f0 !important; }
+        body.theme-dark .pill { background: #0f172a !important; border-color: #334155 !important; color: #cbd5e1 !important; }
+        body.theme-dark .pill[aria-pressed="true"], body.theme-dark .pill.active { background: var(--accent) !important; color: #ffffff !important; }
+        body.theme-dark .text-slate-900,
+        body.theme-dark .text-slate-800,
+        body.theme-dark .text-slate-700 { color: #f8fafc !important; }
+        body.theme-dark .text-slate-600,
+        body.theme-dark .text-slate-500,
+        body.theme-dark .text-slate-400 { color: #94a3b8 !important; }
+        body.theme-dark .bg-white,
+        body.theme-dark .bg-slate-50,
+        body.theme-dark .bg-slate-50\/80,
+        body.theme-dark .bg-slate-100 { background-color: #0f172a !important; border-color: #334155 !important; color: #f1f5f9 !important; }
+        body.theme-dark .input-clean { background: #0f172a !important; border-color: #475569 !important; color: #ffffff !important; }
+        body.theme-dark .rail-btn { background: #0f172a !important; border-color: #334155 !important; color: #cbd5e1 !important; }
+        body.theme-dark .rail-btn.active { background: var(--accent) !important; color: #ffffff !important; }
 
-.a11y-row { display: flex; justify-content: space-between; align-items: center; gap: 12px; padding: 12px 0; border-bottom: 1px solid var(--border); flex-wrap: wrap; }
-.a11y-row:last-child { border-bottom: 0; }
-.color-picker { display: flex; gap: 8px; }
-.color-btn { width: 28px; height: 28px; border-radius: 50%; border: 2px solid transparent; cursor: pointer; }
-.color-btn.active { border-color: #fff; transform: scale(1.1); }
+        /* TEMA ALTO CONTRASTE */
+        body.high-contrast { background: #ffffff !important; color: #000000 !important; }
+        body.high-contrast .frosted-shell,
+        body.high-contrast .glass-card,
+        body.high-contrast .glass-rail,
+        body.high-contrast .cell {
+            background: #ffffff !important;
+            backdrop-filter: none !important;
+            border: 2px solid #000000 !important;
+            box-shadow: none !important;
+        }
+        body.high-contrast .input-clean { border: 2px solid #000000 !important; color: #000000 !important; }
 
-/* Estilos de impressão antigos removidos - Utilizando Motor de Iframe Isolado */
-</style>
+        /* MODO TABLET */
+        body.tablet-mode *,
+        body.tablet-mode *::before,
+        body.tablet-mode *::after {
+            backdrop-filter: none !important;
+            transition: none !important;
+            animation: none !important;
+            box-shadow: none !important;
+        }
+        body.tablet-mode .btn-touch,
+        body.tablet-mode .btn-pill-dark,
+        body.tablet-mode .input-clean,
+        body.tablet-mode select,
+        body.tablet-mode .mob-tab {
+            min-height: 48px !important;
+            font-size: 0.95rem !important;
+        }
+
+        @media (max-width: 640px) {
+            .cell { min-height: 5.2rem; padding: 0.4rem; border-radius: 0.75rem; }
+            .daynum { font-size: 0.72rem; padding-right: 0; }
+            .badge-count { top: 0.3rem; right: 0.3rem; min-width: 16px; height: 16px; font-size: 9px; }
+            .chip { font-size: 9px; padding: 2px 4px; }
+        }
+
+        ::-webkit-scrollbar { width: 6px; height: 6px; }
+        ::-webkit-scrollbar-track { background: transparent; }
+        ::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 9999px; }
+    </style>
 </head>
-<body>
-<div class="wrap">
-    <header class="glass-bar header">
-        <div>
-            <span class="eyebrow">PCM • Manutenção industrial</span>
-            <h1>Agenda de Manutenção</h1>
-            <p class="sub">PCM — Cepera Alimentos</p>
-        </div>
-        <div class="nav">
-            <span class="status" id="statusBox"><span class="dot dot-wait" id="statusDot"></span><span id="statusText">Conectando</span></span>
-            <button class="btn btn-icon" id="prevMonth"><svg class="svg-icon" viewBox="0 0 24 24"><path d="M15 19l-7-7 7-7"/></svg></button>
-            <span class="month-label" id="monthLabel">—</span>
-            <button class="btn btn-icon" id="nextMonth"><svg class="svg-icon" viewBox="0 0 24 24"><path d="M9 5l7 7-7 7"/></svg></button>
-            <button class="btn" id="todayBtn">Hoje</button>
-        </div>
-    </header>
+<body class="min-h-screen flex flex-col">
 
-    <!-- Navegação por Abas Principais -->
-    <div class="nav-tabs">
-        <button class="nav-tab-btn active" onclick="switchView('calendar')">
-            <svg class="svg-icon" viewBox="0 0 24 24"><path d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/></svg> Calendário e Gestão
-        </button>
-        <button class="nav-tab-btn" onclick="switchView('team')">
-            <svg class="svg-icon" viewBox="0 0 24 24"><path d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z"/></svg> Central de Cadastros
-        </button>
-        <button class="nav-tab-btn" onclick="switchView('notifications')">
-            <svg class="svg-icon" viewBox="0 0 24 24"><path d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9"/></svg> Alertas e Notificações
-        </button>
-    </div>
+    <!-- APP PRINCIPAL -->
+    <div id="mainApp" class="min-h-screen w-full p-2 sm:p-4 md:p-5 flex flex-col">
+        <div class="frosted-shell rounded-[26px] flex-1 flex flex-col md:flex-row overflow-hidden min-h-[calc(100vh-2.5rem)]">
 
-    <!-- VIEW 1: CALENDÁRIO & DASHBOARD -->
-    <div id="viewCalendar">
-        <section class="mini-dash" id="miniDash">
-            <div class="dash-card">
-                <div class="dash-label">Total do Mês</div>
-                <div class="dash-val" id="dashTotal">0</div>
-                <div style="font-size:12px; color:var(--text-2); margin-top:4px;">Intervenções programadas</div>
-            </div>
-            <div class="dash-card">
-                <div class="dash-label">Concluídas</div>
-                <div class="dash-val" id="dashDone">0</div>
-                <div style="font-size:12px; color:var(--text-2); margin-top:4px;">Taxa de conclusão: <span id="dashRate" style="font-weight:700;">0%</span></div>
-            </div>
-            <div class="dash-card" style="flex-direction: row; align-items: center; justify-content: space-between;">
-                <div>
-                    <div class="dash-label" style="margin-bottom:8px;">Proporção</div>
-                    <div id="dashLegend" style="font-size: 11px; color: var(--text-2); line-height: 1.5;"></div>
+            <!-- BARRA LATERAL DESKTOP -->
+            <aside aria-label="Menu principal" class="hidden md:flex flex-col items-center justify-between py-5 px-2.5 glass-rail shrink-0 w-24">
+                <div class="flex flex-col items-center gap-3 w-full">
+                    <div class="w-11 h-11 rounded-2xl bg-red-600 text-white font-extrabold text-xs flex items-center justify-center shadow-md tracking-tighter">PCM</div>
+                    <div class="h-px w-10 bg-slate-200/80 my-0.5"></div>
+                    <nav id="desktopRailNav" class="flex flex-col items-center gap-2 w-full">
+                        <button type="button" onclick="switchView('calendar')" id="rail-calendar" class="rail-btn active">
+                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/></svg>
+                            <span>Agenda</span>
+                        </button>
+                        <button type="button" onclick="switchView('notifications')" id="rail-notifications" class="rail-btn">
+                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9"/></svg>
+                            <span>Alertas</span>
+                        </button>
+                        <button type="button" onclick="switchView('team')" id="rail-team" class="rail-btn">
+                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z"/></svg>
+                            <span>Cadastros</span>
+                        </button>
+                    </nav>
                 </div>
-                <div style="width: 75px; height: 75px; position: relative;">
-                    <canvas id="dashChart"></canvas>
+                <div class="flex flex-col items-center gap-2 w-full">
+                    <button type="button" onclick="abrirEspacoUsuario()" title="Espaço do Usuário (Alt + U)" class="rail-btn">
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"/><circle cx="12" cy="12" r="3" stroke-width="2"/></svg>
+                        <span>Espaço</span>
+                    </button>
+                    <button type="button" onclick="abrirModalAtalhos()" title="Atalhos de Teclado (Ctrl + ?)" class="rail-btn">
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8.228 9c.549-1.165 2.03-2 3.772-2 2.21 0 4 1.343 4 3 0 1.4-1.278 2.575-3.006 2.907-.542.104-.994.54-.994 1.093m0 3h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+                        <span>Atalhos</span>
+                    </button>
+                    <button type="button" onclick="fazerLogout()" class="rail-btn hover:!bg-rose-50 hover:!text-rose-600 hover:!border-rose-200">
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"/></svg>
+                        <span>Sair</span>
+                    </button>
                 </div>
-            </div>
-        </section>
+            </aside>
 
-        <section class="glass-bar filters">
-            <div style="display:flex; flex-wrap:wrap; gap:8px; align-items:center; flex:1;">
-                <input type="search" id="searchInput" class="input" placeholder="Buscar (título, responsável...)" style="max-width: 240px; height:32px;">
-                <div id="filterPills" style="display:flex; gap:6px; flex-wrap:wrap;"></div>
-            </div>
-            <div style="display:flex; gap:8px;">
-                <button class="btn btn-primary" id="exportBtn" style="height:32px; font-size:13px;">
-                    <svg class="svg-icon" viewBox="0 0 24 24"><path d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"/></svg> Exportar CSV
-                </button>
-            </div>
-        </section>
-
-        <div style="margin-top:16px; padding:12px; border-radius:12px; border:1px solid var(--danger); background:var(--surface); color:var(--danger); font-size:14px;" id="errBanner" hidden>Não foi possível carregar os dados. Verifique a conexão e as regras do Firestore.</div>
-
-        <section class="panel cal-panel">
-            <div class="cal-head">
-                <div>Dom</div><div>Seg</div><div>Ter</div><div>Qua</div><div>Qui</div><div>Sex</div><div>Sáb</div>
-            </div>
-            <div class="cal-grid" id="calGrid"></div>
-        </section>
-    </div>
-
-    <!-- VIEW 2: CENTRAL DE CADASTROS -->
-    <div id="viewTeam" hidden>
-        <section class="panel" style="padding: 24px; margin-top: 16px;">
-            <div style="display:flex; justify-content:space-between; align-items:flex-start; margin-bottom: 24px;">
-                <div>
-                    <h2 style="font-size: 18px; margin-bottom: 4px; font-weight: 700;">Central de Cadastros</h2>
-                    <p class="sub">Gerencie estruturalmente as equipes, setores e técnicos responsáveis.</p>
-                </div>
-            </div>
-
-            <!-- Sub Abas Cadastros -->
-            <div class="nav-tabs" style="margin-top:0; border-bottom:0; margin-bottom: 16px;">
-                <button class="pill active" id="cadTabBtn_pessoas" onclick="switchCadTab('pessoas')" aria-pressed="true">Pessoas / Responsáveis</button>
-                <button class="pill" id="cadTabBtn_equipes" onclick="switchCadTab('equipes')" aria-pressed="false">Equipes</button>
-                <button class="pill" id="cadTabBtn_setores" onclick="switchCadTab('setores')" aria-pressed="false">Setores</button>
-            </div>
-
-            <!-- ABA PESSOAS -->
-            <div id="cadTab_pessoas">
-                <form id="teamForm" class="form-grid" style="max-width: 800px; margin-bottom: 30px; background: rgba(0,0,0,0.03); padding: 16px; border-radius: 12px; border: 1px solid var(--border);">
-                    <h3 style="font-size: 14px; margin-bottom: 8px; font-weight: 600;">Adicionar Pessoa / Técnico</h3>
-                    <div class="row2">
-                        <div><label class="lbl">Nome Completo</label><input class="input" id="tNome" required placeholder="Ex: Carlos Mendes"></div>
-                        <div><label class="lbl">E-mail Profissional</label><input type="email" class="input" id="tEmail" required placeholder="carlos.mendes@cepera.com.br"></div>
-                    </div>
-                    <div class="row2">
-                        <div>
-                            <label class="lbl">Equipe Base</label>
-                            <select class="input" id="tEquipe"></select>
-                        </div>
-                        <div>
-                            <label class="lbl">Setor de Atuação</label>
-                            <select class="input" id="tSetor"></select>
+            <!-- ÁREA DE CONTEÚDO -->
+            <div class="flex-1 flex flex-col min-w-0">
+                <!-- HEADER SUPERIOR -->
+                <header class="px-5 sm:px-8 py-3.5 flex items-center justify-between border-b border-white/80 bg-white/45 shrink-0">
+                    <div class="flex items-center gap-3">
+                        <button type="button" onclick="voltarParaCentralPCM()" title="Voltar à Central de Aplicativos PCM" class="px-3 py-1.5 rounded-full bg-slate-900 hover:bg-slate-800 text-white text-xs font-extrabold flex items-center gap-1.5 shadow-sm">
+                            <span>⬅ Central</span>
+                        </button>
+                        <span class="md:hidden bg-red-600 text-white font-extrabold px-2.5 py-1 rounded-lg text-xs tracking-wider">CEPÊRA</span>
+                        <div class="flex items-center gap-2 text-xs font-bold text-slate-500">
+                            <span id="statusDot" class="w-2 h-2 rounded-full bg-amber-500 animate-pulse"></span>
+                            <span id="statusText">Conectando...</span>
+                            <span class="hidden sm:inline">• Agenda de Manutenção PCM</span>
                         </div>
                     </div>
-                    <div style="text-align: right;"><button type="submit" class="btn btn-primary">Salvar Pessoa</button></div>
-                </form>
 
-                <h3 style="font-size: 15px; margin-bottom: 12px; font-weight: 600;">Equipe Cadastrada</h3>
-                <div style="overflow-x: auto;">
-                    <table style="width: 100%; border-collapse: collapse; text-align: left; font-size: 14px;">
-                        <thead>
-                            <tr style="border-bottom: 1px solid var(--border); color: var(--text-3); font-size: 12px; text-transform: uppercase;">
-                                <th style="padding: 10px;">Nome</th>
-                                <th style="padding: 10px;">E-mail</th>
-                                <th style="padding: 10px;">Equipe / Setor</th>
-                                <th style="padding: 10px; text-align: right;">Ações</th>
-                            </tr>
-                        </thead>
-                        <tbody id="teamTableBody"></tbody>
-                    </table>
+                    <div class="flex items-center gap-2">
+                        <button type="button" onclick="abrirModalAtalhos()" title="Atalhos (Ctrl + ?)" class="px-3 py-1.5 rounded-full bg-white/85 hover:bg-white border border-slate-200/80 text-xs font-bold text-slate-700 flex items-center gap-1.5 shadow-sm">
+                            <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8.228 9c.549-1.165 2.03-2 3.772-2 2.21 0 4 1.343 4 3 0 1.4-1.278 2.575-3.006 2.907-.542.104-.994.54-.994 1.093m0 3h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+                            <span class="hidden lg:inline">Atalhos (Ctrl+?)</span>
+                        </button>
+                        <button type="button" onclick="abrirEspacoUsuario()" class="px-3 py-1.5 rounded-full bg-white/85 hover:bg-white border border-slate-200/80 text-xs font-bold text-slate-700 flex items-center gap-1.5 shadow-sm">
+                            <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6V4m0 2a2 2 0 100 4m0-4a2 2 0 110 4m-6 8a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4m6 6v10m6-2a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4"/></svg>
+                            <span class="hidden sm:inline">Espaço do Usuário</span>
+                        </button>
+                        <div class="flex items-center gap-2.5 bg-white/85 border border-slate-200/80 rounded-full pl-3.5 pr-1.5 py-1 shadow-sm">
+                            <button type="button" onclick="abrirEspacoUsuario()" class="text-right leading-tight hover:opacity-80">
+                                <div id="loggedUserName" class="font-bold text-xs text-slate-900">Usuário</div>
+                                <div id="loggedUserRole" class="text-[10px] font-extrabold uppercase text-sky-600">Perfil</div>
+                            </button>
+                            <button type="button" onclick="fazerLogout()" title="Sair da conta" class="w-8 h-8 rounded-full bg-slate-900 hover:bg-rose-600 text-white flex items-center justify-center transition-colors">
+                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"/></svg>
+                            </button>
+                        </div>
+                    </div>
+                </header>
+
+                <!-- NAVEGAÇÃO MOBILE -->
+                <div id="mobileTabNav" class="md:hidden flex items-center gap-2 overflow-x-auto px-4 py-2.5 bg-white/55 border-b border-white/80 shrink-0">
+                    <button type="button" onclick="switchView('calendar')" id="mob-calendar" class="mob-tab active">Calendário & Gestão</button>
+                    <button type="button" onclick="switchView('notifications')" id="mob-notifications" class="mob-tab">Alertas & E-mail</button>
+                    <button type="button" onclick="switchView('team')" id="mob-team" class="mob-tab">Central de Cadastros</button>
                 </div>
-            </div>
 
-            <!-- ABA EQUIPES -->
-            <div id="cadTab_equipes" hidden>
-                <form id="equipeForm" style="display:flex; gap:12px; max-width: 400px; margin-bottom: 24px; align-items:flex-end;">
-                    <div style="flex:1;"><label class="lbl">Nome da Equipe</label><input class="input" id="eqNome" placeholder="Ex: Administrativo" required></div>
-                    <button type="submit" class="btn btn-primary">Adicionar</button>
-                </form>
-                <div id="equipesList" style="display: flex; gap: 8px; flex-wrap: wrap;"></div>
-            </div>
+                <!-- CONTAINER DAS PÁGINAS -->
+                <main id="viewContainer" class="flex-1 overflow-y-auto p-4 sm:p-7 space-y-6">
 
-            <!-- ABA SETORES -->
-            <div id="cadTab_setores" hidden>
-                <form id="setorForm" style="display:flex; gap:12px; max-width: 400px; margin-bottom: 24px; align-items:flex-end;">
-                    <div style="flex:1;"><label class="lbl">Nome do Setor</label><input class="input" id="setNome" placeholder="Ex: Produção Geral" required></div>
-                    <button type="submit" class="btn btn-primary">Adicionar</button>
-                </form>
-                <div id="setoresList" style="display: flex; gap: 8px; flex-wrap: wrap;"></div>
-            </div>
+                    <!-- ==================== VIEW 1: CALENDÁRIO & DASHBOARD ==================== -->
+                    <section id="viewCalendar" class="space-y-6 max-w-7xl mx-auto">
+                        <div class="flex flex-col lg:flex-row lg:items-end justify-between gap-4">
+                            <div>
+                                <p class="text-xs font-bold uppercase tracking-widest text-sky-600 mb-1">PCM • Programação & Ordens</p>
+                                <h1 class="text-2xl sm:text-3xl font-extrabold text-slate-900 tracking-tight leading-tight">
+                                    Olá, <span id="dashGreetingName">Gestor</span>. Agenda de Manutenção
+                                </h1>
+                            </div>
+                            <div class="flex flex-wrap items-center gap-2">
+                                <div class="flex items-center gap-1 bg-white border border-slate-200/90 rounded-full p-1 shadow-sm">
+                                    <button type="button" id="prevMonth" class="w-8 h-8 rounded-full hover:bg-slate-100 flex items-center justify-center text-slate-700 font-bold" title="Mês anterior (←)">
+                                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"/></svg>
+                                    </button>
+                                    <span id="monthLabel" class="px-3 text-xs font-extrabold text-slate-900 min-w-[145px] text-center">—</span>
+                                    <button type="button" id="nextMonth" class="w-8 h-8 rounded-full hover:bg-slate-100 flex items-center justify-center text-slate-700 font-bold" title="Próximo mês (→)">
+                                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/></svg>
+                                    </button>
+                                    <button type="button" id="todayBtn" class="px-3 py-1 rounded-full bg-slate-100 hover:bg-slate-200 text-[11px] font-extrabold text-slate-800 mr-0.5">Hoje</button>
+                                </div>
 
-        </section>
+                                <button type="button" onclick="imprimirAgendaMesA4()" class="btn-touch bg-slate-900 hover:bg-slate-800 text-white rounded-full px-4 py-2.5 text-xs shadow-sm">
+                                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z"/></svg>
+                                    <span>Imprimir A4</span>
+                                </button>
+
+                                <button type="button" onclick="abrirNovoLancamentoRapido()" class="btn-pill-dark text-xs">
+                                    <span>+ Agendar Manutenção</span>
+                                </button>
+                            </div>
+                        </div>
+
+                        <!-- KPI CARDS -->
+                        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4" id="miniDash">
+                            <div class="glass-card glass-card-hover p-5 rounded-3xl">
+                                <div class="w-10 h-10 rounded-2xl bg-sky-100 text-sky-600 flex items-center justify-center mb-3">
+                                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/></svg>
+                                </div>
+                                <div class="text-3xl font-extrabold text-slate-900" id="dashTotal">0</div>
+                                <div class="text-sm font-bold text-slate-700 mt-1">Total do Mês</div>
+                                <div class="text-xs text-slate-400 mt-0.5">Intervenções programadas</div>
+                            </div>
+
+                            <div class="glass-card glass-card-hover p-5 rounded-3xl">
+                                <div class="w-10 h-10 rounded-2xl bg-emerald-100 text-emerald-600 flex items-center justify-center mb-3">
+                                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M5 13l4 4L19 7"/></svg>
+                                </div>
+                                <div class="text-3xl font-extrabold text-emerald-600" id="dashDone">0</div>
+                                <div class="text-sm font-bold text-slate-700 mt-1">Concluídas</div>
+                                <div class="text-xs text-slate-400 mt-0.5">Taxa de conclusão: <strong id="dashRate" class="text-emerald-600">0%</strong></div>
+                            </div>
+
+                            <div onclick="switchView('notifications')" class="glass-card glass-card-hover p-5 rounded-3xl cursor-pointer">
+                                <div class="w-10 h-10 rounded-2xl bg-amber-100 text-amber-600 flex items-center justify-center mb-3">
+                                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+                                </div>
+                                <div class="text-3xl font-extrabold text-amber-600" id="dashPending">0</div>
+                                <div class="text-sm font-bold text-slate-700 mt-1">Em Aberto no Mês</div>
+                                <div class="text-xs text-slate-400 mt-0.5">Pendentes ou em andamento</div>
+                            </div>
+
+                            <div class="glass-card p-5 rounded-3xl flex items-center justify-between gap-3">
+                                <div class="min-w-0">
+                                    <div class="text-xs font-extrabold uppercase tracking-wider text-slate-400 mb-2">Proporção</div>
+                                    <div id="dashLegend" class="text-[11px] font-bold text-slate-600 space-y-1"></div>
+                                </div>
+                                <div class="w-20 h-20 relative shrink-0">
+                                    <canvas id="dashChart"></canvas>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- BARRA DE BUSCA E FILTROS -->
+                        <div class="glass-card p-4 sm:p-5 rounded-3xl flex flex-col lg:flex-row lg:items-center justify-between gap-3.5">
+                            <div class="flex flex-wrap items-center gap-2.5 flex-1">
+                                <div class="relative w-full sm:w-64">
+                                    <input type="search" id="searchInput" class="input-clean py-2 pl-9 pr-3 text-xs font-bold" placeholder="Buscar título, equipe, técnico...">
+                                    <svg class="w-4 h-4 text-slate-400 absolute left-3 top-1/2 -translate-y-1/2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/></svg>
+                                </div>
+                                <div id="filterPills" class="flex flex-wrap gap-1.5"></div>
+                            </div>
+                            <div class="flex items-center gap-2">
+                                <button type="button" id="exportBtn" class="btn-touch bg-slate-100 hover:bg-slate-200 text-slate-800 text-xs py-2 px-4">
+                                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"/></svg>
+                                    <span>Exportar CSV</span>
+                                </button>
+                            </div>
+                        </div>
+
+                        <div id="errBanner" hidden class="p-4 rounded-2xl border border-rose-200 bg-rose-50 text-rose-700 text-xs font-bold">
+                            Não foi possível carregar os dados. Verifique a conexão e as regras do Firestore.
+                        </div>
+
+                        <!-- GRADE DO CALENDÁRIO -->
+                        <div class="glass-card p-4 sm:p-6 rounded-3xl">
+                            <div class="cal-head">
+                                <div>Dom</div><div>Seg</div><div>Ter</div><div>Qua</div><div>Qui</div><div>Sex</div><div>Sáb</div>
+                            </div>
+                            <div class="cal-grid" id="calGrid"></div>
+                        </div>
+                    </section>
+
+                    <!-- ==================== VIEW 2: CENTRAL DE CADASTROS ==================== -->
+                    <section id="viewTeam" hidden class="space-y-6 max-w-6xl mx-auto">
+                        <div class="glass-card p-6 sm:p-7 rounded-3xl space-y-6">
+                            <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-slate-100 pb-4">
+                                <div>
+                                    <p class="text-xs font-bold uppercase tracking-widest text-sky-600 mb-1">Estrutura Organizacional • ag_responsaveis</p>
+                                    <h2 class="text-xl sm:text-2xl font-extrabold text-slate-900">Central de Cadastros da Agenda</h2>
+                                    <p class="text-xs text-slate-500 mt-0.5">Gerencie estruturalmente as equipes, setores produtivos e técnicos responsáveis pelas intervenções.</p>
+                                </div>
+                                <div class="flex flex-wrap gap-2">
+                                    <button type="button" class="pill active" id="cadTabBtn_pessoas" onclick="switchCadTab('pessoas')" aria-pressed="true">Pessoas / Responsáveis</button>
+                                    <button type="button" class="pill" id="cadTabBtn_equipes" onclick="switchCadTab('equipes')" aria-pressed="false">Equipes</button>
+                                    <button type="button" class="pill" id="cadTabBtn_setores" onclick="switchCadTab('setores')" aria-pressed="false">Setores</button>
+                                </div>
+                            </div>
+
+                            <!-- ABA PESSOAS -->
+                            <div id="cadTab_pessoas" class="space-y-6">
+                                <form id="teamForm" class="bg-slate-50 p-5 rounded-2xl border border-slate-200/80 space-y-4">
+                                    <h3 class="text-xs font-extrabold uppercase tracking-wider text-slate-700">Adicionar Pessoa / Técnico Responsável</h3>
+                                    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3.5">
+                                        <div>
+                                            <label class="block text-[10px] font-extrabold uppercase text-slate-500 mb-1">Nome Completo *</label>
+                                            <input class="input-clean py-2 text-xs font-bold" id="tNome" required placeholder="Ex: Carlos Mendes">
+                                        </div>
+                                        <div>
+                                            <label class="block text-[10px] font-extrabold uppercase text-slate-500 mb-1">E-mail Corporativo *</label>
+                                            <input type="email" class="input-clean py-2 text-xs font-bold" id="tEmail" required placeholder="carlos.mendes@cepera.com.br">
+                                        </div>
+                                        <div>
+                                            <label class="block text-[10px] font-extrabold uppercase text-slate-500 mb-1">Equipe Base</label>
+                                            <select class="input-clean py-2 text-xs font-bold" id="tEquipe"></select>
+                                        </div>
+                                        <div>
+                                            <label class="block text-[10px] font-extrabold uppercase text-slate-500 mb-1">Setor de Atuação</label>
+                                            <select class="input-clean py-2 text-xs font-bold" id="tSetor"></select>
+                                        </div>
+                                    </div>
+                                    <div class="flex justify-end">
+                                        <button type="submit" class="btn-pill-dark text-xs py-2.5 px-6">Salvar Pessoa</button>
+                                    </div>
+                                </form>
+
+                                <div>
+                                    <h3 class="text-sm font-extrabold text-slate-800 mb-3">Equipe Cadastrada</h3>
+                                    <div class="overflow-x-auto rounded-2xl border border-slate-200">
+                                        <table class="w-full border-collapse text-left text-xs">
+                                            <thead>
+                                                <tr class="bg-slate-50 border-b border-slate-200 text-[10px] font-extrabold uppercase text-slate-500">
+                                                    <th class="py-3 px-4">Nome</th>
+                                                    <th class="py-3 px-4">E-mail</th>
+                                                    <th class="py-3 px-4">Equipe / Setor</th>
+                                                    <th class="py-3 px-4 text-right">Ações</th>
+                                                </tr>
+                                            </thead>
+                                            <tbody id="teamTableBody" class="divide-y divide-slate-100"></tbody>
+                                        </table>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- ABA EQUIPES -->
+                            <div id="cadTab_equipes" hidden class="space-y-5">
+                                <form id="equipeForm" class="flex flex-col sm:flex-row gap-3 max-w-md sm:items-end">
+                                    <div class="flex-1">
+                                        <label class="block text-[10px] font-extrabold uppercase text-slate-500 mb-1">Nome da Equipe *</label>
+                                        <input class="input-clean py-2 text-xs font-bold" id="eqNome" placeholder="Ex: Instrumentação" required>
+                                    </div>
+                                    <button type="submit" class="btn-pill-dark text-xs py-2.5 px-5">Adicionar</button>
+                                </form>
+                                <div id="equipesList" class="flex gap-2 flex-wrap"></div>
+                            </div>
+
+                            <!-- ABA SETORES -->
+                            <div id="cadTab_setores" hidden class="space-y-5">
+                                <form id="setorForm" class="flex flex-col sm:flex-row gap-3 max-w-md sm:items-end">
+                                    <div class="flex-1">
+                                        <label class="block text-[10px] font-extrabold uppercase text-slate-500 mb-1">Nome do Setor *</label>
+                                        <input class="input-clean py-2 text-xs font-bold" id="setNome" placeholder="Ex: Utilidades / Caldeira" required>
+                                    </div>
+                                    <button type="submit" class="btn-pill-dark text-xs py-2.5 px-5">Adicionar</button>
+                                </form>
+                                <div id="setoresList" class="flex gap-2 flex-wrap"></div>
+                            </div>
+                        </div>
+                    </section>
+
+                    <!-- ==================== VIEW 3: CENTRAL DE NOTIFICAÇÕES ==================== -->
+                    <section id="viewNotifications" hidden class="space-y-6 max-w-6xl mx-auto">
+                        <div class="glass-card p-6 sm:p-7 rounded-3xl space-y-5">
+                            <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+                                <div>
+                                    <p class="text-xs font-bold uppercase tracking-widest text-amber-600 mb-1">Comunicação & Avisos Prévios</p>
+                                    <h2 class="text-xl sm:text-2xl font-extrabold text-slate-900">Central de Alertas Preventivos</h2>
+                                    <p class="text-xs text-slate-500 mt-0.5">Acompanhe manutenções pendentes e envie lembretes por e-mail diretamente para o técnico ou equipe responsável.</p>
+                                </div>
+                                <button type="button" class="btn-pill-dark text-xs" onclick="renderNotificationsTable()">
+                                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"/></svg>
+                                    <span>Atualizar Alertas</span>
+                                </button>
+                            </div>
+                            <div class="overflow-x-auto rounded-2xl border border-slate-200">
+                                <table class="w-full border-collapse text-left text-xs">
+                                    <thead>
+                                        <tr class="bg-slate-50 border-b border-slate-200 text-[10px] font-extrabold uppercase text-slate-500">
+                                            <th class="py-3.5 px-4">Data Evento</th>
+                                            <th class="py-3.5 px-4">Atividade / Título</th>
+                                            <th class="py-3.5 px-4">Equipe / Resp.</th>
+                                            <th class="py-3.5 px-4">Aviso Prévio</th>
+                                            <th class="py-3.5 px-4 text-right">Disparar Notificação</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody id="notifTableBody" class="divide-y divide-slate-100"></tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </section>
+
+                </main>
+            </div>
+        </div>
     </div>
 
-    <!-- VIEW 3: CENTRAL DE NOTIFICAÇÕES -->
-    <div id="viewNotifications" hidden>
-        <section class="panel" style="padding: 24px; margin-top: 16px;">
-            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:16px;">
+    <!-- ================= MODAL DO DIA & NOVO LANÇAMENTO ================= -->
+    <div id="dayOverlay" role="dialog" aria-modal="true" hidden class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-50 flex items-end sm:items-center justify-center p-0 sm:p-4">
+        <div class="bg-white w-full max-w-2xl rounded-t-3xl sm:rounded-3xl p-6 sm:p-7 shadow-2xl border border-slate-200 max-h-[92vh] overflow-y-auto space-y-5">
+            <div class="flex items-center justify-between border-b border-slate-100 pb-3">
                 <div>
-                    <h2 style="font-size: 18px; font-weight: 700;">Central de Alertas Preventivos</h2>
-                    <p class="sub">Acompanhe manutenções próximas do vencimento e envie e-mails de alerta direto para a equipe.</p>
+                    <span class="text-[10px] font-extrabold uppercase tracking-widest text-sky-600">Programação Diária • ag_manutencao</span>
+                    <h2 id="dayTitle" class="text-xl font-extrabold text-slate-900">—</h2>
+                    <p id="dayCount" class="text-xs text-slate-500 font-bold">0 lançamentos</p>
                 </div>
-                <button class="btn btn-primary" onclick="renderNotificationsTable()">
-                    <svg class="svg-icon" viewBox="0 0 24 24"><path d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"/></svg> Atualizar Alertas
-                </button>
+                <button type="button" onclick="fecharModal('dayOverlay')" class="w-8 h-8 rounded-full bg-slate-100 text-slate-600 font-bold">✕</button>
             </div>
-            <div style="overflow-x: auto;">
-                <table style="width: 100%; border-collapse: collapse; text-align: left; font-size: 14px;">
-                    <thead>
-                        <tr style="border-bottom: 1px solid var(--border); color: var(--text-3); font-size: 12px; text-transform: uppercase;">
-                            <th style="padding: 10px;">Data Evento</th>
-                            <th style="padding: 10px;">Atividade / Título</th>
-                            <th style="padding: 10px;">Equipe / Resp.</th>
-                            <th style="padding: 10px;">Aviso Prévio</th>
-                            <th style="padding: 10px; text-align: right;">Disparar Notificação</th>
-                        </tr>
-                    </thead>
-                    <tbody id="notifTableBody"></tbody>
-                </table>
+
+            <div class="space-y-2.5">
+                <h3 class="text-xs font-extrabold uppercase tracking-wider text-slate-500">Lançamentos do Dia</h3>
+                <div id="dayList" class="max-h-64 overflow-y-auto divide-y divide-slate-100 pr-1"></div>
             </div>
-        </section>
+
+            <div class="pt-4 border-t border-slate-200 space-y-4">
+                <h3 class="text-xs font-extrabold uppercase tracking-wider text-sky-700">+ Novo Lançamento nesta Data</h3>
+                <form id="addForm" class="space-y-3.5 text-xs">
+                    <div>
+                        <label class="block text-[10px] font-extrabold uppercase text-slate-500 mb-1">Título / Equipamento *</label>
+                        <input class="input-clean py-2 text-xs font-bold" id="fTitulo" required placeholder="Ex: Preventiva Sopradora Multipet 1">
+                    </div>
+                    <div class="grid grid-cols-1 sm:grid-cols-3 gap-3">
+                        <div>
+                            <label class="block text-[10px] font-extrabold uppercase text-slate-500 mb-1">Hora</label>
+                            <input class="input-clean py-2 text-xs font-bold" type="time" id="fHora">
+                        </div>
+                        <div>
+                            <label class="block text-[10px] font-extrabold uppercase text-slate-500 mb-1">Tipo</label>
+                            <select class="input-clean py-2 text-xs font-bold" id="fTipo"></select>
+                        </div>
+                        <div>
+                            <label class="block text-[10px] font-extrabold uppercase text-slate-500 mb-1">Status</label>
+                            <select class="input-clean py-2 text-xs font-bold" id="fStatus">
+                                <option value="pendente">Pendente</option>
+                                <option value="andamento">Em Andamento</option>
+                                <option value="concluido">Concluída</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                        <div>
+                            <label class="block text-[10px] font-extrabold uppercase text-slate-500 mb-1">Equipe Envolvida</label>
+                            <select class="input-clean py-2 text-xs font-bold" id="fEquipe" onchange="atualizarSelectRespAdd()"></select>
+                        </div>
+                        <div>
+                            <label class="block text-[10px] font-extrabold uppercase text-slate-500 mb-1">Técnico Responsável</label>
+                            <select class="input-clean py-2 text-xs font-bold" id="fResp"></select>
+                        </div>
+                    </div>
+                    <div>
+                        <label class="block text-[10px] font-extrabold uppercase text-slate-500 mb-1">Descrição / Escopo Técnico</label>
+                        <textarea class="input-clean py-2 text-xs" rows="2" id="fDesc" placeholder="Detalhes da ordem, peças ou observações..."></textarea>
+                    </div>
+
+                    <!-- Configuração de Notificação -->
+                    <div class="p-3.5 bg-slate-50 border border-slate-200/80 rounded-2xl space-y-2.5">
+                        <div class="text-[11px] font-extrabold uppercase text-slate-600 flex items-center gap-1.5">
+                            <svg class="w-3.5 h-3.5 text-sky-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9"/></svg>
+                            <span>Notificação por E-mail</span>
+                        </div>
+                        <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                            <div>
+                                <label class="block text-[10px] font-bold text-slate-500 mb-1">Aviso Prévio (Lembrete)</label>
+                                <select class="input-clean py-1.5 text-xs font-bold" id="fAlertaPrazo">
+                                    <option value="0">No dia do evento</option>
+                                    <option value="1">1 dia antes</option>
+                                    <option value="2">2 dias antes</option>
+                                    <option value="7">1 semana antes</option>
+                                    <option value="30">1 mês antes</option>
+                                    <option value="90">3 meses antes</option>
+                                    <option value="180">6 meses antes</option>
+                                </select>
+                            </div>
+                            <div>
+                                <label class="block text-[10px] font-bold text-slate-500 mb-1">Destinatários</label>
+                                <select class="input-clean py-1.5 text-xs font-bold" id="fAlertaDest">
+                                    <option value="responsavel">Apenas o Técnico Responsável</option>
+                                    <option value="equipe">Toda a Equipe Setorial</option>
+                                    <option value="todos">Todos os Cadastrados</option>
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Recorrência -->
+                    <div class="p-3.5 bg-slate-50 border border-slate-200/80 rounded-2xl">
+                        <label class="flex items-center gap-2 cursor-pointer text-xs font-extrabold text-slate-700">
+                            <input type="checkbox" id="fRecorrente" class="rounded" onchange="document.getElementById('recMenu').hidden = !this.checked">
+                            <span>🔄 Repetir esta manutenção periodicamente</span>
+                        </label>
+                        <div id="recMenu" hidden class="mt-3 grid grid-cols-1 sm:grid-cols-2 gap-3">
+                            <div>
+                                <label class="block text-[10px] font-bold text-slate-500 mb-1">Frequência</label>
+                                <select class="input-clean py-1.5 text-xs font-bold" id="fRecFreq">
+                                    <option value="diario">Diariamente</option>
+                                    <option value="semanal">Semanalmente</option>
+                                    <option value="mensal">Mensalmente</option>
+                                    <option value="trimestral">Trimestralmente</option>
+                                    <option value="semestral">Semestralmente</option>
+                                    <option value="anual">Anualmente</option>
+                                </select>
+                            </div>
+                            <div>
+                                <label class="block text-[10px] font-bold text-slate-500 mb-1">Termina em</label>
+                                <input type="date" class="input-clean py-1.5 text-xs font-bold" id="fRecFim">
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="flex justify-end gap-2 pt-2">
+                        <button type="button" onclick="fecharModal('dayOverlay')" class="btn-touch bg-slate-100 text-slate-700 text-xs">Fechar</button>
+                        <button type="submit" class="btn-pill-dark text-xs">Salvar Lançamento</button>
+                    </div>
+                </form>
+            </div>
+        </div>
     </div>
-</div>
 
-<button class="fab" onclick="abrirModal('settingsOverlay')">
-    <svg class="svg-icon" viewBox="0 0 24 24"><path d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"></path><path d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path></svg> Configurações
-</button>
-<div style="text-align: center; color: var(--text-3); font-size: 13px; padding: 24px 16px 72px;">Pressione Shift + ? para atalhos.</div>
-
-<!-- ================= MODAIS ================= -->
-<div class="overlay" id="dayOverlay" hidden>
-    <div class="modal">
-        <div class="modal-head">
-            <div>
-                <h2 id="dayTitle">—</h2>
-                <p class="sub" id="dayCount">0 lançamentos</p>
-            </div>
-            <button class="btn" onclick="fecharModal('dayOverlay')">Fechar</button>
-        </div>
-        
-        <div class="modal-sec">
-            <h3 style="font-size: 15px; margin-bottom: 12px;">Lançamentos do dia</h3>
-            <div id="dayList" style="max-height: 280px; overflow-y: auto;"></div>
-        </div>
-
-        <div class="modal-sec">
-            <h3 style="font-size: 15px; margin-bottom: 8px;">Novo Lançamento</h3>
-            <form id="addForm" class="form-grid">
+    <!-- Modal Edição -->
+    <div id="editOverlay" role="dialog" aria-modal="true" hidden class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-[60] flex items-end sm:items-center justify-center p-0 sm:p-4">
+        <div class="bg-white w-full max-w-lg rounded-t-3xl sm:rounded-3xl p-6 sm:p-7 shadow-2xl border border-slate-200 space-y-4">
+            <div class="flex items-center justify-between border-b border-slate-100 pb-3">
                 <div>
-                    <label class="lbl">Título / Equipamento</label>
-                    <input class="input" id="fTitulo" required>
+                    <span class="text-[10px] font-extrabold uppercase tracking-widest text-sky-600">Atualizar Ordem</span>
+                    <h2 class="text-lg font-extrabold text-slate-900">Editar Lançamento</h2>
                 </div>
-                <div class="row3">
+                <button type="button" onclick="fecharModal('editOverlay')" class="w-8 h-8 rounded-full bg-slate-100 text-slate-600 font-bold">✕</button>
+            </div>
+            <form id="editForm" class="space-y-3.5 text-xs">
+                <input type="hidden" id="eId">
+                <div>
+                    <label class="block text-[10px] font-extrabold uppercase text-slate-500 mb-1">Título *</label>
+                    <input class="input-clean py-2 text-xs font-bold" id="eTitulo" required>
+                </div>
+                <div class="grid grid-cols-1 sm:grid-cols-3 gap-3">
+                    <div><label class="block text-[10px] font-extrabold uppercase text-slate-500 mb-1">Hora</label><input class="input-clean py-2 text-xs font-bold" type="time" id="eHora"></div>
+                    <div><label class="block text-[10px] font-extrabold uppercase text-slate-500 mb-1">Tipo</label><select class="input-clean py-2 text-xs font-bold" id="eTipo"></select></div>
                     <div>
-                        <label class="lbl">Hora</label>
-                        <input class="input" type="time" id="fHora">
-                    </div>
-                    <div>
-                        <label class="lbl">Tipo</label>
-                        <select class="input" id="fTipo"></select>
-                    </div>
-                    <div>
-                        <label class="lbl">Status</label>
-                        <select class="input" id="fStatus">
+                        <label class="block text-[10px] font-extrabold uppercase text-slate-500 mb-1">Status</label>
+                        <select class="input-clean py-2 text-xs font-bold" id="eStatus">
                             <option value="pendente">Pendente</option>
                             <option value="andamento">Em Andamento</option>
                             <option value="concluido">Concluída</option>
+                            <option value="cancelado">Cancelada</option>
                         </select>
                     </div>
                 </div>
-                <div class="row2">
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
                     <div>
-                        <label class="lbl">Equipe Envolvida</label>
-                        <select class="input" id="fEquipe"></select>
+                        <label class="block text-[10px] font-extrabold uppercase text-slate-500 mb-1">Equipe</label>
+                        <select class="input-clean py-2 text-xs font-bold" id="eEquipe" onchange="atualizarSelectRespEdit()"></select>
                     </div>
-                    <div>
-                        <label class="lbl">Técnico Responsável</label>
-                        <select class="input" id="fResp"></select>
-                    </div>
+                    <div><label class="block text-[10px] font-extrabold uppercase text-slate-500 mb-1">Responsável</label><select class="input-clean py-2 text-xs font-bold" id="eResp"></select></div>
                 </div>
-                <div>
-                    <label class="lbl">Descrição</label>
-                    <textarea class="input" id="fDesc"></textarea>
-                </div>
-
-                <!-- Configuração de Notificação -->
-                <div style="padding: 12px; background: rgba(0,0,0,0.03); border: 1px solid var(--border); border-radius: 10px;">
-                    <div style="font-size:13px; font-weight:600; margin-bottom:8px;">
-                        <svg class="svg-icon" viewBox="0 0 24 24"><path d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9"/></svg> Notificação por E-mail
-                    </div>
-                    <div class="row2">
-                        <div>
-                            <label class="lbl">Aviso Prévio (Lembrete)</label>
-                            <select class="input" id="fAlertaPrazo">
-                                <option value="0">No dia do evento</option>
-                                <option value="1">1 dia antes</option>
-                                <option value="2">2 dias antes</option>
-                                <option value="7">1 semana antes</option>
-                                <option value="30">1 mês antes</option>
-                                <option value="90">3 meses antes</option>
-                                <option value="180">6 meses antes</option>
-                            </select>
-                        </div>
-                        <div>
-                            <label class="lbl">Destinatários</label>
-                            <select class="input" id="fAlertaDest">
-                                <option value="responsavel">Apenas o Técnico Responsável</option>
-                                <option value="equipe">Toda a Equipe Setorial</option>
-                                <option value="todos">Todos os Cadastrados</option>
-                            </select>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- Recorrência -->
-                <div style="padding: 12px; background: rgba(0,0,0,0.03); border: 1px solid var(--border); border-radius: 10px;">
-                    <label style="display:flex; align-items:center; gap:8px; cursor:pointer; font-size:13px; font-weight:600;">
-                        <input type="checkbox" id="fRecorrente" onchange="document.getElementById('recMenu').hidden = !this.checked">
-                        <svg class="svg-icon" viewBox="0 0 24 24"><path d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"/></svg> Repetir esta manutenção
-                    </label>
-                    <div id="recMenu" hidden style="margin-top:12px; display:grid; gap:12px; grid-template-columns: 1fr 1fr;">
-                        <div>
-                            <label class="lbl">Frequência</label>
-                            <select class="input" id="fRecFreq">
-                                <option value="diario">Diariamente</option>
-                                <option value="semanal">Semanalmente</option>
-                                <option value="mensal">Mensalmente</option>
-                                <option value="trimestral">Trimestralmente</option>
-                                <option value="semestral">Semestralmente</option>
-                                <option value="anual">Anualmente</option>
-                            </select>
-                        </div>
-                        <div>
-                            <label class="lbl">Termina em</label>
-                            <input type="date" class="input" id="fRecFim">
-                        </div>
-                    </div>
-                </div>
-
-                <div style="text-align: right; margin-top: 4px;">
-                    <button type="submit" class="btn btn-primary">Salvar Lançamento</button>
+                <div><label class="block text-[10px] font-extrabold uppercase text-slate-500 mb-1">Descrição</label><textarea class="input-clean py-2 text-xs" rows="3" id="eDesc"></textarea></div>
+                <div class="flex justify-end gap-2 pt-3 border-t border-slate-100">
+                    <button type="button" onclick="fecharModal('editOverlay')" class="btn-touch bg-slate-100 text-slate-700 text-xs">Cancelar</button>
+                    <button type="submit" class="btn-pill-dark text-xs">Atualizar Dados</button>
                 </div>
             </form>
         </div>
     </div>
-</div>
 
-<!-- Modal Edição -->
-<div class="overlay" id="editOverlay" style="z-index: 150;" hidden>
-    <div class="modal">
-        <div class="modal-head">
-            <h2>Editar Lançamento</h2>
-            <button class="btn" onclick="fecharModal('editOverlay')">Cancelar</button>
-        </div>
-        <form id="editForm" class="form-grid">
-            <input type="hidden" id="eId">
-            <div>
-                <label class="lbl">Título</label>
-                <input class="input" id="eTitulo" required>
+    <!-- Modal Exclusão -->
+    <div id="deleteOverlay" role="dialog" aria-modal="true" hidden class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-[70] flex items-center justify-center p-4">
+        <div class="bg-white w-full max-w-sm rounded-3xl p-6 sm:p-7 text-center shadow-2xl border border-slate-200">
+            <div class="mx-auto flex items-center justify-center h-12 w-12 rounded-2xl bg-rose-100 text-rose-600 mb-4">
+                <svg class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/></svg>
             </div>
-            <div class="row3">
-                <div><label class="lbl">Hora</label><input class="input" type="time" id="eHora"></div>
-                <div><label class="lbl">Tipo</label><select class="input" id="eTipo"></select></div>
+            <h2 class="text-lg font-extrabold text-slate-900 mb-1.5">Excluir Lançamento?</h2>
+            <p class="text-xs text-slate-500 mb-6">Esta ação é permanente e removerá a programação do calendário.</p>
+            <div class="flex gap-2">
+                <button type="button" class="btn-touch bg-slate-100 text-slate-700 flex-1 text-xs" onclick="fecharModal('deleteOverlay')">Cancelar</button>
+                <button type="button" class="btn-touch bg-rose-600 hover:bg-rose-700 text-white flex-1 text-xs shadow-md" id="confirmDeleteBtn">Sim, Excluir</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- MODAL ESPAÇO DO USUÁRIO -->
+    <div id="modalEspacoUsuario" role="dialog" aria-modal="true" class="fixed inset-0 bg-slate-900/60 z-50 hidden flex items-end sm:items-center justify-center p-0 sm:p-4">
+        <div class="bg-white w-full sm:max-w-xl sm:rounded-3xl rounded-t-3xl max-h-[92vh] flex flex-col shadow-2xl overflow-hidden border border-slate-200">
+            <div class="p-5 sm:px-7 border-b border-slate-200 bg-slate-50 flex items-center justify-between">
                 <div>
-                    <label class="lbl">Status</label>
-                    <select class="input" id="eStatus">
-                        <option value="pendente">Pendente</option>
-                        <option value="andamento">Em Andamento</option>
-                        <option value="concluido">Concluída</option>
-                        <option value="cancelado">Cancelada</option>
-                    </select>
+                    <span class="text-[10px] font-extrabold uppercase tracking-widest text-sky-600">Preferências Sincronizadas</span>
+                    <h2 class="text-lg font-extrabold text-slate-900">Espaço do Usuário</h2>
+                </div>
+                <button type="button" onclick="fecharModalA11y('modalEspacoUsuario')" class="w-9 h-9 rounded-full bg-white border border-slate-200 text-slate-600 font-bold flex items-center justify-center">✕</button>
+            </div>
+            <div class="p-5 sm:p-7 overflow-y-auto space-y-6 text-sm">
+                <div class="p-4 rounded-2xl bg-slate-50 border border-slate-200 flex items-center justify-between gap-4">
+                    <div>
+                        <div class="font-extrabold text-slate-900 text-sm">Modo Tablet (Alta Performance & Campo)</div>
+                        <p class="text-xs text-slate-500 mt-0.5">Desativa efeitos visuais e aumenta áreas de toque (Atalho: <strong>Alt + T</strong>).</p>
+                    </div>
+                    <button type="button" id="btnToggleTabletMode" onclick="toggleModoTablet()" class="px-4 py-2.5 rounded-xl font-extrabold text-xs bg-slate-200 text-slate-800 shrink-0">DESATIVADO</button>
+                </div>
+                <div>
+                    <label class="block text-xs font-extrabold uppercase tracking-wider text-slate-500 mb-2">Tema Visual</label>
+                    <div class="grid grid-cols-2 sm:grid-cols-4 gap-2">
+                        <button type="button" onclick="definirTemaUsuario('padrao')" id="btnTema_padrao" class="p-3 rounded-xl border border-slate-200 text-xs font-extrabold text-center">Claro Padrão</button>
+                        <button type="button" onclick="definirTemaUsuario('solido')" id="btnTema_solido" class="p-3 rounded-xl border border-slate-200 text-xs font-extrabold text-center">Branco Sólido</button>
+                        <button type="button" onclick="definirTemaUsuario('dark')" id="btnTema_dark" class="p-3 rounded-xl border border-slate-200 text-xs font-extrabold text-center">Escuro Industrial</button>
+                        <button type="button" onclick="definirTemaUsuario('contraste')" id="btnTema_contraste" class="p-3 rounded-xl border border-slate-200 text-xs font-extrabold text-center">Alto Contraste</button>
+                    </div>
+                </div>
+                <div>
+                    <label class="block text-xs font-extrabold uppercase tracking-wider text-slate-500 mb-2">Cor de Destaque (Accent Color)</label>
+                    <div class="grid grid-cols-5 gap-2">
+                        <button type="button" onclick="definirCorDestaque('#0284c7')" class="py-2.5 rounded-xl text-white font-extrabold text-[11px]" style="background:#0284c7">Azul</button>
+                        <button type="button" onclick="definirCorDestaque('#dc2626')" class="py-2.5 rounded-xl text-white font-extrabold text-[11px]" style="background:#dc2626">Cepêra</button>
+                        <button type="button" onclick="definirCorDestaque('#059669')" class="py-2.5 rounded-xl text-white font-extrabold text-[11px]" style="background:#059669">Esmeralda</button>
+                        <button type="button" onclick="definirCorDestaque('#4f46e5')" class="py-2.5 rounded-xl text-white font-extrabold text-[11px]" style="background:#4f46e5">Índigo</button>
+                        <button type="button" onclick="definirCorDestaque('#0f172a')" class="py-2.5 rounded-xl text-white font-extrabold text-[11px]" style="background:#0f172a">Grafite</button>
+                    </div>
+                </div>
+                <div class="pt-2 border-t border-slate-200 space-y-3">
+                    <span class="block text-xs font-extrabold uppercase tracking-wider text-slate-500">Acessibilidade e Leitura</span>
+                    <div class="grid grid-cols-3 gap-2">
+                        <button type="button" onclick="alterarFonte(-1)" class="py-2.5 rounded-xl bg-slate-100 hover:bg-slate-200 font-extrabold text-xs text-slate-800">Texto A-</button>
+                        <button type="button" onclick="alterarFonte(0)" class="py-2.5 rounded-xl bg-slate-100 hover:bg-slate-200 font-extrabold text-xs text-slate-800">Padrão</button>
+                        <button type="button" onclick="alterarFonte(1)" class="py-2.5 rounded-xl bg-slate-100 hover:bg-slate-200 font-extrabold text-xs text-slate-800">Texto A+</button>
+                    </div>
                 </div>
             </div>
-            <div class="row2">
-                <div>
-                    <label class="lbl">Equipe</label>
-                    <select class="input" id="eEquipe" onchange="atualizarSelectRespEdit()"></select>
-                </div>
-                <div><label class="lbl">Responsável</label><select class="input" id="eResp"></select></div>
+            <div class="p-4 sm:px-7 border-t border-slate-200 bg-slate-50 flex items-center justify-between">
+                <span class="text-[11px] font-semibold text-slate-500">Sincronizado com seu perfil PCM Cepêra.</span>
+                <button type="button" onclick="fecharModalA11y('modalEspacoUsuario')" class="btn-pill-dark text-xs py-2 px-6">Concluir</button>
             </div>
-            <div><label class="lbl">Descrição</label><textarea class="input" id="eDesc"></textarea></div>
-            <div style="text-align: right; margin-top: 8px;"><button type="submit" class="btn btn-primary">Atualizar Dados</button></div>
-        </form>
-    </div>
-</div>
-
-<!-- Modal Exclusão -->
-<div class="overlay" id="deleteOverlay" style="z-index: 160;" hidden>
-    <div class="modal" style="max-width: 380px; text-align: center;">
-        <h2 style="color: var(--danger); margin-bottom: 8px;">Excluir Lançamento?</h2>
-        <p style="color: var(--text-2); font-size: 14px; margin-bottom: 24px;">Esta ação é permanente.</p>
-        <div style="display: flex; gap: 12px; justify-content: center;">
-            <button class="btn" onclick="fecharModal('deleteOverlay')" style="flex:1;">Cancelar</button>
-            <button class="btn btn-danger" id="confirmDeleteBtn" style="flex:1;">Sim, Excluir</button>
-        </div>
-    </div>
-</div>
-
-<!-- Modal Configurações -->
-<div class="overlay" id="settingsOverlay" style="z-index: 170;" hidden>
-<div class="modal">
-    <div class="modal-head">
-        <div><h2>Configurações</h2><p class="sub">Personalize temas e cores.</p></div>
-        <button class="btn" onclick="fecharModal('settingsOverlay')">Fechar</button>
-    </div>
-    
-    <div class="modal-sec">
-        <h3 style="font-size: 15px; margin-bottom: 12px; font-weight: 600;">Personalização Visual</h3>
-        <div class="a11y-row">
-            <div><div class="lab">Tema Base</div><p class="sub">Alterna entre escuro e claro</p></div>
-            <button class="btn" id="themeBtn">Escuro</button>
-        </div>
-        <div class="a11y-row">
-            <div><div class="lab">Cor de Destaque</div><p class="sub">Cor principal do sistema</p></div>
-            <div class="color-picker" id="colorPickerGroup"></div>
         </div>
     </div>
 
-    <div class="modal-sec" style="display:flex; gap:12px;">
-        <button class="btn btn-primary" onclick="abrirModal('kbdOverlay'); fecharModal('settingsOverlay');">
-            <svg class="svg-icon" viewBox="0 0 24 24"><path d="M12 15v.01M16 15v.01M8 15v.01M22 10v4a2 2 0 01-2 2H4a2 2 0 01-2-2v-4a2 2 0 012-2h16a2 2 0 012 2zm-3-3h.01M17 7h.01M13 7h.01M9 7h.01M5 7h.01M5 11h.01M9 11h.01M13 11h.01M17 11h.01M21 11h.01"/></svg> Atalhos
-        </button>
-        <button class="btn btn-ghost" onclick="resetPrefs()">Restaurar Padrões</button>
+    <!-- MODAL ATALHOS DE TECLADO (CTRL + ?) -->
+    <div id="modalAtalhos" role="dialog" aria-modal="true" class="fixed inset-0 bg-slate-900/60 z-50 hidden flex items-end sm:items-center justify-center p-0 sm:p-4">
+        <div class="bg-white w-full sm:max-w-lg sm:rounded-3xl rounded-t-3xl p-6 shadow-2xl border border-slate-200 space-y-4">
+            <div class="flex items-center justify-between border-b border-slate-100 pb-3">
+                <div>
+                    <span class="text-[10px] font-extrabold uppercase tracking-widest text-sky-600">Navegação Rápida</span>
+                    <h2 class="text-lg font-extrabold text-slate-900">Teclas de Atalho do Sistema</h2>
+                </div>
+                <button type="button" onclick="fecharModalA11y('modalAtalhos')" class="w-8 h-8 rounded-full bg-slate-100 text-slate-600 font-bold">✕</button>
+            </div>
+            <div class="space-y-2 text-xs">
+                <div class="flex justify-between py-2 border-b border-slate-100"><span>Abrir Central de Atalhos</span><kbd class="px-2 py-0.5 bg-slate-100 border border-slate-300 rounded font-mono font-bold">Ctrl + ?</kbd></div>
+                <div class="flex justify-between py-2 border-b border-slate-100"><span>Abrir Espaço do Usuário</span><kbd class="px-2 py-0.5 bg-slate-100 border border-slate-300 rounded font-mono font-bold">Alt + U</kbd></div>
+                <div class="flex justify-between py-2 border-b border-slate-100"><span>Alternar Modo Tablet</span><kbd class="px-2 py-0.5 bg-slate-100 border border-slate-300 rounded font-mono font-bold">Alt + T</kbd></div>
+                <div class="flex justify-between py-2 border-b border-slate-100"><span>Mês Anterior / Próximo Mês</span><kbd class="px-2 py-0.5 bg-slate-100 border border-slate-300 rounded font-mono font-bold">← / →</kbd></div>
+                <div class="flex justify-between py-2 border-b border-slate-100"><span>Ir para Hoje / Novo Lançamento</span><kbd class="px-2 py-0.5 bg-slate-100 border border-slate-300 rounded font-mono font-bold">T / N</kbd></div>
+                <div class="flex justify-between py-2 border-b border-slate-100"><span>Alternar entre Abas do Menu</span><kbd class="px-2 py-0.5 bg-slate-100 border border-slate-300 rounded font-mono font-bold">Alt + 1 até Alt + 3</kbd></div>
+                <div class="flex justify-between py-2"><span>Fechar qualquer modal</span><kbd class="px-2 py-0.5 bg-slate-100 border border-slate-300 rounded font-mono font-bold">Esc</kbd></div>
+            </div>
+        </div>
     </div>
-</div>
-</div>
 
-<!-- Modal Atalhos -->
-<div class="overlay" id="kbdOverlay" style="z-index: 180;" hidden>
-<div class="modal">
-    <div class="modal-head">
-        <div><h2>Atalhos de Teclado</h2></div>
-        <button class="btn" onclick="fecharModal('kbdOverlay')">Fechar</button>
-    </div>
-    <div style="display:grid; gap:8px; margin-top:12px; font-size:14px;">
-        <div><b>← / →</b> : Mês anterior e próximo</div>
-        <div><b>T</b> : Ir para hoje</div>
-        <div><b>N</b> : Novo lançamento</div>
-        <div><b>M</b> : Alternar tema</div>
-        <div><b>C</b> : Configurações</div>
-        <div><b>Shift + ?</b> : Ajuda</div>
-        <div><b>Esc</b> : Fechar janelas</div>
-    </div>
-</div>
-</div>
+    <div id="toastStack" aria-live="polite" class="fixed bottom-4 right-4 z-[9999] space-y-2 pointer-events-none"></div>
 
-<div class="toast-stack" id="toastStack"></div>
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
+        import { getAuth, signInAnonymously } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
+        import { initializeFirestore, collection, addDoc, onSnapshot, doc, deleteDoc, updateDoc } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
 
-<script type="module">
-import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
-import { getAuth, signInAnonymously } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
-import { getFirestore, collection, addDoc, onSnapshot, doc, deleteDoc, updateDoc } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
+        const memStore = {};
+        const safeStorage = {
+            get(k) { try { return window.localStorage.getItem(k); } catch (_) { return memStore[k] || null; } },
+            set(k, v) { memStore[k] = v; try { window.localStorage.setItem(k, v); } catch (_) {} },
+            remove(k) { delete memStore[k]; try { window.localStorage.removeItem(k); } catch (_) {} }
+        };
 
-const firebaseConfig = {
-    apiKey: "AIzaSyAGbFTTCgbqe9XFKFSb6ltB5lYj5O6QipE",
-    authDomain: "pcm-cepera.firebaseapp.com",
-    projectId: "pcm-cepera",
-    storageBucket: "pcm-cepera.firebasestorage.app",
-    messagingSenderId: "483278589909",
-    appId: "1:483278589909:web:9f69f8a32f50e4e186f75c",
-    measurementId: "G-LW29TG8TJ4"
-};
+        const firebaseConfig = {
+            apiKey: "AIzaSyAGbFTTCgbqe9XFKFSb6ltB5lYj5O6QipE",
+            authDomain: "pcm-cepera.firebaseapp.com",
+            projectId: "pcm-cepera",
+            storageBucket: "pcm-cepera.firebasestorage.app",
+            messagingSenderId: "483278589909",
+            appId: "1:483278589909:web:9f69f8a32f50e4e186f75c",
+            measurementId: "G-LW29TG8TJ4"
+        };
 
-const app = initializeApp(firebaseConfig);
-const db = getFirestore(app);
-const auth = getAuth(app);
-const colRef = collection(db, "ag_manutencao");
-const teamColRef = collection(db, "ag_responsaveis");
-const eqColRef = collection(db, "ag_equipes");
-const setColRef = collection(db, "ag_setores");
+        const app = initializeApp(firebaseConfig);
+        const db = initializeFirestore(app, { experimentalForceLongPolling: true });
+        const auth = getAuth(app);
+        const colRef = collection(db, "ag_manutencao");
+        const teamColRef = collection(db, "ag_responsaveis");
+        const eqColRef = collection(db, "ag_equipes");
+        const setColRef = collection(db, "ag_setores");
 
-const TIPOS = {
-    preventiva: { nome: "Preventiva", cor: "#4d8df6" },
-    preditiva: { nome: "Preditiva", cor: "#9d7bf5" },
-    corretiva: { nome: "Corretiva", cor: "#ff7b7b" },
-    parada: { nome: "Parada Programada", cor: "#ef9440" },
-    melhoria: { nome: "Melhoria", cor: "#3ccf8e" },
-    outros: { nome: "Outros", cor: "#8fa1b8" }
-};
-const STATUSES = {
-    pendente: { nome: "Pendente", badge: "st-pendente" },
-    andamento: { nome: "Em Andamento", badge: "st-andamento" },
-    concluido: { nome: "Concluída", badge: "st-concluido" },
-    cancelado: { nome: "Cancelada", badge: "st-cancelado" }
-};
-const CORES = {
-    azul: { main: '#4d8df6', hover: '#5b9bff', tint: 'rgba(77,141,246,.10)' },
-    verde: { main: '#3ccf8e', hover: '#4ade80', tint: 'rgba(60,207,142,.10)' },
-    vermelho: { main: '#ff7b7b', hover: '#f87171', tint: 'rgba(255,123,123,.10)' },
-    roxo: { main: '#9d7bf5', hover: '#a78bfa', tint: 'rgba(157,123,245,.10)' },
-    laranja: { main: '#ef9440', hover: '#fbbf24', tint: 'rgba(239,148,64,.10)' }
-};
-const MESES = ["Janeiro","Fevereiro","Março","Abril","Maio","Junho","Julho","Agosto","Setembro","Outubro","Novembro","Dezembro"];
+        const TIPOS = {
+            preventiva: { nome: "Preventiva", cor: "#0284c7" },
+            preditiva: { nome: "Preditiva", cor: "#6366f1" },
+            corretiva: { nome: "Corretiva", cor: "#e11d48" },
+            parada: { nome: "Parada Programada", cor: "#d97706" },
+            melhoria: { nome: "Melhoria", cor: "#10b981" },
+            outros: { nome: "Outros", cor: "#64748b" }
+        };
+        const STATUSES = {
+            pendente: { nome: "Pendente", badge: "st-pendente" },
+            andamento: { nome: "Em Andamento", badge: "st-andamento" },
+            concluido: { nome: "Concluída", badge: "st-concluido" },
+            cancelado: { nome: "Cancelada", badge: "st-cancelado" }
+        };
+        const MESES = ["Janeiro", "Fevereiro", "Março", "Abril", "Maio", "Junho", "Julho", "Agosto", "Setembro", "Outubro", "Novembro", "Dezembro"];
 
-let hoje = new Date();
-let viewAno = hoje.getFullYear();
-let viewMes = hoje.getMonth();
-let diaAberto = null;
-let filtroTipo = "all";
-let buscaTxt = "";
-let lancamentos = [];
-let equipeCadastrada = [];
-let listaEquipes = [];
-let listaSetores = [];
-let chartInstance = null;
-let idParaExcluir = null;
+        let hoje = new Date();
+        let viewAno = hoje.getFullYear();
+        let viewMes = hoje.getMonth();
+        let diaAberto = null;
+        let filtroTipo = "all";
+        let buscaTxt = "";
+        let lancamentos = [];
+        let equipeCadastrada = [];
+        let listaEquipes = [];
+        let listaSetores = [];
+        let chartInstance = null;
+        let idParaExcluir = null;
+        let usuarioLogado = null;
 
-// Ícones Reutilizáveis
-const ICONS = {
-    edit: `<svg class="svg-icon" viewBox="0 0 24 24"><path d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z"/></svg>`,
-    trash: `<svg class="svg-icon" viewBox="0 0 24 24"><path d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/></svg>`,
-    mail: `<svg class="svg-icon" viewBox="0 0 24 24"><path d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"/></svg>`
-};
+        const ICONS = {
+            edit: `<svg class="svg-icon" viewBox="0 0 24 24"><path d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z"/></svg>`,
+            trash: `<svg class="svg-icon" viewBox="0 0 24 24"><path d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/></svg>`,
+            mail: `<svg class="svg-icon" viewBox="0 0 24 24"><path d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"/></svg>`
+        };
 
-window.showToast = (msg) => {
-    const stack = document.getElementById("toastStack");
-    const t = document.createElement("div"); t.className = "toast"; t.innerText = msg;
-    stack.appendChild(t);
-    setTimeout(() => t.remove(), 3000);
-};
-window.fecharModal = (id) => { document.getElementById(id).hidden = true; atualizarTudo(); };
-window.abrirModal = (id) => { document.getElementById(id).hidden = false; };
+        window.showToast = (msg, type = 'info') => {
+            const stack = document.getElementById("toastStack");
+            const t = document.createElement("div");
+            t.className = `px-4 py-3 rounded-2xl text-xs font-bold shadow-xl transition-all flex items-center gap-2 ${type === 'error' ? 'bg-rose-600 text-white' : 'bg-slate-900 text-white'}`;
+            t.innerText = msg;
+            stack.appendChild(t);
+            setTimeout(() => t.remove(), 3200);
+        };
 
-window.switchView = (v) => {
-    document.getElementById('viewCalendar').hidden = (v !== 'calendar');
-    document.getElementById('viewTeam').hidden = (v !== 'team');
-    document.getElementById('viewNotifications').hidden = (v !== 'notifications');
-    document.querySelectorAll('.nav-tab-btn').forEach((btn, idx) => {
-        btn.classList.toggle('active', (v === 'calendar' && idx === 0) || (v === 'team' && idx === 1) || (v === 'notifications' && idx === 2));
-    });
-    if(v === 'notifications') renderNotificationsTable();
-};
-
-window.switchCadTab = (tab) => {
-    ['pessoas', 'equipes', 'setores'].forEach(t => {
-        document.getElementById('cadTabBtn_' + t).setAttribute('aria-pressed', t === tab);
-        document.getElementById('cadTab_' + t).hidden = (t !== tab);
-    });
-};
-
-function pad(n) { return String(n).padStart(2, "0"); }
-function chaveDia(ano, mes, dia) { return `${ano}-${pad(mes + 1)}-${pad(dia)}`; }
-function getDiaExtenso(dData) { const p = dData.split('-'); return `${p[2]}/${p[1]}/${p[0]}`; }
-
-async function initFirebase() {
-    try {
-        document.getElementById("statusText").innerText = "Sincronizando...";
-        await signInAnonymously(auth);
-        
-        onSnapshot(colRef, (snapshot) => {
-            lancamentos = [];
-            snapshot.forEach(docSnap => lancamentos.push({ id: docSnap.id, ...docSnap.data() }));
-            document.getElementById("statusText").innerText = "Online";
-            document.getElementById("statusDot").className = "dot dot-ok";
+        window.fecharModal = (id) => {
+            const el = document.getElementById(id);
+            if (el) el.hidden = true;
             atualizarTudo();
-        }, () => { document.getElementById("errBanner").hidden = false; });
+        };
+        window.abrirModal = (id) => {
+            const el = document.getElementById(id);
+            if (el) el.hidden = false;
+        };
+        window.fecharModalA11y = (id) => {
+            document.getElementById(id)?.classList.add('hidden');
+        };
 
-        onSnapshot(teamColRef, (snapshot) => {
-            equipeCadastrada = [];
-            snapshot.forEach(docSnap => equipeCadastrada.push({ id: docSnap.id, ...docSnap.data() }));
-            renderTeamTable();
-            atualizarSelectRespAdd();
-            atualizarSelectRespEdit();
-        });
+        // ================= ESPAÇO DO USUÁRIO & ATALHOS =================
+        let userPrefs = { tema: 'padrao', accent: '#0284c7', tabletMode: false, fontLevel: 0 };
 
-        onSnapshot(eqColRef, snap => {
-            listaEquipes = [];
-            snap.forEach(d => listaEquipes.push({id: d.id, ...d.data()}));
-            atualizarSelectsDominio();
-            renderListaEquipes();
-        });
+        window.abrirEspacoUsuario = function() {
+            atualizarUIPreferencias();
+            document.getElementById('modalEspacoUsuario').classList.remove('hidden');
+        };
 
-        onSnapshot(setColRef, snap => {
-            listaSetores = [];
-            snap.forEach(d => listaSetores.push({id: d.id, ...d.data()}));
-            atualizarSelectsDominio();
-            renderListaSetores();
-        });
+        window.abrirModalAtalhos = function() {
+            document.getElementById('modalAtalhos').classList.remove('hidden');
+        };
 
-    } catch (e) {
-        document.getElementById("errBanner").hidden = false;
-    }
-}
-
-// Domínio (Equipes e Setores Dinâmicos)
-function atualizarSelectsDominio() {
-    const defaultEq = ['Administrativo', 'Mecânica', 'Elétrica', 'Montagem', 'Terceiros'];
-    const todasEq = Array.from(new Set([...defaultEq, ...listaEquipes.map(e => e.nome)]));
-    let eqHtml = '';
-    todasEq.forEach(e => eqHtml += `<option value="${e}">${e}</option>`);
-    document.getElementById('fEquipe').innerHTML = eqHtml;
-    document.getElementById('eEquipe').innerHTML = eqHtml;
-    document.getElementById('tEquipe').innerHTML = eqHtml;
-
-    const defaultSet = ['Geral', 'Produção', 'Embalagem', 'Utilidades'];
-    const todosSet = Array.from(new Set([...defaultSet, ...listaSetores.map(s => s.nome)]));
-    let setHtml = '';
-    todosSet.forEach(s => setHtml += `<option value="${s}">${s}</option>`);
-    document.getElementById('tSetor').innerHTML = setHtml;
-}
-
-window.atualizarSelectRespAdd = () => {
-    const eq = document.getElementById('fEquipe').value;
-    const filtrados = equipeCadastrada.filter(e => e.equipe === eq);
-    let html = filtrados.length ? '' : '<option value="">Nenhum cadastrado nesta equipe</option>';
-    filtrados.forEach(e => { html += `<option value="${e.nome}">${e.nome} (${e.email})</option>`; });
-    document.getElementById('fResp').innerHTML = html;
-};
-
-window.atualizarSelectRespEdit = () => {
-    const eq = document.getElementById('eEquipe').value;
-    const filtrados = equipeCadastrada.filter(e => e.equipe === eq);
-    let html = filtrados.length ? '' : '<option value="">Nenhum cadastrado nesta equipe</option>';
-    filtrados.forEach(e => { html += `<option value="${e.nome}">${e.nome} (${e.email})</option>`; });
-    document.getElementById('eResp').innerHTML = html;
-};
-document.getElementById('tEquipe').addEventListener('change', atualizarSelectRespAdd);
-
-// Cadastros (Equipes, Setores, Pessoas)
-document.getElementById('teamForm').addEventListener('submit', async (e) => {
-    e.preventDefault();
-    const nome = document.getElementById('tNome').value.trim();
-    const email = document.getElementById('tEmail').value.trim();
-    const equipe = document.getElementById('tEquipe').value;
-    const setor = document.getElementById('tSetor').value;
-    try {
-        await addDoc(teamColRef, { nome, email, equipe, setor });
-        document.getElementById('tNome').value = '';
-        document.getElementById('tEmail').value = '';
-        showToast("Responsável cadastrado!");
-    } catch(err) { showToast("Erro: Sem permissão no banco de dados."); console.error(err); }
-});
-window.removerResponsavel = async (id) => { try { await deleteDoc(doc(db, "ag_responsaveis", id)); showToast("Removido."); } catch(err) { showToast("Erro ao excluir."); console.error(err); } };
-
-document.getElementById('equipeForm').addEventListener('submit', async (e) => {
-    e.preventDefault();
-    const nome = document.getElementById('eqNome').value.trim();
-    try { await addDoc(eqColRef, { nome }); document.getElementById('eqNome').value = ''; showToast("Equipe adicionada."); } catch(err) { showToast("Erro: Sem permissão."); console.error(err); }
-});
-window.removerEquipe = async (id) => { try { await deleteDoc(doc(db, "ag_equipes", id)); showToast("Equipe Removida."); } catch(err) { showToast("Erro ao excluir."); console.error(err); } };
-
-document.getElementById('setorForm').addEventListener('submit', async (e) => {
-    e.preventDefault();
-    const nome = document.getElementById('setNome').value.trim();
-    try { await addDoc(setColRef, { nome }); document.getElementById('setNome').value = ''; showToast("Setor adicionado."); } catch(err) { showToast("Erro: Sem permissão."); console.error(err); }
-});
-window.removerSetor = async (id) => { try { await deleteDoc(doc(db, "ag_setores", id)); showToast("Setor Removido."); } catch(err) { showToast("Erro ao excluir."); console.error(err); } };
-
-function renderTeamTable() {
-    const tbody = document.getElementById('teamTableBody');
-    if (!equipeCadastrada.length) { tbody.innerHTML = `<tr><td colspan="4" style="text-align:center; padding:20px; color:var(--text-3);">Nenhum responsável.</td></tr>`; return; }
-    let html = '';
-    equipeCadastrada.forEach(e => {
-        html += `<tr style="border-bottom: 1px solid var(--border);">
-            <td style="padding: 10px; font-weight:600;">${e.nome}</td>
-            <td style="padding: 10px; color: var(--text-2);">${e.email}</td>
-            <td style="padding: 10px;"><span class="st-badge st-andamento" style="margin-right:4px;">${e.equipe}</span> <span class="st-badge" style="color:var(--text-2); border-color:var(--border);">${e.setor || 'Geral'}</span></td>
-            <td style="padding: 10px; text-align: right;"><button class="btn btn-ghost" onclick="removerResponsavel('${e.id}')" style="height:28px; font-size:12px; color:var(--danger);">${ICONS.trash} Excluir</button></td>
-        </tr>`;
-    });
-    tbody.innerHTML = html;
-}
-function renderListaEquipes() {
-    const box = document.getElementById('equipesList');
-    if(!listaEquipes.length) { box.innerHTML = '<span style="color:var(--text-3);font-size:13px;">Nenhuma equipe customizada.</span>'; return; }
-    let h = '';
-    listaEquipes.forEach(e => { h += `<span class="st-badge st-andamento" style="padding:6px 12px; font-size:13px; display:flex; align-items:center; gap:8px;">${e.nome} <button onclick="removerEquipe('${e.id}')" style="background:none;border:none;cursor:pointer;color:inherit;padding:0;">✕</button></span>`; });
-    box.innerHTML = h;
-}
-function renderListaSetores() {
-    const box = document.getElementById('setoresList');
-    if(!listaSetores.length) { box.innerHTML = '<span style="color:var(--text-3);font-size:13px;">Nenhum setor customizado.</span>'; return; }
-    let h = '';
-    listaSetores.forEach(s => { h += `<span class="st-badge" style="color:var(--text-2);border-color:var(--border); padding:6px 12px; font-size:13px; display:flex; align-items:center; gap:8px;">${s.nome} <button onclick="removerSetor('${s.id}')" style="background:none;border:none;cursor:pointer;color:inherit;padding:0;">✕</button></span>`; });
-    box.innerHTML = h;
-}
-
-// Renderização da Central de Notificações
-function renderNotificationsTable() {
-    const tbody = document.getElementById('notifTableBody');
-    const hojeStr = new Date().toISOString().slice(0, 10);
-    const pendentes = lancamentos.filter(l => l.status !== 'concluido' && l.status !== 'cancelado');
-    
-    if(!pendentes.length) {
-        tbody.innerHTML = `<tr><td colspan="5" style="text-align:center; padding:20px; color:var(--text-3);">Nenhuma manutenção pendente para notificação.</td></tr>`;
-        return;
-    }
-
-    let html = '';
-    pendentes.forEach(l => {
-        const prazoDias = parseInt(l.alertaPrazo || 0);
-        const dataEvt = new Date(l.data + 'T00:00:00');
-        const dataAlerta = new Date(dataEvt);
-        dataAlerta.setDate(dataAlerta.getDate() - prazoDias);
-
-        let destTxt = "Resp. " + (l.responsavel || 'Geral');
-        if(l.alertaDest === 'equipe') destTxt = "Equipe " + l.equipe;
-        if(l.alertaDest === 'todos') destTxt = "Todos os Cadastrados";
-
-        let prazoTxt = `${prazoDias} dia(s) antes`;
-        if (prazoDias === 0) prazoTxt = 'No dia';
-        else if (prazoDias === 7) prazoTxt = '1 semana antes';
-        else if (prazoDias === 30) prazoTxt = '1 mês antes';
-        else if (prazoDias === 90) prazoTxt = '3 meses antes';
-        else if (prazoDias === 180) prazoTxt = '6 meses antes';
-
-        html += `<tr style="border-bottom: 1px solid var(--border);">
-            <td style="padding: 10px; font-weight:600;">${getDiaExtenso(l.data)}</td>
-            <td style="padding: 10px;">${l.titulo}</td>
-            <td style="padding: 10px; color:var(--text-2);">${destTxt}</td>
-            <td style="padding: 10px;"><span class="st-badge st-pendente">${prazoTxt}</span></td>
-            <td style="padding: 10px; text-align: right;">
-                <button class="btn btn-primary" onclick="enviarAlertaEmail('${l.id}')" style="height:30px; font-size:12px;">${ICONS.mail} E-mail</button>
-            </td>
-        </tr>`;
-    });
-    tbody.innerHTML = html;
-}
-
-window.enviarAlertaEmail = (id) => {
-    const l = lancamentos.find(x => x.id === id);
-    if(!l) return;
-    
-    let emails = [];
-    const dest = l.alertaDest || 'responsavel';
-    if(dest === 'responsavel') {
-        const r = equipeCadastrada.find(e => e.nome === l.responsavel);
-        if(r) emails.push(r.email);
-    } else if(dest === 'equipe') {
-        equipeCadastrada.filter(e => e.equipe === l.equipe).forEach(e => emails.push(e.email));
-    } else {
-        equipeCadastrada.forEach(e => emails.push(e.email));
-    }
-
-    const destinatarioFinal = emails.length ? emails.join(',') : 'pcm@cepera.com.br';
-    const assunto = encodeURIComponent(`[Alerta PCM Cepera] Manutenção Programada: ${l.titulo}`);
-    const corpo = encodeURIComponent(`Olá,\n\nEste é um lembrete automático de manutenção industrial:\n\n- Atividade: ${l.titulo}\n- Data: ${getDiaExtenso(l.data)} às ${l.hora||'--:--'}\n- Equipe: ${l.equipe}\n- Responsável: ${l.responsavel||'Geral'}\n- Descrição: ${l.descricao||'N/A'}\n\nPor favor, garanta os preparativos.\nPCM - Cepera Alimentos`);
-
-    window.open(`mailto:${destinatarioFinal}?subject=${assunto}&body=${corpo}`);
-    showToast("Cliente de e-mail aberto com mensagem pronta para envio!");
-};
-
-function filtrados(lista) {
-    let res = lista;
-    if (filtroTipo !== "all") res = res.filter(l => l.tipo === filtroTipo);
-    if (buscaTxt) {
-        res = res.filter(l => 
-            (l.titulo && l.titulo.toLowerCase().includes(buscaTxt)) ||
-            (l.responsavel && l.responsavel.toLowerCase().includes(buscaTxt)) ||
-            (l.equipe && l.equipe.toLowerCase().includes(buscaTxt))
-        );
-    }
-    return res;
-}
-
-function renderDashboard() {
-    const mesAtual = lancamentos.filter(l => {
-        if(!l.data) return false;
-        const [a, m] = l.data.split('-');
-        return parseInt(a) === viewAno && parseInt(m) === viewMes + 1;
-    });
-
-    const listF = filtrados(mesAtual);
-    const concluidas = listF.filter(l => l.status === 'concluido').length;
-    
-    document.getElementById('dashTotal').innerText = listF.length;
-    document.getElementById('dashDone').innerText = concluidas;
-    document.getElementById('dashRate').innerText = listF.length ? Math.round((concluidas/listF.length)*100) + '%' : '0%';
-
-    const contagem = {};
-    Object.keys(TIPOS).forEach(k => contagem[k] = 0);
-    listF.forEach(l => { if(contagem[l.tipo] !== undefined) contagem[l.tipo]++; });
-
-    const labels = []; const data = []; const bgColors = [];
-    let legendHTML = '';
-    Object.keys(contagem).forEach(k => {
-        if(contagem[k] > 0) {
-            labels.push(TIPOS[k].nome); data.push(contagem[k]); bgColors.push(TIPOS[k].cor);
-            legendHTML += `<div style="display:flex;align-items:center;gap:6px;"><span style="width:8px;height:8px;border-radius:50%;background:${TIPOS[k].cor}"></span>${TIPOS[k].nome} (${contagem[k]})</div>`;
+        function aplicarPreferenciasVisuais() {
+            document.body.classList.remove('theme-solid', 'theme-dark', 'high-contrast', 'tablet-mode');
+            if (userPrefs.tema === 'solido') document.body.classList.add('theme-solid');
+            if (userPrefs.tema === 'dark') document.body.classList.add('theme-dark');
+            if (userPrefs.tema === 'contraste') document.body.classList.add('high-contrast');
+            if (userPrefs.tabletMode) document.body.classList.add('tablet-mode');
+            document.documentElement.style.setProperty('--accent', userPrefs.accent || '#0284c7');
+            const sizes = { '-1': '14px', '0': '16px', '1': '18px', '2': '20px', '3': '22px' };
+            document.documentElement.style.fontSize = sizes[String(userPrefs.fontLevel || 0)] || '16px';
+            atualizarUIPreferencias();
         }
-    });
-    document.getElementById('dashLegend').innerHTML = legendHTML || 'Sem dados';
 
-    const ctx = document.getElementById('dashChart').getContext('2d');
-    if (chartInstance) chartInstance.destroy();
-    chartInstance = new Chart(ctx, {
-        type: 'doughnut',
-        data: { labels, datasets: [{ data, backgroundColor: bgColors, borderWidth: 0 }] },
-        options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false } }, cutout: '70%' }
-    });
-}
-
-function renderCalendario() {
-    const grid = document.getElementById("calGrid");
-    const primeiro = new Date(viewAno, viewMes, 1).getDay();
-    const totalDias = new Date(viewAno, viewMes + 1, 0).getDate();
-    
-    let html = "";
-    const celulas = Math.ceil((primeiro + totalDias) / 7) * 7;
-    const hojeChave = chaveDia(hoje.getFullYear(), hoje.getMonth(), hoje.getDate());
-
-    for (let c = 0; c < celulas; c++) {
-        if (c < primeiro || c >= primeiro + totalDias) {
-            html += `<div class="cell empty"></div>`;
-            continue;
+        function atualizarUIPreferencias() {
+            const btnTab = document.getElementById('btnToggleTabletMode');
+            if (btnTab) {
+                btnTab.innerText = userPrefs.tabletMode ? 'ATIVADO' : 'DESATIVADO';
+                btnTab.className = userPrefs.tabletMode
+                    ? 'px-4 py-2.5 rounded-xl font-extrabold text-xs bg-emerald-600 text-white shrink-0'
+                    : 'px-4 py-2.5 rounded-xl font-extrabold text-xs bg-slate-200 text-slate-800 shrink-0';
+            }
+            ['padrao', 'solido', 'dark', 'contraste'].forEach(function(t) {
+                const b = document.getElementById('btnTema_' + t);
+                if (b) {
+                    b.className = (userPrefs.tema === t)
+                        ? 'p-3 rounded-xl border-2 border-sky-600 bg-sky-50 text-sky-900 text-xs font-extrabold text-center'
+                        : 'p-3 rounded-xl border border-slate-200 text-xs font-extrabold text-center';
+                }
+            });
         }
-        const dia = c - primeiro + 1;
-        const chave = chaveDia(viewAno, viewMes, dia);
-        const lants = filtrados(lancamentos.filter(l => l.data === chave));
-        
-        let cls = "cell" + (c % 7 === 0 || c % 7 === 6 ? " weekend" : "") + (chave === hojeChave ? " today" : "");
-        let chips = "";
-        lants.slice(0, 4).forEach(l => {
-            const isDone = l.status === 'concluido';
-            chips += `<div class="chip ${isDone ? 'done' : ''}"><span class="dot-sm" style="background:${TIPOS[l.tipo].cor}"></span><span class="t">${l.titulo}</span></div>`;
-        });
-        if(lants.length > 4) chips += `<span style="font-size:11px;color:var(--text-3)">+${lants.length-4} mais</span>`;
-        const badge = lants.length ? `<span class="badge-count">${lants.length}</span>` : '';
-        html += `<div class="${cls}" onclick="abrirDia('${chave}')"><span class="daynum">${dia}</span>${badge}${chips}</div>`;
-    }
-    grid.innerHTML = html;
-    document.getElementById("monthLabel").innerText = `${MESES[viewMes]} de ${viewAno}`;
-    renderDashboard();
-}
 
-window.abrirDia = (chave) => {
-    diaAberto = chave;
-    const p = chave.split('-');
-    document.getElementById("dayTitle").innerText = `${p[2]} de ${MESES[parseInt(p[1])-1]}`;
-    abrirModal('dayOverlay');
-    atualizarSelectRespAdd();
-    renderListaDia();
-};
-
-window.mudarStatus = async (id, novoStatus) => {
-    try { await updateDoc(doc(db, "ag_manutencao", id), { status: novoStatus }); showToast("Status atualizado!"); } catch(err) { showToast("Erro."); }
-};
-
-function renderListaDia() {
-    const list = filtrados(lancamentos.filter(l => l.data === diaAberto)).sort((a,b) => (a.hora||'').localeCompare(b.hora||''));
-    document.getElementById("dayCount").innerText = `${list.length} lançamentos`;
-    
-    const box = document.getElementById("dayList");
-    if(!list.length) { box.innerHTML = `<div style="text-align:center;padding:20px;color:var(--text-3)">Nenhum lançamento.</div>`; return; }
-
-    let html = "";
-    list.forEach(l => {
-        const t = TIPOS[l.tipo];
-        const s = STATUSES[l.status || 'pendente'];
-        let statusOptions = "";
-        Object.keys(STATUSES).forEach(stKey => {
-            statusOptions += `<option value="${stKey}" ${stKey === (l.status||'pendente') ? 'selected' : ''}>${STATUSES[stKey].nome}</option>`;
-        });
-
-        html += `<div class="entry">
-            <div class="entry-bar" style="background:${t.cor}"></div>
-            <div>
-                <div class="entry-top">
-                    <span style="font-weight:700;font-size:14px">${l.hora || '--:--'}</span>
-                    <span class="st-badge" style="border-color:${t.cor};color:${t.cor}">${t.nome}</span>
-                    <select class="st-badge st-select ${s.badge}" onchange="mudarStatus('${l.id}', this.value)">${statusOptions}</select>
-                </div>
-                <p class="entry-title">${l.titulo}</p>
-                <p class="entry-meta"><span style="font-weight:600;color:var(--text)">${l.equipe || 'Geral'}</span> • Resp: ${l.responsavel || 'N/A'}</p>
-                ${l.descricao ? `<div class="entry-desc">${l.descricao}</div>` : ''}
-                <div class="entry-actions">
-                    <button class="btn btn-ghost" onclick="abrirEdicao('${l.id}')" style="height:26px;font-size:12px;">${ICONS.edit} Editar</button>
-                    <button class="btn btn-ghost" onclick="confirmarExclusao('${l.id}')" style="height:26px;font-size:12px;color:var(--danger)">${ICONS.trash} Excluir</button>
-                </div>
-            </div>
-        </div>`;
-    });
-    box.innerHTML = html;
-}
-
-// Submissão de Lançamento com Recorrência e Notificação
-document.getElementById('addForm').addEventListener('submit', async (e) => {
-    e.preventDefault();
-    const btn = e.submitter; btn.disabled = true; btn.innerText = "Salvando...";
-
-    const baseData = {
-        titulo: document.getElementById('fTitulo').value.trim(),
-        hora: document.getElementById('fHora').value || '',
-        tipo: document.getElementById('fTipo').value,
-        status: document.getElementById('fStatus').value,
-        equipe: document.getElementById('fEquipe').value,
-        responsavel: document.getElementById('fResp').value || '',
-        descricao: document.getElementById('fDesc').value.trim(),
-        alertaPrazo: document.getElementById('fAlertaPrazo').value,
-        alertaDest: document.getElementById('fAlertaDest').value,
-        criadoEm: new Date().toISOString()
-    };
-
-    let datasParaSalvar = [diaAberto];
-    const isRec = document.getElementById('fRecorrente').checked;
-    if(isRec) {
-        const freq = document.getElementById('fRecFreq').value;
-        const limitStr = document.getElementById('fRecFim').value;
-        if(limitStr) {
-            let currDate = new Date(diaAberto + 'T12:00:00');
-            let limitDate = new Date(limitStr + 'T12:00:00');
-            let count = 0;
-            while(currDate <= limitDate && count < 365) {
-                if(freq === 'diario') currDate.setDate(currDate.getDate() + 1);
-                else if(freq === 'semanal') currDate.setDate(currDate.getDate() + 7);
-                else if(freq === 'mensal') currDate.setMonth(currDate.getMonth() + 1);
-                else if(freq === 'trimestral') currDate.setMonth(currDate.getMonth() + 3);
-                else if(freq === 'semestral') currDate.setMonth(currDate.getMonth() + 6);
-                else if(freq === 'anual') currDate.setFullYear(currDate.getFullYear() + 1);
-                
-                if(currDate <= limitDate) datasParaSalvar.push(chaveDia(currDate.getFullYear(), currDate.getMonth(), currDate.getDate()));
-                count++;
+        async function persistirPreferenciasUsuario() {
+            const chaveLocal = usuarioLogado ? ('cepera_prefs_' + usuarioLogado.user) : 'cepera_prefs_guest';
+            safeStorage.set(chaveLocal, JSON.stringify(userPrefs));
+            if (usuarioLogado && usuarioLogado.id && usuarioLogado.id !== 'default_admin') {
+                try { await updateDoc(doc(db, "ir_funcionarios", usuarioLogado.id), { preferencias: userPrefs }); } catch (_) {}
             }
         }
-    }
 
-    try {
-        const promises = datasParaSalvar.map(d => addDoc(colRef, { ...baseData, data: d }));
-        await Promise.all(promises);
-        document.getElementById('addForm').reset();
-        document.getElementById('recMenu').hidden = true;
-        fecharModal('dayOverlay');
-        showToast(datasParaSalvar.length > 1 ? `${datasParaSalvar.length} lançamentos programados!` : "Lançamento salvo com sucesso!");
-    } catch(err) { showToast("Erro ao salvar."); }
-    btn.disabled = false; btn.innerText = "Salvar Lançamento";
-});
-
-window.abrirEdicao = (id) => {
-    const l = lancamentos.find(x => x.id === id);
-    if(!l) return;
-    document.getElementById('eId').value = l.id;
-    document.getElementById('eTitulo').value = l.titulo || '';
-    document.getElementById('eHora').value = l.hora || '';
-    document.getElementById('eTipo').value = l.tipo || 'preventiva';
-    document.getElementById('eStatus').value = l.status || 'pendente';
-    document.getElementById('eEquipe').value = l.equipe || '';
-    atualizarSelectRespEdit();
-    document.getElementById('eResp').value = l.responsavel || '';
-    document.getElementById('eDesc').value = l.descricao || '';
-    abrirModal('editOverlay');
-};
-
-document.getElementById('editForm').addEventListener('submit', async (e) => {
-    e.preventDefault();
-    const id = document.getElementById('eId').value;
-    try {
-        await updateDoc(doc(db, "ag_manutencao", id), {
-            titulo: document.getElementById('eTitulo').value,
-            hora: document.getElementById('eHora').value,
-            tipo: document.getElementById('eTipo').value,
-            status: document.getElementById('eStatus').value,
-            equipe: document.getElementById('eEquipe').value,
-            responsavel: document.getElementById('eResp').value,
-            descricao: document.getElementById('eDesc').value
-        });
-        fecharModal('editOverlay');
-        showToast("Atualizado!");
-    } catch(err) { showToast("Erro."); }
-});
-
-window.confirmarExclusao = (id) => { idParaExcluir = id; abrirModal('deleteOverlay'); };
-document.getElementById('confirmDeleteBtn').addEventListener('click', async () => {
-    if(!idParaExcluir) return;
-    try {
-        await deleteDoc(doc(db, "ag_manutencao", idParaExcluir));
-        fecharModal('deleteOverlay');
-        showToast("Excluído.");
-    } catch(err) { showToast("Erro."); }
-});
-
-// CSV Export
-document.getElementById("exportBtn").addEventListener('click', () => {
-    const mesAtual = lancamentos.filter(l => l.data && l.data.startsWith(`${viewAno}-${pad(viewMes+1)}`));
-    if(!mesAtual.length) return showToast("Sem dados para exportar.");
-    let csv = "Data,Hora,Titulo,Equipe,Responsavel,Tipo,Status,Descricao\n";
-    mesAtual.forEach(l => {
-        csv += `${l.data},${l.hora||''},"${(l.titulo||'').replace(/"/g,'""')}","${l.equipe||''}","${(l.responsavel||'').replace(/"/g,'""')}","${TIPOS[l.tipo]?.nome||''}","${STATUSES[l.status||'pendente']?.nome||''}","${(l.descricao||'').replace(/\n/g,' ')}"\n`;
-    });
-    const blob = new Blob(["\uFEFF"+csv], {type: 'text/csv;charset=utf-8;'});
-    const link = document.createElement("a");
-    link.href = URL.createObjectURL(blob);
-    link.download = `Manutencao_Cepera_${viewAno}_${pad(viewMes+1)}.csv`;
-    link.click();
-});
-
-var prefs = {};
-try { prefs = JSON.parse(localStorage.getItem("cepera-agenda-prefs") || "{}"); } catch (e) {}
-function salvarPrefs() { try { localStorage.setItem("cepera-agenda-prefs", JSON.stringify(prefs)); } catch (e) {} }
-
-function aplicarPrefs() {
-    var root = document.documentElement;
-    root.setAttribute("data-theme", prefs.theme === "light" ? "light" : "dark");
-    if (prefs.accentColor) {
-        root.style.setProperty('--action', prefs.accentColor.main);
-        root.style.setProperty('--action-hover', prefs.accentColor.hover);
-        root.style.setProperty('--tint', prefs.accentColor.tint);
-    }
-    document.getElementById("themeBtn").textContent = prefs.theme === "light" ? "Claro" : "Escuro";
-    renderColorPicker();
-}
-
-function renderColorPicker() {
-    let html = '';
-    const currentMain = prefs.accentColor ? prefs.accentColor.main : '#4d8df6';
-    Object.keys(CORES).forEach(k => {
-        const isActive = currentMain === CORES[k].main;
-        html += `<button type="button" class="color-btn ${isActive ? 'active' : ''}" style="background:${CORES[k].main}" data-color="${k}"></button>`;
-    });
-    document.getElementById('colorPickerGroup').innerHTML = html;
-}
-
-document.getElementById('colorPickerGroup').addEventListener('click', (e) => {
-    const btn = e.target.closest('.color-btn');
-    if(!btn) return;
-    prefs.accentColor = CORES[btn.getAttribute('data-color')];
-    salvarPrefs(); aplicarPrefs();
-});
-
-document.getElementById("themeBtn").addEventListener("click", () => { prefs.theme = prefs.theme === "light" ? "dark" : "light"; salvarPrefs(); aplicarPrefs(); });
-window.resetPrefs = () => { prefs = {}; salvarPrefs(); aplicarPrefs(); showToast("Restaurado"); };
-
-document.getElementById("prevMonth").onclick = () => { viewMes--; if(viewMes<0){viewMes=11;viewAno--;} renderCalendario(); };
-document.getElementById("nextMonth").onclick = () => { viewMes++; if(viewMes>11){viewMes=0;viewAno++;} renderCalendario(); };
-document.getElementById("todayBtn").onclick = () => { viewAno=hoje.getFullYear(); viewMes=hoje.getMonth(); renderCalendario(); };
-document.getElementById("searchInput").addEventListener('input', (e) => { buscaTxt = e.target.value.toLowerCase(); atualizarTudo(); });
-
-document.addEventListener("keydown", function (e) {
-    if (e.key === "Escape") { 
-        ['kbdOverlay', 'settingsOverlay', 'deleteOverlay', 'editOverlay', 'dayOverlay'].forEach(id => {
-            if(!document.getElementById(id).hidden) fecharModal(id);
-        });
-        return; 
-    }
-    if (e.ctrlKey || e.altKey || e.metaKey) return;
-    var t = e.target;
-    if (t && (t.tagName === "INPUT" || t.tagName === "TEXTAREA" || t.tagName === "SELECT" || t.isContentEditable)) return;
-    let bloqueado = !document.getElementById("dayOverlay").hidden || !document.getElementById("editOverlay").hidden || !document.getElementById("deleteOverlay").hidden || !document.getElementById("settingsOverlay").hidden || !document.getElementById("kbdOverlay").hidden;
-
-    var k = e.key;
-    if (k === "ArrowLeft") { if (!bloqueado) { viewMes--; if(viewMes<0){viewMes=11;viewAno--;} renderCalendario(); e.preventDefault(); } }
-    else if (k === "ArrowRight") { if (!bloqueado) { viewMes++; if(viewMes>11){viewMes=0;viewAno++;} renderCalendario(); e.preventDefault(); } }
-    else if (k === "t" || k === "T") { if (!bloqueado) { viewAno=hoje.getFullYear(); viewMes=hoje.getMonth(); renderCalendario(); } }
-    else if (k === "n" || k === "N") {
-        if (!bloqueado) {
-            viewAno = hoje.getFullYear(); viewMes = hoje.getMonth(); renderCalendario();
-            abrirDia(chaveDia(hoje.getFullYear(), hoje.getMonth(), hoje.getDate()));
-            setTimeout(()=>document.getElementById('fTitulo').focus(), 100);
-        }
-    }
-    else if (k === "m" || k === "M") { prefs.theme = prefs.theme === "light" ? "dark" : "light"; salvarPrefs(); aplicarPrefs(); }
-    else if (k === "c" || k === "C") { if (!bloqueado) abrirModal("settingsOverlay"); }
-    else if (k === "?") { if (!bloqueado) abrirModal("kbdOverlay"); }
-});
-
-function atualizarTudo() { renderCalendario(); if(!document.getElementById('dayOverlay').hidden) renderListaDia(); }
-
-let selHtml = ''; let pillHtml = `<button class="pill" data-filter="all" aria-pressed="true">Todos</button>`;
-Object.keys(TIPOS).forEach(k => {
-    selHtml += `<option value="${k}">${TIPOS[k].nome}</option>`;
-    pillHtml += `<button class="pill" data-filter="${k}" aria-pressed="false"><span class="dot-sm" style="background:${TIPOS[k].cor}"></span>${TIPOS[k].nome}</button>`;
-});
-document.getElementById("fTipo").innerHTML = selHtml;
-document.getElementById("eTipo").innerHTML = selHtml;
-document.getElementById("filterPills").innerHTML = pillHtml;
-
-document.getElementById("filterPills").addEventListener('click', (e) => {
-    if(e.target.tagName !== 'BUTTON') return;
-    filtroTipo = e.target.getAttribute('data-filter');
-    document.querySelectorAll('#filterPills button').forEach(b => b.setAttribute('aria-pressed', b===e.target));
-    atualizarTudo();
-});
-
-document.addEventListener('DOMContentLoaded', () => { aplicarPrefs(); initFirebase(); });
-
-// ================= GUARDA CENTRAL SSO & RBAC (PCM CEPÊRA) =================
-(function verificarAcessoCentralSSO() {
-    try {
-        const raw = localStorage.getItem('cepera_central_session');
-        const userStr = localStorage.getItem('cepera_ir_user');
-        if (!raw && !userStr) {
-            if (window.parent && window.parent !== window) {
-                window.parent.postMessage({ type: 'CEPERA_LOGOUT_CENTRAL' }, '*');
-            } else {
-                window.location.href = 'index.html?app=agenda_pcm';
+        function carregarPreferenciasUsuario(u) {
+            let carregado = (u && u.preferencias && typeof u.preferencias === 'object') ? u.preferencias : null;
+            if (!carregado) {
+                const salvoLocal = safeStorage.get(u ? ('cepera_prefs_' + u.user) : 'cepera_prefs_guest');
+                if (salvoLocal) { try { carregado = JSON.parse(salvoLocal); } catch (_) {} }
             }
-            return;
+            userPrefs = {
+                tema: (carregado && carregado.tema) || 'padrao',
+                accent: (carregado && carregado.accent) || '#0284c7',
+                tabletMode: Boolean(carregado && carregado.tabletMode),
+                fontLevel: Number((carregado && carregado.fontLevel) || 0)
+            };
+            aplicarPreferenciasVisuais();
         }
-        const sess = raw ? JSON.parse(raw) : null;
-        if (sess && sess.role !== 'Admin' && Array.isArray(sess.apps_permitidos) && !sess.apps_permitidos.includes('agenda_pcm')) {
+
+        window.toggleModoTablet = function() { userPrefs.tabletMode = !userPrefs.tabletMode; aplicarPreferenciasVisuais(); persistirPreferenciasUsuario(); };
+        window.definirTemaUsuario = function(tema) { userPrefs.tema = tema; aplicarPreferenciasVisuais(); persistirPreferenciasUsuario(); };
+        window.definirCorDestaque = function(cor) { userPrefs.accent = cor; aplicarPreferenciasVisuais(); persistirPreferenciasUsuario(); };
+        window.alterarFonte = function(dir) {
+            userPrefs.fontLevel = (dir === 0) ? 0 : Math.max(-1, Math.min(3, (userPrefs.fontLevel || 0) + dir));
+            aplicarPreferenciasVisuais();
+            persistirPreferenciasUsuario();
+        };
+
+        window.voltarParaCentralPCM = function() {
             if (window.parent && window.parent !== window) {
                 window.parent.postMessage({ type: 'CEPERA_VOLTAR_CENTRAL' }, '*');
             } else {
                 window.location.href = 'index.html';
             }
-            return;
+        };
+
+        window.fazerLogout = function() {
+            safeStorage.remove('cepera_ir_user');
+            safeStorage.remove('cepera_central_session');
+            if (window.parent && window.parent !== window) {
+                window.parent.postMessage({ type: 'CEPERA_LOGOUT_CENTRAL' }, '*');
+            } else {
+                window.location.href = 'index.html';
+            }
+        };
+
+        window.switchView = (v) => {
+            document.getElementById('viewCalendar').hidden = (v !== 'calendar');
+            document.getElementById('viewTeam').hidden = (v !== 'team');
+            document.getElementById('viewNotifications').hidden = (v !== 'notifications');
+            ['calendar', 'notifications', 'team'].forEach(id => {
+                document.getElementById('rail-' + id)?.classList.toggle('active', id === v);
+                document.getElementById('mob-' + id)?.classList.toggle('active', id === v);
+            });
+            if (v === 'notifications') renderNotificationsTable();
+        };
+
+        window.switchCadTab = (tab) => {
+            ['pessoas', 'equipes', 'setores'].forEach(t => {
+                const btn = document.getElementById('cadTabBtn_' + t);
+                if (btn) {
+                    btn.setAttribute('aria-pressed', t === tab);
+                    btn.classList.toggle('active', t === tab);
+                }
+                document.getElementById('cadTab_' + t).hidden = (t !== tab);
+            });
+        };
+
+        function pad(n) { return String(n).padStart(2, "0"); }
+        function chaveDia(ano, mes, dia) { return `${ano}-${pad(mes + 1)}-${pad(dia)}`; }
+        function getDiaExtenso(dData) { const p = (dData || '').split('-'); return p.length === 3 ? `${p[2]}/${p[1]}/${p[0]}` : dData; }
+
+        window.abrirNovoLancamentoRapido = function() {
+            viewAno = hoje.getFullYear();
+            viewMes = hoje.getMonth();
+            renderCalendario();
+            abrirDia(chaveDia(hoje.getFullYear(), hoje.getMonth(), hoje.getDate()));
+            setTimeout(() => document.getElementById('fTitulo')?.focus(), 100);
+        };
+
+        async function initFirebase() {
+            try {
+                document.getElementById("statusText").innerText = "Sincronizando...";
+                await signInAnonymously(auth);
+
+                onSnapshot(colRef, (snapshot) => {
+                    lancamentos = [];
+                    snapshot.forEach(docSnap => lancamentos.push({ id: docSnap.id, ...docSnap.data() }));
+                    document.getElementById("statusText").innerText = "Banco Sincronizado (Online)";
+                    document.getElementById("statusDot").className = "w-2 h-2 rounded-full bg-emerald-500";
+                    atualizarTudo();
+                }, () => { document.getElementById("errBanner").hidden = false; });
+
+                onSnapshot(teamColRef, (snapshot) => {
+                    equipeCadastrada = [];
+                    snapshot.forEach(docSnap => equipeCadastrada.push({ id: docSnap.id, ...docSnap.data() }));
+                    renderTeamTable();
+                    atualizarSelectRespAdd();
+                    atualizarSelectRespEdit();
+                });
+
+                onSnapshot(eqColRef, snap => {
+                    listaEquipes = [];
+                    snap.forEach(d => listaEquipes.push({ id: d.id, ...d.data() }));
+                    atualizarSelectsDominio();
+                    renderListaEquipes();
+                });
+
+                onSnapshot(setColRef, snap => {
+                    listaSetores = [];
+                    snap.forEach(d => listaSetores.push({ id: d.id, ...d.data() }));
+                    atualizarSelectsDominio();
+                    renderListaSetores();
+                });
+
+            } catch (e) {
+                document.getElementById("errBanner").hidden = false;
+            }
         }
-        if (window.self === window.top && sess) {
-            const bar = document.createElement('div');
-            bar.style.cssText = 'position:fixed;bottom:14px;left:14px;z-index:9999;display:flex;align-items:center;gap:8px;background:#0f172a;color:#fff;padding:6px 12px;border-radius:9999px;font-family:sans-serif;font-size:11px;font-weight:700;box-shadow:0 8px 20px rgba(0,0,0,0.25);border:1px solid #334155;';
-            bar.innerHTML = `<button type="button" onclick="window.location.href='index.html'" style="background:#0284c7;color:#fff;border:none;padding:4px 10px;border-radius:9999px;font-weight:800;font-size:11px;cursor:pointer;">⬅ Central PCM</button><span>${sess.nome || sess.user} (${sess.role || ''})</span>`;
-            document.body.appendChild(bar);
+
+        function atualizarSelectsDominio() {
+            const defaultEq = ['Administrativo', 'Mecânica', 'Elétrica', 'Montagem', 'Terceiros'];
+            const todasEq = Array.from(new Set([...defaultEq, ...listaEquipes.map(e => e.nome)]));
+            let eqHtml = '';
+            todasEq.forEach(e => eqHtml += `<option value="${e}">${e}</option>`);
+            document.getElementById('fEquipe').innerHTML = eqHtml;
+            document.getElementById('eEquipe').innerHTML = eqHtml;
+            document.getElementById('tEquipe').innerHTML = eqHtml;
+
+            const defaultSet = ['Geral', 'Produção', 'Embalagem', 'Utilidades'];
+            const todosSet = Array.from(new Set([...defaultSet, ...listaSetores.map(s => s.nome)]));
+            let setHtml = '';
+            todosSet.forEach(s => setHtml += `<option value="${s}">${s}</option>`);
+            document.getElementById('tSetor').innerHTML = setHtml;
         }
-    } catch (_) {}
-})();
-</script>
+
+        window.atualizarSelectRespAdd = () => {
+            const eq = document.getElementById('fEquipe').value;
+            const filtrados = equipeCadastrada.filter(e => e.equipe === eq);
+            let html = filtrados.length ? '' : '<option value="">Nenhum cadastrado nesta equipe</option>';
+            filtrados.forEach(e => { html += `<option value="${e.nome}">${e.nome} (${e.email})</option>`; });
+            document.getElementById('fResp').innerHTML = html;
+        };
+
+        window.atualizarSelectRespEdit = () => {
+            const eq = document.getElementById('eEquipe').value;
+            const filtrados = equipeCadastrada.filter(e => e.equipe === eq);
+            let html = filtrados.length ? '' : '<option value="">Nenhum cadastrado nesta equipe</option>';
+            filtrados.forEach(e => { html += `<option value="${e.nome}">${e.nome} (${e.email})</option>`; });
+            document.getElementById('eResp').innerHTML = html;
+        };
+        document.getElementById('tEquipe').addEventListener('change', atualizarSelectRespAdd);
+
+        // Cadastros (Equipes, Setores, Pessoas)
+        document.getElementById('teamForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const nome = document.getElementById('tNome').value.trim();
+            const email = document.getElementById('tEmail').value.trim();
+            const equipe = document.getElementById('tEquipe').value;
+            const setor = document.getElementById('tSetor').value;
+            try {
+                await addDoc(teamColRef, { nome, email, equipe, setor });
+                document.getElementById('tNome').value = '';
+                document.getElementById('tEmail').value = '';
+                showToast("Responsável cadastrado!");
+            } catch (err) { showToast("Erro: Sem permissão no banco de dados.", "error"); }
+        });
+        window.removerResponsavel = async (id) => { try { await deleteDoc(doc(db, "ag_responsaveis", id)); showToast("Removido."); } catch (err) { showToast("Erro ao excluir.", "error"); } };
+
+        document.getElementById('equipeForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const nome = document.getElementById('eqNome').value.trim();
+            try { await addDoc(eqColRef, { nome }); document.getElementById('eqNome').value = ''; showToast("Equipe adicionada."); } catch (err) { showToast("Erro: Sem permissão.", "error"); }
+        });
+        window.removerEquipe = async (id) => { try { await deleteDoc(doc(db, "ag_equipes", id)); showToast("Equipe removida."); } catch (err) { showToast("Erro ao excluir.", "error"); } };
+
+        document.getElementById('setorForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const nome = document.getElementById('setNome').value.trim();
+            try { await addDoc(setColRef, { nome }); document.getElementById('setNome').value = ''; showToast("Setor adicionado."); } catch (err) { showToast("Erro: Sem permissão.", "error"); }
+        });
+        window.removerSetor = async (id) => { try { await deleteDoc(doc(db, "ag_setores", id)); showToast("Setor removido."); } catch (err) { showToast("Erro ao excluir.", "error"); } };
+
+        function renderTeamTable() {
+            const tbody = document.getElementById('teamTableBody');
+            if (!equipeCadastrada.length) {
+                tbody.innerHTML = `<tr><td colspan="4" class="text-center py-6 text-slate-400 font-bold">Nenhum responsável cadastrado.</td></tr>`;
+                return;
+            }
+            let html = '';
+            equipeCadastrada.forEach(e => {
+                html += `<tr class="hover:bg-slate-50/80 transition-colors">
+                    <td class="py-3 px-4 font-extrabold text-slate-900">${e.nome}</td>
+                    <td class="py-3 px-4 text-slate-500 font-medium">${e.email}</td>
+                    <td class="py-3 px-4"><span class="st-badge st-andamento mr-1.5">${e.equipe}</span> <span class="st-badge bg-slate-100 text-slate-700 border-slate-200">${e.setor || 'Geral'}</span></td>
+                    <td class="py-3 px-4 text-right"><button type="button" class="px-3 py-1.5 rounded-xl bg-rose-50 text-rose-600 hover:bg-rose-100 border border-rose-200 font-extrabold text-[11px]" onclick="removerResponsavel('${e.id}')">${ICONS.trash} Excluir</button></td>
+                </tr>`;
+            });
+            tbody.innerHTML = html;
+        }
+
+        function renderListaEquipes() {
+            const box = document.getElementById('equipesList');
+            if (!listaEquipes.length) { box.innerHTML = '<span class="text-slate-400 text-xs font-bold">Nenhuma equipe customizada cadastrada.</span>'; return; }
+            let h = '';
+            listaEquipes.forEach(e => { h += `<span class="st-badge st-andamento py-1.5 px-3.5 text-xs flex items-center gap-2">${e.nome} <button type="button" onclick="removerEquipe('${e.id}')" class="hover:text-rose-600 font-extrabold">✕</button></span>`; });
+            box.innerHTML = h;
+        }
+
+        function renderListaSetores() {
+            const box = document.getElementById('setoresList');
+            if (!listaSetores.length) { box.innerHTML = '<span class="text-slate-400 text-xs font-bold">Nenhum setor customizado cadastrado.</span>'; return; }
+            let h = '';
+            listaSetores.forEach(s => { h += `<span class="st-badge bg-slate-100 text-slate-700 border-slate-200 py-1.5 px-3.5 text-xs flex items-center gap-2">${s.nome} <button type="button" onclick="removerSetor('${s.id}')" class="hover:text-rose-600 font-extrabold">✕</button></span>`; });
+            box.innerHTML = h;
+        }
+
+        function renderNotificationsTable() {
+            const tbody = document.getElementById('notifTableBody');
+            const pendentes = lancamentos.filter(l => l.status !== 'concluido' && l.status !== 'cancelado').sort((a, b) => (a.data || '').localeCompare(b.data || ''));
+
+            if (!pendentes.length) {
+                tbody.innerHTML = `<tr><td colspan="5" class="text-center py-8 text-slate-400 font-bold">Nenhuma manutenção pendente para notificação.</td></tr>`;
+                return;
+            }
+
+            let html = '';
+            pendentes.forEach(l => {
+                const prazoDias = parseInt(l.alertaPrazo || 0);
+                let destTxt = "Resp. " + (l.responsavel || 'Geral');
+                if (l.alertaDest === 'equipe') destTxt = "Equipe " + l.equipe;
+                if (l.alertaDest === 'todos') destTxt = "Todos os Cadastrados";
+
+                let prazoTxt = `${prazoDias} dia(s) antes`;
+                if (prazoDias === 0) prazoTxt = 'No dia';
+                else if (prazoDias === 7) prazoTxt = '1 semana antes';
+                else if (prazoDias === 30) prazoTxt = '1 mês antes';
+                else if (prazoDias === 90) prazoTxt = '3 meses antes';
+                else if (prazoDias === 180) prazoTxt = '6 meses antes';
+
+                html += `<tr class="hover:bg-slate-50/80 transition-colors">
+                    <td class="py-3.5 px-4 font-extrabold text-slate-900">${getDiaExtenso(l.data)}</td>
+                    <td class="py-3.5 px-4 font-bold text-slate-800">${l.titulo}</td>
+                    <td class="py-3.5 px-4 text-slate-500 font-semibold">${destTxt}</td>
+                    <td class="py-3.5 px-4"><span class="st-badge st-pendente">${prazoTxt}</span></td>
+                    <td class="py-3.5 px-4 text-right">
+                        <button type="button" class="btn-pill-dark !py-1.5 !px-3.5 text-[11px]" onclick="enviarAlertaEmail('${l.id}')">${ICONS.mail} <span>E-mail</span></button>
+                    </td>
+                </tr>`;
+            });
+            tbody.innerHTML = html;
+        }
+
+        window.enviarAlertaEmail = (id) => {
+            const l = lancamentos.find(x => x.id === id);
+            if (!l) return;
+
+            let emails = [];
+            const dest = l.alertaDest || 'responsavel';
+            if (dest === 'responsavel') {
+                const r = equipeCadastrada.find(e => e.nome === l.responsavel);
+                if (r) emails.push(r.email);
+            } else if (dest === 'equipe') {
+                equipeCadastrada.filter(e => e.equipe === l.equipe).forEach(e => emails.push(e.email));
+            } else {
+                equipeCadastrada.forEach(e => emails.push(e.email));
+            }
+
+            const destinatarioFinal = emails.length ? emails.join(',') : 'pcm@cepera.com.br';
+            const assunto = encodeURIComponent(`[Alerta PCM Cepera] Manutenção Programada: ${l.titulo}`);
+            const corpo = encodeURIComponent(`Olá,\n\nEste é um lembrete automático de manutenção industrial:\n\n- Atividade: ${l.titulo}\n- Data: ${getDiaExtenso(l.data)} às ${l.hora || '--:--'}\n- Equipe: ${l.equipe}\n- Responsável: ${l.responsavel || 'Geral'}\n- Descrição: ${l.descricao || 'N/A'}\n\nPor favor, garanta os preparativos.\nPCM - Cepera Alimentos`);
+
+            window.open(`mailto:${destinatarioFinal}?subject=${assunto}&body=${corpo}`);
+            showToast("Cliente de e-mail aberto com mensagem pronta!");
+        };
+
+        function filtrados(lista) {
+            let res = lista;
+            if (filtroTipo !== "all") res = res.filter(l => l.tipo === filtroTipo);
+            if (buscaTxt) {
+                res = res.filter(l =>
+                    (l.titulo && l.titulo.toLowerCase().includes(buscaTxt)) ||
+                    (l.responsavel && l.responsavel.toLowerCase().includes(buscaTxt)) ||
+                    (l.equipe && l.equipe.toLowerCase().includes(buscaTxt))
+                );
+            }
+            return res;
+        }
+
+        function renderDashboard() {
+            const mesAtual = lancamentos.filter(l => {
+                if (!l.data) return false;
+                const [a, m] = l.data.split('-');
+                return parseInt(a) === viewAno && parseInt(m) === viewMes + 1;
+            });
+
+            const listF = filtrados(mesAtual);
+            const concluidas = listF.filter(l => l.status === 'concluido').length;
+            const emAberto = listF.filter(l => l.status !== 'concluido' && l.status !== 'cancelado').length;
+
+            document.getElementById('dashTotal').innerText = listF.length;
+            document.getElementById('dashDone').innerText = concluidas;
+            document.getElementById('dashPending').innerText = emAberto;
+            document.getElementById('dashRate').innerText = listF.length ? Math.round((concluidas / listF.length) * 100) + '%' : '0%';
+
+            const contagem = {};
+            Object.keys(TIPOS).forEach(k => contagem[k] = 0);
+            listF.forEach(l => { if (contagem[l.tipo] !== undefined) contagem[l.tipo]++; });
+
+            const labels = []; const data = []; const bgColors = [];
+            let legendHTML = '';
+            Object.keys(contagem).forEach(k => {
+                if (contagem[k] > 0) {
+                    labels.push(TIPOS[k].nome); data.push(contagem[k]); bgColors.push(TIPOS[k].cor);
+                    legendHTML += `<div class="flex items-center gap-1.5 truncate"><span class="w-2 h-2 rounded-full shrink-0" style="background:${TIPOS[k].cor}"></span><span class="truncate">${TIPOS[k].nome} (${contagem[k]})</span></div>`;
+                }
+            });
+            document.getElementById('dashLegend').innerHTML = legendHTML || '<span class="text-slate-400">Sem dados no mês</span>';
+
+            const ctx = document.getElementById('dashChart').getContext('2d');
+            if (chartInstance) chartInstance.destroy();
+            chartInstance = new Chart(ctx, {
+                type: 'doughnut',
+                data: { labels, datasets: [{ data: data.length ? data : [1], backgroundColor: data.length ? bgColors : ['#e2e8f0'], borderWidth: 0 }] },
+                options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false }, tooltip: { enabled: data.length > 0 } }, cutout: '70%' }
+            });
+        }
+
+        function renderCalendario() {
+            const grid = document.getElementById("calGrid");
+            const primeiro = new Date(viewAno, viewMes, 1).getDay();
+            const totalDias = new Date(viewAno, viewMes + 1, 0).getDate();
+
+            let html = "";
+            const celulas = Math.ceil((primeiro + totalDias) / 7) * 7;
+            const hojeChave = chaveDia(hoje.getFullYear(), hoje.getMonth(), hoje.getDate());
+
+            for (let c = 0; c < celulas; c++) {
+                if (c < primeiro || c >= primeiro + totalDias) {
+                    html += `<div class="cell empty"></div>`;
+                    continue;
+                }
+                const dia = c - primeiro + 1;
+                const chave = chaveDia(viewAno, viewMes, dia);
+                const lants = filtrados(lancamentos.filter(l => l.data === chave));
+
+                let cls = "cell" + (c % 7 === 0 || c % 7 === 6 ? " weekend" : "") + (chave === hojeChave ? " today" : "");
+                let chips = "";
+                lants.slice(0, 4).forEach(l => {
+                    const isDone = l.status === 'concluido';
+                    const tipoCor = (TIPOS[l.tipo] && TIPOS[l.tipo].cor) || '#0284c7';
+                    chips += `<div class="chip ${isDone ? 'done' : ''}"><span class="dot-sm" style="background:${tipoCor}"></span><span class="t">${l.titulo}</span></div>`;
+                });
+                if (lants.length > 4) chips += `<span class="text-[10px] font-extrabold text-slate-400">+${lants.length - 4} mais</span>`;
+                const badge = lants.length ? `<span class="badge-count">${lants.length}</span>` : '';
+                html += `<div class="${cls}" onclick="abrirDia('${chave}')"><span class="daynum">${dia}</span>${badge}${chips}</div>`;
+            }
+            grid.innerHTML = html;
+            document.getElementById("monthLabel").innerText = `${MESES[viewMes]} de ${viewAno}`;
+            renderDashboard();
+        }
+
+        window.abrirDia = (chave) => {
+            diaAberto = chave;
+            const p = chave.split('-');
+            document.getElementById("dayTitle").innerText = `${p[2]} de ${MESES[parseInt(p[1]) - 1]} de ${p[0]}`;
+            abrirModal('dayOverlay');
+            atualizarSelectRespAdd();
+            renderListaDia();
+        };
+
+        window.mudarStatus = async (id, novoStatus) => {
+            try { await updateDoc(doc(db, "ag_manutencao", id), { status: novoStatus }); showToast("Status atualizado!"); } catch (err) { showToast("Erro ao atualizar status.", "error"); }
+        };
+
+        function renderListaDia() {
+            const list = filtrados(lancamentos.filter(l => l.data === diaAberto)).sort((a, b) => (a.hora || '').localeCompare(b.hora || ''));
+            document.getElementById("dayCount").innerText = `${list.length} lançamentos programados`;
+
+            const box = document.getElementById("dayList");
+            if (!list.length) {
+                box.innerHTML = `<div class="text-center py-6 text-slate-400 text-xs font-bold">Nenhum lançamento registrado neste dia.</div>`;
+                return;
+            }
+
+            let html = "";
+            list.forEach(l => {
+                const t = TIPOS[l.tipo] || TIPOS.preventiva;
+                const s = STATUSES[l.status || 'pendente'];
+                let statusOptions = "";
+                Object.keys(STATUSES).forEach(stKey => {
+                    statusOptions += `<option value="${stKey}" ${stKey === (l.status || 'pendente') ? 'selected' : ''}>${STATUSES[stKey].nome}</option>`;
+                });
+
+                html += `<div class="py-3.5 flex gap-3 items-start">
+                    <div class="w-1.5 self-stretch rounded-full shrink-0" style="background:${t.cor}"></div>
+                    <div class="flex-1 min-w-0">
+                        <div class="flex flex-wrap items-center gap-2">
+                            <span class="font-extrabold text-xs text-slate-900">${l.hora || '--:--'}</span>
+                            <span class="st-badge" style="border-color:${t.cor};color:${t.cor}">${t.nome}</span>
+                            <select class="st-badge st-select ${s.badge}" onchange="mudarStatus('${l.id}', this.value)">${statusOptions}</select>
+                        </div>
+                        <p class="font-extrabold text-sm text-slate-900 mt-1">${l.titulo}</p>
+                        <p class="text-xs text-slate-500 font-semibold mt-0.5"><strong class="text-slate-700">${l.equipe || 'Geral'}</strong> • Resp: ${l.responsavel || 'N/A'}</p>
+                        ${l.descricao ? `<div class="text-xs text-slate-600 mt-1.5 bg-slate-50 p-2.5 rounded-xl border border-slate-200/70">${l.descricao}</div>` : ''}
+                        <div class="flex gap-2 mt-2.5">
+                            <button type="button" class="px-3 py-1 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-700 font-extrabold text-[11px] flex items-center gap-1" onclick="abrirEdicao('${l.id}')">${ICONS.edit} Editar</button>
+                            <button type="button" class="px-3 py-1 rounded-xl bg-rose-50 hover:bg-rose-100 text-rose-600 border border-rose-200 font-extrabold text-[11px] flex items-center gap-1" onclick="confirmarExclusao('${l.id}')">${ICONS.trash} Excluir</button>
+                        </div>
+                    </div>
+                </div>`;
+            });
+            box.innerHTML = html;
+        }
+
+        // Relatório A4 Mensal da Agenda
+        window.imprimirAgendaMesA4 = function() {
+            const mesAtual = filtrados(lancamentos.filter(l => l.data && l.data.startsWith(`${viewAno}-${pad(viewMes + 1)}`))).sort((a, b) => (a.data || '').localeCompare(b.data || '') || (a.hora || '').localeCompare(b.hora || ''));
+            const dataHora = new Date().toLocaleString('pt-BR');
+            let rowsHtml = '';
+            mesAtual.forEach(l => {
+                const t = TIPOS[l.tipo] || TIPOS.preventiva;
+                const s = STATUSES[l.status || 'pendente'];
+                rowsHtml += `<tr>
+                    <td><strong>${getDiaExtenso(l.data)}</strong> ${l.hora ? 'às ' + l.hora : ''}</td>
+                    <td><strong>${l.titulo}</strong>${l.descricao ? '<br><span style="color:#64748b;font-size:10px;">' + l.descricao + '</span>' : ''}</td>
+                    <td>${t.nome}</td>
+                    <td>${l.equipe || 'Geral'}<br><span style="color:#64748b;font-size:10px;">${l.responsavel || '-'}</span></td>
+                    <td style="text-align:center;font-weight:800;">${s.nome}</td>
+                </tr>`;
+            });
+
+            const html = `<!DOCTYPE html><html lang="pt-BR"><head><meta charset="UTF-8"><title>Agenda PCM — ${MESES[viewMes]} ${viewAno}</title>
+            <style>
+                @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;800&display=swap');
+                body { font-family: 'Plus Jakarta Sans', sans-serif; font-size: 11px; color: #0f172a; padding: 24px; }
+                .header { border-bottom: 3px solid #0284c7; padding-bottom: 12px; margin-bottom: 20px; display: flex; justify-content: space-between; align-items: flex-end; }
+                .logo { background: #dc2626; color: #fff; padding: 4px 10px; border-radius: 6px; font-weight: 800; font-size: 13px; display: inline-block; margin-bottom: 6px; }
+                h1 { margin: 0; font-size: 19px; font-weight: 800; text-transform: uppercase; }
+                table { width: 100%; border-collapse: collapse; }
+                th { background: #f1f5f9; padding: 8px 10px; text-align: left; font-size: 10px; text-transform: uppercase; border-bottom: 2px solid #cbd5e1; }
+                td { padding: 8px 10px; border-bottom: 1px solid #e2e8f0; vertical-align: top; }
+                @media print { body { padding: 0; } @page { size: A4 portrait; margin: 1cm; } }
+            </style></head><body>
+                <div class="header">
+                    <div><div class="logo">CEPÊRA</div><h1>Agenda de Manutenção PCM — ${MESES[viewMes]} de ${viewAno}</h1></div>
+                    <div style="text-align:right;font-size:10px;color:#64748b;"><strong>PCM Cepêra Alimentos</strong><br>${mesAtual.length} atividades • Emitido em ${dataHora}</div>
+                </div>
+                <table><thead><tr><th>Data / Hora</th><th>Atividade / Equipamento</th><th>Tipo</th><th>Equipe / Responsável</th><th style="text-align:center;">Status</th></tr></thead>
+                <tbody>${rowsHtml || '<tr><td colspan="5" style="text-align:center;">Nenhuma atividade programada para este mês.</td></tr>'}</tbody></table>
+            </body></html>`;
+
+            const win = window.open('', '_blank');
+            if (win) {
+                win.document.write(html);
+                win.document.close();
+                win.focus();
+                setTimeout(() => win.print(), 400);
+            }
+        };
+
+        // Submissão de Lançamento com Recorrência e Notificação
+        document.getElementById('addForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const btn = e.submitter;
+            if (btn) { btn.disabled = true; btn.innerText = "Salvando..."; }
+
+            const baseData = {
+                titulo: document.getElementById('fTitulo').value.trim(),
+                hora: document.getElementById('fHora').value || '',
+                tipo: document.getElementById('fTipo').value,
+                status: document.getElementById('fStatus').value,
+                equipe: document.getElementById('fEquipe').value,
+                responsavel: document.getElementById('fResp').value || '',
+                descricao: document.getElementById('fDesc').value.trim(),
+                alertaPrazo: document.getElementById('fAlertaPrazo').value,
+                alertaDest: document.getElementById('fAlertaDest').value,
+                criadoEm: new Date().toISOString()
+            };
+
+            let datasParaSalvar = [diaAberto];
+            const isRec = document.getElementById('fRecorrente').checked;
+            if (isRec) {
+                const freq = document.getElementById('fRecFreq').value;
+                const limitStr = document.getElementById('fRecFim').value;
+                if (limitStr) {
+                    let currDate = new Date(diaAberto + 'T12:00:00');
+                    let limitDate = new Date(limitStr + 'T12:00:00');
+                    let count = 0;
+                    while (currDate <= limitDate && count < 365) {
+                        if (freq === 'diario') currDate.setDate(currDate.getDate() + 1);
+                        else if (freq === 'semanal') currDate.setDate(currDate.getDate() + 7);
+                        else if (freq === 'mensal') currDate.setMonth(currDate.getMonth() + 1);
+                        else if (freq === 'trimestral') currDate.setMonth(currDate.getMonth() + 3);
+                        else if (freq === 'semestral') currDate.setMonth(currDate.getMonth() + 6);
+                        else if (freq === 'anual') currDate.setFullYear(currDate.getFullYear() + 1);
+
+                        if (currDate <= limitDate) datasParaSalvar.push(chaveDia(currDate.getFullYear(), currDate.getMonth(), currDate.getDate()));
+                        count++;
+                    }
+                }
+            }
+
+            try {
+                const promises = datasParaSalvar.map(d => addDoc(colRef, { ...baseData, data: d }));
+                await Promise.all(promises);
+                document.getElementById('addForm').reset();
+                document.getElementById('recMenu').hidden = true;
+                fecharModal('dayOverlay');
+                showToast(datasParaSalvar.length > 1 ? `${datasParaSalvar.length} lançamentos programados!` : "Lançamento salvo com sucesso!");
+            } catch (err) { showToast("Erro ao salvar.", "error"); }
+            if (btn) { btn.disabled = false; btn.innerText = "Salvar Lançamento"; }
+        });
+
+        window.abrirEdicao = (id) => {
+            const l = lancamentos.find(x => x.id === id);
+            if (!l) return;
+            document.getElementById('eId').value = l.id;
+            document.getElementById('eTitulo').value = l.titulo || '';
+            document.getElementById('eHora').value = l.hora || '';
+            document.getElementById('eTipo').value = l.tipo || 'preventiva';
+            document.getElementById('eStatus').value = l.status || 'pendente';
+            document.getElementById('eEquipe').value = l.equipe || '';
+            atualizarSelectRespEdit();
+            document.getElementById('eResp').value = l.responsavel || '';
+            document.getElementById('eDesc').value = l.descricao || '';
+            abrirModal('editOverlay');
+        };
+
+        document.getElementById('editForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const id = document.getElementById('eId').value;
+            try {
+                await updateDoc(doc(db, "ag_manutencao", id), {
+                    titulo: document.getElementById('eTitulo').value,
+                    hora: document.getElementById('eHora').value,
+                    tipo: document.getElementById('eTipo').value,
+                    status: document.getElementById('eStatus').value,
+                    equipe: document.getElementById('eEquipe').value,
+                    responsavel: document.getElementById('eResp').value,
+                    descricao: document.getElementById('eDesc').value
+                });
+                fecharModal('editOverlay');
+                showToast("Atualizado!");
+            } catch (err) { showToast("Erro ao atualizar.", "error"); }
+        });
+
+        window.confirmarExclusao = (id) => { idParaExcluir = id; abrirModal('deleteOverlay'); };
+        document.getElementById('confirmDeleteBtn').addEventListener('click', async () => {
+            if (!idParaExcluir) return;
+            try {
+                await deleteDoc(doc(db, "ag_manutencao", idParaExcluir));
+                fecharModal('deleteOverlay');
+                showToast("Excluído.");
+            } catch (err) { showToast("Erro ao excluir.", "error"); }
+        });
+
+        // CSV Export
+        document.getElementById("exportBtn").addEventListener('click', () => {
+            const mesAtual = lancamentos.filter(l => l.data && l.data.startsWith(`${viewAno}-${pad(viewMes + 1)}`));
+            if (!mesAtual.length) return showToast("Sem dados para exportar neste mês.", "error");
+            let csv = "Data,Hora,Titulo,Equipe,Responsavel,Tipo,Status,Descricao\n";
+            mesAtual.forEach(l => {
+                csv += `${l.data},${l.hora || ''},"${(l.titulo || '').replace(/"/g, '""')}","${l.equipe || ''}","${(l.responsavel || '').replace(/"/g, '""')}","${TIPOS[l.tipo]?.nome || ''}","${STATUSES[l.status || 'pendente']?.nome || ''}","${(l.descricao || '').replace(/\n/g, ' ')}"\n`;
+            });
+            const blob = new Blob(["\uFEFF" + csv], { type: 'text/csv;charset=utf-8;' });
+            const link = document.createElement("a");
+            link.href = URL.createObjectURL(blob);
+            link.download = `Manutencao_Cepera_${viewAno}_${pad(viewMes + 1)}.csv`;
+            link.click();
+        });
+
+        document.getElementById("prevMonth").onclick = () => { viewMes--; if (viewMes < 0) { viewMes = 11; viewAno--; } renderCalendario(); };
+        document.getElementById("nextMonth").onclick = () => { viewMes++; if (viewMes > 11) { viewMes = 0; viewAno++; } renderCalendario(); };
+        document.getElementById("todayBtn").onclick = () => { viewAno = hoje.getFullYear(); viewMes = hoje.getMonth(); renderCalendario(); };
+        document.getElementById("searchInput").addEventListener('input', (e) => { buscaTxt = e.target.value.toLowerCase(); atualizarTudo(); });
+
+        document.addEventListener("keydown", function(e) {
+            if (e.key === "Escape") {
+                ['deleteOverlay', 'editOverlay', 'dayOverlay'].forEach(id => {
+                    const el = document.getElementById(id);
+                    if (el && !el.hidden) fecharModal(id);
+                });
+                ['modalEspacoUsuario', 'modalAtalhos'].forEach(fecharModalA11y);
+                return;
+            }
+            if ((e.ctrlKey || e.metaKey) && (e.key === '?' || e.key === '/')) {
+                e.preventDefault();
+                abrirModalAtalhos();
+                return;
+            }
+            var t = e.target;
+            if (t && (t.tagName === "INPUT" || t.tagName === "TEXTAREA" || t.tagName === "SELECT" || t.isContentEditable)) return;
+
+            if (e.altKey) {
+                const k = e.key.toLowerCase();
+                if (k === 't') { e.preventDefault(); toggleModoTablet(); return; }
+                if (k === 'u') { e.preventDefault(); abrirEspacoUsuario(); return; }
+                if (k === '1') { e.preventDefault(); switchView('calendar'); return; }
+                if (k === '2') { e.preventDefault(); switchView('notifications'); return; }
+                if (k === '3') { e.preventDefault(); switchView('team'); return; }
+            }
+
+            if (e.ctrlKey || e.altKey || e.metaKey) return;
+            let bloqueado = !document.getElementById("dayOverlay").hidden || !document.getElementById("editOverlay").hidden || !document.getElementById("deleteOverlay").hidden;
+
+            var k = e.key;
+            if (k === "ArrowLeft") { if (!bloqueado) { viewMes--; if (viewMes < 0) { viewMes = 11; viewAno--; } renderCalendario(); e.preventDefault(); } }
+            else if (k === "ArrowRight") { if (!bloqueado) { viewMes++; if (viewMes > 11) { viewMes = 0; viewAno++; } renderCalendario(); e.preventDefault(); } }
+            else if (k === "t" || k === "T") { if (!bloqueado) { viewAno = hoje.getFullYear(); viewMes = hoje.getMonth(); renderCalendario(); } }
+            else if (k === "n" || k === "N") {
+                if (!bloqueado) abrirNovoLancamentoRapido();
+            }
+        });
+
+        function atualizarTudo() { renderCalendario(); if (!document.getElementById('dayOverlay').hidden) renderListaDia(); }
+
+        let selHtml = ''; let pillHtml = `<button type="button" class="pill active" data-filter="all" aria-pressed="true">Todos</button>`;
+        Object.keys(TIPOS).forEach(k => {
+            selHtml += `<option value="${k}">${TIPOS[k].nome}</option>`;
+            pillHtml += `<button type="button" class="pill" data-filter="${k}" aria-pressed="false"><span class="dot-sm" style="background:${TIPOS[k].cor}"></span>${TIPOS[k].nome}</button>`;
+        });
+        document.getElementById("fTipo").innerHTML = selHtml;
+        document.getElementById("eTipo").innerHTML = selHtml;
+        document.getElementById("filterPills").innerHTML = pillHtml;
+
+        document.getElementById("filterPills").addEventListener('click', (e) => {
+            const btn = e.target.closest('button[data-filter]');
+            if (!btn) return;
+            filtroTipo = btn.getAttribute('data-filter');
+            document.querySelectorAll('#filterPills button').forEach(b => {
+                b.setAttribute('aria-pressed', b === btn);
+                b.classList.toggle('active', b === btn);
+            });
+            atualizarTudo();
+        });
+
+        // ================= GUARDA CENTRAL SSO & RBAC (PCM CEPÊRA) =================
+        (function verificarAcessoCentralSSO() {
+            try {
+                const raw = safeStorage.get('cepera_central_session');
+                const userStr = safeStorage.get('cepera_ir_user');
+                if (!raw && !userStr) {
+                    if (window.parent && window.parent !== window) {
+                        window.parent.postMessage({ type: 'CEPERA_LOGOUT_CENTRAL' }, '*');
+                    } else {
+                        window.location.href = 'index.html?app=agenda_pcm';
+                    }
+                    return;
+                }
+                const sess = raw ? JSON.parse(raw) : { user: userStr, nome: userStr, role: 'Admin' };
+                if (sess && sess.role !== 'Admin' && Array.isArray(sess.apps_permitidos) && !sess.apps_permitidos.includes('agenda_pcm')) {
+                    if (window.parent && window.parent !== window) {
+                        window.parent.postMessage({ type: 'CEPERA_VOLTAR_CENTRAL' }, '*');
+                    } else {
+                        window.location.href = 'index.html';
+                    }
+                    return;
+                }
+                usuarioLogado = sess;
+                carregarPreferenciasUsuario(sess);
+                const nameEl = document.getElementById('loggedUserName');
+                const roleEl = document.getElementById('loggedUserRole');
+                const greetEl = document.getElementById('dashGreetingName');
+                if (nameEl) nameEl.innerText = sess.nome || sess.user || 'Usuário';
+                if (roleEl) roleEl.innerText = sess.role || 'PCM';
+                if (greetEl) greetEl.innerText = (sess.nome || sess.user || 'Gestor').split(' ')[0];
+            } catch (_) {}
+        })();
+
+        document.addEventListener('DOMContentLoaded', () => { initFirebase(); });
+    </script>
 </body>
 </html>

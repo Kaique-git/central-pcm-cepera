@@ -1,379 +1,703 @@
 <!DOCTYPE html>
-<html lang="pt-BR" data-theme="light">
+<html lang="pt-BR">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Gestão Integrada de Ativos — PCM Cepêra</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0">
+    <title>Gestão Integrada de Ativos & Obsolescência — PCM Cepêra</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
-    <script>
-    (function () {
-        var pref = {}; try { pref = JSON.parse(localStorage.getItem("cepera-obs-prefs") || "{}"); } catch (e) { }
-        document.documentElement.setAttribute("data-theme", pref.theme || "light");
-    })();
-    </script>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
     <style>
         :root {
-            --bg-main: #f8fafc; --surface: #ffffff; --surface-hover: #f1f5f9; --surface-alt: #f8fafc;
-            --border: #e2e8f0; --text-main: #0f172a; --text-muted: #64748b;
-            --primary: #0284c7; --primary-hover: #0369a1; --shadow: 0 4px 6px -1px rgba(0,0,0,0.05), 0 2px 4px -1px rgba(0,0,0,0.03);
+            --primary: #0f172a;
+            --accent: #0284c7;
+            --cepera: #dc2626;
             --tree-line: #cbd5e1;
         }
-        body { font-family: 'Inter', sans-serif; -webkit-tap-highlight-color: transparent; background-color: var(--bg-main); color: var(--text-main); }
-        ::-webkit-scrollbar { width: 8px; height: 8px; } ::-webkit-scrollbar-track { background: transparent; } ::-webkit-scrollbar-thumb { background: var(--border); border-radius: 4px; }
-        .glass-panel { background: var(--surface); border: 1px solid var(--border); box-shadow: var(--shadow); }
-        
-        .badge-critico { background: rgba(225, 29, 72, 0.1); color: #e11d48; border: 1px solid rgba(225, 29, 72, 0.2); }
-        .badge-alto { background: rgba(245, 158, 11, 0.1); color: #d97706; border: 1px solid rgba(245, 158, 11, 0.2); }
-        .badge-medio { background: rgba(234, 179, 8, 0.1); color: #ca8a04; border: 1px solid rgba(234, 179, 8, 0.2); }
-        .badge-baixo { background: rgba(16, 185, 129, 0.1); color: #059669; border: 1px solid rgba(16, 185, 129, 0.2); }
 
-        .input-touch { padding: 0.75rem 1rem; font-size: 0.95rem; border-radius: 0.5rem; background: var(--surface); border: 1px solid var(--border); color: var(--text-main); transition: all 0.2s; }
-        .input-touch:focus { outline: none; border-color: var(--primary); box-shadow: 0 0 0 3px rgba(2, 132, 199, 0.1); }
-        .tab-btn { padding: 0.875rem 1.25rem; font-size: 0.875rem; white-space: nowrap; cursor: pointer; font-weight: 600; border-bottom: 2px solid transparent; transition: all 0.2s; color: var(--text-muted); }
-        .tab-btn.active { color: var(--primary); border-bottom-color: var(--primary); background: var(--surface-hover); }
-        .tab-btn:hover:not(.active) { color: var(--text-main); }
-        
+        html, body {
+            margin: 0 !important;
+            padding: 0 !important;
+            width: 100% !important;
+            min-height: 100vh !important;
+            overflow-x: hidden;
+            font-family: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, sans-serif;
+            color: #0f172a;
+            -webkit-tap-highlight-color: transparent;
+            background: linear-gradient(135deg, #f1f5f9 0%, #f8fafc 50%, #e2e8f0 100%);
+        }
+
+        .frosted-shell {
+            background: rgba(255, 255, 255, 0.94);
+            backdrop-filter: blur(8px);
+            -webkit-backdrop-filter: blur(8px);
+            border: 1px solid #e2e8f0;
+            box-shadow: 0 12px 32px -12px rgba(15, 23, 42, 0.06);
+        }
+
+        .glass-card {
+            background: #ffffff;
+            border: 1px solid #e2e8f0;
+            box-shadow: 0 4px 12px -4px rgba(15, 23, 42, 0.04);
+            transition: transform 0.15s ease, box-shadow 0.15s ease;
+        }
+
+        .glass-card-hover:hover {
+            transform: translateY(-1px);
+            box-shadow: 0 10px 20px -8px rgba(15, 23, 42, 0.08);
+        }
+
+        .glass-rail {
+            background: rgba(255, 255, 255, 0.9);
+            border-right: 1px solid #e2e8f0;
+        }
+
+        .input-clean {
+            padding: 0.75rem 0.95rem;
+            font-size: 0.9rem;
+            border-radius: 0.85rem;
+            border: 1px solid #cbd5e1;
+            background: #ffffff;
+            transition: border-color 0.15s;
+            width: 100%;
+            color: #0f172a;
+        }
+        .input-clean:focus {
+            outline: none;
+            border-color: var(--accent);
+            box-shadow: 0 0 0 3px rgba(2, 132, 199, 0.12);
+        }
+
+        .btn-pill-dark {
+            background: var(--accent);
+            color: #ffffff;
+            font-weight: 700;
+            border-radius: 9999px;
+            padding: 0.7rem 1.35rem;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.5rem;
+            transition: opacity 0.15s ease, transform 0.15s ease;
+            cursor: pointer;
+            box-shadow: 0 6px 16px -4px rgba(15, 23, 42, 0.25);
+        }
+        .btn-pill-dark:hover { opacity: 0.92; transform: translateY(-1px); }
+        .btn-pill-dark:active { transform: scale(0.98); }
+
+        .btn-touch {
+            padding: 0.7rem 1.15rem;
+            font-weight: 700;
+            border-radius: 0.85rem;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.45rem;
+            transition: all 0.15s ease;
+            cursor: pointer;
+        }
+        .btn-touch:active { transform: scale(0.98); }
+
+        .rail-btn {
+            width: 100%;
+            padding: 0.65rem 0.4rem;
+            border-radius: 1rem;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            gap: 0.25rem;
+            color: #64748b;
+            background: #ffffff;
+            border: 1px solid #e2e8f0;
+            transition: all 0.15s;
+            cursor: pointer;
+            font-size: 10px;
+            font-weight: 800;
+            text-align: center;
+            line-height: 1.15;
+        }
+        .rail-btn:hover { color: #0f172a; border-color: #cbd5e1; }
+        .rail-btn.active {
+            background: var(--accent);
+            color: #ffffff;
+            border-color: var(--accent);
+            box-shadow: 0 4px 12px rgba(15, 23, 42, 0.2);
+        }
+
+        .mob-tab {
+            padding: 0.6rem 0.95rem;
+            border-radius: 9999px;
+            font-size: 0.78rem;
+            font-weight: 700;
+            color: #64748b;
+            white-space: nowrap;
+            transition: all 0.15s;
+        }
+        .mob-tab.active {
+            background: var(--accent);
+            color: #ffffff;
+        }
+
+        .badge-critico { background: #fee2e2; color: #b91c1c; border: 1px solid #fecaca; }
+        .badge-alto { background: #ffedd5; color: #c2410c; border: 1px solid #fed7aa; }
+        .badge-medio { background: #fef3c7; color: #b45309; border: 1px solid #fde68a; }
+        .badge-baixo { background: #dcfce7; color: #15803d; border: 1px solid #bbf7d0; }
+
         /* Árvore Corporativa */
-        .tree-area { margin-bottom: 24px; }
-        .tree-area-header { background: var(--text-main); color: var(--surface); padding: 10px 16px; border-radius: 6px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.05em; display: flex; align-items: center; gap: 8px; margin-bottom: 12px; font-size: 0.85rem; }
-        .tree-machine { background: var(--surface); border: 1px solid var(--border); border-radius: 8px; padding: 16px; margin-bottom: 12px; margin-left: 12px; box-shadow: var(--shadow); }
-        .tree-equip { margin-left: 20px; border-left: 2px solid var(--primary); padding-left: 16px; margin-top: 12px; padding-bottom: 8px;}
-        .tree-assembly { margin-left: 20px; border-left: 2px solid var(--tree-line); padding-left: 16px; margin-top: 10px; }
-        .tree-component { margin-left: 16px; padding: 12px 16px; background: var(--surface-alt); border: 1px solid var(--border); border-radius: 6px; margin-top: 8px; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 12px; }
-        
-        .gut-slider { height: 8px; border-radius: 4px; appearance: none; background: var(--tree-line); outline: none; }
-        .gut-slider::-webkit-slider-thumb { appearance: none; width: 24px; height: 24px; border-radius: 50%; background: var(--primary); cursor: pointer; border: 3px solid var(--surface); box-shadow: 0 2px 4px rgba(0,0,0,0.2); }
+        .tree-area { margin-bottom: 1.25rem; }
+        .tree-area-header {
+            background: #0f172a;
+            color: #ffffff;
+            padding: 0.7rem 1.15rem;
+            border-radius: 1rem;
+            font-weight: 800;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            margin-bottom: 0.75rem;
+            font-size: 0.78rem;
+            box-shadow: 0 4px 12px -4px rgba(15, 23, 42, 0.18);
+        }
+        .tree-machine {
+            background: #ffffff;
+            border: 1px solid #e2e8f0;
+            border-radius: 1.25rem;
+            padding: 1.15rem;
+            margin-bottom: 0.75rem;
+            margin-left: 0.5rem;
+            box-shadow: 0 4px 12px -4px rgba(15, 23, 42, 0.04);
+        }
+        .tree-equip { margin-left: 1rem; border-left: 2px solid var(--accent); padding-left: 1rem; margin-top: 0.75rem; padding-bottom: 0.35rem; }
+        .tree-assembly { margin-left: 1rem; border-left: 2px solid #cbd5e1; padding-left: 1rem; margin-top: 0.6rem; }
+        .tree-component {
+            margin-left: 0.5rem;
+            padding: 0.85rem 1.1rem;
+            background: #f8fafc;
+            border: 1px solid #e2e8f0;
+            border-radius: 0.95rem;
+            margin-top: 0.5rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 0.75rem;
+            transition: border-color 0.15s ease;
+        }
+        .tree-component:hover { border-color: #cbd5e1; }
+
+        .gut-slider { height: 8px; border-radius: 4px; appearance: none; background: #cbd5e1; outline: none; }
+        .gut-slider::-webkit-slider-thumb { appearance: none; width: 22px; height: 22px; border-radius: 50%; background: var(--accent); cursor: pointer; border: 3px solid #ffffff; box-shadow: 0 2px 4px rgba(0,0,0,0.2); }
+
+        *:focus-visible { outline: 3px solid var(--accent) !important; outline-offset: 2px; }
+
+        /* TEMA BRANCO SÓLIDO */
+        body.theme-solid { background: #f8fafc !important; }
+        body.theme-solid .frosted-shell,
+        body.theme-solid .glass-card,
+        body.theme-solid .glass-rail,
+        body.theme-solid .tree-machine {
+            background: #ffffff !important;
+            backdrop-filter: none !important;
+            box-shadow: none !important;
+            border: 1px solid #cbd5e1 !important;
+        }
+
+        /* TEMA ESCURO INDUSTRIAL */
+        body.theme-dark { background: #090d16 !important; color: #f1f5f9 !important; }
+        body.theme-dark .frosted-shell { background: #0f172a !important; border-color: #1e293b !important; backdrop-filter: none !important; }
+        body.theme-dark .glass-card,
+        body.theme-dark .glass-rail,
+        body.theme-dark .tree-machine { background: #1e293b !important; border-color: #334155 !important; color: #f1f5f9 !important; backdrop-filter: none !important; }
+        body.theme-dark .tree-component { background: #0f172a !important; border-color: #334155 !important; color: #f1f5f9 !important; }
+        body.theme-dark .text-slate-900,
+        body.theme-dark .text-slate-800,
+        body.theme-dark .text-slate-700 { color: #f8fafc !important; }
+        body.theme-dark .text-slate-600,
+        body.theme-dark .text-slate-500,
+        body.theme-dark .text-slate-400 { color: #94a3b8 !important; }
+        body.theme-dark .bg-white,
+        body.theme-dark .bg-slate-50,
+        body.theme-dark .bg-slate-50\/80,
+        body.theme-dark .bg-slate-100 { background-color: #0f172a !important; border-color: #334155 !important; color: #f1f5f9 !important; }
+        body.theme-dark .input-clean { background: #0f172a !important; border-color: #475569 !important; color: #ffffff !important; }
+        body.theme-dark .rail-btn { background: #0f172a !important; border-color: #334155 !important; color: #cbd5e1 !important; }
+        body.theme-dark .rail-btn.active { background: var(--accent) !important; color: #ffffff !important; }
+
+        /* TEMA ALTO CONTRASTE */
+        body.high-contrast { background: #ffffff !important; color: #000000 !important; }
+        body.high-contrast .frosted-shell,
+        body.high-contrast .glass-card,
+        body.high-contrast .glass-rail,
+        body.high-contrast .tree-machine,
+        body.high-contrast .tree-component {
+            background: #ffffff !important;
+            backdrop-filter: none !important;
+            border: 2px solid #000000 !important;
+            box-shadow: none !important;
+        }
+        body.high-contrast .input-clean { border: 2px solid #000000 !important; color: #000000 !important; }
+
+        /* MODO TABLET */
+        body.tablet-mode *,
+        body.tablet-mode *::before,
+        body.tablet-mode *::after {
+            backdrop-filter: none !important;
+            transition: none !important;
+            animation: none !important;
+            box-shadow: none !important;
+        }
+        body.tablet-mode .btn-touch,
+        body.tablet-mode .btn-pill-dark,
+        body.tablet-mode .input-clean,
+        body.tablet-mode select,
+        body.tablet-mode .mob-tab {
+            min-height: 48px !important;
+            font-size: 0.95rem !important;
+        }
+
+        ::-webkit-scrollbar { width: 6px; height: 6px; }
+        ::-webkit-scrollbar-track { background: transparent; }
+        ::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 9999px; }
     </style>
 </head>
 <body class="min-h-screen flex flex-col">
 
-    <!-- Header Principal -->
-    <header class="bg-white border-b border-[var(--border)] sticky top-0 z-40">
-        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
-            <div class="flex items-center space-x-4">
-                <div class="bg-red-600 text-white font-black px-3 py-1.5 rounded tracking-widest text-sm shadow-sm">CEPÊRA</div>
-                <div class="h-6 w-px bg-[var(--border)] hidden sm:block"></div>
-                <h1 class="text-base font-bold text-slate-800 flex items-center gap-2">
-                    Gestão de Ativos <span class="bg-slate-100 text-slate-600 border border-slate-200 text-[10px] font-bold px-2 py-0.5 rounded">PCM</span>
-                </h1>
-            </div>
-            <div class="flex items-center space-x-3">
-                <div id="statusBadge" class="hidden md:flex items-center space-x-2 bg-slate-50 px-3 py-1.5 rounded-md border border-slate-200 text-xs">
-                    <span id="statusDot" class="w-2 h-2 rounded-full bg-amber-500 animate-pulse"></span>
-                    <span id="statusText" class="text-slate-500 font-semibold">Conectando...</span>
-                </div>
-                <div class="flex gap-2">
-                    <button onclick="openModal('modalItem', 'Preventiva')" class="hidden sm:flex bg-blue-50 text-blue-700 hover:bg-blue-100 border border-blue-200 text-xs font-bold px-4 py-2 rounded-md transition-all items-center gap-2">
-                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6"/></svg>
-                        Nova Preventiva
-                    </button>
-                    <button onclick="openModal('modalItem', 'Obsolescencia')" class="hidden sm:flex bg-rose-600 hover:bg-rose-700 text-white text-xs font-bold px-4 py-2 rounded-md transition-all items-center gap-2 shadow-sm">
-                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"/></svg>
-                        Risco de Obsolescência
-                    </button>
-                </div>
-            </div>
-        </div>
-    </header>
+    <!-- APP PRINCIPAL -->
+    <div id="mainApp" class="min-h-screen w-full p-2 sm:p-4 md:p-5 flex flex-col">
+        <div class="frosted-shell rounded-[26px] flex-1 flex flex-col md:flex-row overflow-hidden min-h-[calc(100vh-2.5rem)]">
 
-    <!-- Sub-Header / Navegação -->
-    <div class="bg-white border-b border-[var(--border)]">
-        <div class="max-w-7xl mx-auto px-4 flex space-x-1 overflow-x-auto">
-            <button onclick="switchTab('dashboard')" id="tabBtn-dashboard" class="tab-btn active flex items-center gap-2">
-                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2V6zM14 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2V6zM4 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2v-2zM14 16a2 2 0 012-2h2a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2v-2z"/></svg>
-                Visão Geral
-            </button>
-            <button onclick="switchTab('obs')" id="tabBtn-obs" class="tab-btn flex items-center gap-2">
-                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"/></svg>
-                Obsolescência
-            </button>
-            <button onclick="switchTab('prev')" id="tabBtn-prev" class="tab-btn flex items-center gap-2">
-                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/></svg>
-                Preventiva & Desgaste
-            </button>
-            <button onclick="switchTab('acoes')" id="tabBtn-acoes" class="tab-btn flex items-center gap-2">
-                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4"/></svg>
-                Planos de Ação
-            </button>
-            <button onclick="switchTab('cadastros')" id="tabBtn-cadastros" class="tab-btn flex items-center gap-2">
-                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 7v10c0 2.21 3.582 4 8 4s8-1.79 8-4V7M4 7c0 2.21 3.582 4 8 4s8-1.79 8-4M4 7c0-2.21 3.582-4 8-4s8 1.79 8 4m0 5c0 2.21-3.582 4-8 4s-8-1.79-8-4"/></svg>
-                Estrutura & Atributos
-            </button>
+            <!-- BARRA LATERAL DESKTOP -->
+            <aside aria-label="Menu principal" class="hidden md:flex flex-col items-center justify-between py-5 px-2.5 glass-rail shrink-0 w-24">
+                <div class="flex flex-col items-center gap-3 w-full">
+                    <div class="w-11 h-11 rounded-2xl bg-red-600 text-white font-extrabold text-xs flex items-center justify-center shadow-md tracking-tighter">PCM</div>
+                    <div class="h-px w-10 bg-slate-200/80 my-0.5"></div>
+                    <nav id="desktopRailNav" class="flex flex-col items-center gap-2 w-full">
+                        <button type="button" onclick="switchTab('dashboard')" id="rail-dashboard" class="rail-btn active">
+                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2V6zM14 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2V6zM4 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2v-2zM14 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2v-2z"/></svg>
+                            <span>Painel</span>
+                        </button>
+                        <button type="button" onclick="switchTab('obs')" id="rail-obs" class="rail-btn">
+                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"/></svg>
+                            <span>Riscos</span>
+                        </button>
+                        <button type="button" onclick="switchTab('prev')" id="rail-prev" class="rail-btn">
+                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"/><circle cx="12" cy="12" r="3" stroke-width="2"/></svg>
+                            <span>Desgaste</span>
+                        </button>
+                        <button type="button" onclick="switchTab('acoes')" id="rail-acoes" class="rail-btn">
+                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4"/></svg>
+                            <span>Ações</span>
+                        </button>
+                        <button type="button" onclick="switchTab('cadastros')" id="rail-cadastros" class="rail-btn">
+                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10"/></svg>
+                            <span>Árvore</span>
+                        </button>
+                    </nav>
+                </div>
+                <div class="flex flex-col items-center gap-2 w-full">
+                    <button type="button" onclick="abrirEspacoUsuario()" title="Espaço do Usuário (Alt + U)" class="rail-btn">
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"/><circle cx="12" cy="12" r="3" stroke-width="2"/></svg>
+                        <span>Espaço</span>
+                    </button>
+                    <button type="button" onclick="abrirModalAtalhos()" title="Atalhos de Teclado (Ctrl + ?)" class="rail-btn">
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8.228 9c.549-1.165 2.03-2 3.772-2 2.21 0 4 1.343 4 3 0 1.4-1.278 2.575-3.006 2.907-.542.104-.994.54-.994 1.093m0 3h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+                        <span>Atalhos</span>
+                    </button>
+                    <button type="button" onclick="fazerLogout()" class="rail-btn hover:!bg-rose-50 hover:!text-rose-600 hover:!border-rose-200">
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"/></svg>
+                        <span>Sair</span>
+                    </button>
+                </div>
+            </aside>
+
+            <!-- ÁREA DE CONTEÚDO -->
+            <div class="flex-1 flex flex-col min-w-0">
+                <!-- HEADER SUPERIOR -->
+                <header class="px-5 sm:px-8 py-3.5 flex items-center justify-between border-b border-white/80 bg-white/45 shrink-0">
+                    <div class="flex items-center gap-3">
+                        <button type="button" onclick="voltarParaCentralPCM()" title="Voltar à Central de Aplicativos PCM" class="px-3 py-1.5 rounded-full bg-slate-900 hover:bg-slate-800 text-white text-xs font-extrabold flex items-center gap-1.5 shadow-sm">
+                            <span>⬅ Central</span>
+                        </button>
+                        <span class="md:hidden bg-red-600 text-white font-extrabold px-2.5 py-1 rounded-lg text-xs tracking-wider">CEPÊRA</span>
+                        <div class="flex items-center gap-2 text-xs font-bold text-slate-500">
+                            <span id="statusDot" class="w-2 h-2 rounded-full bg-amber-500 animate-pulse"></span>
+                            <span id="statusText">Conectando...</span>
+                            <span class="hidden sm:inline">• Gestão de Ativos & Obsolescência</span>
+                        </div>
+                    </div>
+
+                    <div class="flex items-center gap-2">
+                        <button type="button" onclick="abrirModalAtalhos()" title="Atalhos (Ctrl + ?)" class="px-3 py-1.5 rounded-full bg-white/85 hover:bg-white border border-slate-200/80 text-xs font-bold text-slate-700 flex items-center gap-1.5 shadow-sm">
+                            <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8.228 9c.549-1.165 2.03-2 3.772-2 2.21 0 4 1.343 4 3 0 1.4-1.278 2.575-3.006 2.907-.542.104-.994.54-.994 1.093m0 3h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+                            <span class="hidden lg:inline">Atalhos (Ctrl+?)</span>
+                        </button>
+                        <button type="button" onclick="abrirEspacoUsuario()" class="px-3 py-1.5 rounded-full bg-white/85 hover:bg-white border border-slate-200/80 text-xs font-bold text-slate-700 flex items-center gap-1.5 shadow-sm">
+                            <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6V4m0 2a2 2 0 100 4m0-4a2 2 0 110 4m-6 8a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4m6 6v10m6-2a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4"/></svg>
+                            <span class="hidden sm:inline">Espaço do Usuário</span>
+                        </button>
+                        <div class="flex items-center gap-2.5 bg-white/85 border border-slate-200/80 rounded-full pl-3.5 pr-1.5 py-1 shadow-sm">
+                            <button type="button" onclick="abrirEspacoUsuario()" class="text-right leading-tight hover:opacity-80">
+                                <div id="loggedUserName" class="font-bold text-xs text-slate-900">Usuário</div>
+                                <div id="loggedUserRole" class="text-[10px] font-extrabold uppercase text-sky-600">Perfil</div>
+                            </button>
+                            <button type="button" onclick="fazerLogout()" title="Sair da conta" class="w-8 h-8 rounded-full bg-slate-900 hover:bg-rose-600 text-white flex items-center justify-center transition-colors">
+                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"/></svg>
+                            </button>
+                        </div>
+                    </div>
+                </header>
+
+                <!-- NAVEGAÇÃO MOBILE -->
+                <div id="mobileTabNav" class="md:hidden flex items-center gap-2 overflow-x-auto px-4 py-2.5 bg-white/55 border-b border-white/80 shrink-0">
+                    <button type="button" onclick="switchTab('dashboard')" id="tabBtn-dashboard" class="mob-tab active">Visão Geral</button>
+                    <button type="button" onclick="switchTab('obs')" id="tabBtn-obs" class="mob-tab">Obsolescência</button>
+                    <button type="button" onclick="switchTab('prev')" id="tabBtn-prev" class="mob-tab">Preventiva & Desgaste</button>
+                    <button type="button" onclick="switchTab('acoes')" id="tabBtn-acoes" class="mob-tab">Planos de Ação</button>
+                    <button type="button" onclick="switchTab('cadastros')" id="tabBtn-cadastros" class="mob-tab">Árvore & Estrutura</button>
+                </div>
+
+                <!-- CONTAINER DAS PÁGINAS -->
+                <main id="viewContainer" class="flex-1 overflow-y-auto p-4 sm:p-7 space-y-6">
+
+                    <!-- ================= TAB 1: DASHBOARD ================= -->
+                    <section id="view-dashboard" class="space-y-6 max-w-7xl mx-auto">
+                        <div class="flex flex-col lg:flex-row lg:items-end justify-between gap-4">
+                            <div>
+                                <p class="text-xs font-bold uppercase tracking-widest text-sky-600 mb-1">PCM • Engenharia & Confiabilidade</p>
+                                <h1 class="text-2xl sm:text-3xl font-extrabold text-slate-900 tracking-tight leading-tight">
+                                    Olá, <span id="dashGreetingName">Gestor</span>. Central de Obsolescência & Ativos
+                                </h1>
+                            </div>
+                            <div class="flex flex-wrap gap-2.5">
+                                <button type="button" onclick="openModal('modalImportLinhas')" class="btn-touch bg-indigo-600 hover:bg-indigo-700 text-white rounded-full px-5 py-2.5 text-xs shadow-md">
+                                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16m-7 6h7"/></svg>
+                                    <span>Importar Árvore</span>
+                                </button>
+                                <button type="button" onclick="openModal('modalItem', 'Preventiva')" class="btn-touch bg-sky-600 hover:bg-sky-700 text-white rounded-full px-5 py-2.5 text-xs shadow-md">
+                                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6"/></svg>
+                                    <span>Nova Preventiva</span>
+                                </button>
+                                <button type="button" onclick="openModal('modalItem', 'Obsolescencia')" class="btn-pill-dark !bg-rose-600 text-xs">
+                                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"/></svg>
+                                    <span>Risco de Obsolescência</span>
+                                </button>
+                            </div>
+                        </div>
+
+                        <!-- KPI CARDS -->
+                        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+                            <div onclick="switchTab('obs')" class="glass-card glass-card-hover p-5 rounded-3xl cursor-pointer">
+                                <div class="w-10 h-10 rounded-2xl bg-rose-100 text-rose-600 flex items-center justify-center mb-3">
+                                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"/></svg>
+                                </div>
+                                <div id="kpiObsoletas" class="text-3xl font-extrabold text-rose-600">0</div>
+                                <div class="text-sm font-bold text-slate-700 mt-1">Riscos de Obsolescência</div>
+                                <div class="text-xs text-slate-400 mt-0.5">Mapeados com Matriz GUT</div>
+                            </div>
+
+                            <div onclick="switchTab('prev')" class="glass-card glass-card-hover p-5 rounded-3xl cursor-pointer">
+                                <div class="w-10 h-10 rounded-2xl bg-sky-100 text-sky-600 flex items-center justify-center mb-3">
+                                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"/><circle cx="12" cy="12" r="3" stroke-width="2"/></svg>
+                                </div>
+                                <div id="kpiPreventivas" class="text-3xl font-extrabold text-sky-600">0</div>
+                                <div class="text-sm font-bold text-slate-700 mt-1">Peças Preventivas</div>
+                                <div class="text-xs text-slate-400 mt-0.5">Controle de vida útil & desgaste</div>
+                            </div>
+
+                            <div onclick="switchTab('acoes')" class="glass-card glass-card-hover p-5 rounded-3xl cursor-pointer">
+                                <div class="w-10 h-10 rounded-2xl bg-emerald-100 text-emerald-600 flex items-center justify-center mb-3">
+                                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M5 13l4 4L19 7"/></svg>
+                                </div>
+                                <div id="kpiAcoesDone" class="text-3xl font-extrabold text-emerald-600">0 / 0</div>
+                                <div class="text-sm font-bold text-slate-700 mt-1">Ações Concluídas / Total</div>
+                                <div class="text-xs text-slate-400 mt-0.5">Planos de retrofit e substituição</div>
+                            </div>
+
+                            <div onclick="switchTab('acoes')" class="glass-card glass-card-hover p-5 rounded-3xl cursor-pointer border-amber-200/80">
+                                <div class="w-10 h-10 rounded-2xl bg-amber-100 text-amber-600 flex items-center justify-center mb-3">
+                                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+                                </div>
+                                <div id="kpiCustoTotal" class="text-2xl sm:text-3xl font-extrabold text-amber-600">R$ 0</div>
+                                <div class="text-sm font-bold text-slate-700 mt-1">Custo Est. Mitigação</div>
+                                <div class="text-xs text-amber-700 font-bold mt-0.5">Investimento total mapeado</div>
+                            </div>
+                        </div>
+
+                        <div class="grid grid-cols-1 lg:grid-cols-3 gap-5">
+                            <div class="lg:col-span-2 glass-card p-6 rounded-3xl flex flex-col justify-between">
+                                <div class="mb-4">
+                                    <h2 class="font-extrabold text-slate-800 text-sm">Top 5 Riscos de Obsolescência (Matriz GUT)</h2>
+                                    <p class="text-xs text-slate-400">Componentes críticos com maior score Gravidade × Urgência × Tendência</p>
+                                </div>
+                                <div class="h-64 w-full relative"><canvas id="chartGutRank"></canvas></div>
+                            </div>
+                            <div class="glass-card p-6 rounded-3xl flex flex-col justify-between">
+                                <div class="mb-4">
+                                    <h2 class="font-extrabold text-slate-800 text-sm">Proporção de Cadastros</h2>
+                                    <p class="text-xs text-slate-400">Obsolescência vs Preventiva & Desgaste</p>
+                                </div>
+                                <div class="h-56 w-full relative"><canvas id="chartTiposPie"></canvas></div>
+                            </div>
+                        </div>
+                    </section>
+
+                    <!-- ================= TAB 2: OBSOLESCÊNCIA ================= -->
+                    <section id="view-obs" class="hidden space-y-5 max-w-7xl mx-auto">
+                        <div class="glass-card p-6 rounded-3xl flex flex-col lg:flex-row lg:items-center justify-between gap-4">
+                            <div>
+                                <p class="text-xs font-bold uppercase tracking-widest text-rose-600 mb-1">Engenharia de Confiabilidade • Matriz GUT</p>
+                                <h2 class="text-xl sm:text-2xl font-extrabold text-slate-900">Mapeamento de Obsolescência</h2>
+                                <p class="text-xs text-slate-500 mt-0.5">Árvore de peças avaliadas pela matriz GUT para mitigação de risco de parada.</p>
+                            </div>
+                            <div class="flex flex-wrap items-center gap-2.5">
+                                <button type="button" onclick="openModalFiltroRelatorio('obs')" class="btn-touch bg-slate-100 hover:bg-slate-200 text-slate-800 text-xs py-2.5 px-4">
+                                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z"/></svg>
+                                    <span>Gerar Relatório A4</span>
+                                </button>
+                                <button type="button" onclick="openModal('modalItem', 'Obsolescencia')" class="btn-pill-dark !bg-rose-600 text-xs">
+                                    <span>+ Adicionar Risco</span>
+                                </button>
+                            </div>
+                        </div>
+                        <div id="treeContainerObs" class="space-y-6 pb-8"></div>
+                    </section>
+
+                    <!-- ================= TAB 3: PREVENTIVAS ================= -->
+                    <section id="view-prev" class="hidden space-y-5 max-w-7xl mx-auto">
+                        <div class="glass-card p-6 rounded-3xl flex flex-col lg:flex-row lg:items-center justify-between gap-4">
+                            <div>
+                                <p class="text-xs font-bold uppercase tracking-widest text-sky-600 mb-1">Controle de Vida Útil • ob_equipamentos</p>
+                                <h2 class="text-xl sm:text-2xl font-extrabold text-slate-900">Plano de Preventivas & Desgaste</h2>
+                                <p class="text-xs text-slate-500 mt-0.5">Árvore contendo peças rotineiras, controle de vida útil e planejamento de trocas periódicas.</p>
+                            </div>
+                            <div class="flex flex-wrap items-center gap-2.5">
+                                <button type="button" onclick="openModalFiltroRelatorio('prev')" class="btn-touch bg-slate-100 hover:bg-slate-200 text-slate-800 text-xs py-2.5 px-4">
+                                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z"/></svg>
+                                    <span>Relatório A4</span>
+                                </button>
+                                <button type="button" onclick="openModal('modalImportPecas')" class="btn-touch bg-sky-50 hover:bg-sky-100 border border-sky-200 text-sky-800 text-xs py-2.5 px-4">
+                                    <span>📥 Importar Peças em Massa</span>
+                                </button>
+                                <button type="button" onclick="openModal('modalItem', 'Preventiva')" class="btn-pill-dark text-xs">
+                                    <span>+ Nova Preventiva</span>
+                                </button>
+                            </div>
+                        </div>
+                        <div id="treeContainerPrev" class="space-y-6 pb-8"></div>
+                    </section>
+
+                    <!-- ================= TAB 4: AÇÕES ================= -->
+                    <section id="view-acoes" class="hidden space-y-5 max-w-7xl mx-auto pb-8">
+                        <div class="glass-card rounded-3xl overflow-hidden p-6 space-y-4">
+                            <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+                                <div>
+                                    <p class="text-xs font-bold uppercase tracking-widest text-sky-600 mb-1">Acompanhamento de Retrofit & Trocas</p>
+                                    <h2 class="text-xl sm:text-2xl font-extrabold text-slate-900">Planos de Ação (Obsolescência)</h2>
+                                    <p class="text-xs text-slate-500 mt-0.5">Gerencie o status de execução das ações propostas para os componentes críticos.</p>
+                                </div>
+                                <button type="button" onclick="openModalFiltroRelatorio('acoes')" class="btn-pill-dark text-xs">
+                                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z"/></svg>
+                                    <span>Relatório de Ações A4</span>
+                                </button>
+                            </div>
+                            <div class="overflow-x-auto rounded-2xl border border-slate-200">
+                                <table class="w-full text-left text-xs whitespace-nowrap">
+                                    <thead class="bg-slate-50 text-slate-500 uppercase font-extrabold text-[10px] border-b border-slate-200">
+                                        <tr>
+                                            <th class="py-3.5 px-5">Componente / Estrutura</th>
+                                            <th class="py-3.5 px-5">Ação Proposta (Retrofit/Troca)</th>
+                                            <th class="py-3.5 px-5">Custo (R$)</th>
+                                            <th class="py-3.5 px-5 text-center">Status de Execução</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody id="tbodyAcoes" class="divide-y divide-slate-100 bg-white"></tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </section>
+
+                    <!-- ================= TAB 5: ATRIBUTOS (ESTRUTURA) ================= -->
+                    <section id="view-cadastros" class="hidden space-y-5 max-w-7xl mx-auto pb-8">
+                        <div class="glass-card rounded-3xl p-6 space-y-5">
+                            <div class="flex flex-col md:flex-row md:items-center justify-between gap-4">
+                                <div>
+                                    <p class="text-xs font-bold uppercase tracking-widest text-indigo-600 mb-1">Inventário Físico • ob_linhas</p>
+                                    <h2 class="text-xl sm:text-2xl font-extrabold text-slate-900">Gerenciador de Estrutura & Atributos</h2>
+                                    <p class="text-xs text-slate-500 mt-0.5">A árvore é sincronizada com o app de Inspeção de Rotas. Gerencie aqui Modelos e Número de Série (SN) das máquinas.</p>
+                                </div>
+                                <div class="flex gap-2.5 flex-wrap">
+                                    <button type="button" onclick="openModalFiltroRelatorio('arvore')" class="btn-touch bg-slate-100 hover:bg-slate-200 text-slate-800 text-xs py-2.5 px-4">
+                                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z"/></svg>
+                                        <span>Imprimir Inventário A4</span>
+                                    </button>
+                                    <button type="button" onclick="openModal('modalImportLinhas')" class="btn-pill-dark text-xs">
+                                        <span>📥 Importar Árvore</span>
+                                    </button>
+                                </div>
+                            </div>
+
+                            <div class="bg-slate-50 p-4 rounded-2xl border border-slate-200/80 grid grid-cols-1 sm:grid-cols-2 gap-4">
+                                <div>
+                                    <label class="block text-[10px] font-extrabold uppercase text-slate-500 mb-1">1. Filtrar Setor / Área</label>
+                                    <select id="exploraArea" class="input-clean py-2 text-xs font-bold" onchange="renderExploradorMaquinas()"></select>
+                                </div>
+                                <div>
+                                    <label class="block text-[10px] font-extrabold uppercase text-slate-500 mb-1">2. Filtrar Máquina / Linha</label>
+                                    <select id="exploraMaquina" class="input-clean py-2 text-xs font-bold" onchange="renderExploradorCards()"></select>
+                                </div>
+                            </div>
+
+                            <div id="estruturaCardsContainer" class="grid grid-cols-1 lg:grid-cols-2 gap-4">
+                                <div class="p-8 text-center text-slate-400 text-sm font-bold">Selecione o Setor e a Máquina acima.</div>
+                            </div>
+                        </div>
+                    </section>
+
+                </main>
+            </div>
         </div>
     </div>
 
-    <!-- MAIN CONTENT -->
-    <main class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 flex-1 w-full mb-20 sm:mb-6">
-
-        <!-- ================= TAB 1: DASHBOARD ================= -->
-        <div id="view-dashboard" class="space-y-6">
-            <div class="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-4">
-                <div class="glass-panel p-5 rounded-xl border-l-4 border-l-rose-500">
-                    <p class="text-xs font-bold uppercase text-slate-500 tracking-wider">Riscos de Obsolescência</p>
-                    <h3 id="kpiObsoletas" class="text-3xl font-black text-rose-600 mt-2">0</h3>
-                </div>
-                <div class="glass-panel p-5 rounded-xl border-l-4 border-l-blue-500">
-                    <p class="text-xs font-bold uppercase text-slate-500 tracking-wider">Peças Preventivas</p>
-                    <h3 id="kpiPreventivas" class="text-3xl font-black text-blue-600 mt-2">0</h3>
-                </div>
-                <div class="glass-panel p-5 rounded-xl border-l-4 border-l-emerald-500">
-                    <p class="text-xs font-bold uppercase text-slate-500 tracking-wider">Ações Concluídas / Total</p>
-                    <h3 id="kpiAcoesDone" class="text-2xl font-black text-emerald-600 mt-2">0 / 0</h3>
-                </div>
-                <div class="glass-panel p-5 rounded-xl border-l-4 border-l-amber-500">
-                    <p class="text-xs font-bold uppercase text-slate-500 tracking-wider">Custo Est. Mitigação</p>
-                    <h3 id="kpiCustoTotal" class="text-2xl font-black text-amber-600 mt-2">R$ 0</h3>
-                </div>
-            </div>
-            <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
-                <div class="lg:col-span-2 glass-panel p-6 rounded-xl">
-                    <h3 class="text-sm font-bold uppercase tracking-wider text-slate-500 mb-6">Top 5 Riscos de Obsolescência (Matriz GUT)</h3>
-                    <div class="h-64 w-full relative"><canvas id="chartGutRank"></canvas></div>
-                </div>
-                <div class="glass-panel p-6 rounded-xl">
-                    <h3 class="text-sm font-bold uppercase tracking-wider text-slate-500 mb-6">Proporção de Cadastros</h3>
-                    <div class="h-48 w-full relative"><canvas id="chartTiposPie"></canvas></div>
-                </div>
-            </div>
-        </div>
-
-        <!-- ================= TAB 2: OBSOLESCÊNCIA ================= -->
-        <div id="view-obs" class="hidden space-y-4">
-            <div class="flex justify-between items-center bg-white p-5 rounded-xl border border-[var(--border)] shadow-sm flex-wrap gap-4">
-                <div>
-                    <h2 class="text-lg font-bold text-slate-800 flex items-center gap-2">
-                        <svg class="w-5 h-5 text-rose-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"/></svg>
-                        Mapeamento de Obsolescência
-                    </h2>
-                    <p class="text-xs text-slate-500 mt-1">Árvore de peças avaliadas pela matriz GUT para mitigação de risco de parada.</p>
-                </div>
-                <div class="flex gap-2 flex-wrap">
-                    <button onclick="openModalFiltroRelatorio('obs')" class="px-4 py-2 bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs font-bold rounded shadow-sm transition-colors flex items-center gap-2">
-                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z"/></svg> Gerar Relatório
-                    </button>
-                    <button onclick="openModal('modalItem', 'Obsolescencia')" class="px-4 py-2 bg-rose-600 hover:bg-rose-700 text-white text-xs font-bold rounded shadow-sm transition-colors">Adicionar Risco</button>
-                </div>
-            </div>
-            <div id="treeContainerObs" class="space-y-6 pb-8"></div>
-        </div>
-
-        <!-- ================= TAB 3: PREVENTIVAS ================= -->
-        <div id="view-prev" class="hidden space-y-4">
-            <div class="flex justify-between items-center bg-white p-5 rounded-xl border border-[var(--border)] shadow-sm flex-wrap gap-4">
-                <div>
-                    <h2 class="text-lg font-bold text-slate-800 flex items-center gap-2">
-                        <svg class="w-5 h-5 text-blue-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/></svg>
-                        Plano de Preventivas & Desgaste
-                    </h2>
-                    <p class="text-xs text-slate-500 mt-1">Árvore contendo peças rotineiras, controle de vida útil e planejamento de trocas.</p>
-                </div>
-                <div class="flex gap-2 flex-wrap">
-                    <button onclick="openModalFiltroRelatorio('prev')" class="px-4 py-2 bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs font-bold rounded shadow-sm transition-colors flex items-center gap-2">
-                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z"/></svg> Relatório
-                    </button>
-                    <button onclick="openModal('modalImportPecas')" class="px-4 py-2 bg-slate-100 hover:bg-slate-200 border border-slate-300 text-slate-700 text-xs font-bold rounded shadow-sm transition-colors flex items-center gap-2">
-                        📥 Importar Peças em Massa
-                    </button>
-                    <button onclick="openModal('modalItem', 'Preventiva')" class="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white text-xs font-bold rounded shadow-sm transition-colors">Nova Preventiva</button>
-                </div>
-            </div>
-            <div id="treeContainerPrev" class="space-y-6 pb-8"></div>
-        </div>
-
-        <!-- ================= TAB 4: AÇÕES ================= -->
-        <div id="view-acoes" class="hidden space-y-6 pb-12">
-            <div class="glass-panel rounded-xl overflow-hidden">
-                <div class="p-5 border-b border-[var(--border)] bg-slate-50 flex justify-between items-center flex-wrap gap-4">
-                    <h2 class="text-base font-bold text-slate-800">Planos de Ação (Obsolescência)</h2>
-                    <button onclick="openModalFiltroRelatorio('acoes')" class="px-4 py-2 bg-slate-800 hover:bg-slate-900 text-white text-xs font-bold rounded shadow-sm transition-colors flex items-center gap-2">
-                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z"/></svg> Relatório de Ações
-                    </button>
-                </div>
-                <div class="overflow-x-auto">
-                    <table class="w-full text-left text-sm whitespace-nowrap">
-                        <thead class="bg-white text-slate-500 uppercase font-bold text-[10px] border-b border-[var(--border)]">
-                            <tr><th class="py-3 px-5">Componente / Estrutura</th><th class="py-3 px-5">Ação Proposta (Retrofit/Troca)</th><th class="py-3 px-5">Custo (R$)</th><th class="py-3 px-5 text-center">Status de Execução</th></tr>
-                        </thead>
-                        <tbody id="tbodyAcoes" class="divide-y divide-[var(--border)] bg-white"></tbody>
-                    </table>
-                </div>
-            </div>
-        </div>
-
-        <!-- ================= TAB 5: ATRIBUTOS (ESTRUTURA) ================= -->
-        <div id="view-cadastros" class="hidden space-y-6 pb-12">
-            <div class="glass-panel rounded-xl p-6 space-y-6">
-                <div class="flex flex-col md:flex-row md:items-center justify-between gap-4">
-                    <div>
-                        <h2 class="text-base font-bold text-slate-800">Gerenciador de Estrutura</h2>
-                        <p class="text-xs text-slate-500 mt-1">A árvore é criada sozinha nos apontamentos. Gerencie aqui Modelos e SN das Máquinas.</p>
-                    </div>
-                    <div class="flex gap-2 flex-wrap">
-                        <button onclick="openModalFiltroRelatorio('arvore')" class="px-4 py-2 bg-slate-100 border border-slate-200 hover:bg-slate-200 text-slate-700 text-xs font-bold rounded shadow-sm transition-colors flex items-center gap-2">
-                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z"/></svg> Imprimir Inventário
-                        </button>
-                        <button onclick="openModal('modalImportLinhas')" class="px-4 py-2 bg-slate-100 hover:bg-slate-200 border border-slate-300 text-slate-700 text-xs font-bold rounded shadow-sm transition-colors">
-                            📥 Importar Árvore
-                        </button>
-                    </div>
-                </div>
-
-                <div class="bg-slate-50 p-4 rounded-lg border border-slate-200 flex flex-col sm:flex-row gap-4">
-                    <div class="flex-1">
-                        <label class="block text-[10px] font-bold uppercase text-slate-500 mb-1">Filtrar Setor / Área</label>
-                        <select id="exploraArea" class="input-touch w-full py-2 text-sm" onchange="renderExploradorMaquinas()"></select>
-                    </div>
-                    <div class="flex-1">
-                        <label class="block text-[10px] font-bold uppercase text-slate-500 mb-1">Filtrar Máquina / Linha</label>
-                        <select id="exploraMaquina" class="input-touch w-full py-2 text-sm" onchange="renderExploradorCards()"></select>
-                    </div>
-                </div>
-
-                <div id="estruturaCardsContainer" class="grid grid-cols-1 lg:grid-cols-2 gap-4 mt-4">
-                    <div class="p-8 text-center text-slate-400 text-sm">Selecione o Setor e a Máquina acima.</div>
-                </div>
-            </div>
-        </div>
-    </main>
-
     <!-- ================= MODAL DE FILTRO PARA RELATÓRIOS ================= -->
-    <div id="modalFiltroRelatorio" class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-50 hidden flex items-center justify-center p-4">
-        <div class="glass-panel w-full max-w-md rounded-2xl p-6 shadow-2xl relative">
-            <div class="flex justify-between items-center border-b border-slate-200 pb-4 mb-5">
+    <div id="modalFiltroRelatorio" role="dialog" aria-modal="true" class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-50 hidden flex items-end sm:items-center justify-center p-0 sm:p-4">
+        <div class="bg-white w-full max-w-md rounded-t-3xl sm:rounded-3xl p-6 shadow-2xl border border-slate-200 relative space-y-4">
+            <div class="flex justify-between items-center border-b border-slate-100 pb-3">
                 <div>
-                    <h3 class="text-lg font-bold text-slate-800">Filtros do Relatório</h3>
-                    <p class="text-xs text-slate-500 mt-1">Gere um documento específico limitando a extração.</p>
+                    <span class="text-[10px] font-extrabold uppercase tracking-widest text-sky-600">Extração de Documento A4</span>
+                    <h3 class="text-lg font-extrabold text-slate-900">Filtros do Relatório</h3>
                 </div>
-                <button onclick="closeModal('modalFiltroRelatorio')" class="p-2 rounded-md hover:bg-slate-100 text-slate-500">✕</button>
+                <button type="button" onclick="closeModal('modalFiltroRelatorio')" class="w-8 h-8 rounded-full bg-slate-100 text-slate-600 font-bold">✕</button>
             </div>
-            
+
             <input type="hidden" id="relatorioTipoAtivo">
-            
-            <div class="space-y-4">
+
+            <div class="space-y-3 text-xs">
                 <div>
-                    <label class="block text-[10px] font-bold uppercase text-slate-500 mb-1">Filtrar por Área/Setor</label>
-                    <select id="relArea" class="input-touch w-full text-sm" onchange="atualizaFiltrosRelatorio('area')"><option value="ALL">Todas as Áreas</option></select>
+                    <label class="block text-[10px] font-extrabold uppercase text-slate-500 mb-1">Filtrar por Área / Setor</label>
+                    <select id="relArea" class="input-clean py-2 text-xs font-bold" onchange="atualizaFiltrosRelatorio('area')"><option value="ALL">Todas as Áreas</option></select>
                 </div>
                 <div>
-                    <label class="block text-[10px] font-bold uppercase text-slate-500 mb-1">Filtrar por Máquina</label>
-                    <select id="relMaquina" class="input-touch w-full text-sm" onchange="atualizaFiltrosRelatorio('maquina')"><option value="ALL">Todas as Máquinas</option></select>
+                    <label class="block text-[10px] font-extrabold uppercase text-slate-500 mb-1">Filtrar por Máquina</label>
+                    <select id="relMaquina" class="input-clean py-2 text-xs font-bold" onchange="atualizaFiltrosRelatorio('maquina')"><option value="ALL">Todas as Máquinas</option></select>
                 </div>
                 <div>
-                    <label class="block text-[10px] font-bold uppercase text-slate-500 mb-1">Filtrar por Equipamento</label>
-                    <select id="relEquipamento" class="input-touch w-full text-sm" onchange="atualizaFiltrosRelatorio('equipamento')"><option value="ALL">Todos os Equipamentos</option></select>
+                    <label class="block text-[10px] font-extrabold uppercase text-slate-500 mb-1">Filtrar por Equipamento</label>
+                    <select id="relEquipamento" class="input-clean py-2 text-xs font-bold" onchange="atualizaFiltrosRelatorio('equipamento')"><option value="ALL">Todos os Equipamentos</option></select>
                 </div>
                 <div>
-                    <label class="block text-[10px] font-bold uppercase text-slate-500 mb-1">Filtrar por Conjunto</label>
-                    <select id="relConjunto" class="input-touch w-full text-sm"><option value="ALL">Todos os Conjuntos</option></select>
+                    <label class="block text-[10px] font-extrabold uppercase text-slate-500 mb-1">Filtrar por Conjunto</label>
+                    <select id="relConjunto" class="input-clean py-2 text-xs font-bold"><option value="ALL">Todos os Conjuntos</option></select>
                 </div>
             </div>
 
-            <div class="flex flex-col gap-2 mt-6 pt-4 border-t border-slate-200">
-                <button onclick="executarRelatorioFiltrado()" class="w-full py-3 bg-slate-800 hover:bg-slate-900 text-white font-bold rounded-lg text-sm shadow-md flex items-center justify-center gap-2">
-                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z"/></svg> Gerar Documento
+            <div class="flex gap-2 pt-3 border-t border-slate-100">
+                <button type="button" onclick="closeModal('modalFiltroRelatorio')" class="btn-touch bg-slate-100 text-slate-700 flex-1 text-xs">Cancelar</button>
+                <button type="button" onclick="executarRelatorioFiltrado()" class="btn-pill-dark flex-1 text-xs">
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z"/></svg>
+                    <span>Gerar Documento</span>
                 </button>
             </div>
         </div>
     </div>
 
     <!-- ================= MODAL IMPORTAR PEÇAS (SMART IMPORT) ================= -->
-    <div id="modalImportPecas" class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-50 hidden flex items-center justify-center p-4">
-        <div class="glass-panel w-full max-w-3xl rounded-3xl p-6 sm:p-8 space-y-5 shadow-2xl relative">
-            <div class="flex justify-between items-center border-b border-[var(--border)] pb-4">
+    <div id="modalImportPecas" role="dialog" aria-modal="true" class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-50 hidden flex items-end sm:items-center justify-center p-0 sm:p-4">
+        <div class="bg-white w-full max-w-3xl rounded-t-3xl sm:rounded-3xl p-6 sm:p-8 space-y-5 shadow-2xl border border-slate-200 max-h-[92vh] overflow-y-auto">
+            <div class="flex justify-between items-center border-b border-slate-100 pb-4">
                 <div>
-                    <h3 class="text-xl font-bold">Importação em Massa de Peças (Preventiva)</h3>
-                    <p class="text-xs text-slate-500 mt-1">Selecione o destino e cole sua planilha do Excel.</p>
+                    <span class="text-[10px] font-extrabold uppercase tracking-widest text-sky-600">Smart Import • Excel</span>
+                    <h3 class="text-lg sm:text-xl font-extrabold text-slate-900">Importação em Massa de Peças (Preventiva)</h3>
                 </div>
-                <button onclick="closeModal('modalImportPecas')" class="p-2 rounded-md hover:bg-slate-100 text-slate-500">✕</button>
+                <button type="button" onclick="closeModal('modalImportPecas')" class="w-8 h-8 rounded-full bg-slate-100 text-slate-600 font-bold">✕</button>
             </div>
-            
-            <div class="bg-blue-50 border border-blue-100 rounded-xl p-4">
-                <h4 class="font-bold text-xs uppercase text-blue-700 mb-2">1. Destino na Árvore (Onde as peças vão entrar?)</h4>
+
+            <div class="bg-sky-50/70 border border-sky-200 rounded-2xl p-4">
+                <h4 class="font-extrabold text-xs uppercase text-sky-800 mb-2.5">1. Destino na Árvore (Onde as peças vão entrar?)</h4>
                 <div class="grid grid-cols-2 md:grid-cols-4 gap-3">
-                    <div><label class="block text-[10px] font-bold text-slate-500">Área *</label><input type="text" id="impPecaArea" list="dlAreas" class="input-touch py-1.5 text-sm w-full"></div>
-                    <div><label class="block text-[10px] font-bold text-slate-500">Máquina *</label><input type="text" id="impPecaMaq" list="dlMaquinas" class="input-touch py-1.5 text-sm w-full"></div>
-                    <div><label class="block text-[10px] font-bold text-slate-500">Equipamento *</label><input type="text" id="impPecaEq" list="dlEquipamentos" class="input-touch py-1.5 text-sm w-full"></div>
-                    <div><label class="block text-[10px] font-bold text-slate-500">Conjunto (Opc)</label><input type="text" id="impPecaCj" list="dlConjuntos" class="input-touch py-1.5 text-sm w-full"></div>
+                    <div><label class="block text-[10px] font-extrabold uppercase text-slate-500 mb-1">Área *</label><input type="text" id="impPecaArea" list="dlAreas" class="input-clean py-2 text-xs font-bold"></div>
+                    <div><label class="block text-[10px] font-extrabold uppercase text-slate-500 mb-1">Máquina *</label><input type="text" id="impPecaMaq" list="dlMaquinas" class="input-clean py-2 text-xs font-bold"></div>
+                    <div><label class="block text-[10px] font-extrabold uppercase text-slate-500 mb-1">Equipamento *</label><input type="text" id="impPecaEq" list="dlEquipamentos" class="input-clean py-2 text-xs font-bold"></div>
+                    <div><label class="block text-[10px] font-extrabold uppercase text-slate-500 mb-1">Conjunto (Opc)</label><input type="text" id="impPecaCj" list="dlConjuntos" class="input-clean py-2 text-xs font-bold"></div>
                 </div>
             </div>
 
             <div>
-                <h4 class="font-bold text-xs uppercase text-slate-700 mb-2 mt-2">2. Cole as colunas do Excel</h4>
-                <span class="font-mono font-bold bg-slate-100 px-3 py-1.5 rounded block text-[9px] text-slate-600 mb-2 border border-slate-200">
+                <h4 class="font-extrabold text-xs uppercase text-slate-700 mb-2">2. Cole as colunas do Excel</h4>
+                <span class="font-mono font-bold bg-slate-100 px-3 py-1.5 rounded-xl block text-[10px] text-slate-600 mb-2 border border-slate-200">
                     NOME COMPONENTE | FABRICANTE (Opc) | QUANTIDADE (Opc) | GATILHO/VIDA (Opc) | CUSTO (Opc) | CÓDIGO ERP (Opc)
                 </span>
-                <textarea id="importPecasText" rows="6" class="input-touch w-full font-mono text-xs leading-tight whitespace-pre" placeholder="Ex:
-Filtro de Óleo	Parker	2	5000h	250	871239
-Rolamento 6205	SKF	4	1 ano	80	998122"></textarea>
+                <textarea id="importPecasText" rows="6" class="input-clean font-mono text-xs leading-tight whitespace-pre" placeholder="Ex:&#10;Filtro de Óleo	Parker	2	5000h	250	871239&#10;Rolamento 6205	SKF	4	1 ano	80	998122"></textarea>
             </div>
-            <div class="flex justify-end gap-3 pt-3 border-t border-[var(--border)]">
-                <button type="button" onclick="closeModal('modalImportPecas')" class="px-5 py-2.5 bg-slate-100 text-slate-600 font-bold rounded-lg text-xs">Cancelar</button>
-                <button type="button" onclick="processarImportacaoPecas()" id="btnProcessImportPecas" class="px-6 py-2.5 bg-blue-600 text-white font-bold rounded-lg text-xs shadow-md">Importar Peças</button>
+            <div class="flex justify-end gap-2.5 pt-3 border-t border-slate-100">
+                <button type="button" onclick="closeModal('modalImportPecas')" class="btn-touch bg-slate-100 text-slate-700 text-xs">Cancelar</button>
+                <button type="button" onclick="processarImportacaoPecas()" id="btnProcessImportPecas" class="btn-pill-dark text-xs">Importar Peças</button>
             </div>
         </div>
     </div>
 
     <!-- ================= MODAL IMPORTAR ESTRUTURA (ARVORE) ================= -->
-    <div id="modalImportLinhas" class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-50 hidden flex items-center justify-center p-4">
-        <div class="glass-panel w-full max-w-2xl rounded-3xl p-6 sm:p-8 space-y-5 shadow-2xl relative">
-            <div class="flex justify-between items-center border-b border-[var(--border)] pb-4">
-                <h3 class="text-xl font-bold">Importar Árvore em Massa</h3>
-                <button onclick="closeModal('modalImportLinhas')" class="p-2 rounded-md hover:bg-slate-100 text-slate-500">✕</button>
+    <div id="modalImportLinhas" role="dialog" aria-modal="true" class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-50 hidden flex items-end sm:items-center justify-center p-0 sm:p-4">
+        <div class="bg-white w-full max-w-2xl rounded-t-3xl sm:rounded-3xl p-6 sm:p-8 space-y-5 shadow-2xl border border-slate-200">
+            <div class="flex justify-between items-center border-b border-slate-100 pb-4">
+                <div>
+                    <span class="text-[10px] font-extrabold uppercase tracking-widest text-indigo-600">Hierarquia Corporativa • ob_linhas</span>
+                    <h3 class="text-lg sm:text-xl font-extrabold text-slate-900">Importar Árvore em Massa</h3>
+                </div>
+                <button type="button" onclick="closeModal('modalImportLinhas')" class="w-8 h-8 rounded-full bg-slate-100 text-slate-600 font-bold">✕</button>
             </div>
-            <div class="bg-slate-50 p-4 rounded-xl text-xs border border-slate-200 leading-relaxed">
-                Cole a hierarquia respeitando as colunas (separadas por tabulação/Excel).<br>
-                <span class="font-mono font-bold bg-white px-3 py-1.5 rounded block mt-2 shadow-sm border border-slate-200">
+            <div class="bg-slate-50 p-4 rounded-2xl text-xs border border-slate-200 leading-relaxed">
+                Cole a hierarquia respeitando as colunas (separadas por tabulação/Excel):<br>
+                <span class="font-mono font-bold bg-white px-3 py-1.5 rounded-xl block mt-2 shadow-sm border border-slate-200">
                     SETOR (Área) | LINHA (Máquina) | EQUIPAMENTO | CONJUNTO
                 </span>
             </div>
             <div>
-                <textarea id="importLinhasText" rows="6" class="input-touch w-full font-mono text-xs leading-tight whitespace-pre" placeholder="Ex:
-Sopro	Multipet 1	Sopradora	Cambotador"></textarea>
+                <textarea id="importLinhasText" rows="6" class="input-clean font-mono text-xs leading-tight whitespace-pre" placeholder="Ex:&#10;Sopro	Multipet 1	Sopradora	Cambotador"></textarea>
             </div>
-            <div class="flex justify-end gap-3 pt-3 border-t border-[var(--border)]">
-                <button type="button" onclick="closeModal('modalImportLinhas')" class="px-5 py-2.5 bg-slate-100 text-slate-600 font-bold rounded-lg text-xs">Cancelar</button>
-                <button type="button" onclick="processarImportacaoPlanilha()" id="btnProcessImportArv" class="px-6 py-2.5 bg-slate-800 text-white font-bold rounded-lg text-xs shadow-md">Processar Hierarquia</button>
+            <div class="flex justify-end gap-2.5 pt-3 border-t border-slate-100">
+                <button type="button" onclick="closeModal('modalImportLinhas')" class="btn-touch bg-slate-100 text-slate-700 text-xs">Cancelar</button>
+                <button type="button" onclick="processarImportacaoPlanilha()" id="btnProcessImportArv" class="btn-pill-dark text-xs">Processar Hierarquia</button>
             </div>
         </div>
     </div>
 
     <!-- ================= MODAL UNIFICADO (DINÂMICO) ================= -->
-    <div id="modalItem" class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-50 hidden flex items-center justify-center p-4 overflow-y-auto">
-        <div class="glass-panel w-full max-w-4xl rounded-2xl p-6 sm:p-8 my-auto space-y-5 shadow-2xl relative">
-            
-            <div class="flex justify-between items-center border-b border-[var(--border)] pb-4">
+    <div id="modalItem" role="dialog" aria-modal="true" class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-50 hidden flex items-end sm:items-center justify-center p-0 sm:p-4 overflow-y-auto">
+        <div class="bg-white w-full max-w-4xl rounded-t-3xl sm:rounded-3xl p-6 sm:p-8 my-auto space-y-5 shadow-2xl border border-slate-200 max-h-[92vh] overflow-y-auto">
+            <div class="flex justify-between items-center border-b border-slate-100 pb-4">
                 <div>
-                    <h3 id="modalItemTitle" class="text-xl font-bold text-slate-800">Mapear Componente</h3>
-                    <p class="text-xs text-slate-500 mt-1">Preencha a hierarquia e dados da peça para rastreabilidade.</p>
+                    <span class="text-[10px] font-extrabold uppercase tracking-widest text-sky-600">Engenharia PCM • Rastreabilidade</span>
+                    <h3 id="modalItemTitle" class="text-xl font-extrabold text-slate-900">Mapear Componente</h3>
                 </div>
-                <button onclick="closeModal('modalItem')" class="p-2 rounded-md hover:bg-slate-100 text-slate-500"><svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg></button>
+                <button type="button" onclick="closeModal('modalItem')" class="w-8 h-8 rounded-full bg-slate-100 text-slate-600 font-bold">✕</button>
             </div>
 
-            <form id="formItem" onsubmit="saveItem(event)" class="space-y-5">
+            <form id="formItem" onsubmit="saveItem(event)" class="space-y-5 text-xs">
                 <input type="hidden" id="itemId">
                 <input type="hidden" id="formTipoPeca">
-                
+
                 <!-- SEÇÃO 1: HIERARQUIA -->
-                <div class="bg-slate-50 p-4 rounded-xl border border-slate-200 relative">
-                    <h4 class="font-bold text-xs uppercase text-slate-500 mb-3">1. Árvore do Ativo</h4>
+                <div class="bg-slate-50 p-4 rounded-2xl border border-slate-200/80">
+                    <h4 class="font-extrabold text-[11px] uppercase text-slate-500 mb-3">1. Árvore do Ativo</h4>
                     <div class="grid grid-cols-1 md:grid-cols-4 gap-3">
                         <div>
-                            <label class="block text-[10px] font-bold uppercase text-slate-500 mb-1">Setor / Área *</label>
-                            <input type="text" id="fArea" list="dlAreas" required placeholder="Ex: Envase" class="input-touch text-sm py-2 w-full" onblur="atualizarDatalistsDependentes()">
+                            <label class="block text-[10px] font-extrabold uppercase text-slate-500 mb-1">Setor / Área *</label>
+                            <input type="text" id="fArea" list="dlAreas" required placeholder="Ex: Envase" class="input-clean py-2 text-xs font-bold" onblur="atualizarDatalistsDependentes()">
                         </div>
                         <div>
-                            <label class="block text-[10px] font-bold uppercase text-slate-500 mb-1">Máquina / Linha *</label>
-                            <input type="text" id="fMaquina" list="dlMaquinas" required placeholder="Ex: Boatopack 1" class="input-touch text-sm py-2 w-full" onblur="atualizarDatalistsDependentes()">
+                            <label class="block text-[10px] font-extrabold uppercase text-slate-500 mb-1">Máquina / Linha *</label>
+                            <input type="text" id="fMaquina" list="dlMaquinas" required placeholder="Ex: Boatopack 1" class="input-clean py-2 text-xs font-bold" onblur="atualizarDatalistsDependentes()">
                         </div>
                         <div>
-                            <label class="block text-[10px] font-bold uppercase text-slate-500 mb-1">Equipamento *</label>
-                            <input type="text" id="fEquipamentoBusca" list="dlEquipamentos" required placeholder="Ex: Envasadora" class="input-touch text-sm py-2 w-full" onblur="atualizarDatalistsDependentes()">
+                            <label class="block text-[10px] font-extrabold uppercase text-slate-500 mb-1">Equipamento *</label>
+                            <input type="text" id="fEquipamentoBusca" list="dlEquipamentos" required placeholder="Ex: Envasadora" class="input-clean py-2 text-xs font-bold" onblur="atualizarDatalistsDependentes()">
                         </div>
                         <div>
-                            <label class="block text-[10px] font-bold uppercase text-slate-500 mb-1">Conjunto (Opcional)</label>
-                            <input type="text" id="fConjunto" list="dlConjuntos" placeholder="Ex: Dosador" class="input-touch text-sm py-2 w-full">
+                            <label class="block text-[10px] font-extrabold uppercase text-slate-500 mb-1">Conjunto (Opcional)</label>
+                            <input type="text" id="fConjunto" list="dlConjuntos" placeholder="Ex: Dosador" class="input-clean py-2 text-xs font-bold">
                         </div>
                     </div>
                 </div>
@@ -381,90 +705,166 @@ Sopro	Multipet 1	Sopradora	Cambotador"></textarea>
                 <!-- SEÇÃO 2: DADOS COMUNS DA PEÇA -->
                 <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
                     <div>
-                        <label class="block text-[10px] font-bold uppercase text-slate-500 mb-1">Nome do Componente / Peça *</label>
-                        <input type="text" id="fComponente" required placeholder="Ex: Inversor Micromaster" class="input-touch text-sm py-2 w-full">
+                        <label class="block text-[10px] font-extrabold uppercase text-slate-500 mb-1">Nome do Componente / Peça *</label>
+                        <input type="text" id="fComponente" required placeholder="Ex: Inversor Micromaster" class="input-clean py-2 text-xs font-bold">
                     </div>
                     <div>
-                        <label class="block text-[10px] font-bold uppercase text-slate-500 mb-1">Fabricante / Referência</label>
-                        <input type="text" id="fFabricante" placeholder="Ex: Siemens - MM440" class="input-touch text-sm py-2 w-full">
+                        <label class="block text-[10px] font-extrabold uppercase text-slate-500 mb-1">Fabricante / Referência</label>
+                        <input type="text" id="fFabricante" placeholder="Ex: Siemens - MM440" class="input-clean py-2 text-xs font-bold">
                     </div>
                     <div>
-                        <label class="block text-[10px] font-bold uppercase text-slate-500 mb-1 text-primary">Código Sistema / ERP</label>
-                        <input type="text" id="fCodigoSistema" placeholder="Ex: 819203" class="input-touch text-sm py-2 w-full border-blue-200 bg-blue-50 focus:bg-white">
+                        <label class="block text-[10px] font-extrabold uppercase text-sky-700 mb-1">Código Sistema / ERP</label>
+                        <input type="text" id="fCodigoSistema" placeholder="Ex: 819203" class="input-clean py-2 text-xs font-mono font-bold">
                     </div>
-                    
+
                     <div>
-                        <label class="block text-[10px] font-bold uppercase text-slate-500 mb-1">Custo Estimado da Peça (R$)</label>
-                        <input type="number" id="fCusto" placeholder="Ex: 15000" class="input-touch text-sm py-2 w-full font-bold">
+                        <label class="block text-[10px] font-extrabold uppercase text-slate-500 mb-1">Custo Estimado da Peça (R$)</label>
+                        <input type="number" id="fCusto" placeholder="Ex: 15000" class="input-clean py-2 text-xs font-extrabold">
                     </div>
 
                     <!-- CAMPOS EXCLUSIVOS: OBSOLESCÊNCIA -->
                     <div id="obsFields_Status" class="col-span-1">
-                        <label class="block text-[10px] font-bold uppercase text-slate-500 mb-1">Ciclo de Vida (Mercado)</label>
-                        <input type="text" id="fStatusCiclo" placeholder="Ex: Obsoleto sem Estoque" class="input-touch text-sm py-2 w-full border-rose-200 focus:border-rose-500">
+                        <label class="block text-[10px] font-extrabold uppercase text-rose-700 mb-1">Ciclo de Vida (Mercado)</label>
+                        <input type="text" id="fStatusCiclo" placeholder="Ex: Obsoleto sem Estoque" class="input-clean py-2 text-xs font-bold">
                     </div>
                     <div id="obsFields_Acao" class="col-span-1">
-                        <label class="block text-[10px] font-bold uppercase text-slate-500 mb-1">Plano de Mitigação / Ação Proposta</label>
-                        <input type="text" id="fAcaoProposta" placeholder="Ex: Realizar retrofit do painel" class="input-touch text-sm py-2 w-full border-rose-200 focus:border-rose-500">
+                        <label class="block text-[10px] font-extrabold uppercase text-rose-700 mb-1">Plano de Mitigação / Ação Proposta</label>
+                        <input type="text" id="fAcaoProposta" placeholder="Ex: Realizar retrofit do painel" class="input-clean py-2 text-xs font-bold">
                     </div>
 
                     <!-- CAMPOS EXCLUSIVOS: PREVENTIVA -->
                     <div id="prevFields_Qtd" class="col-span-1 hidden">
-                        <label class="block text-[10px] font-bold uppercase text-slate-500 mb-1">Quantidade Aplicada</label>
-                        <input type="number" id="fPrevQtd" placeholder="Ex: 4" class="input-touch text-sm py-2 w-full border-blue-200 focus:border-blue-500">
+                        <label class="block text-[10px] font-extrabold uppercase text-sky-700 mb-1">Quantidade Aplicada</label>
+                        <input type="number" id="fPrevQtd" placeholder="Ex: 4" class="input-clean py-2 text-xs font-bold">
                     </div>
                     <div id="prevFields_Vida" class="col-span-1 hidden">
-                        <label class="block text-[10px] font-bold uppercase text-slate-500 mb-1">Gatilho de Troca / Vida Útil</label>
-                        <input type="text" id="fPrevVida" placeholder="Ex: Troca a cada 6 meses" class="input-touch text-sm py-2 w-full border-blue-200 focus:border-blue-500">
+                        <label class="block text-[10px] font-extrabold uppercase text-sky-700 mb-1">Gatilho de Troca / Vida Útil</label>
+                        <input type="text" id="fPrevVida" placeholder="Ex: Troca a cada 6 meses" class="input-clean py-2 text-xs font-bold">
                     </div>
                 </div>
 
                 <!-- SEÇÃO 3: MATRIZ GUT (EXCLUSIVO OBSOLESCÊNCIA) -->
-                <div id="gutSection" class="bg-rose-50 border border-rose-100 rounded-xl p-5 space-y-4">
+                <div id="gutSection" class="bg-rose-50/70 border border-rose-200 rounded-2xl p-5 space-y-4">
                     <div class="flex justify-between items-center border-b border-rose-200 pb-3">
-                        <h4 class="font-bold text-xs uppercase text-rose-700">Matriz GUT de Risco</h4>
+                        <h4 class="font-extrabold text-xs uppercase text-rose-800">Matriz GUT de Risco</h4>
                         <div class="text-right">
-                            <span class="text-[9px] text-rose-500 block uppercase font-bold tracking-widest">Score GUT</span>
-                            <span id="gutCalcResult" class="text-2xl font-black text-rose-600 leading-none">125</span>
+                            <span class="text-[9px] text-rose-600 block uppercase font-extrabold tracking-widest">Score GUT</span>
+                            <span id="gutCalcResult" class="text-2xl font-extrabold text-rose-600 leading-none">125</span>
                         </div>
                     </div>
-                    <div class="space-y-5">
+                    <div class="space-y-4">
                         <div>
-                            <div class="flex justify-between mb-1"><span class="font-bold text-xs text-rose-800">Gravidade: <span id="valG" class="text-rose-600 text-sm">5</span></span> <span id="descG" class="text-[10px] uppercase font-bold text-rose-500">Parada total</span></div>
+                            <div class="flex justify-between mb-1"><span class="font-extrabold text-xs text-rose-900">Gravidade: <span id="valG" class="text-rose-600">5</span></span> <span id="descG" class="text-[10px] uppercase font-extrabold text-rose-600">Parada total</span></div>
                             <input type="range" id="sliderG" min="1" max="5" value="5" oninput="updateGutCalc()" class="w-full gut-slider">
                         </div>
                         <div>
-                            <div class="flex justify-between mb-1"><span class="font-bold text-xs text-rose-800">Urgência: <span id="valU" class="text-rose-600 text-sm">5</span></span> <span id="descU" class="text-[10px] uppercase font-bold text-rose-500">Ação imediata</span></div>
+                            <div class="flex justify-between mb-1"><span class="font-extrabold text-xs text-rose-900">Urgência: <span id="valU" class="text-rose-600">5</span></span> <span id="descU" class="text-[10px] uppercase font-extrabold text-rose-600">Ação imediata</span></div>
                             <input type="range" id="sliderU" min="1" max="5" value="5" oninput="updateGutCalc()" class="w-full gut-slider">
                         </div>
                         <div>
-                            <div class="flex justify-between mb-1"><span class="font-bold text-xs text-rose-800">Tendência: <span id="valT" class="text-rose-600 text-sm">5</span></span> <span id="descT" class="text-[10px] uppercase font-bold text-rose-500">Piora rápida</span></div>
+                            <div class="flex justify-between mb-1"><span class="font-extrabold text-xs text-rose-900">Tendência: <span id="valT" class="text-rose-600">5</span></span> <span id="descT" class="text-[10px] uppercase font-extrabold text-rose-600">Piora rápida</span></div>
                             <input type="range" id="sliderT" min="1" max="5" value="5" oninput="updateGutCalc()" class="w-full gut-slider">
                         </div>
                     </div>
                 </div>
 
-                <div class="flex justify-end gap-2 pt-4 border-t border-[var(--border)]">
-                    <button type="button" onclick="closeModal('modalItem')" class="px-5 py-2.5 bg-slate-100 text-slate-600 hover:bg-slate-200 font-bold rounded-lg text-xs">Cancelar</button>
-                    <button type="submit" id="btnSaveItem" class="px-6 py-2.5 bg-slate-800 text-white font-bold rounded-lg text-xs shadow-md">Salvar Registro</button>
+                <div class="flex justify-end gap-2.5 pt-4 border-t border-slate-100">
+                    <button type="button" onclick="closeModal('modalItem')" class="btn-touch bg-slate-100 text-slate-700 text-xs">Cancelar</button>
+                    <button type="submit" id="btnSaveItem" class="btn-pill-dark text-xs">Salvar Registro</button>
                 </div>
             </form>
         </div>
     </div>
 
     <!-- MODAL EXCLUSÃO -->
-    <div id="modalDelete" class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-[60] hidden flex items-center justify-center p-4">
-        <div class="glass-panel w-full max-w-sm rounded-2xl p-6 text-center shadow-2xl">
-            <h3 class="text-lg font-bold text-rose-600 mb-2">Excluir Registro?</h3>
-            <p class="text-xs text-slate-500 mb-5">Esta ação não pode ser desfeita.</p>
-            <div class="flex flex-col gap-2">
-                <button onclick="confirmDelete()" id="btnConfirmDeleteExec" class="w-full py-2.5 bg-rose-600 text-white font-bold rounded-lg text-xs">Confirmar Exclusão</button>
-                <button onclick="closeModal('modalDelete')" class="w-full py-2.5 bg-slate-100 text-slate-600 font-bold rounded-lg text-xs">Cancelar</button>
+    <div id="modalDelete" role="dialog" aria-modal="true" class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-[60] hidden flex items-center justify-center p-4">
+        <div class="bg-white w-full max-w-sm rounded-3xl p-6 sm:p-7 text-center shadow-2xl border border-slate-200">
+            <div class="mx-auto flex items-center justify-center h-12 w-12 rounded-2xl bg-rose-100 text-rose-600 mb-4">
+                <svg class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/></svg>
+            </div>
+            <h3 class="text-lg font-extrabold text-slate-900 mb-1.5">Excluir Registro?</h3>
+            <p class="text-xs text-slate-500 mb-6">Esta ação removerá o item permanentemente da árvore de ativos.</p>
+            <div class="flex gap-2">
+                <button type="button" onclick="closeModal('modalDelete')" class="btn-touch bg-slate-100 text-slate-700 flex-1 text-xs">Cancelar</button>
+                <button type="button" onclick="confirmDelete()" id="btnConfirmDeleteExec" class="btn-touch bg-rose-600 hover:bg-rose-700 text-white flex-1 text-xs shadow-md">Confirmar</button>
             </div>
         </div>
     </div>
 
-    <div id="toastStack" class="fixed bottom-6 right-6 z-[70] space-y-2 pointer-events-none"></div>
+    <!-- MODAL ESPAÇO DO USUÁRIO -->
+    <div id="modalEspacoUsuario" role="dialog" aria-modal="true" class="fixed inset-0 bg-slate-900/60 z-50 hidden flex items-end sm:items-center justify-center p-0 sm:p-4">
+        <div class="bg-white w-full sm:max-w-xl sm:rounded-3xl rounded-t-3xl max-h-[92vh] flex flex-col shadow-2xl overflow-hidden border border-slate-200">
+            <div class="p-5 sm:px-7 border-b border-slate-200 bg-slate-50 flex items-center justify-between">
+                <div>
+                    <span class="text-[10px] font-extrabold uppercase tracking-widest text-sky-600">Preferências Sincronizadas</span>
+                    <h2 class="text-lg font-extrabold text-slate-900">Espaço do Usuário</h2>
+                </div>
+                <button type="button" onclick="closeModal('modalEspacoUsuario')" class="w-9 h-9 rounded-full bg-white border border-slate-200 text-slate-600 font-bold flex items-center justify-center">✕</button>
+            </div>
+            <div class="p-5 sm:p-7 overflow-y-auto space-y-6 text-sm">
+                <div class="p-4 rounded-2xl bg-slate-50 border border-slate-200 flex items-center justify-between gap-4">
+                    <div>
+                        <div class="font-extrabold text-slate-900 text-sm">Modo Tablet (Alta Performance & Campo)</div>
+                        <p class="text-xs text-slate-500 mt-0.5">Desativa efeitos visuais e aumenta áreas de toque (Atalho: <strong>Alt + T</strong>).</p>
+                    </div>
+                    <button type="button" id="btnToggleTabletMode" onclick="toggleModoTablet()" class="px-4 py-2.5 rounded-xl font-extrabold text-xs bg-slate-200 text-slate-800 shrink-0">DESATIVADO</button>
+                </div>
+                <div>
+                    <label class="block text-xs font-extrabold uppercase tracking-wider text-slate-500 mb-2">Tema Visual</label>
+                    <div class="grid grid-cols-2 sm:grid-cols-4 gap-2">
+                        <button type="button" onclick="definirTemaUsuario('padrao')" id="btnTema_padrao" class="p-3 rounded-xl border border-slate-200 text-xs font-extrabold text-center">Claro Padrão</button>
+                        <button type="button" onclick="definirTemaUsuario('solido')" id="btnTema_solido" class="p-3 rounded-xl border border-slate-200 text-xs font-extrabold text-center">Branco Sólido</button>
+                        <button type="button" onclick="definirTemaUsuario('dark')" id="btnTema_dark" class="p-3 rounded-xl border border-slate-200 text-xs font-extrabold text-center">Escuro Industrial</button>
+                        <button type="button" onclick="definirTemaUsuario('contraste')" id="btnTema_contraste" class="p-3 rounded-xl border border-slate-200 text-xs font-extrabold text-center">Alto Contraste</button>
+                    </div>
+                </div>
+                <div>
+                    <label class="block text-xs font-extrabold uppercase tracking-wider text-slate-500 mb-2">Cor de Destaque (Accent Color)</label>
+                    <div class="grid grid-cols-5 gap-2">
+                        <button type="button" onclick="definirCorDestaque('#0284c7')" class="py-2.5 rounded-xl text-white font-extrabold text-[11px]" style="background:#0284c7">Azul</button>
+                        <button type="button" onclick="definirCorDestaque('#dc2626')" class="py-2.5 rounded-xl text-white font-extrabold text-[11px]" style="background:#dc2626">Cepêra</button>
+                        <button type="button" onclick="definirCorDestaque('#059669')" class="py-2.5 rounded-xl text-white font-extrabold text-[11px]" style="background:#059669">Esmeralda</button>
+                        <button type="button" onclick="definirCorDestaque('#4f46e5')" class="py-2.5 rounded-xl text-white font-extrabold text-[11px]" style="background:#4f46e5">Índigo</button>
+                        <button type="button" onclick="definirCorDestaque('#0f172a')" class="py-2.5 rounded-xl text-white font-extrabold text-[11px]" style="background:#0f172a">Grafite</button>
+                    </div>
+                </div>
+                <div class="pt-2 border-t border-slate-200 space-y-3">
+                    <span class="block text-xs font-extrabold uppercase tracking-wider text-slate-500">Acessibilidade e Leitura</span>
+                    <div class="grid grid-cols-3 gap-2">
+                        <button type="button" onclick="alterarFonte(-1)" class="py-2.5 rounded-xl bg-slate-100 hover:bg-slate-200 font-extrabold text-xs text-slate-800">Texto A-</button>
+                        <button type="button" onclick="alterarFonte(0)" class="py-2.5 rounded-xl bg-slate-100 hover:bg-slate-200 font-extrabold text-xs text-slate-800">Padrão</button>
+                        <button type="button" onclick="alterarFonte(1)" class="py-2.5 rounded-xl bg-slate-100 hover:bg-slate-200 font-extrabold text-xs text-slate-800">Texto A+</button>
+                    </div>
+                </div>
+            </div>
+            <div class="p-4 sm:px-7 border-t border-slate-200 bg-slate-50 flex items-center justify-between">
+                <span class="text-[11px] font-semibold text-slate-500">Sincronizado com seu perfil PCM Cepêra.</span>
+                <button type="button" onclick="closeModal('modalEspacoUsuario')" class="btn-pill-dark text-xs py-2 px-6">Concluir</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- MODAL ATALHOS DE TECLADO (CTRL + ?) -->
+    <div id="modalAtalhos" role="dialog" aria-modal="true" class="fixed inset-0 bg-slate-900/60 z-50 hidden flex items-end sm:items-center justify-center p-0 sm:p-4">
+        <div class="bg-white w-full sm:max-w-lg sm:rounded-3xl rounded-t-3xl p-6 shadow-2xl border border-slate-200 space-y-4">
+            <div class="flex items-center justify-between border-b border-slate-100 pb-3">
+                <div>
+                    <span class="text-[10px] font-extrabold uppercase tracking-widest text-sky-600">Navegação Rápida</span>
+                    <h2 class="text-lg font-extrabold text-slate-900">Teclas de Atalho do Sistema</h2>
+                </div>
+                <button type="button" onclick="closeModal('modalAtalhos')" class="w-8 h-8 rounded-full bg-slate-100 text-slate-600 font-bold">✕</button>
+            </div>
+            <div class="space-y-2 text-xs">
+                <div class="flex justify-between py-2 border-b border-slate-100"><span>Abrir Central de Atalhos</span><kbd class="px-2 py-0.5 bg-slate-100 border border-slate-300 rounded font-mono font-bold">Ctrl + ?</kbd></div>
+                <div class="flex justify-between py-2 border-b border-slate-100"><span>Abrir Espaço do Usuário</span><kbd class="px-2 py-0.5 bg-slate-100 border border-slate-300 rounded font-mono font-bold">Alt + U</kbd></div>
+                <div class="flex justify-between py-2 border-b border-slate-100"><span>Alternar Modo Tablet</span><kbd class="px-2 py-0.5 bg-slate-100 border border-slate-300 rounded font-mono font-bold">Alt + T</kbd></div>
+                <div class="flex justify-between py-2 border-b border-slate-100"><span>Alternar entre Abas do Menu</span><kbd class="px-2 py-0.5 bg-slate-100 border border-slate-300 rounded font-mono font-bold">Alt + 1 até Alt + 5</kbd></div>
+                <div class="flex justify-between py-2"><span>Fechar qualquer modal</span><kbd class="px-2 py-0.5 bg-slate-100 border border-slate-300 rounded font-mono font-bold">Esc</kbd></div>
+            </div>
+        </div>
+    </div>
+
+    <div id="toastStack" aria-live="polite" class="fixed bottom-4 right-4 z-[9999] space-y-2 pointer-events-none"></div>
 
     <!-- Datalists Global -->
     <datalist id="dlAreas"></datalist><datalist id="dlMaquinas"></datalist><datalist id="dlEquipamentos"></datalist><datalist id="dlConjuntos"></datalist>
@@ -472,41 +872,174 @@ Sopro	Multipet 1	Sopradora	Cambotador"></textarea>
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
         import { getAuth, signInAnonymously } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
-        import { getFirestore, collection, addDoc, onSnapshot, doc, deleteDoc, updateDoc } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
+        import { initializeFirestore, collection, addDoc, onSnapshot, doc, deleteDoc, updateDoc } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
+
+        const memStore = {};
+        const safeStorage = {
+            get(k) { try { return window.localStorage.getItem(k); } catch (_) { return memStore[k] || null; } },
+            set(k, v) { memStore[k] = v; try { window.localStorage.setItem(k, v); } catch (_) {} },
+            remove(k) { delete memStore[k]; try { window.localStorage.removeItem(k); } catch (_) {} }
+        };
 
         const firebaseConfig = { apiKey: "AIzaSyAGbFTTCgbqe9XFKFSb6ltB5lYj5O6QipE", authDomain: "pcm-cepera.firebaseapp.com", projectId: "pcm-cepera", storageBucket: "pcm-cepera.firebasestorage.app", messagingSenderId: "483278589909", appId: "1:483278589909:web:9f69f8a32f50e4e186f75c" };
         const app = initializeApp(firebaseConfig);
-        const db = getFirestore(app); const auth = getAuth(app);
-        const colRef = collection(db, "ob_equipamentos"); const linhasColRef = collection(db, "ob_linhas");
+        const db = initializeFirestore(app, { experimentalForceLongPolling: true });
+        const auth = getAuth(app);
+        const colRef = collection(db, "ob_equipamentos");
+        const linhasColRef = collection(db, "ob_linhas");
 
-        let items = []; let estruturas = [];
-        let itemToDeleteId = null; let isDeletingLinha = false; let chartRankInstance = null; let chartPieInstance = null; let isFirebaseConnected = false;
-        
+        let items = [];
+        let estruturas = [];
+        let usuarioLogado = null;
+        let itemToDeleteId = null;
+        let isDeletingLinha = false;
+        let chartRankInstance = null;
+        let chartPieInstance = null;
+        let isFirebaseConnected = false;
+
         const descGMap = { 1: "Mínimo", 2: "Parada Curta", 3: "Redução de Vel.", 4: "Parada Considerável", 5: "Parada Total" };
         const descUMap = { 1: "Longo Prazo", 2: "Médio Prazo", 3: "Curto Prazo", 4: "Escasso", 5: "Ação Imediata" };
         const descTMap = { 1: "Estável", 2: "Piora Lenta", 3: "Piora Gradual", 4: "Fim Próximo", 5: "Descontinuada" };
 
         window.padronizarTexto = (txt) => {
-            if(!txt) return '';
+            if (!txt) return '';
             let s = txt.trim();
             return s.replace(/\w\S*/g, (w) => (w.replace(/^\w/, (c) => c.toUpperCase())));
         };
 
         window.switchTab = (t) => {
             ['dashboard', 'obs', 'prev', 'acoes', 'cadastros'].forEach(id => {
-                document.getElementById(`view-${id}`).classList.toggle('hidden', id !== t);
+                document.getElementById(`view-${id}`)?.classList.toggle('hidden', id !== t);
                 const b = document.getElementById(`tabBtn-${id}`);
-                if(b) { if (id === t) b.classList.add('active'); else b.classList.remove('active'); }
+                if (b) b.classList.toggle('active', id === t);
+                const r = document.getElementById(`rail-${id}`);
+                if (r) r.classList.toggle('active', id === t);
             });
-            if(t === 'cadastros') renderExploradorAreas();
+            if (t === 'cadastros') renderExploradorAreas();
+        };
+
+        // ================= ESPAÇO DO USUÁRIO & ATALHOS =================
+        let userPrefs = { tema: 'padrao', accent: '#0284c7', tabletMode: false, fontLevel: 0 };
+
+        window.abrirEspacoUsuario = function() {
+            atualizarUIPreferencias();
+            document.getElementById('modalEspacoUsuario').classList.remove('hidden');
+        };
+
+        window.abrirModalAtalhos = function() {
+            document.getElementById('modalAtalhos').classList.remove('hidden');
+        };
+
+        function aplicarPreferenciasVisuais() {
+            document.body.classList.remove('theme-solid', 'theme-dark', 'high-contrast', 'tablet-mode');
+            if (userPrefs.tema === 'solido') document.body.classList.add('theme-solid');
+            if (userPrefs.tema === 'dark') document.body.classList.add('theme-dark');
+            if (userPrefs.tema === 'contraste') document.body.classList.add('high-contrast');
+            if (userPrefs.tabletMode) document.body.classList.add('tablet-mode');
+            document.documentElement.style.setProperty('--accent', userPrefs.accent || '#0284c7');
+            const sizes = { '-1': '14px', '0': '16px', '1': '18px', '2': '20px', '3': '22px' };
+            document.documentElement.style.fontSize = sizes[String(userPrefs.fontLevel || 0)] || '16px';
+            atualizarUIPreferencias();
+        }
+
+        function atualizarUIPreferencias() {
+            const btnTab = document.getElementById('btnToggleTabletMode');
+            if (btnTab) {
+                btnTab.innerText = userPrefs.tabletMode ? 'ATIVADO' : 'DESATIVADO';
+                btnTab.className = userPrefs.tabletMode
+                    ? 'px-4 py-2.5 rounded-xl font-extrabold text-xs bg-emerald-600 text-white shrink-0'
+                    : 'px-4 py-2.5 rounded-xl font-extrabold text-xs bg-slate-200 text-slate-800 shrink-0';
+            }
+            ['padrao', 'solido', 'dark', 'contraste'].forEach(function(t) {
+                const b = document.getElementById('btnTema_' + t);
+                if (b) {
+                    b.className = (userPrefs.tema === t)
+                        ? 'p-3 rounded-xl border-2 border-sky-600 bg-sky-50 text-sky-900 text-xs font-extrabold text-center'
+                        : 'p-3 rounded-xl border border-slate-200 text-xs font-extrabold text-center';
+                }
+            });
+        }
+
+        async function persistirPreferenciasUsuario() {
+            const chaveLocal = usuarioLogado ? ('cepera_prefs_' + usuarioLogado.user) : 'cepera_prefs_guest';
+            safeStorage.set(chaveLocal, JSON.stringify(userPrefs));
+            if (usuarioLogado && usuarioLogado.id && usuarioLogado.id !== 'default_admin') {
+                try { await updateDoc(doc(db, "ir_funcionarios", usuarioLogado.id), { preferencias: userPrefs }); } catch (_) {}
+            }
+        }
+
+        function carregarPreferenciasUsuario(u) {
+            let carregado = (u && u.preferencias && typeof u.preferencias === 'object') ? u.preferencias : null;
+            if (!carregado) {
+                const salvoLocal = safeStorage.get(u ? ('cepera_prefs_' + u.user) : 'cepera_prefs_guest');
+                if (salvoLocal) { try { carregado = JSON.parse(salvoLocal); } catch (_) {} }
+            }
+            userPrefs = {
+                tema: (carregado && carregado.tema) || 'padrao',
+                accent: (carregado && carregado.accent) || '#0284c7',
+                tabletMode: Boolean(carregado && carregado.tabletMode),
+                fontLevel: Number((carregado && carregado.fontLevel) || 0)
+            };
+            aplicarPreferenciasVisuais();
+        }
+
+        window.toggleModoTablet = function() { userPrefs.tabletMode = !userPrefs.tabletMode; aplicarPreferenciasVisuais(); persistirPreferenciasUsuario(); };
+        window.definirTemaUsuario = function(tema) { userPrefs.tema = tema; aplicarPreferenciasVisuais(); persistirPreferenciasUsuario(); };
+        window.definirCorDestaque = function(cor) { userPrefs.accent = cor; aplicarPreferenciasVisuais(); persistirPreferenciasUsuario(); };
+        window.alterarFonte = function(dir) {
+            userPrefs.fontLevel = (dir === 0) ? 0 : Math.max(-1, Math.min(3, (userPrefs.fontLevel || 0) + dir));
+            aplicarPreferenciasVisuais();
+            persistirPreferenciasUsuario();
+        };
+
+        document.addEventListener('keydown', function(e) {
+            if (e.key === 'Escape') {
+                ['modalFiltroRelatorio', 'modalImportPecas', 'modalImportLinhas', 'modalItem', 'modalDelete', 'modalEspacoUsuario', 'modalAtalhos'].forEach(id => closeModal(id));
+                return;
+            }
+            if ((e.ctrlKey || e.metaKey) && (e.key === '?' || e.key === '/')) {
+                e.preventDefault();
+                abrirModalAtalhos();
+                return;
+            }
+            const tag = (document.activeElement && document.activeElement.tagName ? document.activeElement.tagName : '').toUpperCase();
+            if (['INPUT', 'TEXTAREA', 'SELECT'].indexOf(tag) !== -1) return;
+            if (e.altKey) {
+                const k = e.key.toLowerCase();
+                if (k === 't') { e.preventDefault(); toggleModoTablet(); return; }
+                if (k === 'u') { e.preventDefault(); abrirEspacoUsuario(); return; }
+                const tabs = ['dashboard', 'obs', 'prev', 'acoes', 'cadastros'];
+                const idx = parseInt(k, 10) - 1;
+                if (idx >= 0 && idx < tabs.length) { e.preventDefault(); switchTab(tabs[idx]); }
+            }
+        });
+
+        window.voltarParaCentralPCM = function() {
+            if (window.parent && window.parent !== window) {
+                window.parent.postMessage({ type: 'CEPERA_VOLTAR_CENTRAL' }, '*');
+            } else {
+                window.location.href = 'index.html';
+            }
+        };
+
+        window.fazerLogout = function() {
+            safeStorage.remove('cepera_ir_user');
+            safeStorage.remove('cepera_central_session');
+            if (window.parent && window.parent !== window) {
+                window.parent.postMessage({ type: 'CEPERA_LOGOUT_CENTRAL' }, '*');
+            } else {
+                window.location.href = 'index.html';
+            }
         };
 
         window.openModal = (id, tipoForm = 'Obsolescencia', isEdit = false) => {
             if (id === 'modalItem') {
                 if (!isEdit) {
-                    document.getElementById('formItem').reset(); 
+                    document.getElementById('formItem').reset();
                     document.getElementById('itemId').value = '';
-                    document.getElementById('sliderG').value = 5; document.getElementById('sliderU').value = 5; document.getElementById('sliderT').value = 5;
+                    document.getElementById('sliderG').value = 5;
+                    document.getElementById('sliderU').value = 5;
+                    document.getElementById('sliderT').value = 5;
                     updateGutCalc();
                 }
                 document.getElementById('formTipoPeca').value = tipoForm;
@@ -519,7 +1052,7 @@ Sopro	Multipet 1	Sopradora	Cambotador"></textarea>
                     document.getElementById('obsFields_Acao').classList.add('hidden');
                     document.getElementById('prevFields_Qtd').classList.remove('hidden');
                     document.getElementById('prevFields_Vida').classList.remove('hidden');
-                    btnSave.className = "px-6 py-2.5 bg-blue-600 hover:bg-blue-700 text-white font-bold rounded-lg text-xs shadow-md transition-colors";
+                    btnSave.className = "btn-pill-dark text-xs";
                 } else {
                     document.getElementById('modalItemTitle').innerText = isEdit ? 'Editar Obsolescência' : 'Mapear Risco de Obsolescência';
                     document.getElementById('gutSection').classList.remove('hidden');
@@ -527,48 +1060,60 @@ Sopro	Multipet 1	Sopradora	Cambotador"></textarea>
                     document.getElementById('obsFields_Acao').classList.remove('hidden');
                     document.getElementById('prevFields_Qtd').classList.add('hidden');
                     document.getElementById('prevFields_Vida').classList.add('hidden');
-                    btnSave.className = "px-6 py-2.5 bg-rose-600 hover:bg-rose-700 text-white font-bold rounded-lg text-xs shadow-md transition-colors";
+                    btnSave.className = "btn-pill-dark !bg-rose-600 text-xs";
                 }
                 atualizarDatalistsDependentes();
             }
-            document.getElementById(id).classList.remove('hidden');
+            document.getElementById(id)?.classList.remove('hidden');
         };
-        
-        window.closeModal = (id) => document.getElementById(id).classList.add('hidden');
+
+        window.closeModal = (id) => document.getElementById(id)?.classList.add('hidden');
 
         window.updateGutCalc = () => {
-            const g = parseInt(document.getElementById('sliderG').value), u = parseInt(document.getElementById('sliderU').value), t = parseInt(document.getElementById('sliderT').value), s = g*u*t;
-            document.getElementById('valG').innerText = g; document.getElementById('valU').innerText = u; document.getElementById('valT').innerText = t;
-            document.getElementById('descG').innerText = descGMap[g]; document.getElementById('descU').innerText = descUMap[u]; document.getElementById('descT').innerText = descTMap[t];
-            const r = document.getElementById('gutCalcResult'); r.innerText = s;
-            r.className = s >= 80 ? "text-2xl font-black text-rose-600 leading-none" : s >= 45 ? "text-2xl font-black text-amber-500 leading-none" : s >= 18 ? "text-2xl font-black text-yellow-500 leading-none" : "text-2xl font-black text-emerald-500 leading-none";
+            const g = parseInt(document.getElementById('sliderG').value), u = parseInt(document.getElementById('sliderU').value), t = parseInt(document.getElementById('sliderT').value), s = g * u * t;
+            document.getElementById('valG').innerText = g;
+            document.getElementById('valU').innerText = u;
+            document.getElementById('valT').innerText = t;
+            document.getElementById('descG').innerText = descGMap[g];
+            document.getElementById('descU').innerText = descUMap[u];
+            document.getElementById('descT').innerText = descTMap[t];
+            const r = document.getElementById('gutCalcResult');
+            r.innerText = s;
+            r.className = s >= 80 ? "text-2xl font-extrabold text-rose-600 leading-none" : s >= 45 ? "text-2xl font-extrabold text-amber-500 leading-none" : s >= 18 ? "text-2xl font-extrabold text-yellow-500 leading-none" : "text-2xl font-extrabold text-emerald-500 leading-none";
         };
 
         window.showToast = (msg, type = 'info') => {
             const stack = document.getElementById('toastStack'), el = document.createElement('div');
-            el.className = `px-5 py-3 rounded-lg border text-xs font-bold shadow-lg transition-all ${type === 'error' ? 'bg-rose-600 text-white border-rose-800' : 'bg-slate-800 text-white border-slate-700'}`;
-            el.innerText = msg; stack.appendChild(el); setTimeout(() => el.remove(), 3000);
+            el.className = `px-4 py-3 rounded-2xl text-xs font-bold shadow-xl transition-all flex items-center gap-2 ${type === 'error' ? 'bg-rose-600 text-white' : 'bg-slate-900 text-white'}`;
+            el.innerText = msg;
+            stack.appendChild(el);
+            setTimeout(() => el.remove(), 3200);
         };
 
         async function initFirebase() {
             try {
-                await signInAnonymously(auth); isFirebaseConnected = true;
-                document.getElementById('statusDot').className = "w-2 h-2 rounded-full bg-emerald-500"; document.getElementById('statusText').innerText = "Online";
-                
+                await signInAnonymously(auth);
+                isFirebaseConnected = true;
+                document.getElementById('statusDot').className = "w-2 h-2 rounded-full bg-emerald-500";
+                document.getElementById('statusText').innerText = "Banco Sincronizado (Online)";
+
                 onSnapshot(colRef, (snap) => { items = []; snap.forEach(d => items.push({ id: d.id, ...d.data() })); renderAll(); });
                 onSnapshot(linhasColRef, (snap) => { estruturas = []; snap.forEach(d => estruturas.push({ id: d.id, ...d.data() })); renderAll(); });
             } catch (err) { renderAll(); }
         }
-        function renderAll() { 
-            atualizarDatalistsDependentes(); renderKPIs(); renderCharts(); 
+
+        function renderAll() {
+            atualizarDatalistsDependentes();
+            renderKPIs();
+            renderCharts();
             renderArvore('Obsolescencia', 'treeContainerObs');
             renderArvore('Preventiva', 'treeContainerPrev');
-            renderTabelaAcoes(); 
-            if(!document.getElementById('view-cadastros').classList.contains('hidden')) renderExploradorAreas();
+            renderTabelaAcoes();
+            if (!document.getElementById('view-cadastros').classList.contains('hidden')) renderExploradorAreas();
         }
 
         window.atualizarDatalistsDependentes = () => {
-            const a = document.getElementById('fArea')?.value||'', m = document.getElementById('fMaquina')?.value||'', e = document.getElementById('fEquipamentoBusca')?.value||'';
+            const a = document.getElementById('fArea')?.value || '', m = document.getElementById('fMaquina')?.value || '', e = document.getElementById('fEquipamentoBusca')?.value || '';
             const areas = [...new Set(estruturas.map(x => x.area))].filter(Boolean).sort();
             document.getElementById('dlAreas').innerHTML = areas.map(x => `<option value="${x}">`).join('');
             const maquinas = [...new Set(estruturas.filter(x => !a || x.area === a).map(x => x.maquina))].filter(Boolean).sort();
@@ -576,61 +1121,78 @@ Sopro	Multipet 1	Sopradora	Cambotador"></textarea>
             const equips = [...new Set(estruturas.filter(x => (!a || x.area === a) && (!m || x.maquina === m)).map(x => x.equipamento))].filter(Boolean).sort();
             document.getElementById('dlEquipamentos').innerHTML = equips.map(x => `<option value="${x}">`).join('');
             const obj = estruturas.find(x => x.area === a && x.maquina === m && x.equipamento === e);
-            if(obj && obj.conjuntos) document.getElementById('dlConjuntos').innerHTML = obj.conjuntos.map(x => `<option value="${x}">`).join('');
+            if (obj && obj.conjuntos) document.getElementById('dlConjuntos').innerHTML = obj.conjuntos.map(x => `<option value="${x}">`).join('');
             else document.getElementById('dlConjuntos').innerHTML = '';
         };
 
         // --- ABA 5: EXPLORADOR ---
         window.renderExploradorAreas = () => {
-            const sel = document.getElementById('exploraArea'); const val = sel.value;
+            const sel = document.getElementById('exploraArea');
+            const val = sel.value;
             const areas = [...new Set(estruturas.map(e => e.area))].filter(Boolean).sort();
             sel.innerHTML = '<option value="">-- Setor --</option>' + areas.map(a => `<option value="${a}">${a}</option>`).join('');
-            if(val && areas.includes(val)) sel.value = val; else if(areas.length>0) sel.value = areas[0];
+            if (val && areas.includes(val)) sel.value = val;
+            else if (areas.length > 0) sel.value = areas[0];
             renderExploradorMaquinas();
         };
+
         window.renderExploradorMaquinas = () => {
             const area = document.getElementById('exploraArea').value;
-            const sel = document.getElementById('exploraMaquina'); const val = sel.value;
+            const sel = document.getElementById('exploraMaquina');
+            const val = sel.value;
             const maquinas = [...new Set(estruturas.filter(e => e.area === area).map(e => e.maquina))].filter(Boolean).sort();
             sel.innerHTML = '<option value="">-- Máquina --</option>' + maquinas.map(m => `<option value="${m}">${m}</option>`).join('');
-            if(val && maquinas.includes(val)) sel.value = val; else if(maquinas.length>0) sel.value = maquinas[0];
+            if (val && maquinas.includes(val)) sel.value = val;
+            else if (maquinas.length > 0) sel.value = maquinas[0];
             renderExploradorCards();
         };
+
         window.renderExploradorCards = () => {
             const area = document.getElementById('exploraArea').value, maq = document.getElementById('exploraMaquina').value;
             const container = document.getElementById('estruturaCardsContainer');
-            if(!area || !maq) { container.innerHTML = `<div class="col-span-2 p-6 text-center text-slate-400 text-xs bg-white rounded-lg border border-slate-200">Selecione o Setor e a Máquina.</div>`; return; }
-            
-            const equips = estruturas.filter(e => e.area === area && e.maquina === maq).sort((a,b) => (a.equipamento||'').localeCompare(b.equipamento||''));
-            if(equips.length === 0) { container.innerHTML = `<div class="col-span-2 p-6 text-center text-slate-400 text-xs">Nenhum equipamento cadastrado.</div>`; return; }
+            if (!area || !maq) {
+                container.innerHTML = `<div class="col-span-2 p-8 text-center text-slate-400 text-xs font-bold bg-slate-50 rounded-2xl border border-slate-200">Selecione o Setor e a Máquina para visualizar os ativos.</div>`;
+                return;
+            }
+
+            const equips = estruturas.filter(e => e.area === area && e.maquina === maq).sort((a, b) => (a.equipamento || '').localeCompare(b.equipamento || ''));
+            if (equips.length === 0) {
+                container.innerHTML = `<div class="col-span-2 p-8 text-center text-slate-400 text-xs font-bold">Nenhum equipamento cadastrado neste setor/linha.</div>`;
+                return;
+            }
 
             container.innerHTML = equips.map(e => `
-                <div class="bg-white border border-slate-200 rounded-xl p-4 shadow-sm relative hover:border-slate-300 transition-colors">
-                    <button onclick="askDeleteLinha('${e.id}')" class="absolute top-3 right-3 p-1.5 text-rose-400 hover:text-rose-600 hover:bg-rose-50 rounded"><svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/></svg></button>
-                    <h4 class="font-bold text-sm text-slate-800 mb-3 pr-8">${e.equipamento}</h4>
+                <div class="glass-card glass-card-hover rounded-2xl p-5 relative">
+                    <button type="button" onclick="askDeleteLinha('${e.id}')" class="absolute top-3.5 right-3.5 p-1.5 text-rose-500 hover:bg-rose-50 rounded-xl transition-colors" title="Remover equipamento">
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/></svg>
+                    </button>
+                    <h4 class="font-extrabold text-sm text-slate-900 mb-3 pr-8">${e.equipamento}</h4>
                     <div class="grid grid-cols-2 gap-3 mb-3">
                         <div>
-                            <label class="block text-[9px] font-bold uppercase text-slate-500 mb-1">Modelo</label>
-                            <input type="text" value="${e.modelo||''}" onblur="salvarAtributoRapido('${e.id}', 'modelo', this.value)" placeholder="Vazio" class="w-full text-xs border-b border-slate-200 pb-1 bg-transparent focus:outline-none focus:border-blue-500 text-slate-700">
+                            <label class="block text-[9px] font-extrabold uppercase text-slate-400 mb-1">Modelo</label>
+                            <input type="text" value="${e.modelo || ''}" onblur="salvarAtributoRapido('${e.id}', 'modelo', this.value)" placeholder="Clique para informar" class="input-clean py-1.5 px-2.5 text-xs font-bold">
                         </div>
                         <div>
-                            <label class="block text-[9px] font-bold uppercase text-slate-500 mb-1">SN</label>
-                            <input type="text" value="${e.numeroSerie||''}" onblur="salvarAtributoRapido('${e.id}', 'numeroSerie', this.value)" placeholder="Vazio" class="w-full text-xs border-b border-slate-200 pb-1 bg-transparent focus:outline-none focus:border-blue-500 text-slate-700 font-mono">
+                            <label class="block text-[9px] font-extrabold uppercase text-slate-400 mb-1">SN (Número de Série)</label>
+                            <input type="text" value="${e.numeroSerie || ''}" onblur="salvarAtributoRapido('${e.id}', 'numeroSerie', this.value)" placeholder="Clique para informar" class="input-clean py-1.5 px-2.5 text-xs font-mono font-bold">
                         </div>
                     </div>
                     <div>
-                        <label class="block text-[9px] font-bold uppercase text-slate-500 mb-1">Conjuntos</label>
-                        <div class="flex flex-wrap gap-1">
-                            ${e.conjuntos && e.conjuntos.length ? e.conjuntos.map(c => `<span class="bg-slate-100 border border-slate-200 px-1.5 py-0.5 rounded text-[10px] text-slate-600">${c}</span>`).join('') : '<span class="text-[10px] text-slate-400 italic">Sem conjuntos.</span>'}
+                        <label class="block text-[9px] font-extrabold uppercase text-slate-400 mb-1.5">Conjuntos Vinculados</label>
+                        <div class="flex flex-wrap gap-1.5">
+                            ${e.conjuntos && e.conjuntos.length ? e.conjuntos.map(c => `<span class="bg-slate-100 border border-slate-200 px-2.5 py-0.5 rounded-full text-[10px] font-bold text-slate-700">${c}</span>`).join('') : '<span class="text-[10px] text-slate-400 italic">Sem conjuntos cadastrados.</span>'}
                         </div>
                     </div>
                 </div>
             `).join('');
         };
+
         window.salvarAtributoRapido = async (id, campo, valor) => {
-            if(!isFirebaseConnected) return; const obj = estruturas.find(x => x.id === id); if(!obj) return;
-            if(obj[campo] === valor.trim()) return; 
-            try { await updateDoc(doc(db, "ob_linhas", id), { [campo]: valor.trim() }); showToast("Atributo atualizado!"); } catch(e) { showToast("Erro", "error"); }
+            if (!isFirebaseConnected) return;
+            const obj = estruturas.find(x => x.id === id);
+            if (!obj) return;
+            if (obj[campo] === valor.trim()) return;
+            try { await updateDoc(doc(db, "ob_linhas", id), { [campo]: valor.trim() }); showToast("Atributo atualizado!"); } catch (e) { showToast("Erro ao salvar atributo", "error"); }
         };
 
         // --- RENDERIZADORES DE ÁRVORE ---
@@ -638,86 +1200,97 @@ Sopro	Multipet 1	Sopradora	Cambotador"></textarea>
             const container = document.getElementById(containerId);
             const filteredItems = items.filter(i => {
                 const t = i.tipoPeca || 'Obsolescencia';
-                if(tipoDesejado === 'Preventiva') return t === 'Preventiva' || t === 'Preventiva / Desgaste';
+                if (tipoDesejado === 'Preventiva') return t === 'Preventiva' || t === 'Preventiva / Desgaste';
                 return t === 'Obsolescencia' || t === 'Obsolescência';
             });
 
-            if(!filteredItems.length) { 
-                container.innerHTML = `<div class="p-8 text-center bg-white rounded-xl text-slate-400 text-sm border border-slate-200 shadow-sm">Nenhuma peça mapeada. A árvore aparecerá aqui assim que houver dados.</div>`; 
-                return; 
+            if (!filteredItems.length) {
+                container.innerHTML = `<div class="p-10 text-center glass-card rounded-3xl text-slate-400 text-sm font-bold">Nenhuma peça mapeada nesta categoria. A árvore aparecerá aqui assim que houver dados.</div>`;
+                return;
             }
 
             const arv = {};
             filteredItems.forEach(i => {
                 const area = i.area || 'Setor Geral', maq = i.maquina || 'Máquina Base', eq = i.equipamento || 'Equipamento', cj = i.conjunto || 'Conjunto Geral';
-                if(!arv[area]) arv[area] = {}; if(!arv[area][maq]) arv[area][maq] = {}; if(!arv[area][maq][eq]) arv[area][maq][eq] = {}; if(!arv[area][maq][eq][cj]) arv[area][maq][eq][cj] = [];
-                arv[area][maq][eq][cj].push({...i, _nome: i.componente || 'Peça sem nome' });
+                if (!arv[area]) arv[area] = {};
+                if (!arv[area][maq]) arv[area][maq] = {};
+                if (!arv[area][maq][eq]) arv[area][maq][eq] = {};
+                if (!arv[area][maq][eq][cj]) arv[area][maq][eq][cj] = [];
+                arv[area][maq][eq][cj].push({ ...i, _nome: i.componente || 'Peça sem nome' });
             });
 
             const isObs = (tipoDesejado === 'Obsolescencia');
-            const mainColor = isObs ? 'rose' : 'blue';
+            const mainColor = isObs ? 'rose' : 'sky';
 
             let h = '';
             Object.keys(arv).sort().forEach(area => {
                 h += `<div class="tree-area">
                         <div class="tree-area-header"><svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10"/></svg> Setor: ${area}</div>`;
                 Object.keys(arv[area]).sort().forEach(maq => {
-                    h += `<div class="tree-machine"><h3 class="text-sm font-bold uppercase tracking-wider text-${mainColor}-600 border-b border-slate-200 pb-2 mb-2 flex items-center gap-2"><svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4"/></svg> ${maq}</h3>`;
+                    h += `<div class="tree-machine"><h3 class="text-sm font-extrabold uppercase tracking-wider text-${mainColor}-600 border-b border-slate-100 pb-2.5 mb-2.5 flex items-center gap-2"><svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4"/></svg> ${maq}</h3>`;
                     Object.keys(arv[area][maq]).sort().forEach(eq => {
                         const eqData = estruturas.find(x => x.area === area && x.maquina === maq && x.equipamento === eq);
-                        const sub = eqData && (eqData.modelo || eqData.numeroSerie) ? `<span class="text-[9px] bg-slate-100 text-slate-500 px-1.5 py-0.5 rounded border border-slate-200 ml-2 font-mono">Mod: ${eqData.modelo||'-'} | SN: ${eqData.numeroSerie||'-'}</span>` : '';
-                        
-                        h += `<div class="tree-equip text-slate-800"><h4 class="font-bold text-xs uppercase mb-1 flex items-center gap-1.5"><svg class="w-3.5 h-3.5 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/></svg> ${eq} ${sub}</h4>`;
+                        const sub = eqData && (eqData.modelo || eqData.numeroSerie) ? `<span class="text-[10px] bg-slate-100 text-slate-600 px-2 py-0.5 rounded-full border border-slate-200 ml-2 font-mono font-bold">Mod: ${eqData.modelo || '-'} | SN: ${eqData.numeroSerie || '-'}</span>` : '';
+
+                        h += `<div class="tree-equip text-slate-800"><h4 class="font-extrabold text-xs uppercase mb-1.5 flex items-center gap-1.5"><svg class="w-3.5 h-3.5 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"/><circle cx="12" cy="12" r="3" stroke-width="2"/></svg> ${eq} ${sub}</h4>`;
                         Object.keys(arv[area][maq][eq]).sort().forEach(cj => {
-                            h += `<div class="tree-assembly"><h5 class="font-bold text-[10px] text-slate-400 uppercase tracking-wider mb-2 flex items-center gap-1"><svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10"/></svg> Conj: ${cj}</h5>`;
-                            
-                            arv[area][maq][eq][cj].sort((a,b)=> (b.gutScore||0)-(a.gutScore||0)).forEach(item => {
+                            h += `<div class="tree-assembly"><h5 class="font-extrabold text-[10px] text-slate-400 uppercase tracking-wider mb-2 flex items-center gap-1"><svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10"/></svg> Conjunto: ${cj}</h5>`;
+
+                            arv[area][maq][eq][cj].sort((a, b) => (b.gutScore || 0) - (a.gutScore || 0)).forEach(item => {
                                 const s = item.gutScore || 0;
-                                const extraInfo = isObs 
-                                    ? `Status: ${item.statusCicloVida || '-'}` 
+                                const extraInfo = isObs
+                                    ? `Status: ${item.statusCicloVida || '-'}`
                                     : `Gatilho: ${item.gatilhoVidaUtil || '-'} | Qtd: ${item.qtdAplicada || 1}`;
-                                
-                                const spanCodigo = item.codigoSistema ? `<span class="bg-blue-50 text-blue-600 px-1.5 py-0.5 rounded border border-blue-100 font-mono text-[9px] mr-1">Cod: ${item.codigoSistema}</span>` : '';
-                                
+
+                                const spanCodigo = item.codigoSistema ? `<span class="bg-sky-50 text-sky-700 px-2 py-0.5 rounded-full border border-sky-200 font-mono font-bold text-[10px] mr-1.5">Cod: ${item.codigoSistema}</span>` : '';
+
                                 const classeBadge = s >= 80 ? 'badge-critico' : s >= 45 ? 'badge-alto' : s >= 18 ? 'badge-medio' : 'badge-baixo';
-                                const gutBlock = isObs 
-                                    ? `<div class="text-center border-r border-slate-200 pr-3 mr-3"><div class="text-[9px] uppercase font-bold text-slate-400 mb-0.5">GUT</div><div class="px-2 py-0.5 rounded text-[10px] font-bold ${classeBadge}">${s}</div></div>` 
+                                const gutBlock = isObs
+                                    ? `<div class="text-center border-r border-slate-200 pr-3 mr-3"><div class="text-[9px] uppercase font-extrabold text-slate-400 mb-0.5">GUT</div><div class="px-2.5 py-0.5 rounded-full text-[11px] font-extrabold ${classeBadge}">${s}</div></div>`
                                     : '';
 
-                                h += `<div class="tree-component shadow-sm">
+                                h += `<div class="tree-component">
                                         <div class="flex-1 min-w-[200px]">
-                                            <div class="font-bold text-sm mb-1 text-${mainColor}-700">${item._nome}</div>
-                                            <div class="text-[10px] text-slate-500 font-medium">${spanCodigo} Ref: ${item.fabricante || '-'} • ${extraInfo}</div>
+                                            <div class="font-extrabold text-sm mb-1 text-slate-900">${item._nome}</div>
+                                            <div class="text-[11px] text-slate-500 font-semibold">${spanCodigo} Ref: ${item.fabricante || '-'} • ${extraInfo}</div>
                                         </div>
                                         <div class="flex items-center">
                                             ${gutBlock}
                                             <div class="flex gap-1.5">
-                                                <button onclick="editItem('${item.id}', '${tipoDesejado}')" class="p-1.5 bg-slate-100 text-slate-600 hover:bg-slate-200 rounded"><svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z"/></svg></button>
-                                                <button onclick="askDelete('${item.id}')" class="p-1.5 bg-rose-50 text-rose-500 hover:bg-rose-100 rounded"><svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/></svg></button>
+                                                <button type="button" onclick="editItem('${item.id}', '${tipoDesejado}')" class="p-2 bg-white border border-slate-200 text-slate-700 hover:bg-slate-100 rounded-xl transition-colors" title="Editar"><svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z"/></svg></button>
+                                                <button type="button" onclick="askDelete('${item.id}')" class="p-2 bg-rose-50 border border-rose-200 text-rose-600 hover:bg-rose-100 rounded-xl transition-colors" title="Excluir"><svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/></svg></button>
                                             </div>
                                         </div>
                                      </div>`;
-                            }); h += `</div>`;
-                        }); h += `</div>`;
-                    }); h += `</div>`;
-                }); h += `</div>`;
-            }); container.innerHTML = h;
+                            });
+                            h += `</div>`;
+                        });
+                        h += `</div>`;
+                    });
+                    h += `</div>`;
+                });
+                h += `</div>`;
+            });
+            container.innerHTML = h;
         }
 
         window.saveItem = async (e) => {
-            e.preventDefault(); const id = document.getElementById('itemId').value;
-            const tipo = document.getElementById('formTipoPeca').value; 
-            
-            const btn = document.getElementById('btnSaveItem'); btn.disabled = true; btn.innerText = "Processando...";
-            
+            e.preventDefault();
+            const id = document.getElementById('itemId').value;
+            const tipo = document.getElementById('formTipoPeca').value;
+
+            const btn = document.getElementById('btnSaveItem');
+            btn.disabled = true;
+            btn.innerText = "Processando...";
+
             const area = padronizarTexto(document.getElementById('fArea').value);
             const maq = padronizarTexto(document.getElementById('fMaquina').value);
             const eq = padronizarTexto(document.getElementById('fEquipamentoBusca').value);
             const cj = padronizarTexto(document.getElementById('fConjunto').value);
 
-            if(isFirebaseConnected) {
+            if (isFirebaseConnected) {
                 let node = estruturas.find(x => x.area === area && x.maquina === maq && x.equipamento === eq);
-                if(node) {
+                if (node) {
                     if (cj && (!node.conjuntos || !node.conjuntos.includes(cj))) {
                         const nc = node.conjuntos ? [...node.conjuntos, cj] : [cj];
                         await updateDoc(doc(db, "ob_linhas", node.id), { conjuntos: nc });
@@ -729,19 +1302,19 @@ Sopro	Multipet 1	Sopradora	Cambotador"></textarea>
 
             let data = {
                 area, maquina: maq, equipamento: eq, conjunto: cj, tipoPeca: tipo,
-                componente: padronizarTexto(document.getElementById('fComponente').value), 
+                componente: padronizarTexto(document.getElementById('fComponente').value),
                 fabricante: document.getElementById('fFabricante').value.trim(),
                 codigoSistema: document.getElementById('fCodigoSistema').value.trim(),
-                custoEstimado: Number(document.getElementById('fCusto').value)||0,
+                custoEstimado: Number(document.getElementById('fCusto').value) || 0,
                 timestamp: Date.now()
             };
 
             if (tipo === 'Obsolescencia') {
                 const g = parseInt(document.getElementById('sliderG').value), u = parseInt(document.getElementById('sliderU').value), t = parseInt(document.getElementById('sliderT').value);
-                data.gravidade = g; data.urgencia = u; data.tendencia = t; data.gutScore = g*u*t;
+                data.gravidade = g; data.urgencia = u; data.tendencia = t; data.gutScore = g * u * t;
                 data.statusCicloVida = document.getElementById('fStatusCiclo').value.trim() || '-';
                 data.acaoProposta = document.getElementById('fAcaoProposta').value.trim();
-                data.statusAcao = id ? (items.find(x=>x.id===id)?.statusAcao || 'Pendente') : 'Pendente';
+                data.statusAcao = id ? (items.find(x => x.id === id)?.statusAcao || 'Pendente') : 'Pendente';
             } else {
                 data.gravidade = 0; data.urgencia = 0; data.tendencia = 0; data.gutScore = 0;
                 data.qtdAplicada = document.getElementById('fPrevQtd').value.trim() || '1';
@@ -749,28 +1322,31 @@ Sopro	Multipet 1	Sopradora	Cambotador"></textarea>
             }
 
             try {
-                if (id) { if (isFirebaseConnected) await updateDoc(doc(db, "ob_equipamentos", id), data); showToast("Peça Atualizada!"); } 
+                if (id) { if (isFirebaseConnected) await updateDoc(doc(db, "ob_equipamentos", id), data); showToast("Peça Atualizada!"); }
                 else { if (isFirebaseConnected) await addDoc(colRef, data); showToast("Cadastrado na Árvore!"); }
                 closeModal('modalItem');
-            } catch (err) { showToast("Erro.", "error"); } finally { btn.disabled = false; btn.innerText = "Salvar Registro"; }
+            } catch (err) { showToast("Erro ao salvar.", "error"); } finally { btn.disabled = false; btn.innerText = "Salvar Registro"; }
         };
 
         window.editItem = (id, tipoOriginal) => {
-            const i = items.find(x=>x.id===id); if(!i) return;
+            const i = items.find(x => x.id === id);
+            if (!i) return;
             document.getElementById('itemId').value = i.id;
-            document.getElementById('fArea').value = i.area || ''; 
-            document.getElementById('fMaquina').value = i.maquina || ''; 
-            document.getElementById('fEquipamentoBusca').value = i.equipamento || ''; 
-            document.getElementById('fConjunto').value = i.conjunto || ''; 
-            document.getElementById('fComponente').value = i.componente || ''; 
+            document.getElementById('fArea').value = i.area || '';
+            document.getElementById('fMaquina').value = i.maquina || '';
+            document.getElementById('fEquipamentoBusca').value = i.equipamento || '';
+            document.getElementById('fConjunto').value = i.conjunto || '';
+            document.getElementById('fComponente').value = i.componente || '';
             document.getElementById('fFabricante').value = i.fabricante || '';
             document.getElementById('fCodigoSistema').value = i.codigoSistema || '';
             document.getElementById('fCusto').value = i.custoEstimado || '';
-            
+
             if (tipoOriginal === 'Obsolescencia' || i.tipoPeca === 'Obsolescencia' || i.tipoPeca === 'Obsolescência') {
                 document.getElementById('fStatusCiclo').value = i.statusCicloVida || '';
                 document.getElementById('fAcaoProposta').value = i.acaoProposta || '';
-                document.getElementById('sliderG').value = i.gravidade||5; document.getElementById('sliderU').value = i.urgencia||5; document.getElementById('sliderT').value = i.tendencia||5;
+                document.getElementById('sliderG').value = i.gravidade || 5;
+                document.getElementById('sliderU').value = i.urgencia || 5;
+                document.getElementById('sliderT').value = i.tendencia || 5;
                 updateGutCalc();
                 openModal('modalItem', 'Obsolescencia', true);
             } else {
@@ -781,18 +1357,21 @@ Sopro	Multipet 1	Sopradora	Cambotador"></textarea>
         };
 
         function renderTabelaAcoes() {
-            const tbody = document.getElementById('tbodyAcoes'); 
-            const obsItems = items.filter(i => (i.tipoPeca === 'Obsolescencia' || i.tipoPeca === 'Obsolescência')).sort((a,b)=> (b.gutScore||0)-(a.gutScore||0));
-            
-            if (!obsItems.length) { tbody.innerHTML = `<tr><td colspan="4" class="py-6 px-6 text-center text-slate-400 font-medium">Nenhum risco apontado.</td></tr>`; return; }
+            const tbody = document.getElementById('tbodyAcoes');
+            const obsItems = items.filter(i => (i.tipoPeca === 'Obsolescencia' || i.tipoPeca === 'Obsolescência')).sort((a, b) => (b.gutScore || 0) - (a.gutScore || 0));
+
+            if (!obsItems.length) {
+                tbody.innerHTML = `<tr><td colspan="4" class="py-8 px-6 text-center text-slate-400 font-bold">Nenhum risco apontado até o momento.</td></tr>`;
+                return;
+            }
             tbody.innerHTML = obsItems.map(i => {
-                const badgeCod = i.codigoSistema ? `<span class="bg-blue-50 text-blue-600 px-1.5 py-0.5 rounded border border-blue-100 font-mono text-[9px] ml-2">Cod: ${i.codigoSistema}</span>` : '';
-                return `<tr class="hover:bg-slate-50">
-                    <td class="py-3 px-5"><div class="font-bold text-sm text-slate-800">${i.componente} ${badgeCod}</div><div class="text-[9px] text-slate-500 font-bold uppercase mt-1">${i.area||'Geral'} > ${i.maquina||''} > ${i.equipamento||''} ${i.conjunto?'> '+i.conjunto:''}</div></td>
-                    <td class="py-3 px-5 text-xs text-slate-600 font-medium whitespace-normal max-w-xs">${i.acaoProposta || '<span class="text-slate-300 italic">Não definida</span>'}</td>
-                    <td class="py-3 px-5 text-sm font-black text-amber-600">R$ ${(Number(i.custoEstimado)||0).toLocaleString('pt-BR')}</td>
-                    <td class="py-3 px-5 text-center"><select onchange="updateStatusAcao('${i.id}', this.value)" class="input-touch text-[10px] py-1.5 px-2 bg-white font-bold w-full"><option value="Pendente" ${i.statusAcao==='Pendente'?'selected':''}>⏳ Pendente</option><option value="Em Andamento" ${i.statusAcao==='Em Andamento'?'selected':''}>⚙️ Em Andamento</option><option value="Concluído" ${i.statusAcao==='Concluído'?'selected':''}>✅ Concluído</option></select></td>
-                </tr>`
+                const badgeCod = i.codigoSistema ? `<span class="bg-sky-50 text-sky-700 px-2 py-0.5 rounded-full border border-sky-200 font-mono text-[10px] ml-2">Cod: ${i.codigoSistema}</span>` : '';
+                return `<tr class="hover:bg-slate-50/80 transition-colors">
+                    <td class="py-3.5 px-5"><div class="font-extrabold text-sm text-slate-900">${i.componente} ${badgeCod}</div><div class="text-[10px] text-slate-400 font-bold uppercase mt-0.5">${i.area || 'Geral'} › ${i.maquina || ''} › ${i.equipamento || ''} ${i.conjunto ? '› ' + i.conjunto : ''}</div></td>
+                    <td class="py-3.5 px-5 text-xs text-slate-600 font-semibold whitespace-normal max-w-xs">${i.acaoProposta || '<span class="text-slate-300 italic">Não definida</span>'}</td>
+                    <td class="py-3.5 px-5 text-sm font-extrabold text-amber-600">R$ ${(Number(i.custoEstimado) || 0).toLocaleString('pt-BR')}</td>
+                    <td class="py-3.5 px-5 text-center"><select onchange="updateStatusAcao('${i.id}', this.value)" class="input-clean text-xs py-1.5 px-3 font-extrabold"><option value="Pendente" ${i.statusAcao === 'Pendente' ? 'selected' : ''}>⏳ Pendente</option><option value="Em Andamento" ${i.statusAcao === 'Em Andamento' ? 'selected' : ''}>⚙️ Em Andamento</option><option value="Concluído" ${i.statusAcao === 'Concluído' ? 'selected' : ''}>✅ Concluído</option></select></td>
+                </tr>`;
             }).join('');
         }
         window.updateStatusAcao = async (id, ns) => { if (isFirebaseConnected) { await updateDoc(doc(db, "ob_equipamentos", id), { statusAcao: ns }); showToast("Status atualizado!"); } };
@@ -800,51 +1379,79 @@ Sopro	Multipet 1	Sopradora	Cambotador"></textarea>
         window.askDeleteLinha = (id) => { itemToDeleteId = id; isDeletingLinha = true; document.getElementById('modalDelete').classList.remove('hidden'); };
         window.askDelete = (id) => { itemToDeleteId = id; isDeletingLinha = false; document.getElementById('modalDelete').classList.remove('hidden'); };
         window.confirmDelete = async () => {
-            if(!itemToDeleteId) return; const btn = document.getElementById('btnConfirmDeleteExec'); btn.innerText = "Excluindo..."; btn.disabled = true;
+            if (!itemToDeleteId) return;
+            const btn = document.getElementById('btnConfirmDeleteExec');
+            btn.innerText = "Excluindo...";
+            btn.disabled = true;
             try {
-                if(isDeletingLinha) { if(isFirebaseConnected) await deleteDoc(doc(db,"ob_linhas",itemToDeleteId)); showToast("Estrutura removida."); }
-                else { if(isFirebaseConnected) await deleteDoc(doc(db,"ob_equipamentos",itemToDeleteId)); showToast("Peça excluída."); }
-                closeModal('modalDelete'); 
-            } catch(e) { showToast("Erro.", "error"); closeModal('modalDelete'); } finally { btn.innerText = "Confirmar Exclusão"; btn.disabled = false; }
+                if (isDeletingLinha) { if (isFirebaseConnected) await deleteDoc(doc(db, "ob_linhas", itemToDeleteId)); showToast("Estrutura removida."); }
+                else { if (isFirebaseConnected) await deleteDoc(doc(db, "ob_equipamentos", itemToDeleteId)); showToast("Peça excluída."); }
+                closeModal('modalDelete');
+            } catch (e) { showToast("Erro ao excluir.", "error"); closeModal('modalDelete'); } finally { btn.innerText = "Confirmar"; btn.disabled = false; }
         };
 
         function renderKPIs() {
             const prevs = items.filter(i => i.tipoPeca === 'Preventiva' || i.tipoPeca === 'Preventiva / Desgaste').length;
             const obsTotal = items.filter(i => i.tipoPeca === 'Obsolescencia' || i.tipoPeca === 'Obsolescência');
-            
             const acoesDone = obsTotal.filter(i => i.statusAcao === 'Concluído').length;
 
-            document.getElementById('kpiPreventivas').innerText = prevs; 
+            document.getElementById('kpiPreventivas').innerText = prevs;
             document.getElementById('kpiObsoletas').innerText = obsTotal.length;
             document.getElementById('kpiAcoesDone').innerText = `${acoesDone} / ${obsTotal.length}`;
-            document.getElementById('kpiCustoTotal').innerText = items.reduce((acc,i)=>acc+(Number(i.custoEstimado)||0),0).toLocaleString('pt-BR',{style:'currency',currency:'BRL',maximumFractionDigits:0});
+            document.getElementById('kpiCustoTotal').innerText = items.reduce((acc, i) => acc + (Number(i.custoEstimado) || 0), 0).toLocaleString('pt-BR', { style: 'currency', currency: 'BRL', maximumFractionDigits: 0 });
         }
 
         function renderCharts() {
-            const top5 = items.filter(i=> i.tipoPeca === 'Obsolescencia' || i.tipoPeca === 'Obsolescência').sort((a,b)=> (b.gutScore||0)-(a.gutScore||0)).slice(0,5);
-            if(chartRankInstance) chartRankInstance.destroy();
-            chartRankInstance = new Chart(document.getElementById('chartGutRank').getContext('2d'), { type: 'bar', data: { labels: top5.map(i=> { const n = i.componente||''; return n.length>15?n.substring(0,15)+'...':n; }), datasets: [{ data: top5.map(i=>i.gutScore||0), backgroundColor: top5.map(i=> { const s=i.gutScore||0; return s>=80?'#e11d48':s>=45?'#d97706':s>=18?'#ca8a04':'#059669'; }), borderRadius:4 }] }, options: { responsive:true, maintainAspectRatio:false, scales: { y: { beginAtZero:true, max:125, grid: { color: '#f1f5f9' } }, x: { grid: { display: false } } }, plugins: { legend: { display:false } } } });
-            
+            const top5 = items.filter(i => i.tipoPeca === 'Obsolescencia' || i.tipoPeca === 'Obsolescência').sort((a, b) => (b.gutScore || 0) - (a.gutScore || 0)).slice(0, 5);
+            if (chartRankInstance) chartRankInstance.destroy();
+            chartRankInstance = new Chart(document.getElementById('chartGutRank').getContext('2d'), {
+                type: 'bar',
+                data: {
+                    labels: top5.map(i => { const n = i.componente || ''; return n.length > 18 ? n.substring(0, 18) + '...' : n; }),
+                    datasets: [{
+                        data: top5.map(i => i.gutScore || 0),
+                        backgroundColor: top5.map(i => { const s = i.gutScore || 0; return s >= 80 ? '#e11d48' : s >= 45 ? '#d97706' : s >= 18 ? '#ca8a04' : '#059669'; }),
+                        borderRadius: 8
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    scales: { y: { beginAtZero: true, max: 125, grid: { color: '#f1f5f9' } }, x: { grid: { display: false } } },
+                    plugins: { legend: { display: false } }
+                }
+            });
+
             const prevs = items.filter(i => i.tipoPeca === 'Preventiva' || i.tipoPeca === 'Preventiva / Desgaste').length;
             const obs = items.filter(i => i.tipoPeca === 'Obsolescencia' || i.tipoPeca === 'Obsolescência').length;
-            if(chartPieInstance) chartPieInstance.destroy();
-            chartPieInstance = new Chart(document.getElementById('chartTiposPie').getContext('2d'), { type: 'doughnut', data: { labels: ['Obsolescência (Risco)', 'Preventiva/Desgaste'], datasets: [{ data: [obs, prevs], backgroundColor: ['#e11d48','#0284c7'], borderWidth:2, borderColor: '#ffffff' }] }, options: { responsive:true, maintainAspectRatio:false, plugins: { legend: { position: 'bottom', labels: { boxWidth: 12, font: { size: 10 } } } }, cutout:'65%' } });
+            if (chartPieInstance) chartPieInstance.destroy();
+            chartPieInstance = new Chart(document.getElementById('chartTiposPie').getContext('2d'), {
+                type: 'doughnut',
+                data: {
+                    labels: ['Obsolescência (Risco)', 'Preventiva / Desgaste'],
+                    datasets: [{ data: [obs, prevs], backgroundColor: ['#e11d48', '#0284c7'], borderWidth: 2, borderColor: '#ffffff' }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: { legend: { position: 'bottom', labels: { boxWidth: 12, font: { size: 11, weight: 'bold' } } } },
+                    cutout: '68%'
+                }
+            });
         }
 
         // --- SISTEMA DE RELATÓRIOS FILTRADOS ---
         window.openModalFiltroRelatorio = (tipo) => {
             document.getElementById('relatorioTipoAtivo').value = tipo;
-            
             const areas = [...new Set(estruturas.map(e => e.area))].filter(Boolean).sort();
             document.getElementById('relArea').innerHTML = '<option value="ALL">Todas as Áreas</option>' + areas.map(a => `<option value="${a}">${a}</option>`).join('');
-            
             atualizaFiltrosRelatorio('area');
             openModal('modalFiltroRelatorio');
         };
 
         window.atualizaFiltrosRelatorio = (nivelAlterado) => {
-            const a = document.getElementById('relArea').value, m = document.getElementById('relMaquina').value, e = document.getElementById('relEquipamento').value;
-            
+            const a = document.getElementById('relArea').value, m = document.getElementById('relMaquina').value;
+
             if (nivelAlterado === 'area') {
                 const maquinas = a === 'ALL' ? [...new Set(estruturas.map(x => x.maquina))].filter(Boolean).sort() : [...new Set(estruturas.filter(x => x.area === a).map(x => x.maquina))].filter(Boolean).sort();
                 document.getElementById('relMaquina').innerHTML = '<option value="ALL">Todas as Máquinas</option>' + maquinas.map(x => `<option value="${x}">${x}</option>`).join('');
@@ -853,7 +1460,7 @@ Sopro	Multipet 1	Sopradora	Cambotador"></textarea>
             }
             if (nivelAlterado === 'maquina' || nivelAlterado === 'area') {
                 const _m = document.getElementById('relMaquina').value;
-                const equips = _m === 'ALL' ? [] : [...new Set(estruturas.filter(x => (a==='ALL' || x.area === a) && x.maquina === _m).map(x => x.equipamento))].filter(Boolean).sort();
+                const equips = _m === 'ALL' ? [] : [...new Set(estruturas.filter(x => (a === 'ALL' || x.area === a) && x.maquina === _m).map(x => x.equipamento))].filter(Boolean).sort();
                 document.getElementById('relEquipamento').innerHTML = '<option value="ALL">Todos os Equipamentos</option>' + equips.map(x => `<option value="${x}">${x}</option>`).join('');
                 document.getElementById('relConjunto').innerHTML = '<option value="ALL">Todos os Conjuntos</option>';
             }
@@ -861,7 +1468,7 @@ Sopro	Multipet 1	Sopradora	Cambotador"></textarea>
                 const _e = document.getElementById('relEquipamento').value;
                 const _m = document.getElementById('relMaquina').value;
                 const obj = estruturas.find(x => x.area === a && x.maquina === _m && x.equipamento === _e);
-                if(obj && obj.conjuntos && obj.conjuntos.length > 0) {
+                if (obj && obj.conjuntos && obj.conjuntos.length > 0) {
                     document.getElementById('relConjunto').innerHTML = '<option value="ALL">Todos os Conjuntos</option>' + obj.conjuntos.map(x => `<option value="${x}">${x}</option>`).join('');
                 } else {
                     document.getElementById('relConjunto').innerHTML = '<option value="ALL">Todos os Conjuntos</option>';
@@ -873,28 +1480,28 @@ Sopro	Multipet 1	Sopradora	Cambotador"></textarea>
             const tipo = document.getElementById('relatorioTipoAtivo').value;
             const fa = document.getElementById('relArea').value, fm = document.getElementById('relMaquina').value;
             const fe = document.getElementById('relEquipamento').value, fc = document.getElementById('relConjunto').value;
-            
+
             closeModal('modalFiltroRelatorio');
-            
+
             const dataHora = new Date().toLocaleString('pt-BR');
             let titulo = "", corTema = "", conteudoHTML = "", infoKpi = "", totalItens = 0, custoEst = 0;
 
             let txtFiltro = fa === 'ALL' ? 'Fábrica Inteira' : fa;
-            if(fm !== 'ALL') txtFiltro += ` > ${fm}`;
-            if(fe !== 'ALL') txtFiltro += ` > ${fe}`;
-            if(fc !== 'ALL') txtFiltro += ` > ${fc}`;
+            if (fm !== 'ALL') txtFiltro += ` > ${fm}`;
+            if (fe !== 'ALL') txtFiltro += ` > ${fe}`;
+            if (fc !== 'ALL') txtFiltro += ` > ${fc}`;
 
             if (tipo === 'obs') {
                 titulo = "Relatório de Obsolescência & Riscos"; corTema = "#e11d48";
                 let dados = items.filter(i => (i.tipoPeca === 'Obsolescencia' || i.tipoPeca === 'Obsolescência'));
-                if(fa !== 'ALL') dados = dados.filter(i => i.area === fa);
-                if(fm !== 'ALL') dados = dados.filter(i => i.maquina === fm);
-                if(fe !== 'ALL') dados = dados.filter(i => i.equipamento === fe);
-                if(fc !== 'ALL') dados = dados.filter(i => i.conjunto === fc);
-                
-                dados.sort((a,b)=> (b.gutScore||0)-(a.gutScore||0));
-                totalItens = dados.length; custoEst = dados.reduce((a, b) => a + (Number(b.custoEstimado)||0), 0);
-                
+                if (fa !== 'ALL') dados = dados.filter(i => i.area === fa);
+                if (fm !== 'ALL') dados = dados.filter(i => i.maquina === fm);
+                if (fe !== 'ALL') dados = dados.filter(i => i.equipamento === fe);
+                if (fc !== 'ALL') dados = dados.filter(i => i.conjunto === fc);
+
+                dados.sort((a, b) => (b.gutScore || 0) - (a.gutScore || 0));
+                totalItens = dados.length; custoEst = dados.reduce((a, b) => a + (Number(b.custoEstimado) || 0), 0);
+
                 infoKpi = `<div class="kpis">
                     <div class="kpi"><span>Escopo do Filtro</span>${txtFiltro}</div>
                     <div class="kpi"><span>Riscos no Filtro</span>${totalItens} peças</div>
@@ -903,29 +1510,28 @@ Sopro	Multipet 1	Sopradora	Cambotador"></textarea>
 
                 conteudoHTML = `<table><thead><tr><th>Setor / Máquina / Equip.</th><th>Código</th><th>Componente (Ref)</th><th>Ação de Mitigação</th><th style="text-align:center;">GUT</th><th style="text-align:right;">Custo Est.</th></tr></thead><tbody>`;
                 dados.forEach(i => {
-                    const s = i.gutScore||0;
+                    const s = i.gutScore || 0;
                     let classeBadge = s >= 80 ? 'badge critico' : s >= 45 ? 'badge alto' : s >= 18 ? 'badge medio' : 'badge baixo';
                     conteudoHTML += `<tr>
-                        <td><strong>${i.area} • ${i.maquina}</strong><br><span style="color:#64748b; font-size:10px;">${i.equipamento} ${i.conjunto?' > '+i.conjunto:''}</span></td>
+                        <td><strong>${i.area} • ${i.maquina}</strong><br><span style="color:#64748b; font-size:10px;">${i.equipamento} ${i.conjunto ? ' > ' + i.conjunto : ''}</span></td>
                         <td style="font-family:monospace; font-size:10px; font-weight:bold;">${i.codigoSistema || '-'}</td>
-                        <td><strong>${i.componente}</strong><br><span style="color:#64748b; font-size:10px;">Ref: ${i.fabricante || '-'} | Ciclo: ${i.statusCicloVida||'-'}</span></td>
+                        <td><strong>${i.componente}</strong><br><span style="color:#64748b; font-size:10px;">Ref: ${i.fabricante || '-'} | Ciclo: ${i.statusCicloVida || '-'}</span></td>
                         <td>${i.acaoProposta || '-'}</td>
                         <td style="text-align:center;"><span class="${classeBadge}">${s}</span></td>
-                        <td style="text-align:right; font-weight:bold;">R$ ${(Number(i.custoEstimado)||0).toLocaleString('pt-BR')}</td>
+                        <td style="text-align:right; font-weight:bold;">R$ ${(Number(i.custoEstimado) || 0).toLocaleString('pt-BR')}</td>
                     </tr>`;
                 });
                 conteudoHTML += `</tbody></table>`;
-
             } else if (tipo === 'prev') {
                 titulo = "Plano de Preventiva & Desgaste"; corTema = "#0284c7";
                 let dados = items.filter(i => (i.tipoPeca === 'Preventiva' || i.tipoPeca === 'Preventiva / Desgaste'));
-                if(fa !== 'ALL') dados = dados.filter(i => i.area === fa);
-                if(fm !== 'ALL') dados = dados.filter(i => i.maquina === fm);
-                if(fe !== 'ALL') dados = dados.filter(i => i.equipamento === fe);
-                if(fc !== 'ALL') dados = dados.filter(i => i.conjunto === fc);
+                if (fa !== 'ALL') dados = dados.filter(i => i.area === fa);
+                if (fm !== 'ALL') dados = dados.filter(i => i.maquina === fm);
+                if (fe !== 'ALL') dados = dados.filter(i => i.equipamento === fe);
+                if (fc !== 'ALL') dados = dados.filter(i => i.conjunto === fc);
 
-                dados.sort((a,b)=> (a.area||'').localeCompare(b.area||''));
-                totalItens = dados.length; custoEst = dados.reduce((a, b) => a + (Number(b.custoEstimado)||0), 0);
+                dados.sort((a, b) => (a.area || '').localeCompare(b.area || ''));
+                totalItens = dados.length; custoEst = dados.reduce((a, b) => a + (Number(b.custoEstimado) || 0), 0);
 
                 infoKpi = `<div class="kpis">
                     <div class="kpi"><span>Escopo do Filtro</span>${txtFiltro}</div>
@@ -936,28 +1542,27 @@ Sopro	Multipet 1	Sopradora	Cambotador"></textarea>
                 conteudoHTML = `<table><thead><tr><th>Setor / Máquina / Equip.</th><th>Código</th><th>Componente</th><th>Qtd.</th><th>Gatilho / Vida Útil</th><th style="text-align:right;">Custo Unitário</th></tr></thead><tbody>`;
                 dados.forEach(i => {
                     conteudoHTML += `<tr>
-                        <td><strong>${i.area} • ${i.maquina}</strong><br><span style="color:#64748b; font-size:10px;">${i.equipamento} ${i.conjunto?' > '+i.conjunto:''}</span></td>
+                        <td><strong>${i.area} • ${i.maquina}</strong><br><span style="color:#64748b; font-size:10px;">${i.equipamento} ${i.conjunto ? ' > ' + i.conjunto : ''}</span></td>
                         <td style="font-family:monospace; font-size:10px; font-weight:bold;">${i.codigoSistema || '-'}</td>
                         <td><strong>${i.componente}</strong><br><span style="color:#64748b; font-size:10px;">Ref: ${i.fabricante || '-'}</span></td>
                         <td><strong>${i.qtdAplicada || 1}</strong></td>
                         <td>${i.gatilhoVidaUtil || '-'}</td>
-                        <td style="text-align:right; font-weight:bold;">R$ ${(Number(i.custoEstimado)||0).toLocaleString('pt-BR')}</td>
+                        <td style="text-align:right; font-weight:bold;">R$ ${(Number(i.custoEstimado) || 0).toLocaleString('pt-BR')}</td>
                     </tr>`;
                 });
                 conteudoHTML += `</tbody></table>`;
-
             } else if (tipo === 'acoes') {
                 titulo = "Relatório de Planos de Ação (Acompanhamento)"; corTema = "#0f172a";
                 let dados = items.filter(i => (i.tipoPeca === 'Obsolescencia' || i.tipoPeca === 'Obsolescência'));
-                if(fa !== 'ALL') dados = dados.filter(i => i.area === fa);
-                if(fm !== 'ALL') dados = dados.filter(i => i.maquina === fm);
-                if(fe !== 'ALL') dados = dados.filter(i => i.equipamento === fe);
-                if(fc !== 'ALL') dados = dados.filter(i => i.conjunto === fc);
+                if (fa !== 'ALL') dados = dados.filter(i => i.area === fa);
+                if (fm !== 'ALL') dados = dados.filter(i => i.maquina === fm);
+                if (fe !== 'ALL') dados = dados.filter(i => i.equipamento === fe);
+                if (fc !== 'ALL') dados = dados.filter(i => i.conjunto === fc);
 
-                dados.sort((a,b)=> (b.gutScore||0)-(a.gutScore||0));
-                totalItens = dados.length; 
+                dados.sort((a, b) => (b.gutScore || 0) - (a.gutScore || 0));
+                totalItens = dados.length;
                 let concluidas = dados.filter(i => i.statusAcao === 'Concluído').length;
-                custoEst = dados.reduce((a, b) => a + (Number(b.custoEstimado)||0), 0);
+                custoEst = dados.reduce((a, b) => a + (Number(b.custoEstimado) || 0), 0);
 
                 infoKpi = `<div class="kpis">
                     <div class="kpi"><span>Escopo do Filtro</span>${txtFiltro}</div>
@@ -969,25 +1574,24 @@ Sopro	Multipet 1	Sopradora	Cambotador"></textarea>
                 dados.forEach(i => {
                     let corStatus = i.statusAcao === 'Concluído' ? '#059669' : i.statusAcao === 'Em Andamento' ? '#ca8a04' : '#e11d48';
                     conteudoHTML += `<tr>
-                        <td><strong>${i.area} • ${i.maquina}</strong><br><span style="color:#64748b; font-size:10px;">${i.equipamento} ${i.conjunto?' > '+i.conjunto:''}</span></td>
+                        <td><strong>${i.area} • ${i.maquina}</strong><br><span style="color:#64748b; font-size:10px;">${i.equipamento} ${i.conjunto ? ' > ' + i.conjunto : ''}</span></td>
                         <td style="font-family:monospace; font-size:10px; font-weight:bold;">${i.codigoSistema || '-'}</td>
                         <td><strong>${i.componente}</strong><br><span style="color:#64748b; font-size:10px;">Ref: ${i.fabricante || '-'}</span></td>
                         <td>${i.acaoProposta || '-'}</td>
                         <td style="text-align:center; font-weight:bold; font-size:10px; color:${corStatus}; text-transform:uppercase;">${i.statusAcao || 'Pendente'}</td>
-                        <td style="text-align:right; font-weight:bold;">R$ ${(Number(i.custoEstimado)||0).toLocaleString('pt-BR')}</td>
+                        <td style="text-align:right; font-weight:bold;">R$ ${(Number(i.custoEstimado) || 0).toLocaleString('pt-BR')}</td>
                     </tr>`;
                 });
                 conteudoHTML += `</tbody></table>`;
-
             } else if (tipo === 'arvore') {
                 titulo = "Inventário Estrutural Físico (Ativos)"; corTema = "#475569";
                 let dados = [...estruturas];
-                if(fa !== 'ALL') dados = dados.filter(i => i.area === fa);
-                if(fm !== 'ALL') dados = dados.filter(i => i.maquina === fm);
-                if(fe !== 'ALL') dados = dados.filter(i => i.equipamento === fe);
-                if(fc !== 'ALL') dados = dados.filter(i => i.conjuntos && i.conjuntos.includes(fc));
+                if (fa !== 'ALL') dados = dados.filter(i => i.area === fa);
+                if (fm !== 'ALL') dados = dados.filter(i => i.maquina === fm);
+                if (fe !== 'ALL') dados = dados.filter(i => i.equipamento === fe);
+                if (fc !== 'ALL') dados = dados.filter(i => i.conjuntos && i.conjuntos.includes(fc));
 
-                dados.sort((a,b) => (a.area||'').localeCompare(b.area||'') || (a.maquina||'').localeCompare(b.maquina||''));
+                dados.sort((a, b) => (a.area || '').localeCompare(b.area || '') || (a.maquina || '').localeCompare(b.maquina || ''));
                 totalItens = dados.length;
 
                 infoKpi = `<div class="kpis">
@@ -1010,90 +1614,77 @@ Sopro	Multipet 1	Sopradora	Cambotador"></textarea>
                 conteudoHTML += `</tbody></table>`;
             }
 
-            const html = `
-            <!DOCTYPE html>
-            <html lang="pt-BR">
-            <head>
-                <meta charset="UTF-8">
-                <title>${titulo}</title>
-                <style>
-                    @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800&display=swap');
-                    body { font-family: 'Inter', sans-serif; font-size: 11px; color: #1e293b; margin: 0; padding: 25px; background: #fff; }
-                    .header { border-bottom: 3px solid ${corTema}; padding-bottom: 12px; margin-bottom: 20px; display: flex; justify-content: space-between; align-items: flex-end; }
-                    .logo-box { background: #dc2626; color: #fff; padding: 4px 10px; border-radius: 4px; font-weight: 900; font-size: 14px; letter-spacing: 1px; display: inline-block; margin-bottom: 8px;}
-                    .header h1 { margin: 0; font-size: 20px; color: #0f172a; text-transform: uppercase; font-weight: 800;}
-                    .header .meta { text-align: right; color: #64748b; font-size: 10px; line-height: 1.4; }
-                    .kpis { display: flex; gap: 15px; margin-bottom: 25px; flex-wrap:wrap;}
-                    .kpi { padding: 12px 18px; border: 1px solid #e2e8f0; border-radius: 6px; background: #f8fafc; font-weight: 800; font-size: 14px; color: ${corTema}; min-width: 150px;}
-                    .kpi span { display: block; font-size: 9px; color: #64748b; text-transform: uppercase; font-weight: 600; margin-bottom: 4px; }
-                    table { width: 100%; border-collapse: collapse; margin-bottom: 30px; }
-                    th { background-color: #f1f5f9; color: #334155; font-weight: 800; text-align: left; padding: 10px; border-bottom: 2px solid #cbd5e1; font-size: 10px; text-transform: uppercase; }
-                    td { padding: 10px; border-bottom: 1px solid #e2e8f0; vertical-align: top; line-height: 1.4; }
-                    .badge { padding: 3px 8px; border-radius: 4px; font-weight: 800; font-size: 9px; }
-                    .badge.critico { background: #fee2e2; color: #b91c1c; border: 1px solid #fecaca; }
-                    .badge.alto { background: #fef3c7; color: #b45309; border: 1px solid #fde68a; }
-                    .badge.medio { background: #fef08a; color: #854d0e; border: 1px solid #fde047; }
-                    .badge.baixo { background: #d1fae5; color: #047857; border: 1px solid #a7f3d0; }
-                    @media print {
-                        body { padding: 0; -webkit-print-color-adjust: exact; print-color-adjust: exact; }
-                        @page { size: A4 portrait; margin: 1cm; }
-                    }
-                </style>
-            </head>
-            <body>
+            const html = `<!DOCTYPE html><html lang="pt-BR"><head><meta charset="UTF-8"><title>${titulo}</title>
+            <style>
+                @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;800&display=swap');
+                body { font-family: 'Plus Jakarta Sans', sans-serif; font-size: 11px; color: #1e293b; margin: 0; padding: 25px; background: #fff; }
+                .header { border-bottom: 3px solid ${corTema}; padding-bottom: 12px; margin-bottom: 20px; display: flex; justify-content: space-between; align-items: flex-end; }
+                .logo-box { background: #dc2626; color: #fff; padding: 4px 10px; border-radius: 6px; font-weight: 800; font-size: 13px; letter-spacing: 1px; display: inline-block; margin-bottom: 8px;}
+                .header h1 { margin: 0; font-size: 19px; color: #0f172a; text-transform: uppercase; font-weight: 800;}
+                .header .meta { text-align: right; color: #64748b; font-size: 10px; line-height: 1.4; }
+                .kpis { display: flex; gap: 15px; margin-bottom: 25px; flex-wrap:wrap;}
+                .kpi { padding: 12px 18px; border: 1px solid #e2e8f0; border-radius: 10px; background: #f8fafc; font-weight: 800; font-size: 14px; color: ${corTema}; min-width: 150px;}
+                .kpi span { display: block; font-size: 9px; color: #64748b; text-transform: uppercase; font-weight: 700; margin-bottom: 4px; }
+                table { width: 100%; border-collapse: collapse; margin-bottom: 30px; }
+                th { background-color: #f1f5f9; color: #334155; font-weight: 800; text-align: left; padding: 10px; border-bottom: 2px solid #cbd5e1; font-size: 10px; text-transform: uppercase; }
+                td { padding: 10px; border-bottom: 1px solid #e2e8f0; vertical-align: top; line-height: 1.4; }
+                .badge { padding: 3px 8px; border-radius: 999px; font-weight: 800; font-size: 9px; }
+                .badge.critico { background: #fee2e2; color: #b91c1c; border: 1px solid #fecaca; }
+                .badge.alto { background: #fef3c7; color: #b45309; border: 1px solid #fde68a; }
+                .badge.medio { background: #fef08a; color: #854d0e; border: 1px solid #fde047; }
+                .badge.baixo { background: #d1fae5; color: #047857; border: 1px solid #a7f3d0; }
+                @media print { body { padding: 0; -webkit-print-color-adjust: exact; print-color-adjust: exact; } @page { size: A4 portrait; margin: 1cm; } }
+            </style></head><body>
                 <div class="header">
-                    <div>
-                        <div class="logo-box">CEPÊRA</div>
-                        <h1>${titulo}</h1>
-                    </div>
-                    <div class="meta">
-                        <strong>Gerado por:</strong> Planejamento e Controle de Manutenção (PCM)<br>
-                        <strong>Data da Extração:</strong> ${dataHora}
-                    </div>
+                    <div><div class="logo-box">CEPÊRA</div><h1>${titulo}</h1></div>
+                    <div class="meta"><strong>Gerado por:</strong> Planejamento e Controle de Manutenção (PCM)<br><strong>Data da Extração:</strong> ${dataHora}</div>
                 </div>
                 ${infoKpi}
                 ${conteudoHTML}
-                <div style="text-align:center; font-size:9px; color:#94a3b8; margin-top:40px;">
-                    Relatório confidencial interno - Cepêra Alimentos
-                </div>
-            </body>
-            </html>
-            `;
+                <div style="text-align:center; font-size:9px; color:#94a3b8; margin-top:40px;">Relatório confidencial interno - Cepêra Alimentos</div>
+            </body></html>`;
 
             const win = window.open('', '_blank');
-            win.document.write(html);
-            win.document.close();
-            win.focus();
-            setTimeout(() => { win.print(); }, 400);
+            if (win) {
+                win.document.write(html);
+                win.document.close();
+                win.focus();
+                setTimeout(() => { win.print(); }, 400);
+            }
         };
 
         // --- IMPORTADORES EM MASSA ---
         window.processarImportacaoPlanilha = async () => {
-            const text = document.getElementById('importLinhasText').value; if(!text.trim()) return;
-            const btn = document.getElementById('btnProcessImportArv'); btn.disabled = true; btn.innerText = "Processando...";
+            const text = document.getElementById('importLinhasText').value;
+            if (!text.trim()) return;
+            const btn = document.getElementById('btnProcessImportArv');
+            btn.disabled = true;
+            btn.innerText = "Processando...";
             const rows = text.split('\n');
             try {
                 for (let r of rows) {
-                    if(!r.trim()) continue;
-                    const cols = r.split('\t').map(x=>padronizarTexto(x));
-                    if(cols.length < 3) continue; 
+                    if (!r.trim()) continue;
+                    const cols = r.split('\t').map(x => padronizarTexto(x));
+                    if (cols.length < 3) continue;
                     const area = cols[0], maq = cols[1], eq = cols[2], cj = cols[3] || '';
-                    
+
                     let node = estruturas.find(l => l.area === area && l.maquina === maq && l.equipamento === eq);
                     if (node) {
-                        if(cj && (!node.conjuntos || !node.conjuntos.includes(cj))) {
+                        if (cj && (!node.conjuntos || !node.conjuntos.includes(cj))) {
                             const nc = node.conjuntos ? [...node.conjuntos, cj] : [cj];
-                            if(isFirebaseConnected) await updateDoc(doc(db,"ob_linhas",node.id), { conjuntos: nc });
+                            if (isFirebaseConnected) await updateDoc(doc(db, "ob_linhas", node.id), { conjuntos: nc });
                             node.conjuntos = nc;
                         }
                     } else {
                         const nova = { area, maquina: maq, equipamento: eq, modelo: '', numeroSerie: '', conjuntos: cj ? [cj] : [] };
-                        if(isFirebaseConnected) { const ref = await addDoc(linhasColRef, {...nova, timestamp: Date.now()}); nova.id = ref.id; }
+                        if (isFirebaseConnected) { const ref = await addDoc(linhasColRef, { ...nova, timestamp: Date.now() }); nova.id = ref.id; }
                         estruturas.push(nova);
                     }
                 }
-                showToast("Árvore de equipamentos importada!"); document.getElementById('importLinhasText').value=''; closeModal('modalImportLinhas'); 
-            } catch(e) { showToast("Erro ao importar.", "error"); } finally { btn.disabled = false; btn.innerText = "Processar Hierarquia"; }
+                showToast("Árvore de equipamentos importada!");
+                document.getElementById('importLinhasText').value = '';
+                closeModal('modalImportLinhas');
+            } catch (e) { showToast("Erro ao importar.", "error"); } finally { btn.disabled = false; btn.innerText = "Processar Hierarquia"; }
         };
 
         window.processarImportacaoPecas = async () => {
@@ -1103,12 +1694,14 @@ Sopro	Multipet 1	Sopradora	Cambotador"></textarea>
             const c = padronizarTexto(document.getElementById('impPecaCj').value);
             const text = document.getElementById('importPecasText').value;
 
-            if(!a || !m || !e || !text.trim()) { showToast("Preencha o Destino e os Dados!", "error"); return; }
-            const btn = document.getElementById('btnProcessImportPecas'); btn.disabled = true; btn.innerText = "Processando...";
+            if (!a || !m || !e || !text.trim()) { showToast("Preencha o Destino e os Dados!", "error"); return; }
+            const btn = document.getElementById('btnProcessImportPecas');
+            btn.disabled = true;
+            btn.innerText = "Processando...";
 
-            if(isFirebaseConnected) {
+            if (isFirebaseConnected) {
                 let node = estruturas.find(x => x.area === a && x.maquina === m && x.equipamento === e);
-                if(node) {
+                if (node) {
                     if (c && (!node.conjuntos || !node.conjuntos.includes(c))) {
                         const nc = node.conjuntos ? [...node.conjuntos, c] : [c];
                         await updateDoc(doc(db, "ob_linhas", node.id), { conjuntos: nc });
@@ -1122,10 +1715,10 @@ Sopro	Multipet 1	Sopradora	Cambotador"></textarea>
             let count = 0;
             try {
                 for (let r of rows) {
-                    if(!r.trim()) continue;
-                    const cols = r.split('\t').map(x=>x.trim());
-                    if(!cols[0]) continue; 
-                    
+                    if (!r.trim()) continue;
+                    const cols = r.split('\t').map(x => x.trim());
+                    if (!cols[0]) continue;
+
                     const dataPeca = {
                         area: a, maquina: m, equipamento: e, conjunto: c, tipoPeca: 'Preventiva',
                         componente: padronizarTexto(cols[0]),
@@ -1136,23 +1729,21 @@ Sopro	Multipet 1	Sopradora	Cambotador"></textarea>
                         codigoSistema: cols[5] || '',
                         gravidade: 0, urgencia: 0, tendencia: 0, gutScore: 0, timestamp: Date.now() + count
                     };
-                    
+
                     if (isFirebaseConnected) await addDoc(colRef, dataPeca);
                     count++;
                 }
-                showToast(`${count} peças importadas com sucesso!`); 
-                document.getElementById('importPecasText').value=''; 
-                closeModal('modalImportPecas'); 
-            } catch(err) { showToast("Erro ao importar peças.", "error"); } finally { btn.disabled = false; btn.innerText = "Importar Peças"; }
+                showToast(`${count} peças importadas com sucesso!`);
+                document.getElementById('importPecasText').value = '';
+                closeModal('modalImportPecas');
+            } catch (err) { showToast("Erro ao importar peças.", "error"); } finally { btn.disabled = false; btn.innerText = "Importar Peças"; }
         };
-
-        document.addEventListener('DOMContentLoaded', () => { initFirebase(); });
 
         // ================= GUARDA CENTRAL SSO & RBAC (PCM CEPÊRA) =================
         (function verificarAcessoCentralSSO() {
             try {
-                const raw = localStorage.getItem('cepera_central_session');
-                const userStr = localStorage.getItem('cepera_ir_user');
+                const raw = safeStorage.get('cepera_central_session');
+                const userStr = safeStorage.get('cepera_ir_user');
                 if (!raw && !userStr) {
                     if (window.parent && window.parent !== window) {
                         window.parent.postMessage({ type: 'CEPERA_LOGOUT_CENTRAL' }, '*');
@@ -1161,7 +1752,7 @@ Sopro	Multipet 1	Sopradora	Cambotador"></textarea>
                     }
                     return;
                 }
-                const sess = raw ? JSON.parse(raw) : null;
+                const sess = raw ? JSON.parse(raw) : { user: userStr, nome: userStr, role: 'Admin' };
                 if (sess && sess.role !== 'Admin' && Array.isArray(sess.apps_permitidos) && !sess.apps_permitidos.includes('obsolescencia')) {
                     if (window.parent && window.parent !== window) {
                         window.parent.postMessage({ type: 'CEPERA_VOLTAR_CENTRAL' }, '*');
@@ -1170,14 +1761,18 @@ Sopro	Multipet 1	Sopradora	Cambotador"></textarea>
                     }
                     return;
                 }
-                if (window.self === window.top && sess) {
-                    const bar = document.createElement('div');
-                    bar.style.cssText = 'position:fixed;bottom:14px;left:14px;z-index:9999;display:flex;align-items:center;gap:8px;background:#0f172a;color:#fff;padding:6px 12px;border-radius:9999px;font-family:sans-serif;font-size:11px;font-weight:700;box-shadow:0 8px 20px rgba(0,0,0,0.25);border:1px solid #334155;';
-                    bar.innerHTML = `<button type="button" onclick="window.location.href='index.html'" style="background:#0284c7;color:#fff;border:none;padding:4px 10px;border-radius:9999px;font-weight:800;font-size:11px;cursor:pointer;">⬅ Central PCM</button><span>${sess.nome || sess.user} (${sess.role || ''})</span>`;
-                    document.body.appendChild(bar);
-                }
+                usuarioLogado = sess;
+                carregarPreferenciasUsuario(sess);
+                const nameEl = document.getElementById('loggedUserName');
+                const roleEl = document.getElementById('loggedUserRole');
+                const greetEl = document.getElementById('dashGreetingName');
+                if (nameEl) nameEl.innerText = sess.nome || sess.user || 'Usuário';
+                if (roleEl) roleEl.innerText = sess.role || 'PCM';
+                if (greetEl) greetEl.innerText = (sess.nome || sess.user || 'Gestor').split(' ')[0];
             } catch (_) {}
         })();
+
+        document.addEventListener('DOMContentLoaded', () => { initFirebase(); });
     </script>
 </body>
 </html>
