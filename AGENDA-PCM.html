@@ -343,6 +343,39 @@
             font-size: 0.95rem !important;
         }
 
+        /* Mural Dinâmico de Recados */
+        .note-card {
+            border-radius: 1.35rem;
+            border: 1px solid #e2e8f0;
+            background: #ffffff;
+            box-shadow: 0 6px 18px -6px rgba(15, 23, 42, 0.06);
+            transition: transform 0.15s ease, box-shadow 0.15s ease, border-color 0.15s ease;
+        }
+        .note-card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 12px 24px -10px rgba(15, 23, 42, 0.12);
+        }
+        .note-lembrete { border-top: 4px solid #f59e0b; background: linear-gradient(180deg, #fffbeb 0%, #ffffff 42%); }
+        .note-compra { border-top: 4px solid #0284c7; background: linear-gradient(180deg, #f0f9ff 0%, #ffffff 42%); }
+        .note-turno { border-top: 4px solid #e11d48; background: linear-gradient(180deg, #fff1f2 0%, #ffffff 42%); }
+        .note-ideia { border-top: 4px solid #10b981; background: linear-gradient(180deg, #ecfdf5 0%, #ffffff 42%); }
+        .note-pinned { box-shadow: 0 10px 26px -8px rgba(2, 132, 199, 0.18); }
+
+        body.theme-dark .note-card {
+            background: #1e293b !important;
+            border-color: #334155 !important;
+            color: #f1f5f9 !important;
+        }
+        body.theme-dark .note-lembrete { border-top: 4px solid #f59e0b !important; }
+        body.theme-dark .note-compra { border-top: 4px solid #38bdf8 !important; }
+        body.theme-dark .note-turno { border-top: 4px solid #fb7185 !important; }
+        body.theme-dark .note-ideia { border-top: 4px solid #34d399 !important; }
+        body.high-contrast .note-card {
+            background: #ffffff !important;
+            border: 2px solid #000000 !important;
+            box-shadow: none !important;
+        }
+
         @media (max-width: 640px) {
             .cell { min-height: 5.2rem; padding: 0.4rem; border-radius: 0.75rem; }
             .daynum { font-size: 0.72rem; padding-right: 0; }
@@ -370,6 +403,11 @@
                         <button type="button" onclick="switchView('calendar')" id="rail-calendar" class="rail-btn active">
                             <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/></svg>
                             <span>Agenda</span>
+                        </button>
+                        <button type="button" onclick="switchView('notes')" id="rail-notes" class="rail-btn relative">
+                            <span id="badgeRecadosRail" hidden class="hidden absolute -top-1 -right-1 min-w-[18px] h-[18px] px-1 rounded-full bg-amber-500 text-white text-[9px] font-extrabold flex items-center justify-center shadow">0</span>
+                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/></svg>
+                            <span>Recados</span>
                         </button>
                         <button type="button" onclick="switchView('notifications')" id="rail-notifications" class="rail-btn">
                             <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9"/></svg>
@@ -438,6 +476,7 @@
                 <!-- NAVEGAÇÃO MOBILE -->
                 <div id="mobileTabNav" class="md:hidden flex items-center gap-2 overflow-x-auto px-4 py-2.5 bg-white/55 border-b border-white/80 shrink-0">
                     <button type="button" onclick="switchView('calendar')" id="mob-calendar" class="mob-tab active">Calendário & Gestão</button>
+                    <button type="button" onclick="switchView('notes')" id="mob-notes" class="mob-tab">Recados <span id="badgeRecadosMob" class="ml-1 px-1.5 py-0.5 rounded-full bg-amber-500 text-white text-[10px] font-extrabold hidden">0</span></button>
                     <button type="button" onclick="switchView('notifications')" id="mob-notifications" class="mob-tab">Alertas & E-mail</button>
                     <button type="button" onclick="switchView('team')" id="mob-team" class="mob-tab">Central de Cadastros</button>
                 </div>
@@ -469,6 +508,11 @@
                                 <button type="button" onclick="imprimirAgendaMesA4()" class="btn-touch bg-slate-900 hover:bg-slate-800 text-white rounded-full px-4 py-2.5 text-xs shadow-sm">
                                     <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z"/></svg>
                                     <span>Imprimir A4</span>
+                                </button>
+
+                                <button type="button" onclick="abrirModalRecadoRapido()" title="Anotar recado rápido sem ir ao calendário (Tecla R)" class="btn-touch bg-amber-50 hover:bg-amber-100 text-amber-900 border border-amber-200/90 rounded-full px-4 py-2.5 text-xs shadow-sm">
+                                    <svg class="w-4 h-4 text-amber-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/></svg>
+                                    <span>+ Recado Rápido</span>
                                 </button>
 
                                 <button type="button" onclick="abrirNovoLancamentoRapido()" class="btn-pill-dark text-xs">
@@ -536,6 +580,29 @@
 
                         <div id="errBanner" hidden class="p-4 rounded-2xl border border-rose-200 bg-rose-50 text-rose-700 text-xs font-bold">
                             Não foi possível carregar os dados. Verifique a conexão e as regras do Firestore.
+                        </div>
+
+                        <!-- FAIXA DINÂMICA DE RECADOS NA AGENDA -->
+                        <div id="calendarNotesBanner" hidden class="hidden glass-card p-4 sm:p-5 rounded-3xl border border-amber-200/80 space-y-3">
+                            <div class="flex flex-wrap items-center justify-between gap-2">
+                                <div class="flex items-center gap-2.5">
+                                    <span class="w-8 h-8 rounded-2xl bg-amber-100 text-amber-700 flex items-center justify-center shrink-0">
+                                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/></svg>
+                                    </span>
+                                    <div>
+                                        <div class="text-xs font-extrabold text-slate-900 flex items-center gap-2">
+                                            <span>Mural de Recados Ativos</span>
+                                            <span id="calBannerCount" class="px-2 py-0.5 rounded-full bg-amber-500 text-white text-[10px] font-extrabold">0</span>
+                                        </div>
+                                        <p class="text-[11px] text-slate-500 font-semibold">Lembretes informais fora do calendário até você clicar em Planejar.</p>
+                                    </div>
+                                </div>
+                                <div class="flex items-center gap-2">
+                                    <button type="button" onclick="abrirModalRecadoRapido()" class="px-3 py-1.5 rounded-full bg-amber-50 hover:bg-amber-100 text-amber-900 border border-amber-200 text-[11px] font-extrabold">+ Anotar</button>
+                                    <button type="button" onclick="switchView('notes')" class="px-3 py-1.5 rounded-full bg-slate-900 hover:bg-slate-800 text-white text-[11px] font-extrabold">Abrir Mural →</button>
+                                </div>
+                            </div>
+                            <div id="calBannerItems" class="grid grid-cols-1 md:grid-cols-3 gap-2.5"></div>
                         </div>
 
                         <!-- GRADE DO CALENDÁRIO -->
@@ -665,6 +732,95 @@
                         </div>
                     </section>
 
+                    <!-- ==================== VIEW 4: MURAL DINÂMICO DE RECADOS & LEMBRETES ==================== -->
+                    <section id="viewNotes" hidden class="space-y-6 max-w-7xl mx-auto">
+                        <div class="flex flex-col lg:flex-row lg:items-end justify-between gap-4">
+                            <div>
+                                <p class="text-xs font-bold uppercase tracking-widest text-amber-600 mb-1">Comunicação Ágil • Espaço Informal</p>
+                                <h2 class="text-2xl sm:text-3xl font-extrabold text-slate-900 tracking-tight leading-tight">
+                                    Mural Dinâmico de Recados & Lembretes
+                                </h2>
+                                <p class="text-xs text-slate-500 mt-1 font-medium">
+                                    Registre avisos rápidos de turno, peças ou ideias sem poluir o calendário oficial. Quando quiser programar, clique em <strong class="text-sky-700">Planejar</strong>.
+                                </p>
+                            </div>
+                            <div class="flex flex-wrap items-center gap-2" id="notesStatusTabs">
+                                <button type="button" id="notesTab_ativo" onclick="setFiltroRecadoStatus('ativo')" class="pill active" aria-pressed="true">
+                                    <span>Ativos</span>
+                                    <span id="notesCountAtivo" class="px-1.5 py-0.5 rounded-full bg-white/25 text-[10px] font-extrabold">0</span>
+                                </button>
+                                <button type="button" id="notesTab_planejado" onclick="setFiltroRecadoStatus('planejado')" class="pill" aria-pressed="false">
+                                    <span>Planejados</span>
+                                    <span id="notesCountPlanejado" class="px-1.5 py-0.5 rounded-full bg-slate-100 text-slate-700 text-[10px] font-extrabold">0</span>
+                                </button>
+                                <button type="button" id="notesTab_concluido" onclick="setFiltroRecadoStatus('concluido')" class="pill" aria-pressed="false">
+                                    <span>Concluídos</span>
+                                    <span id="notesCountConcluido" class="px-1.5 py-0.5 rounded-full bg-slate-100 text-slate-700 text-[10px] font-extrabold">0</span>
+                                </button>
+                                <button type="button" id="notesTab_todos" onclick="setFiltroRecadoStatus('todos')" class="pill" aria-pressed="false">
+                                    <span>Todos</span>
+                                    <span id="notesCountTodos" class="px-1.5 py-0.5 rounded-full bg-slate-100 text-slate-700 text-[10px] font-extrabold">0</span>
+                                </button>
+                            </div>
+                        </div>
+
+                        <!-- COMPOSITOR RÁPIDO INLINE -->
+                        <form id="recadoForm" class="glass-card p-5 sm:p-6 rounded-3xl space-y-4">
+                            <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
+                                <span class="text-xs font-extrabold uppercase tracking-wider text-slate-700 flex items-center gap-2">
+                                    <svg class="w-4 h-4 text-amber-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/></svg>
+                                    <span>Novo Recado / Lembrete Rápido</span>
+                                </span>
+                                <div class="flex flex-wrap gap-1.5" id="recCatBtns">
+                                    <button type="button" data-cat="lembrete" onclick="setRecadoCatInline('lembrete')" class="pill active text-[11px]" aria-pressed="true">Lembrete</button>
+                                    <button type="button" data-cat="compra" onclick="setRecadoCatInline('compra')" class="pill text-[11px]" aria-pressed="false">Compra / Peça</button>
+                                    <button type="button" data-cat="turno" onclick="setRecadoCatInline('turno')" class="pill text-[11px]" aria-pressed="false">Turno / Atenção</button>
+                                    <button type="button" data-cat="ideia" onclick="setRecadoCatInline('ideia')" class="pill text-[11px]" aria-pressed="false">Ideia / Melhoria</button>
+                                </div>
+                                <input type="hidden" id="recadoCat" value="lembrete">
+                            </div>
+
+                            <textarea id="recadoTexto" rows="2" required class="input-clean py-2.5 text-xs sm:text-sm font-medium" placeholder="Escreva um recado, pedido de peça, observação de turno ou melhoria... (Ctrl + Enter para postar rápido)"></textarea>
+
+                            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 items-end">
+                                <div>
+                                    <label class="block text-[10px] font-extrabold uppercase text-slate-500 mb-1">Equipe Relacionada</label>
+                                    <select id="recadoEquipe" class="input-clean py-2 text-xs font-bold"></select>
+                                </div>
+                                <div>
+                                    <label class="block text-[10px] font-extrabold uppercase text-slate-500 mb-1">Para / Responsável (Opcional)</label>
+                                    <input type="text" id="recadoResp" list="recadoRespList" class="input-clean py-2 text-xs font-bold" placeholder="Ex: João, Turno B, Compras...">
+                                    <datalist id="recadoRespList"></datalist>
+                                </div>
+                                <label class="flex items-center gap-2 cursor-pointer px-3 py-2.5 rounded-xl bg-slate-50 border border-slate-200/80 text-xs font-extrabold text-slate-700">
+                                    <input type="checkbox" id="recadoFixado" class="rounded">
+                                    <span>Fixar no topo e na Agenda</span>
+                                </label>
+                                <button type="submit" class="btn-pill-dark text-xs justify-center py-2.5 px-5">
+                                    <span>Salvar Recado</span>
+                                </button>
+                            </div>
+                        </form>
+
+                        <!-- BUSCA E FILTRO DE CATEGORIAS -->
+                        <div class="glass-card p-4 rounded-3xl flex flex-col md:flex-row md:items-center justify-between gap-3">
+                            <div class="relative w-full md:w-72">
+                                <input type="search" id="notesSearchInput" oninput="onBuscaRecadoInput(this.value)" class="input-clean py-2 pl-9 pr-3 text-xs font-bold" placeholder="Buscar recado, responsável, equipe...">
+                                <svg class="w-4 h-4 text-slate-400 absolute left-3 top-1/2 -translate-y-1/2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/></svg>
+                            </div>
+                            <div class="flex flex-wrap gap-1.5" id="notesCatFilter">
+                                <button type="button" data-catfilter="all" onclick="setFiltroRecadoCat('all')" class="pill active text-[11px]" aria-pressed="true">Todas Categorias</button>
+                                <button type="button" data-catfilter="lembrete" onclick="setFiltroRecadoCat('lembrete')" class="pill text-[11px]" aria-pressed="false">Lembrete</button>
+                                <button type="button" data-catfilter="compra" onclick="setFiltroRecadoCat('compra')" class="pill text-[11px]" aria-pressed="false">Compra / Peça</button>
+                                <button type="button" data-catfilter="turno" onclick="setFiltroRecadoCat('turno')" class="pill text-[11px]" aria-pressed="false">Turno / Atenção</button>
+                                <button type="button" data-catfilter="ideia" onclick="setFiltroRecadoCat('ideia')" class="pill text-[11px]" aria-pressed="false">Ideia / Melhoria</button>
+                            </div>
+                        </div>
+
+                        <!-- GRADE DE RECADOS DINÂMICOS -->
+                        <div id="notesGrid" class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4"></div>
+                    </section>
+
                 </main>
             </div>
         </div>
@@ -688,13 +844,27 @@
             </div>
 
             <div class="pt-4 border-t border-slate-200 space-y-4">
-                <h3 class="text-xs font-extrabold uppercase tracking-wider text-sky-700">+ Novo Lançamento nesta Data</h3>
+                <h3 id="addFormTitle" class="text-xs font-extrabold uppercase tracking-wider text-sky-700">+ Novo Lançamento nesta Data</h3>
+
+                <div id="planRecadoBanner" hidden class="hidden p-3.5 rounded-2xl bg-amber-50 border border-amber-200 text-amber-900 space-y-1.5">
+                    <div class="flex items-center justify-between gap-2">
+                        <span class="text-[10px] font-extrabold uppercase tracking-wider text-amber-700">Planejando a partir do Mural de Recados</span>
+                        <button type="button" onclick="cancelarVinculoRecado()" class="text-[11px] font-extrabold text-amber-800 hover:text-rose-600 underline">Desvincular recado</button>
+                    </div>
+                    <p id="planRecadoResumo" class="text-xs font-semibold text-amber-950 whitespace-pre-wrap"></p>
+                </div>
+
                 <form id="addForm" class="space-y-3.5 text-xs">
+                    <input type="hidden" id="fRecadoOrigemId" value="">
                     <div>
                         <label class="block text-[10px] font-extrabold uppercase text-slate-500 mb-1">Título / Equipamento *</label>
                         <input class="input-clean py-2 text-xs font-bold" id="fTitulo" required placeholder="Ex: Preventiva Sopradora Multipet 1">
                     </div>
-                    <div class="grid grid-cols-1 sm:grid-cols-3 gap-3">
+                    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
+                        <div>
+                            <label class="block text-[10px] font-extrabold uppercase text-slate-500 mb-1">Data Programada *</label>
+                            <input class="input-clean py-2 text-xs font-bold" type="date" id="fData" required onchange="onMudarDataAgendamento(this.value)">
+                        </div>
                         <div>
                             <label class="block text-[10px] font-extrabold uppercase text-slate-500 mb-1">Hora</label>
                             <input class="input-clean py-2 text-xs font-bold" type="time" id="fHora">
@@ -843,12 +1013,59 @@
             <div class="mx-auto flex items-center justify-center h-12 w-12 rounded-2xl bg-rose-100 text-rose-600 mb-4">
                 <svg class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/></svg>
             </div>
-            <h2 class="text-lg font-extrabold text-slate-900 mb-1.5">Excluir Lançamento?</h2>
-            <p class="text-xs text-slate-500 mb-6">Esta ação é permanente e removerá a programação do calendário.</p>
+            <h2 id="deleteOverlayTitle" class="text-lg font-extrabold text-slate-900 mb-1.5">Excluir Lançamento?</h2>
+            <p id="deleteOverlayDesc" class="text-xs text-slate-500 mb-6">Esta ação é permanente e removerá a programação do calendário.</p>
             <div class="flex gap-2">
                 <button type="button" class="btn-touch bg-slate-100 text-slate-700 flex-1 text-xs" onclick="fecharModal('deleteOverlay')">Cancelar</button>
                 <button type="button" class="btn-touch bg-rose-600 hover:bg-rose-700 text-white flex-1 text-xs shadow-md" id="confirmDeleteBtn">Sim, Excluir</button>
             </div>
+        </div>
+    </div>
+
+    <!-- Modal Recado Rápido (Criar / Editar Recado) -->
+    <div id="quickRecadoOverlay" role="dialog" aria-modal="true" hidden class="hidden fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-[65] flex items-end sm:items-center justify-center p-0 sm:p-4">
+        <div class="bg-white w-full max-w-lg rounded-t-3xl sm:rounded-3xl p-6 sm:p-7 shadow-2xl border border-slate-200 space-y-4">
+            <div class="flex items-center justify-between border-b border-slate-100 pb-3">
+                <div>
+                    <span class="text-[10px] font-extrabold uppercase tracking-widest text-amber-600">Mural Dinâmico • Informal</span>
+                    <h2 id="qrModalTitle" class="text-lg font-extrabold text-slate-900">Novo Recado Rápido</h2>
+                </div>
+                <button type="button" onclick="fecharModal('quickRecadoOverlay')" class="w-8 h-8 rounded-full bg-slate-100 text-slate-600 font-bold">✕</button>
+            </div>
+            <form id="quickRecForm" class="space-y-3.5 text-xs">
+                <input type="hidden" id="qrId" value="">
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                    <div>
+                        <label class="block text-[10px] font-extrabold uppercase text-slate-500 mb-1">Categoria</label>
+                        <select class="input-clean py-2 text-xs font-bold" id="qrCategoria">
+                            <option value="lembrete">Lembrete</option>
+                            <option value="compra">Compra / Peça</option>
+                            <option value="turno">Turno / Atenção</option>
+                            <option value="ideia">Ideia / Melhoria</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label class="block text-[10px] font-extrabold uppercase text-slate-500 mb-1">Equipe Relacionada</label>
+                        <select class="input-clean py-2 text-xs font-bold" id="qrEquipe"></select>
+                    </div>
+                </div>
+                <div>
+                    <label class="block text-[10px] font-extrabold uppercase text-slate-500 mb-1">Para / Responsável (Opcional)</label>
+                    <input type="text" class="input-clean py-2 text-xs font-bold" id="qrResp" list="recadoRespList" placeholder="Ex: João, Turno C, Manutenção Elétrica...">
+                </div>
+                <div>
+                    <label class="block text-[10px] font-extrabold uppercase text-slate-500 mb-1">Mensagem / Lembrete *</label>
+                    <textarea class="input-clean py-2 text-xs font-medium" rows="3" id="qrTexto" required placeholder="Anote aqui sem comprometer o calendário..."></textarea>
+                </div>
+                <label class="flex items-center gap-2 cursor-pointer px-3 py-2.5 rounded-xl bg-slate-50 border border-slate-200/80 text-xs font-extrabold text-slate-700">
+                    <input type="checkbox" id="qrFixado" class="rounded">
+                    <span>Fixar no topo do Mural e na faixa do Calendário</span>
+                </label>
+                <div class="flex justify-end gap-2 pt-3 border-t border-slate-100">
+                    <button type="button" onclick="fecharModal('quickRecadoOverlay')" class="btn-touch bg-slate-100 text-slate-700 text-xs">Cancelar</button>
+                    <button type="submit" id="qrSubmitBtn" class="btn-pill-dark text-xs">Salvar Recado</button>
+                </div>
+            </form>
         </div>
     </div>
 
@@ -920,8 +1137,8 @@
                 <div class="flex justify-between py-2 border-b border-slate-100"><span>Abrir Espaço do Usuário</span><kbd class="px-2 py-0.5 bg-slate-100 border border-slate-300 rounded font-mono font-bold">Alt + U</kbd></div>
                 <div class="flex justify-between py-2 border-b border-slate-100"><span>Alternar Modo Tablet</span><kbd class="px-2 py-0.5 bg-slate-100 border border-slate-300 rounded font-mono font-bold">Alt + T</kbd></div>
                 <div class="flex justify-between py-2 border-b border-slate-100"><span>Mês Anterior / Próximo Mês</span><kbd class="px-2 py-0.5 bg-slate-100 border border-slate-300 rounded font-mono font-bold">← / →</kbd></div>
-                <div class="flex justify-between py-2 border-b border-slate-100"><span>Ir para Hoje / Novo Lançamento</span><kbd class="px-2 py-0.5 bg-slate-100 border border-slate-300 rounded font-mono font-bold">T / N</kbd></div>
-                <div class="flex justify-between py-2 border-b border-slate-100"><span>Alternar entre Abas do Menu</span><kbd class="px-2 py-0.5 bg-slate-100 border border-slate-300 rounded font-mono font-bold">Alt + 1 até Alt + 3</kbd></div>
+                <div class="flex justify-between py-2 border-b border-slate-100"><span>Ir para Hoje / Novo Lançamento / Recado Rápido</span><kbd class="px-2 py-0.5 bg-slate-100 border border-slate-300 rounded font-mono font-bold">T / N / R</kbd></div>
+                <div class="flex justify-between py-2 border-b border-slate-100"><span>Alternar entre Abas do Menu</span><kbd class="px-2 py-0.5 bg-slate-100 border border-slate-300 rounded font-mono font-bold">Alt + 1 até Alt + 4</kbd></div>
                 <div class="flex justify-between py-2"><span>Fechar qualquer modal</span><kbd class="px-2 py-0.5 bg-slate-100 border border-slate-300 rounded font-mono font-bold">Esc</kbd></div>
             </div>
         </div>
@@ -967,6 +1184,12 @@
             melhoria: { nome: "Melhoria", cor: "#10b981" },
             outros: { nome: "Outros", cor: "#64748b" }
         };
+        const RECADO_CATEGORIAS = {
+            lembrete: { nome: "Lembrete", cls: "note-lembrete", badgeCls: "bg-amber-100 text-amber-800 border-amber-200", tipoSugerido: "preventiva" },
+            compra: { nome: "Compra / Peça", cls: "note-compra", badgeCls: "bg-sky-100 text-sky-800 border-sky-200", tipoSugerido: "outros" },
+            turno: { nome: "Turno / Atenção", cls: "note-turno", badgeCls: "bg-rose-100 text-rose-800 border-rose-200", tipoSugerido: "corretiva" },
+            ideia: { nome: "Ideia / Melhoria", cls: "note-ideia", badgeCls: "bg-emerald-100 text-emerald-800 border-emerald-200", tipoSugerido: "melhoria" }
+        };
         const STATUSES = {
             pendente: { nome: "Pendente", badge: "st-pendente" },
             andamento: { nome: "Em Andamento", badge: "st-andamento" },
@@ -974,6 +1197,19 @@
             cancelado: { nome: "Cancelada", badge: "st-cancelado" }
         };
         const MESES = ["Janeiro", "Fevereiro", "Março", "Abril", "Maio", "Junho", "Julho", "Agosto", "Setembro", "Outubro", "Novembro", "Dezembro"];
+
+        function escapeHtml(val) {
+            return String(val ?? '')
+                .replace(/&/g, '&amp;')
+                .replace(/</g, '&lt;')
+                .replace(/>/g, '&gt;')
+                .replace(/"/g, '&quot;')
+                .replace(/'/g, '&#39;');
+        }
+
+        function isRecadoDoc(item) {
+            return Boolean(item && item.kind === 'recado');
+        }
 
         let hoje = new Date();
         let viewAno = hoje.getFullYear();
@@ -987,12 +1223,27 @@
         let listaSetores = [];
         let chartInstance = null;
         let idParaExcluir = null;
+        let tipoExclusao = "lancamento";
+        let filtroRecadoStatus = "ativo";
+        let filtroRecadoCat = "all";
+        let buscaRecado = "";
         let usuarioLogado = null;
+
+        function getLancamentosCalendario() {
+            return lancamentos.filter(l => !isRecadoDoc(l) && Boolean(l.data));
+        }
+
+        function getRecadosMural() {
+            return lancamentos.filter(isRecadoDoc);
+        }
 
         const ICONS = {
             edit: `<svg class="svg-icon" viewBox="0 0 24 24"><path d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z"/></svg>`,
             trash: `<svg class="svg-icon" viewBox="0 0 24 24"><path d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/></svg>`,
-            mail: `<svg class="svg-icon" viewBox="0 0 24 24"><path d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"/></svg>`
+            mail: `<svg class="svg-icon" viewBox="0 0 24 24"><path d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"/></svg>`,
+            calendar: `<svg class="svg-icon" viewBox="0 0 24 24"><path d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/></svg>`,
+            pin: `<svg class="svg-icon" viewBox="0 0 24 24"><path d="M12 17v5M9 10.76a2 2 0 01-1.11 1.79l-1.78.9A2 2 0 005 15.24V16a1 1 0 001 1h12a1 1 0 001-1v-.76a2 2 0 00-1.11-1.79l-1.78-.9A2 2 0 0115 10.76V7a1 1 0 011-1 2 2 0 000-4H8a2 2 0 000 4 1 1 0 011 1z"/></svg>`,
+            check: `<svg class="svg-icon" viewBox="0 0 24 24"><path d="M5 13l4 4L19 7"/></svg>`
         };
 
         window.showToast = (msg, type = 'info') => {
@@ -1010,6 +1261,7 @@
                 el.hidden = true;
                 el.classList.add('hidden');
             }
+            if (id === 'dayOverlay') resetFormPlanejamento();
             atualizarTudo();
         };
         window.abrirModal = (id) => {
@@ -1121,13 +1373,15 @@
 
         window.switchView = (v) => {
             document.getElementById('viewCalendar').hidden = (v !== 'calendar');
+            document.getElementById('viewNotes').hidden = (v !== 'notes');
             document.getElementById('viewTeam').hidden = (v !== 'team');
             document.getElementById('viewNotifications').hidden = (v !== 'notifications');
-            ['calendar', 'notifications', 'team'].forEach(id => {
+            ['calendar', 'notes', 'notifications', 'team'].forEach(id => {
                 document.getElementById('rail-' + id)?.classList.toggle('active', id === v);
                 document.getElementById('mob-' + id)?.classList.toggle('active', id === v);
             });
             if (v === 'notifications') renderNotificationsTable();
+            if (v === 'notes') renderMuralRecados();
         };
 
         window.switchCadTab = (tab) => {
@@ -1153,6 +1407,12 @@
             setTimeout(() => document.getElementById('fTitulo')?.focus(), 100);
         };
 
+        function atualizarDatalistRecados() {
+            const dl = document.getElementById('recadoRespList');
+            if (!dl) return;
+            dl.innerHTML = equipeCadastrada.map(e => `<option value="${escapeHtml(e.nome)}">${escapeHtml(e.equipe || '')}</option>`).join('');
+        }
+
         async function initFirebase() {
             try {
                 document.getElementById("statusText").innerText = "Sincronizando...";
@@ -1172,6 +1432,7 @@
                     renderTeamTable();
                     atualizarSelectRespAdd();
                     atualizarSelectRespEdit();
+                    atualizarDatalistRecados();
                 });
 
                 onSnapshot(eqColRef, snap => {
@@ -1195,19 +1456,26 @@
 
         function atualizarSelectsDominio() {
             const defaultEq = ['Administrativo', 'Mecânica', 'Elétrica', 'Montagem', 'Terceiros'];
-            const todasEq = Array.from(new Set([...defaultEq, ...listaEquipes.map(e => e.nome)]));
+            const todasEq = Array.from(new Set([...defaultEq, ...listaEquipes.map(e => e.nome).filter(Boolean)]));
             let eqHtml = '';
-            todasEq.forEach(e => eqHtml += `<option value="${e}">${e}</option>`);
+            todasEq.forEach(e => { eqHtml += `<option value="${escapeHtml(e)}">${escapeHtml(e)}</option>`; });
             document.getElementById('fEquipe').innerHTML = eqHtml;
             document.getElementById('eEquipe').innerHTML = eqHtml;
             document.getElementById('tEquipe').innerHTML = eqHtml;
 
+            const recEqHtml = `<option value="Geral">Geral / Todas</option>` + eqHtml;
+            const recEqEl = document.getElementById('recadoEquipe');
+            const qrEqEl = document.getElementById('qrEquipe');
+            if (recEqEl) recEqEl.innerHTML = recEqHtml;
+            if (qrEqEl) qrEqEl.innerHTML = recEqHtml;
+
             const defaultSet = ['Geral', 'Produção', 'Embalagem', 'Utilidades'];
-            const todosSet = Array.from(new Set([...defaultSet, ...listaSetores.map(s => s.nome)]));
+            const todosSet = Array.from(new Set([...defaultSet, ...listaSetores.map(s => s.nome).filter(Boolean)]));
             let setHtml = '';
-            todosSet.forEach(s => setHtml += `<option value="${s}">${s}</option>`);
+            todosSet.forEach(s => { setHtml += `<option value="${escapeHtml(s)}">${escapeHtml(s)}</option>`; });
             document.getElementById('tSetor').innerHTML = setHtml;
         }
+        atualizarSelectsDominio();
 
         window.atualizarSelectRespAdd = () => {
             const eq = document.getElementById('fEquipe').value;
@@ -1265,10 +1533,10 @@
             let html = '';
             equipeCadastrada.forEach(e => {
                 html += `<tr class="hover:bg-slate-50/80 transition-colors">
-                    <td class="py-3 px-4 font-extrabold text-slate-900">${e.nome}</td>
-                    <td class="py-3 px-4 text-slate-500 font-medium">${e.email}</td>
-                    <td class="py-3 px-4"><span class="st-badge st-andamento mr-1.5">${e.equipe}</span> <span class="st-badge bg-slate-100 text-slate-700 border-slate-200">${e.setor || 'Geral'}</span></td>
-                    <td class="py-3 px-4 text-right"><button type="button" class="px-3 py-1.5 rounded-xl bg-rose-50 text-rose-600 hover:bg-rose-100 border border-rose-200 font-extrabold text-[11px]" onclick="removerResponsavel('${e.id}')">${ICONS.trash} Excluir</button></td>
+                    <td class="py-3 px-4 font-extrabold text-slate-900">${escapeHtml(e.nome)}</td>
+                    <td class="py-3 px-4 text-slate-500 font-medium">${escapeHtml(e.email)}</td>
+                    <td class="py-3 px-4"><span class="st-badge st-andamento mr-1.5">${escapeHtml(e.equipe)}</span> <span class="st-badge bg-slate-100 text-slate-700 border-slate-200">${escapeHtml(e.setor || 'Geral')}</span></td>
+                    <td class="py-3 px-4 text-right"><button type="button" class="px-3 py-1.5 rounded-xl bg-rose-50 text-rose-600 hover:bg-rose-100 border border-rose-200 font-extrabold text-[11px]" onclick="removerResponsavel('${escapeHtml(e.id)}')">${ICONS.trash} Excluir</button></td>
                 </tr>`;
             });
             tbody.innerHTML = html;
@@ -1278,7 +1546,7 @@
             const box = document.getElementById('equipesList');
             if (!listaEquipes.length) { box.innerHTML = '<span class="text-slate-400 text-xs font-bold">Nenhuma equipe customizada cadastrada.</span>'; return; }
             let h = '';
-            listaEquipes.forEach(e => { h += `<span class="st-badge st-andamento py-1.5 px-3.5 text-xs flex items-center gap-2">${e.nome} <button type="button" onclick="removerEquipe('${e.id}')" class="hover:text-rose-600 font-extrabold">✕</button></span>`; });
+            listaEquipes.forEach(e => { h += `<span class="st-badge st-andamento py-1.5 px-3.5 text-xs flex items-center gap-2">${escapeHtml(e.nome)} <button type="button" onclick="removerEquipe('${escapeHtml(e.id)}')" class="hover:text-rose-600 font-extrabold">✕</button></span>`; });
             box.innerHTML = h;
         }
 
@@ -1286,13 +1554,14 @@
             const box = document.getElementById('setoresList');
             if (!listaSetores.length) { box.innerHTML = '<span class="text-slate-400 text-xs font-bold">Nenhum setor customizado cadastrado.</span>'; return; }
             let h = '';
-            listaSetores.forEach(s => { h += `<span class="st-badge bg-slate-100 text-slate-700 border-slate-200 py-1.5 px-3.5 text-xs flex items-center gap-2">${s.nome} <button type="button" onclick="removerSetor('${s.id}')" class="hover:text-rose-600 font-extrabold">✕</button></span>`; });
+            listaSetores.forEach(s => { h += `<span class="st-badge bg-slate-100 text-slate-700 border-slate-200 py-1.5 px-3.5 text-xs flex items-center gap-2">${escapeHtml(s.nome)} <button type="button" onclick="removerSetor('${escapeHtml(s.id)}')" class="hover:text-rose-600 font-extrabold">✕</button></span>`; });
             box.innerHTML = h;
         }
 
+        window.renderNotificationsTable = renderNotificationsTable;
         function renderNotificationsTable() {
             const tbody = document.getElementById('notifTableBody');
-            const pendentes = lancamentos.filter(l => l.status !== 'concluido' && l.status !== 'cancelado').sort((a, b) => (a.data || '').localeCompare(b.data || ''));
+            const pendentes = getLancamentosCalendario().filter(l => l.status !== 'concluido' && l.status !== 'cancelado').sort((a, b) => (a.data || '').localeCompare(b.data || ''));
 
             if (!pendentes.length) {
                 tbody.innerHTML = `<tr><td colspan="5" class="text-center py-8 text-slate-400 font-bold">Nenhuma manutenção pendente para notificação.</td></tr>`;
@@ -1314,12 +1583,12 @@
                 else if (prazoDias === 180) prazoTxt = '6 meses antes';
 
                 html += `<tr class="hover:bg-slate-50/80 transition-colors">
-                    <td class="py-3.5 px-4 font-extrabold text-slate-900">${getDiaExtenso(l.data)}</td>
-                    <td class="py-3.5 px-4 font-bold text-slate-800">${l.titulo}</td>
-                    <td class="py-3.5 px-4 text-slate-500 font-semibold">${destTxt}</td>
-                    <td class="py-3.5 px-4"><span class="st-badge st-pendente">${prazoTxt}</span></td>
+                    <td class="py-3.5 px-4 font-extrabold text-slate-900">${escapeHtml(getDiaExtenso(l.data))}</td>
+                    <td class="py-3.5 px-4 font-bold text-slate-800">${escapeHtml(l.titulo)}</td>
+                    <td class="py-3.5 px-4 text-slate-500 font-semibold">${escapeHtml(destTxt)}</td>
+                    <td class="py-3.5 px-4"><span class="st-badge st-pendente">${escapeHtml(prazoTxt)}</span></td>
                     <td class="py-3.5 px-4 text-right">
-                        <button type="button" class="btn-pill-dark !py-1.5 !px-3.5 text-[11px]" onclick="enviarAlertaEmail('${l.id}')">${ICONS.mail} <span>E-mail</span></button>
+                        <button type="button" class="btn-pill-dark !py-1.5 !px-3.5 text-[11px]" onclick="enviarAlertaEmail('${escapeHtml(l.id)}')">${ICONS.mail} <span>E-mail</span></button>
                     </td>
                 </tr>`;
             });
@@ -1327,7 +1596,7 @@
         }
 
         window.enviarAlertaEmail = (id) => {
-            const l = lancamentos.find(x => x.id === id);
+            const l = getLancamentosCalendario().find(x => x.id === id);
             if (!l) return;
 
             let emails = [];
@@ -1363,7 +1632,7 @@
         }
 
         function renderDashboard() {
-            const mesAtual = lancamentos.filter(l => {
+            const mesAtual = getLancamentosCalendario().filter(l => {
                 if (!l.data) return false;
                 const [a, m] = l.data.split('-');
                 return parseInt(a) === viewAno && parseInt(m) === viewMes + 1;
@@ -1409,6 +1678,7 @@
             let html = "";
             const celulas = Math.ceil((primeiro + totalDias) / 7) * 7;
             const hojeChave = chaveDia(hoje.getFullYear(), hoje.getMonth(), hoje.getDate());
+            const eventosCal = getLancamentosCalendario();
 
             for (let c = 0; c < celulas; c++) {
                 if (c < primeiro || c >= primeiro + totalDias) {
@@ -1417,14 +1687,14 @@
                 }
                 const dia = c - primeiro + 1;
                 const chave = chaveDia(viewAno, viewMes, dia);
-                const lants = filtrados(lancamentos.filter(l => l.data === chave));
+                const lants = filtrados(eventosCal.filter(l => l.data === chave));
 
                 let cls = "cell" + (c % 7 === 0 || c % 7 === 6 ? " weekend" : "") + (chave === hojeChave ? " today" : "");
                 let chips = "";
                 lants.slice(0, 4).forEach(l => {
                     const isDone = l.status === 'concluido';
                     const tipoCor = (TIPOS[l.tipo] && TIPOS[l.tipo].cor) || '#0284c7';
-                    chips += `<div class="chip ${isDone ? 'done' : ''}"><span class="dot-sm" style="background:${tipoCor}"></span><span class="t">${l.titulo}</span></div>`;
+                    chips += `<div class="chip ${isDone ? 'done' : ''}"><span class="dot-sm" style="background:${tipoCor}"></span><span class="t">${escapeHtml(l.titulo)}</span></div>`;
                 });
                 if (lants.length > 4) chips += `<span class="text-[10px] font-extrabold text-slate-400">+${lants.length - 4} mais</span>`;
                 const badge = lants.length ? `<span class="badge-count">${lants.length}</span>` : '';
@@ -1435,10 +1705,40 @@
             renderDashboard();
         }
 
+        function resetFormPlanejamento() {
+            const orig = document.getElementById('fRecadoOrigemId');
+            if (orig) orig.value = '';
+            const banner = document.getElementById('planRecadoBanner');
+            if (banner) { banner.hidden = true; banner.classList.add('hidden'); }
+            const resumo = document.getElementById('planRecadoResumo');
+            if (resumo) resumo.innerText = '';
+            const title = document.getElementById('addFormTitle');
+            if (title) title.innerText = '+ Novo Lançamento nesta Data';
+        }
+
+        window.cancelarVinculoRecado = () => {
+            resetFormPlanejamento();
+            showToast("Vínculo com o recado removido.");
+        };
+
+        window.onMudarDataAgendamento = (val) => {
+            if (!/^\d{4}-\d{2}-\d{2}$/.test(val)) return;
+            diaAberto = val;
+            const p = val.split('-');
+            document.getElementById("dayTitle").innerText = `${p[2]} de ${MESES[parseInt(p[1], 10) - 1]} de ${p[0]}`;
+            renderListaDia();
+        };
+
         window.abrirDia = (chave) => {
             diaAberto = chave;
             const p = chave.split('-');
-            document.getElementById("dayTitle").innerText = `${p[2]} de ${MESES[parseInt(p[1]) - 1]} de ${p[0]}`;
+            document.getElementById("dayTitle").innerText = `${p[2]} de ${MESES[parseInt(p[1], 10) - 1]} de ${p[0]}`;
+            document.getElementById("addForm")?.reset();
+            const fDataEl = document.getElementById("fData");
+            if (fDataEl) fDataEl.value = chave;
+            const rm = document.getElementById('recMenu');
+            if (rm) { rm.hidden = true; rm.classList.add('hidden'); }
+            resetFormPlanejamento();
             abrirModal('dayOverlay');
             atualizarSelectRespAdd();
             renderListaDia();
@@ -1449,7 +1749,7 @@
         };
 
         function renderListaDia() {
-            const list = filtrados(lancamentos.filter(l => l.data === diaAberto)).sort((a, b) => (a.hora || '').localeCompare(b.hora || ''));
+            const list = filtrados(getLancamentosCalendario().filter(l => l.data === diaAberto)).sort((a, b) => (a.hora || '').localeCompare(b.hora || ''));
             document.getElementById("dayCount").innerText = `${list.length} lançamentos programados`;
 
             const box = document.getElementById("dayList");
@@ -1471,16 +1771,17 @@
                     <div class="w-1.5 self-stretch rounded-full shrink-0" style="background:${t.cor}"></div>
                     <div class="flex-1 min-w-0">
                         <div class="flex flex-wrap items-center gap-2">
-                            <span class="font-extrabold text-xs text-slate-900">${l.hora || '--:--'}</span>
+                            <span class="font-extrabold text-xs text-slate-900">${escapeHtml(l.hora || '--:--')}</span>
                             <span class="st-badge" style="border-color:${t.cor};color:${t.cor}">${t.nome}</span>
-                            <select class="st-badge st-select ${s.badge}" onchange="mudarStatus('${l.id}', this.value)">${statusOptions}</select>
+                            <select class="st-badge st-select ${s.badge}" onchange="mudarStatus('${escapeHtml(l.id)}', this.value)">${statusOptions}</select>
+                            ${l.recadoOrigemId ? `<span class="st-badge bg-amber-50 text-amber-800 border-amber-200">Planejado via Mural</span>` : ''}
                         </div>
-                        <p class="font-extrabold text-sm text-slate-900 mt-1">${l.titulo}</p>
-                        <p class="text-xs text-slate-500 font-semibold mt-0.5"><strong class="text-slate-700">${l.equipe || 'Geral'}</strong> • Resp: ${l.responsavel || 'N/A'}</p>
-                        ${l.descricao ? `<div class="text-xs text-slate-600 mt-1.5 bg-slate-50 p-2.5 rounded-xl border border-slate-200/70">${l.descricao}</div>` : ''}
+                        <p class="font-extrabold text-sm text-slate-900 mt-1">${escapeHtml(l.titulo)}</p>
+                        <p class="text-xs text-slate-500 font-semibold mt-0.5"><strong class="text-slate-700">${escapeHtml(l.equipe || 'Geral')}</strong> • Resp: ${escapeHtml(l.responsavel || 'N/A')}</p>
+                        ${l.descricao ? `<div class="text-xs text-slate-600 mt-1.5 bg-slate-50 p-2.5 rounded-xl border border-slate-200/70 whitespace-pre-wrap">${escapeHtml(l.descricao)}</div>` : ''}
                         <div class="flex gap-2 mt-2.5">
-                            <button type="button" class="px-3 py-1 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-700 font-extrabold text-[11px] flex items-center gap-1" onclick="abrirEdicao('${l.id}')">${ICONS.edit} Editar</button>
-                            <button type="button" class="px-3 py-1 rounded-xl bg-rose-50 hover:bg-rose-100 text-rose-600 border border-rose-200 font-extrabold text-[11px] flex items-center gap-1" onclick="confirmarExclusao('${l.id}')">${ICONS.trash} Excluir</button>
+                            <button type="button" class="px-3 py-1 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-700 font-extrabold text-[11px] flex items-center gap-1" onclick="abrirEdicao('${escapeHtml(l.id)}')">${ICONS.edit} Editar</button>
+                            <button type="button" class="px-3 py-1 rounded-xl bg-rose-50 hover:bg-rose-100 text-rose-600 border border-rose-200 font-extrabold text-[11px] flex items-center gap-1" onclick="confirmarExclusao('${escapeHtml(l.id)}')">${ICONS.trash} Excluir</button>
                         </div>
                     </div>
                 </div>`;
@@ -1490,18 +1791,18 @@
 
         // Relatório A4 Mensal da Agenda
         window.imprimirAgendaMesA4 = function() {
-            const mesAtual = filtrados(lancamentos.filter(l => l.data && l.data.startsWith(`${viewAno}-${pad(viewMes + 1)}`))).sort((a, b) => (a.data || '').localeCompare(b.data || '') || (a.hora || '').localeCompare(b.hora || ''));
+            const mesAtual = filtrados(getLancamentosCalendario().filter(l => l.data && l.data.startsWith(`${viewAno}-${pad(viewMes + 1)}`))).sort((a, b) => (a.data || '').localeCompare(b.data || '') || (a.hora || '').localeCompare(b.hora || ''));
             const dataHora = new Date().toLocaleString('pt-BR');
             let rowsHtml = '';
             mesAtual.forEach(l => {
                 const t = TIPOS[l.tipo] || TIPOS.preventiva;
                 const s = STATUSES[l.status || 'pendente'];
                 rowsHtml += `<tr>
-                    <td><strong>${getDiaExtenso(l.data)}</strong> ${l.hora ? 'às ' + l.hora : ''}</td>
-                    <td><strong>${l.titulo}</strong>${l.descricao ? '<br><span style="color:#64748b;font-size:10px;">' + l.descricao + '</span>' : ''}</td>
-                    <td>${t.nome}</td>
-                    <td>${l.equipe || 'Geral'}<br><span style="color:#64748b;font-size:10px;">${l.responsavel || '-'}</span></td>
-                    <td style="text-align:center;font-weight:800;">${s.nome}</td>
+                    <td><strong>${escapeHtml(getDiaExtenso(l.data))}</strong> ${l.hora ? 'às ' + escapeHtml(l.hora) : ''}</td>
+                    <td><strong>${escapeHtml(l.titulo)}</strong>${l.descricao ? '<br><span style="color:#64748b;font-size:10px;">' + escapeHtml(l.descricao) + '</span>' : ''}</td>
+                    <td>${escapeHtml(t.nome)}</td>
+                    <td>${escapeHtml(l.equipe || 'Geral')}<br><span style="color:#64748b;font-size:10px;">${escapeHtml(l.responsavel || '-')}</span></td>
+                    <td style="text-align:center;font-weight:800;">${escapeHtml(s.nome)}</td>
                 </tr>`;
             });
 
@@ -1533,13 +1834,22 @@
             }
         };
 
-        // Submissão de Lançamento com Recorrência e Notificação
+        // Submissão de Lançamento com Recorrência, Notificação e Planejamento de Recado
         document.getElementById('addForm').addEventListener('submit', async (e) => {
             e.preventDefault();
             const btn = e.submitter;
             if (btn) { btn.disabled = true; btn.innerText = "Salvando..."; }
 
+            const dataSelecionada = (document.getElementById('fData')?.value || diaAberto || '').trim();
+            if (!/^\d{4}-\d{2}-\d{2}$/.test(dataSelecionada)) {
+                if (btn) { btn.disabled = false; btn.innerText = "Salvar Lançamento"; }
+                return showToast("Selecione uma data programada válida.", "error");
+            }
+            diaAberto = dataSelecionada;
+            const recadoOrigemId = (document.getElementById('fRecadoOrigemId')?.value || '').trim();
+
             const baseData = {
+                kind: 'agendamento',
                 titulo: document.getElementById('fTitulo').value.trim(),
                 hora: document.getElementById('fHora').value || '',
                 tipo: document.getElementById('fTipo').value,
@@ -1551,14 +1861,15 @@
                 alertaDest: document.getElementById('fAlertaDest').value,
                 criadoEm: new Date().toISOString()
             };
+            if (recadoOrigemId) baseData.recadoOrigemId = recadoOrigemId;
 
-            let datasParaSalvar = [diaAberto];
+            let datasParaSalvar = [dataSelecionada];
             const isRec = document.getElementById('fRecorrente').checked;
             if (isRec) {
                 const freq = document.getElementById('fRecFreq').value;
                 const limitStr = document.getElementById('fRecFim').value;
                 if (limitStr) {
-                    let currDate = new Date(diaAberto + 'T12:00:00');
+                    let currDate = new Date(dataSelecionada + 'T12:00:00');
                     let limitDate = new Date(limitStr + 'T12:00:00');
                     let count = 0;
                     while (currDate <= limitDate && count < 365) {
@@ -1578,17 +1889,40 @@
             try {
                 const promises = datasParaSalvar.map(d => addDoc(colRef, { ...baseData, data: d }));
                 await Promise.all(promises);
+
+                if (recadoOrigemId) {
+                    const nomeUsuario = (usuarioLogado && (usuarioLogado.nome || usuarioLogado.user)) || 'Gestor';
+                    await updateDoc(doc(db, "ag_manutencao", recadoOrigemId), {
+                        recadoStatus: 'planejado',
+                        fixado: false,
+                        planejadoData: dataSelecionada,
+                        planejadoEm: new Date().toISOString(),
+                        planejadoPor: nomeUsuario
+                    });
+                }
+
+                const [pAno, pMes] = dataSelecionada.split('-');
+                if (pAno && pMes) {
+                    viewAno = parseInt(pAno, 10);
+                    viewMes = parseInt(pMes, 10) - 1;
+                }
+
                 document.getElementById('addForm').reset();
                 const rm = document.getElementById('recMenu');
                 if (rm) { rm.hidden = true; rm.classList.add('hidden'); }
                 fecharModal('dayOverlay');
-                showToast(datasParaSalvar.length > 1 ? `${datasParaSalvar.length} lançamentos programados!` : "Lançamento salvo com sucesso!");
+
+                if (recadoOrigemId) {
+                    showToast(`Recado planejado na agenda para ${getDiaExtenso(dataSelecionada)}!`);
+                } else {
+                    showToast(datasParaSalvar.length > 1 ? `${datasParaSalvar.length} lançamentos programados!` : "Lançamento salvo com sucesso!");
+                }
             } catch (err) { showToast("Erro ao salvar.", "error"); }
             if (btn) { btn.disabled = false; btn.innerText = "Salvar Lançamento"; }
         });
 
         window.abrirEdicao = (id) => {
-            const l = lancamentos.find(x => x.id === id);
+            const l = getLancamentosCalendario().find(x => x.id === id);
             if (!l) return;
             document.getElementById('eId').value = l.id;
             document.getElementById('eTitulo').value = l.titulo || '';
@@ -1620,19 +1954,481 @@
             } catch (err) { showToast("Erro ao atualizar.", "error"); }
         });
 
-        window.confirmarExclusao = (id) => { idParaExcluir = id; abrirModal('deleteOverlay'); };
+        window.confirmarExclusao = (id) => {
+            idParaExcluir = id;
+            tipoExclusao = 'lancamento';
+            const t = document.getElementById('deleteOverlayTitle');
+            const d = document.getElementById('deleteOverlayDesc');
+            if (t) t.innerText = 'Excluir Lançamento?';
+            if (d) d.innerText = 'Esta ação é permanente e removerá a programação do calendário.';
+            abrirModal('deleteOverlay');
+        };
+
+        window.excluirRecado = (id) => {
+            idParaExcluir = id;
+            tipoExclusao = 'recado';
+            const t = document.getElementById('deleteOverlayTitle');
+            const d = document.getElementById('deleteOverlayDesc');
+            if (t) t.innerText = 'Excluir Recado?';
+            if (d) d.innerText = 'Este recado será removido permanentemente do mural.';
+            abrirModal('deleteOverlay');
+        };
+
         document.getElementById('confirmDeleteBtn').addEventListener('click', async () => {
             if (!idParaExcluir) return;
+            const alvo = idParaExcluir;
+            const tipo = tipoExclusao;
+            idParaExcluir = null;
             try {
-                await deleteDoc(doc(db, "ag_manutencao", idParaExcluir));
+                await deleteDoc(doc(db, "ag_manutencao", alvo));
                 fecharModal('deleteOverlay');
-                showToast("Excluído.");
+                showToast(tipo === 'recado' ? "Recado excluído." : "Lançamento excluído.");
             } catch (err) { showToast("Erro ao excluir.", "error"); }
         });
 
+        // ================= MURAL DINÂMICO DE RECADOS & AÇÃO PLANEJAR =================
+        function formatarDataHoraRecado(iso) {
+            if (!iso) return 'Agora';
+            const dt = new Date(iso);
+            if (Number.isNaN(dt.getTime())) return 'Recente';
+            return `${pad(dt.getDate())}/${pad(dt.getMonth() + 1)} ${pad(dt.getHours())}:${pad(dt.getMinutes())}`;
+        }
+
+        window.setRecadoCatInline = (cat) => {
+            const inp = document.getElementById('recadoCat');
+            if (inp) inp.value = cat;
+            document.querySelectorAll('#recCatBtns button[data-cat]').forEach(b => {
+                const ativo = b.getAttribute('data-cat') === cat;
+                b.setAttribute('aria-pressed', ativo);
+                b.classList.toggle('active', ativo);
+            });
+        };
+
+        window.setFiltroRecadoStatus = (st) => {
+            filtroRecadoStatus = st || 'ativo';
+            ['ativo', 'planejado', 'concluido', 'todos'].forEach(key => {
+                const btn = document.getElementById('notesTab_' + key);
+                const cntMap = { ativo: 'notesCountAtivo', planejado: 'notesCountPlanejado', concluido: 'notesCountConcluido', todos: 'notesCountTodos' };
+                const cnt = document.getElementById(cntMap[key]);
+                const active = (key === filtroRecadoStatus);
+                if (btn) {
+                    btn.setAttribute('aria-pressed', active);
+                    btn.classList.toggle('active', active);
+                }
+                if (cnt) {
+                    cnt.className = active
+                        ? 'px-1.5 py-0.5 rounded-full bg-white/25 text-white text-[10px] font-extrabold'
+                        : 'px-1.5 py-0.5 rounded-full bg-slate-100 text-slate-700 text-[10px] font-extrabold';
+                }
+            });
+            renderMuralRecados();
+        };
+
+        window.setFiltroRecadoCat = (cat) => {
+            filtroRecadoCat = cat || 'all';
+            document.querySelectorAll('#notesCatFilter button[data-catfilter]').forEach(b => {
+                const ativo = b.getAttribute('data-catfilter') === filtroRecadoCat;
+                b.setAttribute('aria-pressed', ativo);
+                b.classList.toggle('active', ativo);
+            });
+            renderMuralRecados();
+        };
+
+        window.onBuscaRecadoInput = (val) => {
+            buscaRecado = (val || '').toLowerCase();
+            renderMuralRecados();
+        };
+
+        async function salvarNovoRecadoDoc(payload) {
+            const autor = (usuarioLogado && (usuarioLogado.nome || usuarioLogado.user)) || 'Equipe PCM';
+            await addDoc(colRef, {
+                kind: 'recado',
+                categoria: payload.categoria || 'lembrete',
+                texto: payload.texto,
+                equipe: payload.equipe || 'Geral',
+                responsavel: payload.responsavel || '',
+                fixado: Boolean(payload.fixado),
+                recadoStatus: 'ativo',
+                data: '',
+                autorNome: autor,
+                criadoEm: new Date().toISOString()
+            });
+        }
+
+        document.getElementById('recadoForm')?.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const txtEl = document.getElementById('recadoTexto');
+            const texto = (txtEl?.value || '').trim();
+            if (!texto) return;
+
+            const btn = e.submitter;
+            if (btn) { btn.disabled = true; btn.innerText = 'Salvando...'; }
+
+            try {
+                await salvarNovoRecadoDoc({
+                    categoria: document.getElementById('recadoCat')?.value || 'lembrete',
+                    texto,
+                    equipe: document.getElementById('recadoEquipe')?.value || 'Geral',
+                    responsavel: (document.getElementById('recadoResp')?.value || '').trim(),
+                    fixado: Boolean(document.getElementById('recadoFixado')?.checked)
+                });
+                if (txtEl) txtEl.value = '';
+                const respEl = document.getElementById('recadoResp');
+                if (respEl) respEl.value = '';
+                const fixEl = document.getElementById('recadoFixado');
+                if (fixEl) fixEl.checked = false;
+                if (filtroRecadoStatus !== 'ativo' && filtroRecadoStatus !== 'todos') {
+                    setFiltroRecadoStatus('ativo');
+                }
+                showToast("Recado salvo no mural!");
+            } catch (err) {
+                showToast("Erro ao salvar recado.", "error");
+            }
+            if (btn) { btn.disabled = false; btn.innerText = 'Salvar Recado'; }
+        });
+
+        document.getElementById('recadoTexto')?.addEventListener('keydown', (e) => {
+            if ((e.ctrlKey || e.metaKey) && e.key === 'Enter') {
+                e.preventDefault();
+                document.getElementById('recadoForm')?.requestSubmit();
+            }
+        });
+
+        window.abrirModalRecadoRapido = () => {
+            const form = document.getElementById('quickRecForm');
+            if (form) form.reset();
+            const qrId = document.getElementById('qrId');
+            if (qrId) qrId.value = '';
+            const title = document.getElementById('qrModalTitle');
+            if (title) title.innerText = 'Novo Recado Rápido';
+            const btn = document.getElementById('qrSubmitBtn');
+            if (btn) btn.innerText = 'Salvar Recado';
+            abrirModal('quickRecadoOverlay');
+            setTimeout(() => document.getElementById('qrTexto')?.focus(), 80);
+        };
+
+        window.abrirEdicaoRecado = (id) => {
+            const n = getRecadosMural().find(x => x.id === id);
+            if (!n) return;
+            document.getElementById('qrId').value = n.id;
+            document.getElementById('qrCategoria').value = RECADO_CATEGORIAS[n.categoria] ? n.categoria : 'lembrete';
+            const qrEq = document.getElementById('qrEquipe');
+            if (qrEq) qrEq.value = n.equipe || 'Geral';
+            document.getElementById('qrResp').value = n.responsavel || '';
+            document.getElementById('qrTexto').value = n.texto || '';
+            document.getElementById('qrFixado').checked = Boolean(n.fixado);
+            document.getElementById('qrModalTitle').innerText = 'Editar Recado';
+            document.getElementById('qrSubmitBtn').innerText = 'Atualizar Recado';
+            abrirModal('quickRecadoOverlay');
+            setTimeout(() => document.getElementById('qrTexto')?.focus(), 80);
+        };
+
+        document.getElementById('quickRecForm')?.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const id = (document.getElementById('qrId')?.value || '').trim();
+            const texto = (document.getElementById('qrTexto')?.value || '').trim();
+            if (!texto) return;
+
+            const btn = document.getElementById('qrSubmitBtn');
+            if (btn) { btn.disabled = true; btn.innerText = 'Salvando...'; }
+
+            const dados = {
+                categoria: document.getElementById('qrCategoria')?.value || 'lembrete',
+                equipe: document.getElementById('qrEquipe')?.value || 'Geral',
+                responsavel: (document.getElementById('qrResp')?.value || '').trim(),
+                texto,
+                fixado: Boolean(document.getElementById('qrFixado')?.checked)
+            };
+
+            try {
+                if (id) {
+                    await updateDoc(doc(db, "ag_manutencao", id), {
+                        ...dados,
+                        atualizadoEm: new Date().toISOString()
+                    });
+                    showToast("Recado atualizado!");
+                } else {
+                    await salvarNovoRecadoDoc(dados);
+                    showToast("Recado rápido salvo no mural!");
+                }
+                fecharModal('quickRecadoOverlay');
+            } catch (err) {
+                showToast("Erro ao salvar recado.", "error");
+            }
+            if (btn) { btn.disabled = false; btn.innerText = id ? 'Atualizar Recado' : 'Salvar Recado'; }
+        });
+
+        document.getElementById('qrTexto')?.addEventListener('keydown', (e) => {
+            if ((e.ctrlKey || e.metaKey) && e.key === 'Enter') {
+                e.preventDefault();
+                document.getElementById('quickRecForm')?.requestSubmit();
+            }
+        });
+
+        window.alternarFixarRecado = async (id) => {
+            const n = getRecadosMural().find(x => x.id === id);
+            if (!n) return;
+            try {
+                const novoFixado = !n.fixado;
+                await updateDoc(doc(db, "ag_manutencao", id), { fixado: novoFixado });
+                showToast(novoFixado ? "Recado fixado no topo!" : "Recado desafixado.");
+            } catch (err) { showToast("Erro ao atualizar fixação.", "error"); }
+        };
+
+        window.alternarConcluirRecado = async (id) => {
+            const n = getRecadosMural().find(x => x.id === id);
+            if (!n) return;
+            const concluidoAgora = n.recadoStatus === 'concluido';
+            try {
+                await updateDoc(doc(db, "ag_manutencao", id), {
+                    recadoStatus: concluidoAgora ? 'ativo' : 'concluido',
+                    fixado: concluidoAgora ? Boolean(n.fixado) : false
+                });
+                showToast(concluidoAgora ? "Recado reaberto!" : "Recado concluído/arquivado.");
+            } catch (err) { showToast("Erro ao atualizar recado.", "error"); }
+        };
+
+        window.irParaDataNoCalendario = (chave) => {
+            if (!/^\d{4}-\d{2}-\d{2}$/.test(chave)) return;
+            const [ano, mes] = chave.split('-');
+            viewAno = parseInt(ano, 10);
+            viewMes = parseInt(mes, 10) - 1;
+            switchView('calendar');
+            renderCalendario();
+            abrirDia(chave);
+        };
+
+        window.planejarRecado = (id) => {
+            const n = getRecadosMural().find(x => x.id === id);
+            if (!n) return;
+            const dataSugerida = (n.planejadoData && /^\d{4}-\d{2}-\d{2}$/.test(n.planejadoData))
+                ? n.planejadoData
+                : chaveDia(hoje.getFullYear(), hoje.getMonth(), hoje.getDate());
+
+            abrirDia(dataSugerida);
+
+            const origEl = document.getElementById('fRecadoOrigemId');
+            if (origEl) origEl.value = n.id;
+
+            const banner = document.getElementById('planRecadoBanner');
+            if (banner) { banner.hidden = false; banner.classList.remove('hidden'); }
+            const resumo = document.getElementById('planRecadoResumo');
+            if (resumo) resumo.innerText = n.texto || '';
+            const title = document.getElementById('addFormTitle');
+            if (title) title.innerText = n.recadoStatus === 'planejado' ? 'Replanejar Recado na Agenda' : 'Planejar Recado na Agenda';
+
+            const primeiraLinha = (n.texto || '').split(/\r?\n/).map(s => s.trim()).find(Boolean) || '';
+            const tituloSugerido = primeiraLinha.length > 90 ? primeiraLinha.slice(0, 87) + '...' : primeiraLinha;
+            const fTit = document.getElementById('fTitulo');
+            if (fTit) fTit.value = tituloSugerido;
+
+            const catInfo = RECADO_CATEGORIAS[n.categoria] || RECADO_CATEGORIAS.lembrete;
+            const fTipo = document.getElementById('fTipo');
+            if (fTipo && catInfo.tipoSugerido) fTipo.value = catInfo.tipoSugerido;
+
+            const fEq = document.getElementById('fEquipe');
+            const fResp = document.getElementById('fResp');
+            let respMatched = false;
+
+            if (fEq && n.equipe && n.equipe !== 'Geral') {
+                const eqOpt = Array.from(fEq.options).find(o => o.value === n.equipe);
+                if (eqOpt) fEq.value = eqOpt.value;
+            }
+            atualizarSelectRespAdd();
+
+            if (n.responsavel) {
+                const respTermo = n.responsavel.trim().toLowerCase();
+                if (fResp) {
+                    const optMatch = Array.from(fResp.options).find(o => o.value && o.value.toLowerCase() === respTermo);
+                    if (optMatch) {
+                        fResp.value = optMatch.value;
+                        respMatched = true;
+                    }
+                }
+                if (!respMatched) {
+                    const cadMatch = equipeCadastrada.find(e => e.nome && e.nome.toLowerCase() === respTermo);
+                    if (cadMatch && fEq) {
+                        const eqOpt2 = Array.from(fEq.options).find(o => o.value === cadMatch.equipe);
+                        if (eqOpt2) {
+                            fEq.value = eqOpt2.value;
+                            atualizarSelectRespAdd();
+                            if (fResp) {
+                                fResp.value = cadMatch.nome;
+                                respMatched = fResp.value === cadMatch.nome;
+                            }
+                        }
+                    }
+                }
+            }
+
+            const fDesc = document.getElementById('fDesc');
+            if (fDesc) {
+                fDesc.value = (!respMatched && n.responsavel)
+                    ? `${n.texto || ''}\n\nObs. / Para: ${n.responsavel}`.trim()
+                    : (n.texto || '');
+            }
+
+            setTimeout(() => document.getElementById('fData')?.focus(), 100);
+        };
+
+        function ordenarRecados(lista) {
+            const pesoStatus = { ativo: 0, planejado: 1, concluido: 2 };
+            return [...lista].sort((a, b) => {
+                const pinDiff = (b.fixado ? 1 : 0) - (a.fixado ? 1 : 0);
+                if (pinDiff !== 0) return pinDiff;
+                const stA = pesoStatus[a.recadoStatus || 'ativo'] ?? 0;
+                const stB = pesoStatus[b.recadoStatus || 'ativo'] ?? 0;
+                if (stA !== stB) return stA - stB;
+                return (b.criadoEm || '').localeCompare(a.criadoEm || '');
+            });
+        }
+
+        function renderCalendarNotesBanner() {
+            const banner = document.getElementById('calendarNotesBanner');
+            const itemsBox = document.getElementById('calBannerItems');
+            const countEl = document.getElementById('calBannerCount');
+            if (!banner || !itemsBox) return;
+
+            const ativos = ordenarRecados(getRecadosMural().filter(n => (n.recadoStatus || 'ativo') === 'ativo'));
+            if (!ativos.length) {
+                banner.hidden = true;
+                banner.classList.add('hidden');
+                itemsBox.innerHTML = '';
+                return;
+            }
+
+            banner.hidden = false;
+            banner.classList.remove('hidden');
+            if (countEl) countEl.innerText = String(ativos.length);
+
+            let html = '';
+            ativos.slice(0, 3).forEach(n => {
+                const cat = RECADO_CATEGORIAS[n.categoria] || RECADO_CATEGORIAS.lembrete;
+                html += `<div class="note-card ${cat.cls} ${n.fixado ? 'note-pinned' : ''} p-3.5 flex flex-col justify-between gap-2">
+                    <div class="space-y-1.5">
+                        <div class="flex items-center justify-between gap-1.5 flex-wrap">
+                            <span class="st-badge text-[10px] ${cat.badgeCls}">${escapeHtml(cat.nome)}</span>
+                            ${n.fixado ? `<span class="text-[10px] font-extrabold text-amber-700 flex items-center gap-1">${ICONS.pin} Fixado</span>` : `<span class="text-[10px] font-bold text-slate-400">${escapeHtml(formatarDataHoraRecado(n.criadoEm))}</span>`}
+                        </div>
+                        <p class="text-xs font-bold text-slate-800 line-clamp-2 whitespace-pre-wrap break-words">${escapeHtml(n.texto)}</p>
+                        ${(n.equipe && n.equipe !== 'Geral') || n.responsavel ? `<p class="text-[10px] font-semibold text-slate-500 truncate">${escapeHtml(n.equipe || 'Geral')}${n.responsavel ? ' • Para: ' + escapeHtml(n.responsavel) : ''}</p>` : ''}
+                    </div>
+                    <div class="flex items-center justify-between gap-1.5 pt-2 border-t border-slate-200/60">
+                        <button type="button" onclick="planejarRecado('${escapeHtml(n.id)}')" class="px-2.5 py-1 rounded-xl bg-sky-600 hover:bg-sky-700 text-white font-extrabold text-[10px] flex items-center gap-1 shadow-sm">${ICONS.calendar} <span>Planejar</span></button>
+                        <div class="flex items-center gap-1">
+                            <button type="button" onclick="alternarFixarRecado('${escapeHtml(n.id)}')" title="${n.fixado ? 'Desafixar' : 'Fixar'}" class="px-2 py-1 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold text-[10px]">${ICONS.pin}</button>
+                            <button type="button" onclick="alternarConcluirRecado('${escapeHtml(n.id)}')" title="Concluir recado" class="px-2 py-1 rounded-xl bg-emerald-50 hover:bg-emerald-100 text-emerald-700 font-bold text-[10px]">${ICONS.check}</button>
+                        </div>
+                    </div>
+                </div>`;
+            });
+            itemsBox.innerHTML = html;
+        }
+
+        function renderMuralRecados() {
+            const todos = getRecadosMural();
+            const ativosCount = todos.filter(n => (n.recadoStatus || 'ativo') === 'ativo').length;
+            const planejadosCount = todos.filter(n => n.recadoStatus === 'planejado').length;
+            const concluidosCount = todos.filter(n => n.recadoStatus === 'concluido').length;
+
+            const setTxt = (id, val) => { const el = document.getElementById(id); if (el) el.innerText = String(val); };
+            setTxt('notesCountAtivo', ativosCount);
+            setTxt('notesCountPlanejado', planejadosCount);
+            setTxt('notesCountConcluido', concluidosCount);
+            setTxt('notesCountTodos', todos.length);
+
+            const badgeRail = document.getElementById('badgeRecadosRail');
+            if (badgeRail) {
+                badgeRail.innerText = String(ativosCount);
+                badgeRail.hidden = ativosCount === 0;
+                badgeRail.classList.toggle('hidden', ativosCount === 0);
+            }
+            const badgeMob = document.getElementById('badgeRecadosMob');
+            if (badgeMob) {
+                badgeMob.innerText = String(ativosCount);
+                badgeMob.hidden = ativosCount === 0;
+                badgeMob.classList.toggle('hidden', ativosCount === 0);
+            }
+
+            const grid = document.getElementById('notesGrid');
+            if (!grid) return;
+
+            let lista = todos.filter(n => {
+                const st = n.recadoStatus || 'ativo';
+                if (filtroRecadoStatus !== 'todos' && st !== filtroRecadoStatus) return false;
+                if (filtroRecadoCat !== 'all' && (n.categoria || 'lembrete') !== filtroRecadoCat) return false;
+                if (buscaRecado) {
+                    const hit = (n.texto && n.texto.toLowerCase().includes(buscaRecado)) ||
+                                (n.responsavel && n.responsavel.toLowerCase().includes(buscaRecado)) ||
+                                (n.equipe && n.equipe.toLowerCase().includes(buscaRecado)) ||
+                                (n.autorNome && n.autorNome.toLowerCase().includes(buscaRecado));
+                    if (!hit) return false;
+                }
+                return true;
+            });
+
+            lista = ordenarRecados(lista);
+
+            if (!lista.length) {
+                grid.innerHTML = `<div class="col-span-full glass-card p-10 rounded-3xl text-center space-y-2">
+                    <p class="text-sm font-extrabold text-slate-700">Nenhum recado nesta visualização.</p>
+                    <p class="text-xs text-slate-500">Use o campo acima para anotar lembretes informais ou altere os filtros de status/categoria.</p>
+                </div>`;
+                return;
+            }
+
+            let html = '';
+            lista.forEach(n => {
+                const cat = RECADO_CATEGORIAS[n.categoria] || RECADO_CATEGORIAS.lembrete;
+                const st = n.recadoStatus || 'ativo';
+                const isPlan = st === 'planejado';
+                const isDone = st === 'concluido';
+
+                html += `<article class="note-card ${cat.cls} ${n.fixado ? 'note-pinned' : ''} ${isDone ? 'opacity-75' : ''} p-5 flex flex-col justify-between gap-3.5">
+                    <div class="space-y-2.5">
+                        <div class="flex items-center justify-between gap-2 flex-wrap">
+                            <span class="st-badge text-[10px] ${cat.badgeCls}">${escapeHtml(cat.nome)}</span>
+                            <div class="flex items-center gap-1.5 flex-wrap">
+                                ${n.fixado ? `<span class="st-badge text-[10px] bg-amber-100 text-amber-800 border-amber-300 gap-1">${ICONS.pin} Fixado</span>` : ''}
+                                ${isPlan ? `<span class="st-badge text-[10px] bg-sky-100 text-sky-800 border-sky-200">Planejado: ${escapeHtml(getDiaExtenso(n.planejadoData || ''))}</span>` : ''}
+                                ${isDone ? `<span class="st-badge text-[10px] bg-emerald-100 text-emerald-800 border-emerald-200">Concluído</span>` : ''}
+                            </div>
+                        </div>
+
+                        <p class="text-xs sm:text-sm font-bold text-slate-800 whitespace-pre-wrap break-words ${isDone ? 'line-through opacity-80' : ''}">${escapeHtml(n.texto)}</p>
+
+                        <div class="flex flex-wrap items-center gap-1.5 pt-1">
+                            <span class="st-badge text-[10px] bg-slate-100 text-slate-700 border-slate-200">${escapeHtml(n.equipe || 'Geral')}</span>
+                            ${n.responsavel ? `<span class="st-badge text-[10px] bg-slate-100 text-slate-700 border-slate-200">Para: ${escapeHtml(n.responsavel)}</span>` : ''}
+                        </div>
+                    </div>
+
+                    <div class="space-y-2.5 pt-3 border-t border-slate-200/70">
+                        <div class="flex items-center justify-between text-[10px] font-bold text-slate-400">
+                            <span class="truncate">Por ${escapeHtml(n.autorNome || 'Equipe PCM')}</span>
+                            <span>${escapeHtml(formatarDataHoraRecado(n.criadoEm))}</span>
+                        </div>
+                        <div class="flex flex-wrap items-center justify-between gap-1.5">
+                            <div class="flex flex-wrap items-center gap-1.5">
+                                ${!isDone ? `<button type="button" onclick="planejarRecado('${escapeHtml(n.id)}')" class="px-3 py-1.5 rounded-xl bg-sky-600 hover:bg-sky-700 text-white font-extrabold text-[11px] flex items-center gap-1 shadow-sm">${ICONS.calendar} <span>${isPlan ? 'Replanejar' : 'Planejar'}</span></button>` : ''}
+                                ${isPlan && n.planejadoData ? `<button type="button" onclick="irParaDataNoCalendario('${escapeHtml(n.planejadoData)}')" class="px-2.5 py-1.5 rounded-xl bg-sky-50 hover:bg-sky-100 text-sky-700 border border-sky-200 font-extrabold text-[11px]">Ver no dia</button>` : ''}
+                            </div>
+                            <div class="flex flex-wrap items-center gap-1">
+                                <button type="button" onclick="alternarFixarRecado('${escapeHtml(n.id)}')" title="${n.fixado ? 'Desafixar' : 'Fixar no topo'}" class="px-2.5 py-1.5 rounded-xl ${n.fixado ? 'bg-amber-100 text-amber-800 border border-amber-300' : 'bg-slate-100 hover:bg-slate-200 text-slate-700'} font-extrabold text-[11px]">${ICONS.pin}</button>
+                                <button type="button" onclick="abrirEdicaoRecado('${escapeHtml(n.id)}')" title="Editar recado" class="px-2.5 py-1.5 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-700 font-extrabold text-[11px]">${ICONS.edit}</button>
+                                <button type="button" onclick="alternarConcluirRecado('${escapeHtml(n.id)}')" title="${isDone ? 'Reabrir recado' : 'Concluir / Arquivar'}" class="px-2.5 py-1.5 rounded-xl ${isDone ? 'bg-slate-100 hover:bg-slate-200 text-slate-700' : 'bg-emerald-50 hover:bg-emerald-100 text-emerald-700 border border-emerald-200'} font-extrabold text-[11px]">${isDone ? 'Reabrir' : ICONS.check}</button>
+                                <button type="button" onclick="excluirRecado('${escapeHtml(n.id)}')" title="Excluir recado" class="px-2.5 py-1.5 rounded-xl bg-rose-50 hover:bg-rose-100 text-rose-600 border border-rose-200 font-extrabold text-[11px]">${ICONS.trash}</button>
+                            </div>
+                        </div>
+                    </div>
+                </article>`;
+            });
+            grid.innerHTML = html;
+        }
+
         // CSV Export
         document.getElementById("exportBtn").addEventListener('click', () => {
-            const mesAtual = lancamentos.filter(l => l.data && l.data.startsWith(`${viewAno}-${pad(viewMes + 1)}`));
+            const mesAtual = getLancamentosCalendario().filter(l => l.data && l.data.startsWith(`${viewAno}-${pad(viewMes + 1)}`));
             if (!mesAtual.length) return showToast("Sem dados para exportar neste mês.", "error");
             let csv = "Data,Hora,Titulo,Equipe,Responsavel,Tipo,Status,Descricao\n";
             mesAtual.forEach(l => {
@@ -1652,7 +2448,7 @@
 
         document.addEventListener("keydown", function(e) {
             if (e.key === "Escape") {
-                ['deleteOverlay', 'editOverlay', 'dayOverlay'].forEach(id => {
+                ['deleteOverlay', 'quickRecadoOverlay', 'editOverlay', 'dayOverlay'].forEach(id => {
                     const el = document.getElementById(id);
                     if (el && !el.hidden) fecharModal(id);
                 });
@@ -1672,23 +2468,34 @@
                 if (k === 't') { e.preventDefault(); toggleModoTablet(); return; }
                 if (k === 'u') { e.preventDefault(); abrirEspacoUsuario(); return; }
                 if (k === '1') { e.preventDefault(); switchView('calendar'); return; }
-                if (k === '2') { e.preventDefault(); switchView('notifications'); return; }
-                if (k === '3') { e.preventDefault(); switchView('team'); return; }
+                if (k === '2') { e.preventDefault(); switchView('notes'); return; }
+                if (k === '3') { e.preventDefault(); switchView('notifications'); return; }
+                if (k === '4') { e.preventDefault(); switchView('team'); return; }
             }
 
             if (e.ctrlKey || e.altKey || e.metaKey) return;
-            let bloqueado = !document.getElementById("dayOverlay").hidden || !document.getElementById("editOverlay").hidden || !document.getElementById("deleteOverlay").hidden;
+            let bloqueado = !document.getElementById("dayOverlay").hidden ||
+                            !document.getElementById("editOverlay").hidden ||
+                            !document.getElementById("deleteOverlay").hidden ||
+                            !document.getElementById("quickRecadoOverlay").hidden ||
+                            !document.getElementById("modalEspacoUsuario").classList.contains('hidden') ||
+                            !document.getElementById("modalAtalhos").classList.contains('hidden');
 
             var k = e.key;
-            if (k === "ArrowLeft") { if (!bloqueado) { viewMes--; if (viewMes < 0) { viewMes = 11; viewAno--; } renderCalendario(); e.preventDefault(); } }
-            else if (k === "ArrowRight") { if (!bloqueado) { viewMes++; if (viewMes > 11) { viewMes = 0; viewAno++; } renderCalendario(); e.preventDefault(); } }
-            else if (k === "t" || k === "T") { if (!bloqueado) { viewAno = hoje.getFullYear(); viewMes = hoje.getMonth(); renderCalendario(); } }
-            else if (k === "n" || k === "N") {
-                if (!bloqueado) abrirNovoLancamentoRapido();
-            }
+            var naAgenda = !document.getElementById("viewCalendar").hidden;
+            if (k === "ArrowLeft") { if (!bloqueado && naAgenda) { viewMes--; if (viewMes < 0) { viewMes = 11; viewAno--; } renderCalendario(); e.preventDefault(); } }
+            else if (k === "ArrowRight") { if (!bloqueado && naAgenda) { viewMes++; if (viewMes > 11) { viewMes = 0; viewAno++; } renderCalendario(); e.preventDefault(); } }
+            else if (k === "t" || k === "T") { if (!bloqueado && naAgenda) { viewAno = hoje.getFullYear(); viewMes = hoje.getMonth(); renderCalendario(); } }
+            else if (k === "n" || k === "N") { if (!bloqueado) abrirNovoLancamentoRapido(); }
+            else if (k === "r" || k === "R") { if (!bloqueado) abrirModalRecadoRapido(); }
         });
 
-        function atualizarTudo() { renderCalendario(); if (!document.getElementById('dayOverlay').hidden) renderListaDia(); }
+        function atualizarTudo() {
+            renderCalendario();
+            renderCalendarNotesBanner();
+            renderMuralRecados();
+            if (!document.getElementById('dayOverlay').hidden) renderListaDia();
+        }
 
         let selHtml = ''; let pillHtml = `<button type="button" class="pill active" data-filter="all" aria-pressed="true">Todos</button>`;
         Object.keys(TIPOS).forEach(k => {
