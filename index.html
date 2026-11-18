@@ -201,7 +201,7 @@
             </form>
 
             <div class="mt-6 pt-5 border-t border-slate-200/80 flex items-center justify-between text-[11px] text-slate-400 font-semibold">
-                <span>5 Sistemas Integrados</span>
+                <span>6 Sistemas Integrados</span>
                 <span>Banco: pcm-cepera (ir_funcionarios)</span>
             </div>
         </div>
@@ -284,7 +284,7 @@
                         </div>
                     </div>
 
-                    <!-- GRADE DOS 5 APPS -->
+                    <!-- GRADE DOS APPS -->
                     <div id="gridAppsContainer" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5"></div>
                 </section>
 
@@ -312,7 +312,7 @@
                     </div>
 
                     <!-- KPIs RBAC -->
-                    <div class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-3.5" id="rbacKpiRow"></div>
+                    <div class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-7 gap-3.5" id="rbacKpiRow"></div>
 
                     <!-- FILTROS DA MATRIZ RBAC -->
                     <div class="glass-card p-5 rounded-3xl space-y-4">
@@ -336,13 +336,13 @@
                             </div>
                             <div class="text-[11px] font-bold text-slate-500 flex items-center gap-1.5">
                                 <svg class="w-4 h-4 text-sky-600 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
-                                <span>Clique nas chaves verdes para liberar ou bloquear um App instantaneamente para o colaborador.</span>
+                                <span>Clique nas chaves verdes para liberar ou bloquear um App instantaneamente. Gestão de Ativos é exclusivo Admin/Gerente.</span>
                             </div>
                         </div>
 
-                        <!-- TABELA MATRIZ DE ACESSOS (USUÁRIOS x 5 APPS) -->
+                        <!-- TABELA MATRIZ DE ACESSOS (USUÁRIOS x 6 APPS) -->
                         <div class="overflow-x-auto rounded-2xl border border-slate-200">
-                            <table class="w-full border-collapse text-left min-w-[920px]">
+                            <table class="w-full border-collapse text-left min-w-[1040px]">
                                 <thead>
                                     <tr class="bg-slate-50 border-b border-slate-200 text-[11px] font-extrabold uppercase text-slate-600">
                                         <th class="py-3.5 px-4">Colaborador / Login</th>
@@ -352,6 +352,7 @@
                                         <th class="py-3.5 px-3 text-center">Agenda PCM</th>
                                         <th class="py-3.5 px-3 text-center">Obsolescência</th>
                                         <th class="py-3.5 px-3 text-center">Multipet</th>
+                                        <th class="py-3.5 px-3 text-center">Gestão de Ativos</th>
                                         <th class="py-3.5 px-4 text-right">Ações Rápidas</th>
                                     </tr>
                                 </thead>
@@ -467,7 +468,7 @@
         import { getAuth, signInAnonymously } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
         import { initializeFirestore, collection, addDoc, onSnapshot, doc, updateDoc, deleteDoc } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
 
-        // ================= CATÁLOGO OFICIAL DOS 5 APLICATIVOS DA CENTRAL =================
+        // ================= CATÁLOGO OFICIAL DOS 6 APLICATIVOS DA CENTRAL =================
         const APPS_CATALOG = [
             {
                 id: 'inspecao_rota',
@@ -504,7 +505,7 @@
                 badgeClass: 'bg-emerald-100 text-emerald-800 border-emerald-200',
                 accentColor: '#059669',
                 iconHtml: '<svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/></svg>',
-                description: 'Controle de atividades programadas da manutenção, alocação por equipes, responsáveis técnicos, setores produtivos e status.',
+                description: 'Controle de atividades programadas da manutenção, mural de recados, alocação por equipes, responsáveis técnicos, setores produtivos e status.',
                 collections: ['ag_manutencao', 'ag_responsaveis', 'ag_equipes', 'ag_setores'],
                 defaultRoles: ['Admin', 'Gerente', 'Supervisor Mecânica', 'Supervisor Elétrica']
             },
@@ -533,12 +534,30 @@
                 description: 'Acompanhamento diário de volume produzido e eficiência de linha (Multipet 1, Multipet 2/5 e Multipet 3) por turno.',
                 collections: ['mp_producao'],
                 defaultRoles: ['Admin', 'Gerente', 'Supervisor Mecânica', 'Supervisor Elétrica', 'Operação']
+            },
+            {
+                id: 'gestao_ativos',
+                shortTitle: 'Gestão de Ativos',
+                title: 'Central de Gestão de Ativos (Master Data)',
+                file: 'GESTAO-ATIVOS.html',
+                category: 'Exclusivo Admin • Árvore',
+                adminOnly: true,
+                badgeClass: 'bg-teal-100 text-teal-900 border-teal-200',
+                accentColor: '#0f766e',
+                iconHtml: '<svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10"/></svg>',
+                description: 'Governança mestre da árvore industrial (Setor › Máquina › Equipamento › Conjunto › Subconjunto), calculadora de criticidade ABC, periodicidade preventiva e saneamento.',
+                collections: ['ob_linhas', 'ir_anomalias', 'ir_checklists', 'ob_equipamentos'],
+                defaultRoles: ['Admin', 'Gerente']
             }
         ];
 
         function isPerfilAdminCentral(role) {
             const r = String(role || '').trim();
             return r === 'Admin' || r === 'Gerente';
+        }
+
+        function isAppRestritoAdmin(appId) {
+            return Boolean(APPS_CATALOG.find(a => a.id === appId)?.adminOnly);
         }
 
         // ================= STORAGE SEGURO =================
@@ -630,17 +649,18 @@
         export function getAppsPadraoPorRole(role) {
             const r = String(role || 'Mecânica').trim();
             if (isPerfilAdminCentral(r)) return APPS_CATALOG.map(a => a.id);
-            return APPS_CATALOG.filter(a => a.defaultRoles.includes(r)).map(a => a.id);
+            return APPS_CATALOG.filter(a => !a.adminOnly && a.defaultRoles.includes(r)).map(a => a.id);
         }
 
         export function getAppsPermitidosUsuario(userObj) {
             if (!userObj) return [];
-            // Admin e Gerente têm sempre acesso total garantido à Central e aos 5 apps
+            // Admin e Gerente têm sempre acesso total garantido à Central e a todos os módulos
             if (isPerfilAdminCentral(userObj.role)) {
                 return APPS_CATALOG.map(a => a.id);
             }
+            const adminOnlyIds = new Set(APPS_CATALOG.filter(a => a.adminOnly).map(a => a.id));
             if (Array.isArray(userObj.apps_permitidos)) {
-                return userObj.apps_permitidos;
+                return userObj.apps_permitidos.filter(id => !adminOnlyIds.has(id));
             }
             return getAppsPadraoPorRole(userObj.role);
         }
@@ -851,7 +871,10 @@
 
             const badge = document.getElementById('badgeAppsLiberados');
             if (badge) {
-                badge.innerText = `${idsPermitidos.length} de ${APPS_CATALOG.length} módulos liberados`;
+                const totalDisponivelPerfil = isPerfilAdminCentral(usuarioLogado.role)
+                    ? APPS_CATALOG.length
+                    : APPS_CATALOG.filter(a => !a.adminOnly).length;
+                badge.innerText = `${idsPermitidos.length} de ${totalDisponivelPerfil} módulos liberados`;
             }
 
             if (appsVisiveis.length === 0) {
@@ -867,6 +890,12 @@
             container.innerHTML = appsVisiveis.map(app => {
                 const qtdUsuariosComAcesso = listaFunc.filter(u => usuarioPodeAcessarApp(u, app.id)).length;
                 const tagsCols = app.collections.map(c => `<span class="text-[10px] font-mono font-bold px-2 py-0.5 rounded-md bg-slate-100 text-slate-600 border border-slate-200/80">${escapeHtml(c)}</span>`).join('');
+                const badgeAdminLock = app.adminOnly
+                    ? `<span class="inline-flex items-center gap-1 text-[10px] font-extrabold uppercase px-2 py-0.5 rounded-full bg-slate-900 text-white border border-slate-800">
+                        <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"/></svg>
+                        <span>Exclusivo Admin</span>
+                       </span>`
+                    : '';
 
                 return `
                 <div class="glass-card glass-card-hover rounded-3xl p-6 flex flex-col justify-between gap-5 relative overflow-hidden">
@@ -879,6 +908,7 @@
                                 <span class="text-[10px] font-extrabold uppercase px-2.5 py-1 rounded-full border ${app.badgeClass}">
                                     ${escapeHtml(app.category)}
                                 </span>
+                                ${badgeAdminLock}
                                 ${isPerfilAdminCentral(usuarioLogado.role) ? `<span class="text-[10px] font-bold text-slate-400">${qtdUsuariosComAcesso} usuário(s) com acesso</span>` : ''}
                             </div>
                         </div>
@@ -1016,7 +1046,7 @@
 
             const tbody = document.getElementById('tbodyMatrizRbac');
             if (filtrados.length === 0) {
-                tbody.innerHTML = `<tr><td colspan="8" class="p-8 text-center text-slate-400 font-bold">Nenhum colaborador encontrado para este filtro.</td></tr>`;
+                tbody.innerHTML = `<tr><td colspan="9" class="p-8 text-center text-slate-400 font-bold">Nenhum colaborador encontrado para este filtro.</td></tr>`;
                 return;
             }
 
@@ -1030,6 +1060,16 @@
                         : (u.role === 'Elétrica' ? 'bg-amber-100 text-amber-800' : 'bg-sky-100 text-sky-800'));
 
                 const colSwitches = APPS_CATALOG.map(app => {
+                    if (app.adminOnly && !isAdmin) {
+                        return `
+                            <td class="py-3 px-3 text-center align-middle">
+                                <span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-slate-100 text-slate-400 border border-slate-200 text-[10px] font-extrabold cursor-not-allowed" title="${escapeHtml(app.shortTitle)} é exclusivo para perfis Admin e Gerente">
+                                    <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"/></svg>
+                                    <span>Admin</span>
+                                </span>
+                            </td>
+                        `;
+                    }
                     const checked = appsUser.includes(app.id);
                     return `
                         <td class="py-3 px-3 text-center align-middle">
@@ -1056,7 +1096,7 @@
                         <td class="py-3 px-4 text-right whitespace-nowrap">
                             <div class="inline-flex items-center gap-1.5">
                                 ${!isAdmin ? `
-                                    <button type="button" onclick="definirTodosAppsUsuario('${u.id}', true)" title="Liberar todos os 5 apps" class="px-2 py-1 rounded-lg bg-emerald-50 hover:bg-emerald-100 text-emerald-700 font-extrabold text-[10px] border border-emerald-200">Todos</button>
+                                    <button type="button" onclick="definirTodosAppsUsuario('${u.id}', true)" title="Liberar todos os aplicativos disponíveis para este perfil" class="px-2 py-1 rounded-lg bg-emerald-50 hover:bg-emerald-100 text-emerald-700 font-extrabold text-[10px] border border-emerald-200">Todos</button>
                                     <button type="button" onclick="resetarAppsPadraoUsuario('${u.id}')" title="Restaurar apps padrão do cargo" class="px-2 py-1 rounded-lg bg-slate-100 hover:bg-slate-200 text-slate-600 font-extrabold text-[10px]">Padrão</button>
                                 ` : ''}
                                 <button type="button" onclick="abrirModalEditarUsuarioRbac('${u.id}')" class="px-2.5 py-1 rounded-lg bg-sky-50 hover:bg-sky-100 text-sky-700 font-extrabold text-[11px] border border-sky-200">Editar</button>
@@ -1074,6 +1114,12 @@
             if (!usuarioLogado || !isPerfilAdminCentral(usuarioLogado.role)) return;
             const alvo = listaFunc.find(u => u.id === userId);
             if (!alvo || isPerfilAdminCentral(alvo.role)) return;
+
+            if (isAppRestritoAdmin(appId)) {
+                showToast("Gestão de Ativos é um módulo exclusivo para perfis Admin e Gerente.", "error");
+                renderizarMatrizRbac();
+                return;
+            }
 
             const atuais = new Set(getAppsPermitidosUsuario(alvo));
             if (liberar) atuais.add(appId);
@@ -1095,12 +1141,15 @@
             if (!usuarioLogado || !isPerfilAdminCentral(usuarioLogado.role)) return;
             const alvo = listaFunc.find(u => u.id === userId);
             if (!alvo) return;
-            const novoArray = todos ? APPS_CATALOG.map(a => a.id) : [];
+            const isAlvoAdmin = isPerfilAdminCentral(alvo.role);
+            const novoArray = todos
+                ? APPS_CATALOG.filter(a => isAlvoAdmin || !a.adminOnly).map(a => a.id)
+                : [];
             try {
                 await updateDoc(doc(db, "ir_funcionarios", userId), {
                     apps_permitidos: novoArray
                 });
-                showToast(`Todos os 5 aplicativos liberados para ${alvo.nome}!`);
+                showToast(`Todos os ${novoArray.length} aplicativos permitidos foram liberados para ${alvo.nome}!`);
             } catch (err) {
                 showToast("Erro ao atualizar permissões.", "error");
             }
@@ -1143,30 +1192,45 @@
         };
 
         // ================= MODAL DE CADASTRO / EDIÇÃO DE USUÁRIO + RBAC =================
-        function renderCheckboxesAppsNoModal(selecionados = []) {
+        function renderCheckboxesAppsNoModal(selecionados = [], roleAtual = null) {
             const container = document.getElementById('modalListaCheckApps');
+            const roleEfetiva = roleAtual || document.getElementById('uRole')?.value || 'Mecânica';
+            const isAdminModal = isPerfilAdminCentral(roleEfetiva);
             const setSel = new Set(selecionados);
-            container.innerHTML = APPS_CATALOG.map(app => `
-                <label class="flex items-center justify-between p-2.5 rounded-xl bg-white border border-slate-200 cursor-pointer hover:bg-slate-50">
+            container.innerHTML = APPS_CATALOG.map(app => {
+                const bloqueadoPorPerfil = Boolean(app.adminOnly && !isAdminModal);
+                const checked = isAdminModal ? true : (!bloqueadoPorPerfil && setSel.has(app.id));
+                const disabled = isAdminModal || bloqueadoPorPerfil;
+                return `
+                <label class="flex items-center justify-between p-2.5 rounded-xl bg-white border border-slate-200 ${bloqueadoPorPerfil ? 'opacity-60 cursor-not-allowed bg-slate-50' : 'cursor-pointer hover:bg-slate-50'}">
                     <div class="flex items-center gap-2.5 min-w-0">
-                        <input type="checkbox" name="chkModalAppRbac" value="${app.id}" ${setSel.has(app.id) ? 'checked' : ''} class="w-4 h-4 accent-sky-600 rounded">
+                        <input type="checkbox" name="chkModalAppRbac" value="${app.id}" ${checked ? 'checked' : ''} ${disabled ? 'disabled' : ''} class="w-4 h-4 accent-sky-600 rounded">
                         <div class="min-w-0">
                             <div class="text-xs font-extrabold text-slate-900 truncate">${escapeHtml(app.title)}</div>
                             <div class="text-[10px] text-slate-500">${escapeHtml(app.category)}</div>
                         </div>
                     </div>
-                    <span class="text-[10px] font-extrabold px-2 py-0.5 rounded-full border ${app.badgeClass} shrink-0">${escapeHtml(app.shortTitle)}</span>
+                    ${bloqueadoPorPerfil
+                        ? `<span class="text-[10px] font-extrabold px-2 py-0.5 rounded-full bg-slate-200 text-slate-600 border border-slate-300 shrink-0">Exclusivo Admin</span>`
+                        : `<span class="text-[10px] font-extrabold px-2 py-0.5 rounded-full border ${app.badgeClass} shrink-0">${escapeHtml(app.shortTitle)}</span>`
+                    }
                 </label>
-            `).join('');
+            `;
+            }).join('');
         }
 
         window.preencherAppsPadraoNoModal = (role) => {
             const padrao = getAppsPadraoPorRole(role);
-            renderCheckboxesAppsNoModal(padrao);
+            renderCheckboxesAppsNoModal(padrao, role);
         };
 
         window.marcarTodosAppsModal = (todos) => {
-            renderCheckboxesAppsNoModal(todos ? APPS_CATALOG.map(a => a.id) : []);
+            const roleAtual = document.getElementById('uRole')?.value || 'Mecânica';
+            const isAdminModal = isPerfilAdminCentral(roleAtual);
+            const lista = todos
+                ? APPS_CATALOG.filter(a => isAdminModal || !a.adminOnly).map(a => a.id)
+                : [];
+            renderCheckboxesAppsNoModal(lista, roleAtual);
         };
 
         window.abrirModalUsuarioRbac = () => {
@@ -1192,7 +1256,7 @@
             document.getElementById('uUser').value = u.user || '';
             document.getElementById('uPass').value = u.pass || '';
             document.getElementById('uRole').value = u.role || 'Mecânica';
-            renderCheckboxesAppsNoModal(getAppsPermitidosUsuario(u));
+            renderCheckboxesAppsNoModal(getAppsPermitidosUsuario(u), u.role || 'Mecânica');
             document.getElementById('modalUsuarioRbac').classList.remove('hidden');
         };
 
@@ -1214,7 +1278,9 @@
 
             const appsMarcados = isPerfilAdminCentral(role)
                 ? APPS_CATALOG.map(a => a.id)
-                : Array.from(document.querySelectorAll('input[name="chkModalAppRbac"]:checked')).map(el => el.value);
+                : Array.from(document.querySelectorAll('input[name="chkModalAppRbac"]:checked'))
+                    .map(el => el.value)
+                    .filter(id => !isAppRestritoAdmin(id));
 
             const btn = document.getElementById('btnSalvarUsuarioRbac');
             btn.disabled = true;
