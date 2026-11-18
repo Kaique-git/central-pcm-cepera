@@ -2,246 +2,647 @@
 <html lang="pt-BR">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Dashboard Cepêra - Multipets</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0">
+    <title>Dashboard Multipets — PCM Cepêra</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
     <style>
-        body { font-family: 'Inter', sans-serif; }
+        :root {
+            --primary: #0f172a;
+            --accent: #0284c7;
+            --cepera: #dc2626;
+        }
+
+        html, body {
+            margin: 0 !important;
+            padding: 0 !important;
+            width: 100% !important;
+            min-height: 100vh !important;
+            overflow-x: hidden;
+            font-family: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, sans-serif;
+            color: #0f172a;
+            -webkit-tap-highlight-color: transparent;
+            background: linear-gradient(135deg, #f1f5f9 0%, #f8fafc 50%, #e2e8f0 100%);
+        }
+
+        .frosted-shell {
+            background: rgba(255, 255, 255, 0.94);
+            backdrop-filter: blur(8px);
+            -webkit-backdrop-filter: blur(8px);
+            border: 1px solid #e2e8f0;
+            box-shadow: 0 12px 32px -12px rgba(15, 23, 42, 0.06);
+        }
+
+        .glass-card {
+            background: #ffffff;
+            border: 1px solid #e2e8f0;
+            box-shadow: 0 4px 12px -4px rgba(15, 23, 42, 0.04);
+            transition: transform 0.15s ease, box-shadow 0.15s ease;
+        }
+
+        .glass-card-hover:hover {
+            transform: translateY(-1px);
+            box-shadow: 0 10px 20px -8px rgba(15, 23, 42, 0.08);
+        }
+
+        .glass-rail {
+            background: rgba(255, 255, 255, 0.9);
+            border-right: 1px solid #e2e8f0;
+        }
+
+        .input-clean {
+            padding: 0.75rem 0.95rem;
+            font-size: 0.9rem;
+            border-radius: 0.85rem;
+            border: 1px solid #cbd5e1;
+            background: #ffffff;
+            transition: border-color 0.15s;
+            width: 100%;
+            color: #0f172a;
+        }
+        .input-clean:focus {
+            outline: none;
+            border-color: var(--accent);
+            box-shadow: 0 0 0 3px rgba(2, 132, 199, 0.12);
+        }
+
+        .btn-pill-dark {
+            background: var(--accent);
+            color: #ffffff;
+            font-weight: 700;
+            border-radius: 9999px;
+            padding: 0.7rem 1.35rem;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.5rem;
+            transition: opacity 0.15s ease, transform 0.15s ease;
+            cursor: pointer;
+            box-shadow: 0 6px 16px -4px rgba(15, 23, 42, 0.25);
+        }
+        .btn-pill-dark:hover { opacity: 0.92; transform: translateY(-1px); }
+        .btn-pill-dark:active { transform: scale(0.98); }
+
+        .btn-touch {
+            padding: 0.7rem 1.15rem;
+            font-weight: 700;
+            border-radius: 0.85rem;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.45rem;
+            transition: all 0.15s ease;
+            cursor: pointer;
+        }
+        .btn-touch:active { transform: scale(0.98); }
+
+        .rail-btn {
+            width: 100%;
+            padding: 0.65rem 0.4rem;
+            border-radius: 1rem;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            gap: 0.25rem;
+            color: #64748b;
+            background: #ffffff;
+            border: 1px solid #e2e8f0;
+            transition: all 0.15s;
+            cursor: pointer;
+            font-size: 10px;
+            font-weight: 800;
+            text-align: center;
+            line-height: 1.15;
+        }
+        .rail-btn:hover { color: #0f172a; border-color: #cbd5e1; }
+        .rail-btn.active {
+            background: var(--accent);
+            color: #ffffff;
+            border-color: var(--accent);
+            box-shadow: 0 4px 12px rgba(15, 23, 42, 0.2);
+        }
+
+        .mob-tab {
+            padding: 0.6rem 0.95rem;
+            border-radius: 9999px;
+            font-size: 0.78rem;
+            font-weight: 700;
+            color: #64748b;
+            white-space: nowrap;
+            transition: all 0.15s;
+        }
+        .mob-tab.active {
+            background: var(--accent);
+            color: #ffffff;
+        }
+
+        .mp-table-wrap { overflow-x: auto; border: 1px solid #e2e8f0; border-radius: 1rem; background: #ffffff; }
+        .mp-table { border-collapse: collapse; min-width: 100%; }
+        .mp-table th, .mp-table td { border-bottom: 1px solid #f1f5f9; padding: 0.75rem 1rem; font-size: 0.8rem; }
+        .mp-table th { background: #f8fafc; font-weight: 800; color: #475569; text-transform: uppercase; font-size: 0.7rem; letter-spacing: 0.04em; }
+
+        *:focus-visible { outline: 3px solid var(--accent) !important; outline-offset: 2px; }
+
+        /* TEMA BRANCO SÓLIDO */
+        body.theme-solid { background: #f8fafc !important; }
+        body.theme-solid .frosted-shell,
+        body.theme-solid .glass-card,
+        body.theme-solid .glass-rail {
+            background: #ffffff !important;
+            backdrop-filter: none !important;
+            box-shadow: none !important;
+            border: 1px solid #cbd5e1 !important;
+        }
+
+        /* TEMA ESCURO INDUSTRIAL */
+        body.theme-dark { background: #090d16 !important; color: #f1f5f9 !important; }
+        body.theme-dark .frosted-shell { background: #0f172a !important; border-color: #1e293b !important; backdrop-filter: none !important; }
+        body.theme-dark .glass-card,
+        body.theme-dark .glass-rail,
+        body.theme-dark .mp-table-wrap { background: #1e293b !important; border-color: #334155 !important; color: #f1f5f9 !important; backdrop-filter: none !important; }
+        body.theme-dark .mp-table th { background: #0f172a !important; color: #94a3b8 !important; border-color: #334155 !important; }
+        body.theme-dark .mp-table td { border-color: #334155 !important; }
+        body.theme-dark .text-slate-900,
+        body.theme-dark .text-slate-800,
+        body.theme-dark .text-slate-700 { color: #f8fafc !important; }
+        body.theme-dark .text-slate-600,
+        body.theme-dark .text-slate-500,
+        body.theme-dark .text-slate-400 { color: #94a3b8 !important; }
+        body.theme-dark .bg-white,
+        body.theme-dark .bg-slate-50,
+        body.theme-dark .bg-slate-50\/80,
+        body.theme-dark .bg-slate-100 { background-color: #0f172a !important; border-color: #334155 !important; color: #f1f5f9 !important; }
+        body.theme-dark .input-clean { background: #0f172a !important; border-color: #475569 !important; color: #ffffff !important; }
+        body.theme-dark .rail-btn { background: #0f172a !important; border-color: #334155 !important; color: #cbd5e1 !important; }
+        body.theme-dark .rail-btn.active { background: var(--accent) !important; color: #ffffff !important; }
+
+        /* TEMA ALTO CONTRASTE */
+        body.high-contrast { background: #ffffff !important; color: #000000 !important; }
+        body.high-contrast .frosted-shell,
+        body.high-contrast .glass-card,
+        body.high-contrast .glass-rail {
+            background: #ffffff !important;
+            backdrop-filter: none !important;
+            border: 2px solid #000000 !important;
+            box-shadow: none !important;
+        }
+        body.high-contrast .input-clean { border: 2px solid #000000 !important; color: #000000 !important; }
+
+        /* MODO TABLET (ALTA PERFORMANCE & CAMPO) */
+        body.tablet-mode *,
+        body.tablet-mode *::before,
+        body.tablet-mode *::after {
+            backdrop-filter: none !important;
+            transition: none !important;
+            animation: none !important;
+            box-shadow: none !important;
+        }
+        body.tablet-mode .btn-touch,
+        body.tablet-mode .btn-pill-dark,
+        body.tablet-mode .input-clean,
+        body.tablet-mode select,
+        body.tablet-mode .mob-tab {
+            min-height: 48px !important;
+            font-size: 0.95rem !important;
+        }
+
+        ::-webkit-scrollbar { width: 6px; height: 6px; }
+        ::-webkit-scrollbar-track { background: transparent; }
+        ::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 9999px; }
     </style>
 </head>
-<body class="bg-[#F5F7F9] text-slate-800 antialiased h-screen flex overflow-hidden">
+<body class="min-h-screen flex flex-col">
 
-    <!-- Sidebar Navigation -->
-    <aside class="w-64 bg-white border-r border-gray-100 flex flex-col py-8 flex-shrink-0 z-10">
-        <div class="px-8 mb-10">
-            <h1 class="text-red-600 font-bold text-2xl tracking-widest uppercase">Cepêra</h1>
-        </div>
-        
-        <div class="px-4 space-y-1">
-            <p class="px-4 text-xs font-bold text-gray-400 uppercase tracking-wider mb-3 mt-4">Menu</p>
-            <button id="navDashboard" onclick="switchTab('dashboard')" class="w-full flex items-center gap-3 px-4 py-3 bg-blue-50 text-blue-600 rounded-xl font-semibold transition-all">
-                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"></path></svg>
-                Visão Geral
-            </button>
-            <button id="navLancamentos" onclick="switchTab('lancamentos')" class="w-full flex items-center gap-3 px-4 py-3 text-gray-500 hover:bg-gray-50 hover:text-gray-900 rounded-xl font-medium transition-all">
-                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path></svg>
-                Lançamentos
-            </button>
-        </div>
-    </aside>
+    <!-- APP PRINCIPAL -->
+    <div id="mainApp" class="min-h-screen w-full p-2 sm:p-4 md:p-5 flex flex-col">
+        <div class="frosted-shell rounded-[26px] flex-1 flex flex-col md:flex-row overflow-hidden min-h-[calc(100vh-2.5rem)]">
 
-    <!-- Main Content -->
-    <main class="flex-1 flex flex-col h-screen overflow-y-auto relative p-8">
-        
-        <header class="mb-8 flex flex-col md:flex-row md:items-center justify-between gap-4">
-            <h2 id="pageTitle" class="text-3xl font-bold text-slate-800">Visão Geral</h2>
-            <div class="text-sm text-slate-500 font-medium bg-white px-4 py-2 rounded-full shadow-sm border border-gray-100">
-                Base de Cálculo: <span class="font-bold text-slate-700">20,1 Horas</span>
-            </div>
-        </header>
-
-        <!-- ========================================== -->
-        <!-- ABA: DASHBOARD -->
-        <!-- ========================================== -->
-        <div id="sectionDashboard" class="space-y-8 block pb-12">
-            
-            <!-- Cards de Capacidade Nominal -->
-            <section class="grid grid-cols-1 md:grid-cols-3 gap-6">
-                <!-- Multipet 1 -->
-                <div class="bg-white rounded-2xl shadow-sm border border-gray-100 p-6 flex flex-col justify-between">
-                    <div>
-                        <p class="text-sm font-semibold text-gray-400 uppercase tracking-wider mb-1">Acumulado Multipet 1</p>
-                        <p class="text-4xl font-bold text-slate-800 mt-2"><span id="total-mp1">0</span></p>
-                    </div>
-                    <div class="mt-4 h-1 w-full bg-gray-100 rounded-full overflow-hidden">
-                        <div class="h-full bg-[#1F4E78] w-1/3"></div>
-                    </div>
-                </div>
-                <!-- Multipet 2/5 -->
-                <div class="bg-white rounded-2xl shadow-sm border border-gray-100 p-6 flex flex-col justify-between">
-                    <div>
-                        <p class="text-sm font-semibold text-gray-400 uppercase tracking-wider mb-1">Acumulado Multipet 2/5</p>
-                        <p class="text-4xl font-bold text-slate-800 mt-2"><span id="total-mp2">0</span></p>
-                    </div>
-                    <div class="mt-4 h-1 w-full bg-gray-100 rounded-full overflow-hidden">
-                        <div class="h-full bg-[#C00000] w-1/3"></div>
-                    </div>
-                </div>
-                <!-- Multipet 3 -->
-                <div class="bg-white rounded-2xl shadow-sm border border-gray-100 p-6 flex flex-col justify-between">
-                    <div>
-                        <p class="text-sm font-semibold text-gray-400 uppercase tracking-wider mb-1">Acumulado Multipet 3</p>
-                        <p class="text-4xl font-bold text-slate-800 mt-2"><span id="total-mp3">0</span></p>
-                    </div>
-                    <div class="mt-4 h-1 w-full bg-gray-100 rounded-full overflow-hidden">
-                        <div class="h-full bg-[#70AD47] w-1/3"></div>
-                    </div>
-                </div>
-            </section>
-
-            <!-- Gráficos -->
-            <section class="grid grid-cols-1 lg:grid-cols-2 gap-6">
-                <!-- Gráfico de Eficiência -->
-                <div class="bg-white rounded-2xl shadow-sm border border-gray-100 p-6">
-                    <h3 class="text-sm font-semibold text-gray-400 uppercase tracking-wider mb-4">Eficiência Diária (%)</h3>
-                    <div class="relative h-72 w-full">
-                        <canvas id="efficiencyChart"></canvas>
-                    </div>
-                </div>
-
-                <!-- Gráfico de Produção -->
-                <div class="bg-white rounded-2xl shadow-sm border border-gray-100 p-6">
-                    <h3 class="text-sm font-semibold text-gray-400 uppercase tracking-wider mb-4">Produção (Frascos)</h3>
-                    <div class="relative h-72 w-full">
-                        <canvas id="productionChart"></canvas>
-                    </div>
-                </div>
-            </section>
-
-            <!-- Tabela de Dados -->
-            <section class="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden p-6">
-                <h3 class="text-sm font-semibold text-gray-400 uppercase tracking-wider mb-4">Análise Detalhada</h3>
-                <div class="overflow-x-auto">
-                    <table class="w-full text-left min-w-[600px]">
-                        <thead id="tableHead">
-                            <!-- Gerado via JS -->
-                        </thead>
-                        <tbody id="tableBody" class="text-slate-700">
-                            <!-- Gerado via JS -->
-                        </tbody>
-                    </table>
-                </div>
-            </section>
-        </div>
-
-        <!-- ========================================== -->
-        <!-- ABA: LANÇAMENTOS -->
-        <!-- ========================================== -->
-        <div id="sectionLancamentos" class="hidden space-y-6 pb-12">
-            <section class="bg-white rounded-2xl shadow-sm border border-gray-100 p-8 max-w-4xl mx-auto">
-                <div class="mb-8">
-                    <h3 class="text-xl font-bold text-slate-800 mb-1">Registrar Apontamento</h3>
-                    <p class="text-sm text-slate-500">Insira a produção consolidada. Entradas no mesmo dia/máquina serão somadas.</p>
-                </div>
-
-                <form id="addProductionForm" onsubmit="event.preventDefault();" class="space-y-6">
-                    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-                        <div>
-                            <label class="block text-sm font-semibold text-slate-700 mb-2">Data</label>
-                            <input type="date" id="dateInput" required class="w-full border-gray-200 rounded-xl focus:ring-blue-500 focus:border-blue-500 px-4 py-3 border bg-slate-50 transition-colors">
-                        </div>
-                        <div>
-                            <label class="block text-sm font-semibold text-slate-700 mb-2">Máquina</label>
-                            <select id="machineInput" required class="w-full border-gray-200 rounded-xl focus:ring-blue-500 focus:border-blue-500 px-4 py-3 border bg-slate-50 transition-colors">
-                                <option value="Multipet 1">Multipet 1</option>
-                                <option value="Multipet 2/5">Multipet 2/5</option>
-                                <option value="Multipet 3">Multipet 3</option>
-                            </select>
-                        </div>
-                        <div>
-                            <label class="block text-sm font-semibold text-slate-700 mb-2">Turno</label>
-                            <select id="shiftInput" required class="w-full border-gray-200 rounded-xl focus:ring-blue-500 focus:border-blue-500 px-4 py-3 border bg-slate-50 transition-colors">
-                                <option value="1">1º Turno</option>
-                                <option value="2">2º Turno</option>
-                                <option value="3">3º Turno</option>
-                            </select>
-                        </div>
-                        <div>
-                            <label class="block text-sm font-semibold text-slate-700 mb-2">Produção (un)</label>
-                            <input type="number" id="prodInput" required min="1" placeholder="Ex: 12500" class="w-full border-gray-200 rounded-xl focus:ring-blue-500 focus:border-blue-500 px-4 py-3 border bg-slate-50 font-bold transition-colors">
-                        </div>
-                    </div>
-                    
-                    <div class="pt-2">
-                        <button type="submit" id="submitBtn" class="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 px-6 rounded-xl shadow-sm transition-colors">
-                            Salvar Apontamento
+            <!-- BARRA LATERAL DESKTOP -->
+            <aside aria-label="Menu principal" class="hidden md:flex flex-col items-center justify-between py-5 px-2.5 glass-rail shrink-0 w-24">
+                <div class="flex flex-col items-center gap-3 w-full">
+                    <div class="w-11 h-11 rounded-2xl bg-red-600 text-white font-extrabold text-xs flex items-center justify-center shadow-md tracking-tighter">PCM</div>
+                    <div class="h-px w-10 bg-slate-200/80 my-0.5"></div>
+                    <nav id="desktopRailNav" class="flex flex-col items-center gap-2 w-full">
+                        <button type="button" onclick="switchTab('dashboard')" id="rail-dashboard" class="rail-btn active">
+                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"/></svg>
+                            <span>Painel</span>
                         </button>
-                    </div>
-                </form>
-            </section>
-
-            <!-- Histórico -->
-            <section class="max-w-4xl mx-auto mt-8">
-                <h3 class="text-xl font-bold text-slate-800 mb-6">Histórico Recente</h3>
-                <div id="historyContainer" class="space-y-6">
-                    <!-- Gerado via JS dinamicamente -->
+                        <button type="button" onclick="switchTab('lancamentos')" id="rail-lancamentos" class="rail-btn">
+                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/></svg>
+                            <span>Apontar</span>
+                        </button>
+                    </nav>
                 </div>
-            </section>
-        </div>
+                <div class="flex flex-col items-center gap-2 w-full">
+                    <button type="button" onclick="abrirEspacoUsuario()" title="Espaço do Usuário (Alt + U)" class="rail-btn">
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"/><circle cx="12" cy="12" r="3" stroke-width="2"/></svg>
+                        <span>Espaço</span>
+                    </button>
+                    <button type="button" onclick="abrirModalAtalhos()" title="Atalhos de Teclado (Ctrl + ?)" class="rail-btn">
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8.228 9c.549-1.165 2.03-2 3.772-2 2.21 0 4 1.343 4 3 0 1.4-1.278 2.575-3.006 2.907-.542.104-.994.54-.994 1.093m0 3h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+                        <span>Atalhos</span>
+                    </button>
+                    <button type="button" onclick="fazerLogout()" class="rail-btn hover:!bg-rose-50 hover:!text-rose-600 hover:!border-rose-200">
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"/></svg>
+                        <span>Sair</span>
+                    </button>
+                </div>
+            </aside>
 
-        <!-- Modal de Edição -->
-        <div id="editModal" class="hidden fixed inset-0 bg-slate-900/40 backdrop-blur-sm flex items-center justify-center z-50 transition-opacity">
-            <div class="bg-white rounded-2xl shadow-2xl w-full max-w-md mx-4 p-8">
-                <h3 class="text-xl font-bold text-slate-800 mb-6">Editar Apontamento</h3>
-                <form id="editProductionForm" class="space-y-5">
-                    <input type="hidden" id="modalEditId">
-                    <div class="grid grid-cols-2 gap-4">
-                        <div>
-                            <label class="block text-sm font-semibold text-slate-700 mb-2">Data</label>
-                            <input type="date" id="modalDate" required class="w-full border-gray-200 rounded-xl px-4 py-3 border bg-slate-50">
+            <!-- ÁREA DE CONTEÚDO -->
+            <div class="flex-1 flex flex-col min-w-0">
+                <!-- HEADER SUPERIOR -->
+                <header class="px-5 sm:px-8 py-3.5 flex items-center justify-between border-b border-white/80 bg-white/45 shrink-0">
+                    <div class="flex items-center gap-3">
+                        <button type="button" onclick="voltarParaCentralPCM()" title="Voltar à Central de Aplicativos PCM" class="px-3 py-1.5 rounded-full bg-slate-900 hover:bg-slate-800 text-white text-xs font-extrabold flex items-center gap-1.5 shadow-sm">
+                            <span>⬅ Central</span>
+                        </button>
+                        <span class="md:hidden bg-red-600 text-white font-extrabold px-2.5 py-1 rounded-lg text-xs tracking-wider">CEPÊRA</span>
+                        <div class="flex items-center gap-2 text-xs font-bold text-slate-500">
+                            <span id="headerSyncDot" class="w-2 h-2 rounded-full bg-amber-500 animate-pulse"></span>
+                            <span id="headerSyncText">Conectando...</span>
+                            <span class="hidden sm:inline">• Base Nominal: <strong class="text-slate-900">20,1 Horas</strong></span>
                         </div>
-                        <div>
-                            <label class="block text-sm font-semibold text-slate-700 mb-2">Turno</label>
-                            <select id="modalShift" required class="w-full border-gray-200 rounded-xl px-4 py-3 border bg-slate-50">
-                                <option value="1">1º Turno</option>
-                                <option value="2">2º Turno</option>
-                                <option value="3">3º Turno</option>
-                            </select>
+                    </div>
+
+                    <div class="flex items-center gap-2">
+                        <button type="button" onclick="abrirModalAtalhos()" title="Atalhos (Ctrl + ?)" class="px-3 py-1.5 rounded-full bg-white/85 hover:bg-white border border-slate-200/80 text-xs font-bold text-slate-700 flex items-center gap-1.5 shadow-sm">
+                            <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8.228 9c.549-1.165 2.03-2 3.772-2 2.21 0 4 1.343 4 3 0 1.4-1.278 2.575-3.006 2.907-.542.104-.994.54-.994 1.093m0 3h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+                            <span class="hidden lg:inline">Atalhos (Ctrl+?)</span>
+                        </button>
+                        <button type="button" onclick="abrirEspacoUsuario()" class="px-3 py-1.5 rounded-full bg-white/85 hover:bg-white border border-slate-200/80 text-xs font-bold text-slate-700 flex items-center gap-1.5 shadow-sm">
+                            <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6V4m0 2a2 2 0 100 4m0-4a2 2 0 110 4m-6 8a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4m6 6v10m6-2a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4"/></svg>
+                            <span class="hidden sm:inline">Espaço do Usuário</span>
+                        </button>
+                        <div class="flex items-center gap-2.5 bg-white/85 border border-slate-200/80 rounded-full pl-3.5 pr-1.5 py-1 shadow-sm">
+                            <button type="button" onclick="abrirEspacoUsuario()" class="text-right leading-tight hover:opacity-80">
+                                <div id="loggedUserName" class="font-bold text-xs text-slate-900">Usuário</div>
+                                <div id="loggedUserRole" class="text-[10px] font-extrabold uppercase text-sky-600">Perfil</div>
+                            </button>
+                            <button type="button" onclick="fazerLogout()" title="Sair da conta" class="w-8 h-8 rounded-full bg-slate-900 hover:bg-rose-600 text-white flex items-center justify-center transition-colors">
+                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"/></svg>
+                            </button>
                         </div>
+                    </div>
+                </header>
+
+                <!-- NAVEGAÇÃO MOBILE -->
+                <div id="mobileTabNav" class="md:hidden flex items-center gap-2 overflow-x-auto px-4 py-2.5 bg-white/55 border-b border-white/80 shrink-0">
+                    <button type="button" onclick="switchTab('dashboard')" id="mob-dashboard" class="mob-tab active">Visão Geral</button>
+                    <button type="button" onclick="switchTab('lancamentos')" id="mob-lancamentos" class="mob-tab">Lançamentos & Histórico</button>
+                </div>
+
+                <!-- CONTAINER DAS PÁGINAS -->
+                <main id="viewContainer" class="flex-1 overflow-y-auto p-4 sm:p-7 space-y-6">
+
+                    <!-- ==================== PAGE 1: DASHBOARD ==================== -->
+                    <section id="sectionDashboard" aria-label="Visão Geral Multipets" class="space-y-6 max-w-7xl mx-auto">
+                        <div class="flex flex-col lg:flex-row lg:items-end justify-between gap-4">
+                            <div>
+                                <p class="text-xs font-bold uppercase tracking-widest text-sky-600 mb-1">PCM • Indicadores & Eficiência Operacional</p>
+                                <h1 id="pageTitle" class="text-2xl sm:text-3xl font-extrabold text-slate-900 tracking-tight leading-tight">
+                                    Olá, <span id="dashGreetingName">Gestor</span>. Produção & Eficiência Multipets
+                                </h1>
+                            </div>
+                            <div class="flex flex-wrap items-center gap-2.5">
+                                <div class="px-3.5 py-2 rounded-full bg-white border border-slate-200/80 text-xs font-bold text-slate-600 shadow-sm">
+                                    Base de Cálculo: <strong class="text-slate-900">20,1 Horas/dia</strong>
+                                </div>
+                                <button type="button" onclick="imprimirRelatorioMultipet()" class="btn-touch bg-slate-900 hover:bg-slate-800 text-white rounded-full px-4 py-2.5 text-xs shadow-sm">
+                                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z"/></svg>
+                                    <span>Relatório A4</span>
+                                </button>
+                                <button type="button" onclick="switchTab('lancamentos')" class="btn-pill-dark text-xs">
+                                    <span>+ Novo Apontamento</span>
+                                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 5l7 7m0 0l-7 7m7-7H3"/></svg>
+                                </button>
+                            </div>
+                        </div>
+
+                        <!-- KPI CARDS -->
+                        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+                            <!-- Multipet 1 -->
+                            <div onclick="switchTab('lancamentos')" class="glass-card glass-card-hover p-5 rounded-3xl cursor-pointer">
+                                <div class="flex items-center justify-between mb-3">
+                                    <div class="w-10 h-10 rounded-2xl bg-sky-100 text-sky-700 flex items-center justify-center font-extrabold text-xs">MP1</div>
+                                    <span id="badge-eff-mp1" class="text-[11px] font-extrabold px-2.5 py-0.5 rounded-full bg-sky-50 text-sky-700 border border-sky-200">0% ef.</span>
+                                </div>
+                                <div class="text-3xl font-extrabold text-slate-900" id="total-mp1">0</div>
+                                <div class="text-sm font-bold text-slate-700 mt-1">Acumulado Multipet 1</div>
+                                <div class="text-xs text-slate-400 mt-0.5">Cap. Nominal: 86.108 frascos/dia</div>
+                                <div class="mt-3 h-1.5 w-full bg-slate-100 rounded-full overflow-hidden">
+                                    <div id="bar-mp1" class="h-full bg-[#1F4E78] transition-all duration-300" style="width: 35%"></div>
+                                </div>
+                            </div>
+
+                            <!-- Multipet 2/5 -->
+                            <div onclick="switchTab('lancamentos')" class="glass-card glass-card-hover p-5 rounded-3xl cursor-pointer">
+                                <div class="flex items-center justify-between mb-3">
+                                    <div class="w-10 h-10 rounded-2xl bg-rose-100 text-rose-700 flex items-center justify-center font-extrabold text-xs">MP2/5</div>
+                                    <span id="badge-eff-mp2" class="text-[11px] font-extrabold px-2.5 py-0.5 rounded-full bg-rose-50 text-rose-700 border border-rose-200">0% ef.</span>
+                                </div>
+                                <div class="text-3xl font-extrabold text-slate-900" id="total-mp2">0</div>
+                                <div class="text-sm font-bold text-slate-700 mt-1">Acumulado Multipet 2/5</div>
+                                <div class="text-xs text-slate-400 mt-0.5">Cap. Nominal: 36.240 frascos/dia</div>
+                                <div class="mt-3 h-1.5 w-full bg-slate-100 rounded-full overflow-hidden">
+                                    <div id="bar-mp2" class="h-full bg-[#C00000] transition-all duration-300" style="width: 35%"></div>
+                                </div>
+                            </div>
+
+                            <!-- Multipet 3 -->
+                            <div onclick="switchTab('lancamentos')" class="glass-card glass-card-hover p-5 rounded-3xl cursor-pointer">
+                                <div class="flex items-center justify-between mb-3">
+                                    <div class="w-10 h-10 rounded-2xl bg-emerald-100 text-emerald-700 flex items-center justify-center font-extrabold text-xs">MP3</div>
+                                    <span id="badge-eff-mp3" class="text-[11px] font-extrabold px-2.5 py-0.5 rounded-full bg-emerald-50 text-emerald-700 border border-emerald-200">0% ef.</span>
+                                </div>
+                                <div class="text-3xl font-extrabold text-slate-900" id="total-mp3">0</div>
+                                <div class="text-sm font-bold text-slate-700 mt-1">Acumulado Multipet 3</div>
+                                <div class="text-xs text-slate-400 mt-0.5">Cap. Nominal: 65.687 frascos/dia</div>
+                                <div class="mt-3 h-1.5 w-full bg-slate-100 rounded-full overflow-hidden">
+                                    <div id="bar-mp3" class="h-full bg-[#70AD47] transition-all duration-300" style="width: 35%"></div>
+                                </div>
+                            </div>
+
+                            <!-- Consolidado Geral -->
+                            <div onclick="switchTab('lancamentos')" class="glass-card glass-card-hover p-5 rounded-3xl cursor-pointer border-sky-200/80">
+                                <div class="flex items-center justify-between mb-3">
+                                    <div class="w-10 h-10 rounded-2xl bg-indigo-100 text-indigo-600 flex items-center justify-center">
+                                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6"/></svg>
+                                    </div>
+                                    <span id="badge-dias-apontados" class="text-[11px] font-extrabold px-2.5 py-0.5 rounded-full bg-indigo-50 text-indigo-700 border border-indigo-200">0 dias</span>
+                                </div>
+                                <div class="text-3xl font-extrabold text-indigo-700" id="total-geral">0</div>
+                                <div class="text-sm font-bold text-slate-700 mt-1">Produção Total (Frascos)</div>
+                                <div class="text-xs text-sky-600 font-bold mt-0.5" id="sub-registros-count">0 apontamentos sincronizados</div>
+                            </div>
+                        </div>
+
+                        <!-- GRÁFICOS -->
+                        <div class="grid grid-cols-1 lg:grid-cols-2 gap-5">
+                            <div class="glass-card p-6 rounded-3xl flex flex-col justify-between">
+                                <div class="mb-4">
+                                    <h2 class="font-extrabold text-slate-800 text-sm">Eficiência Diária por Linha (%)</h2>
+                                    <p class="text-xs text-slate-400">Comparativo percentual sobre a capacidade nominal de 20,1h</p>
+                                </div>
+                                <div class="relative h-72 w-full">
+                                    <canvas id="efficiencyChart"></canvas>
+                                </div>
+                            </div>
+
+                            <div class="glass-card p-6 rounded-3xl flex flex-col justify-between">
+                                <div class="mb-4">
+                                    <h2 class="font-extrabold text-slate-800 text-sm">Produção Diária Consolidada (Frascos)</h2>
+                                    <p class="text-xs text-slate-400">Volume total de frascos soprados/envasados por data</p>
+                                </div>
+                                <div class="relative h-72 w-full">
+                                    <canvas id="productionChart"></canvas>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- TABELA DE DADOS -->
+                        <div class="glass-card p-6 rounded-3xl space-y-4">
+                            <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
+                                <div>
+                                    <h2 class="font-extrabold text-slate-800 text-sm">Matriz de Análise Detalhada por Data</h2>
+                                    <p class="text-xs text-slate-400">Produção diária acumulada e índice de eficiência por equipamento</p>
+                                </div>
+                                <div class="flex items-center gap-3 text-[11px] font-bold text-slate-500">
+                                    <span class="flex items-center gap-1"><span class="w-2.5 h-2.5 rounded-full bg-emerald-500 inline-block"></span> ≥ 80% Ótimo</span>
+                                    <span class="flex items-center gap-1"><span class="w-2.5 h-2.5 rounded-full bg-amber-500 inline-block"></span> 50–79% Atenção</span>
+                                    <span class="flex items-center gap-1"><span class="w-2.5 h-2.5 rounded-full bg-rose-500 inline-block"></span> &lt; 50% Crítico</span>
+                                </div>
+                            </div>
+                            <div class="mp-table-wrap">
+                                <table class="mp-table text-left min-w-[600px]">
+                                    <thead id="tableHead"></thead>
+                                    <tbody id="tableBody" class="text-slate-700"></tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </section>
+
+                    <!-- ==================== PAGE 2: LANÇAMENTOS ==================== -->
+                    <section id="sectionLancamentos" aria-label="Lançamentos de Produção" class="hidden space-y-6 max-w-6xl mx-auto">
+                        <div class="flex flex-col sm:flex-row sm:items-end justify-between gap-4">
+                            <div>
+                                <p class="text-xs font-bold uppercase tracking-widest text-sky-600 mb-1">Apontamento de Turno • mp_producao</p>
+                                <h2 class="text-2xl sm:text-3xl font-extrabold text-slate-900 tracking-tight">Registrar Apontamento Diário</h2>
+                                <p class="text-sm text-slate-500 mt-1">Insira a produção consolidada por turno. Entradas no mesmo dia e máquina são somadas automaticamente nos gráficos.</p>
+                            </div>
+                            <button type="button" onclick="switchTab('dashboard')" class="btn-touch bg-white hover:bg-slate-50 border border-slate-200 text-slate-800 rounded-full px-4 py-2 text-xs shadow-sm">
+                                <span>📊 Voltar aos Gráficos</span>
+                            </button>
+                        </div>
+
+                        <div class="glass-card p-6 sm:p-7 rounded-3xl">
+                            <form id="addProductionForm" onsubmit="event.preventDefault();" class="space-y-5">
+                                <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+                                    <div>
+                                        <label for="dateInput" class="block text-[11px] font-extrabold uppercase tracking-wider text-slate-500 mb-1.5">Data de Produção *</label>
+                                        <input type="date" id="dateInput" required class="input-clean font-bold">
+                                    </div>
+                                    <div>
+                                        <label for="machineInput" class="block text-[11px] font-extrabold uppercase tracking-wider text-slate-500 mb-1.5">Linha / Máquina *</label>
+                                        <select id="machineInput" required class="input-clean font-bold">
+                                            <option value="Multipet 1">Multipet 1</option>
+                                            <option value="Multipet 2/5">Multipet 2/5</option>
+                                            <option value="Multipet 3">Multipet 3</option>
+                                        </select>
+                                    </div>
+                                    <div>
+                                        <label for="shiftInput" class="block text-[11px] font-extrabold uppercase tracking-wider text-slate-500 mb-1.5">Turno *</label>
+                                        <select id="shiftInput" required class="input-clean font-bold">
+                                            <option value="1">1º Turno</option>
+                                            <option value="2">2º Turno</option>
+                                            <option value="3">3º Turno</option>
+                                        </select>
+                                    </div>
+                                    <div>
+                                        <label for="prodInput" class="block text-[11px] font-extrabold uppercase tracking-wider text-slate-500 mb-1.5">Produção (Frascos) *</label>
+                                        <input type="number" id="prodInput" required min="1" placeholder="Ex: 12500" class="input-clean font-extrabold">
+                                    </div>
+                                </div>
+                                <div class="flex justify-end pt-2 border-t border-slate-100">
+                                    <button type="submit" id="submitBtn" class="btn-pill-dark text-xs py-3 px-7">
+                                        <span>Salvar Apontamento</span>
+                                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg>
+                                    </button>
+                                </div>
+                            </form>
+                        </div>
+
+                        <!-- HISTÓRICO -->
+                        <div class="space-y-4">
+                            <div class="flex items-center justify-between">
+                                <div>
+                                    <h3 class="text-lg font-extrabold text-slate-900">Histórico Recente por Linha</h3>
+                                    <p class="text-xs text-slate-500">Gerencie, edite ou exclua lançamentos registrados no banco de dados</p>
+                                </div>
+                            </div>
+                            <div id="historyContainer" class="space-y-5"></div>
+                        </div>
+                    </section>
+
+                </main>
+            </div>
+        </div>
+    </div>
+
+    <!-- MODAL DE EDIÇÃO -->
+    <div id="editModal" role="dialog" aria-modal="true" class="hidden fixed inset-0 bg-slate-900/60 backdrop-blur-sm flex items-end sm:items-center justify-center z-50 p-0 sm:p-4">
+        <div class="bg-white rounded-t-3xl sm:rounded-3xl shadow-2xl w-full max-w-md p-6 sm:p-7 border border-slate-200 space-y-5">
+            <div class="flex items-center justify-between border-b border-slate-100 pb-3">
+                <div>
+                    <span class="text-[10px] font-extrabold uppercase tracking-widest text-sky-600">Correção de Registro</span>
+                    <h3 class="text-lg font-extrabold text-slate-900">Editar Apontamento</h3>
+                </div>
+                <button type="button" onclick="window.closeEditModal()" class="w-8 h-8 rounded-full bg-slate-100 text-slate-600 font-bold">✕</button>
+            </div>
+            <form id="editProductionForm" class="space-y-4 text-xs">
+                <input type="hidden" id="modalEditId">
+                <div class="grid grid-cols-2 gap-3">
+                    <div>
+                        <label for="modalDate" class="block text-[10px] font-extrabold uppercase text-slate-500 mb-1">Data *</label>
+                        <input type="date" id="modalDate" required class="input-clean py-2 text-xs font-bold">
                     </div>
                     <div>
-                        <label class="block text-sm font-semibold text-slate-700 mb-2">Linha</label>
-                        <select id="modalMachine" required class="w-full border-gray-200 rounded-xl px-4 py-3 border bg-slate-50">
-                            <option value="Multipet 1">Multipet 1</option>
-                            <option value="Multipet 2/5">Multipet 2/5</option>
-                            <option value="Multipet 3">Multipet 3</option>
+                        <label for="modalShift" class="block text-[10px] font-extrabold uppercase text-slate-500 mb-1">Turno *</label>
+                        <select id="modalShift" required class="input-clean py-2 text-xs font-bold">
+                            <option value="1">1º Turno</option>
+                            <option value="2">2º Turno</option>
+                            <option value="3">3º Turno</option>
                         </select>
                     </div>
+                </div>
+                <div>
+                    <label for="modalMachine" class="block text-[10px] font-extrabold uppercase text-slate-500 mb-1">Linha *</label>
+                    <select id="modalMachine" required class="input-clean py-2 text-xs font-bold">
+                        <option value="Multipet 1">Multipet 1</option>
+                        <option value="Multipet 2/5">Multipet 2/5</option>
+                        <option value="Multipet 3">Multipet 3</option>
+                    </select>
+                </div>
+                <div>
+                    <label for="modalProd" class="block text-[10px] font-extrabold uppercase text-slate-500 mb-1">Produção (un) *</label>
+                    <input type="number" id="modalProd" required min="1" class="input-clean py-2 text-xs font-extrabold">
+                </div>
+                <div class="flex gap-2 pt-3 border-t border-slate-100">
+                    <button type="button" onclick="window.closeEditModal()" class="btn-touch bg-slate-100 hover:bg-slate-200 text-slate-700 flex-1 text-xs">Cancelar</button>
+                    <button type="submit" id="modalSubmitBtn" class="btn-pill-dark flex-1 text-xs">Salvar Alterações</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- MODAL DE CONFIRMAÇÃO DE EXCLUSÃO -->
+    <div id="deleteModal" role="dialog" aria-modal="true" class="hidden fixed inset-0 bg-slate-900/60 backdrop-blur-sm flex items-center justify-center z-50 p-4">
+        <div class="bg-white rounded-3xl shadow-2xl w-full max-w-sm p-6 sm:p-7 text-center border border-slate-200">
+            <div class="mx-auto flex items-center justify-center h-12 w-12 rounded-2xl bg-rose-100 text-rose-600 mb-4">
+                <svg class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+                </svg>
+            </div>
+            <h3 class="text-lg font-extrabold text-slate-900 mb-1.5">Excluir Apontamento?</h3>
+            <p class="text-xs text-slate-500 mb-6">Esta ação não pode ser desfeita. Os indicadores e gráficos serão recalculados imediatamente.</p>
+            <div class="flex gap-2">
+                <button type="button" onclick="window.closeDeleteModal()" class="btn-touch bg-slate-100 hover:bg-slate-200 text-slate-700 flex-1 text-xs">Cancelar</button>
+                <button type="button" id="confirmDeleteBtn" class="btn-touch bg-rose-600 hover:bg-rose-700 text-white flex-1 text-xs shadow-md">Sim, Excluir</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- MODAL ESPAÇO DO USUÁRIO -->
+    <div id="modalEspacoUsuario" role="dialog" aria-modal="true" class="fixed inset-0 bg-slate-900/60 z-50 hidden flex items-end sm:items-center justify-center p-0 sm:p-4">
+        <div class="bg-white w-full sm:max-w-xl sm:rounded-3xl rounded-t-3xl max-h-[92vh] flex flex-col shadow-2xl overflow-hidden border border-slate-200">
+            <div class="p-5 sm:px-7 border-b border-slate-200 bg-slate-50 flex items-center justify-between">
+                <div>
+                    <span class="text-[10px] font-extrabold uppercase tracking-widest text-sky-600">Preferências Sincronizadas</span>
+                    <h2 class="text-lg font-extrabold text-slate-900">Espaço do Usuário</h2>
+                </div>
+                <button type="button" onclick="fecharModal('modalEspacoUsuario')" class="w-9 h-9 rounded-full bg-white border border-slate-200 text-slate-600 font-bold flex items-center justify-center">✕</button>
+            </div>
+            <div class="p-5 sm:p-7 overflow-y-auto space-y-6 text-sm">
+                <div class="p-4 rounded-2xl bg-slate-50 border border-slate-200 flex items-center justify-between gap-4">
                     <div>
-                        <label class="block text-sm font-semibold text-slate-700 mb-2">Produção (un)</label>
-                        <input type="number" id="modalProd" required min="1" class="w-full border-gray-200 rounded-xl px-4 py-3 border bg-slate-50 font-bold">
+                        <div class="font-extrabold text-slate-900 text-sm">Modo Tablet (Alta Performance & Campo)</div>
+                        <p class="text-xs text-slate-500 mt-0.5">Desativa efeitos visuais e aumenta áreas de toque (Atalho: <strong>Alt + T</strong>).</p>
                     </div>
-                    <div class="flex justify-end gap-3 mt-8">
-                        <button type="button" onclick="window.closeEditModal()" class="px-5 py-2.5 bg-gray-100 hover:bg-gray-200 text-slate-700 font-semibold rounded-xl transition-colors">Cancelar</button>
-                        <button type="submit" id="modalSubmitBtn" class="px-5 py-2.5 bg-blue-600 hover:bg-blue-700 text-white font-semibold rounded-xl transition-colors">Salvar</button>
+                    <button type="button" id="btnToggleTabletMode" onclick="toggleModoTablet()" class="px-4 py-2.5 rounded-xl font-extrabold text-xs bg-slate-200 text-slate-800 shrink-0">DESATIVADO</button>
+                </div>
+                <div>
+                    <label class="block text-xs font-extrabold uppercase tracking-wider text-slate-500 mb-2">Tema Visual</label>
+                    <div class="grid grid-cols-2 sm:grid-cols-4 gap-2">
+                        <button type="button" onclick="definirTemaUsuario('padrao')" id="btnTema_padrao" class="p-3 rounded-xl border border-slate-200 text-xs font-extrabold text-center">Claro Padrão</button>
+                        <button type="button" onclick="definirTemaUsuario('solido')" id="btnTema_solido" class="p-3 rounded-xl border border-slate-200 text-xs font-extrabold text-center">Branco Sólido</button>
+                        <button type="button" onclick="definirTemaUsuario('dark')" id="btnTema_dark" class="p-3 rounded-xl border border-slate-200 text-xs font-extrabold text-center">Escuro Industrial</button>
+                        <button type="button" onclick="definirTemaUsuario('contraste')" id="btnTema_contraste" class="p-3 rounded-xl border border-slate-200 text-xs font-extrabold text-center">Alto Contraste</button>
                     </div>
-                </form>
+                </div>
+                <div>
+                    <label class="block text-xs font-extrabold uppercase tracking-wider text-slate-500 mb-2">Cor de Destaque (Accent Color)</label>
+                    <div class="grid grid-cols-5 gap-2">
+                        <button type="button" onclick="definirCorDestaque('#0284c7')" class="py-2.5 rounded-xl text-white font-extrabold text-[11px]" style="background:#0284c7">Azul</button>
+                        <button type="button" onclick="definirCorDestaque('#dc2626')" class="py-2.5 rounded-xl text-white font-extrabold text-[11px]" style="background:#dc2626">Cepêra</button>
+                        <button type="button" onclick="definirCorDestaque('#059669')" class="py-2.5 rounded-xl text-white font-extrabold text-[11px]" style="background:#059669">Esmeralda</button>
+                        <button type="button" onclick="definirCorDestaque('#4f46e5')" class="py-2.5 rounded-xl text-white font-extrabold text-[11px]" style="background:#4f46e5">Índigo</button>
+                        <button type="button" onclick="definirCorDestaque('#0f172a')" class="py-2.5 rounded-xl text-white font-extrabold text-[11px]" style="background:#0f172a">Grafite</button>
+                    </div>
+                </div>
+                <div class="pt-2 border-t border-slate-200 space-y-3">
+                    <span class="block text-xs font-extrabold uppercase tracking-wider text-slate-500">Acessibilidade e Leitura</span>
+                    <div class="grid grid-cols-3 gap-2">
+                        <button type="button" onclick="alterarFonte(-1)" class="py-2.5 rounded-xl bg-slate-100 hover:bg-slate-200 font-extrabold text-xs text-slate-800">Texto A-</button>
+                        <button type="button" onclick="alterarFonte(0)" class="py-2.5 rounded-xl bg-slate-100 hover:bg-slate-200 font-extrabold text-xs text-slate-800">Padrão</button>
+                        <button type="button" onclick="alterarFonte(1)" class="py-2.5 rounded-xl bg-slate-100 hover:bg-slate-200 font-extrabold text-xs text-slate-800">Texto A+</button>
+                    </div>
+                </div>
+            </div>
+            <div class="p-4 sm:px-7 border-t border-slate-200 bg-slate-50 flex items-center justify-between">
+                <span class="text-[11px] font-semibold text-slate-500">Sincronizado com seu perfil PCM Cepêra.</span>
+                <button type="button" onclick="fecharModal('modalEspacoUsuario')" class="btn-pill-dark text-xs py-2 px-6">Concluir</button>
             </div>
         </div>
+    </div>
 
-        <!-- Modal de Confirmação de Exclusão -->
-        <div id="deleteModal" class="hidden fixed inset-0 bg-slate-900/40 backdrop-blur-sm flex items-center justify-center z-50 transition-opacity">
-            <div class="bg-white rounded-2xl shadow-2xl w-full max-w-sm mx-4 p-8 text-center">
-                <div class="mx-auto flex items-center justify-center h-12 w-12 rounded-full bg-red-100 mb-4">
-                    <svg class="h-6 w-6 text-red-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
-                    </svg>
+    <!-- MODAL ATALHOS DE TECLADO (CTRL + ?) -->
+    <div id="modalAtalhos" role="dialog" aria-modal="true" class="fixed inset-0 bg-slate-900/60 z-50 hidden flex items-end sm:items-center justify-center p-0 sm:p-4">
+        <div class="bg-white w-full sm:max-w-lg sm:rounded-3xl rounded-t-3xl p-6 shadow-2xl border border-slate-200 space-y-4">
+            <div class="flex items-center justify-between border-b border-slate-100 pb-3">
+                <div>
+                    <span class="text-[10px] font-extrabold uppercase tracking-widest text-sky-600">Navegação Rápida</span>
+                    <h2 class="text-lg font-extrabold text-slate-900">Teclas de Atalho do Sistema</h2>
                 </div>
-                <h3 class="text-xl font-bold text-slate-800 mb-2">Excluir Apontamento?</h3>
-                <p class="text-sm text-slate-500 mb-8">Esta ação não pode ser desfeita. Os gráficos serão recalculados imediatamente.</p>
-                
-                <div class="flex flex-col gap-3">
-                    <button id="confirmDeleteBtn" class="w-full px-5 py-3 bg-red-600 hover:bg-red-700 text-white font-bold rounded-xl transition-colors">
-                        Sim, Excluir
-                    </button>
-                    <button onclick="window.closeDeleteModal()" class="w-full px-5 py-3 bg-gray-100 hover:bg-gray-200 text-slate-700 font-bold rounded-xl transition-colors">
-                        Cancelar
-                    </button>
-                </div>
+                <button type="button" onclick="fecharModal('modalAtalhos')" class="w-8 h-8 rounded-full bg-slate-100 text-slate-600 font-bold">✕</button>
+            </div>
+            <div class="space-y-2 text-xs">
+                <div class="flex justify-between py-2 border-b border-slate-100"><span>Abrir Central de Atalhos</span><kbd class="px-2 py-0.5 bg-slate-100 border border-slate-300 rounded font-mono font-bold">Ctrl + ?</kbd></div>
+                <div class="flex justify-between py-2 border-b border-slate-100"><span>Abrir Espaço do Usuário</span><kbd class="px-2 py-0.5 bg-slate-100 border border-slate-300 rounded font-mono font-bold">Alt + U</kbd></div>
+                <div class="flex justify-between py-2 border-b border-slate-100"><span>Alternar Modo Tablet</span><kbd class="px-2 py-0.5 bg-slate-100 border border-slate-300 rounded font-mono font-bold">Alt + T</kbd></div>
+                <div class="flex justify-between py-2 border-b border-slate-100"><span>Ir para Visão Geral / Lançamentos</span><kbd class="px-2 py-0.5 bg-slate-100 border border-slate-300 rounded font-mono font-bold">Alt + 1 / Alt + 2</kbd></div>
+                <div class="flex justify-between py-2"><span>Fechar qualquer modal</span><kbd class="px-2 py-0.5 bg-slate-100 border border-slate-300 rounded font-mono font-bold">Esc</kbd></div>
             </div>
         </div>
+    </div>
 
-    </main>
+    <!-- TOAST NOTIFICATIONS -->
+    <div id="toastStack" aria-live="polite" class="fixed bottom-4 right-4 z-[9999] space-y-2 pointer-events-none"></div>
 
     <!-- Script de Inicialização e Banco de Dados -->
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
         import { getAuth, signInAnonymously } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
-        import { getFirestore, collection, addDoc, onSnapshot, doc, deleteDoc, updateDoc } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
+        import { initializeFirestore, collection, addDoc, onSnapshot, doc, deleteDoc, updateDoc } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
 
-        // Configuração do Firebase
+        const memStore = {};
+        const safeStorage = {
+            get(k) { try { return window.localStorage.getItem(k); } catch (_) { return memStore[k] || null; } },
+            set(k, v) { memStore[k] = v; try { window.localStorage.setItem(k, v); } catch (_) {} },
+            remove(k) { delete memStore[k]; try { window.localStorage.removeItem(k); } catch (_) {} }
+        };
+
         const firebaseConfig = {
             apiKey: "AIzaSyAGbFTTCgbqe9XFKFSb6ltB5lYj5O6QipE",
             authDomain: "pcm-cepera.firebaseapp.com",
@@ -253,10 +654,9 @@
         };
 
         const app = initializeApp(firebaseConfig);
-        const db = getFirestore(app);
+        const db = initializeFirestore(app, { experimentalForceLongPolling: true });
         const auth = getAuth(app);
 
-        // Configurações Fixas
         const BASE_HOURS = 20.1;
         const CAPACITIES = {
             'Multipet 1': 4284 * BASE_HOURS,
@@ -265,74 +665,207 @@
         };
 
         const configVisual = [
-            { id: 'Multipet 1', nameClass: 'text-[#1F4E78]', bgClass: 'bg-blue-50/30', textClass: 'text-blue-800', hex: '#1F4E78' },
-            { id: 'Multipet 2/5', nameClass: 'text-[#C00000]', bgClass: 'bg-red-50/30', textClass: 'text-red-700', hex: '#C00000' },
-            { id: 'Multipet 3', nameClass: 'text-[#70AD47]', bgClass: 'bg-green-50/30', textClass: 'text-green-700', hex: '#70AD47' }
+            { id: 'Multipet 1', nameClass: 'text-[#1F4E78]', badgeClass: 'bg-sky-50 text-sky-800 border-sky-200', hex: '#0284c7' },
+            { id: 'Multipet 2/5', nameClass: 'text-[#C00000]', badgeClass: 'bg-rose-50 text-rose-800 border-rose-200', hex: '#dc2626' },
+            { id: 'Multipet 3', nameClass: 'text-[#70AD47]', badgeClass: 'bg-emerald-50 text-emerald-800 border-emerald-200', hex: '#10b981' }
         ];
 
         let currentUser = null;
+        let usuarioLogado = null;
+        let rawDataCache = [];
         let chartEffInstance = null;
         let chartProdInstance = null;
         let itemToDeleteId = null;
 
-        // Navegação Lateral
+        // Preenche data de hoje como default
+        const dateInp = document.getElementById('dateInput');
+        if (dateInp && !dateInp.value) {
+            dateInp.value = new Date().toISOString().slice(0, 10);
+        }
+
+        window.showToast = function(msg, type) {
+            const stack = document.getElementById('toastStack');
+            if (!stack) return;
+            const el = document.createElement('div');
+            const cor = (type === 'error') ? 'bg-rose-600 text-white' : 'bg-slate-900 text-white';
+            el.className = 'px-4 py-3 rounded-2xl text-xs font-bold shadow-xl transition-all flex items-center gap-2 ' + cor;
+            el.innerHTML = msg;
+            stack.appendChild(el);
+            setTimeout(function() { el.remove(); }, 3200);
+        };
+
+        window.fecharModal = function(id) {
+            const el = document.getElementById(id);
+            if (el) el.classList.add('hidden');
+        };
+
+        // ================= ESPAÇO DO USUÁRIO & ATALHOS =================
+        let userPrefs = { tema: 'padrao', accent: '#0284c7', tabletMode: false, fontLevel: 0 };
+
+        window.abrirEspacoUsuario = function() {
+            atualizarUIPreferencias();
+            document.getElementById('modalEspacoUsuario').classList.remove('hidden');
+        };
+
+        window.abrirModalAtalhos = function() {
+            document.getElementById('modalAtalhos').classList.remove('hidden');
+        };
+
+        function aplicarPreferenciasVisuais() {
+            document.body.classList.remove('theme-solid', 'theme-dark', 'high-contrast', 'tablet-mode');
+            if (userPrefs.tema === 'solido') document.body.classList.add('theme-solid');
+            if (userPrefs.tema === 'dark') document.body.classList.add('theme-dark');
+            if (userPrefs.tema === 'contraste') document.body.classList.add('high-contrast');
+            if (userPrefs.tabletMode) document.body.classList.add('tablet-mode');
+            document.documentElement.style.setProperty('--accent', userPrefs.accent || '#0284c7');
+            const sizes = { '-1': '14px', '0': '16px', '1': '18px', '2': '20px', '3': '22px' };
+            document.documentElement.style.fontSize = sizes[String(userPrefs.fontLevel || 0)] || '16px';
+            atualizarUIPreferencias();
+        }
+
+        function atualizarUIPreferencias() {
+            const btnTab = document.getElementById('btnToggleTabletMode');
+            if (btnTab) {
+                btnTab.innerText = userPrefs.tabletMode ? 'ATIVADO' : 'DESATIVADO';
+                btnTab.className = userPrefs.tabletMode
+                    ? 'px-4 py-2.5 rounded-xl font-extrabold text-xs bg-emerald-600 text-white shrink-0'
+                    : 'px-4 py-2.5 rounded-xl font-extrabold text-xs bg-slate-200 text-slate-800 shrink-0';
+            }
+            ['padrao', 'solido', 'dark', 'contraste'].forEach(function(t) {
+                const b = document.getElementById('btnTema_' + t);
+                if (b) {
+                    b.className = (userPrefs.tema === t)
+                        ? 'p-3 rounded-xl border-2 border-sky-600 bg-sky-50 text-sky-900 text-xs font-extrabold text-center'
+                        : 'p-3 rounded-xl border border-slate-200 text-xs font-extrabold text-center';
+                }
+            });
+        }
+
+        async function persistirPreferenciasUsuario() {
+            const chaveLocal = usuarioLogado ? ('cepera_prefs_' + usuarioLogado.user) : 'cepera_prefs_guest';
+            safeStorage.set(chaveLocal, JSON.stringify(userPrefs));
+            if (usuarioLogado && usuarioLogado.id && usuarioLogado.id !== 'default_admin') {
+                try { await updateDoc(doc(db, "ir_funcionarios", usuarioLogado.id), { preferencias: userPrefs }); } catch (_) {}
+            }
+        }
+
+        function carregarPreferenciasUsuario(u) {
+            let carregado = (u && u.preferencias && typeof u.preferencias === 'object') ? u.preferencias : null;
+            if (!carregado) {
+                const salvoLocal = safeStorage.get(u ? ('cepera_prefs_' + u.user) : 'cepera_prefs_guest');
+                if (salvoLocal) { try { carregado = JSON.parse(salvoLocal); } catch (_) {} }
+            }
+            userPrefs = {
+                tema: (carregado && carregado.tema) || 'padrao',
+                accent: (carregado && carregado.accent) || '#0284c7',
+                tabletMode: Boolean(carregado && carregado.tabletMode),
+                fontLevel: Number((carregado && carregado.fontLevel) || 0)
+            };
+            aplicarPreferenciasVisuais();
+        }
+
+        window.toggleModoTablet = function() { userPrefs.tabletMode = !userPrefs.tabletMode; aplicarPreferenciasVisuais(); persistirPreferenciasUsuario(); };
+        window.definirTemaUsuario = function(tema) { userPrefs.tema = tema; aplicarPreferenciasVisuais(); persistirPreferenciasUsuario(); };
+        window.definirCorDestaque = function(cor) { userPrefs.accent = cor; aplicarPreferenciasVisuais(); persistirPreferenciasUsuario(); };
+        window.alterarFonte = function(dir) {
+            userPrefs.fontLevel = (dir === 0) ? 0 : Math.max(-1, Math.min(3, (userPrefs.fontLevel || 0) + dir));
+            aplicarPreferenciasVisuais();
+            persistirPreferenciasUsuario();
+        };
+
+        document.addEventListener('keydown', function(e) {
+            if (e.key === 'Escape') {
+                ['editModal', 'deleteModal', 'modalEspacoUsuario', 'modalAtalhos'].forEach(fecharModal);
+                return;
+            }
+            if ((e.ctrlKey || e.metaKey) && (e.key === '?' || e.key === '/')) {
+                e.preventDefault();
+                abrirModalAtalhos();
+                return;
+            }
+            const tag = (document.activeElement && document.activeElement.tagName ? document.activeElement.tagName : '').toUpperCase();
+            if (['INPUT', 'TEXTAREA', 'SELECT'].indexOf(tag) !== -1) return;
+            if (e.altKey) {
+                const k = e.key.toLowerCase();
+                if (k === 't') { e.preventDefault(); toggleModoTablet(); return; }
+                if (k === 'u') { e.preventDefault(); abrirEspacoUsuario(); return; }
+                if (k === '1') { e.preventDefault(); switchTab('dashboard'); return; }
+                if (k === '2') { e.preventDefault(); switchTab('lancamentos'); return; }
+            }
+        });
+
+        window.voltarParaCentralPCM = function() {
+            if (window.parent && window.parent !== window) {
+                window.parent.postMessage({ type: 'CEPERA_VOLTAR_CENTRAL' }, '*');
+            } else {
+                window.location.href = 'index.html';
+            }
+        };
+
+        window.fazerLogout = function() {
+            safeStorage.remove('cepera_ir_user');
+            safeStorage.remove('cepera_central_session');
+            if (window.parent && window.parent !== window) {
+                window.parent.postMessage({ type: 'CEPERA_LOGOUT_CENTRAL' }, '*');
+            } else {
+                window.location.href = 'index.html';
+            }
+        };
+
+        // Navegação entre Abas
         window.switchTab = (tab) => {
-            const navDash = document.getElementById('navDashboard');
-            const navLanc = document.getElementById('navLancamentos');
             const secDash = document.getElementById('sectionDashboard');
             const secLanc = document.getElementById('sectionLancamentos');
-            const pageTitle = document.getElementById('pageTitle');
-
-            const activeClass = ['bg-blue-50', 'text-blue-600', 'font-semibold'];
-            const inactiveClass = ['text-gray-500', 'hover:bg-gray-50', 'hover:text-gray-900', 'font-medium'];
+            const railDash = document.getElementById('rail-dashboard');
+            const railLanc = document.getElementById('rail-lancamentos');
+            const mobDash = document.getElementById('mob-dashboard');
+            const mobLanc = document.getElementById('mob-lancamentos');
 
             if (tab === 'dashboard') {
                 secDash.classList.remove('hidden');
                 secLanc.classList.add('hidden');
-                pageTitle.innerText = "Visão Geral";
-                
-                navDash.classList.add(...activeClass);
-                navDash.classList.remove(...inactiveClass);
-                navLanc.classList.remove(...activeClass);
-                navLanc.classList.add(...inactiveClass);
+                if (railDash) railDash.classList.add('active');
+                if (railLanc) railLanc.classList.remove('active');
+                if (mobDash) mobDash.classList.add('active');
+                if (mobLanc) mobLanc.classList.remove('active');
             } else {
                 secLanc.classList.remove('hidden');
                 secDash.classList.add('hidden');
-                pageTitle.innerText = "Lançamentos Diários";
-
-                navLanc.classList.add(...activeClass);
-                navLanc.classList.remove(...inactiveClass);
-                navDash.classList.remove(...activeClass);
-                navDash.classList.add(...inactiveClass);
+                if (railLanc) railLanc.classList.add('active');
+                if (railDash) railDash.classList.remove('active');
+                if (mobLanc) mobLanc.classList.add('active');
+                if (mobDash) mobDash.classList.remove('active');
             }
         };
 
         // Processamento e Renderização Visual
         function processAndRender(rawData) {
-            // 0. Calcular Totais Acumulados
+            rawDataCache = rawData;
             const totals = { 'Multipet 1': 0, 'Multipet 2/5': 0, 'Multipet 3': 0 };
             rawData.forEach(item => {
                 if (totals[item.machine] !== undefined) {
                     totals[item.machine] += Number(item.production) || 0;
                 }
             });
+
+            const totalGeral = totals['Multipet 1'] + totals['Multipet 2/5'] + totals['Multipet 3'];
             document.getElementById('total-mp1').innerText = totals['Multipet 1'].toLocaleString('pt-BR');
             document.getElementById('total-mp2').innerText = totals['Multipet 2/5'].toLocaleString('pt-BR');
             document.getElementById('total-mp3').innerText = totals['Multipet 3'].toLocaleString('pt-BR');
+            document.getElementById('total-geral').innerText = totalGeral.toLocaleString('pt-BR');
+            document.getElementById('sub-registros-count').innerText = `${rawData.length} apontamentos sincronizados`;
 
-            // 1. Agrupar produção e somar por dia e máquina
             const aggregated = {};
             rawData.forEach(item => {
                 if (!aggregated[item.date]) {
                     aggregated[item.date] = { 'Multipet 1': 0, 'Multipet 2/5': 0, 'Multipet 3': 0 };
                 }
-                aggregated[item.date][item.machine] += item.production || 0;
+                aggregated[item.date][item.machine] += Number(item.production) || 0;
             });
 
-            // Ordenar as datas cronologicamente
             const sortedDates = Object.keys(aggregated).sort();
-            
-            // 2. Preparar dados para os gráficos
+            document.getElementById('badge-dias-apontados').innerText = `${sortedDates.length} dias`;
+
             const effData = { 'Multipet 1': [], 'Multipet 2/5': [], 'Multipet 3': [] };
             const prodData = { 'Multipet 1': [], 'Multipet 2/5': [], 'Multipet 3': [] };
 
@@ -342,96 +875,127 @@
                     const prod = aggregated[date][m];
                     prodData[m].push(prod);
                     const eff = (prod / CAPACITIES[m]) * 100;
-                    effData[m].push(eff.toFixed(1));
+                    effData[m].push(Number(eff.toFixed(1)));
                 });
             });
 
-            // 3. Desenhar
+            // Atualiza médias de eficiência nos KPIs
+            const calcMediaEff = (arr) => {
+                const ativos = arr.filter(v => v > 0);
+                if (!ativos.length) return 0;
+                return (ativos.reduce((a, b) => a + b, 0) / ativos.length).toFixed(1);
+            };
+            const m1Eff = calcMediaEff(effData['Multipet 1']);
+            const m2Eff = calcMediaEff(effData['Multipet 2/5']);
+            const m3Eff = calcMediaEff(effData['Multipet 3']);
+
+            document.getElementById('badge-eff-mp1').innerText = `${m1Eff}% ef. média`;
+            document.getElementById('badge-eff-mp2').innerText = `${m2Eff}% ef. média`;
+            document.getElementById('badge-eff-mp3').innerText = `${m3Eff}% ef. média`;
+
+            document.getElementById('bar-mp1').style.width = `${Math.min(100, Math.max(8, m1Eff))}%`;
+            document.getElementById('bar-mp2').style.width = `${Math.min(100, Math.max(8, m2Eff))}%`;
+            document.getElementById('bar-mp3').style.width = `${Math.min(100, Math.max(8, m3Eff))}%`;
+
             renderCharts(sortedDates, effData, prodData);
             renderTable(sortedDates, aggregated);
             renderHistory(rawData);
         }
 
-        // Formatador de datas (Ex: 2026-10-29 -> 29/10)
         function formatDate(dateStr) {
-            if(!dateStr) return '';
+            if (!dateStr) return '';
             const [y, m, d] = dateStr.split('-');
             return `${d}/${m}`;
         }
 
-        // Gráficos (Chart.js)
         function renderCharts(dates, effData, prodData) {
             const labels = dates.map(formatDate);
 
-            // Função helper para montar os datasets baseado no configVisual
             const getDatasets = (dataObj, isEff) => {
                 return configVisual.map(config => ({
                     label: config.id,
                     data: dataObj[config.id],
-                    backgroundColor: isEff ? config.hex : config.hex + 'CC', // Leve transparência na barra
+                    backgroundColor: isEff ? config.hex : config.hex + 'CC',
                     borderColor: config.hex,
-                    borderWidth: 2,
-                    tension: 0.2, // Curva suave na linha
+                    borderWidth: 2.5,
+                    borderRadius: isEff ? 0 : 6,
+                    tension: 0.25,
                     fill: false,
                     type: isEff ? 'line' : 'bar'
                 }));
             };
 
-            // Gráfico Eficiência
             if (chartEffInstance) chartEffInstance.destroy();
             const ctxEff = document.getElementById('efficiencyChart').getContext('2d');
             chartEffInstance = new Chart(ctxEff, {
                 type: 'line',
-                data: { labels: labels, datasets: getDatasets(effData, true) },
+                data: { labels, datasets: getDatasets(effData, true) },
                 options: {
-                    responsive: true, maintainAspectRatio: false,
-                    scales: { y: { beginAtZero: true, suggestedMax: 100, title: { display: true, text: 'Eficiência (%)' } } },
-                    plugins: { tooltip: { callbacks: { label: (ctx) => ` ${ctx.dataset.label}: ${ctx.raw}%` } } }
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    scales: {
+                        y: { beginAtZero: true, suggestedMax: 100, grid: { color: '#f1f5f9' }, title: { display: true, text: 'Eficiência (%)' } },
+                        x: { grid: { display: false } }
+                    },
+                    plugins: {
+                        legend: { position: 'bottom', labels: { boxWidth: 12, font: { weight: 'bold', size: 11 } } },
+                        tooltip: { callbacks: { label: (ctx) => ` ${ctx.dataset.label}: ${ctx.raw}%` } }
+                    }
                 }
             });
 
-            // Gráfico Produção
             if (chartProdInstance) chartProdInstance.destroy();
             const ctxProd = document.getElementById('productionChart').getContext('2d');
             chartProdInstance = new Chart(ctxProd, {
                 type: 'bar',
-                data: { labels: labels, datasets: getDatasets(prodData, false) },
+                data: { labels, datasets: getDatasets(prodData, false) },
                 options: {
-                    responsive: true, maintainAspectRatio: false,
-                    scales: { y: { beginAtZero: true, title: { display: true, text: 'Frascos Produzidos' } } }
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    scales: {
+                        y: { beginAtZero: true, grid: { color: '#f1f5f9' }, title: { display: true, text: 'Frascos Produzidos' } },
+                        x: { grid: { display: false } }
+                    },
+                    plugins: {
+                        legend: { position: 'bottom', labels: { boxWidth: 12, font: { weight: 'bold', size: 11 } } }
+                    }
                 }
             });
         }
 
-        // Tabela Dinâmica
         function renderTable(dates, aggregated) {
             const thead = document.getElementById('tableHead');
             const tbody = document.getElementById('tableBody');
-            
-            let trHead = `<tr class="border-b border-gray-100 text-xs font-semibold text-gray-400 uppercase tracking-wider">
-                <th class="py-4 px-4 font-semibold">Linha</th>`;
+
+            if (!dates.length) {
+                thead.innerHTML = '<tr><th class="py-3.5 px-4">Linha</th><th class="py-3.5 px-4 text-center">Status</th></tr>';
+                tbody.innerHTML = '<tr><td colspan="2" class="py-8 text-center text-slate-400 font-semibold">Nenhum apontamento registrado para exibição na matriz.</td></tr>';
+                return;
+            }
+
+            let trHead = `<tr><th class="py-3.5 px-4">Linha / Equipamento</th>`;
             dates.forEach(d => {
-                trHead += `<th class="py-4 px-4 font-semibold text-center min-w-[120px]">${formatDate(d)}</th>`;
+                trHead += `<th class="py-3.5 px-4 text-center min-w-[115px]">${formatDate(d)}</th>`;
             });
             trHead += `</tr>`;
             thead.innerHTML = trHead;
 
             tbody.innerHTML = '';
             configVisual.forEach(config => {
-                let tr = `<tr class="border-b border-gray-50 hover:bg-gray-50/50 transition-colors">
-                    <td class="py-4 px-4 font-bold ${config.nameClass}">${config.id}</td>`;
-                
+                let tr = `<tr class="hover:bg-slate-50/80 transition-colors">
+                    <td class="py-3.5 px-4 font-extrabold text-slate-900 whitespace-nowrap">${config.id}</td>`;
+
                 dates.forEach(date => {
                     const prod = aggregated[date][config.id];
                     const eff = ((prod / CAPACITIES[config.id]) * 100).toFixed(1);
-                    
-                    let effColor = 'text-red-500';
-                    if (eff >= 80) effColor = 'text-green-500';
-                    else if (eff >= 50) effColor = 'text-yellow-500';
 
-                    tr += `<td class="py-4 px-4 text-center">
-                        <div class="font-bold text-slate-700">${prod.toLocaleString('pt-BR')}</div>
-                        <div class="text-xs ${effColor} font-semibold mt-1">${eff}% ef.</div>
+                    let effBadge = 'bg-rose-50 text-rose-700 border-rose-200';
+                    if (eff >= 80) effBadge = 'bg-emerald-50 text-emerald-700 border-emerald-200';
+                    else if (eff >= 50) effBadge = 'bg-amber-50 text-amber-700 border-amber-200';
+
+                    tr += `<td class="py-3.5 px-4 text-center">
+                        <div class="font-extrabold text-slate-900">${prod.toLocaleString('pt-BR')}</div>
+                        <span class="inline-block text-[10px] font-extrabold px-2 py-0.5 rounded-full border mt-1 ${effBadge}">${eff}% ef.</span>
                     </td>`;
                 });
                 tr += `</tr>`;
@@ -439,15 +1003,14 @@
             });
         }
 
-        // Histórico e CRUD
         function renderHistory(rawData) {
             const container = document.getElementById('historyContainer');
             container.innerHTML = '';
-            
+
             const sortedData = [...rawData].sort((a, b) => (b.timestamp || 0) - (a.timestamp || 0));
 
             if (sortedData.length === 0) {
-                container.innerHTML = `<div class="py-12 text-center text-gray-400 font-medium bg-white rounded-2xl border border-gray-100 shadow-sm">Nenhum lançamento registrado.</div>`;
+                container.innerHTML = `<div class="py-12 text-center text-slate-400 font-bold glass-card rounded-3xl">Nenhum lançamento registrado até o momento.</div>`;
                 return;
             }
 
@@ -456,36 +1019,40 @@
                 if (macData.length === 0) return;
 
                 let tableHtml = `
-                <div class="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
-                    <div class="px-6 py-4 border-b border-gray-100 font-bold ${config.nameClass} bg-gray-50/50">
-                        ${config.id}
+                <div class="glass-card rounded-3xl overflow-hidden">
+                    <div class="px-6 py-4 border-b border-slate-100 flex items-center justify-between bg-slate-50/70">
+                        <div class="flex items-center gap-2.5">
+                            <span class="w-3 h-3 rounded-full" style="background:${config.hex}"></span>
+                            <span class="font-extrabold text-sm text-slate-900">${config.id}</span>
+                        </div>
+                        <span class="text-[11px] font-bold text-slate-500">${macData.length} registros</span>
                     </div>
                     <div class="overflow-x-auto">
-                        <table class="w-full text-left">
-                            <thead class="text-xs text-gray-400 uppercase tracking-wider border-b border-gray-50">
+                        <table class="w-full text-left text-xs">
+                            <thead class="text-[10px] text-slate-500 uppercase font-extrabold tracking-wider border-b border-slate-100 bg-white">
                                 <tr>
-                                    <th class="py-3 px-6 font-semibold">Data</th>
-                                    <th class="py-3 px-6 font-semibold">Turno</th>
-                                    <th class="py-3 px-6 font-semibold">Produção</th>
-                                    <th class="py-3 px-6 font-semibold text-right">Ações</th>
+                                    <th class="py-3 px-6">Data</th>
+                                    <th class="py-3 px-6">Turno</th>
+                                    <th class="py-3 px-6">Produção Consolidada</th>
+                                    <th class="py-3 px-6 text-right">Ações</th>
                                 </tr>
                             </thead>
-                            <tbody class="text-sm text-slate-600">
+                            <tbody class="divide-y divide-slate-100">
                 `;
 
                 macData.forEach(item => {
                     const parts = item.date ? item.date.split('-') : [];
                     const displayDate = parts.length === 3 ? `${parts[2]}/${parts[1]}/${parts[0]}` : item.date;
-                    const shiftDisplay = item.shift ? `${item.shift}º Turno` : '-';
+                    const shiftDisplay = item.shift ? `${item.shift}º Turno` : '1º Turno';
 
                     tableHtml += `
-                        <tr class="border-b border-gray-50 last:border-0 hover:bg-gray-50/50 transition-colors">
-                            <td class="py-3 px-6">${displayDate}</td>
-                            <td class="py-3 px-6 font-medium text-slate-500">${shiftDisplay}</td>
-                            <td class="py-3 px-6 font-bold text-slate-800">${Number(item.production).toLocaleString('pt-BR')} un</td>
-                            <td class="py-3 px-6 text-right space-x-2">
-                                <button onclick="window.openEditModal('${item.id}', '${item.date}', '${item.machine}', ${item.production}, '${item.shift || '1'}')" class="px-3 py-1.5 bg-blue-50 text-blue-600 hover:bg-blue-100 rounded-lg font-semibold text-xs transition-colors">Editar</button>
-                                <button onclick="window.confirmDelete('${item.id}')" class="px-3 py-1.5 bg-red-50 text-red-600 hover:bg-red-100 rounded-lg font-semibold text-xs transition-colors">Excluir</button>
+                        <tr class="hover:bg-slate-50/80 transition-colors">
+                            <td class="py-3.5 px-6 font-bold text-slate-800">${displayDate}</td>
+                            <td class="py-3.5 px-6"><span class="px-2.5 py-0.5 rounded-full bg-slate-100 text-slate-700 font-bold text-[11px]">${shiftDisplay}</span></td>
+                            <td class="py-3.5 px-6 font-extrabold text-slate-900">${Number(item.production).toLocaleString('pt-BR')} un</td>
+                            <td class="py-3.5 px-6 text-right space-x-1.5">
+                                <button type="button" onclick="window.openEditModal('${item.id}', '${item.date}', '${item.machine}', ${item.production}, '${item.shift || '1'}')" class="px-3 py-1.5 bg-sky-50 text-sky-700 hover:bg-sky-100 border border-sky-200 rounded-xl font-extrabold text-[11px] transition-colors">Editar</button>
+                                <button type="button" onclick="window.confirmDelete('${item.id}')" class="px-3 py-1.5 bg-rose-50 text-rose-600 hover:bg-rose-100 border border-rose-200 rounded-xl font-extrabold text-[11px] transition-colors">Excluir</button>
                             </td>
                         </tr>
                     `;
@@ -496,7 +1063,70 @@
             });
         }
 
-        // Lógica dos Modais
+        // Relatório A4 Padrão PCM Cepêra
+        window.imprimirRelatorioMultipet = function() {
+            const dataHora = new Date().toLocaleString('pt-BR');
+            const mp1 = document.getElementById('total-mp1').innerText;
+            const mp2 = document.getElementById('total-mp2').innerText;
+            const mp3 = document.getElementById('total-mp3').innerText;
+            const total = document.getElementById('total-geral').innerText;
+
+            const sorted = [...rawDataCache].sort((a, b) => (b.date || '').localeCompare(a.date || ''));
+            let rowsHtml = '';
+            sorted.forEach(item => {
+                const p = (item.date || '').split('-');
+                const dt = p.length === 3 ? `${p[2]}/${p[1]}/${p[0]}` : (item.date || '-');
+                const cap = CAPACITIES[item.machine] || 1;
+                const eff = ((Number(item.production || 0) / cap) * 100).toFixed(1);
+                rowsHtml += `<tr>
+                    <td><strong>${dt}</strong></td>
+                    <td>${item.machine}</td>
+                    <td>${item.shift || '1'}º Turno</td>
+                    <td style="text-align:right;font-weight:800;">${Number(item.production || 0).toLocaleString('pt-BR')} un</td>
+                    <td style="text-align:center;font-weight:700;">${eff}%</td>
+                </tr>`;
+            });
+
+            const html = `<!DOCTYPE html><html lang="pt-BR"><head><meta charset="UTF-8"><title>Relatório Multipets — PCM Cepêra</title>
+            <style>
+                @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;800&display=swap');
+                body { font-family: 'Plus Jakarta Sans', sans-serif; font-size: 11px; color: #0f172a; padding: 24px; }
+                .header { border-bottom: 3px solid #0284c7; padding-bottom: 12px; margin-bottom: 20px; display: flex; justify-content: space-between; align-items: flex-end; }
+                .logo { background: #dc2626; color: #fff; padding: 4px 10px; border-radius: 6px; font-weight: 800; font-size: 13px; display: inline-block; margin-bottom: 6px; }
+                h1 { margin: 0; font-size: 19px; font-weight: 800; text-transform: uppercase; }
+                .kpis { display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px; margin-bottom: 20px; }
+                .kpi { border: 1px solid #cbd5e1; border-radius: 10px; padding: 10px 14px; background: #f8fafc; }
+                .kpi span { display: block; font-size: 9px; text-transform: uppercase; color: #64748b; font-weight: 700; }
+                .kpi strong { font-size: 16px; font-weight: 800; color: #0f172a; }
+                table { width: 100%; border-collapse: collapse; }
+                th { background: #f1f5f9; padding: 8px 10px; text-align: left; font-size: 10px; text-transform: uppercase; border-bottom: 2px solid #cbd5e1; }
+                td { padding: 8px 10px; border-bottom: 1px solid #e2e8f0; }
+                @media print { body { padding: 0; } @page { size: A4 portrait; margin: 1cm; } }
+            </style></head><body>
+                <div class="header">
+                    <div><div class="logo">CEPÊRA</div><h1>Relatório de Produção & Eficiência — Multipets</h1></div>
+                    <div style="text-align:right;font-size:10px;color:#64748b;"><strong>PCM Cepêra Alimentos</strong><br>Base Nominal: 20,1h • Emitido em ${dataHora}</div>
+                </div>
+                <div class="kpis">
+                    <div class="kpi"><span>Multipet 1</span><strong>${mp1} un</strong></div>
+                    <div class="kpi"><span>Multipet 2/5</span><strong>${mp2} un</strong></div>
+                    <div class="kpi"><span>Multipet 3</span><strong>${mp3} un</strong></div>
+                    <div class="kpi"><span>Total Consolidado</span><strong>${total} un</strong></div>
+                </div>
+                <table><thead><tr><th>Data</th><th>Linha / Máquina</th><th>Turno</th><th style="text-align:right;">Volume Produzido</th><th style="text-align:center;">Eficiência Dia</th></tr></thead>
+                <tbody>${rowsHtml || '<tr><td colspan="5" style="text-align:center;">Sem apontamentos</td></tr>'}</tbody></table>
+            </body></html>`;
+
+            const win = window.open('', '_blank');
+            if (win) {
+                win.document.write(html);
+                win.document.close();
+                win.focus();
+                setTimeout(() => win.print(), 400);
+            }
+        };
+
+        // Modais CRUD
         window.openEditModal = (id, date, machine, production, shift) => {
             document.getElementById('modalEditId').value = id;
             document.getElementById('modalDate').value = date;
@@ -510,7 +1140,6 @@
             document.getElementById('editModal').classList.add('hidden');
         };
 
-        // Lógica Segura de Exclusão (Substituindo o confirm() padrão)
         window.confirmDelete = (id) => {
             itemToDeleteId = id;
             document.getElementById('deleteModal').classList.remove('hidden');
@@ -530,52 +1159,50 @@
             try {
                 await deleteDoc(doc(db, 'mp_producao', itemToDeleteId));
                 window.closeDeleteModal();
+                showToast('Apontamento excluído com sucesso!');
             } catch (error) {
-                console.error("Erro ao excluir:", error);
-                alert("Erro ao excluir: " + error.message);
+                showToast('Erro ao excluir: ' + error.message, 'error');
             } finally {
                 btn.innerText = 'Sim, Excluir';
                 btn.disabled = false;
             }
         });
 
-        // Inicia Autenticação
         async function initAuth() {
             try {
                 const cred = await signInAnonymously(auth);
                 currentUser = cred.user;
                 startDataListener();
             } catch (error) {
-                console.error("Erro na autenticação:", error);
-                if (error.code === 'auth/api-key-not-valid') {
-                    alert("⚠️ Erro de Firebase: A API Key fornecida é inválida. Por favor, insira a sua API Key real na variável firebaseConfig do código.");
-                } else {
-                    alert("⚠️ Falha ao conectar ao banco de dados: " + error.message);
-                }
+                const dot = document.getElementById('headerSyncDot');
+                const txt = document.getElementById('headerSyncText');
+                if (dot) dot.className = 'w-2 h-2 rounded-full bg-rose-500';
+                if (txt) txt.innerText = 'Erro de Conexão';
+                showToast('Falha ao conectar ao banco de dados.', 'error');
             }
         }
 
-        // Listener Banco de Dados ao Vivo
         function startDataListener() {
             if (!currentUser) return;
-            
-            // Usando uma coleção EXCLUSIVA para a linha Multipets
-            const path = `mp_producao`;
-            const colRef = collection(db, path);
-
+            const colRef = collection(db, 'mp_producao');
             onSnapshot(colRef, (snapshot) => {
+                const dot = document.getElementById('headerSyncDot');
+                const txt = document.getElementById('headerSyncText');
+                if (dot) dot.className = 'w-2 h-2 rounded-full bg-emerald-500';
+                if (txt) txt.innerText = 'Banco Sincronizado (Online)';
+
                 const rawData = [];
-                snapshot.forEach(doc => rawData.push({ id: doc.id, ...doc.data() }));
+                snapshot.forEach(d => rawData.push({ id: d.id, ...d.data() }));
                 processAndRender(rawData);
             }, (error) => {
-                console.error("Erro ao ler dados:", error);
-                if (error.code === 'permission-denied' || error.message.includes('permissions')) {
-                    alert("⚠️ ACESSO NEGADO: Vá ao Firebase Console > Firestore Database > Regras (Rules) e libere o acesso para a coleção 'mp_producao'.");
-                }
+                const dot = document.getElementById('headerSyncDot');
+                const txt = document.getElementById('headerSyncText');
+                if (dot) dot.className = 'w-2 h-2 rounded-full bg-rose-500';
+                if (txt) txt.innerText = 'Sem Permissão (mp_producao)';
+                showToast('Permissão negada na coleção mp_producao.', 'error');
             });
         }
 
-        // Submissão do Formulário
         document.getElementById('addProductionForm').addEventListener('submit', async (e) => {
             e.preventDefault();
             if (!currentUser) return;
@@ -587,38 +1214,26 @@
             const prodVal = document.getElementById('prodInput').value;
 
             btn.disabled = true;
-            btn.innerText = 'Salvando...';
+            btn.innerHTML = '<span>Salvando...</span>';
 
             try {
-                // Coleção exclusiva mp_producao
-                const path = `mp_producao`;
-                const colRef = collection(db, path);
-                
-                await addDoc(colRef, {
+                await addDoc(collection(db, 'mp_producao'), {
                     date: dateVal,
                     machine: machineVal,
                     shift: shiftVal,
                     production: Number(prodVal),
-                    timestamp: new Date().getTime()
+                    timestamp: Date.now()
                 });
-                
                 document.getElementById('prodInput').value = '';
-                // Mantém a data e máquina selecionadas para agilizar envios contínuos
-                
+                showToast('Apontamento registrado com sucesso!');
             } catch (error) {
-                console.error("Erro ao salvar:", error);
-                if (error.code === 'permission-denied' || error.message.includes('permissions')) {
-                    alert("⚠️ ERRO AO SALVAR: Permissão Negada no Firestore. Ajuste as Regras de Segurança (Rules).");
-                } else {
-                    alert("Erro ao salvar: " + error.message);
-                }
+                showToast('Erro ao salvar apontamento: ' + error.message, 'error');
             } finally {
                 btn.disabled = false;
-                btn.innerText = 'Salvar Apontamento';
+                btn.innerHTML = '<span>Salvar Apontamento</span>';
             }
         });
 
-        // Submissão do Modal de Edição
         document.getElementById('editProductionForm').addEventListener('submit', async (e) => {
             e.preventDefault();
             const btn = document.getElementById('modalSubmitBtn');
@@ -632,31 +1247,27 @@
             btn.innerText = 'Salvando...';
 
             try {
-                const docRef = doc(db, 'mp_producao', id);
-                await updateDoc(docRef, {
+                await updateDoc(doc(db, 'mp_producao', id), {
                     date: dateVal,
                     machine: machineVal,
                     shift: shiftVal,
                     production: Number(prodVal)
                 });
                 window.closeEditModal();
+                showToast('Apontamento atualizado!');
             } catch (error) {
-                console.error("Erro ao atualizar:", error);
-                alert("Erro ao atualizar: " + error.message);
+                showToast('Erro ao atualizar: ' + error.message, 'error');
             } finally {
                 btn.disabled = false;
                 btn.innerText = 'Salvar Alterações';
             }
         });
 
-        // Inicializa
-        initAuth();
-
         // ================= GUARDA CENTRAL SSO & RBAC (PCM CEPÊRA) =================
         (function verificarAcessoCentralSSO() {
             try {
-                const raw = localStorage.getItem('cepera_central_session');
-                const userStr = localStorage.getItem('cepera_ir_user');
+                const raw = safeStorage.get('cepera_central_session');
+                const userStr = safeStorage.get('cepera_ir_user');
                 if (!raw && !userStr) {
                     if (window.parent && window.parent !== window) {
                         window.parent.postMessage({ type: 'CEPERA_LOGOUT_CENTRAL' }, '*');
@@ -665,7 +1276,7 @@
                     }
                     return;
                 }
-                const sess = raw ? JSON.parse(raw) : null;
+                const sess = raw ? JSON.parse(raw) : { user: userStr, nome: userStr, role: 'Admin' };
                 if (sess && sess.role !== 'Admin' && Array.isArray(sess.apps_permitidos) && !sess.apps_permitidos.includes('dashboard_multipet')) {
                     if (window.parent && window.parent !== window) {
                         window.parent.postMessage({ type: 'CEPERA_VOLTAR_CENTRAL' }, '*');
@@ -674,14 +1285,18 @@
                     }
                     return;
                 }
-                if (window.self === window.top && sess) {
-                    const bar = document.createElement('div');
-                    bar.style.cssText = 'position:fixed;bottom:14px;left:14px;z-index:9999;display:flex;align-items:center;gap:8px;background:#0f172a;color:#fff;padding:6px 12px;border-radius:9999px;font-family:sans-serif;font-size:11px;font-weight:700;box-shadow:0 8px 20px rgba(0,0,0,0.25);border:1px solid #334155;';
-                    bar.innerHTML = `<button type="button" onclick="window.location.href='index.html'" style="background:#0284c7;color:#fff;border:none;padding:4px 10px;border-radius:9999px;font-weight:800;font-size:11px;cursor:pointer;">⬅ Central PCM</button><span>${sess.nome || sess.user} (${sess.role || ''})</span>`;
-                    document.body.appendChild(bar);
-                }
+                usuarioLogado = sess;
+                carregarPreferenciasUsuario(sess);
+                const nameEl = document.getElementById('loggedUserName');
+                const roleEl = document.getElementById('loggedUserRole');
+                const greetEl = document.getElementById('dashGreetingName');
+                if (nameEl) nameEl.innerText = sess.nome || sess.user || 'Usuário';
+                if (roleEl) roleEl.innerText = sess.role || 'PCM';
+                if (greetEl) greetEl.innerText = (sess.nome || sess.user || 'Gestor').split(' ')[0];
             } catch (_) {}
         })();
+
+        initAuth();
     </script>
 </body>
 </html>
