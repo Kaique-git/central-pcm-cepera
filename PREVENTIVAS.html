@@ -3438,7 +3438,8 @@
             const nextCode = `PM-${String(getPlanosPreventiva().length + 1).padStart(3, '0')}`;
             document.getElementById('plCodigo').value = plano?.codigo || nextCode;
             document.getElementById('plRevisao').value = plano?.revisao || 'Rev. 01';
-            document.getElementById('plTitulo').value = plano?.titulo || (ativoPre ? `Preventiva ${ativoPre.periodicidade_preventiva || ''} — ${ativoPre.equipamento}${ativoPre.subconjunto ? ' (' + ativoPre.subconjunto + ')' : ''}`.trim() : '');
+            const alvoPlanoNom = ativoPre ? (ativoPre.subconjunto || ativoPre.conjunto || '') : '';
+            document.getElementById('plTitulo').value = plano?.titulo || (ativoPre ? `Preventiva ${ativoPre.periodicidade_preventiva || ''} — ${ativoPre.equipamento}${alvoPlanoNom ? ' (' + alvoPlanoNom + ')' : ''}`.trim() : '');
             document.getElementById('plModoAgendamento').value = plano?.modoAgendamento || 'fixo';
             document.getElementById('plPeriodicidade').value = plano?.periodicidade || (PERIODICIDADES[ativoPre?.periodicidade_preventiva] ? ativoPre.periodicidade_preventiva : 'Mensal');
             document.getElementById('plCriticidade').value = plano?.criticidade || ativoPre?.criticidade || 'B';
@@ -4707,6 +4708,98 @@
             if (err) { err.hidden = online; err.classList.toggle('hidden', online); }
         }
 
+        let handoffPrevLoadedManut = false;
+        let handoffPrevLoadedLinhas = false;
+        let handoffPrevConsumido = false;
+
+        function aplicarFiltro52SDoHandoff(ativo) {
+            if (!ativo) return;
+            const s = document.getElementById('sem52FiltroSetor');
+            const m = document.getElementById('sem52FiltroMaquina');
+            const e = document.getElementById('sem52FiltroEquipamento');
+            const c = document.getElementById('sem52FiltroConjunto');
+            const b = document.getElementById('sem52Busca');
+            const hasOpt = (sel, val) => sel && val && Array.from(sel.options || []).some(o => o.value === val);
+
+            if (s && hasOpt(s, ativo.area)) s.value = ativo.area;
+            atualizarOpcoesArvoreSem52('setor');
+            if (m && hasOpt(m, ativo.maquina)) m.value = ativo.maquina;
+            atualizarOpcoesArvoreSem52('maquina');
+            if (e && hasOpt(e, ativo.equipamento)) e.value = ativo.equipamento;
+            atualizarOpcoesArvoreSem52('equipamento');
+
+            const fullConj = [ativo.conjunto, ativo.subconjunto].filter(Boolean).join(' › ');
+            if (c && hasOpt(c, fullConj)) {
+                c.value = fullConj;
+            } else if (c && hasOpt(c, ativo.conjunto)) {
+                c.value = ativo.conjunto;
+            } else if (b && ativo.conjunto) {
+                b.value = ativo.conjunto;
+            }
+            renderCalendario52Semanas();
+        }
+
+        function tentarAplicarHandoffPreventiva() {
+            if (handoffPrevConsumido || !handoffPrevLoadedManut || !handoffPrevLoadedLinhas) return;
+            let raw = null;
+            try { raw = safeStorage.get('cepera_agendamento_handoff'); } catch (_) {}
+            if (!raw) return;
+
+            let h = null;
+            try { h = JSON.parse(raw); } catch (_) { safeStorage.remove('cepera_agendamento_handoff'); return; }
+            if (!h || h.targetApp !== 'preventivas') return;
+            if (h.criadoEm && (Date.now() - Number(h.criadoEm)) > 5 * 60 * 1000) {
+                safeStorage.remove('cepera_agendamento_handoff');
+                return;
+            }
+
+            handoffPrevConsumido = true;
+            safeStorage.remove('cepera_agendamento_handoff');
+
+            if (!isGestao) {
+                showToast('Apenas perfis de Gestão podem programar ou criar planos preventivos.', 'error');
+                return;
+            }
+
+            const a = h.ativo || {};
+            const ativoNorm = {
+                area: a.area || '',
+                maquina: a.maquina || '',
+                equipamento: a.equipamento || '',
+                conjunto: a.conjunto || '',
+                subconjunto: a.subconjunto || '',
+                criticidade: a.criticidade || '',
+                periodicidade_preventiva: a.periodicidade || a.periodicidade_preventiva || '',
+                disciplina: a.disciplina || 'Mecânica',
+                tag: a.tag || ''
+            };
+
+            if (h.action === 'preventiva_programar') {
+                const planos = getPlanosPreventiva();
+                const planoAlvo = planos.find(p => p.id === h.planoId)
+                    || planos.find(p => normKey(p.equipamento) === normKey(ativoNorm.equipamento) && (!ativoNorm.conjunto || normKey(p.conjunto) === normKey(ativoNorm.conjunto)));
+                switchView('semanas52');
+                aplicarFiltro52SDoHandoff(ativoNorm);
+                if (planoAlvo) {
+                    abrirModalProgramarPreventiva(planoAlvo.id);
+                } else {
+                    abrirModalEditorPlano('', ativoNorm);
+                }
+                return;
+            }
+
+            if (h.action === 'preventiva_novo_plano') {
+                switchView('planos');
+                abrirModalEditorPlano('', ativoNorm);
+                return;
+            }
+
+            // Default ou 'preventiva_52s': Calendário 52 Semanas filtrado pelo Conjunto
+            switchView('semanas52');
+            aplicarFiltro52SDoHandoff(ativoNorm);
+            showToast(`Calendário 52 Semanas filtrado para "${ativoNorm.conjunto || ativoNorm.equipamento}". Clique em qualquer semana para agendar.`);
+        }
+
         async function iniciarAplicacao() {
             carregarPreferenciasVisuais();
             usuarioLogado = lerSessaoCentral();
@@ -4728,16 +4821,20 @@
 
             onSnapshot(colManutencao, snap => {
                 allAgendaDocs = snap.docs.map(d => ({ id: d.id, ...d.data() }));
+                handoffPrevLoadedManut = true;
                 setSyncStatus(true, `Sincronizado (${getOrdensPreventiva().length} ordens)`);
                 popularSelectsGlobais();
                 renderCurrentView();
+                tentarAplicarHandoffPreventiva();
             }, () => setSyncStatus(false, 'Erro de conexão Firestore'));
 
             onSnapshot(colLinhas, snap => {
                 rawLinhasDocs = snap.docs.map(d => ({ id: d.id, ...d.data() }));
                 assetNodes = rawLinhasDocs.flatMap(docObj => expandirDocParaNodes(docObj.id, docObj));
+                handoffPrevLoadedLinhas = true;
                 popularSelectsGlobais();
                 renderCurrentView();
+                tentarAplicarHandoffPreventiva();
             });
 
             onSnapshot(colFunc, snap => {
