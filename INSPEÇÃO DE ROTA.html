@@ -871,9 +871,14 @@
 
                         <div class="grid grid-cols-1 lg:grid-cols-12 gap-5 items-start">
                             <div class="glass-card p-4 sm:p-5 rounded-3xl lg:col-span-4 space-y-3">
-                                <div class="flex items-center justify-between pb-2.5 border-b border-slate-100">
+                                <div class="flex items-center justify-between pb-2 border-b border-slate-100">
                                     <h2 class="text-xs font-extrabold uppercase tracking-wider text-slate-700">Equipamentos &gt; Conjuntos</h2>
                                     <span id="cfgCountConjuntos" class="text-[11px] font-bold text-slate-400">0 itens</span>
+                                </div>
+                                <div class="flex flex-wrap items-center gap-1.5" role="group" aria-label="Filtrar conjuntos ativos ou ocultos da inspeção">
+                                    <button type="button" id="btnCfgFiltroInsp_todos" onclick="setCfgFiltroInsp('todos')" class="px-2.5 py-1 rounded-full text-[10px] font-extrabold bg-slate-900 text-white transition-colors">Todos</button>
+                                    <button type="button" id="btnCfgFiltroInsp_ativos" onclick="setCfgFiltroInsp('ativos')" class="px-2.5 py-1 rounded-full text-[10px] font-extrabold bg-slate-100 text-slate-600 hover:bg-slate-200 transition-colors">Ativos Insp.</button>
+                                    <button type="button" id="btnCfgFiltroInsp_ocultos" onclick="setCfgFiltroInsp('ocultos')" class="px-2.5 py-1 rounded-full text-[10px] font-extrabold bg-slate-100 text-slate-600 hover:bg-slate-200 transition-colors">Não Ativos (Ocultos)</button>
                                 </div>
                                 <div id="cfgArvoreConjuntos" class="space-y-3 max-h-[68vh] overflow-y-auto pr-1"></div>
                             </div>
@@ -884,7 +889,7 @@
                                         <svg class="w-7 h-7" fill="none" stroke="currentColor" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9" stroke-width="2"/><circle cx="12" cy="12" r="3" stroke-width="2"/></svg>
                                     </div>
                                     <h3 class="font-extrabold text-slate-800 text-base">Selecione um Conjunto na árvore ao lado</h3>
-                                    <p class="text-xs text-slate-500 max-w-md mx-auto leading-relaxed">Escolha qualquer conjunto dentro de um equipamento para montar pontos de inspeção cirúrgicos, critérios técnicos de aceitação e pontos críticos.</p>
+                                    <p class="text-xs text-slate-500 max-w-md mx-auto leading-relaxed">Escolha qualquer conjunto dentro de um equipamento para montar pontos de inspeção cirúrgicos, critérios técnicos de aceitação ou definir se ele entra no Calendário de Inspeção.</p>
                                 </div>
 
                                 <div id="cfgEditorBody" class="hidden space-y-5">
@@ -898,9 +903,22 @@
                                             </div>
                                         </div>
 
-                                        <div class="flex items-center gap-1.5 bg-slate-100 p-1.5 rounded-full self-start shrink-0">
-                                            <button type="button" id="btnEdEspMec" onclick="trocarEspecialidadeEditor('Mecânica')" class="px-4 py-1.5 rounded-full text-xs font-extrabold bg-slate-900 text-white transition-all">Mecânica</button>
-                                            <button type="button" id="btnEdEspEle" onclick="trocarEspecialidadeEditor('Elétrica')" class="px-4 py-1.5 rounded-full text-xs font-extrabold text-slate-600 hover:text-slate-900 transition-all">Elétrica</button>
+                                        <div class="flex flex-col sm:items-end gap-2 self-start shrink-0">
+                                            <button type="button" id="btnToggleInspAtivaEditor" onclick="toggleConjuntoInspecaoAtiva(editorSelectedNodeId)" class="inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-full text-xs font-extrabold border transition-all bg-emerald-50 text-emerald-800 border-emerald-200 hover:bg-emerald-100" title="Alternar visibilidade deste conjunto no Calendário de 52 Semanas de Inspeção">
+                                                <span id="dotToggleInspAtivaEditor" class="w-2 h-2 rounded-full bg-emerald-500"></span>
+                                                <span id="lblToggleInspAtivaEditor">Inspeção Ativa</span>
+                                            </button>
+                                            <div class="flex items-center gap-1.5 bg-slate-100 p-1.5 rounded-full">
+                                                <button type="button" id="btnEdEspMec" onclick="trocarEspecialidadeEditor('Mecânica')" class="px-4 py-1.5 rounded-full text-xs font-extrabold bg-slate-900 text-white transition-all">Mecânica</button>
+                                                <button type="button" id="btnEdEspEle" onclick="trocarEspecialidadeEditor('Elétrica')" class="px-4 py-1.5 rounded-full text-xs font-extrabold text-slate-600 hover:text-slate-900 transition-all">Elétrica</button>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <div id="cfgEdAvisoOculto" class="hidden p-3.5 rounded-2xl bg-amber-50 border border-amber-200 text-amber-900 text-xs font-semibold">
+                                        <div class="flex flex-wrap items-center justify-between gap-2">
+                                            <span><strong>Conjunto Não Ativo nas Inspeções:</strong> Ele permanece mapeado na árvore e disponível para Planos de Preventiva, porém fica oculto no Planejador de 52 Semanas para não poluir seu agendamento.</span>
+                                            <button type="button" onclick="toggleConjuntoInspecaoAtiva(editorSelectedNodeId)" class="px-3 py-1 rounded-xl bg-amber-600 hover:bg-amber-700 text-white text-[11px] font-extrabold shrink-0">Reativar p/ Inspeção</button>
                                         </div>
                                     </div>
 
@@ -1405,8 +1423,16 @@
                         <span id="arvHintMulti" class="text-[10px] font-bold text-indigo-600">Separe por vírgula ou linha para criar vários de uma vez</span>
                     </div>
                     <textarea id="arvInputConjuntos" rows="3" required class="input-clean py-2.5 text-xs font-bold bg-white" placeholder="Ex: Cabeçote de Selagem, Dosador Volumétrico, Tracionador de Filme, Painel Elétrico"></textarea>
-                    <p class="text-[11px] text-slate-500">Cada subconjunto terá seu próprio Plano Cirúrgico individual e poderá ser agendado separadamente ou em grupo.</p>
+                    <p class="text-[11px] text-slate-500">Cada subconjunto fica mapeado na árvore de ativos e nos Planos Cirúrgicos.</p>
                 </div>
+
+                <label class="flex items-start gap-3 p-3.5 rounded-2xl bg-slate-50 border border-slate-200 cursor-pointer hover:border-sky-300">
+                    <input type="checkbox" id="arvInputInspAtiva" checked class="w-4 h-4 mt-0.5 accent-emerald-600 rounded shrink-0">
+                    <div class="text-xs">
+                        <div class="font-extrabold text-slate-900">Ativo para Inspeção de Rota (Calendário 52 Semanas)</div>
+                        <p class="text-[11px] text-slate-500 font-medium mt-0.5">Se desmarcado (Não Ativo), o conjunto continua aparecendo mapeado em Planos Cirúrgicos e Preventivas, mas fica oculto no agendamento do Calendário de 52 Semanas.</p>
+                    </div>
+                </label>
 
                 <div class="pt-3 border-t border-slate-100 flex items-center justify-end gap-2.5">
                     <button type="button" onclick="fecharModal('modalGerenciarArvore')" class="btn-touch bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs">Cancelar</button>
@@ -2426,21 +2452,38 @@
             return '';
         }
 
+        let rawDocsObLinhas = {};
+
+        window.isConjuntoInspecaoAtiva = (node) => {
+            if (!node) return false;
+            return node.inspecao_ativa !== false && node.inspecao_ativa !== 'false';
+        };
+
         function expandirDocumentoArvore(docId, raw) {
-            const nestedArr = raw.maquinas || raw.equipamentos || raw.conjuntos || raw.itens;
+            rawDocsObLinhas[docId] = raw;
+            const nestedKey = ['maquinas', 'equipamentos', 'conjuntos', 'itens'].find(k => Array.isArray(raw[k]) && raw[k].length > 0);
+            const nestedArr = nestedKey ? raw[nestedKey] : null;
             if (Array.isArray(nestedArr) && nestedArr.length > 0) {
                 const baseArea = pickField(raw, ['setor', 'Setor', 'SETOR', 'area', 'Area', 'AREA', 'área', 'Área', 'ÁREA', 'nome']);
                 const baseMaq = pickField(raw, ['maquina', 'Maquina', 'MAQUINA', 'linha', 'Linha', 'LINHA']);
+                const baseEq = pickField(raw, ['equipamento', 'Equipamento', 'EQUIPAMENTO']) || 'Equipamento';
+                const inatList = Array.isArray(raw.conjuntos_insp_inativos) ? raw.conjuntos_insp_inativos : [];
                 const out = [];
                 nestedArr.forEach((sub, idx) => {
                     if (sub && typeof sub === 'object') {
                         const subConj = pickField(sub, ['conjunto', 'Conjunto', 'CONJUNTO']) || '';
                         const subSubc = pickField(sub, ['subconjunto', 'Subconjunto', 'SUBCONJUNTO']) || '';
+                        const inspAtiva = sub.inspecao_ativa !== undefined
+                            ? (sub.inspecao_ativa !== false && sub.inspecao_ativa !== 'false')
+                            : (raw.inspecao_ativa !== false && raw.inspecao_ativa !== 'false');
                         out.push({
                             id: `${docId}_${idx}`,
+                            _parentDocId: docId,
+                            _nestedKey: nestedKey,
+                            _nestedIdx: idx,
                             area: pickField(sub, ['setor', 'area']) || baseArea || 'Geral',
                             maquina: pickField(sub, ['maquina', 'linha', 'nome']) || baseMaq || 'Linha Geral',
-                            equipamento: pickField(sub, ['equipamento', 'nome']) || 'Equipamento',
+                            equipamento: pickField(sub, ['equipamento', 'nome']) || baseEq,
                             conjunto: subConj || subSubc || 'Conjunto Geral',
                             subconjunto: subConj ? subSubc : '',
                             tag: pickField(sub, ['tag', 'TAG', 'codigo_ativo']) || pickField(raw, ['tag', 'TAG', 'codigo_ativo']),
@@ -2448,8 +2491,30 @@
                             periodicidade_preventiva: pickField(sub, ['periodicidade_preventiva', 'periodicidade']) || pickField(raw, ['periodicidade_preventiva', 'periodicidade']),
                             disciplina: pickField(sub, ['disciplina', 'Disciplina']) || pickField(raw, ['disciplina', 'Disciplina']),
                             status_ativo: pickField(sub, ['status_ativo', 'status']) || pickField(raw, ['status_ativo', 'status']),
+                            inspecao_ativa: inspAtiva,
                             modelo: pickField(sub, ['modelo']),
                             serie: pickField(sub, ['serie', 'n_serie', 'numero_serie'])
+                        });
+                    } else if (typeof sub === 'string' && sub.trim()) {
+                        const inspAtiva = !inatList.includes(idx) && raw.inspecao_ativa !== false && raw.inspecao_ativa !== 'false';
+                        out.push({
+                            id: `${docId}_${idx}`,
+                            _parentDocId: docId,
+                            _nestedKey: nestedKey,
+                            _nestedIdx: idx,
+                            area: baseArea || 'Geral',
+                            maquina: baseMaq || 'Linha Geral',
+                            equipamento: baseEq,
+                            conjunto: sub.trim(),
+                            subconjunto: '',
+                            tag: pickField(raw, ['tag', 'TAG', 'codigo_ativo']),
+                            criticidade: pickField(raw, ['criticidade', 'Criticidade']),
+                            periodicidade_preventiva: pickField(raw, ['periodicidade_preventiva', 'periodicidade']),
+                            disciplina: pickField(raw, ['disciplina', 'Disciplina']),
+                            status_ativo: pickField(raw, ['status_ativo', 'status']),
+                            inspecao_ativa: inspAtiva,
+                            modelo: pickField(raw, ['modelo', 'Modelo', 'MODELO']),
+                            serie: pickField(raw, ['serie', 'n_serie', 'numero_serie'])
                         });
                     }
                 });
@@ -2468,6 +2533,7 @@
             const periodicidade_preventiva = pickField(raw, ['periodicidade_preventiva', 'periodicidade']);
             const disciplina = pickField(raw, ['disciplina', 'Disciplina']);
             const status_ativo = pickField(raw, ['status_ativo', 'status']);
+            const inspecao_ativa = raw.inspecao_ativa !== false && raw.inspecao_ativa !== 'false';
             const modelo = pickField(raw, ['modelo', 'Modelo', 'MODELO']);
             const serie = pickField(raw, ['serie', 'Serie', 'SERIE', 'série', 'Série', 'n_serie', 'num_serie', 'numero_serie']);
 
@@ -2483,6 +2549,7 @@
                 periodicidade_preventiva,
                 disciplina,
                 status_ativo,
+                inspecao_ativa,
                 modelo,
                 serie
             }];
@@ -2497,15 +2564,23 @@
 
         function atualizarBadgesArvore() {
             const total = arvLinhas.length;
+            const ativosInsp = arvLinhas.filter(isConjuntoInspecaoAtiva).length;
+            const ocultosInsp = total - ativosInsp;
             const bPlan = document.getElementById('badgeArvorePlan');
             const bCfg = document.getElementById('badgeArvoreCfg');
             const dTot = document.getElementById('dashTotalArvore');
             const dSub = document.getElementById('dashPlanosCirurgicosSub');
 
-            if (bPlan) bPlan.innerText = ` ${total} ativo(s) da árvore carregados`;
-            if (bCfg) bCfg.innerText = ` ${total} ativo(s) em ob_linhas`;
+            if (bPlan) bPlan.innerText = ocultosInsp > 0
+                ? ` ${ativosInsp} ativo(s) insp. • ${ocultosInsp} oculto(s)`
+                : ` ${ativosInsp} ativo(s) da árvore carregados`;
+            if (bCfg) bCfg.innerText = ocultosInsp > 0
+                ? ` ${total} em ob_linhas (${ocultosInsp} oculto(s) insp.)`
+                : ` ${total} ativo(s) em ob_linhas`;
             if (dTot) dTot.innerText = total;
-            if (dSub) dSub.innerText = `${Object.keys(mapaChecklists).length} planos cirúrgicos ativos`;
+            if (dSub) dSub.innerText = ocultosInsp > 0
+                ? `${Object.keys(mapaChecklists).length} planos cirúrgicos • ${ocultosInsp} conj. oculto(s)`
+                : `${Object.keys(mapaChecklists).length} planos cirúrgicos ativos`;
         }
 
         function escapeHtml(str) {
@@ -2767,6 +2842,7 @@
             } catch (_) {}
 
             onSnapshot(refLinhas, (snap) => {
+                rawDocsObLinhas = {};
                 const temp = [];
                 snap.forEach(d => {
                     const expandidos = expandirDocumentoArvore(d.id, d.data());
@@ -3594,9 +3670,14 @@
             if (selE) selE.value = planEquipsSelecionados[0] || '';
         }
 
+        function getLinhasParaInspecao() {
+            return arvLinhas.filter(isConjuntoInspecaoAtiva);
+        }
+
         window.initPlanejamento = () => {
             atualizarBadgesArvore();
-            const areas = [...new Set(arvLinhas.map(x => x.area))].filter(Boolean).sort((a, b) => a.localeCompare(b));
+            const baseInsp = getLinhasParaInspecao();
+            const areas = [...new Set(baseInsp.map(x => x.area))].filter(Boolean).sort((a, b) => a.localeCompare(b));
 
             const areaSel = document.getElementById('planArea');
             if (areaSel) {
@@ -3635,7 +3716,7 @@
         }
 
         window.atualizaFiltrosPlan = (keepValues = false) => {
-            const baseLinhas = arvLinhas.filter(x => planAreasSelecionadas.includes(x.area));
+            const baseLinhas = getLinhasParaInspecao().filter(x => planAreasSelecionadas.includes(x.area));
             const maqs = [...new Set(baseLinhas.map(x => x.maquina))].filter(Boolean).sort((a, b) => a.localeCompare(b));
 
             const maqSel = document.getElementById('planMaquina');
@@ -3683,7 +3764,7 @@
         };
 
         window.atualizaFiltroEquipPlan = (keepValues = false) => {
-            const baseLinhas = arvLinhas.filter(x => planAreasSelecionadas.includes(x.area) && planMaquinasSelecionadas.includes(x.maquina));
+            const baseLinhas = getLinhasParaInspecao().filter(x => planAreasSelecionadas.includes(x.area) && planMaquinasSelecionadas.includes(x.maquina));
             const equips = [...new Set(baseLinhas.map(x => x.equipamento))].filter(Boolean).sort((a, b) => a.localeCompare(b));
 
             const eqSel = document.getElementById('planEquipamento');
@@ -3728,7 +3809,7 @@
                 } else {
                     planAreasSelecionadas = planAreasSelecionadas.filter(x => x !== valor);
                 }
-                const areas = [...new Set(arvLinhas.map(x => x.area))].filter(Boolean).sort((a, b) => a.localeCompare(b));
+                const areas = [...new Set(getLinhasParaInspecao().map(x => x.area))].filter(Boolean).sort((a, b) => a.localeCompare(b));
                 renderMenuMultiArea(areas);
                 atualizaFiltrosPlan(true);
             } else if (tipo === 'maquina') {
@@ -3750,18 +3831,18 @@
 
         window.marcarTodosPlanMulti = (tipo) => {
             if (tipo === 'area') {
-                const areas = [...new Set(arvLinhas.map(x => x.area))].filter(Boolean).sort((a, b) => a.localeCompare(b));
+                const areas = [...new Set(getLinhasParaInspecao().map(x => x.area))].filter(Boolean).sort((a, b) => a.localeCompare(b));
                 if (planAreasSelecionadas.length === areas.length) {
                     planAreasSelecionadas = areas.length > 0 ? [areas[0]] : [];
                 } else {
                     planAreasSelecionadas = [...areas];
                 }
                 renderMenuMultiArea(areas);
-                const baseLinhas = arvLinhas.filter(x => planAreasSelecionadas.includes(x.area));
+                const baseLinhas = getLinhasParaInspecao().filter(x => planAreasSelecionadas.includes(x.area));
                 planMaquinasSelecionadas = [...new Set(baseLinhas.map(x => x.maquina))].filter(Boolean);
                 atualizaFiltrosPlan(true);
             } else if (tipo === 'maquina') {
-                const baseLinhas = arvLinhas.filter(x => planAreasSelecionadas.includes(x.area));
+                const baseLinhas = getLinhasParaInspecao().filter(x => planAreasSelecionadas.includes(x.area));
                 const maqs = [...new Set(baseLinhas.map(x => x.maquina))].filter(Boolean).sort((a, b) => a.localeCompare(b));
                 if (planMaquinasSelecionadas.length === maqs.length) {
                     planMaquinasSelecionadas = maqs.length > 0 ? [maqs[0]] : [];
@@ -3788,7 +3869,7 @@
             promptEl.classList.add('hidden');
             wrapper.classList.remove('hidden');
 
-            let itens = arvLinhas.filter(x => planAreasSelecionadas.includes(x.area) && planMaquinasSelecionadas.includes(x.maquina));
+            let itens = getLinhasParaInspecao().filter(x => planAreasSelecionadas.includes(x.area) && planMaquinasSelecionadas.includes(x.maquina));
             if (planEquipsSelecionados.length > 0) {
                 itens = itens.filter(x => planEquipsSelecionados.includes(x.equipamento));
             }
@@ -4037,7 +4118,8 @@
             const irmaos = arvLinhas.filter(x =>
                 x.area === node.area &&
                 x.maquina === node.maquina &&
-                x.equipamento === node.equipamento
+                x.equipamento === node.equipamento &&
+                (isConjuntoInspecaoAtiva(x) || x.id === idNode)
             ).sort((a, b) => getNomeConjunto(a).localeCompare(getNomeConjunto(b)));
 
             const boxConj = document.getElementById('agListaConjuntosEquip');
@@ -4792,6 +4874,82 @@
             renderArvoreConjuntosEditor();
         };
 
+        let cfgFiltroInspStatus = 'todos';
+
+        window.setCfgFiltroInsp = (status) => {
+            cfgFiltroInspStatus = ['todos', 'ativos', 'ocultos'].includes(status) ? status : 'todos';
+            ['todos', 'ativos', 'ocultos'].forEach(k => {
+                const btn = document.getElementById(`btnCfgFiltroInsp_${k}`);
+                if (!btn) return;
+                const ativo = k === cfgFiltroInspStatus;
+                btn.className = `px-2.5 py-1 rounded-full text-[10px] font-extrabold transition-colors ${
+                    ativo
+                        ? 'bg-slate-900 text-white'
+                        : 'bg-slate-100 text-slate-600 hover:bg-slate-200'
+                }`;
+            });
+            renderArvoreConjuntosEditor();
+        };
+
+        window.toggleConjuntoInspecaoAtiva = async (nodeId, ev) => {
+            if (ev && ev.stopPropagation) ev.stopPropagation();
+            const node = arvLinhas.find(x => x.id === nodeId);
+            if (!node) return;
+            const novo = !isConjuntoInspecaoAtiva(node);
+            const nomeConj = getNomeConjunto(node);
+
+            try {
+                if (node._nestedKey && node._parentDocId !== undefined && Number.isInteger(node._nestedIdx)) {
+                    const rawDoc = rawDocsObLinhas[node._parentDocId];
+                    if (!rawDoc) return;
+                    const arr = Array.isArray(rawDoc[node._nestedKey]) ? JSON.parse(JSON.stringify(rawDoc[node._nestedKey])) : [];
+                    const item = arr[node._nestedIdx];
+                    if (item && typeof item === 'object') {
+                        item.inspecao_ativa = novo;
+                        await updateDoc(doc(db, "ob_linhas", node._parentDocId), { [node._nestedKey]: arr });
+                    } else {
+                        const inat = new Set(Array.isArray(rawDoc.conjuntos_insp_inativos) ? rawDoc.conjuntos_insp_inativos : []);
+                        if (novo) inat.delete(node._nestedIdx);
+                        else inat.add(node._nestedIdx);
+                        await updateDoc(doc(db, "ob_linhas", node._parentDocId), { conjuntos_insp_inativos: [...inat] });
+                    }
+                } else {
+                    await updateDoc(doc(db, "ob_linhas", node.id), { inspecao_ativa: novo });
+                }
+                node.inspecao_ativa = novo;
+                atualizarBadgesArvore();
+                renderArvoreConjuntosEditor();
+                if (editorSelectedNodeId === node.id) atualizarBotaoInspEditor(node);
+                if (!document.getElementById('view-planejamento')?.classList.contains('hidden')) {
+                    initPlanejamento();
+                }
+                showToast(novo
+                    ? `"${nomeConj}" ativado para Inspeção (visível no Calendário 52 Semanas).`
+                    : `"${nomeConj}" marcado como Não Ativo — oculto das inspeções e mantido mapeado na árvore.`);
+            } catch (err) {
+                showToast("Erro ao atualizar status de inspeção do conjunto.", "error");
+            }
+        };
+
+        function atualizarBotaoInspEditor(node) {
+            const btn = document.getElementById('btnToggleInspAtivaEditor');
+            const dot = document.getElementById('dotToggleInspAtivaEditor');
+            const lbl = document.getElementById('lblToggleInspAtivaEditor');
+            const aviso = document.getElementById('cfgEdAvisoOculto');
+            if (!btn || !dot || !lbl) return;
+            const ativo = isConjuntoInspecaoAtiva(node);
+            if (ativo) {
+                btn.className = 'inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-full text-xs font-extrabold border transition-all bg-emerald-50 text-emerald-800 border-emerald-200 hover:bg-emerald-100';
+                dot.className = 'w-2 h-2 rounded-full bg-emerald-500';
+                lbl.innerText = 'Ativo na Inspeção';
+            } else {
+                btn.className = 'inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-full text-xs font-extrabold border transition-all bg-amber-100 text-amber-900 border-amber-300 hover:bg-amber-200';
+                dot.className = 'w-2 h-2 rounded-full bg-amber-500';
+                lbl.innerText = 'Não Ativo (Oculto Insp.)';
+            }
+            if (aviso) aviso.classList.toggle('hidden', ativo);
+        }
+
         window.renderArvoreConjuntosEditor = () => {
             const area = document.getElementById('chkCfgArea').value;
             const maq = document.getElementById('chkCfgMaquina').value;
@@ -4808,11 +4966,17 @@
                 );
             }
 
-            document.getElementById('cfgCountConjuntos').innerText = `${filtrados.length} conjunto(s)`;
+            const ocultosScope = filtrados.filter(x => !isConjuntoInspecaoAtiva(x)).length;
+            if (cfgFiltroInspStatus === 'ativos') filtrados = filtrados.filter(isConjuntoInspecaoAtiva);
+            else if (cfgFiltroInspStatus === 'ocultos') filtrados = filtrados.filter(x => !isConjuntoInspecaoAtiva(x));
+
+            document.getElementById('cfgCountConjuntos').innerText = ocultosScope > 0
+                ? `${filtrados.length} conjunto(s) (${ocultosScope} oculto(s))`
+                : `${filtrados.length} conjunto(s)`;
             const listEl = document.getElementById('cfgArvoreConjuntos');
 
             if (filtrados.length === 0) {
-                listEl.innerHTML = `<div class="p-6 text-center text-xs font-semibold text-slate-400 border border-dashed border-slate-200 rounded-2xl">Nenhum conjunto encontrado. Clique em <strong>+ Cadastrar Ativo / Subconjuntos</strong> acima.</div>`;
+                listEl.innerHTML = `<div class="p-6 text-center text-xs font-semibold text-slate-400 border border-dashed border-slate-200 rounded-2xl">${cfgFiltroInspStatus !== 'todos' ? 'Nenhum conjunto neste filtro de status.' : 'Nenhum conjunto encontrado. Clique em <strong>+ Cadastrar Ativo / Subconjuntos</strong> acima.'}</div>`;
                 return;
             }
 
@@ -4836,18 +5000,26 @@
                     const qtdMec = planMec ? planMec.grupos.reduce((acc, g) => acc + (g.itens?.length || 0), 0) : 0;
                     const qtdEle = planEle ? planEle.grupos.reduce((acc, g) => acc + (g.itens?.length || 0), 0) : 0;
                     const isSelected = editorSelectedNodeId === node.id;
+                    const ativoInsp = isConjuntoInspecaoAtiva(node);
+                    const toggleCls = ativoInsp
+                        ? (isSelected ? 'bg-emerald-500/20 text-emerald-200 border-emerald-400/50 hover:bg-emerald-500/30' : 'bg-emerald-50 text-emerald-700 border-emerald-200 hover:bg-emerald-100')
+                        : (isSelected ? 'bg-amber-500/20 text-amber-200 border-amber-400/50 hover:bg-amber-500/30' : 'bg-amber-50 text-amber-800 border-amber-200 hover:bg-amber-100');
 
                     return `
                     <div class="p-3 rounded-xl border transition-all ${
                         isSelected
                             ? 'bg-slate-900 text-white border-slate-900 shadow-md'
-                            : 'bg-white hover:bg-slate-50 text-slate-900 border-slate-200/90'
+                            : (ativoInsp ? 'bg-white hover:bg-slate-50 text-slate-900 border-slate-200/90' : 'bg-slate-50/80 hover:bg-slate-100/80 text-slate-600 border-dashed border-slate-300')
                     }">
                         <div class="flex items-start justify-between gap-2">
                             <button type="button" onclick="selecionarConjuntoEditor('${node.id}')" class="text-left flex-1 min-w-0">
                                 <div class="text-xs font-extrabold leading-snug truncate">${escapeHtml(conj)}</div>
                             </button>
                             <div class="flex items-center gap-1 shrink-0">
+                                <button type="button" onclick="toggleConjuntoInspecaoAtiva('${node.id}', event)" title="${ativoInsp ? 'Ativo para Inspeção — clique para ocultar do Calendário 52 Semanas' : 'Não Ativo (Oculto do Calendário 52 Semanas) — clique para reativar'}" class="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[9px] font-extrabold border transition-colors ${toggleCls}">
+                                    <span class="w-1.5 h-1.5 rounded-full ${ativoInsp ? 'bg-emerald-500' : 'bg-amber-500'}"></span>
+                                    <span>${ativoInsp ? 'Ativo' : 'Não Ativo'}</span>
+                                </button>
                                 <button type="button" onclick="abrirModalEditarConjunto('${node.id}')" title="Renomear ou editar conjunto" class="p-1 rounded-lg ${isSelected ? 'hover:bg-slate-800 text-slate-300' : 'hover:bg-slate-100 text-slate-400 hover:text-slate-700'}">
                                     <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z"/></svg>
                                 </button>
@@ -4857,6 +5029,7 @@
                             </div>
                         </div>
                         <div onclick="selecionarConjuntoEditor('${node.id}')" class="flex flex-wrap gap-1.5 mt-2 cursor-pointer">
+                            ${!ativoInsp ? `<span class="inline-flex items-center gap-1 text-[9px] font-extrabold px-2 py-0.5 rounded-full ${isSelected ? 'bg-amber-400 text-slate-950' : 'bg-amber-100 text-amber-800 border border-amber-200'}">Oculto 52s (Preventiva/Árvore)</span>` : ''}
                             <span class="inline-flex items-center gap-1 text-[9px] font-extrabold px-2 py-0.5 rounded-full ${
                                 planMec
                                     ? (isSelected ? 'bg-sky-400 text-slate-950' : 'bg-sky-100 text-sky-800')
@@ -4922,6 +5095,7 @@
 
             document.getElementById('cfgEdCaminho').innerText = `${node.area} > ${node.maquina} > ${node.equipamento}`;
             document.getElementById('cfgEdTituloConjunto').innerText = getNomeConjunto(node);
+            atualizarBotaoInspEditor(node);
 
             const metaEl = document.getElementById('cfgEdMetaTecnica');
             const metas = [];
@@ -7757,6 +7931,8 @@
             document.getElementById('arvInputModelo').value = '';
             document.getElementById('arvInputSerie').value = '';
             document.getElementById('arvInputConjuntos').value = '';
+            const chkInsp = document.getElementById('arvInputInspAtiva');
+            if (chkInsp) chkInsp.checked = true;
 
             atualizarDatalistsArvore();
             document.getElementById('modalGerenciarArvore').classList.remove('hidden');
@@ -7776,6 +7952,8 @@
             document.getElementById('arvInputModelo').value = node.modelo || '';
             document.getElementById('arvInputSerie').value = node.serie || '';
             document.getElementById('arvInputConjuntos').value = '';
+            const chkInsp = document.getElementById('arvInputInspAtiva');
+            if (chkInsp) chkInsp.checked = true;
 
             atualizarDatalistsArvore();
             document.getElementById('modalGerenciarArvore').classList.remove('hidden');
@@ -7800,6 +7978,8 @@
             document.getElementById('arvInputModelo').value = node.modelo || '';
             document.getElementById('arvInputSerie').value = node.serie || '';
             document.getElementById('arvInputConjuntos').value = (node.conjunto && node.conjunto.trim()) || 'Conjunto Geral';
+            const chkInsp = document.getElementById('arvInputInspAtiva');
+            if (chkInsp) chkInsp.checked = isConjuntoInspecaoAtiva(node);
 
             atualizarDatalistsArvore();
             document.getElementById('modalGerenciarArvore').classList.remove('hidden');
@@ -7814,6 +7994,7 @@
             const modelo = document.getElementById('arvInputModelo').value.trim();
             const serie = document.getElementById('arvInputSerie').value.trim();
             const rawConjuntos = document.getElementById('arvInputConjuntos').value;
+            const inspAtiva = document.getElementById('arvInputInspAtiva') ? Boolean(document.getElementById('arvInputInspAtiva').checked) : true;
 
             if (!area || !maquina || !equipamento || !rawConjuntos.trim()) {
                 showToast("Preencha Setor, Máquina, Equipamento e pelo menos um Conjunto.", "error");
@@ -7834,7 +8015,8 @@
                         equipamento,
                         conjunto: nomeUnico,
                         modelo,
-                        serie
+                        serie,
+                        inspecao_ativa: inspAtiva
                     });
                     showToast(`Conjunto "${nomeUnico}" atualizado com sucesso!`);
                 } else {
@@ -7853,6 +8035,7 @@
                             conjunto: nomeConj,
                             modelo,
                             serie,
+                            inspecao_ativa: inspAtiva,
                             timestamp: Date.now()
                         });
                         ultimoId = docRef.id;
@@ -8088,6 +8271,7 @@
                         conjunto: nomeConj,
                         modelo: oldNode.modelo || '',
                         serie: oldNode.serie || '',
+                        inspecao_ativa: isConjuntoInspecaoAtiva(oldNode),
                         timestamp: Date.now()
                     });
                     conjuntosCriados++;
