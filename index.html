@@ -201,7 +201,7 @@
             </form>
 
             <div class="mt-6 pt-5 border-t border-slate-200/80 flex items-center justify-between text-[11px] text-slate-400 font-semibold">
-                <span>6 Sistemas Integrados</span>
+                <span>7 Sistemas Integrados</span>
                 <span>Banco: pcm-cepera (ir_funcionarios)</span>
             </div>
         </div>
@@ -312,7 +312,7 @@
                     </div>
 
                     <!-- KPIs RBAC -->
-                    <div class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-7 gap-3.5" id="rbacKpiRow"></div>
+                    <div class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-8 gap-3.5" id="rbacKpiRow"></div>
 
                     <!-- FILTROS DA MATRIZ RBAC -->
                     <div class="glass-card p-5 rounded-3xl space-y-4">
@@ -340,9 +340,9 @@
                             </div>
                         </div>
 
-                        <!-- TABELA MATRIZ DE ACESSOS (USUÁRIOS x 6 APPS) -->
+                        <!-- TABELA MATRIZ DE ACESSOS (USUÁRIOS x 7 APPS) -->
                         <div class="overflow-x-auto rounded-2xl border border-slate-200">
-                            <table class="w-full border-collapse text-left min-w-[1040px]">
+                            <table class="w-full border-collapse text-left min-w-[1160px]">
                                 <thead>
                                     <tr class="bg-slate-50 border-b border-slate-200 text-[11px] font-extrabold uppercase text-slate-600">
                                         <th class="py-3.5 px-4">Colaborador / Login</th>
@@ -353,6 +353,7 @@
                                         <th class="py-3.5 px-3 text-center">Obsolescência</th>
                                         <th class="py-3.5 px-3 text-center">Multipet</th>
                                         <th class="py-3.5 px-3 text-center">Gestão de Ativos</th>
+                                        <th class="py-3.5 px-3 text-center">Preventivas</th>
                                         <th class="py-3.5 px-4 text-right">Ações Rápidas</th>
                                     </tr>
                                 </thead>
@@ -468,7 +469,7 @@
         import { getAuth, signInAnonymously } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
         import { initializeFirestore, collection, addDoc, onSnapshot, doc, updateDoc, deleteDoc } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
 
-        // ================= CATÁLOGO OFICIAL DOS 6 APLICATIVOS DA CENTRAL =================
+        // ================= CATÁLOGO OFICIAL DOS 7 APLICATIVOS DA CENTRAL =================
         const APPS_CATALOG = [
             {
                 id: 'inspecao_rota',
@@ -548,6 +549,19 @@
                 description: 'Governança mestre da árvore industrial (Setor › Máquina › Equipamento › Conjunto › Subconjunto), calculadora de criticidade ABC, periodicidade preventiva e saneamento.',
                 collections: ['ob_linhas', 'ir_anomalias', 'ir_checklists', 'ob_equipamentos'],
                 defaultRoles: ['Admin', 'Gerente']
+            },
+            {
+                id: 'preventivas',
+                shortTitle: 'Preventivas',
+                title: 'Controle de Manutenção Preventiva',
+                file: 'PREVENTIVAS.html',
+                category: 'Preventiva & Calendário',
+                badgeClass: 'bg-cyan-100 text-cyan-900 border-cyan-200',
+                accentColor: '#0284c7',
+                iconHtml: '<svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"/></svg>',
+                description: 'Planos internos (colar do Excel), cronograma fixo ou flutuante integrado à Agenda PCM, execução em campo com checklist, fotos de evidência, KPIs e relatório A4.',
+                collections: ['ag_manutencao', 'ob_linhas', 'ir_anomalias', 'ir_funcionarios'],
+                defaultRoles: ['Admin', 'Gerente', 'Supervisor Mecânica', 'Supervisor Elétrica', 'Mecânica', 'Elétrica', 'Automação', 'Utilidades']
             }
         ];
 
@@ -1046,7 +1060,7 @@
 
             const tbody = document.getElementById('tbodyMatrizRbac');
             if (filtrados.length === 0) {
-                tbody.innerHTML = `<tr><td colspan="9" class="p-8 text-center text-slate-400 font-bold">Nenhum colaborador encontrado para este filtro.</td></tr>`;
+                tbody.innerHTML = `<tr><td colspan="10" class="p-8 text-center text-slate-400 font-bold">Nenhum colaborador encontrado para este filtro.</td></tr>`;
                 return;
             }
 

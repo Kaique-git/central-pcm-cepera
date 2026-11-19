@@ -1211,6 +1211,10 @@
             return Boolean(item && item.kind === 'recado');
         }
 
+        function isPlanoPreventivaDoc(item) {
+            return Boolean(item && item.kind === 'plano_preventiva');
+        }
+
         let hoje = new Date();
         let viewAno = hoje.getFullYear();
         let viewMes = hoje.getMonth();
@@ -1230,11 +1234,11 @@
         let usuarioLogado = null;
 
         function getLancamentosCalendario() {
-            return lancamentos.filter(l => !isRecadoDoc(l) && Boolean(l.data));
+            return lancamentos.filter(l => !isRecadoDoc(l) && !isPlanoPreventivaDoc(l) && Boolean(l.data));
         }
 
         function getRecadosMural() {
-            return lancamentos.filter(isRecadoDoc);
+            return lancamentos.filter(l => isRecadoDoc(l) && !isPlanoPreventivaDoc(l));
         }
 
         const ICONS = {
@@ -1775,6 +1779,7 @@
                             <span class="st-badge" style="border-color:${t.cor};color:${t.cor}">${t.nome}</span>
                             <select class="st-badge st-select ${s.badge}" onchange="mudarStatus('${escapeHtml(l.id)}', this.value)">${statusOptions}</select>
                             ${l.recadoOrigemId ? `<span class="st-badge bg-amber-50 text-amber-800 border-amber-200">Planejado via Mural</span>` : ''}
+                            ${l.origem === 'modulo_preventivas' ? `<span class="st-badge bg-sky-50 text-sky-800 border-sky-200">Preventiva Integrada${l.planoCodigo ? ' • ' + escapeHtml(l.planoCodigo) : ''}</span>` : ''}
                         </div>
                         <p class="font-extrabold text-sm text-slate-900 mt-1">${escapeHtml(l.titulo)}</p>
                         <p class="text-xs text-slate-500 font-semibold mt-0.5"><strong class="text-slate-700">${escapeHtml(l.equipe || 'Geral')}</strong> • Resp: ${escapeHtml(l.responsavel || 'N/A')}</p>
