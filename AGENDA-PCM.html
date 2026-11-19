@@ -854,8 +854,17 @@
                     <p id="planRecadoResumo" class="text-xs font-semibold text-amber-950 whitespace-pre-wrap"></p>
                 </div>
 
+                <div id="ativoOrigemBanner" hidden class="hidden p-3.5 rounded-2xl bg-emerald-50 border border-emerald-200 text-emerald-950 space-y-1">
+                    <div class="flex items-center justify-between gap-2">
+                        <span class="text-[10px] font-extrabold uppercase tracking-wider text-emerald-700">Conjunto Vinculado da Gestão de Ativos</span>
+                        <button type="button" onclick="cancelarVinculoAtivo()" class="text-[11px] font-extrabold text-emerald-800 hover:text-rose-600 underline">Desvincular ativo</button>
+                    </div>
+                    <p id="ativoOrigemResumo" class="text-xs font-bold text-emerald-950"></p>
+                </div>
+
                 <form id="addForm" class="space-y-3.5 text-xs">
                     <input type="hidden" id="fRecadoOrigemId" value="">
+                    <input type="hidden" id="fAtivoContextoJson" value="">
                     <div>
                         <label class="block text-[10px] font-extrabold uppercase text-slate-500 mb-1">Título / Equipamento *</label>
                         <input class="input-clean py-2 text-xs font-bold" id="fTitulo" required placeholder="Ex: Preventiva Sopradora Multipet 1">
@@ -1233,6 +1242,7 @@
         let filtroRecadoCat = "all";
         let buscaRecado = "";
         let usuarioLogado = null;
+        let pendingAgendaHandoffEquipe = null;
 
         function getLancamentosCalendario() {
             return lancamentos.filter(l => !isRecadoDoc(l) && !isPlanoPreventivaDoc(l) && Boolean(l.data));
@@ -1438,6 +1448,7 @@
                     atualizarSelectRespAdd();
                     atualizarSelectRespEdit();
                     atualizarDatalistRecados();
+                    reAplicarEquipeRespHandoff();
                 });
 
                 onSnapshot(eqColRef, snap => {
@@ -1445,6 +1456,7 @@
                     snap.forEach(d => listaEquipes.push({ id: d.id, ...d.data() }));
                     atualizarSelectsDominio();
                     renderListaEquipes();
+                    reAplicarEquipeRespHandoff();
                 });
 
                 onSnapshot(setColRef, snap => {
@@ -1574,6 +1586,18 @@
             if (!dias.length) return '—';
             if (dias.length === 1) return getDiaExtenso(dias[0]);
             return `${dias.slice(0, 3).map(d => { const p = d.split('-'); return `${p[2]}/${p[1]}`; }).join(', ')}${dias.length > 3 ? ` +${dias.length - 3}` : ''} (${dias.length}d)`;
+        }
+
+        function getIsoWeekInfoAgenda(dInput) {
+            const dt = typeof dInput === 'string' ? new Date(`${dInput.slice(0, 10)}T12:00:00Z`) : new Date(dInput);
+            if (Number.isNaN(dt.getTime())) return { week: 1, isoYear: new Date().getFullYear() };
+            const d = new Date(Date.UTC(dt.getUTCFullYear(), dt.getUTCMonth(), dt.getUTCDate()));
+            const dayNum = d.getUTCDay() || 7;
+            d.setUTCDate(d.getUTCDate() + 4 - dayNum);
+            const isoYear = d.getUTCFullYear();
+            const yearStart = new Date(Date.UTC(isoYear, 0, 1));
+            const week = Math.ceil((((d - yearStart) / 86400000) + 1) / 7);
+            return { week, isoYear };
         }
 
         window.renderNotificationsTable = renderNotificationsTable;
@@ -1733,9 +1757,27 @@
             if (banner) { banner.hidden = true; banner.classList.add('hidden'); }
             const resumo = document.getElementById('planRecadoResumo');
             if (resumo) resumo.innerText = '';
+            const ativoJson = document.getElementById('fAtivoContextoJson');
+            if (ativoJson) ativoJson.value = '';
+            const ativoBan = document.getElementById('ativoOrigemBanner');
+            if (ativoBan) { ativoBan.hidden = true; ativoBan.classList.add('hidden'); }
+            const ativoRes = document.getElementById('ativoOrigemResumo');
+            if (ativoRes) ativoRes.innerText = '';
+            pendingAgendaHandoffEquipe = null;
             const title = document.getElementById('addFormTitle');
             if (title) title.innerText = '+ Novo Lançamento nesta Data';
         }
+
+        window.cancelarVinculoAtivo = () => {
+            const ativoJson = document.getElementById('fAtivoContextoJson');
+            if (ativoJson) ativoJson.value = '';
+            const ativoBan = document.getElementById('ativoOrigemBanner');
+            if (ativoBan) { ativoBan.hidden = true; ativoBan.classList.add('hidden'); }
+            const ativoRes = document.getElementById('ativoOrigemResumo');
+            if (ativoRes) ativoRes.innerText = '';
+            pendingAgendaHandoffEquipe = null;
+            showToast("Vínculo com o conjunto removido.");
+        };
 
         window.cancelarVinculoRecado = () => {
             resetFormPlanejamento();
@@ -1878,6 +1920,11 @@
             }
             diaAberto = dataSelecionada;
             const recadoOrigemId = (document.getElementById('fRecadoOrigemId')?.value || '').trim();
+            const ativoJsonRaw = (document.getElementById('fAtivoContextoJson')?.value || '').trim();
+            let ativoCtx = null;
+            if (ativoJsonRaw) {
+                try { ativoCtx = JSON.parse(ativoJsonRaw); } catch (_) {}
+            }
 
             const baseData = {
                 kind: 'agendamento',
@@ -1893,6 +1940,17 @@
                 criadoEm: new Date().toISOString()
             };
             if (recadoOrigemId) baseData.recadoOrigemId = recadoOrigemId;
+            if (ativoCtx && typeof ativoCtx === 'object') {
+                baseData.origem = 'gestao_ativos';
+                if (ativoCtx.area) baseData.setor = ativoCtx.area;
+                if (ativoCtx.maquina) baseData.maquina = ativoCtx.maquina;
+                if (ativoCtx.equipamento) baseData.equipamento = ativoCtx.equipamento;
+                if (ativoCtx.conjunto) baseData.conjunto = ativoCtx.conjunto;
+                if (ativoCtx.subconjunto) baseData.subconjunto = ativoCtx.subconjunto;
+                if (ativoCtx.tag) baseData.tag = ativoCtx.tag;
+                if (ativoCtx.criticidade) baseData.criticidade = ativoCtx.criticidade;
+                if (ativoCtx.docId || ativoCtx.nodeId) baseData.ativoId = ativoCtx.docId || ativoCtx.nodeId;
+            }
 
             let datasParaSalvar = [dataSelecionada];
             const isRec = document.getElementById('fRecorrente').checked;
@@ -1918,7 +1976,10 @@
             }
 
             try {
-                const promises = datasParaSalvar.map(d => addDoc(colRef, { ...baseData, data: d }));
+                const promises = datasParaSalvar.map(d => {
+                    const wi = getIsoWeekInfoAgenda(d);
+                    return addDoc(colRef, { ...baseData, data: d, dataFim: d, datas: [d], semana: wi.week, ano: wi.isoYear });
+                });
                 await Promise.all(promises);
 
                 if (recadoOrigemId) {
@@ -2595,7 +2656,93 @@
             } catch (_) {}
         })();
 
-        document.addEventListener('DOMContentLoaded', () => { initFirebase(); });
+        function normHandoffKey(v) {
+            return String(v || '').normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase().trim();
+        }
+
+        function reAplicarEquipeRespHandoff() {
+            if (!pendingAgendaHandoffEquipe) return;
+            const { disciplina, padrinho } = pendingAgendaHandoffEquipe;
+            const fEq = document.getElementById('fEquipe');
+            const fResp = document.getElementById('fResp');
+            if (fEq && disciplina) {
+                const discLow = normHandoffKey(disciplina);
+                const matchEq = Array.from(fEq.options).find(o => {
+                    const ov = normHandoffKey(o.value);
+                    return ov === discLow || ov.includes(discLow) || discLow.includes(ov);
+                });
+                if (matchEq) fEq.value = matchEq.value;
+            }
+            atualizarSelectRespAdd();
+            if (fResp && padrinho) {
+                const padLow = normHandoffKey(padrinho);
+                const matchResp = Array.from(fResp.options).find(o => o.value && normHandoffKey(o.value) === padLow);
+                if (matchResp) fResp.value = matchResp.value;
+            }
+        }
+
+        function aplicarHandoffAgendamentoAgenda() {
+            let raw = null;
+            try { raw = safeStorage.get('cepera_agendamento_handoff'); } catch (_) {}
+            if (!raw) return;
+
+            let h = null;
+            try { h = JSON.parse(raw); } catch (_) { safeStorage.remove('cepera_agendamento_handoff'); return; }
+            if (!h || h.targetApp !== 'agenda_pcm') return;
+            if (h.criadoEm && (Date.now() - Number(h.criadoEm)) > 5 * 60 * 1000) {
+                safeStorage.remove('cepera_agendamento_handoff');
+                return;
+            }
+            safeStorage.remove('cepera_agendamento_handoff');
+
+            const a = h.ativo || {};
+            const hojeChave = chaveDia(hoje.getFullYear(), hoje.getMonth(), hoje.getDate());
+            switchView('calendar');
+            abrirDia(hojeChave);
+
+            const ctxEl = document.getElementById('fAtivoContextoJson');
+            if (ctxEl) ctxEl.value = JSON.stringify(a);
+
+            const pathLbl = [a.area, a.maquina, a.equipamento, a.conjunto, a.subconjunto].filter(Boolean).join(' › ');
+            const banner = document.getElementById('ativoOrigemBanner');
+            if (banner) { banner.hidden = false; banner.classList.remove('hidden'); }
+            const res = document.getElementById('ativoOrigemResumo');
+            if (res) res.innerText = pathLbl || a.conjunto || a.equipamento || 'Conjunto selecionado';
+
+            const fTit = document.getElementById('fTitulo');
+            if (fTit) {
+                const alvo = [a.conjunto, a.subconjunto].filter(Boolean).join(' › ');
+                fTit.value = a.equipamento ? `${a.equipamento}${alvo ? ' — ' + alvo : ''}` : (alvo || 'Manutenção Programada');
+            }
+
+            const fTipo = document.getElementById('fTipo');
+            if (fTipo && h.tipoSugerido && TIPOS[h.tipoSugerido]) {
+                fTipo.value = h.tipoSugerido;
+            }
+
+            const discLow = normHandoffKey(a.disciplina);
+            const padrinhoSug = (discLow.includes('el') || discLow.includes('auto')) ? (a.padrinho_ele || a.padrinho_mec) : (a.padrinho_mec || a.padrinho_ele);
+            pendingAgendaHandoffEquipe = { disciplina: a.disciplina || '', padrinho: padrinhoSug || '' };
+            reAplicarEquipeRespHandoff();
+
+            const fDesc = document.getElementById('fDesc');
+            if (fDesc) {
+                const detalhes = [
+                    pathLbl ? `Ativo: ${pathLbl}` : '',
+                    a.tag ? `TAG: ${a.tag}` : '',
+                    a.criticidade ? `Criticidade: Classe ${a.criticidade}` : '',
+                    a.periodicidade ? `Periodicidade padrão: ${a.periodicidade}` : ''
+                ].filter(Boolean);
+                fDesc.value = detalhes.join(' • ');
+            }
+
+            showToast(`Formulário pré-preenchido para "${a.conjunto || a.equipamento}". Escolha a data e salve.`);
+        }
+
+        document.addEventListener('DOMContentLoaded', () => {
+            initFirebase();
+            aplicarHandoffAgendamentoAgenda();
+        });
     </script>
 </body>
 </html>

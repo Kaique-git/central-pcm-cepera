@@ -939,6 +939,74 @@
         </div>
     </div>
 
+    <!-- ==================== MODAL AGENDAR PROGRAMADA DO CONJUNTO ==================== -->
+    <div id="modalAgendarConjunto" role="dialog" aria-modal="true" hidden class="hidden fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-50 flex items-end sm:items-center justify-center p-0 sm:p-4">
+        <div class="bg-white w-full sm:max-w-xl rounded-t-3xl sm:rounded-3xl shadow-2xl border border-slate-200 max-h-[92vh] flex flex-col overflow-hidden">
+            <div class="px-6 py-4 border-b border-slate-100 bg-slate-50 flex items-start justify-between gap-3">
+                <div class="min-w-0 space-y-0.5">
+                    <span class="text-[10px] font-extrabold uppercase tracking-widest text-emerald-700">Agendamento Integrado • Conjunto Selecionado</span>
+                    <h2 id="agConjuntoTitulo" class="text-lg font-extrabold text-slate-900 leading-tight truncate">—</h2>
+                    <div id="agConjuntoMeta" class="space-y-1"></div>
+                </div>
+                <button type="button" onclick="fecharModal('modalAgendarConjunto')" class="w-8 h-8 rounded-full bg-white border border-slate-200 text-slate-600 font-bold shrink-0">✕</button>
+            </div>
+
+            <div class="flex-1 overflow-y-auto p-5 sm:p-6 space-y-4 text-xs">
+                <div id="agConjuntoResumoExistente" hidden class="hidden p-3 rounded-2xl bg-sky-50 border border-sky-200 text-[11px] font-bold text-sky-900"></div>
+
+                <!-- OPÇÃO 1: AGENDA PCM -->
+                <div class="p-4 rounded-2xl bg-slate-50 border border-slate-200/80 space-y-3">
+                    <div class="flex items-start justify-between gap-2">
+                        <div>
+                            <div class="text-xs font-extrabold text-slate-900">1. Agenda PCM (Programação Geral)</div>
+                            <p class="text-[11px] text-slate-500 font-semibold mt-0.5">Leva para a Agenda com o conjunto pré-preenchido (Preventiva avulsa, Parada Programada, Corretiva, Preditiva ou Melhoria).</p>
+                        </div>
+                    </div>
+                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-2.5 items-end">
+                        <div>
+                            <label class="block text-[10px] font-extrabold uppercase text-slate-500 mb-1">Tipo da Programada</label>
+                            <select id="agModalTipoAgenda" class="input-clean py-2 text-xs font-bold">
+                                <option value="preventiva">Preventiva</option>
+                                <option value="parada">Parada Programada</option>
+                                <option value="corretiva">Corretiva</option>
+                                <option value="preditiva">Preditiva</option>
+                                <option value="melhoria">Melhoria</option>
+                            </select>
+                        </div>
+                        <button type="button" onclick="executarHandoffAgendamento('agenda_pcm', 'agenda_novo')" class="btn-pill-dark text-xs justify-center py-2.5 px-4">
+                            <span>Ir para Agenda PCM →</span>
+                        </button>
+                    </div>
+                    <div id="agModalAgendaInfo" class="text-[10px] font-bold text-slate-500"></div>
+                </div>
+
+                <!-- OPÇÃO 2: PREVENTIVAS (PLANOS & 52 SEMANAS) -->
+                <div class="p-4 rounded-2xl bg-sky-50/60 border border-sky-200/80 space-y-3">
+                    <div>
+                        <div class="text-xs font-extrabold text-slate-900">2. Módulo Preventivas (Planos &amp; Calendário 52 Semanas)</div>
+                        <p class="text-[11px] text-slate-500 font-semibold mt-0.5">Programe diretamente um plano do conjunto, crie um novo plano ou abra as 52 Semanas filtradas.</p>
+                    </div>
+
+                    <div id="agModalPlanosLista" class="space-y-2"></div>
+
+                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-2 pt-1">
+                        <button type="button" onclick="executarHandoffAgendamento('preventivas', 'preventiva_novo_plano')" class="btn-touch bg-white hover:bg-slate-50 border border-slate-200 text-slate-800 text-[11px] justify-center py-2.5 px-3">
+                            <span>+ Novo Plano p/ Conjunto</span>
+                        </button>
+                        <button type="button" onclick="executarHandoffAgendamento('preventivas', 'preventiva_52s')" class="btn-touch bg-sky-600 hover:bg-sky-700 text-white text-[11px] justify-center py-2.5 px-3 shadow-sm">
+                            <span>Calendário 52 Semanas →</span>
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <div class="px-6 py-3.5 border-t border-slate-100 bg-slate-50 flex items-center justify-between">
+                <span class="text-[10px] font-semibold text-slate-400">Navegação integrada no workspace da Central.</span>
+                <button type="button" onclick="fecharModal('modalAgendarConjunto')" class="btn-touch bg-white border border-slate-200 text-slate-700 text-xs">Fechar</button>
+            </div>
+        </div>
+    </div>
+
     <!-- ==================== MODAL ESPAÇO DO USUÁRIO ==================== -->
     <div id="modalEspacoUsuario" role="dialog" aria-modal="true" hidden class="hidden fixed inset-0 bg-slate-900/60 z-50 flex items-end sm:items-center justify-center p-0 sm:p-4">
         <div class="bg-white w-full sm:max-w-xl sm:rounded-3xl rounded-t-3xl max-h-[92vh] flex flex-col shadow-2xl overflow-hidden border border-slate-200">
@@ -1046,6 +1114,7 @@
         const refAnomalias = collection(db, "ir_anomalias");
         const refChecklists = collection(db, "ir_checklists");
         const refAgenda = collection(db, "ir_agenda");
+        const refManutencao = collection(db, "ag_manutencao");
         const refObsPecas = collection(db, "ob_equipamentos");
 
         // ================= DOMÍNIO DE ENGENHARIA =================
@@ -1084,6 +1153,7 @@
         let listaAnomalias = [];
         let listaChecklists = [];
         let listaAgenda = [];
+        let listaManutencao = [];
         let listaObsPecas = [];
 
         let currentView = 'arvore';
@@ -1093,6 +1163,7 @@
         let pendingDeleteAction = null;
         let pendingCloneCtx = null;
         let pendingRenameCtx = null;
+        let pendingAgendarCtx = null;
         let parsedCsvRows = [];
         let chartCritInstance = null;
         let chartPerInstance = null;
@@ -1485,6 +1556,12 @@
                     snap.forEach(d => listaObsPecas.push({ id: d.id, ...d.data() }));
                     if (currentView === 'arvore') renderDetailPanel();
                 });
+
+                onSnapshot(refManutencao, (snap) => {
+                    listaManutencao = [];
+                    snap.forEach(d => listaManutencao.push({ id: d.id, ...d.data() }));
+                    if (currentView === 'arvore') renderDetailPanel();
+                });
             } catch (_) {
                 const errB = document.getElementById('errBanner');
                 if (errB) { errB.hidden = false; errB.classList.remove('hidden'); }
@@ -1752,6 +1829,7 @@
                                                 <div class="flex items-center gap-1 shrink-0">
                                                     ${critC ? renderBadgeCrit(critC, 'xs') : ''}
                                                     <span class="text-[10px] font-bold text-slate-400">${leafs.length}</span>
+                                                    <button type="button" title="Agendar programada para este conjunto" aria-label="Agendar programada para ${escapeHtml(cj)}" onclick="event.stopPropagation(); abrirModalAgendarConjunto(${JSON.stringify(area).replace(/"/g, '&quot;')}, ${JSON.stringify(maq).replace(/"/g, '&quot;')}, ${JSON.stringify(eq).replace(/"/g, '&quot;')}, ${JSON.stringify(cj).replace(/"/g, '&quot;')})" class="w-5 h-5 rounded-md bg-slate-100 hover:bg-emerald-100 text-slate-500 hover:text-emerald-700 flex items-center justify-center transition-colors"><svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/></svg></button>
                                                     <button type="button" title="Adicionar Subconjunto neste Conjunto" onclick="event.stopPropagation(); abrirModalNovoAtivo({ area: ${JSON.stringify(area).replace(/"/g, '&quot;')}, maquina: ${JSON.stringify(maq).replace(/"/g, '&quot;')}, equipamento: ${JSON.stringify(eq).replace(/"/g, '&quot;')}, conjunto: ${JSON.stringify(cj).replace(/"/g, '&quot;')} })" class="w-5 h-5 rounded-md bg-slate-100 hover:bg-sky-100 text-slate-600 hover:text-sky-700 font-extrabold text-xs flex items-center justify-center">+</button>
                                                 </div>
                                             </div>`;
@@ -1791,6 +1869,137 @@
 
             box.innerHTML = html;
         }
+
+        // ================= AGENDAMENTO DIRETO DO CONJUNTO =================
+        window.abrirModalAgendarConjunto = (area, maquina, equipamento, conjunto, nodeId = '') => {
+            const areaN = normKey(area);
+            const maqN = normKey(maquina);
+            const eqN = normKey(equipamento);
+            const cjN = normKey(conjunto);
+            const leafs = assetNodes.filter(n =>
+                normKey(n.area) === areaN &&
+                normKey(n.maquina) === maqN &&
+                normKey(n.equipamento) === eqN &&
+                normKey(n.conjunto) === cjN
+            );
+            const rep = (nodeId && leafs.find(n => n.nodeId === nodeId)) || leafs[0] || {};
+
+            pendingAgendarCtx = {
+                area: area || rep.area || '',
+                maquina: maquina || rep.maquina || '',
+                equipamento: equipamento || rep.equipamento || '',
+                conjunto: conjunto || rep.conjunto || '',
+                subconjunto: nodeId ? (rep.subconjunto || '') : '',
+                tag: rep.tag || '',
+                criticidade: maiorCriticidade(leafs) || rep.criticidade || '',
+                periodicidade: rep.periodicidade_preventiva || '',
+                disciplina: rep.disciplina || 'Mecânica',
+                padrinho_mec: rep.padrinho_mec || '',
+                padrinho_ele: rep.padrinho_ele || '',
+                nodeId: rep.nodeId || '',
+                docId: rep.docId || ''
+            };
+
+            const titEl = document.getElementById('agConjuntoTitulo');
+            if (titEl) titEl.innerText = pendingAgendarCtx.conjunto || pendingAgendarCtx.equipamento || 'Conjunto';
+
+            const metaEl = document.getElementById('agConjuntoMeta');
+            if (metaEl) {
+                const pathTxt = [pendingAgendarCtx.area, pendingAgendarCtx.maquina, pendingAgendarCtx.equipamento, pendingAgendarCtx.conjunto, pendingAgendarCtx.subconjunto]
+                    .filter(Boolean).map(escapeHtml).join(' › ');
+                metaEl.innerHTML = `
+                    <div class="text-[11px] font-bold text-slate-500">${pathTxt}</div>
+                    <div class="flex flex-wrap items-center gap-1.5 pt-1">
+                        ${pendingAgendarCtx.criticidade ? renderBadgeCrit(pendingAgendarCtx.criticidade, 'xs') : ''}
+                        ${pendingAgendarCtx.periodicidade ? `<span class="px-2 py-0.5 rounded-full text-[10px] font-extrabold bg-sky-50 text-sky-700 border border-sky-200">${escapeHtml(pendingAgendarCtx.periodicidade)}</span>` : ''}
+                        <span class="px-2 py-0.5 rounded-full text-[10px] font-bold bg-slate-100 text-slate-700">${escapeHtml(pendingAgendarCtx.disciplina)}</span>
+                    </div>`;
+            }
+
+            const planosMatch = listaManutencao.filter(d => {
+                if (!d || d.kind !== 'plano_preventiva') return false;
+                if (normKey(d.equipamento) !== eqN) return false;
+                if (d.conjunto && normKey(d.conjunto) !== cjN) return false;
+                if (d.setor && normKey(d.setor) !== areaN) return false;
+                return true;
+            }).sort((a, b) => ((normKey(b.conjunto) === cjN ? 1 : 0) - (normKey(a.conjunto) === cjN ? 1 : 0)) || String(a.codigo || '').localeCompare(String(b.codigo || '')));
+
+            const pendentesConj = listaManutencao.filter(d => {
+                if (!d || d.kind === 'plano_preventiva' || d.kind === 'recado') return false;
+                if (d.status === 'concluido' || d.status === 'cancelado') return false;
+                const matchAtivo = d.ativoId && leafs.some(n => n.docId === d.ativoId || n.nodeId === d.ativoId);
+                const matchConj = normKey(d.equipamento) === eqN && (!d.conjunto || normKey(d.conjunto) === cjN);
+                return matchAtivo || matchConj;
+            });
+
+            const resEl = document.getElementById('agConjuntoResumoExistente');
+            if (resEl) {
+                if (planosMatch.length || pendentesConj.length) {
+                    resEl.hidden = false;
+                    resEl.classList.remove('hidden');
+                    resEl.innerText = `Resumo atual deste conjunto: ${planosMatch.length} plano(s) preventivo(s) cadastrado(s) e ${pendentesConj.length} programação(ões) em aberto na Agenda.`;
+                } else {
+                    resEl.hidden = true;
+                    resEl.classList.add('hidden');
+                    resEl.innerText = '';
+                }
+            }
+
+            const agInfoEl = document.getElementById('agModalAgendaInfo');
+            if (agInfoEl) {
+                const discLow = normKey(pendingAgendarCtx.disciplina);
+                const padrinhoSug = (discLow.includes('el') || discLow.includes('auto')) ? (pendingAgendarCtx.padrinho_ele || pendingAgendarCtx.padrinho_mec) : (pendingAgendarCtx.padrinho_mec || pendingAgendarCtx.padrinho_ele);
+                agInfoEl.innerText = `Equipe sugerida: ${pendingAgendarCtx.disciplina}${padrinhoSug ? ' • Padrinho: ' + padrinhoSug : ''}`;
+            }
+
+            const selTipoEl = document.getElementById('agModalTipoAgenda');
+            if (selTipoEl) selTipoEl.value = 'preventiva';
+
+            const planosEl = document.getElementById('agModalPlanosLista');
+            if (planosEl) {
+                if (planosMatch.length) {
+                    planosEl.innerHTML = planosMatch.slice(0, 4).map(p => `
+                        <div class="p-2.5 rounded-xl bg-white border border-slate-200 flex items-center justify-between gap-2">
+                            <div class="min-w-0">
+                                <div class="text-[11px] font-extrabold text-slate-900 truncate">${escapeHtml(p.codigo ? p.codigo + ' — ' : '')}${escapeHtml(p.titulo || 'Plano Preventivo')}</div>
+                                <div class="text-[10px] font-semibold text-slate-500">${escapeHtml(p.periodicidade || 'Mensal')} • ${Array.isArray(p.checklist) ? p.checklist.length : 0} item(ns) no checklist</div>
+                            </div>
+                            <button type="button" onclick="executarHandoffAgendamento('preventivas', 'preventiva_programar', '${escapeHtml(p.id)}')" class="px-3 py-1.5 rounded-xl bg-sky-600 hover:bg-sky-700 text-white text-[11px] font-extrabold shrink-0">Programar →</button>
+                        </div>`).join('') + (planosMatch.length > 4 ? `<div class="text-[10px] font-bold text-slate-400">+${planosMatch.length - 4} plano(s) no módulo Preventivas</div>` : '');
+                } else {
+                    planosEl.innerHTML = `<div class="p-2.5 rounded-xl bg-white/80 border border-dashed border-slate-300 text-[11px] font-semibold text-slate-500">Nenhum plano preventivo vinculado ainda a este conjunto. Crie um agora ou filtre o Calendário 52 Semanas abaixo.</div>`;
+                }
+            }
+
+            abrirModal('modalAgendarConjunto');
+        };
+
+        window.executarHandoffAgendamento = (targetApp, action, planoId = '') => {
+            if (!pendingAgendarCtx) return;
+            const tipoSugerido = targetApp === 'agenda_pcm'
+                ? (document.getElementById('agModalTipoAgenda')?.value || 'preventiva')
+                : 'preventiva';
+
+            const handoff = {
+                id: `hg_${Date.now()}`,
+                targetApp,
+                action,
+                planoId: planoId || '',
+                tipoSugerido,
+                ativo: { ...pendingAgendarCtx },
+                criadoEm: Date.now()
+            };
+
+            safeStorage.set('cepera_agendamento_handoff', JSON.stringify(handoff));
+            fecharModal('modalAgendarConjunto');
+
+            if (window.parent && window.parent !== window) {
+                window.parent.postMessage({ type: 'CEPERA_NAVEGAR_APP', appId: targetApp, forceReload: true, handoff }, '*');
+            } else {
+                const file = targetApp === 'preventivas' ? 'PREVENTIVAS.html' : 'AGENDA-PCM.html';
+                window.location.href = `${encodeURI(file)}?agendar=1`;
+            }
+        };
 
         // ================= VISÃO CRUZADA 360° (OUTROS MÓDULOS) =================
         function getDadosCruzados360(nodes) {
@@ -1894,6 +2103,7 @@
                             </div>
                         </div>
                         <div class="flex flex-wrap items-center gap-1.5 shrink-0">
+                            <button type="button" onclick="abrirModalAgendarConjunto(${JSON.stringify(node.area).replace(/"/g, '&quot;')}, ${JSON.stringify(node.maquina).replace(/"/g, '&quot;')}, ${JSON.stringify(node.equipamento).replace(/"/g, '&quot;')}, ${JSON.stringify(node.conjunto).replace(/"/g, '&quot;')}, ${JSON.stringify(node.nodeId).replace(/"/g, '&quot;')})" class="btn-touch bg-emerald-50 hover:bg-emerald-100 text-emerald-800 border border-emerald-200 text-[11px] py-2 px-3 inline-flex items-center gap-1.5"><svg class="w-3.5 h-3.5 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/></svg><span>Agendar</span></button>
                             <button type="button" onclick="imprimirDossieAtivoA4('equipamento', ${JSON.stringify(node.area).replace(/"/g, '&quot;')}, ${JSON.stringify(node.maquina).replace(/"/g, '&quot;')}, ${JSON.stringify(node.equipamento).replace(/"/g, '&quot;')})" class="btn-touch bg-slate-900 hover:bg-slate-800 text-white text-[11px] py-2 px-3">Imprimir A4</button>
                             <button type="button" onclick="duplicarSubconjunto('${escapeHtml(node.nodeId)}')" class="btn-touch bg-slate-100 hover:bg-slate-200 text-slate-700 text-[11px] py-2 px-3">Duplicar</button>
                             <button type="button" onclick="solicitarExclusaoNode('${escapeHtml(node.nodeId)}')" class="btn-touch bg-rose-50 hover:bg-rose-100 text-rose-600 border border-rose-200 text-[11px] py-2 px-3">Excluir</button>
@@ -2088,6 +2298,7 @@
             };
 
             const podeClonar = selectedTarget.level === 'maquina' || selectedTarget.level === 'equipamento';
+            const podeAgendarConj = selectedTarget.level === 'conjunto';
 
             panel.innerHTML = `
             <div class="space-y-5">
@@ -2100,6 +2311,7 @@
                         </p>
                     </div>
                     <div class="flex flex-wrap items-center gap-1.5">
+                        ${podeAgendarConj ? `<button type="button" onclick="abrirModalAgendarConjunto(${JSON.stringify(selectedTarget.area || '').replace(/"/g, '&quot;')}, ${JSON.stringify(selectedTarget.maquina || '').replace(/"/g, '&quot;')}, ${JSON.stringify(selectedTarget.equipamento || '').replace(/"/g, '&quot;')}, ${JSON.stringify(selectedTarget.conjunto || '').replace(/"/g, '&quot;')})" class="btn-touch bg-emerald-50 hover:bg-emerald-100 text-emerald-800 border border-emerald-200 text-[11px] py-2 px-3 inline-flex items-center gap-1.5"><svg class="w-3.5 h-3.5 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/></svg><span>Agendar Programada</span></button>` : ''}
                         <button type="button" onclick='abrirModalNovoAtivo(${JSON.stringify(prefill).replace(/'/g, "&#39;")})' class="btn-pill-dark text-[11px] py-2 px-3.5">+ Adicionar Filho</button>
                         <button type="button" onclick="abrirModalRenomearGalho()" class="btn-touch bg-amber-50 hover:bg-amber-100 text-amber-800 border border-amber-200 text-[11px] py-2 px-3">Renomear Galho</button>
                         ${podeClonar ? `<button type="button" onclick="abrirModalClonarGalho()" class="btn-touch bg-indigo-50 hover:bg-indigo-100 text-indigo-700 border border-indigo-200 text-[11px] py-2 px-3">Clonar Estrutura</button>` : ''}
@@ -3244,7 +3456,7 @@
         // ================= ATALHOS DE TECLADO =================
         document.addEventListener('keydown', (e) => {
             if (e.key === 'Escape') {
-                ['deleteOverlay', 'modalImportCsv', 'modalRenomear', 'modalClonar', 'modalNovoAtivo', 'modalEspacoUsuario', 'modalAtalhos'].forEach(fecharModal);
+                ['deleteOverlay', 'modalAgendarConjunto', 'modalImportCsv', 'modalRenomear', 'modalClonar', 'modalNovoAtivo', 'modalEspacoUsuario', 'modalAtalhos'].forEach(fecharModal);
                 return;
             }
             if ((e.ctrlKey || e.metaKey) && (e.key === '?' || e.key === '/')) {
@@ -3265,7 +3477,7 @@
                 if (k === '4') { e.preventDefault(); switchView('saneamento'); return; }
             }
             if (e.ctrlKey || e.altKey || e.metaKey) return;
-            const algumModal = ['deleteOverlay', 'modalImportCsv', 'modalRenomear', 'modalClonar', 'modalNovoAtivo', 'modalEspacoUsuario', 'modalAtalhos']
+            const algumModal = ['deleteOverlay', 'modalAgendarConjunto', 'modalImportCsv', 'modalRenomear', 'modalClonar', 'modalNovoAtivo', 'modalEspacoUsuario', 'modalAtalhos']
                 .some(id => { const el = document.getElementById(id); return el && !el.hidden; });
             if (!algumModal && (e.key === 'n' || e.key === 'N')) {
                 e.preventDefault();
