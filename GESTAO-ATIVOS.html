@@ -819,6 +819,14 @@
                     </div>
                 </div>
 
+                <label class="flex items-start gap-3 p-3.5 rounded-2xl bg-sky-50/70 border border-sky-200 cursor-pointer">
+                    <input type="checkbox" id="nInspecaoAtiva" checked class="w-4 h-4 mt-0.5 accent-emerald-600 rounded shrink-0">
+                    <div class="text-xs">
+                        <div class="font-extrabold text-slate-900">Ativo para Inspeção de Rota (Calendário 52 Semanas)</div>
+                        <p class="text-[11px] text-slate-600 font-medium mt-0.5">Se desmarcado (Não Ativo), este item aparece mapeado nos Planos Cirúrgicos e Preventivas, porém fica oculto do agendamento semanal de Inspeção de Rota.</p>
+                    </div>
+                </label>
+
                 <div class="flex justify-end gap-2 pt-2 border-t border-slate-100">
                     <button type="button" onclick="fecharModal('modalNovoAtivo')" class="btn-touch bg-slate-100 text-slate-700 text-xs">Cancelar</button>
                     <button type="submit" id="btnSalvarNovoAtivo" class="btn-pill-dark text-xs px-6">Salvar na Árvore</button>
@@ -1160,6 +1168,7 @@
             const periodicidade_preventiva = pickField(raw, ['periodicidade_preventiva', 'periodicidade']);
             const disciplina = pickField(raw, ['disciplina']) || 'Mecânica';
             const status_ativo = STATUS_ATIVOS[raw.status_ativo] ? raw.status_ativo : 'Ativo';
+            const inspecao_ativa_doc = raw.inspecao_ativa !== false && raw.inspecao_ativa !== 'false';
             const padrinho_mec = pickField(raw, ['padrinho_mec']);
             const padrinho_ele = pickField(raw, ['padrinho_ele']);
             const observacoes_tecnicas = pickField(raw, ['observacoes_tecnicas', 'observacoes']);
@@ -1169,10 +1178,14 @@
 
             // Suporta formato legado de Obsolescência com array conjuntos: ["A", "B"]
             if (!conjuntoFlat && Array.isArray(raw.conjuntos) && raw.conjuntos.length > 0) {
+                const inatList = Array.isArray(raw.conjuntos_insp_inativos) ? raw.conjuntos_insp_inativos : [];
                 return raw.conjuntos.map((cItem, idx) => {
                     const isObj = cItem && typeof cItem === 'object';
                     const cjNome = isObj ? (pickField(cItem, ['conjunto', 'nome']) || 'Conjunto Geral') : String(cItem || 'Conjunto Geral').trim();
                     const subNome = isObj ? pickField(cItem, ['subconjunto']) : '';
+                    const inspItem = isObj
+                        ? (cItem.inspecao_ativa !== undefined ? (cItem.inspecao_ativa !== false && cItem.inspecao_ativa !== 'false') : inspecao_ativa_doc)
+                        : (!inatList.includes(idx) && inspecao_ativa_doc);
                     return {
                         nodeId: `${docId}__leg_${idx}`,
                         docId,
@@ -1194,6 +1207,7 @@
                         serie,
                         ano_fabricacao,
                         status_ativo,
+                        inspecao_ativa: inspItem,
                         padrinho_mec,
                         padrinho_ele,
                         observacoes_tecnicas,
@@ -1223,6 +1237,7 @@
                 serie,
                 ano_fabricacao,
                 status_ativo,
+                inspecao_ativa: inspecao_ativa_doc,
                 padrinho_mec,
                 padrinho_ele,
                 observacoes_tecnicas,
@@ -2017,6 +2032,13 @@
                                 </select>
                             </div>
                             <div>
+                                <label class="block text-[10px] font-extrabold uppercase text-sky-700 mb-1">Inspeção de Rota (52s)</label>
+                                <select id="edInspecaoAtiva" class="input-clean py-2 text-xs font-extrabold border-sky-200 bg-sky-50/50">
+                                    <option value="true" ${node.inspecao_ativa !== false ? 'selected' : ''}>Ativo na Inspeção (52 Semanas)</option>
+                                    <option value="false" ${node.inspecao_ativa === false ? 'selected' : ''}>Não Ativo (Ocultar das Inspeções)</option>
+                                </select>
+                            </div>
+                            <div>
                                 <label class="block text-[10px] font-extrabold uppercase text-slate-500 mb-1">Padrinho Mecânica</label>
                                 <select id="edPadMec" class="input-clean py-2 text-xs font-bold">${mecOpts}</select>
                             </div>
@@ -2201,6 +2223,7 @@
             const criticidade = document.getElementById('nCriticidade').value;
             const periodicidade = document.getElementById('nPeriodicidade').value;
             const disciplina = document.getElementById('nDisciplina').value;
+            const inspecao_ativa = document.getElementById('nInspecaoAtiva') ? Boolean(document.getElementById('nInspecaoAtiva').checked) : true;
             const tagBase = document.getElementById('nTag').value.trim();
             const fabricante = document.getElementById('nFabricante').value.trim();
             const modelo = document.getElementById('nModelo').value.trim();
@@ -2226,6 +2249,7 @@
                         periodicidade_preventiva: periodicidade,
                         periodicidade_semanas: PERIODICIDADES[periodicidade]?.semanas ?? 0,
                         disciplina,
+                        inspecao_ativa,
                         fabricante,
                         modelo,
                         serie,
@@ -2272,6 +2296,7 @@
             const serie = document.getElementById('edSerie').value.trim();
             const ano_fabricacao = document.getElementById('edAno').value.trim();
             const status_ativo = document.getElementById('edStatus').value;
+            const inspecao_ativa = document.getElementById('edInspecaoAtiva') ? (document.getElementById('edInspecaoAtiva').value !== 'false') : (node.inspecao_ativa !== false);
             const padrinho_mec = document.getElementById('edPadMec').value;
             const padrinho_ele = document.getElementById('edPadEle').value;
             const observacoes_tecnicas = document.getElementById('edObs').value.trim();
@@ -2306,6 +2331,7 @@
                 numeroSerie: serie,
                 ano_fabricacao,
                 status_ativo,
+                inspecao_ativa,
                 padrinho_mec,
                 padrinho_ele,
                 observacoes_tecnicas,
