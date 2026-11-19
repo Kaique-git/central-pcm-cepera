@@ -700,10 +700,20 @@
 
                     <!-- ==================== VIEW 4: SANEAMENTO & SAÚDE DA BASE ==================== -->
                     <section id="viewSaneamento" hidden class="space-y-6 max-w-6xl mx-auto">
-                        <div>
-                            <p class="text-xs font-extrabold uppercase tracking-widest text-amber-600 mb-0.5">Qualidade de Dados • Auditoria ob_linhas</p>
-                            <h2 class="text-2xl sm:text-3xl font-extrabold text-slate-900 tracking-tight">Saneamento & Unificação da Árvore</h2>
-                            <p class="text-xs text-slate-500 mt-0.5">Detecta automaticamente cadastros legados da Obsolescência, variações de grafia e campos de engenharia pendentes.</p>
+                        <div class="flex flex-wrap items-end justify-between gap-3">
+                            <div>
+                                <p class="text-xs font-extrabold uppercase tracking-widest text-amber-600 mb-0.5">Qualidade de Dados • Conciliação &amp; Auditoria</p>
+                                <h2 class="text-2xl sm:text-3xl font-extrabold text-slate-900 tracking-tight">Saneamento, Órfãos &amp; Unificação da Árvore</h2>
+                                <p class="text-xs text-slate-500 mt-0.5">Reconcilie rotas/planos órfãos sem perder histórico, normalize legados em cascata e mescle conjuntos duplicados com segurança.</p>
+                            </div>
+                        </div>
+
+                        <div class="glass-card p-3.5 rounded-2xl flex flex-wrap items-center justify-between gap-2.5">
+                            <div class="relative flex-1 min-w-[220px]">
+                                <input type="search" id="saneamentoSearchInput" oninput="setSaneamentoBusca(this.value)" class="input-clean py-2 pl-9 pr-3 text-xs font-bold" placeholder="Filtrar órfãos ou duplicidades por setor, linha, equipamento ou conjunto...">
+                                <svg class="w-4 h-4 text-slate-400 absolute left-3 top-1/2 -translate-y-1/2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/></svg>
+                            </div>
+                            <button type="button" id="btnToggleSaneamentoArq" hidden onclick="toggleSaneamentoArquivados()" class="hidden px-3 py-2 rounded-xl border text-xs font-extrabold bg-white text-slate-700 border-slate-200 hover:bg-slate-50"></button>
                         </div>
 
                         <div id="saneamentoContent" class="space-y-5"></div>
@@ -1107,7 +1117,7 @@
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
         import { getAuth, signInAnonymously } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
-        import { initializeFirestore, collection, addDoc, onSnapshot, doc, deleteDoc, updateDoc } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
+        import { initializeFirestore, collection, addDoc, setDoc, onSnapshot, doc, deleteDoc, updateDoc } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
 
         // ================= STORAGE & CONFIG =================
         const memStore = {};
@@ -1193,6 +1203,9 @@
         let parsedCsvRows = [];
         let chartCritInstance = null;
         let chartPerInstance = null;
+        let saneamentoBusca = '';
+        let saneamentoMostrarArquivados = false;
+        let cachedOrphanGroups = [];
 
         // ================= HELPERS PUROS =================
         function escapeHtml(val) {
@@ -1562,36 +1575,43 @@
                 onSnapshot(refAnomalias, (snap) => {
                     listaAnomalias = [];
                     snap.forEach(d => listaAnomalias.push({ id: d.id, ...d.data() }));
-                    if (currentView === 'arvore') renderDetailPanel();
+                    onDadosCruzadosUpdate();
                 });
 
                 onSnapshot(refChecklists, (snap) => {
                     listaChecklists = [];
                     snap.forEach(d => listaChecklists.push({ id: d.id, ...d.data() }));
-                    if (currentView === 'arvore') renderDetailPanel();
+                    onDadosCruzadosUpdate();
                 });
 
                 onSnapshot(refAgenda, (snap) => {
                     listaAgenda = [];
                     snap.forEach(d => listaAgenda.push({ id: d.id, ...d.data() }));
-                    if (currentView === 'arvore') renderDetailPanel();
+                    onDadosCruzadosUpdate();
                 });
 
                 onSnapshot(refObsPecas, (snap) => {
                     listaObsPecas = [];
                     snap.forEach(d => listaObsPecas.push({ id: d.id, ...d.data() }));
-                    if (currentView === 'arvore') renderDetailPanel();
+                    onDadosCruzadosUpdate();
                 });
 
                 onSnapshot(refManutencao, (snap) => {
                     listaManutencao = [];
                     snap.forEach(d => listaManutencao.push({ id: d.id, ...d.data() }));
-                    if (currentView === 'arvore') renderDetailPanel();
+                    onDadosCruzadosUpdate();
                 });
             } catch (_) {
                 const errB = document.getElementById('errBanner');
                 if (errB) { errB.hidden = false; errB.classList.remove('hidden'); }
             }
+        }
+
+        function onDadosCruzadosUpdate() {
+            atualizarBadgesSaneamento();
+            if (currentView === 'arvore') renderDetailPanel();
+            else if (currentView === 'saneamento') renderSaneamento();
+            else if (currentView === 'dashboard') renderDashboard();
         }
 
         function atualizarDatalists() {
@@ -1621,12 +1641,14 @@
             const semCrit = assetNodes.filter(n => !n.criticidade).length;
             const semPer = assetNodes.filter(n => !n.periodicidade_preventiva).length;
             const inconsistencias = detectarInconsistenciasGrafia().length;
-            return { legados, semCrit, semPer, inconsistencias, totalAlertas: legados + inconsistencias };
+            const orfaos = detectarGruposOrfaos().filter(g => !g.ignorado).length;
+            const duplicados = detectarConjuntosDuplicados().length;
+            return { legados, semCrit, semPer, inconsistencias, orfaos, duplicados, totalAlertas: orfaos + legados + inconsistencias + duplicados };
         }
 
         function atualizarBadgesSaneamento() {
-            const { legados, inconsistencias } = contarPendenciasSaneamento();
-            const qtd = legados + inconsistencias;
+            const { totalAlertas } = contarPendenciasSaneamento();
+            const qtd = totalAlertas;
             ['badgeSaneamentoRail', 'badgeSaneamentoMob'].forEach(id => {
                 const el = document.getElementById(id);
                 if (!el) return;
@@ -3024,19 +3046,19 @@
 
             try {
                 if (node.isLegacyArray) {
-                    // Converte com segurança: cria o novo doc plano e remove apenas esse item do array legado
+                    // Converte com segurança: cria o novo doc plano e migra rotas/planos/histórico em cascata
                     const rawEntry = rawLinhasDocs.find(d => d.id === node.docId);
-                    const novoRef = await addDoc(refLinhas, { ...payload, origem_cadastro: 'gestao_ativos', criado_em: new Date().toISOString() });
+                    const novoRef = await addDoc(refLinhas, { ...payload, origem_cadastro: 'gestao_ativos', migrado_de_docId: node.docId, criado_em: new Date().toISOString() });
+                    const oldLegacyIds = [`${node.docId}_${node.legacyIndex}`, `${node.docId}__leg_${node.legacyIndex}`];
+                    if (rawEntry && Array.isArray(rawEntry.data.conjuntos) && rawEntry.data.conjuntos.length === 1) {
+                        oldLegacyIds.push(node.docId);
+                    }
+                    await migrarReferenciasAtivo(oldLegacyIds, { nodeId: novoRef.id, docId: novoRef.id, isLegacyArray: false, ...payload }, { updateNames: false });
                     if (rawEntry && Array.isArray(rawEntry.data.conjuntos)) {
-                        const restantes = rawEntry.data.conjuntos.filter((_, idx) => idx !== node.legacyIndex);
-                        if (restantes.length > 0) {
-                            await updateDoc(doc(db, "ob_linhas", node.docId), { conjuntos: restantes });
-                        } else {
-                            await deleteDoc(doc(db, "ob_linhas", node.docId));
-                        }
+                        await atualizarArrayLegadoAposRemocao(rawEntry, node.legacyIndex);
                     }
                     selectedTarget = { level: 'leaf', area, maquina, equipamento, conjunto, nodeId: novoRef.id };
-                    showToast("Ativo convertido para o padrão completo e salvo!");
+                    showToast("Ativo convertido para o padrão completo com vínculos preservados!");
                 } else {
                     await updateDoc(doc(db, "ob_linhas", node.docId), payload);
                     selectedTarget = { level: 'leaf', area, maquina, equipamento, conjunto, nodeId: node.docId };
@@ -3095,9 +3117,7 @@
                 if (node.isLegacyArray) {
                     const rawEntry = rawLinhasDocs.find(d => d.id === node.docId);
                     if (rawEntry && Array.isArray(rawEntry.data.conjuntos)) {
-                        const restantes = rawEntry.data.conjuntos.filter((_, idx) => idx !== node.legacyIndex);
-                        if (restantes.length > 0) await updateDoc(doc(db, "ob_linhas", node.docId), { conjuntos: restantes });
-                        else await deleteDoc(doc(db, "ob_linhas", node.docId));
+                        await atualizarArrayLegadoAposRemocao(rawEntry, node.legacyIndex);
                     }
                 } else {
                     await deleteDoc(doc(db, "ob_linhas", node.docId));
@@ -3306,8 +3326,8 @@
                 </button>
                 <button type="button" onclick="switchView('saneamento')" class="glass-card glass-card-hover p-4 rounded-2xl text-left flex items-center justify-between gap-3 border-l-4 border-l-indigo-500">
                     <div>
-                        <div class="text-[10px] font-extrabold uppercase text-indigo-600">Saneamento da Base</div>
-                        <div class="text-sm font-extrabold text-slate-900">${pend.legados} legado(s) • ${pend.inconsistencias} grafia(s)</div>
+                        <div class="text-[10px] font-extrabold uppercase text-indigo-600">Qualidade de Dados &amp; Órfãos</div>
+                        <div class="text-sm font-extrabold text-slate-900">${pend.orfaos} órfão(s) • ${pend.legados} legado(s) • ${pend.duplicados} dup. • ${pend.inconsistencias} grafia(s)</div>
                     </div>
                     <span class="text-xs font-extrabold text-sky-600">Auditar →</span>
                 </button>
@@ -3688,7 +3708,245 @@
             if (btn) { btn.disabled = false; btn.innerText = 'Importar Ativos'; }
         };
 
-        // ================= VIEW 4: SANEAMENTO & UNIFICAÇÃO =================
+        // ================= VIEW 4: SANEAMENTO, ÓRFÃOS & UNIFICAÇÃO =================
+        function formatNomeConjuntoInsp(node) {
+            const c = String(node?.conjunto || '').trim();
+            const s = String(node?.subconjunto || '').trim();
+            if (c && s && normKey(c) !== normKey(s)) return `${c} › ${s}`;
+            return c || s || 'Conjunto Geral';
+        }
+
+        function getCanonicalInspNodeId(node) {
+            if (!node) return '';
+            return node.isLegacyArray ? `${node.docId}_${node.legacyIndex}` : (node.docId || node.nodeId);
+        }
+
+        function getValidObLinhasIdsSet() {
+            const valid = new Set();
+            rawLinhasDocs.forEach(d => {
+                const raw = d.data || {};
+                const hasConjFlat = Boolean(pickField(raw, ['conjunto']));
+                if (!hasConjFlat && Array.isArray(raw.conjuntos) && raw.conjuntos.length > 0) {
+                    raw.conjuntos.forEach((_, idx) => {
+                        valid.add(`${d.id}_${idx}`);
+                        valid.add(`${d.id}__leg_${idx}`);
+                    });
+                } else {
+                    valid.add(d.id);
+                }
+            });
+            return valid;
+        }
+
+        function extrairChecklistParse(chk) {
+            const esp = String(chk?.especialidade || (chk?.id && String(chk.id).includes('_') ? String(chk.id).slice(String(chk.id).lastIndexOf('_') + 1) : '') || 'Mecânica').trim();
+            let parsedNodeId = String(chk?.id_node || '').trim();
+            if (!parsedNodeId && chk?.id) {
+                const idStr = String(chk.id);
+                parsedNodeId = (esp && idStr.endsWith(`_${esp}`)) ? idStr.slice(0, -(esp.length + 1)) : (idStr.includes('_') ? idStr.slice(0, idStr.lastIndexOf('_')) : idStr);
+            }
+            return { esp, parsedNodeId };
+        }
+
+        function normalizarGruposChecklistDoc(docObj) {
+            if (Array.isArray(docObj?.grupos) && docObj.grupos.length > 0) {
+                return JSON.parse(JSON.stringify(docObj.grupos));
+            }
+            if (Array.isArray(docObj?.itens) && docObj.itens.length > 0) {
+                return [{ categoria: 'Pontos de Inspeção', itens: JSON.parse(JSON.stringify(docObj.itens)) }];
+            }
+            return [];
+        }
+
+        function mesclarGruposChecklistData(targetDoc, srcDoc) {
+            const gruposDest = normalizarGruposChecklistDoc(targetDoc);
+            const gruposSrc = normalizarGruposChecklistDoc(srcDoc);
+            if (!gruposSrc.length) return gruposDest;
+            if (!gruposDest.length) return gruposSrc;
+
+            const existeItem = (grupoArr, itemObj) => {
+                const txtSrc = normKey(typeof itemObj === 'string' ? itemObj : (itemObj?.texto || itemObj?.item || ''));
+                if (!txtSrc) return false;
+                return grupoArr.some(it => normKey(typeof it === 'string' ? it : (it?.texto || it?.item || '')) === txtSrc);
+            };
+
+            gruposSrc.forEach(sg => {
+                const catSrc = String(sg?.categoria || 'Pontos de Inspeção').trim();
+                let destGrp = gruposDest.find(g => normKey(g?.categoria) === normKey(catSrc));
+                if (!destGrp) {
+                    destGrp = { categoria: catSrc, itens: [] };
+                    gruposDest.push(destGrp);
+                }
+                if (!Array.isArray(destGrp.itens)) destGrp.itens = [];
+                (Array.isArray(sg?.itens) ? sg.itens : []).forEach(it => {
+                    if (!existeItem(destGrp.itens, it)) destGrp.itens.push(JSON.parse(JSON.stringify(it)));
+                });
+            });
+            return gruposDest;
+        }
+
+        async function migrarReferenciasAtivo(oldIds, targetNode, opts = {}) {
+            const oldSet = new Set((Array.isArray(oldIds) ? oldIds : [oldIds]).filter(Boolean).map(String));
+            const canonicalInspId = getCanonicalInspNodeId(targetNode);
+            const canonicalDocId = targetNode.docId || targetNode.nodeId;
+            const conjLabelInsp = formatNomeConjuntoInsp(targetNode);
+            const updateNames = Boolean(opts.updateNames);
+            const clearIgnore = Boolean(opts.clearIgnore);
+            const autor = (usuarioLogado && (usuarioLogado.nome || usuarioLogado.user)) || 'Admin';
+            const agora = new Date().toISOString();
+
+            const explicitRotas = Array.isArray(opts.rotas) ? opts.rotas : null;
+            const explicitPlanos = Array.isArray(opts.planos) ? opts.planos : null;
+            const explicitManuts = Array.isArray(opts.manutencoes) ? opts.manutencoes : null;
+            const explicitAnoms = Array.isArray(opts.anomalias) ? opts.anomalias : null;
+
+            const rotasAlvo = explicitRotas || listaAgenda.filter(a => a.id_node && oldSet.has(String(a.id_node)));
+            const planosAlvo = explicitPlanos || listaChecklists.filter(c => {
+                const { parsedNodeId } = extrairChecklistParse(c);
+                return parsedNodeId && oldSet.has(parsedNodeId);
+            });
+            const manutsAlvo = explicitManuts || listaManutencao.filter(m => m.ativoId && oldSet.has(String(m.ativoId)));
+
+            let cntRotas = 0, cntPlanos = 0, cntManut = 0, cntAnom = 0;
+            const migratedAgendaIds = new Set();
+
+            for (const ag of rotasAlvo) {
+                migratedAgendaIds.add(ag.id);
+                const patch = {
+                    id_node: canonicalInspId,
+                    reconciliado_por: autor,
+                    reconciliado_em: agora
+                };
+                if (clearIgnore && ag.orphan_ignorado) patch.orphan_ignorado = false;
+                if (updateNames) {
+                    if (ag.conjunto && normKey(ag.conjunto) !== normKey(conjLabelInsp) && !ag.conjunto_origem_historico) {
+                        patch.conjunto_origem_historico = ag.conjunto;
+                    }
+                    patch.area = targetNode.area || ag.area || '';
+                    patch.maquina = targetNode.maquina || ag.maquina || '';
+                    patch.equipamento = targetNode.equipamento || ag.equipamento || '';
+                    patch.conjunto = conjLabelInsp;
+                }
+                await updateDoc(doc(db, "ir_agenda", ag.id), patch);
+                cntRotas++;
+            }
+
+            const writtenChecklistsInRun = {};
+            for (const chk of planosAlvo) {
+                const { esp } = extrairChecklistParse(chk);
+                const newDocId = `${canonicalInspId}_${esp}`;
+                const existente = writtenChecklistsInRun[newDocId] || listaChecklists.find(x => x.id === newDocId && x.id !== chk.id);
+                const { id: _omitId, ...rawChkData } = chk;
+                const mergedGrupos = existente
+                    ? mesclarGruposChecklistData(existente, chk)
+                    : normalizarGruposChecklistDoc(chk);
+
+                const basePayload = existente ? { ...existente } : { ...rawChkData };
+                delete basePayload.id;
+                delete basePayload.itens;
+                basePayload.id_node = canonicalInspId;
+                basePayload.especialidade = esp;
+                basePayload.grupos = mergedGrupos.length ? mergedGrupos : (basePayload.grupos || []);
+                basePayload.atualizado_por = autor;
+                basePayload.migrado_de_node = chk.id_node || chk.id;
+                basePayload.timestamp = Date.now();
+                if (clearIgnore) basePayload.orphan_ignorado = false;
+                if (updateNames || !basePayload.equipamento) {
+                    basePayload.area = targetNode.area || basePayload.area || '';
+                    basePayload.maquina = targetNode.maquina || basePayload.maquina || '';
+                    basePayload.equipamento = targetNode.equipamento || basePayload.equipamento || '';
+                    basePayload.conjunto = conjLabelInsp;
+                }
+
+                await setDoc(doc(db, "ir_checklists", newDocId), basePayload);
+                writtenChecklistsInRun[newDocId] = { id: newDocId, ...basePayload };
+                if (newDocId !== chk.id) {
+                    await deleteDoc(doc(db, "ir_checklists", chk.id));
+                }
+                cntPlanos++;
+            }
+
+            for (const m of manutsAlvo) {
+                const patch = {
+                    ativoId: canonicalDocId,
+                    reconciliado_em: agora
+                };
+                if (clearIgnore && m.orphan_ignorado) patch.orphan_ignorado = false;
+                if (updateNames) {
+                    patch.setor = targetNode.area || m.setor || '';
+                    patch.maquina = targetNode.maquina || m.maquina || '';
+                    patch.equipamento = targetNode.equipamento || m.equipamento || '';
+                    patch.conjunto = targetNode.conjunto || m.conjunto || '';
+                    patch.subconjunto = targetNode.subconjunto || '';
+                }
+                await updateDoc(doc(db, "ag_manutencao", m.id), patch);
+                cntManut++;
+            }
+
+            const anomsAlvo = explicitAnoms || listaAnomalias.filter(an =>
+                (an.id_node && oldSet.has(String(an.id_node))) ||
+                (an.id_agenda && migratedAgendaIds.has(an.id_agenda))
+            );
+            for (const an of anomsAlvo) {
+                const patch = {};
+                if (an.id_node && oldSet.has(String(an.id_node))) patch.id_node = canonicalInspId;
+                if (clearIgnore && an.orphan_ignorado) patch.orphan_ignorado = false;
+                if (updateNames) {
+                    patch.area = targetNode.area || an.area || '';
+                    patch.maquina = targetNode.maquina || an.maquina || '';
+                    patch.equipamento = targetNode.equipamento || an.equipamento || '';
+                    patch.conjunto = conjLabelInsp;
+                }
+                if (Object.keys(patch).length > 0) {
+                    patch.reconciliado_em = agora;
+                    await updateDoc(doc(db, "ir_anomalias", an.id), patch);
+                    cntAnom++;
+                }
+            }
+
+            return { cntRotas, cntPlanos, cntManut, cntAnom, total: cntRotas + cntPlanos + cntManut + cntAnom };
+        }
+
+        async function atualizarArrayLegadoAposRemocao(rawEntry, removeIdx) {
+            if (!rawEntry || !Array.isArray(rawEntry.data?.conjuntos)) return;
+            const origArr = rawEntry.data.conjuntos;
+            const restantes = origArr.filter((_, idx) => idx !== removeIdx);
+            if (restantes.length === 0) {
+                await deleteDoc(doc(db, "ob_linhas", rawEntry.id));
+                return;
+            }
+            const inatAtual = Array.isArray(rawEntry.data.conjuntos_insp_inativos) ? rawEntry.data.conjuntos_insp_inativos : [];
+            const novoInat = inatAtual
+                .filter(i => i !== removeIdx)
+                .map(i => (i > removeIdx ? i - 1 : i));
+            await updateDoc(doc(db, "ob_linhas", rawEntry.id), {
+                conjuntos: restantes,
+                conjuntos_insp_inativos: novoInat
+            });
+
+            // Desloca referências de índices posteriores (oldIdx > removeIdx -> oldIdx - 1) para não gerar órfãos
+            for (let oldIdx = removeIdx + 1; oldIdx < origArr.length; oldIdx++) {
+                const newIdx = oldIdx - 1;
+                const cItem = origArr[oldIdx];
+                const cjNome = typeof cItem === 'object' ? (pickField(cItem, ['conjunto', 'nome']) || 'Conjunto Geral') : String(cItem || 'Conjunto Geral').trim();
+                await migrarReferenciasAtivo(
+                    [`${rawEntry.id}_${oldIdx}`, `${rawEntry.id}__leg_${oldIdx}`],
+                    {
+                        nodeId: `${rawEntry.id}__leg_${newIdx}`,
+                        docId: rawEntry.id,
+                        isLegacyArray: true,
+                        legacyIndex: newIdx,
+                        area: pickField(rawEntry.data, ['setor', 'area', 'área']) || '',
+                        maquina: pickField(rawEntry.data, ['maquina', 'máquina', 'linha']) || '',
+                        equipamento: pickField(rawEntry.data, ['equipamento']) || '',
+                        conjunto: cjNome,
+                        subconjunto: typeof cItem === 'object' ? pickField(cItem, ['subconjunto']) : ''
+                    },
+                    { updateNames: false }
+                );
+            }
+        }
+
         function detectarInconsistenciasGrafia() {
             const campos = [
                 { key: 'area', label: 'Setor / Área' },
@@ -3716,6 +3974,419 @@
             return achados;
         }
 
+        function detectarGruposOrfaos() {
+            if (!rawLinhasDocs.length && !assetNodes.length) return [];
+            const validIds = getValidObLinhasIdsSet();
+            const agendaTextByNodeId = new Map();
+            listaAgenda.forEach(ag => {
+                if (ag.id_node && (ag.area || ag.maquina || ag.equipamento)) {
+                    agendaTextByNodeId.set(String(ag.id_node), ag);
+                }
+            });
+
+            const groupsMap = new Map();
+            const addToGroup = (kind, rec, idVal) => {
+                const fallbackTxt = agendaTextByNodeId.get(String(idVal || ''));
+                const area = String(rec.area || rec.setor || fallbackTxt?.area || '').trim();
+                const maquina = String(rec.maquina || fallbackTxt?.maquina || '').trim();
+                const equipamento = String(rec.equipamento || fallbackTxt?.equipamento || '').trim();
+                const conjuntoRaw = String(rec.conjunto || fallbackTxt?.conjunto || 'Conjunto Geral').trim();
+                const baseConj = conjuntoRaw.split(/\s*[›>]\s*/)[0].trim();
+
+                const sigText = normKey(`${area}|${maquina}|${equipamento}|${baseConj}`);
+                const key = (equipamento || maquina || area) ? sigText : `id_${String(idVal || rec.id)}`;
+                if (!groupsMap.has(key)) {
+                    groupsMap.set(key, {
+                        key,
+                        area: area || 'Setor Não Informado',
+                        maquina: maquina || 'Linha Não Informada',
+                        equipamento: equipamento || 'Equipamento Não Informado',
+                        conjunto: conjuntoRaw || 'Conjunto Geral',
+                        rotas: [],
+                        planos: [],
+                        manutencoes: [],
+                        anomalias: [],
+                        oldIds: new Set()
+                    });
+                }
+                const g = groupsMap.get(key);
+                if (area && g.area === 'Setor Não Informado') g.area = area;
+                if (maquina && g.maquina === 'Linha Não Informada') g.maquina = maquina;
+                if (equipamento && g.equipamento === 'Equipamento Não Informado') g.equipamento = equipamento;
+                if (conjuntoRaw && conjuntoRaw.length > g.conjunto.length) g.conjunto = conjuntoRaw;
+                if (idVal) g.oldIds.add(String(idVal));
+                g[kind].push(rec);
+            };
+
+            listaAgenda.forEach(ag => {
+                const idN = String(ag.id_node || '').trim();
+                if (!idN || !validIds.has(idN)) addToGroup('rotas', ag, idN);
+            });
+
+            listaChecklists.forEach(chk => {
+                const { parsedNodeId } = extrairChecklistParse(chk);
+                if (!parsedNodeId || !validIds.has(parsedNodeId)) addToGroup('planos', chk, parsedNodeId);
+            });
+
+            listaManutencao.forEach(m => {
+                const atId = String(m.ativoId || '').trim();
+                if (atId && !validIds.has(atId)) addToGroup('manutencoes', m, atId);
+            });
+
+            listaAnomalias.forEach(an => {
+                const idN = String(an.id_node || '').trim();
+                if (idN && !validIds.has(idN)) addToGroup('anomalias', an, idN);
+            });
+
+            const list = [];
+            groupsMap.forEach(g => {
+                const todos = [...g.rotas, ...g.planos, ...g.manutencoes, ...g.anomalias];
+                if (!todos.length) return;
+                const ignorado = todos.every(item => item.orphan_ignorado === true);
+                const match = sugerirDestinoAtivoParaOrfao(g);
+                list.push({
+                    ...g,
+                    oldIdsArr: [...g.oldIds],
+                    totalRegistros: todos.length,
+                    ignorado,
+                    sugestao: match
+                });
+            });
+
+            list.sort((a, b) => (b.sugestao.bestScore - a.sugestao.bestScore) || (b.totalRegistros - a.totalRegistros) || a.equipamento.localeCompare(b.equipamento));
+            return list;
+        }
+
+        function sugerirDestinoAtivoParaOrfao(grupo) {
+            const gArea = normKey(grupo.area);
+            const gMaq = normKey(grupo.maquina);
+            const gEq = normKey(grupo.equipamento);
+            const gConj = normKey(grupo.conjunto);
+            const [gConjBase, gSubPart] = gConj.split(/\s*[›>]\s*/).map(s => (s || '').trim());
+
+            let bestNode = null;
+            let bestScore = 0;
+            let reason = 'Sem sugestão automática';
+            const scored = [];
+
+            assetNodes.forEach(n => {
+                const nArea = normKey(n.area);
+                const nMaq = normKey(n.maquina);
+                const nEq = normKey(n.equipamento);
+                const nConj = normKey(n.conjunto);
+                const nSub = normKey(n.subconjunto);
+                const nFull = normKey(formatNomeConjuntoInsp(n));
+
+                const sameArea = Boolean(gArea && nArea && gArea === nArea);
+                const sameMaq = Boolean(gMaq && nMaq && gMaq === nMaq);
+                const sameEq = Boolean(gEq && nEq && (gEq === nEq || (gEq.length >= 4 && nEq.includes(gEq)) || (nEq.length >= 4 && gEq.includes(nEq))));
+                const exactEq = Boolean(gEq && nEq && gEq === nEq);
+
+                const conjExact = Boolean(gConj && (gConj === nFull || gConj === nConj || (gConjBase && gConjBase === nConj && (!gSubPart || gSubPart === nSub))));
+                const conjPartial = Boolean(!conjExact && gConjBase && nConj && (nConj.includes(gConjBase) || gConjBase.includes(nConj) || (nSub && (nSub.includes(gConjBase) || gConjBase.includes(nSub)))));
+
+                let score = 0;
+                let r = '';
+                if (sameArea && sameMaq && exactEq && conjExact) {
+                    score = 100;
+                    r = 'Match exato (Setor + Máquina + Equip. + Conjunto)';
+                } else if (sameMaq && exactEq && conjExact) {
+                    score = 92;
+                    r = 'Match forte (Máquina + Equip. + Conjunto)';
+                } else if (sameArea && sameMaq && exactEq && conjPartial) {
+                    score = 82;
+                    r = 'Nome de conjunto semelhante no mesmo equipamento';
+                } else if (sameArea && sameMaq && sameEq) {
+                    score = 70;
+                    r = 'Mesmo equipamento (selecione o conjunto destino)';
+                } else if (sameMaq && sameEq) {
+                    score = 58;
+                    r = 'Mesmo equipamento e linha';
+                } else if (exactEq && conjExact) {
+                    score = 52;
+                    r = 'Mesmo nome de equipamento e conjunto';
+                }
+
+                if (score > 0 && !n.isLegacyArray) score += 1; // prefere documentos já normalizados em caso de empate
+                if (score > 0) scored.push({ node: n, score, reason: r });
+                if (score > bestScore) {
+                    bestScore = score;
+                    bestNode = n;
+                    reason = r;
+                }
+            });
+
+            scored.sort((a, b) => b.score - a.score);
+            return { bestNode, bestScore, reason, topCandidates: scored.slice(0, 8).map(s => s.node) };
+        }
+
+        function detectarConjuntosDuplicados() {
+            const porEquip = new Map();
+            assetNodes.forEach(n => {
+                const kEq = normKey(`${n.area}|${n.maquina}|${n.equipamento}`);
+                if (!porEquip.has(kEq)) porEquip.set(kEq, []);
+                porEquip.get(kEq).push(n);
+            });
+
+            const gruposDup = [];
+            porEquip.forEach((nodes) => {
+                if (nodes.length < 2) return;
+                // 1) Duplicados exatos na assinatura (mesmo conjunto + subconjunto normalizado)
+                const subMap = new Map();
+                nodes.forEach(n => {
+                    const kConj = normKey(`${n.conjunto}|${n.subconjunto || ''}`);
+                    if (!subMap.has(kConj)) subMap.set(kConj, []);
+                    subMap.get(kConj).push(n);
+                });
+                subMap.forEach((arr) => {
+                    if (arr.length > 1) {
+                        const ordenados = [...arr].sort((a, b) => ((b.isLegacyArray ? 0 : 2) + calcularCompletudeNode(b)) - ((a.isLegacyArray ? 0 : 2) + calcularCompletudeNode(a)));
+                        gruposDup.push({
+                            tipo: 'Duplicidade Exata',
+                            area: ordenados[0].area,
+                            maquina: ordenados[0].maquina,
+                            equipamento: ordenados[0].equipamento,
+                            keep: ordenados[0],
+                            absorb: ordenados.slice(1)
+                        });
+                    }
+                });
+
+                // 2) "Conjunto Geral" convivendo com conjuntos específicos OU singular/plural do mesmo conjunto
+                const distintosPorNome = [...new Set(nodes.map(n => normKey(n.conjunto)))].filter(Boolean);
+                const temGeral = nodes.filter(n => normKey(n.conjunto) === 'conjunto geral' && !n.subconjunto);
+                const temEspecifico = nodes.filter(n => normKey(n.conjunto) !== 'conjunto geral');
+                if (temGeral.length > 0 && temEspecifico.length > 0) {
+                    const keepSug = temEspecifico[0];
+                    gruposDup.push({
+                        tipo: 'Conjunto Geral vs Específicos',
+                        area: keepSug.area,
+                        maquina: keepSug.maquina,
+                        equipamento: keepSug.equipamento,
+                        keep: keepSug,
+                        absorb: temGeral
+                    });
+                } else if (distintosPorNome.length > 1) {
+                    const stemKey = (s) => normKey(s).replace(/[^a-z0-9]/g, '').replace(/s$/, '');
+                    const stemMap = new Map();
+                    nodes.forEach(n => {
+                        const sk = `${stemKey(n.conjunto)}|${stemKey(n.subconjunto)}`;
+                        if (!stemMap.has(sk)) stemMap.set(sk, []);
+                        stemMap.get(sk).push(n);
+                    });
+                    stemMap.forEach((arr) => {
+                        const uniqNames = new Set(arr.map(x => normKey(`${x.conjunto}|${x.subconjunto}`)));
+                        if (arr.length > 1 && uniqNames.size > 1) {
+                            const ord = [...arr].sort((a, b) => calcularCompletudeNode(b) - calcularCompletudeNode(a));
+                            gruposDup.push({
+                                tipo: 'Grafia Quase Idêntica',
+                                area: ord[0].area,
+                                maquina: ord[0].maquina,
+                                equipamento: ord[0].equipamento,
+                                keep: ord[0],
+                                absorb: ord.slice(1)
+                            });
+                        }
+                    });
+                }
+            });
+            return gruposDup;
+        }
+
+        function contarVinculosAtivo(node) {
+            if (!node) return 0;
+            const ids = new Set([node.nodeId, node.docId, ...(node.isLegacyArray ? [`${node.docId}_${node.legacyIndex}`] : [])].filter(Boolean));
+            const r = listaAgenda.filter(a => ids.has(String(a.id_node || ''))).length;
+            const c = listaChecklists.filter(p => ids.has(extrairChecklistParse(p).parsedNodeId)).length;
+            const m = listaManutencao.filter(o => ids.has(String(o.ativoId || ''))).length;
+            return r + c + m;
+        }
+
+        window.vincularGrupoOrfao = async (idx) => {
+            const grupo = cachedOrphanGroups[idx];
+            if (!grupo) return;
+            const sel = document.getElementById(`selOrfaoDest_${idx}`);
+            const targetNodeId = sel ? sel.value : '';
+            if (!targetNodeId) return showToast("Selecione o conjunto de destino na árvore.", "error");
+            const targetNode = assetNodes.find(n => n.nodeId === targetNodeId);
+            if (!targetNode) return showToast("Ativo selecionado não encontrado.", "error");
+
+            try {
+                const res = await migrarReferenciasAtivo(grupo.oldIdsArr, targetNode, {
+                    updateNames: true,
+                    clearIgnore: true,
+                    rotas: grupo.rotas,
+                    planos: grupo.planos,
+                    manutencoes: grupo.manutencoes,
+                    anomalias: grupo.anomalias
+                });
+                showToast(`Reconciliado! ${res.cntRotas} rota(s) e ${res.cntPlanos} plano(s) vinculados a "${formatNomeConjuntoInsp(targetNode)}".`);
+            } catch (_) {
+                showToast("Erro ao reconciliar registros órfãos.", "error");
+            }
+        };
+
+        window.recriarAtivoParaGrupoOrfao = async (idx) => {
+            const grupo = cachedOrphanGroups[idx];
+            if (!grupo) return;
+            const chkInsp = document.getElementById(`chkOrfaoInspAtiva_${idx}`);
+            const inspecaoAtiva = chkInsp ? Boolean(chkInsp.checked) : true;
+            const partes = String(grupo.conjunto || 'Conjunto Geral').split(/\s*[›>]\s*/).map(s => s.trim()).filter(Boolean);
+            const cjNome = partes[0] || 'Conjunto Geral';
+            const subNome = partes.slice(1).join(' › ');
+            const autor = (usuarioLogado && (usuarioLogado.nome || usuarioLogado.user)) || 'Admin';
+            const agora = new Date().toISOString();
+
+            try {
+                const novoRef = await addDoc(refLinhas, {
+                    setor: grupo.area,
+                    area: grupo.area,
+                    maquina: grupo.maquina,
+                    equipamento: grupo.equipamento,
+                    conjunto: cjNome,
+                    subconjunto: subNome,
+                    tag: '',
+                    criticidade: '',
+                    periodicidade_preventiva: '',
+                    periodicidade_semanas: 0,
+                    disciplina: 'Mecânica',
+                    status_ativo: 'Ativo',
+                    inspecao_ativa: inspecaoAtiva,
+                    origem_cadastro: 'recriado_saneamento',
+                    criado_em: agora,
+                    atualizado_em: agora,
+                    atualizado_por: autor
+                });
+                const targetNode = {
+                    nodeId: novoRef.id,
+                    docId: novoRef.id,
+                    isLegacyArray: false,
+                    area: grupo.area,
+                    maquina: grupo.maquina,
+                    equipamento: grupo.equipamento,
+                    conjunto: cjNome,
+                    subconjunto: subNome
+                };
+                const res = await migrarReferenciasAtivo(grupo.oldIdsArr, targetNode, {
+                    updateNames: true,
+                    clearIgnore: true,
+                    rotas: grupo.rotas,
+                    planos: grupo.planos,
+                    manutencoes: grupo.manutencoes,
+                    anomalias: grupo.anomalias
+                });
+                showToast(`Conjunto "${cjNome}" recriado na árvore e ${res.total} registro(s) re-vinculado(s)!`);
+            } catch (_) {
+                showToast("Erro ao recriar conjunto na árvore.", "error");
+            }
+        };
+
+        window.arquivarGrupoOrfao = async (idx, restaurar = false) => {
+            const grupo = cachedOrphanGroups[idx];
+            if (!grupo) return;
+            const flag = !restaurar;
+            try {
+                for (const ag of grupo.rotas) await updateDoc(doc(db, "ir_agenda", ag.id), { orphan_ignorado: flag });
+                for (const p of grupo.planos) await updateDoc(doc(db, "ir_checklists", p.id), { orphan_ignorado: flag });
+                for (const m of grupo.manutencoes) await updateDoc(doc(db, "ag_manutencao", m.id), { orphan_ignorado: flag });
+                for (const a of grupo.anomalias) await updateDoc(doc(db, "ir_anomalias", a.id), { orphan_ignorado: flag });
+                showToast(restaurar ? "Grupo restaurado para conciliação." : "Grupo arquivado como histórico sem alertas.");
+            } catch (_) {
+                showToast("Erro ao atualizar status de arquivo do grupo.", "error");
+            }
+        };
+
+        window.conciliarTodosMatchesExatos = async () => {
+            const candidatos = cachedOrphanGroups.filter(g => !g.ignorado && g.sugestao.bestScore >= 95 && g.sugestao.bestNode);
+            if (!candidatos.length) return showToast("Nenhum grupo com match exato automático disponível.");
+            let ok = 0;
+            try {
+                for (const g of candidatos) {
+                    await migrarReferenciasAtivo(g.oldIdsArr, g.sugestao.bestNode, {
+                        updateNames: true,
+                        clearIgnore: true,
+                        rotas: g.rotas,
+                        planos: g.planos,
+                        manutencoes: g.manutencoes,
+                        anomalias: g.anomalias
+                    });
+                    ok++;
+                }
+                showToast(`${ok} grupo(s) órfão(s) reconciliado(s) automaticamente!`);
+            } catch (_) {
+                showToast("Erro durante conciliação em lote.", "error");
+            }
+        };
+
+        window.mesclarConjuntosAtivos = async (keepNodeId, absorbNodeIds) => {
+            const keep = assetNodes.find(n => n.nodeId === keepNodeId);
+            const absorbList = (Array.isArray(absorbNodeIds) ? absorbNodeIds : [absorbNodeIds])
+                .map(id => assetNodes.find(n => n.nodeId === id))
+                .filter(n => n && n.nodeId !== keepNodeId);
+            if (!keep || !absorbList.length) return showToast("Selecione ativos distintos para mesclar.", "error");
+
+            try {
+                const patchKeep = {};
+                ['tag', 'fabricante', 'modelo', 'serie', 'ano_fabricacao', 'criticidade', 'periodicidade_preventiva', 'padrinho_mec', 'padrinho_ele', 'observacoes_tecnicas'].forEach(f => {
+                    if (!keep[f]) {
+                        const found = absorbList.find(ab => ab[f]);
+                        if (found) patchKeep[f] = found[f];
+                    }
+                });
+                if (patchKeep.serie && !keep.serie) patchKeep.numeroSerie = patchKeep.serie;
+                if (patchKeep.periodicidade_preventiva && PERIODICIDADES[patchKeep.periodicidade_preventiva]) {
+                    patchKeep.periodicidade_semanas = PERIODICIDADES[patchKeep.periodicidade_preventiva].semanas;
+                }
+                if (Object.keys(patchKeep).length > 0 && !keep.isLegacyArray) {
+                    patchKeep.atualizado_em = new Date().toISOString();
+                    patchKeep.atualizado_por = (usuarioLogado && (usuarioLogado.nome || usuarioLogado.user)) || 'Admin';
+                    await updateDoc(doc(db, "ob_linhas", keep.docId), patchKeep);
+                }
+
+                let migTotal = 0;
+                for (const ab of absorbList) {
+                    const oldIds = [ab.nodeId, ab.docId];
+                    if (ab.isLegacyArray) oldIds.push(`${ab.docId}_${ab.legacyIndex}`, `${ab.docId}__leg_${ab.legacyIndex}`);
+                    const res = await migrarReferenciasAtivo(oldIds, keep, { updateNames: true, clearIgnore: true });
+                    migTotal += res.total;
+
+                    // Atualiza eventuais peças em ob_equipamentos que apontavam para o nome antigo no mesmo equipamento
+                    const pecasRelacionadas = listaObsPecas.filter(p =>
+                        normKey(p.equipamento) === normKey(ab.equipamento) &&
+                        normKey(p.maquina) === normKey(ab.maquina) &&
+                        normKey(p.conjunto) === normKey(ab.conjunto) &&
+                        normKey(ab.conjunto) !== normKey(keep.conjunto)
+                    );
+                    for (const p of pecasRelacionadas) {
+                        await updateDoc(doc(db, "ob_equipamentos", p.id), {
+                            area: keep.area,
+                            maquina: keep.maquina,
+                            equipamento: keep.equipamento,
+                            conjunto: keep.conjunto
+                        });
+                    }
+
+                    if (ab.isLegacyArray) {
+                        const rawEntry = rawLinhasDocs.find(d => d.id === ab.docId);
+                        if (rawEntry) await atualizarArrayLegadoAposRemocao(rawEntry, ab.legacyIndex);
+                    } else {
+                        await deleteDoc(doc(db, "ob_linhas", ab.docId));
+                    }
+                }
+                showToast(`Mesclagem concluída! ${absorbList.length} duplicado(s) absorvido(s) e ${migTotal} vínculo(s) preservado(s).`);
+            } catch (_) {
+                showToast("Erro ao mesclar conjuntos duplicados.", "error");
+            }
+        };
+
+        window.executarMesclagemManualSaneamento = async () => {
+            const keepId = document.getElementById('selMergeKeep')?.value || '';
+            const absorbId = document.getElementById('selMergeAbsorb')?.value || '';
+            if (!keepId || !absorbId) return showToast("Escolha os dois conjuntos para mesclar.", "error");
+            if (keepId === absorbId) return showToast("O ativo oficial e o duplicado precisam ser diferentes.", "error");
+            await mesclarConjuntosAtivos(keepId, [absorbId]);
+        };
+
         window.normalizarDocLegado = async (docId) => {
             const rawEntry = rawLinhasDocs.find(d => d.id === docId);
             if (!rawEntry || !Array.isArray(rawEntry.data.conjuntos) || !rawEntry.data.conjuntos.length) return;
@@ -3725,38 +4396,69 @@
             const equipamento = pickField(d, ['equipamento']) || 'Equipamento';
             const modelo = pickField(d, ['modelo']);
             const serie = pickField(d, ['serie', 'numeroSerie', 'n_serie']);
+            const padrinho_mec = pickField(d, ['padrinho_mec']);
+            const padrinho_ele = pickField(d, ['padrinho_ele']);
+            const inatList = Array.isArray(d.conjuntos_insp_inativos) ? d.conjuntos_insp_inativos : [];
+            const inspDoc = d.inspecao_ativa !== false && d.inspecao_ativa !== 'false';
             const autor = (usuarioLogado && (usuarioLogado.nome || usuarioLogado.user)) || 'Admin';
             const agora = new Date().toISOString();
 
             try {
-                for (const cItem of d.conjuntos) {
-                    const cj = typeof cItem === 'object' ? (pickField(cItem, ['conjunto', 'nome']) || 'Conjunto Geral') : String(cItem || 'Conjunto Geral').trim();
-                    await addDoc(refLinhas, {
+                let totalMigrados = 0;
+                for (let idx = 0; idx < d.conjuntos.length; idx++) {
+                    const cItem = d.conjuntos[idx];
+                    const isObj = cItem && typeof cItem === 'object';
+                    const cj = isObj ? (pickField(cItem, ['conjunto', 'nome']) || 'Conjunto Geral') : String(cItem || 'Conjunto Geral').trim();
+                    const sub = isObj ? pickField(cItem, ['subconjunto']) : '';
+                    const inspItem = isObj
+                        ? (cItem.inspecao_ativa !== undefined ? (cItem.inspecao_ativa !== false && cItem.inspecao_ativa !== 'false') : inspDoc)
+                        : (!inatList.includes(idx) && inspDoc);
+
+                    const payload = {
                         setor: area,
                         area,
                         maquina,
                         equipamento,
                         conjunto: cj,
-                        subconjunto: '',
-                        tag: pickField(d, ['tag']),
-                        criticidade: normalizarCriticidade(pickField(d, ['criticidade'])),
-                        periodicidade_preventiva: pickField(d, ['periodicidade_preventiva', 'periodicidade']),
-                        disciplina: pickField(d, ['disciplina']) || 'Mecânica',
+                        subconjunto: sub,
+                        tag: (isObj && pickField(cItem, ['tag'])) || pickField(d, ['tag']),
+                        criticidade: normalizarCriticidade((isObj && pickField(cItem, ['criticidade'])) || pickField(d, ['criticidade'])),
+                        periodicidade_preventiva: (isObj && pickField(cItem, ['periodicidade_preventiva', 'periodicidade'])) || pickField(d, ['periodicidade_preventiva', 'periodicidade']),
+                        disciplina: (isObj && pickField(cItem, ['disciplina'])) || pickField(d, ['disciplina']) || 'Mecânica',
                         fabricante: pickField(d, ['fabricante']),
-                        modelo,
-                        serie,
-                        numeroSerie: serie,
-                        status_ativo: 'Ativo',
+                        modelo: (isObj && pickField(cItem, ['modelo'])) || modelo,
+                        serie: (isObj && pickField(cItem, ['serie', 'numeroSerie', 'n_serie'])) || serie,
+                        numeroSerie: (isObj && pickField(cItem, ['serie', 'numeroSerie', 'n_serie'])) || serie,
+                        status_ativo: STATUS_ATIVOS[d.status_ativo] ? d.status_ativo : 'Ativo',
+                        inspecao_ativa: inspItem,
+                        padrinho_mec,
+                        padrinho_ele,
                         origem_cadastro: 'normalizado_legado',
+                        migrado_de_docId: docId,
                         criado_em: agora,
                         atualizado_em: agora,
                         atualizado_por: autor
-                    });
+                    };
+                    const novoRef = await addDoc(refLinhas, payload);
+                    const oldIds = [`${docId}_${idx}`, `${docId}__leg_${idx}`];
+                    if (d.conjuntos.length === 1 || idx === 0) oldIds.push(docId);
+                    const res = await migrarReferenciasAtivo(oldIds, { nodeId: novoRef.id, docId: novoRef.id, isLegacyArray: false, ...payload }, { updateNames: false });
+                    totalMigrados += res.total;
                 }
                 await deleteDoc(doc(db, "ob_linhas", docId));
-                showToast(`Ativo "${equipamento}" normalizado com sucesso!`);
+                showToast(totalMigrados > 0
+                    ? `Ativo "${equipamento}" normalizado com ${totalMigrados} vínculo(s) migrado(s)!`
+                    : `Ativo "${equipamento}" normalizado com sucesso!`);
             } catch (_) {
                 showToast("Erro ao normalizar documento legado.", "error");
+            }
+        };
+
+        window.normalizarTodosLegados = async () => {
+            const legados = rawLinhasDocs.filter(d => !pickField(d.data, ['conjunto']) && Array.isArray(d.data.conjuntos) && d.data.conjuntos.length > 0);
+            if (!legados.length) return;
+            for (const l of legados) {
+                await window.normalizarDocLegado(l.id);
             }
         };
 
@@ -3769,8 +4471,13 @@
             else patch[campo] = canonico;
 
             try {
+                const affectedIds = new Set(afetados.map(n => n.docId));
                 for (const n of afetados) {
                     await updateDoc(doc(db, "ob_linhas", n.docId), patch);
+                }
+                // Atualiza também o texto espelhado em rotas ligadas a esses nós
+                for (const ag of listaAgenda.filter(a => a.id_node && affectedIds.has(String(a.id_node)))) {
+                    await updateDoc(doc(db, "ir_agenda", ag.id), { [campo]: canonico });
                 }
                 showToast(`Padronizado para "${canonico}" em ${afetados.length} registro(s)!`);
             } catch (_) {
@@ -3778,46 +4485,251 @@
             }
         };
 
+        window.setSaneamentoBusca = (val) => {
+            saneamentoBusca = String(val || '');
+            renderSaneamento();
+        };
+
+        window.toggleSaneamentoArquivados = () => {
+            saneamentoMostrarArquivados = !saneamentoMostrarArquivados;
+            renderSaneamento();
+        };
+
+        function getOpcoesAtivosSelectHtml(preferidos = [], selectedId = '') {
+            const seen = new Set();
+            const prefList = [];
+            (preferidos || []).forEach(n => {
+                if (n && !seen.has(n.nodeId)) {
+                    seen.add(n.nodeId);
+                    prefList.push(n);
+                }
+            });
+            const outros = assetNodes.filter(n => !seen.has(n.nodeId));
+            const mkOpt = (n) => {
+                const lbl = `${n.area} › ${n.maquina} › ${n.equipamento} › ${formatNomeConjuntoInsp(n)}${n.isLegacyArray ? ' [Legado]' : ''}`;
+                const sel = n.nodeId === selectedId ? ' selected' : '';
+                return `<option value="${escapeHtml(n.nodeId)}"${sel}>${escapeHtml(lbl)}</option>`;
+            };
+
+            let html = '<option value="">-- Selecionar conjunto na árvore atual --</option>';
+            if (prefList.length) {
+                html += `<optgroup label="Sugestões mais compatíveis">${prefList.map(mkOpt).join('')}</optgroup>`;
+            }
+            if (outros.length) {
+                html += `<optgroup label="Todos os ativos cadastrados">${outros.map(mkOpt).join('')}</optgroup>`;
+            }
+            return html;
+        }
+
         function renderSaneamento() {
             const box = document.getElementById('saneamentoContent');
             if (!box) return;
 
+            const q = normKey(saneamentoBusca);
+            const allOrfaos = detectarGruposOrfaos();
+            cachedOrphanGroups = allOrfaos;
+
+            const orfaosAtivos = allOrfaos.filter(g => !g.ignorado);
+            const orfaosArquivados = allOrfaos.filter(g => g.ignorado);
+            const orfaosBase = saneamentoMostrarArquivados ? orfaosArquivados : orfaosAtivos;
+            const orfaosVisiveis = q
+                ? orfaosBase.filter(g => normKey(`${g.area} ${g.maquina} ${g.equipamento} ${g.conjunto} ${g.oldIdsArr.join(' ')}`).includes(q))
+                : orfaosBase;
+
+            const exactMatchCount = orfaosAtivos.filter(g => g.sugestao.bestScore >= 95 && g.sugestao.bestNode).length;
             const legados = rawLinhasDocs.filter(d => !pickField(d.data, ['conjunto']) && Array.isArray(d.data.conjuntos) && d.data.conjuntos.length > 0);
             const grafias = detectarInconsistenciasGrafia();
+            const duplicados = detectarConjuntosDuplicados();
+            const duplicadosVisiveis = q
+                ? duplicados.filter(d => normKey(`${d.area} ${d.maquina} ${d.equipamento} ${d.keep.conjunto} ${d.absorb.map(x => x.conjunto).join(' ')}`).includes(q))
+                : duplicados;
             const incompletos = assetNodes.filter(n => !n.criticidade || !n.periodicidade_preventiva || !n.subconjunto);
 
+            const allOptsMesclarHtml = getOpcoesAtivosSelectHtml([], '');
+
+            const btnArq = document.getElementById('btnToggleSaneamentoArq');
+            if (btnArq) {
+                const showBtn = orfaosArquivados.length > 0 || saneamentoMostrarArquivados;
+                btnArq.hidden = !showBtn;
+                btnArq.classList.toggle('hidden', !showBtn);
+                btnArq.className = `${showBtn ? '' : 'hidden '}px-3 py-2 rounded-xl border text-xs font-extrabold ${saneamentoMostrarArquivados ? 'bg-slate-900 text-white border-slate-900' : 'bg-white text-slate-700 border-slate-200 hover:bg-slate-50'}`;
+                btnArq.innerText = saneamentoMostrarArquivados
+                    ? `← Ver Pendentes (${orfaosAtivos.length})`
+                    : `Ver Arquivados (${orfaosArquivados.length})`;
+            }
+
             box.innerHTML = `
-                <!-- BLOCO 1: LEGADOS EM ARRAY -->
+                <!-- FILTRO RÁPIDO + KPIs -->
+                <div class="grid grid-cols-2 lg:grid-cols-4 gap-3">
+                    <div class="glass-card p-4 rounded-2xl border-l-4 ${orfaosAtivos.length ? 'border-l-amber-500' : 'border-l-emerald-500'}">
+                        <div class="text-[10px] font-extrabold uppercase text-slate-400">Histórico / Planos Órfãos</div>
+                        <div class="text-2xl font-extrabold ${orfaosAtivos.length ? 'text-amber-600' : 'text-emerald-600'} mt-0.5">${orfaosAtivos.length}</div>
+                        <div class="text-[11px] font-semibold text-slate-500">${orfaosAtivos.reduce((a, g) => a + g.totalRegistros, 0)} registro(s) preservado(s)</div>
+                    </div>
+                    <div class="glass-card p-4 rounded-2xl border-l-4 ${legados.length ? 'border-l-amber-500' : 'border-l-emerald-500'}">
+                        <div class="text-[10px] font-extrabold uppercase text-slate-400">Legados em Array</div>
+                        <div class="text-2xl font-extrabold ${legados.length ? 'text-amber-600' : 'text-emerald-600'} mt-0.5">${legados.length}</div>
+                        <div class="text-[11px] font-semibold text-slate-500">Migráveis em cascata</div>
+                    </div>
+                    <div class="glass-card p-4 rounded-2xl border-l-4 ${(duplicados.length + grafias.length) ? 'border-l-indigo-500' : 'border-l-emerald-500'}">
+                        <div class="text-[10px] font-extrabold uppercase text-slate-400">Duplicidades &amp; Grafia</div>
+                        <div class="text-2xl font-extrabold ${(duplicados.length + grafias.length) ? 'text-indigo-600' : 'text-emerald-600'} mt-0.5">${duplicados.length + grafias.length}</div>
+                        <div class="text-[11px] font-semibold text-slate-500">${duplicados.length} dup. • ${grafias.length} grafia(s)</div>
+                    </div>
+                    <div class="glass-card p-4 rounded-2xl border-l-4 ${incompletos.length ? 'border-l-rose-500' : 'border-l-emerald-500'}">
+                        <div class="text-[10px] font-extrabold uppercase text-slate-400">Pendências Engenharia</div>
+                        <div class="text-2xl font-extrabold ${incompletos.length ? 'text-rose-600' : 'text-emerald-600'} mt-0.5">${incompletos.length}</div>
+                        <div class="text-[11px] font-semibold text-slate-500">Subconj. / Crit. / Per.</div>
+                    </div>
+                </div>
+
+                <!-- BLOCO 1: RECONCILIAÇÃO DE ÓRFÃOS -->
                 <div class="glass-card p-5 sm:p-6 rounded-3xl space-y-4">
                     <div class="flex flex-wrap items-center justify-between gap-2">
                         <div>
-                            <h3 class="text-sm font-extrabold text-slate-900">1. Registros Legados em Array (Obsolescência)</h3>
-                            <p class="text-xs text-slate-500">Documentos antigos em <code>ob_linhas</code> que guardam vários conjuntos num único array em vez de nós individuais com criticidade e periodicidade.</p>
+                            <h3 class="text-sm font-extrabold text-slate-900">1. Conciliação de Inspeções &amp; Planos Órfãos ${saneamentoMostrarArquivados ? '(Arquivados)' : ''}</h3>
+                            <p class="text-xs text-slate-500">Inspeções finalizadas, rotas pendentes ou planos cirúrgicos cujo <code>id_node</code> antigo não está mais na árvore atual — todo o histórico foi mantido e pode ser re-vinculado ou recriado aqui.</p>
                         </div>
-                        <span class="px-3 py-1 rounded-full text-xs font-extrabold ${legados.length ? 'bg-amber-100 text-amber-800' : 'bg-emerald-100 text-emerald-700'}">${legados.length} encontrado(s)</span>
+                        <div class="flex flex-wrap items-center gap-2">
+                            ${!saneamentoMostrarArquivados && exactMatchCount > 0 ? `
+                                <button type="button" onclick="conciliarTodosMatchesExatos()" class="px-3.5 py-1.5 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white font-extrabold text-[11px] shadow-sm">
+                                    ✓ Conciliar ${exactMatchCount} Match(es) Exato(s)
+                                </button>
+                            ` : ''}
+                            <span class="px-3 py-1 rounded-full text-xs font-extrabold ${orfaosAtivos.length ? 'bg-amber-100 text-amber-800' : 'bg-emerald-100 text-emerald-700'}">${orfaosAtivos.length} grupo(s) ativo(s)</span>
+                        </div>
+                    </div>
+
+                    ${orfaosVisiveis.length ? `<div class="space-y-3">
+                        ${orfaosVisiveis.map(g => {
+                            const origIdx = allOrfaos.indexOf(g);
+                            const concCount = g.rotas.filter(r => normKey(r.status) === 'concluido').length;
+                            const pendCount = g.rotas.length - concCount;
+                            const semanas = [...new Set(g.rotas.map(r => r.semana).filter(Boolean))].sort((a, b) => a - b).slice(0, 6).map(w => `S${w}`).join(', ');
+                            const hasMatchForte = g.sugestao.bestScore >= 90;
+                            const optsHtml = getOpcoesAtivosSelectHtml(g.sugestao.topCandidates, g.sugestao.bestNode?.nodeId || '');
+                            return `
+                            <div class="p-4 rounded-2xl border ${hasMatchForte ? 'border-emerald-200 bg-emerald-50/30' : 'border-slate-200 bg-white'} space-y-3">
+                                <div class="flex flex-wrap items-start justify-between gap-2">
+                                    <div class="min-w-0 space-y-1">
+                                        <div class="text-[11px] font-bold uppercase text-slate-400 truncate">${escapeHtml(g.area)} › ${escapeHtml(g.maquina)} › ${escapeHtml(g.equipamento)}</div>
+                                        <div class="text-sm font-extrabold text-slate-900">${escapeHtml(g.conjunto)}</div>
+                                        <div class="flex flex-wrap items-center gap-1.5 pt-0.5">
+                                            ${g.rotas.length ? `<span class="px-2 py-0.5 rounded-full text-[10px] font-extrabold bg-sky-100 text-sky-800">${g.rotas.length} rota(s) (${concCount} concluída${concCount === 1 ? '' : 's'}, ${pendCount} pendente${pendCount === 1 ? '' : 's'})</span>` : ''}
+                                            ${semanas ? `<span class="px-2 py-0.5 rounded-full text-[10px] font-bold bg-slate-100 text-slate-600">${escapeHtml(semanas)}${g.rotas.length > 6 ? '...' : ''}</span>` : ''}
+                                            ${g.planos.length ? `<span class="px-2 py-0.5 rounded-full text-[10px] font-extrabold bg-indigo-100 text-indigo-800">${g.planos.length} Plano(s) Cirúrgico(s)</span>` : ''}
+                                            ${g.manutencoes.length ? `<span class="px-2 py-0.5 rounded-full text-[10px] font-extrabold bg-teal-100 text-teal-800">${g.manutencoes.length} Preventiva(s)/OS</span>` : ''}
+                                            ${g.anomalias.length ? `<span class="px-2 py-0.5 rounded-full text-[10px] font-extrabold bg-rose-100 text-rose-700">${g.anomalias.length} Anomalia(s)</span>` : ''}
+                                        </div>
+                                    </div>
+                                    <span class="px-2.5 py-0.5 rounded-full text-[10px] font-extrabold ${hasMatchForte ? 'bg-emerald-100 text-emerald-800' : 'bg-amber-100 text-amber-800'} shrink-0">${escapeHtml(g.sugestao.reason)}</span>
+                                </div>
+
+                                <div class="grid grid-cols-1 lg:grid-cols-12 gap-2 items-center pt-2 border-t border-slate-100 text-xs">
+                                    <div class="lg:col-span-6">
+                                        <select id="selOrfaoDest_${origIdx}" class="input-clean py-2 text-xs font-bold">${optsHtml}</select>
+                                    </div>
+                                    <div class="lg:col-span-6 flex flex-wrap items-center gap-2">
+                                        <button type="button" onclick="vincularGrupoOrfao(${origIdx})" class="px-3 py-2 rounded-xl bg-slate-900 hover:bg-slate-800 text-white font-extrabold text-[11px]">
+                                            Vincular ao Selecionado
+                                        </button>
+                                        <button type="button" onclick="recriarAtivoParaGrupoOrfao(${origIdx})" class="px-3 py-2 rounded-xl bg-sky-600 hover:bg-sky-700 text-white font-extrabold text-[11px]" title="Recria este conjunto diretamente na árvore ob_linhas e conecta o histórico">
+                                            + Recriar na Árvore
+                                        </button>
+                                        <label class="inline-flex items-center gap-1 text-[10px] font-bold text-slate-600 cursor-pointer select-none" title="Define se o conjunto recriado fica visível nas semanas da Inspeção 52S">
+                                            <input type="checkbox" id="chkOrfaoInspAtiva_${origIdx}" checked class="w-3.5 h-3.5 accent-emerald-600 rounded">
+                                            <span>Ativo 52S</span>
+                                        </label>
+                                        <button type="button" onclick="arquivarGrupoOrfao(${origIdx}, ${g.ignorado ? 'true' : 'false'})" class="ml-auto px-2.5 py-2 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-600 font-bold text-[11px]">
+                                            ${g.ignorado ? 'Restaurar' : 'Arquivar'}
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>`;
+                        }).join('')}
+                    </div>` : `<div class="text-xs font-bold text-emerald-700 bg-emerald-50 border border-emerald-200 p-3.5 rounded-2xl">
+                        ${saneamentoMostrarArquivados ? 'Nenhum registro órfão arquivado.' : 'Nenhum histórico ou plano órfão pendente — todas as fichas e planos cirúrgicos estão vinculados à árvore atual!'}
+                    </div>`}
+                </div>
+
+                <!-- BLOCO 2: LEGADOS EM ARRAY -->
+                <div class="glass-card p-5 sm:p-6 rounded-3xl space-y-4">
+                    <div class="flex flex-wrap items-center justify-between gap-2">
+                        <div>
+                            <h3 class="text-sm font-extrabold text-slate-900">2. Registros Legados em Array (Obsolescência)</h3>
+                            <p class="text-xs text-slate-500">Documentos antigos em <code>ob_linhas</code> que guardam conjuntos em array. Ao normalizar aqui, o sistema agora <strong>migra automaticamente</strong> rotas, planos cirúrgicos e o status Ativo/Oculto.</p>
+                        </div>
+                        <div class="flex items-center gap-2">
+                            ${legados.length > 1 ? `<button type="button" onclick="normalizarTodosLegados()" class="px-3.5 py-1.5 rounded-xl bg-amber-500 hover:bg-amber-600 text-white font-extrabold text-[11px]">Normalizar Todos (${legados.length})</button>` : ''}
+                            <span class="px-3 py-1 rounded-full text-xs font-extrabold ${legados.length ? 'bg-amber-100 text-amber-800' : 'bg-emerald-100 text-emerald-700'}">${legados.length} encontrado(s)</span>
+                        </div>
                     </div>
                     ${legados.length ? `<div class="divide-y divide-slate-100 rounded-2xl border border-slate-200">
                         ${legados.map(l => `
                             <div class="p-3.5 flex flex-wrap items-center justify-between gap-2 text-xs">
                                 <div>
                                     <div class="font-extrabold text-slate-900">${escapeHtml(pickField(l.data, ['area', 'setor']))} › ${escapeHtml(pickField(l.data, ['maquina', 'linha']))} › ${escapeHtml(pickField(l.data, ['equipamento']))}</div>
-                                    <div class="text-[11px] text-slate-500">Conjuntos no array: ${escapeHtml((l.data.conjuntos || []).join(', '))}</div>
+                                    <div class="text-[11px] text-slate-500">Conjuntos no array: ${escapeHtml((l.data.conjuntos || []).map(c => typeof c === 'object' ? (c.conjunto || c.nome || '') : c).join(', '))}</div>
                                 </div>
-                                <button type="button" onclick="normalizarDocLegado('${escapeHtml(l.id)}')" class="px-3 py-1.5 rounded-xl bg-amber-500 hover:bg-amber-600 text-white font-extrabold text-[11px]">Normalizar para Árvore</button>
+                                <button type="button" onclick="normalizarDocLegado('${escapeHtml(l.id)}')" class="px-3 py-1.5 rounded-xl bg-amber-500 hover:bg-amber-600 text-white font-extrabold text-[11px]">Normalizar com Cascata</button>
                             </div>
                         `).join('')}
                     </div>` : `<div class="text-xs font-bold text-emerald-700 bg-emerald-50 border border-emerald-200 p-3.5 rounded-2xl">Nenhum registro legado pendente — toda a base já está normalizada!</div>`}
                 </div>
 
-                <!-- BLOCO 2: VARIAÇÕES DE GRAFIA -->
+                <!-- BLOCO 3: MESCLAR DUPLICIDADES & GRAFIA -->
                 <div class="glass-card p-5 sm:p-6 rounded-3xl space-y-4">
                     <div class="flex flex-wrap items-center justify-between gap-2">
                         <div>
-                            <h3 class="text-sm font-extrabold text-slate-900">2. Inconsistências de Grafia (Maiúsculas / Acentos / Espaços)</h3>
-                            <p class="text-xs text-slate-500">Mesmo nome cadastrado com variações que dividem erroneamente galhos na árvore.</p>
+                            <h3 class="text-sm font-extrabold text-slate-900">3. Mesclar Conjuntos Duplicados &amp; Unificar Grafia</h3>
+                            <p class="text-xs text-slate-500">Unifique conjuntos parecidos (Obsolescência × Inspeção) sem perder rotas, planos cirúrgicos ou peças vinculadas.</p>
                         </div>
-                        <span class="px-3 py-1 rounded-full text-xs font-extrabold ${grafias.length ? 'bg-amber-100 text-amber-800' : 'bg-emerald-100 text-emerald-700'}">${grafias.length} grupo(s)</span>
+                        <span class="px-3 py-1 rounded-full text-xs font-extrabold ${(duplicados.length + grafias.length) ? 'bg-indigo-100 text-indigo-800' : 'bg-emerald-100 text-emerald-700'}">${duplicados.length + grafias.length} alerta(s)</span>
                     </div>
+
+                    ${duplicadosVisiveis.length ? `<div class="space-y-2.5">
+                        ${duplicadosVisiveis.map(d => {
+                            const absIdsJson = JSON.stringify(d.absorb.map(x => x.nodeId)).replace(/"/g, '&quot;');
+                            return `
+                            <div class="p-3.5 rounded-2xl border border-indigo-200 bg-indigo-50/40 flex flex-wrap items-center justify-between gap-3 text-xs">
+                                <div class="min-w-0 space-y-1">
+                                    <div class="flex items-center gap-1.5">
+                                        <span class="px-2 py-0.5 rounded-full text-[9px] font-extrabold bg-indigo-100 text-indigo-800 uppercase">${escapeHtml(d.tipo)}</span>
+                                        <span class="font-bold text-slate-500 truncate">${escapeHtml(d.area)} › ${escapeHtml(d.maquina)} › ${escapeHtml(d.equipamento)}</span>
+                                    </div>
+                                    <div class="font-extrabold text-slate-900">
+                                        Manter: <span class="text-emerald-700">${escapeHtml(formatNomeConjuntoInsp(d.keep))}</span> (${contarVinculosAtivo(d.keep)} vínc.)
+                                        <span class="text-slate-400 mx-1">← Absorver:</span>
+                                        ${d.absorb.map(ab => `<span class="px-2 py-0.5 rounded bg-white border border-slate-200 text-slate-700 mr-1">${escapeHtml(formatNomeConjuntoInsp(ab))} (${contarVinculosAtivo(ab)} vínc.)</span>`).join('')}
+                                    </div>
+                                </div>
+                                <button type="button" onclick="mesclarConjuntosAtivos('${escapeHtml(d.keep.nodeId)}', ${absIdsJson})" class="px-3 py-1.5 rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white font-extrabold text-[11px] shrink-0">
+                                    Mesclar com Segurança
+                                </button>
+                            </div>`;
+                        }).join('')}
+                    </div>` : `<div class="text-xs font-bold text-emerald-700 bg-emerald-50 border border-emerald-200 p-3 rounded-2xl">Nenhuma duplicidade evidente encontrada entre conjuntos do mesmo equipamento.</div>`}
+
+                    <!-- MESCLAGEM MANUAL -->
+                    <div class="p-4 rounded-2xl bg-slate-50 border border-slate-200/90 space-y-2.5 text-xs">
+                        <div class="font-extrabold text-slate-800">Mesclagem Manual (Juntar dois conjuntos com nomes diferentes)</div>
+                        <div class="grid grid-cols-1 lg:grid-cols-11 gap-2 items-end">
+                            <div class="lg:col-span-4">
+                                <label class="block text-[10px] font-extrabold uppercase text-emerald-700 mb-1">1. Manter Este (Oficial)</label>
+                                <select id="selMergeKeep" class="input-clean py-2 text-xs font-bold">${allOptsMesclarHtml}</select>
+                            </div>
+                            <div class="lg:col-span-4">
+                                <label class="block text-[10px] font-extrabold uppercase text-rose-600 mb-1">2. Absorver e Remover Este</label>
+                                <select id="selMergeAbsorb" class="input-clean py-2 text-xs font-bold">${allOptsMesclarHtml}</select>
+                            </div>
+                            <div class="lg:col-span-3">
+                                <button type="button" onclick="executarMesclagemManualSaneamento()" class="btn-pill-dark w-full py-2.5 px-3 text-xs justify-center">
+                                    Mesclar 2 → 1
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+
                     ${grafias.length ? `<div class="divide-y divide-slate-100 rounded-2xl border border-slate-200">
                         ${grafias.map(g => `
                             <div class="p-3.5 flex flex-wrap items-center justify-between gap-2 text-xs">
@@ -3828,15 +4740,15 @@
                                 <button type="button" onclick="unificarGrafiaCampo('${g.campo}', ${JSON.stringify(g.normVal).replace(/"/g, '&quot;')}, ${JSON.stringify(g.canonico).replace(/"/g, '&quot;')})" class="px-3 py-1.5 rounded-xl bg-slate-900 hover:bg-slate-800 text-white font-extrabold text-[11px]">Unificar como "${escapeHtml(g.canonico)}"</button>
                             </div>
                         `).join('')}
-                    </div>` : `<div class="text-xs font-bold text-emerald-700 bg-emerald-50 border border-emerald-200 p-3.5 rounded-2xl">Nenhuma inconsistência de grafia detectada na árvore!</div>`}
+                    </div>` : ''}
                 </div>
 
-                <!-- BLOCO 3: ATIVOS INCOMPLETOS -->
+                <!-- BLOCO 4: ATIVOS INCOMPLETOS -->
                 <div class="glass-card p-5 sm:p-6 rounded-3xl space-y-4">
                     <div class="flex flex-wrap items-center justify-between gap-2">
                         <div>
-                            <h3 class="text-sm font-extrabold text-slate-900">3. Pendências de Engenharia (Subconjunto, Criticidade ou Periodicidade)</h3>
-                            <p class="text-xs text-slate-500">Ativos que ainda precisam de classificação completa. Você pode corrigir individualmente ou usar a aba <strong>Lote & CSV</strong>.</p>
+                            <h3 class="text-sm font-extrabold text-slate-900">4. Pendências de Engenharia (Subconjunto, Criticidade ou Periodicidade)</h3>
+                            <p class="text-xs text-slate-500">Ativos que ainda precisam de classificação completa. Você pode corrigir individualmente ou usar a aba <strong>Lote &amp; CSV</strong>.</p>
                         </div>
                         <span class="px-3 py-1 rounded-full text-xs font-extrabold ${incompletos.length ? 'bg-rose-100 text-rose-700' : 'bg-emerald-100 text-emerald-700'}">${incompletos.length} item(ns)</span>
                     </div>

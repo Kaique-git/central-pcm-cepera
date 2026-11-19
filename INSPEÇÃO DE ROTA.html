@@ -2562,6 +2562,74 @@
             return c || s || 'Conjunto Geral';
         }
 
+        function normTextoReligacao(val) {
+            return String(val || '').normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase().trim().replace(/\s+/g, ' ');
+        }
+
+        function getValidArvIdsSet() {
+            return new Set(arvLinhas.map(x => String(x.id || '')).filter(Boolean));
+        }
+
+        function matchConjuntoReligacao(node, recConjStr) {
+            const rC = normTextoReligacao(recConjStr);
+            if (!rC) return false;
+            const nFull = normTextoReligacao(getNomeConjunto(node));
+            const nConj = normTextoReligacao(node?.conjunto);
+            if (nFull && rC === nFull) return true;
+            if (nConj && rC === nConj) return true;
+            const rBase = rC.split(/\s*[›>]\s*/)[0].trim();
+            if (rC.includes('›') || rC.includes('>')) {
+                return Boolean(nFull === rC || (nConj === rBase && !node?.subconjunto));
+            }
+            return false;
+        }
+
+        function matchRegistroMesmoConjuntoNode(node, rec) {
+            if (!node || !rec) return false;
+            if (normTextoReligacao(rec.area) !== normTextoReligacao(node.area)) return false;
+            if (normTextoReligacao(rec.maquina) !== normTextoReligacao(node.maquina)) return false;
+            if (normTextoReligacao(rec.equipamento) !== normTextoReligacao(node.equipamento)) return false;
+            return matchConjuntoReligacao(node, rec.conjunto);
+        }
+
+        function findAgendaCellParaNodeSemana(node, semana, validIds = null) {
+            if (!node) return null;
+            const semN = Number(semana);
+            const exact = agendaRotas.find(a => a.id_node === node.id && Number(a.semana) === semN);
+            if (exact) return exact;
+            const vSet = validIds || getValidArvIdsSet();
+            return agendaRotas.find(a =>
+                Number(a.semana) === semN &&
+                !a.orphan_ignorado &&
+                (!a.id_node || !vSet.has(String(a.id_node))) &&
+                matchRegistroMesmoConjuntoNode(node, a)
+            ) || null;
+        }
+
+        function findChecklistCirurgicoParaNode(idNode, role, validIds = null) {
+            const key = `${idNode}_${role}`;
+            if (mapaChecklists[key]) return mapaChecklists[key];
+            const node = arvLinhas.find(x => x.id === idNode);
+            if (!node) return null;
+            const vSet = validIds || getValidArvIdsSet();
+            const roleNorm = normTextoReligacao(role);
+            return Object.values(mapaChecklists || {}).find(c => {
+                if (!c || c.orphan_ignorado) return false;
+                if (c.id_node && vSet.has(String(c.id_node))) return false;
+                const espNorm = normTextoReligacao(c.especialidade || (c.id && String(c.id).includes('_') ? String(c.id).slice(String(c.id).lastIndexOf('_') + 1) : ''));
+                if (roleNorm && espNorm && espNorm !== roleNorm) return false;
+                return matchRegistroMesmoConjuntoNode(node, c);
+            }) || null;
+        }
+
+        function findNodeHibridoPorRegistro(rec) {
+            if (!rec) return null;
+            const exact = arvLinhas.find(n => n.id === rec.id_node);
+            if (exact) return { node: exact, isOrphanLink: false };
+            const fallback = arvLinhas.find(n => matchRegistroMesmoConjuntoNode(n, rec)) || null;
+            return { node: fallback, isOrphanLink: true };
+        }
+
         function atualizarBadgesArvore() {
             const total = arvLinhas.length;
             const ativosInsp = arvLinhas.filter(isConjuntoInspecaoAtiva).length;
@@ -3977,6 +4045,7 @@
             let tbody = '';
             let chaveMaquinaAnterior = '';
             const exibirDivisoriaMaquina = planMaquinasSelecionadas.length > 1 || planAreasSelecionadas.length > 1;
+            const validArvIds = getValidArvIdsSet();
 
             itens.forEach(node => {
                 const chaveMaqAtual = `${node.area || ''}|||${node.maquina || ''}`;
@@ -3992,7 +4061,10 @@
                 }
 
                 const nomeConjunto = getNomeConjunto(node);
-                const temCirurgico = Boolean(mapaChecklists[`${node.id}_Mecânica`] || mapaChecklists[`${node.id}_Elétrica`]);
+                const temCirurgico = Boolean(
+                    findChecklistCirurgicoParaNode(node.id, 'Mecânica', validArvIds) ||
+                    findChecklistCirurgicoParaNode(node.id, 'Elétrica', validArvIds)
+                );
                 const padInfo = mapaPadrinhosLinhas[node.id] || {};
                 const padMec = node.padrinho_mec || padInfo.padrinho_mec || '';
                 const padEle = node.padrinho_ele || padInfo.padrinho_ele || '';
@@ -4040,7 +4112,7 @@
                         ${badgesPadrinhosHtml}
                     </td>`;
                 for (let w = 1; w <= 52; w++) {
-                    const cell = agendaRotas.find(a => a.id_node === node.id && a.semana === w);
+                    const cell = findAgendaCellParaNodeSemana(node, w, validArvIds);
                     let classBtn = 'cell-empty';
                     let txt = '+';
                     let title = `Agendar S${w}`;
@@ -4059,7 +4131,7 @@
                         }
                         const iniciais = (cell.nome_tecnico || '✓').split(' ').map(p => p[0]).slice(0, 2).join('').toUpperCase();
                         txt = cell.status === 'Concluído' ? '✓' : iniciais;
-                        title = `${cell.nome_tecnico} • ${cell.role_tecnico || 'Técnico'} (${cell.status})`;
+                        title = `${cell.nome_tecnico} • ${cell.role_tecnico || 'Técnico'} (${cell.status})${cell.id_node !== node.id ? ' • Vínculo antigo' : ''}`;
                     }
                     tbody += `<td class="cell-active" title="${escapeHtml(title)}" onclick="abrirAgendaCell('${node.id}', ${w})"><div class="matrix-cell-btn ${classBtn}">${txt}</div></td>`;
                 }
@@ -4168,7 +4240,8 @@
         window.abrirAgendaCell = (idNode, sem) => {
             const node = arvLinhas.find(x => x.id === idNode);
             if (!node) return;
-            const ext = agendaRotas.find(a => a.id_node === idNode && a.semana === sem);
+            const validArvIds = getValidArvIdsSet();
+            const ext = findAgendaCellParaNodeSemana(node, sem, validArvIds);
             if (ext && ext.status === 'Concluído') {
                 abrirModalVisualizarFicha(ext.id);
                 return;
@@ -4203,10 +4276,10 @@
 
             const boxConj = document.getElementById('agListaConjuntosEquip');
             boxConj.innerHTML = irmaos.map(ir => {
-                const jaAgendado = agendaRotas.find(a => a.id_node === ir.id && a.semana === sem);
+                const jaAgendado = findAgendaCellParaNodeSemana(ir, sem, validArvIds);
                 const checked = ir.id === idNode ? 'checked' : '';
-                const temMec = Boolean(mapaChecklists[`${ir.id}_Mecânica`]);
-                const temEle = Boolean(mapaChecklists[`${ir.id}_Elétrica`]);
+                const temMec = Boolean(findChecklistCirurgicoParaNode(ir.id, 'Mecânica', validArvIds));
+                const temEle = Boolean(findChecklistCirurgicoParaNode(ir.id, 'Elétrica', validArvIds));
                 return `
                 <label class="flex items-center justify-between gap-2 p-2 rounded-xl bg-white border border-slate-200 cursor-pointer hover:border-sky-400">
                     <div class="flex items-center gap-2 min-w-0">
@@ -4247,10 +4320,11 @@
             }
 
             try {
+                const validArvIds = getValidArvIdsSet();
                 for (const targetNodeId of selecionados) {
                     const node = arvLinhas.find(x => x.id === targetNodeId);
                     if (!node) continue;
-                    const ext = agendaRotas.find(a => a.id_node === targetNodeId && a.semana === semana);
+                    const ext = findAgendaCellParaNodeSemana(node, semana, validArvIds);
                     if (ext && ext.status === 'Concluído') continue;
 
                     const data = {
@@ -4448,12 +4522,18 @@
                 return;
             }
 
+            const validArvIds = getValidArvIdsSet();
             container.innerHTML = filtradas.map(ag => {
                 const isDone = ag.status === 'Concluído';
                 const conj = ag.conjunto || 'Conjunto Geral';
-                const nodeInfo = arvLinhas.find(n => n.id === ag.id_node);
+                const hyb = findNodeHibridoPorRegistro(ag);
+                const nodeInfo = hyb?.node || null;
+                const isOrphanLink = Boolean((!ag.id_node || !validArvIds.has(String(ag.id_node))) && !ag.orphan_ignorado);
                 const anoms = getAnomaliasOficiais().filter(a => a.id_agenda === ag.id);
-                const hasCustom = Boolean(mapaChecklists[`${ag.id_node}_${ag.role_tecnico}`]);
+                const hasCustom = Boolean(
+                    mapaChecklists[`${ag.id_node}_${ag.role_tecnico}`] ||
+                    (nodeInfo && findChecklistCirurgicoParaNode(nodeInfo.id, ag.role_tecnico, validArvIds))
+                );
 
                 let resumoRespostasHtml = '';
                 if (isDone && Array.isArray(ag.checklist_respostas) && ag.checklist_respostas.length > 0) {
@@ -4468,7 +4548,7 @@
                         ${anoms.length > 0 ? `<span class="text-[10px] font-extrabold px-2 py-0.5 rounded-md bg-rose-600 text-white"> ${anoms.length} Registro(s)</span>` : ''}
                     </div>`;
                 } else {
-                    const plano = getChecklistParaExecucao(ag.id_node, ag.role_tecnico);
+                    const plano = getChecklistParaExecucao(ag.id_node, ag.role_tecnico, ag);
                     const totalPts = plano.grupos.reduce((acc, g) => acc + (g.itens?.length || 0), 0);
                     resumoRespostasHtml = `
                     <div class="mt-2.5 text-[11px] font-semibold text-amber-800 bg-amber-50/80 border border-amber-200/80 px-3 py-1.5 rounded-xl">
@@ -4490,6 +4570,7 @@
                                 </span>
                                 <span class="text-[10px] font-extrabold uppercase px-2 py-0.5 rounded-full bg-slate-100 text-slate-700">S${ag.semana}</span>
                                 ${hasCustom ? '<span class="text-[10px] font-extrabold px-2 py-0.5 rounded-full bg-indigo-100 text-indigo-800"> Cirúrgico</span>' : ''}
+                                ${isOrphanLink ? '<span class="text-[10px] font-extrabold px-2 py-0.5 rounded-full bg-amber-100 text-amber-800 border border-amber-200" title="ID antigo da árvore — reconcilie em Gestão de Ativos > Qualidade de Dados">Vínculo antigo</span>' : ''}
                             </div>
                             <span class="text-[10px] font-extrabold uppercase text-sky-700">${escapeHtml(ag.role_tecnico || '')}</span>
                         </div>
@@ -4529,9 +4610,9 @@
         function construirCorpoFichaHtml(ag) {
             const isDone = ag.status === 'Concluído';
             const conj = ag.conjunto || 'Conjunto Geral';
-            const nodeInfo = arvLinhas.find(n => n.id === ag.id_node);
+            const nodeInfo = findNodeHibridoPorRegistro(ag)?.node || null;
             const anoms = getAnomaliasOficiais().filter(a => a.id_agenda === ag.id);
-            const planoAtual = getChecklistParaExecucao(ag.id_node, ag.role_tecnico);
+            const planoAtual = getChecklistParaExecucao(ag.id_node, ag.role_tecnico, ag);
 
             const dataExecStr = isDone && ag.data_conclusao
                 ? new Date(ag.data_conclusao).toLocaleString('pt-BR', { dateStyle: 'short', timeStyle: 'short' })
@@ -4907,11 +4988,39 @@
             ];
         }
 
-        function getChecklistParaExecucao(idNode, role) {
+        function getChecklistParaExecucao(idNode, role, fallbackRec = null) {
             const key = `${idNode}_${role}`;
-            const custom = mapaChecklists[key];
-            if (custom && Array.isArray(custom.grupos) && custom.grupos.length > 0) {
-                return { isCustom: true, grupos: custom.grupos };
+            const direct = mapaChecklists[key];
+            const directGrupos = (direct && Array.isArray(direct.grupos) && direct.grupos.length > 0)
+                ? direct.grupos
+                : (direct && Array.isArray(direct.itens) && direct.itens.length > 0 ? [{ categoria: 'Pontos de Inspeção', itens: direct.itens }] : null);
+            if (directGrupos) return { isCustom: true, grupos: directGrupos };
+
+            const targetNodeId = arvLinhas.some(n => n.id === idNode)
+                ? idNode
+                : (fallbackRec ? findNodeHibridoPorRegistro(fallbackRec)?.node?.id : null);
+            if (targetNodeId) {
+                const hybChk = findChecklistCirurgicoParaNode(targetNodeId, role);
+                if (hybChk) {
+                    const hybGrupos = Array.isArray(hybChk.grupos) && hybChk.grupos.length > 0
+                        ? hybChk.grupos
+                        : (Array.isArray(hybChk.itens) && hybChk.itens.length > 0 ? [{ categoria: 'Pontos de Inspeção', itens: hybChk.itens }] : null);
+                    if (hybGrupos) return { isCustom: true, grupos: hybGrupos };
+                }
+            }
+            if (fallbackRec) {
+                const roleNorm = normTextoReligacao(role);
+                const orphanTextChk = Object.values(mapaChecklists || {}).find(c =>
+                    c && !c.orphan_ignorado &&
+                    (!roleNorm || !c.especialidade || normTextoReligacao(c.especialidade) === roleNorm) &&
+                    normTextoReligacao(c.area) === normTextoReligacao(fallbackRec.area) &&
+                    normTextoReligacao(c.maquina) === normTextoReligacao(fallbackRec.maquina) &&
+                    normTextoReligacao(c.equipamento) === normTextoReligacao(fallbackRec.equipamento) &&
+                    normTextoReligacao(c.conjunto) === normTextoReligacao(fallbackRec.conjunto)
+                );
+                if (orphanTextChk && Array.isArray(orphanTextChk.grupos) && orphanTextChk.grupos.length > 0) {
+                    return { isCustom: true, grupos: orphanTextChk.grupos };
+                }
             }
             return { isCustom: false, grupos: getChecklistPadraoEstruturado(role) };
         }
@@ -5068,16 +5177,17 @@
 
             const chavesOrdenadas = Object.keys(gruposEquip).sort((a, b) => a.localeCompare(b));
 
+            const validArvIds = getValidArvIdsSet();
             listEl.innerHTML = chavesOrdenadas.map(chave => {
                 const nodes = gruposEquip[chave].sort((a, b) => getNomeConjunto(a).localeCompare(getNomeConjunto(b)));
                 const refSample = nodes[0];
 
                 const itensHtml = nodes.map(node => {
                     const conj = getNomeConjunto(node);
-                    const planMec = mapaChecklists[`${node.id}_Mecânica`];
-                    const planEle = mapaChecklists[`${node.id}_Elétrica`];
-                    const qtdMec = planMec ? planMec.grupos.reduce((acc, g) => acc + (g.itens?.length || 0), 0) : 0;
-                    const qtdEle = planEle ? planEle.grupos.reduce((acc, g) => acc + (g.itens?.length || 0), 0) : 0;
+                    const planMec = findChecklistCirurgicoParaNode(node.id, 'Mecânica', validArvIds);
+                    const planEle = findChecklistCirurgicoParaNode(node.id, 'Elétrica', validArvIds);
+                    const qtdMec = planMec ? (planMec.grupos ? planMec.grupos.reduce((acc, g) => acc + (g.itens?.length || 0), 0) : (Array.isArray(planMec.itens) ? planMec.itens.length : 0)) : 0;
+                    const qtdEle = planEle ? (planEle.grupos ? planEle.grupos.reduce((acc, g) => acc + (g.itens?.length || 0), 0) : (Array.isArray(planEle.itens) ? planEle.itens.length : 0)) : 0;
                     const isSelected = editorSelectedNodeId === node.id;
                     const ativoInsp = isConjuntoInspecaoAtiva(node);
                     const toggleCls = ativoInsp
@@ -5186,17 +5296,21 @@
                 metaEl.classList.add('hidden');
             }
 
-            const key = `${node.id}_${editorEspecialidade}`;
-            const saved = mapaChecklists[key];
+            const saved = findChecklistCirurgicoParaNode(node.id, editorEspecialidade);
             const badge = document.getElementById('cfgEdStatusBadge');
             const btnRestaurar = document.getElementById('btnRemoverPlanoCustom');
             const btnMasterPlan = document.getElementById('btnExcluirPlanoMaster');
-            const hasSavedPlan = Boolean(saved && Array.isArray(saved.grupos));
+            const savedGrupos = (saved && Array.isArray(saved.grupos))
+                ? saved.grupos
+                : (saved && Array.isArray(saved.itens) ? [{ categoria: 'Pontos de Inspeção', itens: saved.itens }] : null);
+            const hasSavedPlan = Boolean(savedGrupos);
 
             if (hasSavedPlan) {
-                editorGruposData = JSON.parse(JSON.stringify(saved.grupos));
+                editorGruposData = JSON.parse(JSON.stringify(savedGrupos));
                 badge.className = 'mt-2 inline-flex items-center gap-1.5 text-[11px] font-extrabold px-3 py-1 rounded-full bg-indigo-100 text-indigo-800';
-                badge.innerText = ` Plano Cirúrgico Salvo (${editorEspecialidade})`;
+                badge.innerText = saved.id_node !== node.id
+                    ? ` Plano Cirúrgico (${editorEspecialidade}) — Vínculo antigo (clique em Salvar para atualizar)`
+                    : ` Plano Cirúrgico Salvo (${editorEspecialidade})`;
                 btnRestaurar.classList.remove('hidden');
             } else {
                 editorGruposData = JSON.parse(JSON.stringify(getChecklistPadraoEstruturado(editorEspecialidade)));
@@ -5878,13 +5992,20 @@
                 return;
             }
 
+            const validArvIds = getValidArvIdsSet();
             container.innerHTML = filtradas.map(i => {
                 const conj = i.conjunto || 'Conjunto Geral';
                 const isDone = i.status === 'Concluído';
-                const hasCustom = Boolean(mapaChecklists[`${i.id_node}_${i.role_tecnico}`]);
+                const hyb = findNodeHibridoPorRegistro(i);
+                const nodeRef = hyb?.node || null;
+                const isOrphanLink = Boolean((!i.id_node || !validArvIds.has(String(i.id_node))) && !i.orphan_ignorado);
+                const hasCustom = Boolean(
+                    mapaChecklists[`${i.id_node}_${i.role_tecnico}`] ||
+                    (nodeRef && findChecklistCirurgicoParaNode(nodeRef.id, i.role_tecnico, validArvIds))
+                );
                 const isEle = String(i.role_tecnico || '').toLowerCase().includes('elét') || String(i.role_tecnico || '').toLowerCase().includes('elet');
-                const nodeRef = arvLinhas.find(n => n.id === i.id_node);
-                const padInfo = mapaPadrinhosLinhas[i.id_node] || {};
+                const targetAgendaNodeId = nodeRef?.id || i.id_node;
+                const padInfo = mapaPadrinhosLinhas[targetAgendaNodeId] || {};
                 const padMec = nodeRef?.padrinho_mec || padInfo.padrinho_mec || '';
                 const padEle = nodeRef?.padrinho_ele || padInfo.padrinho_ele || '';
                 const dataConcStr = isDone && i.data_conclusao ? new Date(i.data_conclusao).toLocaleDateString('pt-BR') : '';
@@ -5896,6 +6017,7 @@
                             <div class="flex flex-wrap items-center gap-1.5">
                                 <span class="text-[10px] font-extrabold uppercase tracking-wider px-2.5 py-0.5 rounded-full ${isEle ? 'bg-amber-100 text-amber-800' : 'bg-sky-100 text-sky-800'}">${escapeHtml(i.role_tecnico || 'Mecânica')}</span>
                                 ${hasCustom ? '<span class="text-[10px] font-extrabold px-2 py-0.5 rounded-full bg-indigo-100 text-indigo-800">Plano Cirúrgico</span>' : ''}
+                                ${isOrphanLink ? '<span class="text-[10px] font-extrabold px-2 py-0.5 rounded-full bg-amber-100 text-amber-800 border border-amber-200">Vínculo antigo</span>' : ''}
                                 <span class="text-[10px] font-extrabold uppercase px-2 py-0.5 rounded-full ${isDone ? 'bg-emerald-100 text-emerald-800' : 'bg-amber-100 text-amber-800'}">${isDone ? '✓ Concluído' : 'Pendente'}</span>
                             </div>
                             <span class="text-[11px] font-extrabold text-slate-500 bg-slate-100 px-2.5 py-0.5 rounded-full">Semana S${i.semana}</span>
@@ -5927,7 +6049,7 @@
                                 </div>
                             </div>
                             ${gestor && !isDone ? `
-                                <button type="button" onclick="abrirAgendaCell('${i.id_node}', ${i.semana})" class="text-[10px] font-extrabold px-2.5 py-1 rounded-xl bg-white hover:bg-slate-100 text-slate-700 border border-slate-200 shrink-0 transition-colors" title="Alterar responsável ou agendamento">
+                                <button type="button" onclick="abrirAgendaCell('${targetAgendaNodeId}', ${i.semana})" class="text-[10px] font-extrabold px-2.5 py-1 rounded-xl bg-white hover:bg-slate-100 text-slate-700 border border-slate-200 shrink-0 transition-colors" title="Alterar responsável ou agendamento">
                                     Trocar
                                 </button>
                             ` : (dataConcStr ? `<span class="text-[10px] font-bold text-emerald-700 shrink-0">${dataConcStr}</span>` : '')}
@@ -5962,7 +6084,7 @@
         window.abrirChecklist = (idAgenda) => {
             const ag = agendaRotas.find(a => a.id === idAgenda);
             if (!ag) return;
-            const plano = getChecklistParaExecucao(ag.id_node, ag.role_tecnico);
+            const plano = getChecklistParaExecucao(ag.id_node, ag.role_tecnico, ag);
             renderModalChecklist({
                 isPreview: false,
                 idAgenda,
