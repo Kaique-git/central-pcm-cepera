@@ -139,14 +139,72 @@
             cursor: not-allowed;
         }
 
-        /* Tema Escuro */
+        /* Tema Branco Sólido (Sem Blur / Sem Sombras) */
+        body.theme-solid { background: #f8fafc !important; }
+        body.theme-solid .frosted-shell,
+        body.theme-solid .glass-card {
+            background: #ffffff !important;
+            backdrop-filter: none !important;
+            -webkit-backdrop-filter: none !important;
+            box-shadow: none !important;
+            border: 1px solid #cbd5e1 !important;
+        }
+        body.theme-solid .backdrop-blur-sm {
+            backdrop-filter: none !important;
+            -webkit-backdrop-filter: none !important;
+        }
+
+        /* Tema Escuro Industrial */
         body.theme-dark { background: #090d16 !important; color: #f1f5f9 !important; }
-        body.theme-dark .frosted-shell { background: #0f172a !important; border-color: #1e293b !important; backdrop-filter: none !important; }
+        body.theme-dark .frosted-shell { background: #0f172a !important; border-color: #1e293b !important; backdrop-filter: none !important; -webkit-backdrop-filter: none !important; }
         body.theme-dark .glass-card { background: #1e293b !important; border-color: #334155 !important; color: #f1f5f9 !important; }
+        body.theme-dark .backdrop-blur-sm { backdrop-filter: none !important; -webkit-backdrop-filter: none !important; }
         body.theme-dark .text-slate-900, body.theme-dark .text-slate-800, body.theme-dark .text-slate-700 { color: #f8fafc !important; }
         body.theme-dark .text-slate-600, body.theme-dark .text-slate-500, body.theme-dark .text-slate-400 { color: #94a3b8 !important; }
-        body.theme-dark .bg-white, body.theme-dark .bg-slate-50, body.theme-dark .bg-slate-100 { background-color: #0f172a !important; border-color: #334155 !important; color: #f1f5f9 !important; }
+        body.theme-dark .bg-white, body.theme-dark .bg-white\/60, body.theme-dark .bg-white\/80, body.theme-dark .bg-slate-50 { background-color: #0f172a !important; border-color: #334155 !important; color: #f1f5f9 !important; }
+        body.theme-dark .bg-slate-100 { background-color: #1e293b !important; border-color: #334155 !important; color: #f1f5f9 !important; }
+        body.theme-dark .bg-slate-200 { background-color: #334155 !important; border-color: #475569 !important; color: #f8fafc !important; }
+        body.theme-dark .border-slate-200, body.theme-dark .border-slate-200\/80, body.theme-dark .border-slate-100 { border-color: #334155 !important; }
         body.theme-dark .input-clean { background: #0f172a !important; border-color: #475569 !important; color: #ffffff !important; }
+
+        /* Tema Alto Contraste */
+        body.high-contrast { background: #ffffff !important; color: #000000 !important; }
+        body.high-contrast .frosted-shell,
+        body.high-contrast .glass-card {
+            background: #ffffff !important;
+            backdrop-filter: none !important;
+            -webkit-backdrop-filter: none !important;
+            border: 2px solid #000000 !important;
+            box-shadow: none !important;
+        }
+        body.high-contrast .bg-white,
+        body.high-contrast .bg-slate-50,
+        body.high-contrast .border-slate-200 { border-color: #000000 !important; }
+        body.high-contrast .input-clean { border: 2px solid #000000 !important; color: #000000 !important; }
+
+        /* Modo Tela Leve / Tablet (Alta Performance) */
+        body.tablet-mode *,
+        body.tablet-mode *::before,
+        body.tablet-mode *::after {
+            backdrop-filter: none !important;
+            -webkit-backdrop-filter: none !important;
+            transition: none !important;
+            animation: none !important;
+            box-shadow: none !important;
+        }
+        body.tablet-mode .glass-card-hover:hover,
+        body.tablet-mode .btn-pill-dark:hover,
+        body.tablet-mode .btn-pill-dark:active,
+        body.tablet-mode .btn-touch:active {
+            transform: none !important;
+        }
+        body.tablet-mode .btn-touch,
+        body.tablet-mode .btn-pill-dark,
+        body.tablet-mode .input-clean,
+        body.tablet-mode select {
+            min-height: 46px !important;
+            font-size: 0.92rem !important;
+        }
 
         *:focus-visible { outline: 3px solid var(--accent) !important; outline-offset: 2px; }
         ::-webkit-scrollbar { width: 6px; height: 6px; }
@@ -241,15 +299,16 @@
                         </button>
                     </div>
 
-                    <button type="button" onclick="toggleTemaEscuro()" class="px-3 py-2 rounded-full bg-white hover:bg-slate-50 border border-slate-200 text-xs font-bold text-slate-700 shadow-sm flex items-center justify-center" title="Alternar Tema">
-                        <span id="lblTemaBtnPortal" class="inline-flex items-center"><svg class="w-4 h-4 text-slate-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z"/></svg></span>
+                    <button type="button" onclick="abrirEspacoUsuario()" class="px-3.5 py-2 rounded-full bg-white hover:bg-slate-50 border border-slate-200 text-xs font-bold text-slate-700 shadow-sm flex items-center gap-1.5" title="Preferências & Modo Tela Leve (Alt + U)">
+                        <svg class="w-4 h-4 text-sky-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6V4m0 2a2 2 0 100 4m0-4a2 2 0 110 4m-6 8a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4m6 6v10m6-2a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4"/></svg>
+                        <span class="hidden sm:inline">Preferências</span>
                     </button>
 
                     <div class="flex items-center gap-2.5 bg-white border border-slate-200 rounded-full pl-3.5 pr-1.5 py-1 shadow-sm">
-                        <div class="text-right leading-tight">
+                        <button type="button" onclick="abrirEspacoUsuario()" title="Abrir Preferências (Alt + U)" class="text-right leading-tight hover:opacity-80">
                             <div id="loggedUserName" class="font-extrabold text-xs text-slate-900">Usuário</div>
                             <div id="loggedUserRole" class="text-[10px] font-extrabold uppercase text-sky-600">Perfil</div>
-                        </div>
+                        </button>
                         <button type="button" onclick="fazerLogoutCentral()" title="Sair da Central PCM" class="w-8 h-8 rounded-full bg-slate-900 hover:bg-rose-600 text-white flex items-center justify-center transition-colors">
                             <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"/></svg>
                         </button>
@@ -461,6 +520,59 @@
         </div>
     </div>
 
+    <!-- ==================== MODAL PREFERÊNCIAS / ESPAÇO DO USUÁRIO ==================== -->
+    <div id="modalEspacoUsuario" role="dialog" aria-modal="true" class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-[80] hidden flex items-end sm:items-center justify-center p-0 sm:p-4">
+        <div class="bg-white w-full sm:max-w-xl sm:rounded-3xl rounded-t-3xl max-h-[92vh] flex flex-col shadow-2xl overflow-hidden border border-slate-200">
+            <div class="p-5 sm:px-7 border-b border-slate-200 bg-slate-50 flex items-center justify-between">
+                <div>
+                    <span class="text-[10px] font-extrabold uppercase tracking-widest text-sky-600">Preferências Sincronizadas</span>
+                    <h2 class="text-lg font-extrabold text-slate-900">Preferências da Central &amp; Espaço do Usuário</h2>
+                </div>
+                <button type="button" onclick="fecharModal('modalEspacoUsuario')" class="w-9 h-9 rounded-full bg-white border border-slate-200 text-slate-600 font-bold flex items-center justify-center">✕</button>
+            </div>
+            <div class="p-5 sm:p-7 overflow-y-auto space-y-6 text-sm">
+                <div class="p-4 rounded-2xl bg-slate-50 border border-slate-200 flex items-center justify-between gap-4">
+                    <div>
+                        <div class="font-extrabold text-slate-900 text-sm">Modo Tela Leve / Tablet (Alta Performance)</div>
+                        <p class="text-xs text-slate-500 mt-0.5">Remove desfoque (blur), sombras e animações para deixar a tela mais leve e amplia botões (Atalho: <strong>Alt + T</strong>).</p>
+                    </div>
+                    <button type="button" id="btnToggleTabletMode" onclick="toggleModoTablet()" class="px-4 py-2.5 rounded-xl font-extrabold text-xs bg-slate-200 text-slate-800 shrink-0">DESATIVADO</button>
+                </div>
+                <div>
+                    <label class="block text-xs font-extrabold uppercase tracking-wider text-slate-500 mb-2">Tema Visual</label>
+                    <div class="grid grid-cols-2 sm:grid-cols-4 gap-2">
+                        <button type="button" onclick="definirTemaUsuario('padrao')" id="btnTema_padrao" class="p-3 rounded-xl border border-slate-200 text-xs font-extrabold text-center text-slate-700">Claro Padrão</button>
+                        <button type="button" onclick="definirTemaUsuario('solido')" id="btnTema_solido" class="p-3 rounded-xl border border-slate-200 text-xs font-extrabold text-center text-slate-700">Branco Sólido</button>
+                        <button type="button" onclick="definirTemaUsuario('dark')" id="btnTema_dark" class="p-3 rounded-xl border border-slate-200 text-xs font-extrabold text-center text-slate-700">Escuro Industrial</button>
+                        <button type="button" onclick="definirTemaUsuario('contraste')" id="btnTema_contraste" class="p-3 rounded-xl border border-slate-200 text-xs font-extrabold text-center text-slate-700">Alto Contraste</button>
+                    </div>
+                </div>
+                <div>
+                    <label class="block text-xs font-extrabold uppercase tracking-wider text-slate-500 mb-2">Cor de Destaque (Accent Color)</label>
+                    <div class="grid grid-cols-5 gap-2">
+                        <button type="button" onclick="definirCorDestaque('#0284c7')" class="py-2.5 rounded-xl text-white font-extrabold text-[11px]" style="background:#0284c7">Azul</button>
+                        <button type="button" onclick="definirCorDestaque('#dc2626')" class="py-2.5 rounded-xl text-white font-extrabold text-[11px]" style="background:#dc2626">Cepêra</button>
+                        <button type="button" onclick="definirCorDestaque('#059669')" class="py-2.5 rounded-xl text-white font-extrabold text-[11px]" style="background:#059669">Esmeralda</button>
+                        <button type="button" onclick="definirCorDestaque('#4f46e5')" class="py-2.5 rounded-xl text-white font-extrabold text-[11px]" style="background:#4f46e5">Índigo</button>
+                        <button type="button" onclick="definirCorDestaque('#0f172a')" class="py-2.5 rounded-xl text-white font-extrabold text-[11px]" style="background:#0f172a">Grafite</button>
+                    </div>
+                </div>
+                <div class="pt-2 border-t border-slate-200 space-y-3">
+                    <span class="block text-xs font-extrabold uppercase tracking-wider text-slate-500">Acessibilidade e Leitura</span>
+                    <div class="grid grid-cols-3 gap-2">
+                        <button type="button" onclick="alterarFonte(-1)" class="py-2.5 rounded-xl bg-slate-100 hover:bg-slate-200 border border-slate-200 font-extrabold text-xs text-slate-800">Texto A-</button>
+                        <button type="button" onclick="alterarFonte(0)" class="py-2.5 rounded-xl bg-slate-100 hover:bg-slate-200 border border-slate-200 font-extrabold text-xs text-slate-800">Padrão</button>
+                        <button type="button" onclick="alterarFonte(1)" class="py-2.5 rounded-xl bg-slate-100 hover:bg-slate-200 border border-slate-200 font-extrabold text-xs text-slate-800">Texto A+</button>
+                    </div>
+                </div>
+            </div>
+            <div class="p-4 sm:px-7 border-t border-slate-200 bg-slate-50 flex items-center justify-between">
+                <span class="text-[11px] font-semibold text-slate-500">Sincronizado com seu perfil PCM Cepêra (Alt + U).</span>
+                <button type="button" onclick="fecharModal('modalEspacoUsuario')" class="btn-pill-dark text-xs py-2 px-6">Concluir</button>
+            </div>
+        </div>
+    </div>
+
     <!-- TOAST NOTIFICATIONS -->
     <div id="toastStack" aria-live="polite" class="fixed bottom-5 right-5 z-[100] space-y-2 max-w-sm"></div>
 
@@ -647,16 +759,124 @@
             inp.type = inp.type === 'password' ? 'text' : 'password';
         };
 
-        const ICON_SUN = '<svg class="w-4 h-4 text-amber-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z"/></svg>';
-        const ICON_MOON = '<svg class="w-4 h-4 text-slate-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z"/></svg>';
+        // ================= PREFERÊNCIAS VISUAIS & MODO TELA LEVE =================
+        let userPrefs = { tema: 'padrao', accent: '#0284c7', tabletMode: false, fontLevel: 0 };
+        let prefsSyncLockUntil = 0;
+
+        window.abrirEspacoUsuario = () => {
+            atualizarUIPreferencias();
+            document.getElementById('modalEspacoUsuario')?.classList.remove('hidden');
+        };
+
+        function aplicarPreferenciasVisuais() {
+            document.body.classList.remove('theme-solid', 'theme-dark', 'high-contrast', 'tablet-mode');
+            if (userPrefs.tema === 'solido') document.body.classList.add('theme-solid');
+            if (userPrefs.tema === 'dark') document.body.classList.add('theme-dark');
+            if (userPrefs.tema === 'contraste') document.body.classList.add('high-contrast');
+            if (userPrefs.tabletMode) document.body.classList.add('tablet-mode');
+
+            document.documentElement.style.setProperty('--accent', userPrefs.accent || '#0284c7');
+            const sizes = { '-1': '14px', '0': '16px', '1': '18px', '2': '20px', '3': '22px' };
+            document.documentElement.style.fontSize = sizes[String(userPrefs.fontLevel || 0)] || '16px';
+
+            const l1 = document.getElementById('lblTemaBtnLogin');
+            if (l1) l1.innerText = userPrefs.tema === 'dark' ? 'Claro' : 'Escuro';
+            atualizarUIPreferencias();
+        }
+
+        function atualizarUIPreferencias() {
+            const btnTab = document.getElementById('btnToggleTabletMode');
+            if (btnTab) {
+                btnTab.innerText = userPrefs.tabletMode ? 'ATIVADO' : 'DESATIVADO';
+                btnTab.className = userPrefs.tabletMode
+                    ? 'px-4 py-2.5 rounded-xl font-extrabold text-xs bg-emerald-600 text-white shrink-0'
+                    : 'px-4 py-2.5 rounded-xl font-extrabold text-xs bg-slate-200 text-slate-800 shrink-0';
+            }
+            ['padrao', 'solido', 'dark', 'contraste'].forEach(t => {
+                const b = document.getElementById('btnTema_' + t);
+                if (b) {
+                    b.className = (userPrefs.tema === t)
+                        ? 'p-3 rounded-xl border-2 border-sky-600 bg-sky-50 text-sky-900 text-xs font-extrabold text-center'
+                        : 'p-3 rounded-xl border border-slate-200 text-xs font-extrabold text-center text-slate-700';
+                }
+            });
+        }
+
+        async function persistirPreferenciasUsuario() {
+            prefsSyncLockUntil = Date.now() + 2500;
+            const chaveLocal = usuarioLogado ? ('cepera_prefs_' + usuarioLogado.user) : 'cepera_prefs_guest';
+            safeStorage.set(chaveLocal, JSON.stringify(userPrefs));
+            safeStorage.set('cepera_central_theme', userPrefs.tema === 'dark' ? 'dark' : 'light');
+
+            if (usuarioLogado) {
+                usuarioLogado.preferencias = { ...userPrefs };
+                sincronizarSessaoSSO(usuarioLogado);
+                if (usuarioLogado.id && usuarioLogado.id !== 'default_admin') {
+                    try {
+                        await updateDoc(doc(db, "ir_funcionarios", usuarioLogado.id), {
+                            preferencias: { ...userPrefs }
+                        });
+                    } catch (_) {}
+                }
+            }
+        }
+
+        function carregarPreferenciasUsuario(u) {
+            let carregado = (u && u.preferencias && typeof u.preferencias === 'object') ? u.preferencias : null;
+            if (!carregado) {
+                const salvoLocal = safeStorage.get(u ? ('cepera_prefs_' + u.user) : 'cepera_prefs_guest');
+                if (salvoLocal) { try { carregado = JSON.parse(salvoLocal); } catch (_) {} }
+            }
+            if (!carregado && u) {
+                const guestLocal = safeStorage.get('cepera_prefs_guest');
+                if (guestLocal) { try { carregado = JSON.parse(guestLocal); } catch (_) {} }
+            }
+            if (!carregado && safeStorage.get('cepera_central_theme') === 'dark') {
+                carregado = { tema: 'dark' };
+            }
+            userPrefs = {
+                tema: (carregado && carregado.tema) || 'padrao',
+                accent: (carregado && carregado.accent) || '#0284c7',
+                tabletMode: Boolean(carregado && carregado.tabletMode),
+                fontLevel: Number((carregado && carregado.fontLevel) || 0)
+            };
+            aplicarPreferenciasVisuais();
+        }
+
+        window.toggleModoTablet = () => {
+            userPrefs.tabletMode = !userPrefs.tabletMode;
+            aplicarPreferenciasVisuais();
+            persistirPreferenciasUsuario();
+            showToast(userPrefs.tabletMode ? 'Modo Tela Leve / Tablet ativado!' : 'Modo Tela Leve desativado.');
+        };
+
+        window.definirTemaUsuario = (tema) => {
+            userPrefs.tema = tema;
+            aplicarPreferenciasVisuais();
+            persistirPreferenciasUsuario();
+            const nomes = { padrao: 'Claro Padrão', solido: 'Branco Sólido', dark: 'Escuro Industrial', contraste: 'Alto Contraste' };
+            showToast(`Tema alterado para: ${nomes[tema] || tema}`);
+        };
+
+        window.definirCorDestaque = (cor) => {
+            userPrefs.accent = cor;
+            aplicarPreferenciasVisuais();
+            persistirPreferenciasUsuario();
+            showToast('Cor de destaque atualizada!');
+        };
+
+        window.alterarFonte = (dir) => {
+            userPrefs.fontLevel = (dir === 0) ? 0 : Math.max(-1, Math.min(3, (userPrefs.fontLevel || 0) + dir));
+            aplicarPreferenciasVisuais();
+            persistirPreferenciasUsuario();
+            const msg = dir === 0 ? 'Tamanho da fonte restaurado ao padrão.' : (userPrefs.fontLevel > 0 ? `Fonte ampliada (+${userPrefs.fontLevel})` : 'Fonte reduzida');
+            showToast(msg);
+        };
 
         window.toggleTemaEscuro = () => {
-            const isDark = document.body.classList.toggle('theme-dark');
-            safeStorage.set('cepera_central_theme', isDark ? 'dark' : 'light');
-            const l1 = document.getElementById('lblTemaBtnLogin');
-            const l2 = document.getElementById('lblTemaBtnPortal');
-            if (l1) l1.innerText = isDark ? 'Claro' : 'Escuro';
-            if (l2) l2.innerHTML = isDark ? ICON_SUN : ICON_MOON;
+            userPrefs.tema = userPrefs.tema === 'dark' ? 'padrao' : 'dark';
+            aplicarPreferenciasVisuais();
+            persistirPreferenciasUsuario();
         };
 
         // ================= MOTOR DE PERMISSÕES RBAC =================
@@ -697,6 +917,7 @@
                 user: userObj.user,
                 role: userObj.role,
                 apps_permitidos: appsPermitidos,
+                preferencias: (userObj.preferencias && typeof userObj.preferencias === 'object') ? userObj.preferencias : { ...userPrefs },
                 ts: Date.now()
             };
             safeStorage.set('cepera_ir_user', userObj.user);
@@ -705,13 +926,7 @@
 
         // ================= INICIALIZAÇÃO E REALTIME FIREBASE =================
         async function initCentral() {
-            if (safeStorage.get('cepera_central_theme') === 'dark') {
-                document.body.classList.add('theme-dark');
-                const l1 = document.getElementById('lblTemaBtnLogin');
-                const l2 = document.getElementById('lblTemaBtnPortal');
-                if (l1) l1.innerText = 'Claro';
-                if (l2) l2.innerHTML = ICON_SUN;
-            }
+            carregarPreferenciasUsuario(null);
 
             document.getElementById('headerSemanaAtual').innerText = getWeekNumber(new Date());
 
@@ -751,7 +966,13 @@
                 if (usuarioLogado) {
                     const atualizado = listaFunc.find(x => x.user.toLowerCase() === usuarioLogado.user.toLowerCase());
                     if (atualizado) {
+                        const prefsEmUso = { ...userPrefs };
                         usuarioLogado = atualizado;
+                        if (Date.now() <= prefsSyncLockUntil) {
+                            usuarioLogado.preferencias = prefsEmUso;
+                        } else if (atualizado.preferencias && typeof atualizado.preferencias === 'object') {
+                            carregarPreferenciasUsuario(atualizado);
+                        }
                         sincronizarSessaoSSO(usuarioLogado);
                         atualizarHeaderUsuario();
                         renderizarCardsApps();
@@ -796,6 +1017,7 @@
 
         function entrarNoPortal(userObj, silencioso = false) {
             usuarioLogado = userObj;
+            carregarPreferenciasUsuario(userObj);
             sincronizarSessaoSSO(userObj);
 
             document.getElementById('loginView').classList.add('hidden');
@@ -1350,6 +1572,24 @@
                 fecharAppWorkspace();
             } else if (ev.data.type === 'CEPERA_LOGOUT_CENTRAL') {
                 fazerLogoutCentral();
+            }
+        });
+
+        // Atalhos de teclado da Central PCM (Preferências, Tela Leve e fechar modais)
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'Escape') {
+                fecharModal('modalEspacoUsuario');
+                fecharModal('modalUsuarioRbac');
+                return;
+            }
+            const tag = (e.target && e.target.tagName) || '';
+            if (tag === 'INPUT' || tag === 'TEXTAREA' || tag === 'SELECT') return;
+            if (e.altKey && (e.key === 'u' || e.key === 'U')) {
+                e.preventDefault();
+                abrirEspacoUsuario();
+            } else if (e.altKey && (e.key === 't' || e.key === 'T')) {
+                e.preventDefault();
+                toggleModoTablet();
             }
         });
 
