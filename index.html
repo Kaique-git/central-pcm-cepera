@@ -304,6 +304,11 @@
                         <span class="hidden sm:inline">Preferências</span>
                     </button>
 
+                    <button type="button" id="btnMasterCentral" onclick="abrirModalAdminMaster()" class="hidden px-3 py-2 rounded-full bg-white hover:bg-slate-50 border border-slate-200 text-xs font-extrabold text-slate-700 shadow-sm items-center gap-1.5" title="Desbloquear Modo Admin Master (Senha Oculta)">
+                        <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"/></svg>
+                        <span id="lblBtnMasterCentral">Master</span>
+                    </button>
+
                     <div class="flex items-center gap-2.5 bg-white border border-slate-200 rounded-full pl-3.5 pr-1.5 py-1 shadow-sm">
                         <button type="button" onclick="abrirEspacoUsuario()" title="Abrir Preferências (Alt + U)" class="text-right leading-tight hover:opacity-80">
                             <div id="loggedUserName" class="font-extrabold text-xs text-slate-900">Usuário</div>
@@ -573,13 +578,49 @@
         </div>
     </div>
 
+    <!-- ==================== MODAL ADMIN MASTER (SENHA OCULTA) ==================== -->
+    <div id="modalAdminMaster" role="dialog" aria-modal="true" class="fixed inset-0 bg-slate-900/65 backdrop-blur-sm z-[85] hidden flex items-end sm:items-center justify-center p-0 sm:p-4">
+        <div class="bg-white w-full sm:max-w-md sm:rounded-3xl rounded-t-3xl p-6 shadow-2xl border border-slate-200 space-y-4">
+            <div class="flex items-center justify-between border-b border-slate-100 pb-3">
+                <div>
+                    <span class="text-[10px] font-extrabold uppercase tracking-widest text-rose-600">Segurança Avançada • PCM</span>
+                    <h2 class="text-lg font-extrabold text-slate-900">Modo Admin Master</h2>
+                </div>
+                <button type="button" onclick="fecharModal('modalAdminMaster')" class="w-8 h-8 rounded-full bg-slate-100 hover:bg-slate-200 text-slate-600 font-bold">✕</button>
+            </div>
+
+            <div id="masterStatusBannerCentral" class="p-3.5 rounded-2xl bg-slate-50 border border-slate-200 text-xs text-slate-700 space-y-1"></div>
+
+            <form id="formDesbloquearMasterCentral" onsubmit="desbloquearAdminMasterCentral(event)" class="space-y-3 text-xs">
+                <div>
+                    <label for="inpMasterPassCentral" class="block text-[10px] font-extrabold uppercase text-slate-500 mb-1">Senha Oculta Admin Master *</label>
+                    <input type="password" id="inpMasterPassCentral" required autocomplete="off" class="input-clean py-2.5 text-xs font-mono" placeholder="Digite a senha oculta restrita">
+                </div>
+                <button type="submit" id="btnUnlockMasterCentral" class="btn-pill-dark w-full py-2.5 text-xs">Desbloquear Admin Master</button>
+            </form>
+
+            <div id="secMasterAtivoCentral" class="hidden space-y-4 text-xs">
+                <form onsubmit="salvarNovaSenhaMasterCentral(event)" class="p-3.5 rounded-2xl bg-slate-50 border border-slate-200 space-y-2.5">
+                    <div class="font-extrabold text-slate-800 uppercase text-[10px] tracking-wider">Alterar Senha Oculta Master</div>
+                    <input type="password" id="inpNovaSenhaMaster1" required minlength="6" autocomplete="new-password" class="input-clean py-2 text-xs font-mono" placeholder="Nova senha oculta (mín. 6 caracteres)">
+                    <input type="password" id="inpNovaSenhaMaster2" required minlength="6" autocomplete="new-password" class="input-clean py-2 text-xs font-mono" placeholder="Confirmar nova senha oculta">
+                    <button type="submit" id="btnSalvarNovaSenhaMaster" class="btn-touch bg-slate-900 hover:bg-slate-800 text-white w-full py-2 text-xs">Atualizar Senha Oculta (SHA-256)</button>
+                </form>
+
+                <button type="button" onclick="travarAdminMasterCentral()" class="btn-touch bg-rose-50 hover:bg-rose-100 text-rose-700 border border-rose-200 w-full py-2.5 text-xs">
+                    Travar Modo Admin Master Nesta Sessão
+                </button>
+            </div>
+        </div>
+    </div>
+
     <!-- TOAST NOTIFICATIONS -->
     <div id="toastStack" aria-live="polite" class="fixed bottom-5 right-5 z-[100] space-y-2 max-w-sm"></div>
 
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
         import { getAuth, signInAnonymously } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
-        import { initializeFirestore, collection, addDoc, onSnapshot, doc, updateDoc, deleteDoc } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
+        import { initializeFirestore, collection, addDoc, setDoc, onSnapshot, doc, updateDoc, deleteDoc } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
 
         // ================= CATÁLOGO OFICIAL DOS 7 APLICATIVOS DA CENTRAL =================
         const APPS_CATALOG = [
@@ -709,6 +750,196 @@
         const db = initializeFirestore(app, { experimentalForceLongPolling: true });
         const auth = getAuth(app);
         const refFunc = collection(db, "ir_funcionarios");
+        const refMasterCfg = doc(db, "pcm_config", "admin_master");
+        const DEFAULT_MASTER_HASH = "7c2cce436d043699877f19ad8a6aef78dc5b1f167d97fbfa5d316885c2150a59";
+        let customMasterHash = null;
+
+        const memSession = {};
+        function safeSessionGet(k) { try { return window.sessionStorage.getItem(k); } catch (_) { return memSession[k] || null; } }
+        function safeSessionSet(k, v) { memSession[k] = v; try { window.sessionStorage.setItem(k, v); } catch (_) {} }
+        function safeSessionRemove(k) { delete memSession[k]; try { window.sessionStorage.removeItem(k); } catch (_) {} }
+
+        function sha256Fallback(ascii) {
+            function rightRotate(v, amt) { return (v >>> amt) | (v << (32 - amt)); }
+            const maxWord = Math.pow(2, 32);
+            let result = '';
+            const words = [];
+            const bytes = new TextEncoder().encode(String(ascii || ''));
+            const bitLen = bytes.length * 8;
+            const hash = [];
+            const k = [];
+            let primeCounter = 0;
+            const isPrime = (n) => { for (let f = 2; f * f <= n; f++) if (n % f === 0) return false; return true; };
+            for (let candidate = 2; primeCounter < 64; candidate++) {
+                if (isPrime(candidate)) {
+                    if (primeCounter < 8) hash[primeCounter] = ((Math.pow(candidate, 0.5) * maxWord) | 0);
+                    k[primeCounter++] = ((Math.pow(candidate, 1 / 3) * maxWord) | 0);
+                }
+            }
+            const padded = Array.from(bytes);
+            padded.push(0x80);
+            while ((padded.length % 64) !== 56) padded.push(0);
+            const hi = Math.floor(bitLen / maxWord);
+            const lo = bitLen >>> 0;
+            padded.push((hi >>> 24) & 0xff, (hi >>> 16) & 0xff, (hi >>> 8) & 0xff, hi & 0xff);
+            padded.push((lo >>> 24) & 0xff, (lo >>> 16) & 0xff, (lo >>> 8) & 0xff, lo & 0xff);
+            for (let i = 0; i < padded.length; i += 4) {
+                words.push((padded[i] << 24) | (padded[i + 1] << 16) | (padded[i + 2] << 8) | padded[i + 3]);
+            }
+            for (let j = 0; j < words.length; j += 16) {
+                const w = words.slice(j, j + 16);
+                const old = hash.slice(0);
+                for (let i = 0; i < 64; i++) {
+                    if (i >= 16) {
+                        const s0 = rightRotate(w[i - 15], 7) ^ rightRotate(w[i - 15], 18) ^ (w[i - 15] >>> 3);
+                        const s1 = rightRotate(w[i - 2], 17) ^ rightRotate(w[i - 2], 19) ^ (w[i - 2] >>> 10);
+                        w[i] = (w[i - 16] + s0 + w[i - 7] + s1) | 0;
+                    }
+                    const a = hash[0], b = hash[1], c = hash[2], d = hash[3], e = hash[4], f = hash[5], g = hash[6], h = hash[7];
+                    const S1 = rightRotate(e, 6) ^ rightRotate(e, 11) ^ rightRotate(e, 25);
+                    const ch = (e & f) ^ ((~e) & g);
+                    const t1 = (h + S1 + ch + k[i] + w[i]) | 0;
+                    const S0 = rightRotate(a, 2) ^ rightRotate(a, 13) ^ rightRotate(a, 22);
+                    const maj = (a & b) ^ (a & c) ^ (b & c);
+                    const t2 = (S0 + maj) | 0;
+                    hash.unshift((t1 + t2) | 0);
+                    hash.pop();
+                    hash[4] = (hash[4] + t1) | 0;
+                }
+                for (let i = 0; i < 8; i++) hash[i] = (hash[i] + old[i]) | 0;
+            }
+            for (let i = 0; i < 8; i++) result += (hash[i] >>> 0).toString(16).padStart(8, '0');
+            return result;
+        }
+
+        async function sha256Hex(texto) {
+            const raw = String(texto || '');
+            if (window.crypto && window.crypto.subtle) {
+                try {
+                    const buf = await window.crypto.subtle.digest('SHA-256', new TextEncoder().encode(raw));
+                    return Array.from(new Uint8Array(buf)).map(b => b.toString(16).padStart(2, '0')).join('');
+                } catch (_) {}
+            }
+            return sha256Fallback(raw);
+        }
+
+        function getActiveMasterHash() {
+            return customMasterHash || DEFAULT_MASTER_HASH;
+        }
+
+        async function verifyAdminMasterPass(pass) {
+            if (!pass) return false;
+            const h = await sha256Hex(pass);
+            return h === getActiveMasterHash();
+        }
+
+        function isAdminMasterAtivoCentral() {
+            return isPerfilAdminCentral(usuarioLogado?.role) && safeSessionGet('cepera_admin_master_auth') === getActiveMasterHash();
+        }
+
+        function setAdminMasterSessao(ativo) {
+            if (ativo) safeSessionSet('cepera_admin_master_auth', getActiveMasterHash());
+            else safeSessionRemove('cepera_admin_master_auth');
+            atualizarBadgeMasterCentral();
+        }
+
+        function atualizarBadgeMasterCentral() {
+            const btn = document.getElementById('btnMasterCentral');
+            const lbl = document.getElementById('lblBtnMasterCentral');
+            if (!btn) return;
+            if (!usuarioLogado || !isPerfilAdminCentral(usuarioLogado.role)) {
+                btn.classList.add('hidden');
+                btn.classList.remove('inline-flex');
+                return;
+            }
+            btn.classList.remove('hidden');
+            btn.classList.add('inline-flex');
+            const ativo = isAdminMasterAtivoCentral();
+            if (ativo) {
+                btn.className = 'inline-flex px-3 py-2 rounded-full bg-rose-600 hover:bg-rose-700 border border-rose-700 text-xs font-extrabold text-white shadow-sm items-center gap-1.5';
+                if (lbl) lbl.innerText = 'Master Ativo';
+            } else {
+                btn.className = 'inline-flex px-3 py-2 rounded-full bg-white hover:bg-slate-50 border border-slate-200 text-xs font-extrabold text-slate-700 shadow-sm items-center gap-1.5';
+                if (lbl) lbl.innerText = 'Master';
+            }
+        }
+
+        function renderModalAdminMaster() {
+            const banner = document.getElementById('masterStatusBannerCentral');
+            const formUnlock = document.getElementById('formDesbloquearMasterCentral');
+            const secAtivo = document.getElementById('secMasterAtivoCentral');
+            const ativo = isAdminMasterAtivoCentral();
+            if (banner) {
+                banner.className = ativo
+                    ? 'p-3.5 rounded-2xl bg-rose-50 border border-rose-200 text-xs text-rose-900 space-y-1'
+                    : 'p-3.5 rounded-2xl bg-slate-50 border border-slate-200 text-xs text-slate-700 space-y-1';
+                banner.innerHTML = ativo
+                    ? '<div class="font-extrabold text-rose-800">Admin Master DESBLOQUEADO nesta sessão</div><p>A limpeza definitiva de anomalias, planos e fichas está liberada nos módulos integrados. Feche a aba ou clique em travar quando finalizar.</p>'
+                    : '<div class="font-extrabold text-slate-900">Acesso Master Bloqueado</div><p>Digite a senha oculta restrita para liberar exclusões definitivas de banco sem sair do app.</p>';
+            }
+            if (formUnlock) formUnlock.classList.toggle('hidden', ativo);
+            if (secAtivo) secAtivo.classList.toggle('hidden', !ativo);
+        }
+
+        window.abrirModalAdminMaster = () => {
+            if (!usuarioLogado || !isPerfilAdminCentral(usuarioLogado.role)) {
+                showToast('Recurso exclusivo para administradores.', 'error');
+                return;
+            }
+            const inp = document.getElementById('inpMasterPassCentral');
+            if (inp) inp.value = '';
+            renderModalAdminMaster();
+            document.getElementById('modalAdminMaster')?.classList.remove('hidden');
+            setTimeout(() => document.getElementById('inpMasterPassCentral')?.focus(), 80);
+        };
+
+        window.desbloquearAdminMasterCentral = async (e) => {
+            e.preventDefault();
+            const pass = document.getElementById('inpMasterPassCentral')?.value || '';
+            const ok = await verifyAdminMasterPass(pass);
+            if (!ok) {
+                showToast('Senha oculta do Admin Master incorreta.', 'error');
+                return;
+            }
+            setAdminMasterSessao(true);
+            renderModalAdminMaster();
+            showToast('Admin Master desbloqueado com sucesso!');
+        };
+
+        window.travarAdminMasterCentral = () => {
+            setAdminMasterSessao(false);
+            renderModalAdminMaster();
+            showToast('Modo Admin Master travado.');
+        };
+
+        window.salvarNovaSenhaMasterCentral = async (e) => {
+            e.preventDefault();
+            if (!isAdminMasterAtivoCentral()) return;
+            const s1 = document.getElementById('inpNovaSenhaMaster1')?.value || '';
+            const s2 = document.getElementById('inpNovaSenhaMaster2')?.value || '';
+            if (s1.length < 6) { showToast('A nova senha deve ter pelo menos 6 caracteres.', 'error'); return; }
+            if (s1 !== s2) { showToast('As duas senhas digitadas não conferem.', 'error'); return; }
+
+            const btn = document.getElementById('btnSalvarNovaSenhaMaster');
+            if (btn) { btn.disabled = true; btn.innerText = 'Salvando hash...'; }
+            try {
+                const novoHash = await sha256Hex(s1);
+                await setDoc(refMasterCfg, {
+                    pass_hash: novoHash,
+                    updated_by: usuarioLogado?.nome || 'Admin Master',
+                    updated_at: Date.now()
+                });
+                customMasterHash = novoHash;
+                safeSessionSet('cepera_admin_master_auth', novoHash);
+                document.getElementById('inpNovaSenhaMaster1').value = '';
+                document.getElementById('inpNovaSenhaMaster2').value = '';
+                showToast('Senha oculta do Admin Master atualizada com segurança (SHA-256)!');
+            } catch (err) {
+                showToast('Erro ao salvar nova senha oculta no Firestore.', 'error');
+            } finally {
+                if (btn) { btn.disabled = false; btn.innerText = 'Atualizar Senha Oculta (SHA-256)'; }
+            }
+        };
 
         const DEFAULT_ADMIN = {
             id: 'default_admin',
@@ -811,7 +1042,7 @@
             if (usuarioLogado) {
                 usuarioLogado.preferencias = { ...userPrefs };
                 sincronizarSessaoSSO(usuarioLogado);
-                if (usuarioLogado.id && usuarioLogado.id !== 'default_admin') {
+                if (usuarioLogado.id && usuarioLogado.id !== 'default_admin' && usuarioLogado.id !== 'admin_master') {
                     try {
                         await updateDoc(doc(db, "ir_funcionarios", usuarioLogado.id), {
                             preferencias: { ...userPrefs }
@@ -916,6 +1147,7 @@
                 nome: userObj.nome,
                 user: userObj.user,
                 role: userObj.role,
+                isMaster: Boolean(userObj.isMaster),
                 apps_permitidos: appsPermitidos,
                 preferencias: (userObj.preferencias && typeof userObj.preferencias === 'object') ? userObj.preferencias : { ...userPrefs },
                 ts: Date.now()
@@ -948,6 +1180,14 @@
                 ]);
             } catch (_) {}
 
+            try {
+                onSnapshot(refMasterCfg, (snapDoc) => {
+                    const data = snapDoc.exists() ? snapDoc.data() : null;
+                    customMasterHash = (data && data.pass_hash) ? String(data.pass_hash) : null;
+                    atualizarBadgeMasterCentral();
+                }, () => {});
+            } catch (_) {}
+
             onSnapshot(refFunc, (snap) => {
                 const temp = [];
                 snap.forEach(d => temp.push({ id: d.id, ...d.data() }));
@@ -964,6 +1204,14 @@
                 if (countBadge) countBadge.innerText = listaFunc.length;
 
                 if (usuarioLogado) {
+                    if (usuarioLogado.id === 'admin_master') {
+                        sincronizarSessaoSSO(usuarioLogado);
+                        atualizarHeaderUsuario();
+                        renderizarCardsApps();
+                        renderizarMatrizRbac();
+                        if (appAtualWorkspace) renderizarBarraWorkspace();
+                        return;
+                    }
                     const atualizado = listaFunc.find(x => x.user.toLowerCase() === usuarioLogado.user.toLowerCase());
                     if (atualizado) {
                         const prefsEmUso = { ...userPrefs };
@@ -986,8 +1234,24 @@
                 } else {
                     const savedUser = safeStorage.get('cepera_ir_user');
                     if (savedUser) {
-                        const achou = listaFunc.find(x => x.user.toLowerCase() === savedUser.toLowerCase());
-                        if (achou) entrarNoPortal(achou, true);
+                        if (savedUser.toLowerCase() === 'master') {
+                            if (safeSessionGet('cepera_admin_master_auth') === getActiveMasterHash()) {
+                                entrarNoPortal({
+                                    id: 'admin_master',
+                                    nome: 'Admin Master PCM',
+                                    user: 'master',
+                                    role: 'Admin',
+                                    isMaster: true,
+                                    apps_permitidos: APPS_CATALOG.map(a => a.id)
+                                }, true);
+                            } else {
+                                safeStorage.remove('cepera_ir_user');
+                                safeStorage.remove('cepera_central_session');
+                            }
+                        } else {
+                            const achou = listaFunc.find(x => x.user.toLowerCase() === savedUser.toLowerCase());
+                            if (achou) entrarNoPortal(achou, true);
+                        }
                     }
                 }
             }, (err) => {
@@ -1000,10 +1264,30 @@
         }
 
         // ================= LOGIN E LOGOUT UNIFICADO =================
-        window.realizarLoginCentral = (e) => {
+        window.realizarLoginCentral = async (e) => {
             e.preventDefault();
             const usr = document.getElementById('loginUser').value.trim().toLowerCase();
             const pass = document.getElementById('loginPass').value;
+
+            if (usr === 'master') {
+                const okMaster = await verifyAdminMasterPass(pass);
+                if (!okMaster) {
+                    showToast("Usuário ou senha incorretos.", "error");
+                    return;
+                }
+                setAdminMasterSessao(true);
+                const masterUser = {
+                    id: 'admin_master',
+                    nome: 'Admin Master PCM',
+                    user: 'master',
+                    role: 'Admin',
+                    isMaster: true,
+                    apps_permitidos: APPS_CATALOG.map(a => a.id)
+                };
+                entrarNoPortal(masterUser, false);
+                showToast("Bem-vindo, Admin Master PCM (Acesso Total Liberado)!");
+                return;
+            }
 
             const userObj = listaFunc.find(x => (x.user || '').toLowerCase() === usr && x.pass === pass);
             if (!userObj) {
@@ -1054,9 +1338,11 @@
                 adminTabs.classList.add('hidden');
                 adminTabs.classList.remove('inline-flex');
             }
+            atualizarBadgeMasterCentral();
         }
 
         window.fazerLogoutCentral = () => {
+            setAdminMasterSessao(false);
             sincronizarSessaoSSO(null);
             usuarioLogado = null;
             appAtualWorkspace = null;
@@ -1506,6 +1792,11 @@
             const pass = document.getElementById('uPass').value.trim();
             const role = document.getElementById('uRole').value;
 
+            if (user === 'master') {
+                showToast('O login "master" é reservado ao Admin Master oculto.', 'error');
+                return;
+            }
+
             const duplicado = listaFunc.find(f => (f.user || '').toLowerCase() === user && f.id !== editId);
             if (duplicado) {
                 showToast(`O login "${user}" já está em uso por ${duplicado.nome}.`, "error");
@@ -1580,6 +1871,7 @@
             if (e.key === 'Escape') {
                 fecharModal('modalEspacoUsuario');
                 fecharModal('modalUsuarioRbac');
+                fecharModal('modalAdminMaster');
                 return;
             }
             const tag = (e.target && e.target.tagName) || '';

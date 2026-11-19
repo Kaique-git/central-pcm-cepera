@@ -363,6 +363,10 @@
                     </div>
 
                     <div class="flex items-center gap-2">
+                        <button type="button" id="btnMasterInsp" onclick="abrirModalAdminMaster()" class="hidden px-3 py-1.5 rounded-full bg-white/85 hover:bg-white border border-slate-200/80 text-xs font-extrabold text-slate-700 items-center gap-1.5 shadow-sm" title="Modo Admin Master (Senha Oculta)">
+                            <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"/></svg>
+                            <span id="lblBtnMasterInsp">Master</span>
+                        </button>
                         <button type="button" onclick="abrirModalAtalhos()" title="Atalhos de Teclado (Ctrl + ?)" class="px-3 py-1.5 rounded-full bg-white/85 hover:bg-white border border-slate-200/80 text-xs font-bold text-slate-700 flex items-center gap-1.5 shadow-sm">
                             <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8.228 9c.549-1.165 2.03-2 3.772-2 2.21 0 4 1.343 4 3 0 1.4-1.278 2.575-3.006 2.907-.542.104-.994.54-.994 1.093m0 3h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
                             <span class="hidden lg:inline">Atalhos (Ctrl+?)</span>
@@ -919,6 +923,9 @@
                                             <button type="button" id="btnRemoverPlanoCustom" onclick="restaurarPadraoConjunto()" class="hidden btn-touch bg-rose-50 hover:bg-rose-100 border border-rose-200 text-rose-700 py-2 px-3 text-xs">
                                                 Resetar Padrão
                                             </button>
+                                            <button type="button" id="btnExcluirPlanoMaster" onclick="excluirPlanoChecklistMaster()" class="hidden btn-touch bg-red-600 hover:bg-red-700 text-white py-2 px-3 text-xs shadow-sm">
+                                                Excluir Plano (Master)
+                                            </button>
                                         </div>
                                     </div>
 
@@ -935,7 +942,7 @@
                         </div>
                     </section>
 
-                    <!<!-- ==================== PAGE 6: ANOMALIAS ==================== -->
+                    <!-- ==================== PAGE 6: ANOMALIAS ==================== -->
                     <section id="view-anomalias" aria-label="Registro de Anomalias" class="hidden space-y-6 max-w-6xl mx-auto">
                         <div class="glass-card p-6 rounded-3xl flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
                             <div>
@@ -955,26 +962,71 @@
                             </div>
                         </div>
 
-                        <div id="boxDiretasEmTriagem" class="hidden space-y-3"></div>
-
-                        <div class="grid grid-cols-1 sm:grid-cols-3 gap-3">
-                            <input type="text" id="filtroAnomBusca" oninput="renderListaAnomalias()" class="input-clean py-2.5 text-sm" placeholder="Buscar por máquina, conjunto ou defeito...">
-                            <select id="filtroAnomStatus" onchange="renderListaAnomalias()" class="input-clean py-2.5 text-sm font-bold">
-                                <option value="">Todos os Status</option>
-                                <option value="Pendente">Pendente</option>
-                                <option value="Em Andamento">Em Andamento</option>
-                                <option value="Aguardando Validação">Aguardando OK Supervisor</option>
-                                <option value="Concluída">Concluída</option>
-                            </select>
-                            <select id="filtroAnomUrgencia" onchange="renderListaAnomalias()" class="input-clean py-2.5 text-sm font-bold">
-                                <option value="">Todas as Prioridades</option>
-                                <option value="Alta">Alta (Risco de Quebra)</option>
-                                <option value="Média">Média (Atenção)</option>
-                                <option value="Baixa">Baixa (Programar)</option>
-                            </select>
+                        <div id="adminAnomSubTabs" class="hidden flex flex-wrap items-center gap-2 bg-white/80 p-1.5 rounded-full border border-slate-200/80 w-fit">
+                            <button type="button" id="btnSubAnomOficiais" onclick="setSubAbaAnomalias('oficiais')" class="px-4 py-1.5 rounded-full text-xs font-extrabold bg-slate-900 text-white transition-all">
+                                Anomalias Oficiais
+                            </button>
+                            <button type="button" id="btnSubAnomReprovadas" onclick="setSubAbaAnomalias('reprovadas')" class="px-4 py-1.5 rounded-full text-xs font-extrabold text-slate-600 hover:text-slate-900 inline-flex items-center gap-1.5 transition-all">
+                                <span>Banco de Reprovadas (Admin)</span>
+                                <span id="badgeAnomReprovadasAdmin" class="px-2 py-0.5 rounded-full text-[10px] font-extrabold bg-rose-100 text-rose-700">0</span>
+                            </button>
                         </div>
 
-                        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5" id="listaAnomalias"></div>
+                        <div id="secAnomOficiais" class="space-y-6">
+                            <div id="boxDiretasEmTriagem" class="hidden space-y-3"></div>
+
+                            <div class="grid grid-cols-1 sm:grid-cols-3 gap-3">
+                                <input type="text" id="filtroAnomBusca" oninput="renderListaAnomalias()" class="input-clean py-2.5 text-sm" placeholder="Buscar por máquina, conjunto ou defeito...">
+                                <select id="filtroAnomStatus" onchange="renderListaAnomalias()" class="input-clean py-2.5 text-sm font-bold">
+                                    <option value="">Todos os Status</option>
+                                    <option value="Pendente">Pendente</option>
+                                    <option value="Em Andamento">Em Andamento</option>
+                                    <option value="Aguardando Validação">Aguardando OK Supervisor</option>
+                                    <option value="Concluída">Concluída</option>
+                                </select>
+                                <select id="filtroAnomUrgencia" onchange="renderListaAnomalias()" class="input-clean py-2.5 text-sm font-bold">
+                                    <option value="">Todas as Prioridades</option>
+                                    <option value="Alta">Alta (Risco de Quebra)</option>
+                                    <option value="Média">Média (Atenção)</option>
+                                    <option value="Baixa">Baixa (Programar)</option>
+                                </select>
+                            </div>
+
+                            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5" id="listaAnomalias"></div>
+                        </div>
+
+                        <div id="secAnomReprovadasAdmin" class="hidden space-y-5">
+                            <div class="glass-card p-5 rounded-3xl border border-rose-200 bg-rose-50/50 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+                                <div>
+                                    <span class="text-[10px] font-extrabold uppercase tracking-widest text-rose-700">Auditoria & Controle Exclusivo Admin / Gerente</span>
+                                    <h2 class="text-base font-extrabold text-slate-900">Banco de Anomalias Reprovadas pela Supervisão</h2>
+                                    <p class="text-xs text-slate-600 mt-0.5">Mesmo quando reprovadas na triagem ou descartadas pelo solicitante, todas ficam preservadas aqui para controle e reenvio à Supervisão.</p>
+                                </div>
+                                <span id="repAnomResumoCount" class="text-xs font-extrabold px-3.5 py-1.5 rounded-full bg-white border border-rose-200 text-rose-700 shrink-0">0 reprovadas</span>
+                            </div>
+
+                            <div class="grid grid-cols-1 sm:grid-cols-3 gap-3">
+                                <input type="text" id="filtroRepAnomBusca" oninput="renderBancoReprovadasAdmin()" class="input-clean py-2.5 text-sm" placeholder="Buscar por máquina, conjunto, autor ou motivo...">
+                                <select id="filtroRepAnomEquipe" onchange="renderBancoReprovadasAdmin()" class="input-clean py-2.5 text-sm font-bold">
+                                    <option value="">Todas as Equipes</option>
+                                    <option value="Mecânica">Mecânica</option>
+                                    <option value="Elétrica">Elétrica</option>
+                                    <option value="Automação / Instrumentação">Automação / Instrumentação</option>
+                                    <option value="Utilidades">Utilidades</option>
+                                    <option value="Caldeiraria / Serralheria">Caldeiraria / Serralheria</option>
+                                    <option value="Predial / Civil">Predial / Civil</option>
+                                    <option value="Produção">Produção</option>
+                                    <option value="Terceiros / Especializada">Terceiros / Especializada</option>
+                                </select>
+                                <select id="filtroRepAnomOrigem" onchange="renderBancoReprovadasAdmin()" class="input-clean py-2.5 text-sm font-bold">
+                                    <option value="">Todas as Origens</option>
+                                    <option value="Direta">Anomalia Direta</option>
+                                    <option value="Rota">Via Rota / Ficha</option>
+                                </select>
+                            </div>
+
+                            <div id="listaAnomaliasReprovadasAdmin" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5"></div>
+                        </div>
                     </section>
 
                     <!-- ==================== PAGE 7: EQUIPE ==================== -->
@@ -1017,7 +1069,7 @@
                                     1. Fichas de Rota (<span id="countSupFichas">0</span>)
                                 </button>
                                 <button type="button" id="btnSupTabDiretas" onclick="setSubAbaSupervisao('diretas')" class="px-4 py-2 rounded-full text-xs font-extrabold bg-white border border-slate-200 text-slate-700">
-                                    2. Anomalias Diretas (<span id="countSupDiretas">0</span>)
+                                    2. Anomalias Pendentes (<span id="countSupDiretas">0</span>)
                                 </button>
                                 <button type="button" id="btnSupTabReparos" onclick="setSubAbaSupervisao('reparos')" class="px-4 py-2 rounded-full text-xs font-extrabold bg-white border border-slate-200 text-slate-700">
                                     3. Reparos Aguardando OK Final (<span id="countSupReparos">0</span>)
@@ -1047,6 +1099,51 @@
                         <div id="listaMinhasPendencias" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5"></div>
                     </section>
 
+                    <!-- ==================== PAGE 10: LIMPEZA ADMIN MASTER (EXCLUSÃO DEFINITIVA) ==================== -->
+                    <section id="view-master-db" aria-label="Limpeza Master de Banco" class="hidden space-y-6 max-w-7xl mx-auto">
+                        <div class="glass-card p-6 rounded-3xl border-2 border-red-200 bg-gradient-to-r from-red-50/80 via-white to-rose-50/70 flex flex-col lg:flex-row lg:items-center justify-between gap-4">
+                            <div>
+                                <div class="flex items-center gap-2 mb-1">
+                                    <span class="px-2.5 py-0.5 rounded-full text-[10px] font-extrabold uppercase tracking-wider bg-red-600 text-white">Modo Admin Master Ativo</span>
+                                    <span class="text-[11px] font-bold text-rose-700">Acesso Restrito por Senha Oculta</span>
+                                </div>
+                                <h1 class="text-xl sm:text-2xl font-extrabold text-slate-900">Limpeza &amp; Correção de Registros (Master)</h1>
+                                <p class="text-xs text-slate-600 mt-0.5">Exclua permanentemente anomalias, planos cirúrgicos ou fichas/agendamentos lançados com erro, sem abrir o Console do banco.</p>
+                            </div>
+                            <div class="flex flex-wrap items-center gap-2">
+                                <button type="button" onclick="abrirModalAdminMaster()" class="btn-touch bg-white hover:bg-slate-50 border border-slate-200 text-slate-800 py-2 px-4 text-xs">
+                                    Configurar / Senha Master
+                                </button>
+                                <button type="button" onclick="travarAdminMaster()" class="btn-touch bg-slate-900 hover:bg-slate-800 text-white py-2 px-4 text-xs">
+                                    Sair do Modo Master
+                                </button>
+                            </div>
+                        </div>
+
+                        <div class="glass-card p-5 rounded-3xl space-y-4">
+                            <div class="flex flex-col md:flex-row md:items-center justify-between gap-3">
+                                <div class="flex flex-wrap items-center gap-1.5 bg-slate-100 p-1 rounded-full w-fit">
+                                    <button type="button" id="btnMasterTabAnom" onclick="setMasterDbTab('anomalias')" class="px-4 py-1.5 rounded-full text-xs font-extrabold bg-slate-900 text-white">
+                                        Anomalias (<span id="masterCntAnom">0</span>)
+                                    </button>
+                                    <button type="button" id="btnMasterTabPlanos" onclick="setMasterDbTab('planos')" class="px-4 py-1.5 rounded-full text-xs font-extrabold text-slate-600">
+                                        Planos Cirúrgicos (<span id="masterCntPlanos">0</span>)
+                                    </button>
+                                    <button type="button" id="btnMasterTabRotas" onclick="setMasterDbTab('rotas')" class="px-4 py-1.5 rounded-full text-xs font-extrabold text-slate-600">
+                                        Fichas / Agenda (<span id="masterCntRotas">0</span>)
+                                    </button>
+                                </div>
+                                <div class="flex flex-wrap items-center gap-2">
+                                    <input type="text" id="masterDbBusca" oninput="renderMasterDbView()" class="input-clean py-2 text-xs w-64" placeholder="Buscar por ativo, conjunto, autor, ID...">
+                                    <button type="button" id="btnMasterExcluirSelecionados" onclick="excluirLoteMaster()" class="hidden btn-touch bg-red-600 hover:bg-red-700 text-white py-2 px-4 text-xs shadow-sm">
+                                        Excluir Selecionados (<span id="masterSelCount">0</span>)
+                                    </button>
+                                </div>
+                            </div>
+                            <div id="masterDbLista" class="space-y-2.5 max-h-[60vh] overflow-y-auto pr-1"></div>
+                        </div>
+                    </section>
+
                 </main>
             </div>
         </div>
@@ -1064,6 +1161,9 @@
                     </div>
                 </div>
                 <div class="flex items-center gap-2">
+                    <button type="button" id="btnExcluirFichaMasterModal" class="hidden btn-touch bg-red-600 hover:bg-red-700 text-white py-2 px-3.5 text-xs shadow-sm">
+                        Excluir Ficha (Master)
+                    </button>
                     <button type="button" id="btnImprimirDoModalFicha" class="btn-pill-dark py-2 px-4 text-xs">
                         <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z"/></svg>
                         <span>Imprimir / Salvar PDF</span>
@@ -1112,6 +1212,7 @@
                     <select id="fRole" required class="input-clean py-2.5 text-sm font-bold">
                         <option value="Mecânica">Técnico Mecânica</option>
                         <option value="Elétrica">Técnico Elétrica</option>
+                        <option value="Produção">Produção / Operação</option>
                         <option value="Supervisor Mecânica">Supervisor Mecânica</option>
                         <option value="Supervisor Elétrica">Supervisor Elétrica</option>
                         <option value="Gerente">Gerente</option>
@@ -1248,6 +1349,7 @@
                 <div class="flex flex-wrap gap-2 pt-3 border-t border-slate-100">
                     <button type="button" onclick="fecharModal('modalAgendaNode')" class="btn-touch bg-slate-100 text-slate-700 flex-1 text-xs">Cancelar</button>
                     <button type="button" id="btnRemoverAgenda" onclick="removerAgendamento()" class="hidden btn-touch bg-rose-50 hover:bg-rose-100 text-rose-600 px-4 text-xs">Desagendar</button>
+                    <button type="button" id="btnRemoverAgendaMaster" onclick="removerAgendamentoMaster()" class="hidden btn-touch bg-red-600 hover:bg-red-700 text-white px-4 text-xs shadow-sm">Excluir Rota (Master)</button>
                     <button type="submit" class="btn-pill-dark flex-1 text-xs">Confirmar Programação</button>
                 </div>
             </form>
@@ -1486,6 +1588,7 @@
                             <option value="Utilidades">Utilidades</option>
                             <option value="Caldeiraria / Serralheria">Caldeiraria / Serralheria</option>
                             <option value="Predial / Civil">Predial / Civil</option>
+                            <option value="Produção">Produção</option>
                             <option value="Terceiros / Especializada">Terceiros / Especializada</option>
                         </select>
                     </div>
@@ -1574,6 +1677,72 @@
                     <button type="submit" id="btnConfirmarRejeicaoAnom" class="btn-touch bg-rose-600 hover:bg-rose-700 text-white flex-1 text-xs shadow-md">Confirmar Recusa</button>
                 </div>
             </form>
+        </div>
+    </div>
+
+    <!-- MODAL ADMIN MASTER (SENHA OCULTA) -->
+    <div id="modalAdminMaster" role="dialog" aria-modal="true" class="fixed inset-0 bg-slate-900/65 backdrop-blur-sm z-[75] hidden flex items-end sm:items-center justify-center p-0 sm:p-4">
+        <div class="bg-white w-full sm:max-w-md sm:rounded-3xl rounded-t-3xl p-6 shadow-2xl border border-slate-200 space-y-4">
+            <div class="flex items-center justify-between border-b border-slate-100 pb-3">
+                <div>
+                    <div class="flex items-center gap-2 mb-1">
+                        <span class="text-[10px] font-extrabold uppercase tracking-widest text-red-600">Privilégio Restrito</span>
+                        <span id="masterModalBadge" class="text-[10px] font-extrabold uppercase px-2 py-0.5 rounded-full bg-slate-100 text-slate-600">Bloqueado</span>
+                    </div>
+                    <h2 class="text-lg font-extrabold text-slate-900">Acesso Admin Master</h2>
+                </div>
+                <button type="button" onclick="fecharModal('modalAdminMaster')" class="w-8 h-8 rounded-full bg-slate-100 text-slate-600 font-bold">✕</button>
+            </div>
+
+            <form id="masterUnlockBox" onsubmit="desbloquearAdminMaster(event)" class="space-y-4">
+                <p class="text-xs text-slate-600 leading-relaxed">
+                    Digite a <strong>senha oculta Admin Master</strong> para habilitar exclusão definitiva de anomalias, planos cirúrgicos e fichas de inspeção com erro de lançamento.
+                </p>
+                <div>
+                    <label for="masterPassInput" class="block text-[11px] font-extrabold uppercase text-slate-500 mb-1">Senha Oculta Master *</label>
+                    <input type="password" id="masterPassInput" required autocomplete="off" class="input-clean py-2.5 text-sm font-mono" placeholder="••••••••••••">
+                </div>
+                <div class="flex gap-2 pt-2 border-t border-slate-100">
+                    <button type="button" onclick="fecharModal('modalAdminMaster')" class="btn-touch bg-slate-100 text-slate-700 flex-1 text-xs">Cancelar</button>
+                    <button type="submit" class="btn-touch bg-red-600 hover:bg-red-700 text-white flex-1 text-xs shadow-md">Desbloquear Master</button>
+                </div>
+            </form>
+
+            <div id="masterActiveBox" class="hidden space-y-4">
+                <div class="p-3.5 rounded-2xl bg-red-50 border border-red-200 text-xs text-red-900 space-y-1">
+                    <div class="font-extrabold">✓ Admin Master Desbloqueado nesta Sessão</div>
+                    <p class="text-[11px]">Você pode excluir anomalias, planos e fichas diretamente pelas abas ou pelo menu <strong>Limpeza Master</strong>.</p>
+                </div>
+                <div class="p-3.5 rounded-2xl bg-slate-50 border border-slate-200 space-y-2.5">
+                    <div class="text-[11px] font-extrabold uppercase text-slate-600">Alterar Senha Oculta Master</div>
+                    <input type="password" id="masterNewPass1" autocomplete="new-password" class="input-clean py-2 text-xs font-mono" placeholder="Nova senha oculta (mín. 6 caracteres)">
+                    <input type="password" id="masterNewPass2" autocomplete="new-password" class="input-clean py-2 text-xs font-mono" placeholder="Confirmar nova senha oculta">
+                    <button type="button" onclick="salvarNovaSenhaMaster()" class="btn-touch bg-slate-900 hover:bg-slate-800 text-white w-full py-2 text-xs">Atualizar Senha Oculta</button>
+                </div>
+                <div class="flex gap-2 pt-2 border-t border-slate-100">
+                    <button type="button" onclick="fecharModal('modalAdminMaster'); switchTab('master-db');" class="btn-touch bg-red-600 hover:bg-red-700 text-white flex-1 text-xs">Abrir Limpeza Master</button>
+                    <button type="button" onclick="travarAdminMaster()" class="btn-touch bg-slate-100 hover:bg-slate-200 text-slate-800 flex-1 text-xs">Bloquear / Sair</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- MODAL CONFIRMAÇÃO EXCLUSÃO DEFINITIVA (ADMIN MASTER) -->
+    <div id="modalConfirmMasterDelete" role="dialog" aria-modal="true" class="fixed inset-0 bg-slate-900/70 backdrop-blur-sm z-[80] hidden flex items-end sm:items-center justify-center p-0 sm:p-4">
+        <div class="bg-white w-full sm:max-w-md sm:rounded-3xl rounded-t-3xl p-6 shadow-2xl border-2 border-red-200 space-y-4">
+            <div class="flex items-start gap-3">
+                <div class="w-10 h-10 rounded-2xl bg-red-100 text-red-600 flex items-center justify-center shrink-0 font-extrabold">!</div>
+                <div class="min-w-0">
+                    <span class="text-[10px] font-extrabold uppercase tracking-widest text-red-600">Ação Irreversível • Admin Master</span>
+                    <h2 id="confirmMasterTitle" class="text-base font-extrabold text-slate-900">Confirmar Exclusão Definitiva</h2>
+                    <p id="confirmMasterSubtitle" class="text-xs font-bold text-slate-500 mt-0.5 truncate"></p>
+                </div>
+            </div>
+            <div id="confirmMasterDesc" class="p-3.5 rounded-2xl bg-rose-50 border border-rose-200 text-xs text-rose-900 leading-relaxed"></div>
+            <div class="flex gap-2 pt-2 border-t border-slate-100">
+                <button type="button" onclick="fecharModal('modalConfirmMasterDelete')" class="btn-touch bg-slate-100 hover:bg-slate-200 text-slate-700 flex-1 text-xs">Cancelar</button>
+                <button type="button" id="btnConfirmarExclusaoMaster" class="btn-touch bg-red-600 hover:bg-red-700 text-white flex-1 text-xs shadow-md">Excluir Permanentemente</button>
+            </div>
         </div>
     </div>
 
@@ -1719,8 +1888,11 @@
         const refAgenda = collection(db, "ir_agenda");
         const refAnomalias = collection(db, "ir_anomalias");
         const refChecklists = collection(db, "ir_checklists");
+        const refMasterCfg = doc(db, "pcm_config", "admin_master");
 
         const DEFAULT_ADMIN = { id: 'default_admin', nome: 'Administrador PCM', user: 'admin', pass: 'admin', role: 'Admin' };
+        const DEFAULT_MASTER_HASH = "7c2cce436d043699877f19ad8a6aef78dc5b1f167d97fbfa5d316885c2150a59";
+        let customMasterHash = null;
 
         let arvLinhas = [];
         let listaFunc = [DEFAULT_ADMIN];
@@ -1733,6 +1905,8 @@
         let currentWeekNumber = 1;
         let chartAnomInstance = null;
         let filtroRotaStatus = 'Pendente';
+        let currentSubAbaAnom = 'oficiais';
+        let currentMasterDbTab = 'anomalias';
         let checklistState = {};
         let currentChecklistItems = [];
         let blocoAnomCounter = 0;
@@ -1742,6 +1916,484 @@
         let editorGruposData = [];
 
         const METODOS_INSPECAO = ['Visual', 'Sensitivo', 'Medição', 'Termografia', 'Lubrificação', 'Segurança'];
+        const EQUIPES_RESPONSAVEIS_ANOMALIA = [
+            'Mecânica',
+            'Elétrica',
+            'Automação / Instrumentação',
+            'Utilidades',
+            'Caldeiraria / Serralheria',
+            'Predial / Civil',
+            'Produção',
+            'Terceiros / Especializada'
+        ];
+
+        // ================= SESSÃO E AUTH ADMIN MASTER (SENHA OCULTA SHA-256) =================
+        const memSession = {};
+        function safeSessionGet(k) { try { return window.sessionStorage.getItem(k); } catch (_) { return memSession[k] || null; } }
+        function safeSessionSet(k, v) { memSession[k] = v; try { window.sessionStorage.setItem(k, v); } catch (_) {} }
+        function safeSessionRemove(k) { delete memSession[k]; try { window.sessionStorage.removeItem(k); } catch (_) {} }
+
+        function sha256Fallback(ascii) {
+            function rightRotate(v, amt) { return (v >>> amt) | (v << (32 - amt)); }
+            const maxWord = Math.pow(2, 32);
+            let result = '';
+            const words = [];
+            const bytes = new TextEncoder().encode(String(ascii || ''));
+            const bitLen = bytes.length * 8;
+            const hash = [];
+            const k = [];
+            let primeCounter = 0;
+            const isPrime = (n) => { for (let f = 2; f * f <= n; f++) if (n % f === 0) return false; return true; };
+            for (let candidate = 2; primeCounter < 64; candidate++) {
+                if (isPrime(candidate)) {
+                    if (primeCounter < 8) hash[primeCounter] = ((Math.pow(candidate, 0.5) * maxWord) | 0);
+                    k[primeCounter++] = ((Math.pow(candidate, 1 / 3) * maxWord) | 0);
+                }
+            }
+            const padded = Array.from(bytes);
+            padded.push(0x80);
+            while ((padded.length % 64) !== 56) padded.push(0);
+            const hi = Math.floor(bitLen / maxWord);
+            const lo = bitLen >>> 0;
+            padded.push((hi >>> 24) & 0xff, (hi >>> 16) & 0xff, (hi >>> 8) & 0xff, hi & 0xff);
+            padded.push((lo >>> 24) & 0xff, (lo >>> 16) & 0xff, (lo >>> 8) & 0xff, lo & 0xff);
+            for (let i = 0; i < padded.length; i += 4) {
+                words.push((padded[i] << 24) | (padded[i + 1] << 16) | (padded[i + 2] << 8) | padded[i + 3]);
+            }
+            for (let j = 0; j < words.length; j += 16) {
+                const w = words.slice(j, j + 16);
+                const old = hash.slice(0);
+                for (let i = 0; i < 64; i++) {
+                    if (i >= 16) {
+                        const s0 = rightRotate(w[i - 15], 7) ^ rightRotate(w[i - 15], 18) ^ (w[i - 15] >>> 3);
+                        const s1 = rightRotate(w[i - 2], 17) ^ rightRotate(w[i - 2], 19) ^ (w[i - 2] >>> 10);
+                        w[i] = (w[i - 16] + s0 + w[i - 7] + s1) | 0;
+                    }
+                    const a = hash[0], b = hash[1], c = hash[2], d = hash[3], e = hash[4], f = hash[5], g = hash[6], h = hash[7];
+                    const S1 = rightRotate(e, 6) ^ rightRotate(e, 11) ^ rightRotate(e, 25);
+                    const ch = (e & f) ^ ((~e) & g);
+                    const t1 = (h + S1 + ch + k[i] + w[i]) | 0;
+                    const S0 = rightRotate(a, 2) ^ rightRotate(a, 13) ^ rightRotate(a, 22);
+                    const maj = (a & b) ^ (a & c) ^ (b & c);
+                    const t2 = (S0 + maj) | 0;
+                    hash.unshift((t1 + t2) | 0);
+                    hash.pop();
+                    hash[4] = (hash[4] + t1) | 0;
+                }
+                for (let i = 0; i < 8; i++) hash[i] = (hash[i] + old[i]) | 0;
+            }
+            for (let i = 0; i < 8; i++) result += (hash[i] >>> 0).toString(16).padStart(8, '0');
+            return result;
+        }
+
+        async function sha256Hex(texto) {
+            const raw = String(texto || '');
+            if (window.crypto && window.crypto.subtle) {
+                try {
+                    const buf = await window.crypto.subtle.digest('SHA-256', new TextEncoder().encode(raw));
+                    return Array.from(new Uint8Array(buf)).map(b => b.toString(16).padStart(2, '0')).join('');
+                } catch (_) {}
+            }
+            return sha256Fallback(raw);
+        }
+
+        function getActiveMasterHash() {
+            return customMasterHash || DEFAULT_MASTER_HASH;
+        }
+
+        async function verifyAdminMasterPass(pass) {
+            if (!pass) return false;
+            const h = await sha256Hex(pass);
+            return h === getActiveMasterHash();
+        }
+
+        window.isAdminMasterAtivo = () => {
+            return Boolean(usuarioLogado && isPerfilAdmin(usuarioLogado.role) && safeSessionGet('cepera_admin_master_auth') === getActiveMasterHash());
+        };
+
+        function setAdminMasterSessao(ativo) {
+            if (ativo) safeSessionSet('cepera_admin_master_auth', getActiveMasterHash());
+            else safeSessionRemove('cepera_admin_master_auth');
+            atualizarBadgeMasterInsp();
+        }
+
+        function atualizarBadgeMasterInsp() {
+            const btn = document.getElementById('btnMasterInsp');
+            const lbl = document.getElementById('lblBtnMasterInsp');
+            const isAdm = Boolean(usuarioLogado && isPerfilAdmin(usuarioLogado.role));
+            const ativo = isAdminMasterAtivo();
+
+            if (btn) {
+                if (!isAdm) {
+                    btn.classList.add('hidden');
+                    btn.classList.remove('inline-flex');
+                } else {
+                    btn.classList.remove('hidden');
+                    btn.classList.add('inline-flex');
+                    if (ativo) {
+                        btn.className = 'inline-flex px-3 py-1.5 rounded-full bg-red-600 hover:bg-red-700 border border-red-700 text-xs font-extrabold text-white items-center gap-1.5 shadow-sm';
+                        if (lbl) lbl.innerText = 'Master Ativo';
+                    } else {
+                        btn.className = 'inline-flex px-3 py-1.5 rounded-full bg-white/85 hover:bg-white border border-slate-200/80 text-xs font-extrabold text-slate-700 items-center gap-1.5 shadow-sm';
+                        if (lbl) lbl.innerText = 'Master';
+                    }
+                }
+            }
+
+            const railMaster = document.getElementById('rail-master-db');
+            const mobMaster = document.getElementById('mob-master-db');
+            if (railMaster) railMaster.classList.toggle('hidden', !ativo);
+            if (mobMaster) mobMaster.classList.toggle('hidden', !ativo);
+
+            const viewMaster = document.getElementById('view-master-db');
+            if (!ativo && viewMaster && !viewMaster.classList.contains('hidden')) {
+                switchTab('dashboard');
+            }
+        }
+
+        function renderModalAdminMaster() {
+            const ativo = isAdminMasterAtivo();
+            const badge = document.getElementById('masterModalBadge');
+            const unlockBox = document.getElementById('masterUnlockBox');
+            const activeBox = document.getElementById('masterActiveBox');
+            if (badge) {
+                badge.innerText = ativo ? 'Desbloqueado' : 'Bloqueado';
+                badge.className = ativo
+                    ? 'text-[10px] font-extrabold uppercase px-2 py-0.5 rounded-full bg-red-600 text-white'
+                    : 'text-[10px] font-extrabold uppercase px-2 py-0.5 rounded-full bg-slate-100 text-slate-600';
+            }
+            if (unlockBox) unlockBox.classList.toggle('hidden', ativo);
+            if (activeBox) activeBox.classList.toggle('hidden', !ativo);
+        }
+
+        window.abrirModalAdminMaster = () => {
+            if (!usuarioLogado || !isPerfilAdmin(usuarioLogado.role)) {
+                showToast('Recurso exclusivo para administradores.', 'error');
+                return;
+            }
+            const inp = document.getElementById('masterPassInput');
+            if (inp) inp.value = '';
+            renderModalAdminMaster();
+            document.getElementById('modalAdminMaster')?.classList.remove('hidden');
+            setTimeout(() => document.getElementById('masterPassInput')?.focus(), 80);
+        };
+
+        window.desbloquearAdminMaster = async (e) => {
+            e.preventDefault();
+            const pass = document.getElementById('masterPassInput')?.value || '';
+            const ok = await verifyAdminMasterPass(pass);
+            if (!ok) {
+                showToast('Senha oculta do Admin Master incorreta.', 'error');
+                return;
+            }
+            setAdminMasterSessao(true);
+            renderModalAdminMaster();
+            rotearTelas();
+            if (typeof carregarDadosEditorChecklist === 'function' && editorSelectedNodeId) {
+                carregarDadosEditorChecklist();
+            }
+            showToast('Modo Admin Master desbloqueado nesta sessão!');
+        };
+
+        window.travarAdminMaster = () => {
+            setAdminMasterSessao(false);
+            renderModalAdminMaster();
+            fecharModal('modalAdminMaster');
+            rotearTelas();
+            if (typeof carregarDadosEditorChecklist === 'function' && editorSelectedNodeId) {
+                carregarDadosEditorChecklist();
+            }
+            showToast('Modo Admin Master bloqueado.');
+        };
+
+        window.salvarNovaSenhaMaster = async () => {
+            if (!isAdminMasterAtivo()) return;
+            const s1 = document.getElementById('masterNewPass1')?.value || '';
+            const s2 = document.getElementById('masterNewPass2')?.value || '';
+            if (s1.length < 6) {
+                showToast('A nova senha oculta deve ter pelo menos 6 caracteres.', 'error');
+                return;
+            }
+            if (s1 !== s2) {
+                showToast('As senhas digitadas não conferem.', 'error');
+                return;
+            }
+            try {
+                const novoHash = await sha256Hex(s1);
+                await setDoc(refMasterCfg, {
+                    pass_hash: novoHash,
+                    updated_by: usuarioLogado?.nome || 'Admin Master',
+                    updated_at: Date.now()
+                });
+                customMasterHash = novoHash;
+                safeSessionSet('cepera_admin_master_auth', novoHash);
+                document.getElementById('masterNewPass1').value = '';
+                document.getElementById('masterNewPass2').value = '';
+                showToast('Senha oculta Admin Master atualizada (SHA-256)!');
+            } catch (err) {
+                showToast('Erro ao salvar nova senha oculta no Firestore.', 'error');
+            }
+        };
+
+        let pendingMasterAction = null;
+        window.pedirExclusaoMaster = ({ title, subtitle, desc, onConfirm }) => {
+            if (!isAdminMasterAtivo()) {
+                abrirModalAdminMaster();
+                showToast('Desbloqueie o modo Admin Master para excluir registros.', 'error');
+                return;
+            }
+            pendingMasterAction = onConfirm;
+            document.getElementById('confirmMasterTitle').innerText = title || 'Confirmar Exclusão Definitiva';
+            document.getElementById('confirmMasterSubtitle').innerText = subtitle || '';
+            document.getElementById('confirmMasterDesc').innerHTML = desc || 'Esta ação removerá permanentemente o registro do Firestore.';
+            const btn = document.getElementById('btnConfirmarExclusaoMaster');
+            if (btn) {
+                btn.disabled = false;
+                btn.innerText = 'Excluir Permanentemente';
+                btn.onclick = () => executarExclusaoMaster();
+            }
+            document.getElementById('modalConfirmMasterDelete')?.classList.remove('hidden');
+        };
+
+        window.executarExclusaoMaster = async () => {
+            if (typeof pendingMasterAction !== 'function') return;
+            const btn = document.getElementById('btnConfirmarExclusaoMaster');
+            if (btn) { btn.disabled = true; btn.innerText = 'Excluindo...'; }
+            try {
+                await pendingMasterAction();
+                pendingMasterAction = null;
+                fecharModal('modalConfirmMasterDelete');
+            } catch (err) {
+                showToast('Erro ao executar exclusão no banco de dados.', 'error');
+            } finally {
+                if (btn) { btn.disabled = false; btn.innerText = 'Excluir Permanentemente'; }
+            }
+        };
+
+        window.excluirAnomaliaMaster = (idAnom) => {
+            const a = listaAnomalias.find(x => x.id === idAnom);
+            if (!a) return;
+            pedirExclusaoMaster({
+                title: 'Excluir Anomalia (Master)',
+                subtitle: `${a.equipamento || ''} • ${a.conjunto || 'Geral'}`,
+                desc: `Confirma a exclusão permanente da anomalia <strong>"${escapeHtml(a.componente || a.descricao?.slice(0, 60) || idAnom)}"</strong> (Status: ${escapeHtml(a.status || '-')}) do banco <code>ir_anomalias</code>?`,
+                onConfirm: async () => {
+                    await deleteDoc(doc(db, "ir_anomalias", idAnom));
+                    listaAnomalias = listaAnomalias.filter(x => x.id !== idAnom);
+                    showToast('Anomalia excluída definitivamente (Master).');
+                    rotearTelas();
+                    renderMasterDbView();
+                }
+            });
+        };
+
+        window.excluirPlanoMasterPorId = (planId) => {
+            const p = mapaChecklists[planId];
+            if (!p) return;
+            const node = arvLinhas.find(n => n.id === p.id_node);
+            const label = node ? `${node.maquina} › ${node.equipamento} › ${getNomeConjunto(node)}` : (p.id_node || planId);
+            pedirExclusaoMaster({
+                title: 'Excluir Plano Cirúrgico (Master)',
+                subtitle: `${label} (${p.especialidade || ''})`,
+                desc: `Confirma a exclusão permanente do documento <code>${escapeHtml(planId)}</code> na coleção <code>ir_checklists</code>?`,
+                onConfirm: async () => {
+                    await deleteDoc(doc(db, "ir_checklists", planId));
+                    delete mapaChecklists[planId];
+                    showToast('Plano cirúrgico excluído definitivamente (Master).');
+                    atualizarBadgesArvore();
+                    if (editorSelectedNodeId && `${editorSelectedNodeId}_${editorEspecialidade}` === planId) {
+                        carregarDadosEditorChecklist();
+                    }
+                    renderMasterDbView();
+                }
+            });
+        };
+
+        window.excluirPlanoChecklistMaster = () => {
+            if (!editorSelectedNodeId) return;
+            const key = `${editorSelectedNodeId}_${editorEspecialidade}`;
+            if (!mapaChecklists[key]) {
+                showToast('Não há plano cirúrgico salvo no banco para excluir neste conjunto.', 'error');
+                return;
+            }
+            excluirPlanoMasterPorId(key);
+        };
+
+        window.excluirFichaMaster = (idAgenda) => {
+            const ag = agendaRotas.find(x => x.id === idAgenda);
+            if (!ag) return;
+            pedirExclusaoMaster({
+                title: 'Excluir Ficha / Rota (Master)',
+                subtitle: `Semana S${ag.semana} • ${ag.equipamento || ''} › ${ag.conjunto || 'Geral'}`,
+                desc: `Confirma a exclusão definitiva desta ficha/agendamento (${escapeHtml(ag.status || 'Pendente')}) da coleção <code>ir_agenda</code>?`,
+                onConfirm: async () => {
+                    await deleteDoc(doc(db, "ir_agenda", idAgenda));
+                    agendaRotas = agendaRotas.filter(x => x.id !== idAgenda);
+                    fecharModal('modalVisualizarFicha');
+                    fecharModal('modalAgendaNode');
+                    showToast('Ficha / rota excluída definitivamente (Master).');
+                    rotearTelas();
+                    renderMasterDbView();
+                }
+            });
+        };
+
+        window.removerAgendamentoMaster = () => {
+            const idAgenda = document.getElementById('modalAgendaNode')?.getAttribute('data-idagenda');
+            if (idAgenda) excluirFichaMaster(idAgenda);
+        };
+
+        window.setMasterDbTab = (tab) => {
+            currentMasterDbTab = tab;
+            const map = {
+                anomalias: document.getElementById('btnMasterTabAnom'),
+                planos: document.getElementById('btnMasterTabPlanos'),
+                rotas: document.getElementById('btnMasterTabRotas')
+            };
+            Object.entries(map).forEach(([k, btn]) => {
+                if (!btn) return;
+                btn.className = k === tab
+                    ? 'px-4 py-1.5 rounded-full text-xs font-extrabold bg-slate-900 text-white'
+                    : 'px-4 py-1.5 rounded-full text-xs font-extrabold text-slate-600';
+            });
+            renderMasterDbView();
+        };
+
+        window.atualizarContadoresMasterSel = () => {
+            const chks = document.querySelectorAll('input[name="chkMasterBatch"]:checked');
+            const btn = document.getElementById('btnMasterExcluirSelecionados');
+            const cnt = document.getElementById('masterSelCount');
+            if (cnt) cnt.innerText = chks.length;
+            if (btn) btn.classList.toggle('hidden', chks.length === 0);
+        };
+
+        window.excluirLoteMaster = () => {
+            const chks = Array.from(document.querySelectorAll('input[name="chkMasterBatch"]:checked'));
+            if (chks.length === 0) return;
+            const tab = currentMasterDbTab;
+            const colMap = { anomalias: 'ir_anomalias', planos: 'ir_checklists', rotas: 'ir_agenda' };
+            const colecao = colMap[tab] || 'ir_anomalias';
+            const ids = chks.map(c => c.value);
+
+            pedirExclusaoMaster({
+                title: `Excluir ${ids.length} Registro(s) em Lote`,
+                subtitle: `Coleção: ${colecao}`,
+                desc: `Você selecionou <strong>${ids.length}</strong> registro(s) para exclusão definitiva do banco <code>${colecao}</code>. Esta operação não pode ser desfeita.`,
+                onConfirm: async () => {
+                    for (const id of ids) {
+                        await deleteDoc(doc(db, colecao, id));
+                        if (tab === 'anomalias') listaAnomalias = listaAnomalias.filter(x => x.id !== id);
+                        else if (tab === 'planos') delete mapaChecklists[id];
+                        else if (tab === 'rotas') agendaRotas = agendaRotas.filter(x => x.id !== id);
+                    }
+                    showToast(`${ids.length} registro(s) excluído(s) definitivamente (Master)!`);
+                    atualizarBadgesArvore();
+                    rotearTelas();
+                    renderMasterDbView();
+                }
+            });
+        };
+
+        window.renderMasterDbView = () => {
+            if (!isAdminMasterAtivo()) return;
+            const listaEl = document.getElementById('masterDbLista');
+            if (!listaEl) return;
+
+            const plansArr = Object.values(mapaChecklists || {});
+            const cAnom = document.getElementById('masterCntAnom');
+            const cPlan = document.getElementById('masterCntPlanos');
+            const cRot = document.getElementById('masterCntRotas');
+            if (cAnom) cAnom.innerText = listaAnomalias.length;
+            if (cPlan) cPlan.innerText = plansArr.length;
+            if (cRot) cRot.innerText = agendaRotas.length;
+
+            const busca = normTextoControle(document.getElementById('masterDbBusca')?.value || '');
+            let html = '';
+
+            if (currentMasterDbTab === 'anomalias') {
+                const items = [...listaAnomalias]
+                    .sort((a, b) => (b.timestamp || 0) - (a.timestamp || 0))
+                    .filter(a => !busca || normTextoControle(`${a.id} ${a.area} ${a.maquina} ${a.equipamento} ${a.conjunto || ''} ${a.componente || ''} ${a.relator || ''} ${a.status || ''} ${a.status_aprovacao || ''} ${a.descricao || ''}`).includes(busca));
+
+                html = items.length === 0
+                    ? '<div class="p-8 text-center text-xs font-bold text-slate-400">Nenhuma anomalia encontrada.</div>'
+                    : items.map(a => `
+                        <div class="p-3.5 rounded-2xl bg-slate-50 border border-slate-200/80 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+                            <label class="flex items-start gap-3 min-w-0 flex-1 cursor-pointer">
+                                <input type="checkbox" name="chkMasterBatch" value="${escapeHtml(a.id)}" onchange="atualizarContadoresMasterSel()" class="mt-1 w-4 h-4 accent-red-600 rounded shrink-0">
+                                <div class="min-w-0">
+                                    <div class="flex flex-wrap items-center gap-1.5 mb-0.5">
+                                        <span class="text-[10px] font-mono px-1.5 py-0.5 rounded bg-slate-200 text-slate-700">${escapeHtml(a.id)}</span>
+                                        <span class="text-[10px] font-extrabold uppercase px-2 py-0.5 rounded-full ${a.status_aprovacao === 'Rejeitada' ? 'bg-rose-100 text-rose-700' : a.status_aprovacao === 'Pendente Aprovação' ? 'bg-amber-100 text-amber-800' : 'bg-sky-100 text-sky-800'}">${escapeHtml(a.status_aprovacao || a.status || 'Oficial')}</span>
+                                        <span class="text-[10px] font-bold px-2 py-0.5 rounded-full bg-white border border-slate-200 text-slate-600">${escapeHtml(a.equipe_responsavel || a.especialidade || '-')}</span>
+                                    </div>
+                                    <div class="text-xs font-extrabold text-slate-900 truncate">${escapeHtml(a.area)} › ${escapeHtml(a.maquina)} › ${escapeHtml(a.equipamento)} (${escapeHtml(a.conjunto || 'Geral')})</div>
+                                    <div class="text-[11px] text-slate-600 line-clamp-1">${escapeHtml(a.componente || '-')} — ${escapeHtml(a.descricao || '')}</div>
+                                    <div class="text-[10px] text-slate-400 font-bold">Solicitante: ${escapeHtml(a.relator || '-')} • Status: ${escapeHtml(a.status || '-')}</div>
+                                </div>
+                            </label>
+                            <button type="button" onclick="excluirAnomaliaMaster('${escapeHtml(a.id)}')" class="btn-touch bg-red-600 hover:bg-red-700 text-white py-2 px-3.5 text-xs shrink-0">Excluir</button>
+                        </div>`).join('');
+            } else if (currentMasterDbTab === 'planos') {
+                const items = plansArr
+                    .sort((a, b) => (b.atualizado_em || 0) - (a.atualizado_em || 0))
+                    .filter(p => {
+                        const node = arvLinhas.find(n => n.id === p.id_node);
+                        const txtNode = node ? `${node.area} ${node.maquina} ${node.equipamento} ${getNomeConjunto(node)}` : 'orfao';
+                        return !busca || normTextoControle(`${p.id} ${p.id_node} ${p.especialidade} ${txtNode}`).includes(busca);
+                    });
+
+                html = items.length === 0
+                    ? '<div class="p-8 text-center text-xs font-bold text-slate-400">Nenhum plano cirúrgico salvo em ir_checklists.</div>'
+                    : items.map(p => {
+                        const node = arvLinhas.find(n => n.id === p.id_node);
+                        const totalPts = Array.isArray(p.grupos) ? p.grupos.reduce((acc, g) => acc + (g.itens?.length || 0), 0) : 0;
+                        const titulo = node ? `${node.area} › ${node.maquina} › ${node.equipamento} › ${getNomeConjunto(node)}` : `Ativo removido da árvore (${p.id_node || '?'})`;
+                        return `
+                        <div class="p-3.5 rounded-2xl ${node ? 'bg-slate-50 border-slate-200/80' : 'bg-amber-50/70 border-amber-300'} border flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+                            <label class="flex items-start gap-3 min-w-0 flex-1 cursor-pointer">
+                                <input type="checkbox" name="chkMasterBatch" value="${escapeHtml(p.id)}" onchange="atualizarContadoresMasterSel()" class="mt-1 w-4 h-4 accent-red-600 rounded shrink-0">
+                                <div class="min-w-0">
+                                    <div class="flex flex-wrap items-center gap-1.5 mb-0.5">
+                                        <span class="text-[10px] font-mono px-1.5 py-0.5 rounded bg-slate-200 text-slate-700">${escapeHtml(p.id)}</span>
+                                        <span class="text-[10px] font-extrabold uppercase px-2 py-0.5 rounded-full bg-indigo-100 text-indigo-800">${escapeHtml(p.especialidade || 'Mecânica')}</span>
+                                        ${!node ? '<span class="text-[10px] font-extrabold uppercase px-2 py-0.5 rounded-full bg-amber-200 text-amber-900">Registro Órfão</span>' : ''}
+                                    </div>
+                                    <div class="text-xs font-extrabold text-slate-900 truncate">${escapeHtml(titulo)}</div>
+                                    <div class="text-[10px] text-slate-500 font-bold">${Array.isArray(p.grupos) ? p.grupos.length : 0} bloco(s) • ${totalPts} ponto(s) • Atualizado por: ${escapeHtml(p.atualizado_por || '-')}</div>
+                                </div>
+                            </label>
+                            <button type="button" onclick="excluirPlanoMasterPorId('${escapeHtml(p.id)}')" class="btn-touch bg-red-600 hover:bg-red-700 text-white py-2 px-3.5 text-xs shrink-0">Excluir</button>
+                        </div>`;
+                    }).join('');
+            } else {
+                const items = [...agendaRotas]
+                    .sort((a, b) => (b.data_conclusao || b.timestamp || 0) - (a.data_conclusao || a.timestamp || 0))
+                    .filter(ag => !busca || normTextoControle(`${ag.id} S${ag.semana} ${ag.area} ${ag.maquina} ${ag.equipamento} ${ag.conjunto || ''} ${ag.nome_tecnico || ''} ${ag.status || ''}`).includes(busca));
+
+                html = items.length === 0
+                    ? '<div class="p-8 text-center text-xs font-bold text-slate-400">Nenhuma ficha ou rota encontrada em ir_agenda.</div>'
+                    : items.map(ag => `
+                        <div class="p-3.5 rounded-2xl bg-slate-50 border border-slate-200/80 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+                            <label class="flex items-start gap-3 min-w-0 flex-1 cursor-pointer">
+                                <input type="checkbox" name="chkMasterBatch" value="${escapeHtml(ag.id)}" onchange="atualizarContadoresMasterSel()" class="mt-1 w-4 h-4 accent-red-600 rounded shrink-0">
+                                <div class="min-w-0">
+                                    <div class="flex flex-wrap items-center gap-1.5 mb-0.5">
+                                        <span class="text-[10px] font-mono px-1.5 py-0.5 rounded bg-slate-200 text-slate-700">${escapeHtml(ag.id)}</span>
+                                        <span class="text-[10px] font-extrabold uppercase px-2 py-0.5 rounded-full bg-slate-900 text-white">S${ag.semana}</span>
+                                        <span class="text-[10px] font-extrabold uppercase px-2 py-0.5 rounded-full ${ag.status === 'Concluído' ? 'bg-emerald-100 text-emerald-800' : 'bg-amber-100 text-amber-800'}">${escapeHtml(ag.status || 'Pendente')}</span>
+                                    </div>
+                                    <div class="text-xs font-extrabold text-slate-900 truncate">${escapeHtml(ag.area)} › ${escapeHtml(ag.maquina)} › ${escapeHtml(ag.equipamento)} (${escapeHtml(ag.conjunto || 'Geral')})</div>
+                                    <div class="text-[10px] text-slate-500 font-bold">Responsável: ${escapeHtml(ag.nome_tecnico || '-')} (${escapeHtml(ag.role_tecnico || '-')})</div>
+                                </div>
+                            </label>
+                            <button type="button" onclick="excluirFichaMaster('${escapeHtml(ag.id)}')" class="btn-touch bg-red-600 hover:bg-red-700 text-white py-2 px-3.5 text-xs shrink-0">Excluir</button>
+                        </div>`).join('');
+            }
+
+            listaEl.innerHTML = html;
+            atualizarContadoresMasterSel();
+        };
 
         function getWeekNumber(d) {
             d = new Date(Date.UTC(d.getFullYear(), d.getMonth(), d.getDate()));
@@ -1926,7 +2578,7 @@
         async function persistirPreferenciasUsuario() {
             const chaveLocal = usuarioLogado ? `cepera_prefs_${usuarioLogado.user}` : 'cepera_prefs_guest';
             safeStorage.set(chaveLocal, JSON.stringify(userPrefs));
-            if (usuarioLogado && usuarioLogado.id && usuarioLogado.id !== 'default_admin') {
+            if (usuarioLogado && usuarioLogado.id && usuarioLogado.id !== 'default_admin' && usuarioLogado.id !== 'admin_master') {
                 try {
                     await updateDoc(doc(db, "ir_funcionarios", usuarioLogado.id), {
                         preferencias: userPrefs
@@ -2013,7 +2665,7 @@
         // ATALHOS GLOBAIS DE TECLADO (Ctrl + ?, Alt + 1..7, Alt + T, Alt + C, Alt + U, Esc)
         document.addEventListener('keydown', (e) => {
             if (e.key === 'Escape') {
-                ['modalFunc', 'modalExecutarInsp', 'modalAgendaNode', 'modalZoomFoto', 'modalCopiarPlano', 'modalVisualizarFicha', 'modalEspacoUsuario', 'modalAtalhos', 'a11yPanel'].forEach(id => {
+                ['modalFunc', 'modalExecutarInsp', 'modalAgendaNode', 'modalZoomFoto', 'modalCopiarPlano', 'modalVisualizarFicha', 'modalEspacoUsuario', 'modalAtalhos', 'modalAdminMaster', 'modalConfirmMasterDelete', 'a11yPanel'].forEach(id => {
                     const el = document.getElementById(id);
                     if (el && !el.classList.contains('hidden')) el.classList.add('hidden');
                 });
@@ -2105,6 +2757,15 @@
                 }
             }, 8000);
 
+            try {
+                onSnapshot(refMasterCfg, (snapDoc) => {
+                    const data = snapDoc.exists() ? snapDoc.data() : null;
+                    customMasterHash = (data && data.pass_hash) ? String(data.pass_hash) : null;
+                    atualizarBadgeMasterInsp();
+                    if (usuarioLogado) rotearTelas();
+                }, () => {});
+            } catch (_) {}
+
             onSnapshot(refLinhas, (snap) => {
                 const temp = [];
                 snap.forEach(d => {
@@ -2163,6 +2824,9 @@
                     if (!document.getElementById('view-fichas').classList.contains('hidden')) {
                         renderListaFichas();
                     }
+                    if (!document.getElementById('view-master-db')?.classList.contains('hidden')) {
+                        renderMasterDbView();
+                    }
                 }
             });
 
@@ -2172,6 +2836,11 @@
                 listaFunc = temp.length > 0 ? temp : [DEFAULT_ADMIN];
                 atualizarStatusConexao('online');
                 if (usuarioLogado) {
+                    if (usuarioLogado.id === 'admin_master') {
+                        atualizarBadgeMasterInsp();
+                        renderEquipe();
+                        return;
+                    }
                     const atualizado = listaFunc.find(x => x.user === usuarioLogado.user);
                     if (atualizado) usuarioLogado = atualizado;
                     renderEquipe();
@@ -2193,12 +2862,27 @@
 
         window.verificarSessao = () => {
             const s = safeStorage.get('cepera_ir_user');
+            if (s && s.toLowerCase() === 'master') {
+                if (safeSessionGet('cepera_admin_master_auth') === getActiveMasterHash()) {
+                    setUsuarioLogado({
+                        id: 'admin_master',
+                        nome: 'Admin Master PCM',
+                        user: 'master',
+                        role: 'Admin',
+                        isMaster: true
+                    });
+                    return;
+                }
+                safeStorage.remove('cepera_ir_user');
+                safeStorage.remove('cepera_central_session');
+            }
+
             let u = s ? listaFunc.find(x => (x.user || '').toLowerCase() === s.toLowerCase()) : null;
 
             if (!u && s) {
                 try {
                     const cached = JSON.parse(safeStorage.get('cepera_central_session') || 'null');
-                    if (cached && (cached.user || '').toLowerCase() === s.toLowerCase()) {
+                    if (cached && (cached.user || '').toLowerCase() === s.toLowerCase() && (cached.user || '').toLowerCase() !== 'master') {
                         u = cached;
                     }
                 } catch (_) {}
@@ -2222,10 +2906,32 @@
             }
         };
 
-        window.realizarLogin = (e) => {
+        window.realizarLogin = async (e) => {
             e.preventDefault();
             const usr = document.getElementById('loginUser').value.trim().toLowerCase();
             const pass = document.getElementById('loginPass').value;
+
+            if (usr === 'master') {
+                const okMaster = await verifyAdminMasterPass(pass);
+                if (!okMaster) {
+                    showToast("Usuário ou senha incorretos.", "error");
+                    return;
+                }
+                setAdminMasterSessao(true);
+                const masterUser = {
+                    id: 'admin_master',
+                    nome: 'Admin Master PCM',
+                    user: 'master',
+                    role: 'Admin',
+                    isMaster: true
+                };
+                safeStorage.set('cepera_ir_user', 'master');
+                safeStorage.set('cepera_central_session', JSON.stringify(masterUser));
+                setUsuarioLogado(masterUser);
+                showToast('Bem-vindo, Admin Master PCM!');
+                return;
+            }
+
             const userObj = listaFunc.find(x => x.user === usr && x.pass === pass);
 
             if (userObj) {
@@ -2239,6 +2945,7 @@
         };
 
         window.fazerLogout = () => {
+            setAdminMasterSessao(false);
             safeStorage.remove('cepera_ir_user');
             safeStorage.remove('cepera_central_session');
             usuarioLogado = null;
@@ -2275,6 +2982,7 @@
             const mob = document.getElementById('mobileTabNav');
 
             if (isPerfilAdmin(u.role)) {
+                const masterAtivo = isAdminMasterAtivo();
                 rail.innerHTML = `
                     <button type="button" onclick="switchTab('dashboard')" id="rail-dashboard" class="rail-btn active">
                         <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2V6zM14 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2V6zM4 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2v-2zM14 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2v-2z"/></svg>
@@ -2308,6 +3016,10 @@
                         <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0z"/></svg>
                         <span>Equipe</span>
                     </button>
+                    <button type="button" onclick="switchTab('master-db')" id="rail-master-db" class="rail-btn ${masterAtivo ? '' : 'hidden'} text-red-700 hover:!bg-red-50">
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/></svg>
+                        <span>Master</span>
+                    </button>
                 `;
                 mob.innerHTML = `
                     <button type="button" onclick="switchTab('dashboard')" id="mob-dashboard" class="mob-tab active">Visão Geral</button>
@@ -2318,6 +3030,7 @@
                     <button type="button" onclick="switchTab('checklists')" id="mob-checklists" class="mob-tab">Planos Cirúrgicos</button>
                     <button type="button" onclick="switchTab('anomalias')" id="mob-anomalias" class="mob-tab">Anomalias</button>
                     <button type="button" onclick="switchTab('equipe')" id="mob-equipe" class="mob-tab">Equipe</button>
+                    <button type="button" onclick="switchTab('master-db')" id="mob-master-db" class="mob-tab ${masterAtivo ? '' : 'hidden'} !text-red-700">Limpeza Master</button>
                 `;
                 switchTab('dashboard');
             } else if (isPerfilSupervisor(u.role)) {
@@ -2378,11 +3091,17 @@
                 `;
                 switchTab('minharota');
             }
+            atualizarBadgeMasterInsp();
             rotearTelas();
         }
 
         window.switchTab = (t) => {
-            ['dashboard', 'supervisao', 'planejamento', 'fichas', 'checklists', 'anomalias', 'equipe', 'minharota', 'pendencias'].forEach(id => {
+            if (t === 'master-db' && !isAdminMasterAtivo()) {
+                abrirModalAdminMaster();
+                showToast('Desbloqueie o modo Admin Master para acessar a Limpeza Master.', 'error');
+                return;
+            }
+            ['dashboard', 'supervisao', 'planejamento', 'fichas', 'checklists', 'anomalias', 'equipe', 'minharota', 'pendencias', 'master-db'].forEach(id => {
                 const el = document.getElementById(`view-${id}`);
                 if (el) el.classList.add('hidden');
                 const rb = document.getElementById(`rail-${id}`);
@@ -2405,6 +3124,7 @@
             if (t === 'anomalias') renderListaAnomalias();
             if (t === 'minharota') renderMinhaRota();
             if (t === 'pendencias') renderMinhasPendencias();
+            if (t === 'master-db') renderMasterDbView();
         };
 
         function rotearTelas() {
@@ -2422,6 +3142,9 @@
             }
             if (!document.getElementById('view-minharota')?.classList.contains('hidden')) {
                 renderMinhaRota();
+            }
+            if (!document.getElementById('view-master-db')?.classList.contains('hidden')) {
+                renderMasterDbView();
             }
             if (isPerfilAdmin(usuarioLogado.role)) {
                 renderDashboard();
@@ -2479,6 +3202,10 @@
 
             if (!nome || !user || !pass) {
                 showToast("Preencha nome, usuário e senha.", "error");
+                return;
+            }
+            if (user === 'master') {
+                showToast('O usuário "master" é reservado ao acesso oculto Admin Master.', "error");
                 return;
             }
 
@@ -2593,14 +3320,18 @@
         function renderEquipe() {
             if (!usuarioLogado || !isPerfilAdmin(usuarioLogado.role)) return;
             const tbody = document.getElementById('tbodyEquipe');
-            tbody.innerHTML = listaFunc.map(f => {
+            const visiveis = listaFunc.filter(f => (f.user || '').toLowerCase() !== 'master');
+            tbody.innerHTML = visiveis.map(f => {
+                const roleLower = (f.role || '').toLowerCase();
                 const badge = f.role === 'Admin'
                     ? 'bg-slate-900 text-white'
                     : f.role === 'Gerente'
                         ? 'bg-emerald-700 text-white'
                         : f.role === 'Elétrica'
                             ? 'bg-amber-100 text-amber-800'
-                            : 'bg-sky-100 text-sky-800';
+                            : (roleLower.includes('produ') || roleLower.includes('oper'))
+                                ? 'bg-violet-100 text-violet-800'
+                                : 'bg-sky-100 text-sky-800';
                 return `
                 <tr class="hover:bg-slate-50/80 transition-colors">
                     <td class="p-4 font-bold text-slate-900">${escapeHtml(f.nome)}</td>
@@ -3296,6 +4027,8 @@
             const btnRem = document.getElementById('btnRemoverAgenda');
             if (ext) btnRem.classList.remove('hidden');
             else btnRem.classList.add('hidden');
+            const btnRemMaster = document.getElementById('btnRemoverAgendaMaster');
+            if (btnRemMaster) btnRemMaster.classList.toggle('hidden', !(ext && isAdminMasterAtivo()));
 
             const tecs = listaFunc.filter(f => !isPerfilAdmin(f.role));
             document.getElementById('agTecnico').innerHTML = '<option value="">-- Selecione o Técnico --</option>' +
@@ -3623,6 +4356,10 @@
                                 <span> Imprimir</span>
                             </button>
                         </div>
+                        ${isAdminMasterAtivo() ? `
+                        <button type="button" onclick="excluirFichaMaster('${ag.id}')" class="btn-touch bg-red-600 hover:bg-red-700 text-white py-2 px-3 text-xs w-full shadow-sm">
+                            Excluir Ficha (Master)
+                        </button>` : ''}
                     </div>
                 </article>`;
             }).join('');
@@ -3868,6 +4605,12 @@
 
             const btnPrint = document.getElementById('btnImprimirDoModalFicha');
             btnPrint.onclick = () => imprimirFichaIndividual(idAgenda);
+
+            const btnMaster = document.getElementById('btnExcluirFichaMasterModal');
+            if (btnMaster) {
+                btnMaster.classList.toggle('hidden', !isAdminMasterAtivo());
+                btnMaster.onclick = () => excluirFichaMaster(idAgenda);
+            }
 
             document.getElementById('modalVisualizarFicha').classList.remove('hidden');
         };
@@ -4195,8 +4938,10 @@
             const saved = mapaChecklists[key];
             const badge = document.getElementById('cfgEdStatusBadge');
             const btnRestaurar = document.getElementById('btnRemoverPlanoCustom');
+            const btnMasterPlan = document.getElementById('btnExcluirPlanoMaster');
+            const hasSavedPlan = Boolean(saved && Array.isArray(saved.grupos));
 
-            if (saved && Array.isArray(saved.grupos)) {
+            if (hasSavedPlan) {
                 editorGruposData = JSON.parse(JSON.stringify(saved.grupos));
                 badge.className = 'mt-2 inline-flex items-center gap-1.5 text-[11px] font-extrabold px-3 py-1 rounded-full bg-indigo-100 text-indigo-800';
                 badge.innerText = ` Plano Cirúrgico Salvo (${editorEspecialidade})`;
@@ -4207,6 +4952,7 @@
                 badge.innerText = ` Modelo Base (${editorEspecialidade}) — Personalize abaixo e salve`;
                 btnRestaurar.classList.add('hidden');
             }
+            if (btnMasterPlan) btnMasterPlan.classList.toggle('hidden', !(hasSavedPlan && isAdminMasterAtivo()));
 
             renderGruposEditor();
         }
@@ -5102,7 +5848,12 @@
             blocoAnomCounter++;
             const bid = `anom_blk_${blocoAnomCounter}`;
             const container = document.getElementById('containerBlocosAnomalias');
-            const eqPadrao = (usuarioLogado && (usuarioLogado.role === 'Elétrica' || usuarioLogado.role === 'Mecânica')) ? usuarioLogado.role : 'Mecânica';
+            const roleU = (usuarioLogado?.role || '');
+            const eqPadrao = (roleU === 'Elétrica' || roleU === 'Mecânica')
+                ? roleU
+                : (roleU.toLowerCase().includes('produ') || roleU.toLowerCase().includes('oper'))
+                    ? 'Produção'
+                    : 'Mecânica';
 
             const card = document.createElement('div');
             card.id = bid;
@@ -5131,13 +5882,7 @@
                         <label class="block text-[10px] font-extrabold uppercase text-slate-500 mb-1">Equipe Responsável *</label>
                         <select data-field="equipe_responsavel" required class="input-clean py-2 text-xs font-bold">
                             <option value="">-- Selecione --</option>
-                            <option value="Mecânica" ${eqPadrao === 'Mecânica' ? 'selected' : ''}>Mecânica</option>
-                            <option value="Elétrica" ${eqPadrao === 'Elétrica' ? 'selected' : ''}>Elétrica</option>
-                            <option value="Automação / Instrumentação">Automação / Instrumentação</option>
-                            <option value="Utilidades">Utilidades</option>
-                            <option value="Caldeiraria / Serralheria">Caldeiraria / Serralheria</option>
-                            <option value="Predial / Civil">Predial / Civil</option>
-                            <option value="Terceiros / Especializada">Terceiros / Especializada</option>
+                            ${EQUIPES_RESPONSAVEIS_ANOMALIA.map(op => `<option value="${op}" ${eqPadrao === op ? 'selected' : ''}>${op}</option>`).join('')}
                         </select>
                     </div>
                     <div>
@@ -5473,7 +6218,7 @@
                                         <div>
                                             <label class="block text-[10px] font-extrabold uppercase text-slate-500 mb-0.5">Equipe Responsável</label>
                                             <select id="sup_eq_${ag.id}_${pIdx}" class="input-clean py-1.5 text-xs font-bold">
-                                                ${['Mecânica', 'Elétrica', 'Automação / Instrumentação', 'Utilidades', 'Caldeiraria / Serralheria', 'Predial / Civil', 'Terceiros / Especializada'].map(op =>
+                                                ${EQUIPES_RESPONSAVEIS_ANOMALIA.map(op =>
                                                     `<option value="${op}" ${(p.equipe_responsavel || 'Mecânica') === op ? 'selected' : ''}>${op}</option>`
                                                 ).join('')}
                                             </select>
@@ -5494,9 +6239,15 @@
                                             </select>
                                         </div>
                                     </div>
-                                    <div>
-                                        <label class="block text-[10px] font-extrabold uppercase text-slate-500 mb-0.5">Descrição da Anomalia (Editável pelo Supervisor)</label>
-                                        <input type="text" id="sup_desc_${ag.id}_${pIdx}" value="${escapeHtml(p.descricao || '')}" class="input-clean py-1.5 text-xs">
+                                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
+                                        <div>
+                                            <label class="block text-[10px] font-extrabold uppercase text-slate-500 mb-0.5">Descrição da Anomalia (Editável pelo Supervisor)</label>
+                                            <input type="text" id="sup_desc_${ag.id}_${pIdx}" value="${escapeHtml(p.descricao || '')}" class="input-clean py-1.5 text-xs">
+                                        </div>
+                                        <div>
+                                            <label class="block text-[10px] font-extrabold uppercase text-rose-700 mb-0.5">Motivo se Desmarcar / Reprovar (vai p/ Banco Admin)</label>
+                                            <input type="text" id="sup_motivo_rep_${ag.id}_${pIdx}" placeholder="Opcional: justifique caso desmarque para reprovar..." class="input-clean py-1.5 text-xs">
+                                        </div>
                                     </div>
                                 </div>
                             `).join('');
@@ -5517,6 +6268,7 @@
                                     <span class="text-xs font-bold px-3 py-1.5 rounded-xl bg-emerald-50 text-emerald-700 border border-emerald-200">${qtdOk} OK</span>
                                     <span class="text-xs font-bold px-3 py-1.5 rounded-xl bg-rose-50 text-rose-700 border border-rose-200">${qtdAn} Anomalia(s)</span>
                                     <button type="button" onclick="abrirModalVisualizarFicha('${ag.id}')" class="btn-touch bg-slate-100 hover:bg-slate-200 text-slate-700 py-2 px-3 text-xs">Ver Ficha A4</button>
+                                    ${isAdminMasterAtivo() ? `<button type="button" onclick="excluirFichaMaster('${ag.id}')" class="btn-touch bg-red-600 hover:bg-red-700 text-white py-2 px-3 text-xs shadow-sm">Excluir Ficha (Master)</button>` : ''}
                                 </div>
                             </div>
 
@@ -5529,7 +6281,7 @@
 
                             <div class="pt-3 border-t border-slate-100 flex justify-end">
                                 <button type="button" onclick="aprovarFichaSupervisao('${ag.id}')" class="btn-pill-dark text-xs py-2.5 px-6">
-                                    ✓ Aprovar Ficha & Enviar Anomalias p/ Banco Oficial
+                                    ✓ Aprovar Ficha &amp; Enviar Anomalias p/ Banco Oficial
                                 </button>
                             </div>
                         </div>`;
@@ -5540,9 +6292,9 @@
             const boxDiretas = document.getElementById('supContainerDiretas');
             if (boxDiretas) {
                 if (diretasPendentes.length === 0) {
-                    boxDiretas.innerHTML = `<div class="p-10 text-center text-slate-400 font-bold border-2 border-dashed border-slate-200 rounded-3xl bg-white/50">Nenhuma Anomalia Direta aguardando triagem e aprovação na sua área.</div>`;
+                    boxDiretas.innerHTML = `<div class="p-10 text-center text-slate-400 font-bold border-2 border-dashed border-slate-200 rounded-3xl bg-white/50">Nenhuma anomalia pendente aguardando triagem e aprovação na sua área.</div>`;
                 } else {
-                    const eqOpcoes = ['Mecânica', 'Elétrica', 'Automação / Instrumentação', 'Utilidades', 'Caldeiraria / Serralheria', 'Predial / Civil', 'Terceiros / Especializada'];
+                    const eqOpcoes = EQUIPES_RESPONSAVEIS_ANOMALIA;
                     const classifOpcoes = ['QUEBRA', 'CORRETIVA PROGRAMADA', 'PREVENTIVA / AJUSTE', 'SEGURANÇA / 5S', 'MELHORIA'];
                     const tempoOpcoes = ['00:15', '00:30', '00:45', '01:00', '01:30', '02:00', '03:00', '04:00', '06:00', '08:00'];
                     const oficiaisAbertas = getAnomaliasOficiais().filter(x => x.status !== 'Concluída');
@@ -5565,16 +6317,18 @@
 
                         const tAtual = a.tempo_estimado || '01:00';
                         const temposSelect = tempoOpcoes.includes(tAtual) ? tempoOpcoes : [tAtual, ...tempoOpcoes];
+                        const isDiretaOri = a.origem === 'Anomalia Direta' || a.id_agenda === 'DIRETA';
 
                         return `
                         <article class="glass-card p-5 sm:p-6 rounded-3xl space-y-4 border-2 ${a.risco_parada ? 'border-rose-300' : 'border-amber-200/90'}">
                             <div class="flex flex-col sm:flex-row sm:items-start justify-between gap-3 pb-3 border-b border-slate-100">
                                 <div>
                                     <div class="flex flex-wrap items-center gap-2 mb-1">
-                                        <span class="text-[10px] font-extrabold uppercase px-2.5 py-0.5 rounded-full bg-purple-100 text-purple-800 border border-purple-200">Anomalia Direta (Campo Livre)</span>
+                                        <span class="text-[10px] font-extrabold uppercase px-2.5 py-0.5 rounded-full bg-purple-100 text-purple-800 border border-purple-200">${isDiretaOri ? 'Anomalia Direta (Campo Livre)' : escapeHtml(a.origem || 'Via Rota')}</span>
                                         <span class="text-[10px] font-extrabold uppercase px-2.5 py-0.5 rounded-full bg-amber-100 text-amber-800">Aguardando Aprovação</span>
                                         ${a.risco_parada ? `<span class="text-[10px] font-extrabold uppercase px-2.5 py-0.5 rounded-full bg-rose-600 text-white">Risco Segurança / Parada</span>` : ''}
                                         ${Number(a.reenvio_count || 0) > 0 ? `<span class="text-[10px] font-extrabold uppercase px-2.5 py-0.5 rounded-full bg-sky-100 text-sky-800">Reenviada (#${a.reenvio_count})</span>` : ''}
+                                        ${a.reenviado_por_admin ? `<span class="text-[10px] font-extrabold uppercase px-2.5 py-0.5 rounded-full bg-indigo-100 text-indigo-800">Reenviada p/ Aprovação pelo Admin</span>` : ''}
                                     </div>
                                     <p class="text-[11px] font-extrabold uppercase text-slate-400">${escapeHtml(a.area)} • ${escapeHtml(a.maquina)} • ${escapeHtml(a.equipamento)}</p>
                                     <h3 class="text-lg font-extrabold text-slate-900">${escapeHtml(a.conjunto || 'Conjunto Geral')}</h3>
@@ -5649,6 +6403,10 @@
                             </div>
 
                             <div class="pt-3 border-t border-slate-100 flex flex-wrap justify-end gap-2.5">
+                                ${isAdminMasterAtivo() ? `
+                                    <button type="button" onclick="excluirAnomaliaMaster('${a.id}')" class="btn-touch bg-red-600 hover:bg-red-700 text-white py-2.5 px-4 text-xs shadow-sm">
+                                        Excluir (Master)
+                                    </button>` : ''}
                                 <button type="button" onclick="abrirModalRejeitarAnomaliaDireta('${a.id}')" class="btn-touch bg-rose-50 hover:bg-rose-100 text-rose-700 border border-rose-200 py-2.5 px-5 text-xs">
                                     Recusar / Devolver
                                 </button>
@@ -5687,9 +6445,12 @@
                                     ${a.foto_execucaoB64 ? `<img src="${a.foto_execucaoB64}" onclick="abrirZoomFoto('${a.foto_execucaoB64}')" class="w-full h-32 object-cover rounded-xl border border-emerald-300 cursor-zoom-in mt-1">` : ''}
                                 </div>
                             </div>
-                            <div class="grid grid-cols-2 gap-2 pt-2 border-t border-slate-100">
-                                <button type="button" onclick="devolverReparoSupervisao('${a.id}')" class="btn-touch bg-rose-50 hover:bg-rose-100 text-rose-700 py-2.5 text-xs">Devolver Reparo</button>
-                                <button type="button" onclick="aprovarReparoFinalSupervisao('${a.id}')" class="btn-touch bg-emerald-600 hover:bg-emerald-700 text-white py-2.5 text-xs shadow-md">✓ Dar OK Final</button>
+                            <div class="space-y-2 pt-2 border-t border-slate-100">
+                                <div class="grid grid-cols-2 gap-2">
+                                    <button type="button" onclick="devolverReparoSupervisao('${a.id}')" class="btn-touch bg-rose-50 hover:bg-rose-100 text-rose-700 py-2.5 text-xs">Devolver Reparo</button>
+                                    <button type="button" onclick="aprovarReparoFinalSupervisao('${a.id}')" class="btn-touch bg-emerald-600 hover:bg-emerald-700 text-white py-2.5 text-xs shadow-md">✓ Dar OK Final</button>
+                                </div>
+                                ${isAdminMasterAtivo() ? `<button type="button" onclick="excluirAnomaliaMaster('${a.id}')" class="btn-touch bg-red-600 hover:bg-red-700 text-white py-2 text-xs w-full shadow-sm">Excluir Anomalia (Master)</button>` : ''}
                             </div>
                         </article>
                     `).join('');
@@ -5776,14 +6537,15 @@
                 await updateDoc(doc(db, "ir_anomalias", idAnom), {
                     status: 'Rejeitada',
                     status_aprovacao: 'Rejeitada',
+                    descartada_solicitante: false,
                     rejeitado_por: usuarioLogado.nome,
                     data_rejeicao: Date.now(),
                     motivo_rejeicao: motivo
                 });
                 fecharModal('modalRejeitarAnomaliaDireta');
-                showToast("Anomalia Direta recusada e devolvida ao solicitante com justificativa.");
+                showToast("Anomalia recusada e salva no Banco de Reprovadas (Admin) / devolvida com justificativa.");
             } catch (err) {
-                showToast("Erro ao recusar Anomalia Direta.", "error");
+                showToast("Erro ao recusar anomalia.", "error");
             } finally {
                 if (btn) { btn.disabled = false; btn.innerText = "Confirmar Recusa"; }
             }
@@ -5795,13 +6557,12 @@
 
             const propostas = Array.isArray(ag.anomalias_propostas) ? ag.anomalias_propostas : [];
             let enviadas = 0;
+            let reprovadas = 0;
 
             try {
                 for (let idx = 0; idx < propostas.length; idx++) {
                     const p = propostas[idx];
                     const chk = document.getElementById(`sup_chk_${idAgenda}_${idx}`);
-                    if (!chk || !chk.checked) continue;
-
                     const componente = document.getElementById(`sup_comp_${idAgenda}_${idx}`)?.value.trim() || p.componente || 'Geral';
                     const equipe_responsavel = document.getElementById(`sup_eq_${idAgenda}_${idx}`)?.value || p.equipe_responsavel || 'Mecânica';
                     const qtd_tecnicos = parseInt(document.getElementById(`sup_qtd_${idAgenda}_${idx}`)?.value || p.qtd_tecnicos || 1, 10);
@@ -5809,7 +6570,39 @@
                     const urgencia = document.getElementById(`sup_urg_${idAgenda}_${idx}`)?.value || p.urgencia || 'Média';
                     const descricao = document.getElementById(`sup_desc_${idAgenda}_${idx}`)?.value.trim() || p.descricao || '';
 
+                    if (!chk || !chk.checked) {
+                        const motivoRep = document.getElementById(`sup_motivo_rep_${idAgenda}_${idx}`)?.value.trim() || 'Item reprovado na revisão da ficha pela Supervisão';
+                        await addDoc(refAnomalias, {
+                            origem: 'Via Rota (Reprovada na Ficha)',
+                            area: ag.area || '',
+                            maquina: ag.maquina || '',
+                            equipamento: ag.equipamento || '',
+                            conjunto: ag.conjunto || 'Conjunto Geral',
+                            componente,
+                            urgencia,
+                            equipe_responsavel,
+                            qtd_tecnicos: Math.max(1, qtd_tecnicos),
+                            tempo_estimado,
+                            id_agenda: idAgenda,
+                            descricao,
+                            fotoB64: p.fotoB64 || '',
+                            relator: p.relator || ag.nome_tecnico,
+                            especialidade: ag.role_tecnico || 'Mecânica',
+                            rejeitado_por: usuarioLogado.nome,
+                            data_rejeicao: Date.now(),
+                            motivo_rejeicao: motivoRep,
+                            descartada_solicitante: false,
+                            status: 'Rejeitada',
+                            status_aprovacao: 'Rejeitada',
+                            classificacao_os: 'QUEBRA',
+                            timestamp: Date.now()
+                        });
+                        reprovadas++;
+                        continue;
+                    }
+
                     await addDoc(refAnomalias, {
+                        origem: 'Via Rota',
                         area: ag.area || '',
                         maquina: ag.maquina || '',
                         equipamento: ag.equipamento || '',
@@ -5839,7 +6632,9 @@
                     data_aprovacao: Date.now()
                 });
 
-                showToast(`Ficha aprovada! ${enviadas} anomalia(s) enviada(s) ao banco oficial para delegação.`);
+                showToast(reprovadas > 0
+                    ? `Ficha aprovada! ${enviadas} oficializada(s) e ${reprovadas} salva(s) no Banco de Reprovadas (Admin).`
+                    : `Ficha aprovada! ${enviadas} anomalia(s) enviada(s) ao banco oficial para delegação.`);
             } catch (err) {
                 showToast("Erro ao aprovar ficha e gerar anomalias.", "error");
             }
@@ -5890,11 +6685,22 @@
                 <div class="text-sky-700 font-extrabold">Necessário escalar: ${qtdReq} técnico(s) • Tempo Estimado: ${escapeHtml(a.tempo_estimado || '01:00')}</div>
             `;
 
-            const tecnicos = listaFunc.filter(f => f.role === 'Mecânica' || f.role === 'Elétrica');
-            const eqAlvo = (a.equipe_responsavel || a.especialidade || '').toLowerCase();
+            const tecnicos = listaFunc.filter(f =>
+                !isPerfilAdmin(f.role) &&
+                !isPerfilSupervisor(f.role) &&
+                (f.user || '').toLowerCase() !== 'master'
+            );
+            const eqAlvo = normTextoControle(a.equipe_responsavel || a.especialidade || '');
+            const matchEq = (roleStr) => {
+                const rl = normTextoControle(roleStr || '');
+                if (!rl || !eqAlvo) return false;
+                if (eqAlvo.includes(rl) || rl.includes(eqAlvo)) return true;
+                if (eqAlvo.includes('produc') && (rl.includes('produc') || rl.includes('oper'))) return true;
+                return false;
+            };
             tecnicos.sort((t1, t2) => {
-                const m1 = eqAlvo.includes(t1.role.toLowerCase()) ? 0 : 1;
-                const m2 = eqAlvo.includes(t2.role.toLowerCase()) ? 0 : 1;
+                const m1 = matchEq(t1.role) ? 0 : 1;
+                const m2 = matchEq(t2.role) ? 0 : 1;
                 return m1 - m2 || t1.nome.localeCompare(t2.nome);
             });
 
@@ -5902,7 +6708,12 @@
 
             document.getElementById('delListaTecnicos').innerHTML = tecnicos.map(t => {
                 const checked = delegadosIds.includes(t.id) ? 'checked' : '';
-                const badge = t.role === 'Elétrica' ? 'bg-amber-100 text-amber-800' : 'bg-sky-100 text-sky-800';
+                const rl = (t.role || '').toLowerCase();
+                const badge = t.role === 'Elétrica'
+                    ? 'bg-amber-100 text-amber-800'
+                    : (rl.includes('produ') || rl.includes('oper'))
+                        ? 'bg-violet-100 text-violet-800'
+                        : 'bg-sky-100 text-sky-800';
                 return `
                 <label class="flex items-center justify-between p-2.5 rounded-xl bg-slate-50 hover:bg-slate-100 border border-slate-200 cursor-pointer">
                     <div class="flex items-center gap-2.5">
@@ -6266,6 +7077,11 @@
             const areaSel = document.getElementById('dirAnomArea');
             areaSel.innerHTML = '<option value="">-- Selecione --</option>' + areas.map(a => `<option value="${escapeHtml(a)}">${escapeHtml(a)}</option>`).join('');
 
+            const roleLow = (usuarioLogado?.role || '').toLowerCase();
+            const defaultEqDir = (roleLow.includes('produ') || roleLow.includes('oper'))
+                ? 'Produção'
+                : (usuarioLogado?.role === 'Elétrica' ? 'Elétrica' : 'Mecânica');
+
             document.getElementById('dirAnomMaquina').innerHTML = '<option value="">-- Selecione --</option>';
             document.getElementById('dirAnomEquipamento').innerHTML = '<option value="">-- Selecione --</option>';
             document.getElementById('dirAnomConjunto').innerHTML = '<option value="">-- Selecione --</option>';
@@ -6273,7 +7089,7 @@
             document.getElementById('dirAnomModalTitulo').innerText = 'Registrar Anomalia Direta';
             document.getElementById('dirAnomComponente').value = '';
             document.getElementById('dirAnomUrgencia').value = 'Média';
-            document.getElementById('dirAnomEquipe').value = 'Mecânica';
+            document.getElementById('dirAnomEquipe').value = defaultEqDir;
             document.getElementById('dirAnomQtdTec').value = '1';
             document.getElementById('dirAnomTempoEst').value = '01:00';
             document.getElementById('dirAnomDescricao').value = '';
@@ -6282,7 +7098,7 @@
 
             if (prefill && typeof prefill === 'object') {
                 document.getElementById('dirAnomReenvioId').value = prefill.id || '';
-                document.getElementById('dirAnomModalTitulo').innerText = 'Corrigir e Reenviar Anomalia Direta';
+                document.getElementById('dirAnomModalTitulo').innerText = 'Corrigir e Reenviar Anomalia p/ Aprovação';
                 if (prefill.area && areas.includes(prefill.area)) {
                     areaSel.value = prefill.area;
                     onDirAnomAreaChange();
@@ -6300,7 +7116,7 @@
                 }
                 document.getElementById('dirAnomComponente').value = prefill.componente || '';
                 document.getElementById('dirAnomUrgencia').value = prefill.urgencia || 'Média';
-                document.getElementById('dirAnomEquipe').value = prefill.equipe_responsavel || 'Mecânica';
+                document.getElementById('dirAnomEquipe').value = prefill.equipe_responsavel || defaultEqDir;
                 document.getElementById('dirAnomQtdTec').value = String(prefill.qtd_tecnicos || 1);
                 document.getElementById('dirAnomTempoEst').value = prefill.tempo_estimado || '01:00';
                 document.getElementById('dirAnomDescricao').value = prefill.descricao || '';
@@ -6331,10 +7147,21 @@
 
         window.dispensarAnomaliaRejeitada = async (idAnom) => {
             try {
-                await deleteDoc(doc(db, "ir_anomalias", idAnom));
-                showToast("Solicitação recusada removida da sua lista.");
+                await updateDoc(doc(db, "ir_anomalias", idAnom), {
+                    descartada_solicitante: true,
+                    descartada_em: Date.now(),
+                    descartada_por: usuarioLogado?.nome || 'Solicitante'
+                });
+                const item = listaAnomalias.find(x => x.id === idAnom);
+                if (item) {
+                    item.descartada_solicitante = true;
+                    item.descartada_em = Date.now();
+                    item.descartada_por = usuarioLogado?.nome || 'Solicitante';
+                }
+                renderListaAnomalias();
+                showToast("Ocultada da sua fila (mantida no Banco de Reprovadas do Admin).");
             } catch (err) {
-                showToast("Erro ao remover solicitação.", "error");
+                showToast("Erro ao ocultar solicitação.", "error");
             }
         };
 
@@ -6427,9 +7254,11 @@
             btn.innerText = "Enviando p/ Supervisão...";
 
             try {
+                const prevDoc = reenvioId ? listaAnomalias.find(x => x.id === reenvioId) : null;
+                const isAdminResend = Boolean(reenvioId && isPerfilAdmin(usuarioLogado?.role));
                 const payloadBase = {
-                    origem: 'Anomalia Direta',
-                    id_agenda: 'DIRETA',
+                    origem: prevDoc?.origem || 'Anomalia Direta',
+                    id_agenda: prevDoc?.id_agenda || 'DIRETA',
                     area,
                     maquina,
                     equipamento,
@@ -6442,13 +7271,15 @@
                     tempo_estimado,
                     descricao,
                     fotoB64,
-                    relator: usuarioLogado.nome,
-                    relator_id: usuarioLogado.id || '',
-                    relator_role: usuarioLogado.role || '',
+                    relator: prevDoc?.relator || usuarioLogado.nome,
+                    relator_id: prevDoc?.relator_id ?? (usuarioLogado.id || ''),
+                    relator_role: prevDoc?.relator_role ?? (usuarioLogado.role || ''),
                     especialidade: equipe_responsavel,
                     aprovado_por: '',
                     status: 'Aguardando Aprovação',
                     status_aprovacao: 'Pendente Aprovação',
+                    descartada_solicitante: false,
+                    reenviado_por_admin: isAdminResend ? usuarioLogado.nome : (prevDoc?.reenviado_por_admin || ''),
                     motivo_rejeicao: '',
                     rejeitado_por: '',
                     classificacao_os: 'QUEBRA',
@@ -6456,12 +7287,12 @@
                 };
 
                 if (reenvioId) {
-                    const prevDoc = listaAnomalias.find(x => x.id === reenvioId);
                     await updateDoc(doc(db, "ir_anomalias", reenvioId), {
                         ...payloadBase,
                         reenvio_count: Number(prevDoc?.reenvio_count || 0) + 1
                     });
-                    showToast("Anomalia Direta corrigida e reenviada para aprovação do Supervisor!");
+                    if (prevDoc) Object.assign(prevDoc, { ...payloadBase, reenvio_count: Number(prevDoc.reenvio_count || 0) + 1 });
+                    showToast("Anomalia corrigida e reenviada para aprovação do Supervisor!");
                 } else {
                     await addDoc(refAnomalias, {
                         ...payloadBase,
@@ -6470,6 +7301,7 @@
                     showToast("Anomalia Direta enviada para aprovação do Supervisor!");
                 }
                 fecharModal('modalAnomaliaDireta');
+                renderListaAnomalias();
             } catch (err) {
                 showToast("Erro ao enviar Anomalia Direta.", "error");
             } finally {
@@ -6496,6 +7328,8 @@
             }
 
             const minhasTriagens = listaAnomalias.filter(a =>
+                !a.descartada_solicitante &&
+                (a.origem === 'Anomalia Direta' || a.id_agenda === 'DIRETA' || a.status_aprovacao === 'Pendente Aprovação') &&
                 (a.status_aprovacao === 'Pendente Aprovação' || a.status_aprovacao === 'Rejeitada') &&
                 (a.relator === usuarioLogado.nome || (a.relator_id && a.relator_id === usuarioLogado.id))
             ).sort((a, b) => (b.timestamp || 0) - (a.timestamp || 0));
@@ -6510,8 +7344,8 @@
                             <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"/></svg>
                         </div>
                         <div>
-                            <div class="text-xs font-extrabold text-indigo-950">${pendentesGestao.length} Anomalia(s) Direta(s) aguardando aprovação da Supervisão</div>
-                            <p class="text-[11px] font-medium text-indigo-800">Apontamentos por campo livre não entram no banco oficial até revisão e aprovação técnica.</p>
+                            <div class="text-xs font-extrabold text-indigo-950">${pendentesGestao.length} Anomalia(s) aguardando aprovação da Supervisão</div>
+                            <p class="text-[11px] font-medium text-indigo-800">Apontamentos não entram no banco oficial até revisão e aprovação técnica.</p>
                         </div>
                     </div>
                     <button type="button" onclick="abrirAprovacaoDiretasSupervisao()" class="btn-touch bg-indigo-600 hover:bg-indigo-700 text-white px-5 py-2.5 text-xs shrink-0 shadow-sm">
@@ -6526,7 +7360,7 @@
                     <div class="flex items-center justify-between gap-2">
                         <div>
                             <span class="text-[10px] font-extrabold uppercase tracking-wider text-amber-700">Acompanhamento do Solicitante</span>
-                            <h2 class="text-sm font-extrabold text-slate-900">Minhas Anomalias Diretas em Triagem / Devolvidas (${minhasTriagens.length})</h2>
+                            <h2 class="text-sm font-extrabold text-slate-900">Minhas Anomalias em Triagem / Devolvidas (${minhasTriagens.length})</h2>
                         </div>
                     </div>
                     <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
@@ -6546,7 +7380,7 @@
                                 ${rej ? `
                                     <div class="flex gap-2 pt-1">
                                         <button type="button" onclick="reenviarAnomaliaRejeitada('${a.id}')" class="btn-touch bg-slate-900 hover:bg-slate-800 text-white py-2 px-3 text-[11px] flex-1">Editar e Reenviar</button>
-                                        <button type="button" onclick="dispensarAnomaliaRejeitada('${a.id}')" class="btn-touch bg-white hover:bg-slate-100 text-slate-700 border border-slate-200 py-2 px-3 text-[11px]">Descartar</button>
+                                        <button type="button" onclick="dispensarAnomaliaRejeitada('${a.id}')" title="Ocultar da sua lista (permanece no Banco de Reprovadas do Admin)" class="btn-touch bg-white hover:bg-slate-100 text-slate-700 border border-slate-200 py-2 px-3 text-[11px]">Descartar</button>
                                     </div>` : ''}
                             </div>`;
                         }).join('')}
@@ -6563,8 +7397,156 @@
             }
         }
 
+        function getAnomaliasReprovadas() {
+            return listaAnomalias.filter(a => a.status_aprovacao === 'Rejeitada' || a.status === 'Rejeitada');
+        }
+
+        window.setSubAbaAnomalias = (sub) => {
+            if (sub === 'reprovadas' && !(usuarioLogado && isPerfilAdmin(usuarioLogado.role))) {
+                sub = 'oficiais';
+            }
+            currentSubAbaAnom = sub;
+            const secOf = document.getElementById('secAnomOficiais');
+            const secRep = document.getElementById('secAnomReprovadasAdmin');
+            const btnOf = document.getElementById('btnSubAnomOficiais');
+            const btnRep = document.getElementById('btnSubAnomReprovadas');
+            if (secOf) secOf.classList.toggle('hidden', sub === 'reprovadas');
+            if (secRep) secRep.classList.toggle('hidden', sub !== 'reprovadas');
+            if (btnOf) {
+                btnOf.className = sub === 'oficiais'
+                    ? 'px-4 py-1.5 rounded-full text-xs font-extrabold bg-slate-900 text-white transition-all'
+                    : 'px-4 py-1.5 rounded-full text-xs font-extrabold text-slate-600 hover:text-slate-900 transition-all';
+            }
+            if (btnRep) {
+                btnRep.className = sub === 'reprovadas'
+                    ? 'px-4 py-1.5 rounded-full text-xs font-extrabold bg-rose-600 text-white inline-flex items-center gap-1.5 transition-all'
+                    : 'px-4 py-1.5 rounded-full text-xs font-extrabold text-slate-600 hover:text-slate-900 inline-flex items-center gap-1.5 transition-all';
+            }
+            if (sub === 'reprovadas') renderBancoReprovadasAdmin();
+        };
+
+        window.reenviarAnomaliaReprovadaAdmin = async (idAnom) => {
+            if (!usuarioLogado || !isPerfilAdmin(usuarioLogado.role)) return;
+            const a = listaAnomalias.find(x => x.id === idAnom);
+            if (!a) return;
+            try {
+                const novoCount = Number(a.reenvio_count || 0) + 1;
+                const upd = {
+                    status: 'Aguardando Aprovação',
+                    status_aprovacao: 'Pendente Aprovação',
+                    descartada_solicitante: false,
+                    reenviado_por_admin: usuarioLogado.nome,
+                    reenviado_admin_em: Date.now(),
+                    reenvio_count: novoCount
+                };
+                await updateDoc(doc(db, "ir_anomalias", idAnom), upd);
+                Object.assign(a, upd);
+                rotearTelas();
+                showToast("Anomalia reenviada à fila da Supervisão para nova aprovação!");
+            } catch (err) {
+                showToast("Erro ao reenviar anomalia para Supervisão.", "error");
+            }
+        };
+
+        window.editarReenviarAnomaliaReprovadaAdmin = (idAnom) => {
+            if (!usuarioLogado || !isPerfilAdmin(usuarioLogado.role)) return;
+            const a = listaAnomalias.find(x => x.id === idAnom);
+            if (!a) return;
+            abrirModalAnomaliaDireta(a);
+        };
+
+        window.renderBancoReprovadasAdmin = () => {
+            if (!usuarioLogado || !isPerfilAdmin(usuarioLogado.role)) return;
+            const container = document.getElementById('listaAnomaliasReprovadasAdmin');
+            if (!container) return;
+
+            const busca = normTextoControle(document.getElementById('filtroRepAnomBusca')?.value || '');
+            const fEq = document.getElementById('filtroRepAnomEquipe')?.value || '';
+            const fOri = document.getElementById('filtroRepAnomOrigem')?.value || '';
+
+            let lista = [...getAnomaliasReprovadas()].sort((a, b) => (b.data_rejeicao || b.timestamp || 0) - (a.data_rejeicao || a.timestamp || 0));
+            if (fEq) lista = lista.filter(a => (a.equipe_responsavel || a.especialidade || '') === fEq);
+            if (fOri === 'Direta') lista = lista.filter(a => a.origem === 'Anomalia Direta' || a.id_agenda === 'DIRETA');
+            if (fOri === 'Rota') lista = lista.filter(a => a.origem !== 'Anomalia Direta' && a.id_agenda !== 'DIRETA');
+            if (busca) {
+                lista = lista.filter(a => normTextoControle(`${a.area} ${a.maquina} ${a.equipamento} ${a.conjunto || ''} ${a.componente || ''} ${a.relator || ''} ${a.rejeitado_por || ''} ${a.motivo_rejeicao || ''} ${a.descricao || ''}`).includes(busca));
+            }
+
+            const cntEl = document.getElementById('repAnomResumoCount');
+            if (cntEl) cntEl.innerText = `${lista.length} reprovada(s)`;
+
+            if (lista.length === 0) {
+                container.innerHTML = `<div class="col-span-full p-10 text-center text-slate-400 font-bold border-2 border-dashed border-slate-200 rounded-3xl bg-white/50">Nenhuma anomalia reprovada encontrada no banco com os filtros atuais.</div>`;
+                return;
+            }
+
+            const masterAtivo = isAdminMasterAtivo();
+            container.innerHTML = lista.map(a => {
+                const isDir = a.origem === 'Anomalia Direta' || a.id_agenda === 'DIRETA';
+                const dataRepStr = a.data_rejeicao ? new Date(a.data_rejeicao).toLocaleString('pt-BR', { dateStyle: 'short', timeStyle: 'short' }) : '-';
+                return `
+                <article class="glass-card p-5 rounded-3xl flex flex-col justify-between space-y-3 border-2 border-rose-200/90">
+                    <div class="space-y-2.5">
+                        <div class="flex items-start justify-between gap-2">
+                            <div class="min-w-0">
+                                <span class="text-[10px] font-extrabold uppercase text-slate-400 block truncate">${escapeHtml(a.area)} • ${escapeHtml(a.maquina)}</span>
+                                <span class="text-xs font-extrabold text-sky-700 block truncate">${escapeHtml(a.equipamento)}</span>
+                                <h3 class="font-extrabold text-slate-900 text-base leading-snug">${escapeHtml(a.conjunto || 'Conjunto Geral')}</h3>
+                            </div>
+                            <span class="text-[10px] font-extrabold uppercase px-2.5 py-1 rounded-full bg-rose-600 text-white shrink-0">Reprovada</span>
+                        </div>
+
+                        <div class="flex flex-wrap items-center gap-1.5">
+                            <span class="text-[10px] font-extrabold px-2 py-0.5 rounded-lg ${isDir ? 'bg-purple-100 text-purple-800' : 'bg-slate-100 text-slate-700'}">${isDir ? 'Anomalia Direta' : escapeHtml(a.origem || 'Via Rota')}</span>
+                            <span class="text-[10px] font-extrabold px-2 py-0.5 rounded-lg bg-slate-100 text-slate-700">${escapeHtml(a.equipe_responsavel || a.especialidade || '-')}</span>
+                            ${a.descartada_solicitante ? `<span class="text-[10px] font-bold px-2 py-0.5 rounded-lg bg-amber-100 text-amber-800">Descartada pelo solicitante</span>` : ''}
+                        </div>
+
+                        <div class="text-xs text-slate-700"><strong>Ponto:</strong> ${escapeHtml(a.componente || '-')}</div>
+                        ${a.fotoB64 ? `<img src="${a.fotoB64}" onclick="abrirZoomFoto('${a.fotoB64}')" alt="Evidência" class="w-full h-36 object-cover rounded-2xl border border-slate-200 cursor-zoom-in">` : ''}
+                        <p class="text-xs text-slate-700 font-medium whitespace-pre-wrap leading-relaxed">${escapeHtml(a.descricao || '')}</p>
+
+                        <div class="p-3 rounded-2xl bg-rose-50/80 border border-rose-200 text-[11px] text-rose-900 space-y-1">
+                            <div><strong>Reprovada por:</strong> ${escapeHtml(a.rejeitado_por || 'Supervisão')} • ${dataRepStr}</div>
+                            <div><strong>Motivo:</strong> ${escapeHtml(a.motivo_rejeicao || 'Não informado.')}</div>
+                            <div class="text-slate-600"><strong>Autor original:</strong> ${escapeHtml(a.relator || '-')}</div>
+                        </div>
+                    </div>
+
+                    <div class="pt-3 border-t border-slate-100 space-y-2">
+                        <button type="button" onclick="reenviarAnomaliaReprovadaAdmin('${a.id}')" class="btn-touch bg-emerald-600 hover:bg-emerald-700 text-white py-2 px-3 text-xs w-full shadow-sm">
+                            Enviar p/ Aprovação Novamente
+                        </button>
+                        <button type="button" onclick="editarReenviarAnomaliaReprovadaAdmin('${a.id}')" class="btn-touch bg-slate-900 hover:bg-slate-800 text-white py-2 px-3 text-xs w-full">
+                            Editar e Reenviar
+                        </button>
+                        ${masterAtivo ? `
+                        <button type="button" onclick="excluirAnomaliaMaster('${a.id}')" class="btn-touch bg-red-600 hover:bg-red-700 text-white py-2 px-3 text-xs w-full shadow-sm">
+                            Excluir Definitivamente (Master)
+                        </button>` : ''}
+                    </div>
+                </article>`;
+            }).join('');
+        };
+
         window.renderListaAnomalias = () => {
             renderBoxDiretasEmTriagem();
+
+            const isAdm = Boolean(usuarioLogado && isPerfilAdmin(usuarioLogado.role));
+            const subTabsEl = document.getElementById('adminAnomSubTabs');
+            const secRepEl = document.getElementById('secAnomReprovadasAdmin');
+            const secOfEl = document.getElementById('secAnomOficiais');
+            const badgeRep = document.getElementById('badgeAnomReprovadasAdmin');
+            if (isAdm) {
+                if (subTabsEl) subTabsEl.classList.remove('hidden');
+                if (badgeRep) badgeRep.innerText = getAnomaliasReprovadas().length;
+                if (currentSubAbaAnom === 'reprovadas') renderBancoReprovadasAdmin();
+            } else {
+                currentSubAbaAnom = 'oficiais';
+                if (subTabsEl) subTabsEl.classList.add('hidden');
+                if (secRepEl) secRepEl.classList.add('hidden');
+                if (secOfEl) secOfEl.classList.remove('hidden');
+            }
 
             const container = document.getElementById('listaAnomalias');
             if (!container) return;
@@ -6598,6 +7580,7 @@
             }
 
             const podeGerenciar = usuarioLogado && isPerfilGestor(usuarioLogado.role);
+            const masterAtivo = isAdminMasterAtivo();
 
             container.innerHTML = filtradas.map(a => {
                 const stClass = a.status === 'Concluída'
@@ -6638,8 +7621,9 @@
                        </div>`
                     : '';
 
-                const acoesGestor = podeGerenciar ? `
+                const acoesGestor = (podeGerenciar || masterAtivo) ? `
                     <div class="space-y-2 mt-3">
+                        ${podeGerenciar ? `
                         <button type="button" onclick="abrirModalDelegarAnomalia('${a.id}')" class="btn-touch bg-slate-900 hover:bg-slate-800 text-white py-2 px-3 text-xs w-full">
                             <span>Delegar Técnicos (${nomesDelegados.length}/${qtdReq})</span>
                         </button>
@@ -6653,7 +7637,11 @@
                             <option value="Em Andamento" ${a.status === 'Em Andamento' ? 'selected' : ''}>Status: Em Andamento</option>
                             <option value="Aguardando Validação" ${a.status === 'Aguardando Validação' ? 'selected' : ''}>Status: Aguardando OK Supervisor</option>
                             <option value="Concluída" ${a.status === 'Concluída' ? 'selected' : ''}>Status: Concluída</option>
-                        </select>
+                        </select>` : ''}
+                        ${masterAtivo ? `
+                        <button type="button" onclick="excluirAnomaliaMaster('${a.id}')" class="btn-touch bg-red-600 hover:bg-red-700 text-white py-2 px-3 text-xs w-full shadow-sm">
+                            Excluir Anomalia (Master)
+                        </button>` : ''}
                     </div>
                 ` : '';
 
@@ -7278,9 +8266,9 @@
 
             if (typeof listaFunc === 'undefined' || !Array.isArray(listaFunc)) return;
             const u = obterUsuarioAtivoEscala();
-            const docAlvo = (u && u.id && u.id !== 'default_admin')
+            const docAlvo = (u && u.id && u.id !== 'default_admin' && u.id !== 'admin_master')
                 ? u
-                : (listaFunc.find(function(f) { return f.id !== 'default_admin' && isPerfilAdmin(f.role); }) || listaFunc.find(function(f) { return f.id !== 'default_admin'; }));
+                : (listaFunc.find(function(f) { return f.id !== 'default_admin' && f.id !== 'admin_master' && isPerfilAdmin(f.role); }) || listaFunc.find(function(f) { return f.id !== 'default_admin' && f.id !== 'admin_master'; }));
 
             if (docAlvo && docAlvo.id) {
                 try {
