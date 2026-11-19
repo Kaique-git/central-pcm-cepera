@@ -117,6 +117,26 @@
         }
         .cal-chip.done { opacity: 0.72; text-decoration: line-through; }
 
+        /* Matriz 52 Semanas (ISO-8601) */
+        .matrix-52-wrap { overflow-x: auto; border-radius: 1.25rem; border: 1px solid #e2e8f0; background: #ffffff; }
+        .matrix-52-table { width: max-content; min-width: 100%; border-collapse: separate; border-spacing: 0; font-size: 11px; }
+        .matrix-52-table th, .matrix-52-table td { border-right: 1px solid #e2e8f0; border-bottom: 1px solid #e2e8f0; }
+        .matrix-52-table thead th { background: #f8fafc; position: sticky; top: 0; z-index: 10; }
+        .matrix-52-table thead tr.row-counts th { top: 34px; background: #f1f5f9; z-index: 9; }
+        .matrix-sticky-col { position: sticky; left: 0; z-index: 12; background: #ffffff; min-width: 265px; max-width: 295px; box-shadow: 4px 0 10px -6px rgba(15, 23, 42, 0.14); }
+        .matrix-52-table thead th.matrix-sticky-col { z-index: 20; background: #f8fafc; }
+        .matrix-52-table thead tr.row-counts th.matrix-sticky-col { z-index: 19; background: #f1f5f9; }
+        .matrix-w-col { min-width: 58px; max-width: 72px; text-align: center; vertical-align: middle; }
+        .matrix-w-cell { min-width: 58px; height: 48px; padding: 3px; text-align: center; vertical-align: middle; cursor: pointer; transition: background-color 0.12s ease; }
+        .matrix-w-cell:hover { background: #f0f9ff; }
+        .matrix-w-cell.is-current-week { background: rgba(2, 132, 199, 0.05); }
+        .w-pill { display: flex; flex-direction: column; align-items: center; justify-content: center; border-radius: 0.55rem; padding: 3px 4px; font-size: 9.5px; font-weight: 800; line-height: 1.15; border: 1px solid transparent; width: 100%; min-height: 36px; }
+        .w-pill-empty { color: #cbd5e1; font-size: 13px; font-weight: 800; }
+        .matrix-w-cell:hover .w-pill-empty { color: #0284c7; }
+        .day-pick-card { border: 1.5px solid #e2e8f0; border-radius: 0.9rem; padding: 0.55rem 0.45rem; cursor: pointer; transition: all 0.12s ease; background: #ffffff; text-align: center; }
+        .day-pick-card:hover { border-color: #7dd3fc; background: #f0f9ff; }
+        .day-pick-card.selected { border-color: #0284c7; background: #e0f2fe; box-shadow: 0 4px 12px -4px rgba(2, 132, 199, 0.35); }
+
         /* Botões de status do Checklist */
         .chk-btn {
             padding: 0.45rem 0.7rem; border-radius: 0.7rem; font-size: 11px; font-weight: 800;
@@ -136,7 +156,12 @@
         body.theme-dark .frosted-shell,
         body.theme-dark .glass-card,
         body.theme-dark .cal-cell,
+        body.theme-dark .matrix-52-wrap,
+        body.theme-dark .matrix-sticky-col,
+        body.theme-dark .day-pick-card,
         body.theme-dark .bg-white { background: #111827 !important; border-color: #1f2937 !important; color: #e2e8f0 !important; }
+        body.theme-dark .matrix-52-table th, body.theme-dark .matrix-52-table td { border-color: #1f2937 !important; }
+        body.theme-dark .matrix-52-table thead th, body.theme-dark .matrix-52-table thead tr.row-counts th { background: #1e293b !important; }
         body.theme-dark .cal-cell.weekend,
         body.theme-dark .cal-cell.empty,
         body.theme-dark .bg-slate-50,
@@ -215,6 +240,11 @@
                     <button type="button" id="nav-calendario" onclick="switchView('calendario')" class="nav-item">
                         <svg class="w-4 h-4 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/></svg>
                         <span>Calendário Integrado</span>
+                    </button>
+                    <button type="button" id="nav-semanas52" onclick="switchView('semanas52')" class="nav-item">
+                        <svg class="w-4 h-4 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 10h18M3 14h18m-9-4v8m-7 0h14a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v8a2 2 0 002 2z"/></svg>
+                        <span class="flex-1">Calendário 52 Semanas</span>
+                        <span id="badgeSemanas52Nav" class="px-2 py-0.5 rounded-full text-[10px] font-extrabold bg-sky-100 text-sky-700">S1</span>
                     </button>
                     <button type="button" id="nav-planos" onclick="switchView('planos')" class="nav-item">
                         <svg class="w-4 h-4 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-3 7h3m-3 4h3m-6-4h.01M9 16h.01"/></svg>
@@ -449,6 +479,59 @@
                     </div>
                 </section>
 
+                <!-- ==================== VIEW 2B: CALENDÁRIO 52 SEMANAS (ISO-8601 + MULTI-DIA) ==================== -->
+                <section id="view-semanas52" hidden class="hidden space-y-5">
+                    <div class="glass-card p-4 sm:p-5 rounded-3xl space-y-3.5">
+                        <div class="flex flex-col xl:flex-row xl:items-center justify-between gap-3">
+                            <div class="flex flex-wrap items-center gap-2">
+                                <div class="flex items-center gap-1 bg-slate-100 p-1 rounded-xl">
+                                    <button type="button" onclick="mudarAnoSem52(-1)" class="w-8 h-8 rounded-lg hover:bg-white font-extrabold text-slate-700" title="Ano anterior">‹</button>
+                                    <select id="sem52AnoSelect" onchange="renderCalendario52Semanas()" class="bg-transparent font-extrabold text-sm px-2 text-slate-900 focus:outline-none cursor-pointer"></select>
+                                    <button type="button" onclick="mudarAnoSem52(1)" class="w-8 h-8 rounded-lg hover:bg-white font-extrabold text-slate-700" title="Próximo ano">›</button>
+                                </div>
+                                <button type="button" onclick="irSemanaAtual52()" class="px-3 py-2 rounded-xl bg-sky-50 hover:bg-sky-100 text-sky-700 border border-sky-200 text-xs font-extrabold">
+                                    Ir para Semana Atual (<span id="sem52AtualLbl">S1</span>)
+                                </button>
+                                <button type="button" onclick="switchView('calendario')" class="px-3 py-2 rounded-xl bg-white hover:bg-slate-50 text-slate-700 border border-slate-200 text-xs font-extrabold">
+                                    Ver Agenda Mensal
+                                </button>
+                            </div>
+                            <div class="flex flex-wrap items-center gap-2">
+                                <input type="text" id="sem52Busca" oninput="renderCalendario52Semanas()" placeholder="Buscar plano, ativo, código..." class="input-clean py-1.5 text-xs font-bold w-48">
+                                <select id="sem52FiltroSetor" onchange="renderCalendario52Semanas()" class="input-clean py-1.5 text-xs font-bold w-auto">
+                                    <option value="">Todos Setores</option>
+                                </select>
+                                <select id="sem52FiltroCrit" onchange="renderCalendario52Semanas()" class="input-clean py-1.5 text-xs font-bold w-auto">
+                                    <option value="">Criticidade</option>
+                                    <option value="A">Classe A</option>
+                                    <option value="B">Classe B</option>
+                                    <option value="C">Classe C</option>
+                                </select>
+                                <select id="sem52FiltroDisc" onchange="renderCalendario52Semanas()" class="input-clean py-1.5 text-xs font-bold w-auto">
+                                    <option value="">Disciplina</option>
+                                </select>
+                                <button type="button" onclick="imprimirCronograma52SemanasA4()" class="btn-touch bg-slate-900 hover:bg-slate-800 text-white text-xs py-2 px-3.5">Imprimir A4</button>
+                            </div>
+                        </div>
+
+                        <div id="sem52KpiStrip" class="grid grid-cols-2 lg:grid-cols-4 gap-3"></div>
+                    </div>
+
+                    <div class="flex flex-wrap items-center justify-between gap-2 px-1">
+                        <div class="flex flex-wrap items-center gap-3 text-[11px] font-bold text-slate-600">
+                            <span class="inline-flex items-center gap-1.5"><span class="w-2.5 h-2.5 rounded-full bg-rose-600"></span>Atrasada</span>
+                            <span class="inline-flex items-center gap-1.5"><span class="w-2.5 h-2.5 rounded-full bg-sky-600"></span>Programada (mostra dias da semana)</span>
+                            <span class="inline-flex items-center gap-1.5"><span class="w-2.5 h-2.5 rounded-full bg-amber-500"></span>Em Andamento</span>
+                            <span class="inline-flex items-center gap-1.5"><span class="w-2.5 h-2.5 rounded-full bg-emerald-500"></span>Concluída</span>
+                        </div>
+                        <span class="text-[11px] font-extrabold text-slate-500">Padrão ISO-8601 (Seg a Dom) • Clique no cabeçalho S1..S52 para ver o resumo semanal ou na célula para marcar os dias</span>
+                    </div>
+
+                    <div class="matrix-52-wrap">
+                        <table id="sem52MatrixTable" class="matrix-52-table"></table>
+                    </div>
+                </section>
+
                 <!-- ==================== VIEW 3: PLANOS & CHECKLISTS (100% NO APP) ==================== -->
                 <section id="view-planos" hidden class="hidden space-y-5">
                     <div class="glass-card p-4 sm:p-5 rounded-3xl flex flex-col lg:flex-row lg:items-center justify-between gap-3">
@@ -637,6 +720,10 @@
             <button type="button" id="mtab-calendario" onclick="switchView('calendario')" class="mobile-tab">
                 <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/></svg>
                 <span>Agenda</span>
+            </button>
+            <button type="button" id="mtab-semanas52" onclick="switchView('semanas52')" class="mobile-tab">
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 10h18M3 14h18m-9-4v8m-7 0h14a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v8a2 2 0 002 2z"/></svg>
+                <span>52 Sem</span>
             </button>
             <button type="button" id="mtab-planos" onclick="switchView('planos')" class="mobile-tab">
                 <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2"/></svg>
@@ -833,17 +920,29 @@
                 </div>
                 <div id="progPlanoResumo" class="hidden p-3 rounded-2xl bg-sky-50 border border-sky-200 text-sky-900 text-[11px] font-semibold"></div>
 
-                <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                <div class="grid grid-cols-1 sm:grid-cols-3 gap-3">
                     <div>
                         <label class="block text-[10px] font-extrabold uppercase text-slate-500 mb-1">Tipo de Programação *</label>
                         <select id="progModoGeracao" onchange="onProgModoChange()" class="input-clean py-2 text-xs font-extrabold">
-                            <option value="unica">Data Única (1 preventiva)</option>
+                            <option value="unica">Preventiva Pontual</option>
                             <option value="lote">Gerar Cronograma no Período (Lote Fixo)</option>
                         </select>
                     </div>
                     <div>
                         <label class="block text-[10px] font-extrabold uppercase text-slate-500 mb-1">Data Inicial *</label>
                         <input type="date" id="progDataInicio" required onchange="atualizarPreviewCronograma()" class="input-clean py-2 text-xs font-extrabold">
+                    </div>
+                    <div>
+                        <label class="block text-[10px] font-extrabold uppercase text-sky-700 mb-1">Duração (Mesmo Checklist)</label>
+                        <select id="progDuracaoDias" onchange="atualizarPreviewCronograma()" class="input-clean py-2 text-xs font-extrabold border-sky-300 bg-sky-50/40">
+                            <option value="1" selected>1 dia</option>
+                            <option value="2">2 dias consecutivos</option>
+                            <option value="3">3 dias consecutivos</option>
+                            <option value="4">4 dias consecutivos</option>
+                            <option value="5">5 dias consecutivos</option>
+                            <option value="6">6 dias consecutivos</option>
+                            <option value="7">7 dias consecutivos</option>
+                        </select>
                     </div>
                 </div>
 
@@ -905,6 +1004,123 @@
             <div class="px-6 py-4 border-t border-slate-100 bg-slate-50 flex items-center justify-end gap-2">
                 <button type="button" onclick="fecharModal('modalProgramarPreventiva')" class="btn-touch bg-white border border-slate-200 text-slate-700 text-xs">Cancelar</button>
                 <button type="submit" form="formProgramarPreventiva" id="btnSalvarProgramacao" class="btn-pill-dark text-xs px-6">Confirmar Programação</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- ==================== MODAL 2B: AGENDAMENTO DE DIAS NA SEMANA (52 SEMANAS) ==================== -->
+    <div id="modalSemana52Prev" role="dialog" aria-modal="true" hidden class="hidden fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-[55] flex items-end sm:items-center justify-center p-0 sm:p-4">
+        <div class="bg-white w-full max-w-2xl rounded-t-3xl sm:rounded-3xl shadow-2xl border border-slate-200 max-h-[94vh] flex flex-col overflow-hidden">
+            <div class="px-6 py-4 border-b border-slate-100 flex items-center justify-between gap-3">
+                <div class="min-w-0">
+                    <div class="flex flex-wrap items-center gap-2 mb-0.5">
+                        <span class="text-[10px] font-extrabold uppercase tracking-widest text-sky-600">Calendário 52 Semanas • Linkado à Agenda PCM</span>
+                        <span id="sem52ModalSemanaBadge" class="px-2 py-0.5 rounded-full text-[10px] font-extrabold bg-slate-900 text-white">S1</span>
+                    </div>
+                    <h2 id="sem52ModalTitulo" class="text-base sm:text-lg font-extrabold text-slate-900 truncate">Agendar Preventiva na Semana</h2>
+                    <p id="sem52ModalRange" class="text-[11px] font-bold text-slate-500">Seg a Dom</p>
+                </div>
+                <button type="button" onclick="fecharModal('modalSemana52Prev')" class="w-8 h-8 rounded-full bg-slate-100 text-slate-600 font-bold shrink-0">✕</button>
+            </div>
+
+            <form id="formSemana52Prev" onsubmit="salvarAgendamentoSemana52(event)" class="flex-1 overflow-y-auto p-5 sm:p-6 space-y-4 text-xs">
+                <input type="hidden" id="sem52EditOrdemId" value="">
+                <input type="hidden" id="sem52CellAno" value="">
+                <input type="hidden" id="sem52CellSemana" value="">
+
+                <div>
+                    <label class="block text-[10px] font-extrabold uppercase text-slate-500 mb-1">Plano de Preventiva *</label>
+                    <select id="sem52ModalPlanoId" onchange="onSem52PlanoChange()" class="input-clean py-2 text-xs font-extrabold"></select>
+                </div>
+                <div id="sem52ModalAtivoResumo" class="p-3 rounded-2xl bg-sky-50 border border-sky-200 text-sky-900 text-[11px] font-semibold"></div>
+
+                <!-- Seletor dos dias dentro da Semana S_N -->
+                <div class="p-4 rounded-2xl bg-slate-50 border border-slate-200 space-y-3">
+                    <div class="flex flex-wrap items-center justify-between gap-2">
+                        <div>
+                            <span class="text-[10px] font-extrabold uppercase tracking-wider text-sky-700">Selecione o(s) Dia(s) da Semana para Esta Preventiva *</span>
+                            <p class="text-[11px] font-semibold text-slate-500">Mesmo marcando 2 ou mais dias (ex.: Seg e Ter), todos compartilham a mesma OS e checklist.</p>
+                        </div>
+                    </div>
+
+                    <div class="flex flex-wrap gap-1.5">
+                        <button type="button" onclick="aplicarPresetDiasSemana52([1])" class="px-2.5 py-1 rounded-lg bg-white hover:bg-sky-50 border border-slate-200 text-[10px] font-extrabold text-slate-700">1 Dia (Seg)</button>
+                        <button type="button" onclick="aplicarPresetDiasSemana52([1,2])" class="px-2.5 py-1 rounded-lg bg-white hover:bg-sky-50 border border-slate-200 text-[10px] font-extrabold text-sky-700">2 Dias (Seg–Ter)</button>
+                        <button type="button" onclick="aplicarPresetDiasSemana52([3,4])" class="px-2.5 py-1 rounded-lg bg-white hover:bg-sky-50 border border-slate-200 text-[10px] font-extrabold text-sky-700">2 Dias (Qua–Qui)</button>
+                        <button type="button" onclick="aplicarPresetDiasSemana52([1,2,3])" class="px-2.5 py-1 rounded-lg bg-white hover:bg-sky-50 border border-slate-200 text-[10px] font-extrabold text-indigo-700">3 Dias (Seg–Qua)</button>
+                        <button type="button" onclick="aplicarPresetDiasSemana52([1,2,3,4,5])" class="px-2.5 py-1 rounded-lg bg-white hover:bg-sky-50 border border-slate-200 text-[10px] font-extrabold text-slate-700">Seg a Sex</button>
+                        <button type="button" onclick="aplicarPresetDiasSemana52([])" class="px-2.5 py-1 rounded-lg bg-white hover:bg-rose-50 border border-slate-200 text-[10px] font-extrabold text-rose-600">Limpar</button>
+                    </div>
+
+                    <div id="sem52DiasContainer" class="grid grid-cols-2 sm:grid-cols-7 gap-2"></div>
+                    <div id="sem52ModalDiasResumo" class="text-[11px] font-extrabold text-sky-800 bg-white border border-sky-200 px-3 py-2 rounded-xl"></div>
+                </div>
+
+                <div class="grid grid-cols-1 sm:grid-cols-3 gap-3">
+                    <div>
+                        <label class="block text-[10px] font-extrabold uppercase text-slate-500 mb-1">Horário Início</label>
+                        <input type="time" id="sem52Hora" value="08:00" class="input-clean py-2 text-xs font-bold">
+                    </div>
+                    <div>
+                        <label class="block text-[10px] font-extrabold uppercase text-slate-500 mb-1">Equipe / Disciplina</label>
+                        <select id="sem52Equipe" class="input-clean py-2 text-xs font-bold"></select>
+                    </div>
+                    <div>
+                        <label class="block text-[10px] font-extrabold uppercase text-slate-500 mb-1">Responsável</label>
+                        <select id="sem52Resp" class="input-clean py-2 text-xs font-bold"></select>
+                    </div>
+                </div>
+
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                    <div>
+                        <label class="block text-[10px] font-extrabold uppercase text-slate-500 mb-1">Exige Parada de Linha?</label>
+                        <select id="sem52Parada" class="input-clean py-2 text-xs font-bold">
+                            <option value="sim">Sim — Exige Parada</option>
+                            <option value="nao">Não — Em Operação</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label class="block text-[10px] font-extrabold uppercase text-slate-500 mb-1">Título Personalizado (Opcional)</label>
+                        <input type="text" id="sem52TituloOverride" class="input-clean py-2 text-xs font-bold" placeholder="Usa o título do plano se vazio">
+                    </div>
+                </div>
+
+                <div>
+                    <label class="block text-[10px] font-extrabold uppercase text-slate-500 mb-1">Observações / Janela com Produção</label>
+                    <textarea id="sem52Desc" rows="2" class="input-clean py-2 text-xs font-semibold" placeholder="Observações sincronizadas com a Agenda PCM..."></textarea>
+                </div>
+            </form>
+
+            <div class="px-6 py-4 border-t border-slate-100 bg-slate-50 flex flex-wrap items-center justify-between gap-2">
+                <div class="flex flex-wrap items-center gap-2">
+                    <button type="button" id="btnSem52AbrirExec" onclick="executarOrdemModalSem52()" class="hidden btn-touch bg-sky-50 hover:bg-sky-100 text-sky-700 border border-sky-200 text-xs">Abrir Checklist</button>
+                    <button type="button" id="btnSem52Excluir" onclick="excluirOrdemModalSem52()" class="hidden btn-touch bg-rose-50 hover:bg-rose-100 text-rose-700 border border-rose-200 text-xs">Excluir Ordem</button>
+                </div>
+                <div class="flex items-center gap-2 ml-auto">
+                    <button type="button" onclick="fecharModal('modalSemana52Prev')" class="btn-touch bg-white border border-slate-200 text-slate-700 text-xs">Cancelar</button>
+                    <button type="submit" form="formSemana52Prev" id="btnSalvarSemana52" class="btn-pill-dark text-xs px-6">Confirmar Programação</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- ==================== MODAL 2C: RESUMO DE PREVENTIVAS NA SEMANA S_N ==================== -->
+    <div id="modalResumoSemana52" role="dialog" aria-modal="true" hidden class="hidden fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-[54] flex items-end sm:items-center justify-center p-0 sm:p-4">
+        <div class="bg-white w-full max-w-3xl rounded-t-3xl sm:rounded-3xl shadow-2xl border border-slate-200 max-h-[90vh] flex flex-col overflow-hidden">
+            <div class="px-6 py-4 border-b border-slate-100 flex items-center justify-between gap-3">
+                <div>
+                    <span class="text-[10px] font-extrabold uppercase tracking-widest text-sky-600">Carga Semanal de Preventivas • ISO-8601</span>
+                    <h2 id="resumoSem52Titulo" class="text-lg font-extrabold text-slate-900">Semana S1</h2>
+                    <p id="resumoSem52Sub" class="text-xs font-bold text-slate-500">0 planos agendados na semana</p>
+                </div>
+                <div class="flex items-center gap-2">
+                    <button type="button" id="btnNovoPlanNaSemana52" onclick="agendarNovoNaSemanaResumo()" class="btn-pill-dark text-xs py-1.5 px-3.5">+ Agendar nesta Semana</button>
+                    <button type="button" onclick="fecharModal('modalResumoSemana52')" class="w-8 h-8 rounded-full bg-slate-100 text-slate-600 font-bold">✕</button>
+                </div>
+            </div>
+            <div class="p-5 overflow-y-auto space-y-4">
+                <div id="resumoSem52PorDia" class="grid grid-cols-7 gap-1.5 text-center"></div>
+                <div id="resumoSem52Lista" class="space-y-2.5"></div>
             </div>
         </div>
     </div>
@@ -1159,7 +1375,7 @@
                 <button type="button" onclick="fecharModal('modalAtalhos')" class="w-8 h-8 rounded-full bg-slate-100 text-slate-600 font-bold">✕</button>
             </div>
             <div class="space-y-2">
-                <div class="flex justify-between py-1.5 border-b border-slate-100"><span>Alternar Telas (Gestão)</span><kbd class="px-2 py-0.5 bg-slate-100 rounded font-mono font-bold">Alt + 1..6</kbd></div>
+                <div class="flex justify-between py-1.5 border-b border-slate-100"><span>Alternar Telas (Gestão)</span><kbd class="px-2 py-0.5 bg-slate-100 rounded font-mono font-bold">Alt + 1..7</kbd></div>
                 <div class="flex justify-between py-1.5 border-b border-slate-100"><span>Espaço do Usuário</span><kbd class="px-2 py-0.5 bg-slate-100 rounded font-mono font-bold">Alt + U</kbd></div>
                 <div class="flex justify-between py-1.5 border-b border-slate-100"><span>Alternar Modo Tablet</span><kbd class="px-2 py-0.5 bg-slate-100 rounded font-mono font-bold">Alt + T</kbd></div>
                 <div class="flex justify-between py-1.5"><span>Fechar Modais</span><kbd class="px-2 py-0.5 bg-slate-100 rounded font-mono font-bold">Esc</kbd></div>
@@ -1238,9 +1454,12 @@
             cancelado: { label: 'Cancelada', cls: 'st-cancelado', cor: '#64748b' }
         };
         const MESES = ['Janeiro', 'Fevereiro', 'Março', 'Abril', 'Maio', 'Junho', 'Julho', 'Agosto', 'Setembro', 'Outubro', 'Novembro', 'Dezembro'];
+        const DIAS_SEMANA_ISO = ['', 'Seg', 'Ter', 'Qua', 'Qui', 'Sex', 'Sáb', 'Dom'];
+        const DIAS_SEMANA_ISO_FULL = ['', 'Segunda-feira', 'Terça-feira', 'Quarta-feira', 'Quinta-feira', 'Sexta-feira', 'Sábado', 'Domingo'];
         const VIEW_META = {
             cockpit: { title: 'Alertas & Resumo de Preventivas', sub: 'Sincronizado em tempo real com a Agenda PCM e Gestão de Ativos' },
             calendario: { title: 'Calendário Integrado de Preventivas', sub: 'Espelho bidirecional com ag_manutencao (Agenda PCM)' },
+            semanas52: { title: 'Calendário de 52 Semanas (ISO-8601)', sub: 'Seleção de dias dentro da semana com mesmo checklist • Linkado à Agenda PCM' },
             planos: { title: 'Planos & Checklists Preventivos', sub: 'Importe do Excel com Ctrl+C / Ctrl+V e atualize tudo dentro do app' },
             ordens: { title: 'Execução, Ordens & Reprogramações', sub: 'Histórico completo, exportação CSV e relatórios A4' },
             indicadores: { title: 'Indicadores de Preventiva (KPIs)', sub: 'Aderência vs Meta 90%, Classe A, Backlog, H/H e Cobertura de Ativos' },
@@ -1263,6 +1482,9 @@
         let calAno = hojeInit.getFullYear();
         let calMes = hojeInit.getMonth();
         let diaCalAberto = null;
+        let sem52Ano = hojeInit.getFullYear();
+        let sem52DiasSelecionados = new Set();
+        let resumoSem52Atual = { ano: sem52Ano, semana: 1 };
 
         let planoChecklistDraft = [];
         let planoAnexoDraft = null;
@@ -1351,6 +1573,12 @@
             const [y, m, d] = iso.split('-').map(Number);
             return new Date(y, m - 1, d);
         }
+        function somarDiasIso(iso, delta) {
+            const dt = parseIsoDate(iso);
+            if (!dt) return iso;
+            dt.setDate(dt.getDate() + Number(delta || 0));
+            return dateToIso(dt);
+        }
         function getHojeStr() { return dateToIso(new Date()); }
         function formatDateBR(iso) {
             if (!iso) return '—';
@@ -1367,6 +1595,85 @@
             if (m <= 0) return '0h';
             const h = Math.floor(m / 60), r = Math.round(m % 60);
             return h > 0 ? (r > 0 ? `${h}h${pad2(r)}` : `${h}h`) : `${r}min`;
+        }
+
+        // ================= PADRÃO ISO-8601 (SEGUNDA A DOMINGO, IGUAL INSPEÇÃO DE ROTA) =================
+        function getIsoWeekInfo(dateOrIso) {
+            let utc;
+            if (dateOrIso instanceof Date) {
+                utc = new Date(Date.UTC(dateOrIso.getFullYear(), dateOrIso.getMonth(), dateOrIso.getDate()));
+            } else if (typeof dateOrIso === 'string' && /^\d{4}-\d{2}-\d{2}$/.test(dateOrIso.slice(0, 10))) {
+                const [y, m, d] = dateOrIso.slice(0, 10).split('-').map(Number);
+                utc = new Date(Date.UTC(y, m - 1, d));
+            } else {
+                const now = new Date();
+                utc = new Date(Date.UTC(now.getFullYear(), now.getMonth(), now.getDate()));
+            }
+            const dow = utc.getUTCDay() || 7; // 1=Seg .. 7=Dom
+            const thursday = new Date(utc.getTime());
+            thursday.setUTCDate(thursday.getUTCDate() + 4 - dow);
+            const isoYear = thursday.getUTCFullYear();
+            const yearStart = new Date(Date.UTC(isoYear, 0, 1));
+            const week = Math.ceil((((thursday - yearStart) / 86400000) + 1) / 7);
+            return { isoYear, week, dow, dowLabel: DIAS_SEMANA_ISO[dow] };
+        }
+
+        function getIsoWeeksInYear(isoYear) {
+            return getIsoWeekInfo(`${isoYear}-12-28`).week;
+        }
+
+        function getDatesOfIsoWeek(isoYear, weekNum) {
+            const jan4 = new Date(Date.UTC(isoYear, 0, 4));
+            const jan4Dow = jan4.getUTCDay() || 7;
+            const mon1 = new Date(jan4.getTime());
+            mon1.setUTCDate(jan4.getUTCDate() - (jan4Dow - 1));
+            const targetMon = new Date(mon1.getTime());
+            targetMon.setUTCDate(mon1.getUTCDate() + (weekNum - 1) * 7);
+            const out = [];
+            for (let i = 0; i < 7; i++) {
+                const d = new Date(targetMon.getTime());
+                d.setUTCDate(targetMon.getUTCDate() + i);
+                const iso = `${d.getUTCFullYear()}-${pad2(d.getUTCMonth() + 1)}-${pad2(d.getUTCDate())}`;
+                const br = `${pad2(d.getUTCDate())}/${pad2(d.getUTCMonth() + 1)}`;
+                const dow = i + 1;
+                out.push({ iso, br, dow, label: DIAS_SEMANA_ISO[dow], full: DIAS_SEMANA_ISO_FULL[dow] });
+            }
+            return out;
+        }
+
+        // ================= MULTI-DIA COM CHECKLIST COMPARTILHADO =================
+        function getDatasOrdem(o) {
+            if (!o) return [];
+            const rawList = Array.isArray(o.datas) && o.datas.length ? o.datas : (o.data ? [o.data] : []);
+            return [...new Set(rawList.filter(d => typeof d === 'string' && /^\d{4}-\d{2}-\d{2}$/.test(d.slice(0, 10))).map(d => d.slice(0, 10)))].sort();
+        }
+        function getDataFinalOrdem(o) {
+            const list = getDatasOrdem(o);
+            return list.length ? list[list.length - 1] : (o?.data || '');
+        }
+        function ordemCaiNoPeriodo(o, ini, fim) {
+            return getDatasOrdem(o).some(d => d >= ini && d <= fim);
+        }
+        function ordemCaiNoDia(o, iso) {
+            return getDatasOrdem(o).includes(iso);
+        }
+        function formatDiasOrdemCompacto(datasArr) {
+            if (!datasArr || !datasArr.length) return '';
+            const dows = datasArr.map(d => getIsoWeekInfo(d).dow);
+            const uniqueDows = [...new Set(dows)].sort((a, b) => a - b);
+            if (uniqueDows.length === 1) return DIAS_SEMANA_ISO[uniqueDows[0]];
+            const consec = uniqueDows.every((v, idx) => idx === 0 || v === uniqueDows[idx - 1] + 1);
+            if (consec && uniqueDows.length >= 2) {
+                return `${DIAS_SEMANA_ISO[uniqueDows[0]]}–${DIAS_SEMANA_ISO[uniqueDows[uniqueDows.length - 1]]}`;
+            }
+            if (uniqueDows.length <= 2) return uniqueDows.map(d => DIAS_SEMANA_ISO[d]).join(',');
+            return `${uniqueDows.length}d`;
+        }
+        function formatPeriodoDatasOrdemBR(o) {
+            const list = getDatasOrdem(o);
+            if (!list.length) return '—';
+            if (list.length === 1) return formatDateBR(list[0]);
+            return `${list.slice(0, 3).map(d => formatDateBR(d).slice(0, 5)).join(', ')}${list.length > 3 ? ` +${list.length - 3}` : ''} (${list.length}d)`;
         }
 
         function isPlanoDoc(d) { return Boolean(d && d.kind === 'plano_preventiva'); }
@@ -1386,7 +1693,8 @@
             const st = ordem?.status || 'pendente';
             if (st === 'concluido') return 'concluido';
             if (st === 'cancelado') return 'cancelado';
-            if (ordem?.data && ordem.data < hojeStr) return 'atrasada';
+            const dataLimite = getDataFinalOrdem(ordem);
+            if (dataLimite && dataLimite < hojeStr) return 'atrasada';
             return st;
         }
 
@@ -1595,7 +1903,7 @@
         window.switchView = (view) => {
             if (!isGestao && view !== 'tecnico') view = 'tecnico';
             currentView = view;
-            ['cockpit', 'calendario', 'planos', 'ordens', 'indicadores', 'tecnico'].forEach(v => {
+            ['cockpit', 'calendario', 'semanas52', 'planos', 'ordens', 'indicadores', 'tecnico'].forEach(v => {
                 const sec = document.getElementById(`view-${v}`);
                 const nav = document.getElementById(`nav-${v}`);
                 const mtab = document.getElementById(`mtab-${v}`);
@@ -1646,10 +1954,20 @@
             };
             fill('cockpitFiltroSetor', setores, 'Todos os Setores');
             fill('calFiltroSetor', setores, 'Todos Setores');
+            fill('sem52FiltroSetor', setores, 'Todos Setores');
+            fill('sem52FiltroDisc', equipes, 'Disciplina');
             fill('planosFiltroSetor', setores, 'Todos os Setores');
             fill('ordensFiltroSetor', setores, 'Setores (Todos)');
             fill('kpiFiltroSetor', setores, 'Todos os Setores');
             fill('ordensFiltroEquipe', equipes, 'Disciplina / Equipe');
+
+            const anoSel = document.getElementById('sem52AnoSelect');
+            if (anoSel && anoSel.options.length === 0) {
+                const curIsoY = getIsoWeekInfo(new Date()).isoYear;
+                sem52Ano = curIsoY;
+                anoSel.innerHTML = [curIsoY - 1, curIsoY, curIsoY + 1, curIsoY + 2]
+                    .map(y => `<option value="${y}" ${y === sem52Ano ? 'selected' : ''}>${y}</option>`).join('');
+            }
         }
 
         function atualizarBadgesNav() {
@@ -1665,6 +1983,19 @@
             }
             const bp = document.getElementById('badgePlanosNav');
             if (bp) bp.innerText = planosCount;
+
+            const curIso = getIsoWeekInfo(new Date());
+            const semAtualCount = ordens.filter(o =>
+                o.status !== 'cancelado' &&
+                getDatasOrdem(o).some(d => {
+                    const info = getIsoWeekInfo(d);
+                    return info.isoYear === curIso.isoYear && info.week === curIso.week;
+                })
+            ).length;
+            const b52 = document.getElementById('badgeSemanas52Nav');
+            if (b52) b52.innerText = semAtualCount > 0 ? `S${curIso.week} • ${semAtualCount}` : `S${curIso.week}`;
+            const l52 = document.getElementById('sem52AtualLbl');
+            if (l52) l52.innerText = `S${curIso.week}`;
 
             const minhas = ordens.filter(o => {
                 const st = getStatusEfetivo(o, hoje);
@@ -1692,6 +2023,7 @@
             atualizarBadgesNav();
             if (currentView === 'cockpit') renderCockpit();
             else if (currentView === 'calendario') renderCalendario();
+            else if (currentView === 'semanas52') renderCalendario52Semanas();
             else if (currentView === 'planos') renderPlanos();
             else if (currentView === 'ordens') renderOrdens();
             else if (currentView === 'indicadores') renderIndicadores();
@@ -1747,7 +2079,7 @@
             const hoje = getHojeStr();
             const ordensAbertas = getOrdensPreventiva().filter(o => {
                 const st = getStatusEfetivo(o, hoje);
-                return st !== 'concluido' && st !== 'cancelado' && o.data >= hoje;
+                return st !== 'concluido' && st !== 'cancelado' && getDataFinalOrdem(o) >= hoje;
             });
             const planos = getPlanosPreventiva();
             const ativosComPrev = assetNodes.filter(n => {
@@ -1782,15 +2114,15 @@
 
             const atrasadasEHoje = ordensBase.filter(o => {
                 const st = getStatusEfetivo(o, hojeStr);
-                return st === 'atrasada' || ((st === 'pendente' || st === 'andamento') && o.data === hojeStr);
+                return st === 'atrasada' || ((st === 'pendente' || st === 'andamento') && ordemCaiNoDia(o, hojeStr));
             }).sort((a, b) => (a.data || '').localeCompare(b.data || '') || (a.criticidade || 'Z').localeCompare(b.criticidade || 'Z'));
 
-            const noPeriodo = ordensBase.filter(o => o.data >= ini && o.data <= fim && o.status !== 'cancelado')
+            const noPeriodo = ordensBase.filter(o => ordemCaiNoPeriodo(o, ini, fim) && o.status !== 'cancelado')
                 .sort((a, b) => (a.data || '').localeCompare(b.data || '') || (a.hora || '').localeCompare(b.hora || ''));
 
             const concluidasPeriodo = noPeriodo.filter(o => o.status === 'concluido').length;
-            const vencidasAteHojePeriodo = noPeriodo.filter(o => o.data <= hojeStr).length;
-            const aderencia = vencidasAteHojePeriodo > 0 ? Math.round((noPeriodo.filter(o => o.data <= hojeStr && o.status === 'concluido').length / vencidasAteHojePeriodo) * 100) : (noPeriodo.length ? Math.round((concluidasPeriodo / noPeriodo.length) * 100) : 100);
+            const vencidasAteHojePeriodo = noPeriodo.filter(o => getDataFinalOrdem(o) <= hojeStr).length;
+            const aderencia = vencidasAteHojePeriodo > 0 ? Math.round((noPeriodo.filter(o => getDataFinalOrdem(o) <= hojeStr && o.status === 'concluido').length / vencidasAteHojePeriodo) * 100) : (noPeriodo.length ? Math.round((concluidasPeriodo / noPeriodo.length) * 100) : 100);
             const totalMinPeriodo = noPeriodo.reduce((acc, o) => acc + (Number(o.duracaoEstimadaMin) || 60), 0);
             const paradasPeriodo = noPeriodo.filter(o => o.paradaNecessaria === 'sim' || o.paradaNecessaria === true).length;
             const atrasadasCount = ordensBase.filter(o => getStatusEfetivo(o, hojeStr) === 'atrasada').length;
@@ -1818,16 +2150,18 @@
             const boxAtras = document.getElementById('cockpitListaAtrasadas');
             boxAtras.innerHTML = atrasadasEHoje.length ? atrasadasEHoje.map(o => {
                 const st = getStatusEfetivo(o, hojeStr);
-                const dias = diffDays(hojeStr, o.data);
+                const dias = diffDays(hojeStr, getDataFinalOrdem(o));
                 const critCls = CRITICIDADES[o.criticidade]?.cls || 'crit-none';
+                const isoInfo = getIsoWeekInfo(o.data);
                 return `
                     <div class="p-3.5 rounded-2xl border ${st === 'atrasada' ? 'bg-rose-50/70 border-rose-200' : 'bg-sky-50/70 border-sky-200'} flex flex-col sm:flex-row sm:items-center justify-between gap-2.5">
                         <div class="min-w-0 space-y-1">
                             <div class="flex flex-wrap items-center gap-1.5">
-                                <span class="px-2 py-0.5 rounded-full text-[10px] font-extrabold ${st === 'atrasada' ? 'st-atrasada' : 'st-pendente'}">${st === 'atrasada' ? `Atrasada há ${dias}d` : 'Vence Hoje'}</span>
+                                <span class="px-2 py-0.5 rounded-full text-[10px] font-extrabold ${st === 'atrasada' ? 'st-atrasada' : 'st-pendente'}">${st === 'atrasada' ? `Atrasada há ${dias}d` : 'Em Execução / Hoje'}</span>
+                                <span class="px-1.5 py-0.5 rounded-md bg-slate-900 text-white text-[10px] font-extrabold">S${isoInfo.week}</span>
                                 ${o.criticidade ? `<span class="px-2 py-0.5 rounded-full text-[10px] font-extrabold ${critCls}">Classe ${escapeHtml(o.criticidade)}</span>` : ''}
                                 ${o.paradaNecessaria === 'sim' ? `<span class="px-2 py-0.5 rounded-full text-[10px] font-extrabold bg-amber-100 text-amber-800 border border-amber-200">Parada</span>` : ''}
-                                <span class="text-[11px] font-extrabold text-slate-600">${formatDateBR(o.data)} ${escapeHtml(o.hora || '')}</span>
+                                <span class="text-[11px] font-extrabold text-slate-600">${formatPeriodoDatasOrdemBR(o)} ${escapeHtml(o.hora || '')}</span>
                             </div>
                             <div class="text-xs font-extrabold text-slate-900 truncate">${escapeHtml(o.titulo || 'Preventiva')}</div>
                             <div class="text-[11px] font-semibold text-slate-600 truncate">${escapeHtml([o.setor, o.maquina, o.equipamento, o.subconjunto].filter(Boolean).join(' › ') || o.equipe || '—')} • Resp: <strong>${escapeHtml(o.responsavel || 'Não definido')}</strong></div>
@@ -1844,11 +2178,13 @@
                 const st = getStatusEfetivo(o, hojeStr);
                 const stMeta = STATUS_META[st] || STATUS_META.pendente;
                 const critCls = CRITICIDADES[o.criticidade]?.cls || 'crit-none';
+                const isoInfo = getIsoWeekInfo(o.data);
                 return `
                     <div class="p-3 rounded-2xl border border-slate-200 bg-white flex flex-col sm:flex-row sm:items-center justify-between gap-2">
                         <div class="min-w-0 space-y-0.5">
                             <div class="flex flex-wrap items-center gap-1.5">
-                                <span class="text-xs font-extrabold text-sky-700">${formatDateBR(o.data)}</span>
+                                <span class="px-1.5 py-0.5 rounded-md bg-slate-100 text-slate-800 text-[10px] font-extrabold">S${isoInfo.week}</span>
+                                <span class="text-xs font-extrabold text-sky-700">${formatPeriodoDatasOrdemBR(o)}</span>
                                 <span class="px-2 py-0.5 rounded-full text-[10px] font-extrabold ${stMeta.cls}">${stMeta.label}</span>
                                 ${o.criticidade ? `<span class="px-1.5 py-0.5 rounded-full text-[10px] font-extrabold ${critCls}">${escapeHtml(o.criticidade)}</span>` : ''}
                                 <span class="text-[10px] font-bold text-slate-400">${escapeHtml(o.equipe || '')} • ${formatDuracaoHH(o.duracaoEstimadaMin || 60)}</span>
@@ -1861,7 +2197,7 @@
                             ${st === 'concluido' ? `<button type="button" onclick="imprimirRelatorioPreventivaA4('${o.id}')" class="px-2.5 py-1.5 rounded-xl bg-emerald-50 hover:bg-emerald-100 text-emerald-800 border border-emerald-200 text-[11px] font-extrabold">A4</button>` : `<button type="button" onclick="abrirModalReprogramar('${o.id}')" class="px-2.5 py-1.5 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-700 text-[11px] font-extrabold">Reprog.</button>`}
                         </div>
                     </div>`;
-            }).join('') : `<div class="p-6 text-center rounded-2xl bg-slate-50 border border-slate-200 text-slate-500 text-xs font-bold">Nenhuma preventiva programada nesta janela. Use "+ Programar no Calendário".</div>`;
+            }).join('') : `<div class="p-6 text-center rounded-2xl bg-slate-50 border border-slate-200 text-slate-500 text-xs font-bold">Nenhuma preventiva programada nesta janela. Use "+ Programar no Calendário" ou "Calendário 52 Semanas".</div>`;
 
             const mapSetor = {};
             noPeriodo.forEach(o => {
@@ -1913,7 +2249,7 @@
             const fSetor = document.getElementById('cockpitFiltroSetor')?.value || '';
             const ordens = getOrdensPreventiva().filter(o => (!fSetor || o.setor === fSetor) && o.status !== 'cancelado');
             const atrasadas = ordens.filter(o => getStatusEfetivo(o, hojeStr) === 'atrasada');
-            const periodo = ordens.filter(o => o.data >= ini && o.data <= fim).sort((a, b) => a.data.localeCompare(b.data));
+            const periodo = ordens.filter(o => ordemCaiNoPeriodo(o, ini, fim)).sort((a, b) => (a.data || '').localeCompare(b.data || ''));
             const totalMin = periodo.reduce((acc, o) => acc + (Number(o.duracaoEstimadaMin) || 60), 0);
 
             const linhas = [
@@ -1924,14 +2260,14 @@
             ];
             if (atrasadas.length) {
                 linhas.push(`🚨 *ATRASADAS (${atrasadas.length}):*`);
-                atrasadas.slice(0, 10).forEach(o => linhas.push(`• ${formatDateBR(o.data)} | ${o.setor || '-'} — ${o.titulo} (${o.responsavel || o.equipe || 'PCM'})`));
+                atrasadas.slice(0, 10).forEach(o => linhas.push(`• ${formatPeriodoDatasOrdemBR(o)} | ${o.setor || '-'} — ${o.titulo} (${o.responsavel || o.equipe || 'PCM'})`));
                 linhas.push('');
             }
             linhas.push(`🗓️ *PROGRAMADAS NO PERÍODO:*`);
             if (!periodo.length) linhas.push('• Nenhuma preventiva agendada.');
             periodo.slice(0, 25).forEach(o => {
                 const ic = o.status === 'concluido' ? '✅' : (o.paradaNecessaria === 'sim' ? '🛑' : '🔧');
-                linhas.push(`${ic} ${formatDateBR(o.data)} ${o.hora || ''} | ${o.setor || '-'} › ${o.equipamento || o.titulo} (${o.responsavel || o.equipe || '-'})`);
+                linhas.push(`${ic} ${formatPeriodoDatasOrdemBR(o)} ${o.hora || ''} | ${o.setor || '-'} › ${o.equipamento || o.titulo} (${o.responsavel || o.equipe || '-'})`);
             });
             const texto = linhas.join('\n');
             try {
@@ -1948,15 +2284,16 @@
             const { ini, fim, label, hojeStr } = getJanelaCockpit();
             const fSetor = document.getElementById('cockpitFiltroSetor')?.value || '';
             const periodo = getOrdensPreventiva()
-                .filter(o => (!fSetor || o.setor === fSetor) && o.data >= ini && o.data <= fim && o.status !== 'cancelado')
-                .sort((a, b) => a.data.localeCompare(b.data));
+                .filter(o => (!fSetor || o.setor === fSetor) && ordemCaiNoPeriodo(o, ini, fim) && o.status !== 'cancelado')
+                .sort((a, b) => (a.data || '').localeCompare(b.data || ''));
             const rows = periodo.map(o => {
                 const st = STATUS_META[getStatusEfetivo(o, hojeStr)]?.label || o.status;
-                return `<tr><td>${formatDateBR(o.data)} ${escapeHtml(o.hora || '')}</td><td><strong>${escapeHtml(o.titulo)}</strong><br><small>${escapeHtml(o.planoCodigo || '')}</small></td><td>${escapeHtml([o.setor, o.maquina, o.equipamento, o.subconjunto].filter(Boolean).join(' › '))}</td><td>${escapeHtml(o.criticidade || '-')}</td><td>${escapeHtml(o.responsavel || o.equipe || '-')}</td><td>${o.paradaNecessaria === 'sim' ? 'SIM' : 'NÃO'}</td><td>${escapeHtml(st)}</td></tr>`;
+                const isoInfo = getIsoWeekInfo(o.data);
+                return `<tr><td><strong>S${isoInfo.week}</strong> • ${formatPeriodoDatasOrdemBR(o)} ${escapeHtml(o.hora || '')}</td><td><strong>${escapeHtml(o.titulo)}</strong><br><small>${escapeHtml(o.planoCodigo || '')}</small></td><td>${escapeHtml([o.setor, o.maquina, o.equipamento, o.subconjunto].filter(Boolean).join(' › '))}</td><td>${escapeHtml(o.criticidade || '-')}</td><td>${escapeHtml(o.responsavel || o.equipe || '-')}</td><td>${o.paradaNecessaria === 'sim' ? 'SIM' : 'NÃO'}</td><td>${escapeHtml(st)}</td></tr>`;
             }).join('');
             const w = window.open('', '_blank');
             if (!w) { showToast('Permita pop-ups para imprimir o resumo A4.', 'error'); return; }
-            w.document.write(`<!DOCTYPE html><html lang="pt-BR"><head><meta charset="UTF-8"><title>Resumo Preventivas — ${escapeHtml(label)}</title><style>body{font-family:Arial,sans-serif;color:#0f172a;margin:20px;font-size:11px}header{display:flex;justify-content:space-between;align-items:center;border-bottom:2px solid #0f172a;padding-bottom:10px;margin-bottom:14px}img{height:38px}table{width:100%;border-collapse:collapse}th,td{border:1px solid #cbd5e1;padding:6px;text-align:left}th{background:#f1f5f9;font-size:10px;text-transform:uppercase}</style></head><body><header><div style="display:flex;align-items:center;gap:12px"><img src="CEPERA_LOGO.png" alt="Cepêra"><div><h2 style="margin:0">Resumo de Manutenção Preventiva Programada</h2><div>Período: <strong>${escapeHtml(label)}</strong>${fSetor ? ` • Setor: <strong>${escapeHtml(fSetor)}</strong>` : ''}</div></div></div><div>Emitido em ${formatDateBR(hojeStr)}<br>Total: <strong>${periodo.length}</strong> ordens</div></header><table><thead><tr><th>Data/Hora</th><th>Preventiva / Plano</th><th>Ativo</th><th>Crit.</th><th>Responsável</th><th>Parada</th><th>Status</th></tr></thead><tbody>${rows || '<tr><td colspan="7" style="text-align:center;padding:16px">Nenhuma preventiva no período.</td></tr>'}</tbody></table><script>window.onload=()=>window.print();<\/script></body></html>`);
+            w.document.write(`<!DOCTYPE html><html lang="pt-BR"><head><meta charset="UTF-8"><title>Resumo Preventivas — ${escapeHtml(label)}</title><style>body{font-family:Arial,sans-serif;color:#0f172a;margin:20px;font-size:11px}header{display:flex;justify-content:space-between;align-items:center;border-bottom:2px solid #0f172a;padding-bottom:10px;margin-bottom:14px}img{height:38px}table{width:100%;border-collapse:collapse}th,td{border:1px solid #cbd5e1;padding:6px;text-align:left}th{background:#f1f5f9;font-size:10px;text-transform:uppercase}</style></head><body><header><div style="display:flex;align-items:center;gap:12px"><img src="CEPERA_LOGO.png" alt="Cepêra"><div><h2 style="margin:0">Resumo de Manutenção Preventiva Programada</h2><div>Período: <strong>${escapeHtml(label)}</strong>${fSetor ? ` • Setor: <strong>${escapeHtml(fSetor)}</strong>` : ''}</div></div></div><div>Emitido em ${formatDateBR(hojeStr)}<br>Total: <strong>${periodo.length}</strong> ordens</div></header><table><thead><tr><th>Semana / Datas</th><th>Preventiva / Plano</th><th>Ativo</th><th>Crit.</th><th>Responsável</th><th>Parada</th><th>Status</th></tr></thead><tbody>${rows || '<tr><td colspan="7" style="text-align:center;padding:16px">Nenhuma preventiva no período.</td></tr>'}</tbody></table><script>window.onload=()=>window.print();<\/script></body></html>`);
             w.document.close();
         };
 
@@ -1989,7 +2326,12 @@
             const outros = verGeral ? getOutrosEventosAgenda().filter(o => !fSetor || !o.setor || o.setor === fSetor) : [];
 
             const byDate = {};
-            prevs.forEach(o => { (byDate[o.data] = byDate[o.data] || []).push({ ...o, _isPrev: true }); });
+            prevs.forEach(o => {
+                const dias = getDatasOrdem(o);
+                dias.forEach((isoD, idx) => {
+                    (byDate[isoD] = byDate[isoD] || []).push({ ...o, _isPrev: true, _diaIdx: idx + 1, _totalDias: dias.length });
+                });
+            });
             outros.forEach(o => { (byDate[o.data] = byDate[o.data] || []).push({ ...o, _isPrev: false }); });
 
             const firstDow = new Date(calAno, calMes, 1).getDay();
@@ -2008,7 +2350,8 @@
                     const st = getStatusEfetivo(it, hojeStr);
                     const bg = st === 'atrasada' ? 'bg-rose-100 text-rose-800 border-rose-200' : st === 'concluido' ? 'bg-emerald-100 text-emerald-800 border-emerald-200 done' : st === 'andamento' ? 'bg-amber-100 text-amber-900 border-amber-200' : 'bg-sky-100 text-sky-900 border-sky-200';
                     const dot = STATUS_META[st]?.cor || '#0284c7';
-                    return `<div class="cal-chip ${bg}" title="${escapeHtml(it.titulo)}"><span class="w-1.5 h-1.5 rounded-full shrink-0" style="background:${dot}"></span><span class="truncate">${it.criticidade === 'A' ? '[A] ' : ''}${escapeHtml(it.equipamento || it.titulo)}</span></div>`;
+                    const tagDia = it._totalDias > 1 ? `[D${it._diaIdx}/${it._totalDias}] ` : '';
+                    return `<div class="cal-chip ${bg}" title="${escapeHtml(it.titulo)}${it._totalDias > 1 ? ` • Dia ${it._diaIdx} de ${it._totalDias} (mesmo checklist)` : ''}"><span class="w-1.5 h-1.5 rounded-full shrink-0" style="background:${dot}"></span><span class="truncate">${it.criticidade === 'A' ? '[A] ' : ''}${tagDia}${escapeHtml(it.equipamento || it.titulo)}</span></div>`;
                 }).join('');
                 const extra = items.length > 4 ? `<div class="text-[10px] font-extrabold text-sky-700 pl-1">+${items.length - 4} mais</div>` : '';
                 html += `
@@ -2027,9 +2370,10 @@
             diaCalAberto = iso;
             const hojeStr = getHojeStr();
             const verGeral = Boolean(document.getElementById('calMostrarAgendaGeral')?.checked);
-            const prevs = getOrdensPreventiva().filter(o => o.data === iso);
+            const prevs = getOrdensPreventiva().filter(o => ordemCaiNoDia(o, iso));
             const outros = verGeral ? getOutrosEventosAgenda().filter(o => o.data === iso) : [];
-            document.getElementById('diaCalTitulo').innerText = formatDateBR(iso);
+            const isoW = getIsoWeekInfo(iso);
+            document.getElementById('diaCalTitulo').innerText = `${formatDateBR(iso)} (${isoW.dowLabel} • S${isoW.week})`;
             document.getElementById('diaCalSubtitulo').innerText = `${prevs.length} preventiva(s)${verGeral ? ` • ${outros.length} outro(s) evento(s) na Agenda PCM` : ''}`;
             const btnProg = document.getElementById('btnProgDiaCal');
             if (btnProg) btnProg.classList.toggle('hidden', !isGestao);
@@ -2040,11 +2384,14 @@
                 const st = getStatusEfetivo(o, hojeStr);
                 const stMeta = STATUS_META[st] || STATUS_META.pendente;
                 const critCls = CRITICIDADES[o.criticidade]?.cls || 'crit-none';
+                const diasOrd = getDatasOrdem(o);
+                const diaIdx = diasOrd.indexOf(iso) + 1;
                 cards.push(`
                     <div class="p-4 rounded-2xl border border-slate-200 bg-white space-y-2">
                         <div class="flex flex-wrap items-center justify-between gap-2">
                             <div class="flex flex-wrap items-center gap-1.5">
                                 <span class="px-2 py-0.5 rounded-full text-[10px] font-extrabold ${stMeta.cls}">${stMeta.label}</span>
+                                ${diasOrd.length > 1 ? `<span class="px-2 py-0.5 rounded-full text-[10px] font-extrabold bg-indigo-100 text-indigo-800">Dia ${diaIdx}/${diasOrd.length} (Checklist Único: ${formatDiasOrdemCompacto(diasOrd)})</span>` : ''}
                                 ${o.criticidade ? `<span class="px-2 py-0.5 rounded-full text-[10px] font-extrabold ${critCls}">Classe ${escapeHtml(o.criticidade)}</span>` : ''}
                                 ${o.paradaNecessaria === 'sim' ? `<span class="px-2 py-0.5 rounded-full text-[10px] font-extrabold bg-amber-100 text-amber-800">Exige Parada</span>` : ''}
                                 <span class="text-[11px] font-bold text-slate-500">${escapeHtml(o.hora || '08:00')} • ${formatDuracaoHH(o.duracaoEstimadaMin || 60)}</span>
@@ -2053,10 +2400,11 @@
                         </div>
                         <div class="text-sm font-extrabold text-slate-900">${escapeHtml(o.titulo)}</div>
                         <div class="text-xs font-semibold text-slate-600">${escapeHtml([o.setor, o.maquina, o.equipamento, o.conjunto, o.subconjunto].filter(Boolean).join(' › ') || 'Sem ativo vinculado')}</div>
-                        <div class="text-[11px] font-bold text-slate-500">Equipe: ${escapeHtml(o.equipe || '-')} • Responsável: ${escapeHtml(o.responsavel || 'Não definido')}</div>
+                        <div class="text-[11px] font-bold text-slate-500">Equipe: ${escapeHtml(o.equipe || '-')} • Responsável: ${escapeHtml(o.responsavel || 'Não definido')}${diasOrd.length > 1 ? ` • Datas: ${formatPeriodoDatasOrdemBR(o)}` : ''}</div>
                         <div class="flex flex-wrap items-center gap-1.5 pt-2 border-t border-slate-100">
                             <button type="button" onclick="fecharModal('modalDiaCal'); abrirModalExecutarPreventiva('${o.id}')" class="px-3 py-1.5 rounded-xl bg-sky-600 text-white text-[11px] font-extrabold">${st === 'concluido' ? 'Abrir Checklist / Fotos' : 'Executar Checklist'}</button>
                             ${st === 'concluido' ? `<button type="button" onclick="imprimirRelatorioPreventivaA4('${o.id}')" class="px-3 py-1.5 rounded-xl bg-emerald-50 text-emerald-800 border border-emerald-200 text-[11px] font-extrabold">Relatório A4</button>` : ''}
+                            ${isGestao ? `<button type="button" onclick="fecharModal('modalDiaCal'); abrirModalSemana52('${escapeHtml(o.planoId || '')}', ${isoW.week}, '${o.id}', ${isoW.isoYear})" class="px-3 py-1.5 rounded-xl bg-indigo-50 text-indigo-800 border border-indigo-200 text-[11px] font-extrabold">Dias na S${isoW.week}</button>` : ''}
                             ${isGestao ? `<button type="button" onclick="fecharModal('modalDiaCal'); abrirModalReprogramar('${o.id}')" class="px-3 py-1.5 rounded-xl bg-amber-50 text-amber-800 border border-amber-200 text-[11px] font-extrabold">Reprogramar</button>` : ''}
                             ${isGestao ? `<button type="button" onclick="excluirOrdemPreventiva('${o.id}')" class="px-3 py-1.5 rounded-xl bg-rose-50 text-rose-700 border border-rose-200 text-[11px] font-extrabold ml-auto">Excluir</button>` : ''}
                         </div>
@@ -2080,6 +2428,572 @@
         window.programarNoDiaAberto = () => {
             fecharModal('modalDiaCal');
             abrirModalProgramarPreventiva('', diaCalAberto || getHojeStr());
+        };
+
+        // ================= VIEW 2B: CALENDÁRIO 52 SEMANAS (ISO-8601 + SELEÇÃO DE DIAS) =================
+        function getPlanoMatchIdParaOrdem(ordem, planos) {
+            if (ordem.planoId && planos.some(p => p.id === ordem.planoId)) return ordem.planoId;
+            if (ordem.planoCodigo) {
+                const cod = normKey(ordem.planoCodigo);
+                const mCod = planos.find(p => normKey(p.codigo) === cod);
+                if (mCod) return mCod.id;
+            }
+            return '';
+        }
+
+        function getOrdensNaSemanaIso(ano, weekNum, ordensBase = getOrdensPreventiva()) {
+            return ordensBase.filter(o => {
+                if (o.status === 'cancelado') return false;
+                return getDatasOrdem(o).some(d => {
+                    const w = getIsoWeekInfo(d);
+                    return w.isoYear === ano && w.week === weekNum;
+                });
+            }).sort((a, b) => (a.data || '').localeCompare(b.data || '') || (a.hora || '').localeCompare(b.hora || ''));
+        }
+
+        window.mudarAnoSem52 = (delta) => {
+            const sel = document.getElementById('sem52AnoSelect');
+            const atual = Number(sel?.value || sem52Ano);
+            const novo = atual + delta;
+            sem52Ano = novo;
+            if (sel) {
+                if (!Array.from(sel.options).some(opt => Number(opt.value) === novo)) {
+                    const opt = document.createElement('option');
+                    opt.value = String(novo);
+                    opt.text = String(novo);
+                    sel.appendChild(opt);
+                }
+                sel.value = String(novo);
+            }
+            renderCalendario52Semanas();
+        };
+
+        window.irSemanaAtual52 = () => {
+            const cur = getIsoWeekInfo(new Date());
+            sem52Ano = cur.isoYear;
+            const sel = document.getElementById('sem52AnoSelect');
+            if (sel) sel.value = String(sem52Ano);
+            renderCalendario52Semanas();
+            abrirResumoSemana52(cur.isoYear, cur.week);
+        };
+
+        window.renderCalendario52Semanas = () => {
+            const tbl = document.getElementById('sem52MatrixTable');
+            if (!tbl) return;
+
+            const selAno = document.getElementById('sem52AnoSelect');
+            if (selAno && selAno.value) sem52Ano = Number(selAno.value);
+            const ano = sem52Ano;
+            const totalWeeks = getIsoWeeksInYear(ano);
+            const curIso = getIsoWeekInfo(new Date());
+            const hojeStr = getHojeStr();
+
+            const busca = normKey(document.getElementById('sem52Busca')?.value || '');
+            const fSetor = document.getElementById('sem52FiltroSetor')?.value || '';
+            const fCrit = document.getElementById('sem52FiltroCrit')?.value || '';
+            const fDisc = document.getElementById('sem52FiltroDisc')?.value || '';
+
+            const planosTodos = getPlanosPreventiva().sort((a, b) => (a.codigo || '').localeCompare(b.codigo || ''));
+            const ordensAll = getOrdensPreventiva().filter(o => o.status !== 'cancelado');
+
+            const rows = [];
+            planosTodos.forEach(p => {
+                if (fSetor && p.setor !== fSetor) return;
+                if (fCrit && p.criticidade !== fCrit) return;
+                if (fDisc && normKey(p.disciplina) !== normKey(fDisc)) return;
+                if (busca) {
+                    const hay = normKey([p.codigo, p.titulo, p.setor, p.maquina, p.equipamento, p.conjunto, p.subconjunto, p.tag, p.disciplina].join(' '));
+                    if (!hay.includes(busca)) return;
+                }
+                rows.push({
+                    rowKey: p.id,
+                    isPlano: true,
+                    plano: p,
+                    codigo: p.codigo || 'PM',
+                    titulo: p.titulo || 'Preventiva',
+                    subtitulo: [p.setor, p.maquina, p.equipamento, p.subconjunto].filter(Boolean).join(' › '),
+                    criticidade: p.criticidade || '',
+                    disciplina: p.disciplina || 'Mecânica',
+                    periodicidade: p.periodicidade || 'Mensal',
+                    modo: p.modoAgendamento || 'fixo'
+                });
+            });
+
+            // Preventivas oriundas diretamente da Agenda PCM sem planoId vinculado
+            const unlinkedMap = new Map();
+            ordensAll.forEach(o => {
+                const matchId = getPlanoMatchIdParaOrdem(o, planosTodos);
+                if (matchId) return;
+                const datasAno = getDatasOrdem(o).filter(d => getIsoWeekInfo(d).isoYear === ano);
+                if (!datasAno.length) return;
+                if (fSetor && o.setor !== fSetor) return;
+                if (fCrit && o.criticidade !== fCrit) return;
+                if (fDisc && normKey(o.equipe) !== normKey(fDisc)) return;
+                if (busca) {
+                    const hay = normKey([o.titulo, o.planoCodigo, o.setor, o.maquina, o.equipamento, o.equipe, o.responsavel].join(' '));
+                    if (!hay.includes(busca)) return;
+                }
+                const uKey = `UNLINKED__${normKey(o.equipamento || o.titulo || o.id)}`;
+                if (!unlinkedMap.has(uKey)) {
+                    unlinkedMap.set(uKey, {
+                        rowKey: uKey,
+                        isPlano: false,
+                        plano: null,
+                        codigo: 'AGENDA',
+                        titulo: o.titulo || 'Preventiva Avulsa (Agenda PCM)',
+                        subtitulo: [o.setor, o.equipamento, o.responsavel].filter(Boolean).join(' › ') || 'Lançada na Agenda PCM',
+                        criticidade: o.criticidade || '',
+                        disciplina: o.equipe || 'Geral',
+                        periodicidade: o.periodicidade || 'Avulsa',
+                        modo: 'agenda'
+                    });
+                }
+            });
+            rows.push(...unlinkedMap.values());
+
+            const cellMap = new Map();
+            const weekCounts = Array(totalWeeks + 1).fill(0);
+            const weekMin = Array(totalWeeks + 1).fill(0);
+            const weekStatusScore = Array(totalWeeks + 1).fill('empty'); // empty, ok, pend, atrasada
+            const rowSetKeys = new Set(rows.map(r => r.rowKey));
+
+            let totalOrdensAno = 0;
+            let totalConcAno = 0;
+
+            ordensAll.forEach(o => {
+                const matchId = getPlanoMatchIdParaOrdem(o, planosTodos);
+                const rKey = matchId || `UNLINKED__${normKey(o.equipamento || o.titulo || o.id)}`;
+                if (!rowSetKeys.has(rKey)) return;
+
+                const datasInYear = getDatasOrdem(o).filter(d => getIsoWeekInfo(d).isoYear === ano);
+                if (!datasInYear.length) return;
+
+                totalOrdensAno++;
+                const st = getStatusEfetivo(o, hojeStr);
+                if (st === 'concluido') totalConcAno++;
+
+                const semanasDistinct = [...new Set(datasInYear.map(d => getIsoWeekInfo(d).week))];
+                semanasDistinct.forEach(w => {
+                    if (w < 1 || w > totalWeeks) return;
+                    weekCounts[w]++;
+                    weekMin[w] += Number(o.duracaoEstimadaMin) || 60;
+                    if (st === 'atrasada') weekStatusScore[w] = 'atrasada';
+                    else if (st === 'pendente' || st === 'andamento') {
+                        if (weekStatusScore[w] !== 'atrasada') weekStatusScore[w] = 'pend';
+                    } else if (st === 'concluido' && weekStatusScore[w] === 'empty') {
+                        weekStatusScore[w] = 'ok';
+                    }
+                    const ck = `${rKey}__W${w}`;
+                    if (!cellMap.has(ck)) cellMap.set(ck, []);
+                    cellMap.get(ck).push(o);
+                });
+            });
+
+            const semAtualCount = (curIso.isoYear === ano && curIso.week <= totalWeeks) ? weekCounts[curIso.week] : 0;
+            const kpiBox = document.getElementById('sem52KpiStrip');
+            if (kpiBox) {
+                kpiBox.innerHTML = [
+                    { k: 'Planos na Matriz', v: rows.length, sub: `Ano ISO ${ano} (${totalWeeks} sem.)`, vc: 'text-slate-900', cls: 'border-slate-200' },
+                    { k: `Agendadas na S${curIso.week} (Atual)`, v: semAtualCount, sub: curIso.isoYear === ano ? 'Planos programados nesta semana' : `Ano visualizado: ${ano}`, vc: 'text-sky-700', cls: 'border-sky-200 bg-sky-50/40' },
+                    { k: `Preventivas em ${ano}`, v: totalOrdensAno, sub: `${rows.length ? Math.round((totalOrdensAno / rows.length) * 10) / 10 : 0} média/plano`, vc: 'text-indigo-700', cls: 'border-indigo-200' },
+                    { k: `Concluídas em ${ano}`, v: totalConcAno, sub: totalOrdensAno ? `${Math.round((totalConcAno / totalOrdensAno) * 100)}% do programado` : 'Sem programações', vc: 'text-emerald-700', cls: 'border-emerald-200' }
+                ].map(c => `<div class="p-3 rounded-2xl border bg-white ${c.cls}"><div class="text-[10px] font-extrabold uppercase text-slate-500">${c.k}</div><div class="text-xl font-extrabold mt-0.5 ${c.vc}">${c.v}</div><div class="text-[10px] font-semibold text-slate-500 truncate">${c.sub}</div></div>`).join('');
+            }
+
+            let thead = `<tr><th class="matrix-sticky-col p-3 text-left"><div class="text-[10px] font-extrabold uppercase tracking-wider text-slate-400">Plano / Equipamento</div><div class="text-xs font-extrabold text-slate-800">${rows.length} linha(s)</div></th>`;
+            for (let w = 1; w <= totalWeeks; w++) {
+                const isAtual = curIso.isoYear === ano && curIso.week === w;
+                const dts = getDatesOfIsoWeek(ano, w);
+                const rng = `${dts[0].br} a ${dts[6].br}`;
+                thead += `<th onclick="abrirResumoSemana52(${ano}, ${w})" title="Semana S${w}: ${rng} (Clique p/ ver resumo)" class="matrix-w-col py-2 px-1 cursor-pointer hover:bg-sky-50 transition-colors ${isAtual ? '!bg-sky-600 !text-white' : 'text-slate-700'}"><div class="font-extrabold text-[11px]">S${w}</div><div class="text-[8.5px] font-bold ${isAtual ? 'text-sky-100' : 'text-slate-400'}">${dts[0].br}</div></th>`;
+            }
+            thead += `</tr>`;
+
+            // Linha 2 do cabeçalho: QUANTIDADE DE PLANOS AGENDADOS POR SEMANA
+            thead += `<tr class="row-counts"><th class="matrix-sticky-col px-3 py-1.5 text-left text-[10px] font-extrabold uppercase tracking-wider text-slate-600">Qtd. Planos na Semana</th>`;
+            for (let w = 1; w <= totalWeeks; w++) {
+                const cnt = weekCounts[w];
+                const stW = weekStatusScore[w];
+                const pillCls = cnt === 0
+                    ? 'bg-slate-200/70 text-slate-400'
+                    : stW === 'atrasada'
+                        ? 'bg-rose-600 text-white'
+                        : stW === 'ok'
+                            ? 'bg-emerald-600 text-white'
+                            : 'bg-sky-600 text-white';
+                thead += `<th onclick="abrirResumoSemana52(${ano}, ${w})" title="${cnt} preventiva(s) na S${w} (${formatDuracaoHH(weekMin[w])})" class="matrix-w-col py-1.5 px-1 cursor-pointer"><span class="inline-flex items-center justify-center min-w-[22px] px-1.5 py-0.5 rounded-full text-[10px] font-extrabold ${pillCls}">${cnt}</span></th>`;
+            }
+            thead += `</tr>`;
+
+            let tbody = '';
+            if (!rows.length) {
+                tbody = `<tr><td colspan="${totalWeeks + 1}" class="p-10 text-center text-xs font-bold text-slate-400">Nenhum plano de preventiva cadastrado ou correspondente aos filtros. Crie um plano em "Planos & Checklists".</td></tr>`;
+            } else {
+                rows.forEach(r => {
+                    const critCls = CRITICIDADES[r.criticidade]?.cls || 'crit-none';
+                    const headRow = `
+                        <td class="matrix-sticky-col p-2.5 text-left align-top">
+                            <div class="flex items-center justify-between gap-1 mb-0.5">
+                                <span class="font-mono text-[10px] font-extrabold ${r.isPlano ? 'text-sky-700 bg-sky-50 border-sky-200' : 'text-indigo-700 bg-indigo-50 border-indigo-200'} px-1.5 py-0.5 rounded border">${escapeHtml(r.codigo)}</span>
+                                <div class="flex items-center gap-1 shrink-0">
+                                    ${r.criticidade ? `<span class="px-1.5 py-0.5 rounded-full text-[9px] font-extrabold ${critCls}">${r.criticidade}</span>` : ''}
+                                    <span class="px-1.5 py-0.5 rounded bg-slate-100 text-slate-600 text-[9px] font-bold">${escapeHtml(r.periodicidade)}</span>
+                                </div>
+                            </div>
+                            <div class="text-[11px] font-extrabold text-slate-900 truncate" title="${escapeHtml(r.titulo)}">${escapeHtml(r.titulo)}</div>
+                            <div class="text-[10px] font-semibold text-slate-500 truncate" title="${escapeHtml(r.subtitulo)}">${escapeHtml(r.subtitulo || r.disciplina)}</div>
+                        </td>`;
+
+                    let cellsHtml = '';
+                    for (let w = 1; w <= totalWeeks; w++) {
+                        const isAtual = curIso.isoYear === ano && curIso.week === w;
+                        const ords = cellMap.get(`${r.rowKey}__W${w}`) || [];
+                        if (!ords.length) {
+                            const clickAttr = r.isPlano ? `onclick="abrirModalSemana52('${r.plano.id}', ${w}, '', ${ano})"` : '';
+                            cellsHtml += `<td ${clickAttr} class="matrix-w-cell ${isAtual ? 'is-current-week' : ''}"><div class="w-pill-empty">${r.isPlano ? '+' : ''}</div></td>`;
+                        } else {
+                            const pri = ords[0];
+                            const st = getStatusEfetivo(pri, hojeStr);
+                            const pillCls = st === 'atrasada'
+                                ? 'st-atrasada'
+                                : st === 'concluido'
+                                    ? 'st-concluido'
+                                    : st === 'andamento'
+                                        ? 'st-andamento'
+                                        : 'st-pendente';
+                            const diasNaSemana = getDatasOrdem(pri).filter(d => {
+                                const wi = getIsoWeekInfo(d);
+                                return wi.isoYear === ano && wi.week === w;
+                            });
+                            const diasTxt = formatDiasOrdemCompacto(diasNaSemana);
+                            const totalD = getDatasOrdem(pri).length;
+                            const badgeMult = ords.length > 1 ? ` (+${ords.length - 1})` : '';
+                            const pArg = r.isPlano ? r.plano.id : (pri.planoId || '');
+                            const clickCell = ords.length > 1
+                                ? `onclick="abrirResumoSemana52(${ano}, ${w})"`
+                                : `onclick="abrirModalSemana52('${escapeHtml(pArg)}', ${w}, '${pri.id}', ${ano})"`;
+                            const tip = ords.map(o => `${o.titulo}: ${formatPeriodoDatasOrdemBR(o)} (${STATUS_META[getStatusEfetivo(o, hojeStr)]?.label})`).join(' | ');
+                            cellsHtml += `<td ${clickCell} title="${escapeHtml(tip)}" class="matrix-w-cell ${isAtual ? 'is-current-week' : ''}"><div class="w-pill ${pillCls}"><span>${st === 'concluido' ? '✓ ' : ''}${escapeHtml(diasTxt)}${badgeMult}</span>${totalD > 1 ? `<span class="text-[8px] opacity-85">${totalD}d</span>` : ''}</div></td>`;
+                        }
+                    }
+                    tbody += `<tr>${headRow}${cellsHtml}</tr>`;
+                });
+            }
+
+            tbl.innerHTML = `<thead>${thead}</thead><tbody>${tbody}</tbody>`;
+        };
+
+        window.abrirModalSemana52 = (planoId = '', weekNum = 1, ordemId = '', anoPre = null) => {
+            if (!isGestao) { showToast('Apenas perfis de Gestão podem programar na matriz de 52 semanas.', 'error'); return; }
+            const planos = getPlanosPreventiva().sort((a, b) => (a.codigo || '').localeCompare(b.codigo || ''));
+            const ordemExist = ordemId ? getOrdensPreventiva().find(x => x.id === ordemId) : null;
+
+            if (!ordemExist && !planos.length) {
+                showToast('Crie primeiro um Plano de Preventiva para programar nas 52 semanas.', 'error');
+                abrirModalEditorPlano();
+                return;
+            }
+
+            const ano = Number(anoPre || sem52Ano || getIsoWeekInfo(new Date()).isoYear);
+            const w = Math.max(1, Math.min(getIsoWeeksInYear(ano), Number(weekNum) || 1));
+            const datesWeek = getDatesOfIsoWeek(ano, w);
+
+            document.getElementById('sem52EditOrdemId').value = ordemExist ? ordemExist.id : '';
+            document.getElementById('sem52CellAno').value = String(ano);
+            document.getElementById('sem52CellSemana').value = String(w);
+            document.getElementById('sem52ModalSemanaBadge').innerText = `S${w} / ${ano}`;
+            document.getElementById('sem52ModalRange').innerText = `${datesWeek[0].br}/${ano} (Seg) a ${datesWeek[6].br} (Dom) • Padrão ISO-8601`;
+            document.getElementById('sem52ModalTitulo').innerText = ordemExist ? `Editar Dias da Preventiva na S${w}` : `Agendar Preventiva na Semana S${w}`;
+
+            const selPl = document.getElementById('sem52ModalPlanoId');
+            let plOpts = planos.map(p => `<option value="${p.id}">${escapeHtml(p.codigo || 'PM')} — ${escapeHtml(p.titulo)} (${escapeHtml(p.periodicidade || 'Mensal')})</option>`).join('');
+            if (ordemExist && !planos.some(p => p.id === ordemExist.planoId)) {
+                plOpts = `<option value="">(Preventiva Avulsa Agenda PCM — ${escapeHtml(ordemExist.titulo)})</option>` + plOpts;
+            }
+            selPl.innerHTML = plOpts;
+            selPl.value = ordemExist ? (planos.some(p => p.id === ordemExist.planoId) ? ordemExist.planoId : '') : (planoId && planos.some(p => p.id === planoId) ? planoId : (planos[0]?.id || ''));
+            selPl.disabled = Boolean(ordemExist);
+
+            const eqs = getEquipesUnicas();
+            document.getElementById('sem52Equipe').innerHTML = eqs.map(e => `<option value="${escapeHtml(e)}">${escapeHtml(e)}</option>`).join('');
+            const resps = getResponsaveisUnicos();
+            document.getElementById('sem52Resp').innerHTML = `<option value="">A definir / Equipe</option>` + resps.map(r => `<option value="${escapeHtml(r)}">${escapeHtml(r)}</option>`).join('');
+
+            if (ordemExist) {
+                const weekIsoSet = new Set(datesWeek.map(d => d.iso));
+                const existentesNaSem = getDatasOrdem(ordemExist).filter(d => weekIsoSet.has(d));
+                sem52DiasSelecionados = new Set(existentesNaSem.length ? existentesNaSem : [datesWeek[0].iso]);
+                document.getElementById('sem52Hora').value = ordemExist.hora || '08:00';
+                document.getElementById('sem52Equipe').value = ordemExist.equipe || 'Mecânica';
+                document.getElementById('sem52Resp').value = ordemExist.responsavel || '';
+                document.getElementById('sem52Parada').value = ordemExist.paradaNecessaria || 'sim';
+                document.getElementById('sem52TituloOverride').value = ordemExist.titulo || '';
+                document.getElementById('sem52Desc').value = ordemExist.descricao || '';
+                document.getElementById('btnSem52AbrirExec').classList.remove('hidden');
+                document.getElementById('btnSem52Excluir').classList.remove('hidden');
+                document.getElementById('btnSalvarSemana52').innerText = 'Salvar Alterações da Semana';
+            } else {
+                sem52DiasSelecionados = new Set([datesWeek[0].iso]);
+                document.getElementById('sem52Hora').value = '08:00';
+                document.getElementById('sem52TituloOverride').value = '';
+                document.getElementById('sem52Desc').value = '';
+                document.getElementById('btnSem52AbrirExec').classList.add('hidden');
+                document.getElementById('btnSem52Excluir').classList.add('hidden');
+                document.getElementById('btnSalvarSemana52').innerText = `Agendar na S${w}`;
+                onSem52PlanoChange();
+            }
+
+            onSem52PlanoChange(Boolean(ordemExist));
+            renderSem52DiasPicker();
+            abrirModal('modalSemana52Prev');
+        };
+
+        window.onSem52PlanoChange = (manterCampos = false) => {
+            const pId = document.getElementById('sem52ModalPlanoId')?.value || '';
+            const p = getPlanosPreventiva().find(x => x.id === pId);
+            const resumoEl = document.getElementById('sem52ModalAtivoResumo');
+            if (p) {
+                if (resumoEl) resumoEl.innerHTML = `<strong>${escapeHtml([p.setor, p.maquina, p.equipamento, p.subconjunto].filter(Boolean).join(' › '))}</strong><br>Criticidade <strong>${escapeHtml(p.criticidade || '-')}</strong> • Periodicidade: <strong>${escapeHtml(p.periodicidade || 'Mensal')}</strong> • Checklist único com <strong>${(p.checklist || []).length}</strong> item(ns).`;
+                if (!manterCampos) {
+                    const eqSel = document.getElementById('sem52Equipe');
+                    if (eqSel) eqSel.value = p.disciplina || 'Mecânica';
+                    const parSel = document.getElementById('sem52Parada');
+                    if (parSel) parSel.value = p.paradaNecessaria || 'sim';
+                }
+            } else if (resumoEl) {
+                resumoEl.innerText = 'Preventiva avulsa vinculada à Agenda PCM.';
+            }
+        };
+
+        function renderSem52DiasPicker() {
+            const ano = Number(document.getElementById('sem52CellAno').value || sem52Ano);
+            const w = Number(document.getElementById('sem52CellSemana').value || 1);
+            const editId = document.getElementById('sem52EditOrdemId').value;
+            const datesWeek = getDatesOfIsoWeek(ano, w);
+            const hojeStr = getHojeStr();
+            const ordensAll = getOrdensPreventiva().filter(o => o.status !== 'cancelado' && o.id !== editId);
+
+            const box = document.getElementById('sem52DiasContainer');
+            box.innerHTML = datesWeek.map(d => {
+                const sel = sem52DiasSelecionados.has(d.iso);
+                const cargaDia = ordensAll.filter(o => ordemCaiNoDia(o, d.iso)).length;
+                return `
+                    <button type="button" onclick="toggleDiaSemana52('${d.iso}')" class="day-pick-card ${sel ? 'selected' : ''} ${d.iso === hojeStr ? 'ring-2 ring-sky-400' : ''}">
+                        <div class="text-[11px] font-extrabold ${sel ? 'text-sky-800' : 'text-slate-800'}">${d.label}</div>
+                        <div class="text-[11px] font-mono font-bold ${sel ? 'text-sky-700' : 'text-slate-500'}">${d.br}</div>
+                        <div class="mt-1 text-[9px] font-extrabold px-1.5 py-0.5 rounded-full ${sel ? 'bg-sky-600 text-white' : cargaDia > 0 ? 'bg-amber-100 text-amber-800' : 'bg-slate-100 text-slate-400'}">${sel ? '✓ Selecionado' : cargaDia > 0 ? `${cargaDia} prev.` : 'Livre'}</div>
+                    </button>`;
+            }).join('');
+
+            const selecionadas = datesWeek.filter(d => sem52DiasSelecionados.has(d.iso));
+            const resEl = document.getElementById('sem52ModalDiasResumo');
+            if (!selecionadas.length) {
+                resEl.className = 'text-[11px] font-extrabold text-rose-700 bg-rose-50 border border-rose-200 px-3 py-2 rounded-xl';
+                resEl.innerText = 'Selecione pelo menos 1 dia da semana para programar na Agenda PCM.';
+            } else {
+                resEl.className = 'text-[11px] font-extrabold text-sky-800 bg-white border border-sky-200 px-3 py-2 rounded-xl';
+                resEl.innerText = `${selecionadas.length} dia(s) selecionado(s): ${selecionadas.map(d => `${d.label} (${d.br})`).join(', ')} — Compartilham o mesmo checklist único.`;
+            }
+        }
+
+        window.toggleDiaSemana52 = (iso) => {
+            if (sem52DiasSelecionados.has(iso)) sem52DiasSelecionados.delete(iso);
+            else sem52DiasSelecionados.add(iso);
+            renderSem52DiasPicker();
+        };
+
+        window.aplicarPresetDiasSemana52 = (dows) => {
+            const ano = Number(document.getElementById('sem52CellAno').value || sem52Ano);
+            const w = Number(document.getElementById('sem52CellSemana').value || 1);
+            const datesWeek = getDatesOfIsoWeek(ano, w);
+            sem52DiasSelecionados = new Set(datesWeek.filter(d => dows.includes(d.dow)).map(d => d.iso));
+            renderSem52DiasPicker();
+        };
+
+        window.executarOrdemModalSem52 = () => {
+            const id = document.getElementById('sem52EditOrdemId').value;
+            if (!id) return;
+            fecharModal('modalSemana52Prev');
+            abrirModalExecutarPreventiva(id);
+        };
+
+        window.excluirOrdemModalSem52 = () => {
+            const id = document.getElementById('sem52EditOrdemId').value;
+            if (!id) return;
+            fecharModal('modalSemana52Prev');
+            excluirOrdemPreventiva(id);
+        };
+
+        window.salvarAgendamentoSemana52 = async (e) => {
+            e.preventDefault();
+            const datas = [...sem52DiasSelecionados].sort();
+            if (!datas.length) {
+                showToast('Selecione pelo menos 1 dia dentro da semana.', 'error');
+                return;
+            }
+            const editId = document.getElementById('sem52EditOrdemId').value.trim();
+            const ano = Number(document.getElementById('sem52CellAno').value || sem52Ano);
+            const weekNum = Number(document.getElementById('sem52CellSemana').value || 1);
+            const hora = document.getElementById('sem52Hora').value || '08:00';
+            const equipe = document.getElementById('sem52Equipe').value || 'Mecânica';
+            const responsavel = document.getElementById('sem52Resp').value || '';
+            const paradaNecessaria = document.getElementById('sem52Parada').value || 'sim';
+            const tituloOverride = document.getElementById('sem52TituloOverride').value.trim();
+            const descExtra = document.getElementById('sem52Desc').value.trim();
+
+            const btn = document.getElementById('btnSalvarSemana52');
+            btn.disabled = true; btn.innerText = 'Sincronizando Agenda...';
+
+            try {
+                if (editId) {
+                    const o = getOrdensPreventiva().find(x => x.id === editId);
+                    if (!o) return;
+                    const weekSet = new Set(getDatesOfIsoWeek(ano, weekNum).map(d => d.iso));
+                    const outrosDiasFora = getDatasOrdem(o).filter(d => !weekSet.has(d));
+                    const novasDatas = [...new Set([...outrosDiasFora, ...datas])].sort();
+                    const pInfo = getIsoWeekInfo(novasDatas[0]);
+                    await updateDoc(doc(db, 'ag_manutencao', editId), {
+                        data: novasDatas[0],
+                        dataFim: novasDatas[novasDatas.length - 1],
+                        datas: novasDatas,
+                        semana: pInfo.week,
+                        ano: pInfo.isoYear,
+                        hora,
+                        equipe,
+                        responsavel,
+                        paradaNecessaria,
+                        titulo: tituloOverride || o.titulo,
+                        descricao: descExtra,
+                        atualizadoEm: new Date().toISOString()
+                    });
+                    showToast(`Preventiva atualizada (${formatDiasOrdemCompacto(novasDatas)} na S${weekNum}) e espelhada na Agenda PCM!`, 'success');
+                } else {
+                    const p = getPlanosPreventiva().find(x => x.id === document.getElementById('sem52ModalPlanoId').value);
+                    if (!p) { showToast('Selecione um plano válido.', 'error'); return; }
+                    const checklistExec = (p.checklist || []).map(it => ({
+                        id: it.id, tarefa: it.tarefa, criterio: it.criterio || '', peca: it.peca || '', critico: Boolean(it.critico), status: '', obs: ''
+                    }));
+                    const titulo = tituloOverride || `${p.codigo ? p.codigo + ' — ' : ''}${p.titulo}`;
+                    await addDoc(colManutencao, {
+                        kind: 'agendamento',
+                        origem: 'modulo_preventivas',
+                        tipo: 'preventiva',
+                        status: 'pendente',
+                        data: datas[0],
+                        dataFim: datas[datas.length - 1],
+                        datas,
+                        semana: weekNum,
+                        ano,
+                        dataOriginal: datas[0],
+                        hora,
+                        titulo,
+                        setor: p.setor || '',
+                        maquina: p.maquina || '',
+                        equipamento: p.equipamento || '',
+                        conjunto: p.conjunto || '',
+                        subconjunto: p.subconjunto || '',
+                        tag: p.tag || '',
+                        ativoId: p.ativoId || '',
+                        planoId: p.id,
+                        planoCodigo: p.codigo || '',
+                        planoRevisao: p.revisao || 'Rev. 01',
+                        criticidade: p.criticidade || 'B',
+                        periodicidade: p.periodicidade || 'Mensal',
+                        modoAgendamento: p.modoAgendamento || 'fixo',
+                        paradaNecessaria,
+                        duracaoEstimadaMin: Number(p.duracaoEstimadaMin) || 60,
+                        duracaoRealMin: 0,
+                        epis: p.epis || '',
+                        pecas: p.pecas || '',
+                        equipe,
+                        responsavel,
+                        descricao: descExtra || `[Plano ${p.codigo || ''}] ${[p.maquina, p.equipamento, p.subconjunto].filter(Boolean).join(' › ')}`,
+                        checklistExec,
+                        fotos: [],
+                        reprogramacoes: [],
+                        criadoPor: usuarioLogado?.nome || 'PCM',
+                        criadoEm: new Date().toISOString()
+                    });
+                    showToast(`Preventiva agendada na S${weekNum} (${formatDiasOrdemCompacto(datas)}) e sincronizada na Agenda PCM!`, 'success');
+                }
+                fecharModal('modalSemana52Prev');
+            } catch (err) {
+                showToast('Erro ao salvar agendamento semanal na Agenda PCM.', 'error');
+            } finally {
+                btn.disabled = false; btn.innerText = 'Confirmar Programação';
+            }
+        };
+
+        window.abrirResumoSemana52 = (ano, weekNum) => {
+            resumoSem52Atual = { ano: Number(ano), semana: Number(weekNum) };
+            const datesWeek = getDatesOfIsoWeek(resumoSem52Atual.ano, resumoSem52Atual.semana);
+            const ordensSem = getOrdensNaSemanaIso(resumoSem52Atual.ano, resumoSem52Atual.semana);
+            const hojeStr = getHojeStr();
+
+            document.getElementById('resumoSem52Titulo').innerText = `Semana S${resumoSem52Atual.semana} / ${resumoSem52Atual.ano} (${datesWeek[0].br} a ${datesWeek[6].br})`;
+            const hhTotal = ordensSem.reduce((acc, o) => acc + (Number(o.duracaoEstimadaMin) || 60), 0);
+            document.getElementById('resumoSem52Sub').innerText = `${ordensSem.length} plano(s) agendado(s) na semana • Carga estimada: ${formatDuracaoHH(hhTotal)}`;
+            const btnNovo = document.getElementById('btnNovoPlanNaSemana52');
+            if (btnNovo) btnNovo.classList.toggle('hidden', !isGestao);
+
+            document.getElementById('resumoSem52PorDia').innerHTML = datesWeek.map(d => {
+                const qDia = ordensSem.filter(o => ordemCaiNoDia(o, d.iso)).length;
+                return `<div class="p-2 rounded-xl border ${d.iso === hojeStr ? 'border-sky-400 bg-sky-50' : qDia > 0 ? 'border-slate-300 bg-white' : 'border-slate-200 bg-slate-50'}"><div class="text-[10px] font-extrabold text-slate-600">${d.label}</div><div class="text-[10px] text-slate-400 font-bold">${d.br}</div><div class="text-sm font-extrabold mt-0.5 ${qDia > 0 ? 'text-sky-700' : 'text-slate-300'}">${qDia}</div></div>`;
+            }).join('');
+
+            const box = document.getElementById('resumoSem52Lista');
+            if (!ordensSem.length) {
+                box.innerHTML = `<div class="p-8 text-center text-xs font-bold text-slate-400 border border-dashed border-slate-200 rounded-2xl">Nenhum plano preventivo programado para S${resumoSem52Atual.semana}.</div>`;
+            } else {
+                box.innerHTML = ordensSem.map(o => {
+                    const st = getStatusEfetivo(o, hojeStr);
+                    const stMeta = STATUS_META[st] || STATUS_META.pendente;
+                    const critCls = CRITICIDADES[o.criticidade]?.cls || 'crit-none';
+                    const diasW = getDatasOrdem(o).filter(d => datesWeek.some(dw => dw.iso === d));
+                    return `
+                        <div class="p-3.5 rounded-2xl border border-slate-200 bg-white flex flex-col sm:flex-row sm:items-center justify-between gap-2.5">
+                            <div class="min-w-0 space-y-1">
+                                <div class="flex flex-wrap items-center gap-1.5">
+                                    <span class="px-2 py-0.5 rounded-full text-[10px] font-extrabold ${stMeta.cls}">${stMeta.label}</span>
+                                    <span class="px-2 py-0.5 rounded-lg bg-indigo-50 text-indigo-800 border border-indigo-200 text-[10px] font-extrabold">${escapeHtml(formatDiasOrdemCompacto(diasW))} (${getDatasOrdem(o).length}d)</span>
+                                    ${o.criticidade ? `<span class="px-1.5 py-0.5 rounded-full text-[10px] font-extrabold ${critCls}">Classe ${o.criticidade}</span>` : ''}
+                                    <span class="text-[10px] font-mono text-slate-400">${escapeHtml(o.planoCodigo || 'Agenda')}</span>
+                                </div>
+                                <div class="text-xs font-extrabold text-slate-900 truncate">${escapeHtml(o.titulo)}</div>
+                                <div class="text-[11px] font-semibold text-slate-500 truncate">${escapeHtml([o.setor, o.maquina, o.equipamento].filter(Boolean).join(' › '))} • ${escapeHtml(o.equipe || '-')} • Resp: ${escapeHtml(o.responsavel || '-')}</div>
+                            </div>
+                            <div class="flex flex-wrap items-center gap-1.5 shrink-0">
+                                <button type="button" onclick="fecharModal('modalResumoSemana52'); abrirModalExecutarPreventiva('${o.id}')" class="px-3 py-1.5 rounded-xl bg-sky-600 text-white text-[11px] font-extrabold">${st === 'concluido' ? 'Relatório' : 'Checklist'}</button>
+                                ${isGestao ? `<button type="button" onclick="fecharModal('modalResumoSemana52'); abrirModalSemana52('${escapeHtml(o.planoId || '')}', ${resumoSem52Atual.semana}, '${o.id}', ${resumoSem52Atual.ano})" class="px-3 py-1.5 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-800 text-[11px] font-extrabold">Alterar Dias</button>` : ''}
+                            </div>
+                        </div>`;
+                }).join('');
+            }
+            abrirModal('modalResumoSemana52');
+        };
+
+        window.agendarNovoNaSemanaResumo = () => {
+            fecharModal('modalResumoSemana52');
+            abrirModalSemana52('', resumoSem52Atual.semana, '', resumoSem52Atual.ano);
+        };
+
+        window.imprimirCronograma52SemanasA4 = () => {
+            const ano = sem52Ano;
+            const totalWeeks = getIsoWeeksInYear(ano);
+            const hojeStr = getHojeStr();
+            const rowsHtml = getOrdensPreventiva()
+                .filter(o => o.status !== 'cancelado' && getDatasOrdem(o).some(d => getIsoWeekInfo(d).isoYear === ano))
+                .sort((a, b) => (a.data || '').localeCompare(b.data || ''))
+                .map(o => {
+                    const wi = getIsoWeekInfo(o.data);
+                    const st = STATUS_META[getStatusEfetivo(o, hojeStr)]?.label || o.status;
+                    return `<tr><td style="text-align:center;font-weight:800">S${wi.week}</td><td>${formatPeriodoDatasOrdemBR(o)}</td><td><strong>${escapeHtml(o.titulo)}</strong></td><td>${escapeHtml([o.setor, o.maquina, o.equipamento].filter(Boolean).join(' › '))}</td><td>${escapeHtml(o.responsavel || o.equipe || '-')}</td><td>${escapeHtml(st)}</td></tr>`;
+                }).join('');
+
+            const w = window.open('', '_blank');
+            if (!w) { showToast('Permita pop-ups para imprimir o cronograma 52 semanas.', 'error'); return; }
+            w.document.write(`<!DOCTYPE html><html lang="pt-BR"><head><meta charset="UTF-8"><title>Cronograma Anual 52 Semanas — ${ano}</title><style>body{font-family:Arial,sans-serif;color:#0f172a;margin:18px;font-size:11px}header{display:flex;justify-content:space-between;align-items:center;border-bottom:2px solid #0284c7;padding-bottom:8px;margin-bottom:12px}table{width:100%;border-collapse:collapse}th,td{border:1px solid #cbd5e1;padding:6px;text-align:left}th{background:#f1f5f9;font-size:10px;text-transform:uppercase}</style></head><body><header><div style="display:flex;align-items:center;gap:12px"><img src="CEPERA_LOGO.png" style="height:36px"><div><h2 style="margin:0">Cronograma Anual de Preventivas — ${ano} (${totalWeeks} Semanas ISO)</h2><div>Sincronizado com Agenda PCM Cepêra</div></div></div><div>Emitido em ${formatDateBR(hojeStr)}</div></header><table><thead><tr><th style="width:55px;text-align:center">Sem.</th><th>Dias Programados</th><th>Plano / Preventiva</th><th>Ativo</th><th>Equipe / Resp.</th><th>Status</th></tr></thead><tbody>${rowsHtml || '<tr><td colspan="6" style="text-align:center">Sem programações no ano.</td></tr>'}</tbody></table><script>window.onload=()=>window.print();<\/script></body></html>`);
+            w.document.close();
         };
 
         // ================= VIEW 3: PLANOS & CHECKLISTS (100% INTERNO + EXCEL) =================
@@ -2463,6 +3377,8 @@
             document.getElementById('progDataInicio').value = hoje;
             document.getElementById('progDataFim').value = `${new Date().getFullYear()}-12-31`;
             document.getElementById('progDiaSemanaPref').value = '';
+            const selDur = document.getElementById('progDuracaoDias');
+            if (selDur) selDur.value = '1';
             document.getElementById('progHora').value = '08:00';
             document.getElementById('progTituloOverride').value = '';
             document.getElementById('progDescricao').value = '';
@@ -2497,11 +3413,16 @@
             const dIni = document.getElementById('progDataInicio').value;
             const dFim = document.getElementById('progDataFim').value;
             const dow = document.getElementById('progDiaSemanaPref').value;
+            const durDias = Math.max(1, Math.min(7, Number(document.getElementById('progDuracaoDias')?.value || 1)));
             const box = document.getElementById('progPreviewDatas');
             if (!p || !dIni) { box.innerText = 'Selecione o plano e a data inicial.'; return; }
             const datas = modo === 'lote' ? gerarDatasCronograma(dIni, dFim, p.periodicidade || 'Mensal', dow) : [dIni];
             if (!datas.length) { box.innerText = 'Verifique se a data final é maior ou igual à data inicial.'; return; }
-            box.innerHTML = `<div class="font-extrabold text-slate-800 mb-1">Serão criadas ${datas.length} ordem(ns) na Agenda PCM (ag_manutencao):</div><div class="flex flex-wrap gap-1">${datas.slice(0, 18).map(d => `<span class="px-2 py-0.5 rounded-lg bg-white border border-slate-200 font-mono text-[10px] font-bold">${formatDateBR(d)}</span>`).join('')}${datas.length > 18 ? `<span class="text-[10px] font-bold text-slate-500">+${datas.length - 18} datas</span>` : ''}</div>`;
+            box.innerHTML = `<div class="font-extrabold text-slate-800 mb-1">Serão criadas ${datas.length} ordem(ns) na Agenda PCM (ag_manutencao)${durDias > 1 ? ` • ${durDias} dias/ordem com checklist único` : ''}:</div><div class="flex flex-wrap gap-1">${datas.slice(0, 18).map(d => {
+                const wi = getIsoWeekInfo(d);
+                const fimSpan = durDias > 1 ? somarDiasIso(d, durDias - 1) : d;
+                return `<span class="px-2 py-0.5 rounded-lg bg-white border border-slate-200 font-mono text-[10px] font-bold">S${wi.week} • ${durDias > 1 ? `${formatDateBR(d).slice(0, 5)}–${formatDateBR(fimSpan).slice(0, 5)}` : formatDateBR(d)}</span>`;
+            }).join('')}${datas.length > 18 ? `<span class="text-[10px] font-bold text-slate-500">+${datas.length - 18} datas</span>` : ''}</div>`;
         };
 
         window.salvarProgramacaoPreventiva = async (e) => {
@@ -2512,6 +3433,7 @@
             const dIni = document.getElementById('progDataInicio').value;
             const dFim = document.getElementById('progDataFim').value;
             const dow = document.getElementById('progDiaSemanaPref').value;
+            const durDias = Math.max(1, Math.min(7, Number(document.getElementById('progDuracaoDias')?.value || 1)));
             const datas = modo === 'lote' ? gerarDatasCronograma(dIni, dFim, p.periodicidade || 'Mensal', dow) : [dIni];
             if (!datas.length) { showToast('Nenhuma data válida para programar.', 'error'); return; }
 
@@ -2529,13 +3451,22 @@
                     const checklistExec = (p.checklist || []).map(it => ({
                         id: it.id, tarefa: it.tarefa, criterio: it.criterio || '', peca: it.peca || '', critico: Boolean(it.critico), status: '', obs: ''
                     }));
+                    const diasSpan = [];
+                    for (let k = 0; k < durDias; k++) diasSpan.push(somarDiasIso(dt, k));
+                    const datasSorted = [...new Set(diasSpan)].sort();
+                    const wi = getIsoWeekInfo(datasSorted[0]);
+
                     await addDoc(colManutencao, {
                         kind: 'agendamento',
                         origem: 'modulo_preventivas',
                         tipo: 'preventiva',
                         status: 'pendente',
-                        data: dt,
-                        dataOriginal: dt,
+                        data: datasSorted[0],
+                        dataFim: datasSorted[datasSorted.length - 1],
+                        datas: datasSorted,
+                        semana: wi.week,
+                        ano: wi.isoYear,
+                        dataOriginal: datasSorted[0],
                         hora,
                         titulo,
                         setor: p.setor || '',
@@ -2566,7 +3497,7 @@
                         criadoEm: new Date().toISOString()
                     });
                 }
-                showToast(`${datas.length} preventiva(s) programada(s) e sincronizada(s) na Agenda PCM!`, 'success');
+                showToast(`${datas.length} preventiva(s) programada(s)${durDias > 1 ? ` (${durDias} dias cada, checklist compartilhado)` : ''} e sincronizada(s) na Agenda PCM!`, 'success');
                 fecharModal('modalProgramarPreventiva');
             } catch (err) {
                 showToast('Erro ao gravar programação no Firestore.', 'error');
@@ -2592,7 +3523,7 @@
                 if (fSetor && (o.setor || '') !== fSetor) return false;
                 if (fCrit && (o.criticidade || '') !== fCrit) return false;
                 if (fEq && (o.equipe || '') !== fEq) return false;
-                if (dIni && o.data < dIni) return false;
+                if (dIni && getDataFinalOrdem(o) < dIni) return false;
                 if (dFim && o.data > dFim) return false;
                 if (busca) {
                     const hay = normKey([o.titulo, o.planoCodigo, o.setor, o.maquina, o.equipamento, o.conjunto, o.subconjunto, o.tag, o.responsavel, o.equipe].join(' '));
@@ -2630,11 +3561,16 @@
                 const doneChk = chk.filter(x => x.status).length;
                 const fotosQtd = Array.isArray(o.fotos) ? o.fotos.length : 0;
                 const reprogs = Array.isArray(o.reprogramacoes) ? o.reprogramacoes.length : 0;
+                const datasOrd = getDatasOrdem(o);
+                const isoInfo = getIsoWeekInfo(o.data);
                 return `
                     <tr class="hover:bg-slate-50/70">
                         <td class="py-3 px-4 whitespace-nowrap">
-                            <div class="font-extrabold text-slate-900">${formatDateBR(o.data)}</div>
-                            <div class="text-[10px] font-bold text-slate-400">${escapeHtml(o.hora || '08:00')}${reprogs ? ` • ↻${reprogs}x` : ''}</div>
+                            <div class="flex items-center gap-1.5">
+                                <span class="px-1.5 py-0.5 rounded bg-slate-900 text-white text-[9px] font-extrabold">S${isoInfo.week}</span>
+                                <span class="font-extrabold text-slate-900">${formatPeriodoDatasOrdemBR(o)}</span>
+                            </div>
+                            <div class="text-[10px] font-bold text-slate-400">${datasOrd.length > 1 ? `${formatDiasOrdemCompacto(datasOrd)} • ` : ''}${escapeHtml(o.hora || '08:00')}${reprogs ? ` • ↻${reprogs}x` : ''}</div>
                         </td>
                         <td class="py-3 px-3">
                             <div class="font-extrabold text-slate-900">${escapeHtml(o.titulo)}</div>
@@ -2660,6 +3596,7 @@
                         </td>
                         <td class="py-3 px-4 text-right whitespace-nowrap space-x-1">
                             <button type="button" onclick="abrirModalExecutarPreventiva('${o.id}')" class="px-2.5 py-1 rounded-lg bg-sky-600 hover:bg-sky-700 text-white text-[11px] font-extrabold">${st === 'concluido' ? 'Abrir' : 'Executar'}</button>
+                            <button type="button" onclick="abrirModalSemana52('${escapeHtml(o.planoId || '')}', ${isoInfo.week}, '${o.id}', ${isoInfo.isoYear})" class="px-2 py-1 rounded-lg bg-indigo-50 hover:bg-indigo-100 text-indigo-700 border border-indigo-200 text-[11px] font-extrabold" title="Ajustar dias na S${isoInfo.week}">S${isoInfo.week}</button>
                             <button type="button" onclick="imprimirRelatorioPreventivaA4('${o.id}')" class="px-2 py-1 rounded-lg bg-emerald-50 hover:bg-emerald-100 text-emerald-800 border border-emerald-200 text-[11px] font-extrabold" title="Relatório A4">A4</button>
                             <button type="button" onclick="abrirModalReprogramar('${o.id}')" class="px-2 py-1 rounded-lg bg-amber-50 hover:bg-amber-100 text-amber-800 border border-amber-200 text-[11px] font-extrabold" title="Reprogramar">↻</button>
                             <button type="button" onclick="excluirOrdemPreventiva('${o.id}')" class="px-2 py-1 rounded-lg bg-rose-50 hover:bg-rose-100 text-rose-700 border border-rose-200 text-[11px] font-extrabold" title="Excluir">✕</button>
@@ -2672,10 +3609,10 @@
             const list = getOrdensFiltradas();
             if (!list.length) { showToast('Nenhuma ordem para exportar.', 'error'); return; }
             const hojeStr = getHojeStr();
-            const headers = ['Data', 'Hora', 'Plano', 'Titulo', 'Setor', 'Maquina', 'Equipamento', 'Subconjunto', 'Criticidade', 'Periodicidade', 'Modo', 'Equipe', 'Responsavel', 'Status', 'HH_Estimado_Min', 'HH_Real_Min', 'Fotos', 'Reprogramacoes'];
+            const headers = ['Semana', 'Data', 'Hora', 'Plano', 'Titulo', 'Setor', 'Maquina', 'Equipamento', 'Subconjunto', 'Criticidade', 'Periodicidade', 'Modo', 'Equipe', 'Responsavel', 'Status', 'HH_Estimado_Min', 'HH_Real_Min', 'Fotos', 'Reprogramacoes'];
             const esc = v => `"${String(v ?? '').replace(/"/g, '""')}"`;
             const rows = list.map(o => [
-                formatDateBR(o.data), o.hora || '', o.planoCodigo || '', o.titulo || '',
+                `S${getIsoWeekInfo(o.data).week}`, formatPeriodoDatasOrdemBR(o), o.hora || '', o.planoCodigo || '', o.titulo || '',
                 o.setor || '', o.maquina || '', o.equipamento || '', o.subconjunto || '',
                 o.criticidade || '', o.periodicidade || '', o.modoAgendamento || 'fixo',
                 o.equipe || '', o.responsavel || '', STATUS_META[getStatusEfetivo(o, hojeStr)]?.label || o.status,
@@ -2696,7 +3633,7 @@
             if (!o) return;
             document.getElementById('reprogOrdemId').value = o.id;
             document.getElementById('reprogTituloResumo').innerText = `${o.titulo} — ${[o.setor, o.equipamento].filter(Boolean).join(' › ')}`;
-            document.getElementById('reprogDataAtual').value = formatDateBR(o.data);
+            document.getElementById('reprogDataAtual').value = formatPeriodoDatasOrdemBR(o);
             document.getElementById('reprogNovaData').value = o.data || getHojeStr();
             document.getElementById('reprogObs').value = '';
             const hist = Array.isArray(o.reprogramacoes) ? o.reprogramacoes : [];
@@ -2722,12 +3659,20 @@
             try {
                 const hist = Array.isArray(o.reprogramacoes) ? [...o.reprogramacoes] : [];
                 hist.push({ de: o.data, para: novaData, motivo, obs, por: usuarioLogado?.nome || 'PCM', em: new Date().toISOString() });
+                const delta = diffDays(novaData, o.data);
+                const origDatas = getDatasOrdem(o);
+                const novasDatas = origDatas.length ? [...new Set(origDatas.map(d => somarDiasIso(d, delta)))].sort() : [novaData];
+                const wi = getIsoWeekInfo(novasDatas[0]);
                 await updateDoc(doc(db, 'ag_manutencao', id), {
-                    data: novaData,
+                    data: novasDatas[0],
+                    dataFim: novasDatas[novasDatas.length - 1],
+                    datas: novasDatas,
+                    semana: wi.week,
+                    ano: wi.isoYear,
                     reprogramacoes: hist,
                     atualizadoEm: new Date().toISOString()
                 });
-                showToast(`Preventiva reprogramada para ${formatDateBR(novaData)} e sincronizada na Agenda PCM!`, 'success');
+                showToast(`Preventiva reprogramada para ${formatPeriodoDatasOrdemBR({ datas: novasDatas })} (S${wi.week}) e sincronizada na Agenda PCM!`, 'success');
                 fecharModal('modalReprogramar');
             } catch (_) {
                 showToast('Erro ao salvar reprogramação.', 'error');
@@ -2739,7 +3684,7 @@
         window.excluirOrdemPreventiva = (ordemId) => {
             const o = getOrdensPreventiva().find(x => x.id === ordemId);
             if (!o) return;
-            pedirConfirmacaoExclusao('Excluir Ordem Preventiva', `Remover "${o.titulo}" (${formatDateBR(o.data)}) do calendário e da Agenda PCM?`, async () => {
+            pedirConfirmacaoExclusao('Excluir Ordem Preventiva', `Remover "${o.titulo}" (${formatPeriodoDatasOrdemBR(o)}) do calendário e da Agenda PCM?`, async () => {
                 await deleteDoc(doc(db, 'ag_manutencao', ordemId));
                 fecharModal('modalDiaCal');
                 showToast('Ordem preventiva excluída.');
@@ -2765,11 +3710,11 @@
             const ordens = getOrdensPreventiva().filter(o => {
                 if (o.status === 'cancelado') return false;
                 if (fSetor && o.setor !== fSetor) return false;
-                if (corteIso && o.data < corteIso) return false;
+                if (corteIso && getDataFinalOrdem(o) < corteIso) return false;
                 return true;
             });
 
-            const vencidasAteHoje = ordens.filter(o => o.data <= hojeStr);
+            const vencidasAteHoje = ordens.filter(o => getDataFinalOrdem(o) <= hojeStr);
             const concluidasAteHoje = vencidasAteHoje.filter(o => o.status === 'concluido');
             const aderencia = vencidasAteHoje.length ? Math.round((concluidasAteHoje.length / vencidasAteHoje.length) * 100) : 100;
 
@@ -2809,7 +3754,7 @@
                 const dt = new Date(hoje.getFullYear(), hoje.getMonth() - i, 1);
                 const ym = `${dt.getFullYear()}-${pad2(dt.getMonth() + 1)}`;
                 labelsMes.push(`${MESES[dt.getMonth()].slice(0, 3)}/${String(dt.getFullYear()).slice(2)}`);
-                const doMes = ordens.filter(o => (o.data || '').startsWith(ym));
+                const doMes = ordens.filter(o => getDatasOrdem(o).some(d => d.startsWith(ym)));
                 const conc = doMes.filter(o => o.status === 'concluido').length;
                 progData.push(doMes.length);
                 concData.push(conc);
@@ -2950,6 +3895,8 @@
                 const done = chk.filter(x => x.status).length;
                 const pct = chk.length ? Math.round((done / chk.length) * 100) : 0;
                 const fotos = Array.isArray(o.fotos) ? o.fotos.length : 0;
+                const datasOrd = getDatasOrdem(o);
+                const isoInfo = getIsoWeekInfo(o.data);
                 return `
                     <div class="glass-card glass-card-hover p-5 rounded-3xl flex flex-col justify-between gap-3 ${st === 'atrasada' ? 'border-rose-300' : ''}">
                         <div class="space-y-2">
@@ -2959,7 +3906,7 @@
                                     ${o.criticidade ? `<span class="px-2 py-0.5 rounded-full text-[10px] font-extrabold ${critCls}">Classe ${o.criticidade}</span>` : ''}
                                     ${o.paradaNecessaria === 'sim' ? `<span class="px-2 py-0.5 rounded-full text-[10px] font-extrabold bg-amber-100 text-amber-800">Máq. Parada</span>` : ''}
                                 </div>
-                                <span class="text-xs font-extrabold text-slate-700">${formatDateBR(o.data)} ${escapeHtml(o.hora || '')}</span>
+                                <span class="text-xs font-extrabold text-slate-700"><span class="px-1.5 py-0.5 rounded bg-slate-900 text-white text-[9px] mr-1">S${isoInfo.week}</span>${formatPeriodoDatasOrdemBR(o)}${datasOrd.length > 1 ? ` (${formatDiasOrdemCompacto(datasOrd)})` : ''} ${escapeHtml(o.hora || '')}</span>
                             </div>
                             <h3 class="text-sm font-extrabold text-slate-900">${escapeHtml(o.titulo)}</h3>
                             <p class="text-xs font-semibold text-slate-600">${escapeHtml([o.setor, o.maquina, o.equipamento, o.conjunto, o.subconjunto].filter(Boolean).join(' › ') || '—')}</p>
@@ -2993,6 +3940,8 @@
             const st = getStatusEfetivo(o, getHojeStr());
             const stMeta = STATUS_META[st] || STATUS_META.pendente;
             const critCls = CRITICIDADES[o.criticidade]?.cls || 'crit-none';
+            const isoInfo = getIsoWeekInfo(o.data);
+            const datasOrd = getDatasOrdem(o);
 
             document.getElementById('execOrdemId').value = o.id;
             document.getElementById('execHeaderBadge').innerHTML = `
@@ -3004,7 +3953,7 @@
             document.getElementById('execAtivoCaminho').innerText = [o.setor, o.maquina, o.equipamento, o.conjunto, o.subconjunto, o.tag ? `TAG ${o.tag}` : ''].filter(Boolean).join(' › ') || 'Atividade da Agenda PCM';
 
             document.getElementById('execMetaStrip').innerHTML = `
-                <div class="p-2.5 rounded-xl bg-slate-50 border border-slate-200"><div class="text-[10px] font-extrabold uppercase text-slate-400">Data Programada</div><div class="font-extrabold text-slate-800">${formatDateBR(o.data)} ${escapeHtml(o.hora || '')}</div></div>
+                <div class="p-2.5 rounded-xl bg-slate-50 border border-slate-200"><div class="text-[10px] font-extrabold uppercase text-slate-400">Data Programada (S${isoInfo.week})</div><div class="font-extrabold text-slate-800">${formatPeriodoDatasOrdemBR(o)}${datasOrd.length > 1 ? ` • ${formatDiasOrdemCompacto(datasOrd)}` : ''} ${escapeHtml(o.hora || '')}</div></div>
                 <div class="p-2.5 rounded-xl bg-slate-50 border border-slate-200"><div class="text-[10px] font-extrabold uppercase text-slate-400">Responsável / Equipe</div><div class="font-extrabold text-slate-800 truncate">${escapeHtml(o.responsavel || o.equipe || '—')}</div></div>
                 <div class="p-2.5 rounded-xl bg-slate-50 border border-slate-200"><div class="text-[10px] font-extrabold uppercase text-slate-400">EPIs / Bloqueios</div><div class="font-bold text-slate-700 truncate">${escapeHtml(o.epis || plano?.epis || 'Padrão PCM')}</div></div>
                 <div class="p-2.5 rounded-xl bg-slate-50 border border-slate-200"><div class="text-[10px] font-extrabold uppercase text-slate-400">Peças Previstas</div><div class="font-bold text-slate-700 truncate">${escapeHtml(o.pecas || plano?.pecas || '—')}</div></div>`;
@@ -3251,6 +4200,7 @@
             const checklistBase = (plano?.checklist || o.checklistExec || []).map(it => ({
                 id: it.id, tarefa: it.tarefa, criterio: it.criterio || '', peca: it.peca || '', critico: Boolean(it.critico), status: '', obs: ''
             }));
+            const proxIso = getIsoWeekInfo(proxData);
             const btn = document.getElementById('btnConfirmarFlut');
             btn.disabled = true; btn.innerText = 'Agendando...';
             try {
@@ -3260,6 +4210,10 @@
                     tipo: 'preventiva',
                     status: 'pendente',
                     data: proxData,
+                    dataFim: proxData,
+                    datas: [proxData],
+                    semana: proxIso.week,
+                    ano: proxIso.isoYear,
                     dataOriginal: proxData,
                     hora: document.getElementById('flutHora').value || '08:00',
                     titulo: o.titulo,
@@ -3292,7 +4246,7 @@
                     criadoEm: new Date().toISOString()
                 });
                 fecharModal('modalProxFlutuante');
-                showToast(`Próxima preventiva flutuante agendada para ${formatDateBR(proxData)}!`, 'success');
+                showToast(`Próxima preventiva flutuante agendada para ${formatDateBR(proxData)} (S${proxIso.week})!`, 'success');
             } catch (_) {
                 showToast('Erro ao agendar próxima preventiva.', 'error');
             } finally {
@@ -3343,6 +4297,8 @@
                 </div>` : '';
 
             const stLabel = STATUS_META[getStatusEfetivo(o, getHojeStr())]?.label || o.status;
+            const wi = getIsoWeekInfo(o.data);
+            const datasOrd = getDatasOrdem(o);
             const w = window.open('', '_blank');
             if (!w) { showToast('Permita pop-ups para gerar o Relatório A4.', 'error'); return; }
             w.document.write(`<!DOCTYPE html><html lang="pt-BR"><head><meta charset="UTF-8"><title>Relatório Preventiva — ${escapeHtml(o.planoCodigo || o.titulo)}</title><style>
@@ -3377,7 +4333,7 @@
                     <div class="box" style="grid-column:span 2"><div class="lbl">Ativo (Árvore Gestão de Ativos)</div><div class="val">${escapeHtml([o.setor, o.maquina, o.equipamento, o.conjunto, o.subconjunto].filter(Boolean).join(' › ') || '—')}</div></div>
                     <div class="box"><div class="lbl">TAG / Criticidade</div><div class="val">${escapeHtml(o.tag || '—')} • Classe ${escapeHtml(o.criticidade || '—')}</div></div>
                     <div class="box"><div class="lbl">Periodicidade / Modo</div><div class="val">${escapeHtml(o.periodicidade || '—')} (${o.modoAgendamento === 'flutuante' ? 'Flutuante' : 'Fixo'})</div></div>
-                    <div class="box"><div class="lbl">Data Programada</div><div class="val">${formatDateBR(o.data)} ${escapeHtml(o.hora || '')}</div></div>
+                    <div class="box"><div class="lbl">Data Programada</div><div class="val">S${wi.week} • ${formatPeriodoDatasOrdemBR(o)}${datasOrd.length > 1 ? ` (${formatDiasOrdemCompacto(datasOrd)})` : ''} ${escapeHtml(o.hora || '')}</div></div>
                     <div class="box"><div class="lbl">Conclusão Real</div><div class="val">${o.dataConclusao ? formatDateBR(o.dataConclusao) : 'Em aberto'}</div></div>
                     <div class="box"><div class="lbl">Equipe / Executante</div><div class="val">${escapeHtml(o.equipe || '—')} / ${escapeHtml(o.executadoPor || o.responsavel || '—')}</div></div>
                     <div class="box"><div class="lbl">Tempo Plan. / Real</div><div class="val">${formatDuracaoHH(o.duracaoEstimadaMin || 60)} / ${formatDuracaoHH(durReal || 0)}</div></div>
@@ -3403,14 +4359,14 @@
         // ================= ATALHOS DE TECLADO =================
         document.addEventListener('keydown', (e) => {
             if (e.key === 'Escape') {
-                ['modalZoomFoto', 'deleteOverlay', 'modalProxFlutuante', 'modalReprogramar', 'modalExecutarPreventiva', 'modalDiaCal', 'modalProgramarPreventiva', 'modalEditorPlano', 'modalEspacoUsuario', 'modalAtalhos'].forEach(fecharModal);
+                ['modalZoomFoto', 'deleteOverlay', 'modalProxFlutuante', 'modalReprogramar', 'modalExecutarPreventiva', 'modalDiaCal', 'modalSemana52Prev', 'modalResumoSemana52', 'modalProgramarPreventiva', 'modalEditorPlano', 'modalEspacoUsuario', 'modalAtalhos'].forEach(fecharModal);
                 return;
             }
             if (e.ctrlKey && e.key === '?') { e.preventDefault(); abrirModalAtalhos(); return; }
             if (e.altKey && e.key.toLowerCase() === 'u') { e.preventDefault(); abrirEspacoUsuario(); return; }
             if (e.altKey && e.key.toLowerCase() === 't') { e.preventDefault(); toggleTabletMode(); return; }
             if (e.altKey && isGestao) {
-                const map = { '1': 'cockpit', '2': 'calendario', '3': 'planos', '4': 'ordens', '5': 'indicadores', '6': 'tecnico' };
+                const map = { '1': 'cockpit', '2': 'calendario', '3': 'semanas52', '4': 'planos', '5': 'ordens', '6': 'indicadores', '7': 'tecnico' };
                 if (map[e.key]) { e.preventDefault(); switchView(map[e.key]); }
             }
         });
@@ -3449,7 +4405,7 @@
             if (navGestao) navGestao.classList.toggle('hidden', !isGestao);
             if (hdrGestao) hdrGestao.classList.toggle('hidden', !isGestao);
 
-            ['mtab-cockpit', 'mtab-calendario', 'mtab-planos', 'mtab-ordens'].forEach(id => {
+            ['mtab-cockpit', 'mtab-calendario', 'mtab-semanas52', 'mtab-planos', 'mtab-ordens'].forEach(id => {
                 const el = document.getElementById(id);
                 if (el) el.classList.toggle('hidden', !isGestao);
             });
