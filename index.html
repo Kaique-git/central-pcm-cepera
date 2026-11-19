@@ -1887,7 +1887,13 @@
                     safeStorage.set('cepera_agendamento_handoff', JSON.stringify(ev.data.handoff));
                 }
                 if (!usuarioLogado) return;
-                abrirAppWorkspace(targetId, Boolean(ev.data.forceReload || ev.data.handoff));
+                if (!usuarioPodeAcessarApp(usuarioLogado, targetId)) {
+                    try { ev.source?.postMessage?.({ type: 'CEPERA_NAVEGAR_ACK', appId: targetId, denied: true }, '*'); } catch (_) {}
+                    showToast("Acesso negado pelo controle RBAC para este aplicativo.", "error");
+                    return;
+                }
+                try { ev.source?.postMessage?.({ type: 'CEPERA_NAVEGAR_ACK', appId: targetId }, '*'); } catch (_) {}
+                abrirAppWorkspace(targetId, true);
             }
         });
 

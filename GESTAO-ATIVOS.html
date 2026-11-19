@@ -941,7 +941,7 @@
 
     <!-- ==================== MODAL AGENDAR PROGRAMADA DO CONJUNTO ==================== -->
     <div id="modalAgendarConjunto" role="dialog" aria-modal="true" hidden class="hidden fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-50 flex items-end sm:items-center justify-center p-0 sm:p-4">
-        <div class="bg-white w-full sm:max-w-xl rounded-t-3xl sm:rounded-3xl shadow-2xl border border-slate-200 max-h-[92vh] flex flex-col overflow-hidden">
+        <div class="bg-white w-full sm:max-w-2xl rounded-t-3xl sm:rounded-3xl shadow-2xl border border-slate-200 max-h-[92vh] flex flex-col overflow-hidden">
             <div class="px-6 py-4 border-b border-slate-100 bg-slate-50 flex items-start justify-between gap-3">
                 <div class="min-w-0 space-y-0.5">
                     <span class="text-[10px] font-extrabold uppercase tracking-widest text-emerald-700">Agendamento Integrado • Conjunto Selecionado</span>
@@ -953,6 +953,11 @@
 
             <div class="flex-1 overflow-y-auto p-5 sm:p-6 space-y-4 text-xs">
                 <div id="agConjuntoResumoExistente" hidden class="hidden p-3 rounded-2xl bg-sky-50 border border-sky-200 text-[11px] font-bold text-sky-900"></div>
+
+                <div id="agConjuntoProgramadosBox" hidden class="hidden p-3.5 rounded-2xl bg-slate-50 border border-slate-200/90 space-y-2">
+                    <div class="text-[10px] font-extrabold uppercase tracking-wider text-slate-600">Já Programado &amp; Anomalias em Aberto neste Conjunto</div>
+                    <div id="agConjuntoProgramadosLista" class="max-h-36 overflow-y-auto space-y-1.5 pr-1"></div>
+                </div>
 
                 <!-- OPÇÃO 1: AGENDA PCM -->
                 <div class="p-4 rounded-2xl bg-slate-50 border border-slate-200/80 space-y-3">
@@ -998,10 +1003,27 @@
                         </button>
                     </div>
                 </div>
+
+                <!-- OPÇÃO 3: INSPEÇÃO DE ROTA (ROTAS 52 SEMANAS & PLANO CIRÚRGICO) -->
+                <div class="p-4 rounded-2xl bg-indigo-50/60 border border-indigo-200/80 space-y-3">
+                    <div>
+                        <div class="text-xs font-extrabold text-slate-900">3. Inspeção de Rota (Rotas 52 Semanas &amp; Plano Cirúrgico)</div>
+                        <p class="text-[11px] text-slate-500 font-semibold mt-0.5">Acesse a programação de rotas semanais ou o plano cirúrgico de inspeção deste conjunto.</p>
+                    </div>
+                    <div id="agModalInspAviso" hidden class="hidden p-2.5 rounded-xl bg-amber-50 border border-amber-200 text-[11px] font-bold text-amber-900"></div>
+                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-2">
+                        <button type="button" onclick="executarHandoffAgendamento('inspecao_rota', 'inspecao_plano')" class="btn-touch bg-white hover:bg-slate-50 border border-slate-200 text-slate-800 text-[11px] justify-center py-2.5 px-3">
+                            <span>Plano Cirúrgico →</span>
+                        </button>
+                        <button type="button" onclick="executarHandoffAgendamento('inspecao_rota', 'inspecao_52s')" class="btn-touch bg-indigo-600 hover:bg-indigo-700 text-white text-[11px] justify-center py-2.5 px-3 shadow-sm">
+                            <span>Inspeção 52 Semanas →</span>
+                        </button>
+                    </div>
+                </div>
             </div>
 
             <div class="px-6 py-3.5 border-t border-slate-100 bg-slate-50 flex items-center justify-between">
-                <span class="text-[10px] font-semibold text-slate-400">Navegação integrada no workspace da Central.</span>
+                <span class="text-[10px] font-semibold text-slate-400">Navegação integrada com fallback automático no workspace.</span>
                 <button type="button" onclick="fecharModal('modalAgendarConjunto')" class="btn-touch bg-white border border-slate-200 text-slate-700 text-xs">Fechar</button>
             </div>
         </div>
@@ -1164,6 +1186,10 @@
         let pendingCloneCtx = null;
         let pendingRenameCtx = null;
         let pendingAgendarCtx = null;
+        let active360Tab = 'programados';
+        let active360AnomFilter = 'todas';
+        let last360Nodes = [];
+        let last360Level = '';
         let parsedCsvRows = [];
         let chartCritInstance = null;
         let chartPerInstance = null;
@@ -1871,6 +1897,35 @@
         }
 
         // ================= AGENDAMENTO DIRETO DO CONJUNTO =================
+        function formatDataBr360(val) {
+            if (!val && val !== 0) return '—';
+            if (typeof val === 'number') {
+                const dt = new Date(val);
+                if (Number.isNaN(dt.getTime())) return '—';
+                return dt.toLocaleDateString('pt-BR');
+            }
+            const s = String(val).trim();
+            if (/^\d{4}-\d{2}-\d{2}/.test(s)) {
+                const [y, m, d] = s.slice(0, 10).split('-');
+                return `${d}/${m}/${y}`;
+            }
+            const n = Number(s);
+            if (!Number.isNaN(n) && n > 1e11) return new Date(n).toLocaleDateString('pt-BR');
+            const dt = new Date(s);
+            return Number.isNaN(dt.getTime()) ? s.slice(0, 16) : dt.toLocaleDateString('pt-BR');
+        }
+
+        function sortTimestamp360(val) {
+            if (!val && val !== 0) return 0;
+            if (typeof val === 'number') return val;
+            const s = String(val).trim();
+            if (/^\d{4}-\d{2}-\d{2}$/.test(s)) return new Date(`${s}T12:00:00Z`).getTime() || 0;
+            const n = Number(s);
+            if (!Number.isNaN(n) && n > 1e11) return n;
+            const t = new Date(s).getTime();
+            return Number.isNaN(t) ? 0 : t;
+        }
+
         window.abrirModalAgendarConjunto = (area, maquina, equipamento, conjunto, nodeId = '') => {
             const areaN = normKey(area);
             const maqN = normKey(maquina);
@@ -1883,6 +1938,7 @@
                 normKey(n.conjunto) === cjN
             );
             const rep = (nodeId && leafs.find(n => n.nodeId === nodeId)) || leafs[0] || {};
+            const inspAtiva = leafs.length ? leafs.some(n => n.inspecao_ativa !== false) : true;
 
             pendingAgendarCtx = {
                 area: area || rep.area || '',
@@ -1897,7 +1953,8 @@
                 padrinho_mec: rep.padrinho_mec || '',
                 padrinho_ele: rep.padrinho_ele || '',
                 nodeId: rep.nodeId || '',
-                docId: rep.docId || ''
+                docId: rep.docId || '',
+                inspecao_ativa: inspAtiva
             };
 
             const titEl = document.getElementById('agConjuntoTitulo');
@@ -1916,32 +1973,71 @@
                     </div>`;
             }
 
-            const planosMatch = listaManutencao.filter(d => {
-                if (!d || d.kind !== 'plano_preventiva') return false;
-                if (normKey(d.equipamento) !== eqN) return false;
-                if (d.conjunto && normKey(d.conjunto) !== cjN) return false;
-                if (d.setor && normKey(d.setor) !== areaN) return false;
-                return true;
-            }).sort((a, b) => ((normKey(b.conjunto) === cjN ? 1 : 0) - (normKey(a.conjunto) === cjN ? 1 : 0)) || String(a.codigo || '').localeCompare(String(b.codigo || '')));
-
-            const pendentesConj = listaManutencao.filter(d => {
-                if (!d || d.kind === 'plano_preventiva' || d.kind === 'recado') return false;
-                if (d.status === 'concluido' || d.status === 'cancelado') return false;
-                const matchAtivo = d.ativoId && leafs.some(n => n.docId === d.ativoId || n.nodeId === d.ativoId);
-                const matchConj = normKey(d.equipamento) === eqN && (!d.conjunto || normKey(d.conjunto) === cjN);
-                return matchAtivo || matchConj;
-            });
+            const cruz = getDadosCruzados360(leafs.length ? leafs : [pendingAgendarCtx], 'conjunto');
+            const planosMatch = cruz.planosPreventiva;
+            const pendentesConj = cruz.programacoesAbertas;
+            const rotasPend = cruz.rotasPendentes;
+            const anomPend = cruz.anomaliasAbertas;
 
             const resEl = document.getElementById('agConjuntoResumoExistente');
             if (resEl) {
-                if (planosMatch.length || pendentesConj.length) {
+                if (planosMatch.length || pendentesConj.length || rotasPend.length || anomPend.length) {
                     resEl.hidden = false;
                     resEl.classList.remove('hidden');
-                    resEl.innerText = `Resumo atual deste conjunto: ${planosMatch.length} plano(s) preventivo(s) cadastrado(s) e ${pendentesConj.length} programação(ões) em aberto na Agenda.`;
+                    const partes = [
+                        `${planosMatch.length} plano(s) preventivo(s)`,
+                        `${pendentesConj.length} programação(ões) em aberto`
+                    ];
+                    if (rotasPend.length) partes.push(`${rotasPend.length} rota(s) de inspeção S52`);
+                    if (anomPend.length) partes.push(`${anomPend.length} anomalia(s) aberta(s)`);
+                    resEl.innerText = `Resumo atual deste conjunto: ${partes.join(' • ')}.`;
                 } else {
                     resEl.hidden = true;
                     resEl.classList.add('hidden');
                     resEl.innerText = '';
+                }
+            }
+
+            const progBox = document.getElementById('agConjuntoProgramadosBox');
+            const progLista = document.getElementById('agConjuntoProgramadosLista');
+            if (progBox && progLista) {
+                const previews = [];
+                pendentesConj.forEach(o => {
+                    const dataLbl = o.data ? `${o.semana ? 'S' + o.semana + ' • ' : ''}${formatDataBr360(o.data)}` : 'Sem data';
+                    previews.push(`<div class="p-2 rounded-xl bg-white border border-slate-200 flex items-center justify-between gap-2">
+                        <div class="min-w-0">
+                            <div class="text-[11px] font-extrabold text-slate-800 truncate">${escapeHtml(o.titulo || 'Programada')}</div>
+                            <div class="text-[10px] font-semibold text-slate-500">${escapeHtml(o.tipo || 'preventiva').toUpperCase()} • ${escapeHtml(dataLbl)} • ${escapeHtml(o.responsavel || o.equipe || 'PCM')}</div>
+                        </div>
+                        <span class="px-2 py-0.5 rounded-full text-[9px] font-extrabold bg-amber-100 text-amber-800 shrink-0">${escapeHtml(o.status || 'pendente')}</span>
+                    </div>`);
+                });
+                rotasPend.forEach(r => {
+                    previews.push(`<div class="p-2 rounded-xl bg-white border border-indigo-200/80 flex items-center justify-between gap-2">
+                        <div class="min-w-0">
+                            <div class="text-[11px] font-extrabold text-slate-800 truncate">Inspeção de Rota • ${escapeHtml(r.conjunto || pendingAgendarCtx.conjunto)}</div>
+                            <div class="text-[10px] font-semibold text-slate-500">Semana ${escapeHtml(String(r.semana || '-'))} • ${escapeHtml(r.nome_tecnico || 'Técnico')} (${escapeHtml(r.role_tecnico || '-')})</div>
+                        </div>
+                        <span class="px-2 py-0.5 rounded-full text-[9px] font-extrabold bg-indigo-100 text-indigo-800 shrink-0">S${escapeHtml(String(r.semana || '-'))}</span>
+                    </div>`);
+                });
+                anomPend.slice(0, 3).forEach(a => {
+                    previews.push(`<div class="p-2 rounded-xl bg-rose-50/70 border border-rose-200/80 flex items-center justify-between gap-2">
+                        <div class="min-w-0">
+                            <div class="text-[11px] font-extrabold text-rose-900 truncate">Anomalia (${escapeHtml(a.urgencia || 'Média')}): ${escapeHtml(a.componente || a.conjunto || 'Ponto')}</div>
+                            <div class="text-[10px] font-semibold text-rose-700 truncate">${escapeHtml(a.descricao || a.defeito || '')}</div>
+                        </div>
+                        <span class="px-2 py-0.5 rounded-full text-[9px] font-extrabold bg-rose-100 text-rose-700 shrink-0">${escapeHtml(a.status || 'Pendente')}</span>
+                    </div>`);
+                });
+                if (previews.length) {
+                    progBox.hidden = false;
+                    progBox.classList.remove('hidden');
+                    progLista.innerHTML = previews.join('');
+                } else {
+                    progBox.hidden = true;
+                    progBox.classList.add('hidden');
+                    progLista.innerHTML = '';
                 }
             }
 
@@ -1971,6 +2067,19 @@
                 }
             }
 
+            const inspAviso = document.getElementById('agModalInspAviso');
+            if (inspAviso) {
+                if (!inspAtiva) {
+                    inspAviso.hidden = false;
+                    inspAviso.classList.remove('hidden');
+                    inspAviso.innerText = 'Obs.: este conjunto está marcado como "Não Ativo (Oculto)" nas rotas 52 Semanas da Inspeção.';
+                } else {
+                    inspAviso.hidden = true;
+                    inspAviso.classList.add('hidden');
+                    inspAviso.innerText = '';
+                }
+            }
+
             abrirModal('modalAgendarConjunto');
         };
 
@@ -1992,62 +2101,424 @@
 
             safeStorage.set('cepera_agendamento_handoff', JSON.stringify(handoff));
             fecharModal('modalAgendarConjunto');
+            showToast('Abrindo módulo de agendamento...');
+
+            const fileMap = {
+                agenda_pcm: 'AGENDA-PCM.html',
+                preventivas: 'PREVENTIVAS.html',
+                inspecao_rota: 'INSPEÇÃO DE ROTA.html'
+            };
+            const targetFile = fileMap[targetApp] || 'AGENDA-PCM.html';
+            const fallbackUrl = `${encodeURI(targetFile)}?agendar=1&v=${Date.now()}`;
 
             if (window.parent && window.parent !== window) {
-                window.parent.postMessage({ type: 'CEPERA_NAVEGAR_APP', appId: targetApp, forceReload: true, handoff }, '*');
+                let acked = false;
+                const markAck = (ev) => {
+                    if (ev?.data?.type === 'CEPERA_NAVEGAR_ACK' && ev.data.appId === targetApp) {
+                        acked = true;
+                    }
+                };
+                const onHide = () => { acked = true; };
+                if (typeof window.addEventListener === 'function') {
+                    window.addEventListener('message', markAck);
+                    window.addEventListener('pagehide', onHide, { once: true });
+                }
+                try {
+                    window.parent.postMessage({ type: 'CEPERA_NAVEGAR_APP', appId: targetApp, forceReload: true, handoff }, '*');
+                } catch (_) {}
+
+                setTimeout(() => {
+                    if (typeof window.removeEventListener === 'function') {
+                        window.removeEventListener('message', markAck);
+                    }
+                    if (!acked) {
+                        window.location.href = fallbackUrl;
+                    }
+                }, 180);
             } else {
-                const file = targetApp === 'preventivas' ? 'PREVENTIVAS.html' : 'AGENDA-PCM.html';
-                window.location.href = `${encodeURI(file)}?agendar=1`;
+                window.location.href = fallbackUrl;
             }
         };
 
-        // ================= VISÃO CRUZADA 360° (OUTROS MÓDULOS) =================
-        function getDadosCruzados360(nodes) {
-            const ids = new Set(nodes.map(n => n.docId));
-            const eqKeys = new Set(nodes.map(n => `${normKey(n.maquina)}|${normKey(n.equipamento)}`));
-
-            const anomalias = listaAnomalias.filter(a => {
-                if (a.status === 'Resolvido' || a.status === 'Concluído' || a.status === 'Rejeitado') return false;
-                if (a.id_node && ids.has(a.id_node)) return true;
-                return eqKeys.has(`${normKey(a.maquina)}|${normKey(a.equipamento)}`);
-            });
-
-            const rotasAgendadas = listaAgenda.filter(ag => ids.has(ag.id_node));
-            const planos = listaChecklists.filter(c => ids.has(c.id_node));
-            const pecasObs = listaObsPecas.filter(p => eqKeys.has(`${normKey(p.maquina)}|${normKey(p.equipamento)}`));
-
-            return { anomalias, rotasAgendadas, planos, pecasObs };
+        // ================= VISÃO CRUZADA 360° E HISTÓRICO COMPLETO =================
+        function isStatusConcluidoManut(st) {
+            const k = normKey(st);
+            return k === 'concluido' || k === 'concluida' || k === 'resolvido' || k === 'resolvida';
         }
 
-        function renderBlocoCruzado360(nodes) {
-            const { anomalias, rotasAgendadas, planos, pecasObs } = getDadosCruzados360(nodes);
+        function isStatusAnomaliaRejeitada(a) {
+            const st = normKey(a?.status);
+            const ap = normKey(a?.status_aprovacao);
+            return st === 'rejeitada' || st === 'rejeitado' || ap === 'rejeitada';
+        }
+
+        function getDadosCruzados360(nodes, scopeLevel = '') {
+            const lista = Array.isArray(nodes) ? nodes : [];
+            const docIds = new Set(lista.map(n => n.docId).filter(Boolean));
+            const nodeIds = new Set(lista.map(n => n.nodeId).filter(Boolean));
+            const eqKeys = new Set(lista.map(n => `${normKey(n.maquina)}|${normKey(n.equipamento)}`));
+            const equipSet = new Set(lista.map(n => normKey(n.equipamento)).filter(Boolean));
+            const areaSet = new Set(lista.map(n => normKey(n.area)).filter(Boolean));
+            const conjSet = new Set(lista.map(n => normKey(n.conjunto)).filter(Boolean));
+            const isConjScope = scopeLevel === 'conjunto' || scopeLevel === 'leaf';
+
+            const matchConjValue = (rawConj) => {
+                if (!isConjScope) return true;
+                const cNorm = normKey(rawConj);
+                if (!cNorm || cNorm === 'conjunto geral') return true;
+                if (conjSet.has(cNorm)) return true;
+                for (const c of conjSet) {
+                    if (cNorm.startsWith(`${c} >`) || cNorm.startsWith(`${c} ›`) || cNorm === c) return true;
+                }
+                return false;
+            };
+
+            const matchIdRef = (idStr) => {
+                if (!idStr) return false;
+                const s = String(idStr);
+                return docIds.has(s) || nodeIds.has(s) || docIds.has(s.split('_')[0]);
+            };
+
+            const matchEquipFallback = (item) => {
+                const mk = normKey(item?.maquina);
+                const ek = normKey(item?.equipamento);
+                if (mk && ek && eqKeys.has(`${mk}|${ek}`)) return matchConjValue(item?.conjunto);
+                if (!mk && ek && equipSet.has(ek)) {
+                    if (item?.setor || item?.area) {
+                        if (!areaSet.has(normKey(item.setor || item.area))) return false;
+                    }
+                    return matchConjValue(item?.conjunto);
+                }
+                return false;
+            };
+
+            const anomaliasTodas = listaAnomalias.filter(a => {
+                if (!a) return false;
+                if (a.id_node && matchIdRef(a.id_node)) return matchConjValue(a.conjunto);
+                return matchEquipFallback(a);
+            }).sort((a, b) => sortTimestamp360(b.data_validacao || b.data_rejeicao || b.timestamp) - sortTimestamp360(a.data_validacao || a.data_rejeicao || a.timestamp));
+
+            const anomaliasAbertas = anomaliasTodas.filter(a => !isStatusConcluidoManut(a.status) && !isStatusAnomaliaRejeitada(a));
+            const anomaliasHistorico = anomaliasTodas.filter(a => isStatusConcluidoManut(a.status) || isStatusAnomaliaRejeitada(a));
+
+            const planosPreventiva = listaManutencao.filter(d => {
+                if (!d || d.kind !== 'plano_preventiva') return false;
+                return matchEquipFallback(d);
+            }).sort((a, b) => String(a.codigo || '').localeCompare(String(b.codigo || '')));
+
+            const programacoes = listaManutencao.filter(d => {
+                if (!d || d.kind === 'plano_preventiva' || d.kind === 'recado') return false;
+                if (d.ativoId && matchIdRef(d.ativoId)) return matchConjValue(d.conjunto);
+                if (matchEquipFallback(d)) return true;
+                if (!d.equipamento && d.titulo) {
+                    const titN = normKey(d.titulo);
+                    const hitConj = [...conjSet].some(c => c.length >= 4 && titN.includes(c));
+                    const hitEq = [...equipSet].some(e => e.length >= 3 && titN.includes(e));
+                    return hitConj && hitEq;
+                }
+                return false;
+            });
+
+            const programacoesAbertas = programacoes
+                .filter(o => !isStatusConcluidoManut(o.status) && normKey(o.status) !== 'cancelado')
+                .sort((a, b) => sortTimestamp360(a.data) - sortTimestamp360(b.data));
+
+            const programacoesHistorico = programacoes
+                .filter(o => isStatusConcluidoManut(o.status) || normKey(o.status) === 'cancelado')
+                .sort((a, b) => sortTimestamp360(b.concluidoEm || b.data) - sortTimestamp360(a.concluidoEm || a.data));
+
+            const rotasAgendadas = listaAgenda.filter(ag => {
+                if (!ag) return false;
+                if (ag.id_node && matchIdRef(ag.id_node)) return matchConjValue(ag.conjunto);
+                return matchEquipFallback(ag);
+            });
+
+            const rotasPendentes = rotasAgendadas
+                .filter(ag => normKey(ag.status) !== 'concluido')
+                .sort((a, b) => (Number(a.semana || 0) - Number(b.semana || 0)) || sortTimestamp360(b.timestamp) - sortTimestamp360(a.timestamp));
+
+            const rotasHistorico = rotasAgendadas
+                .filter(ag => normKey(ag.status) === 'concluido')
+                .sort((a, b) => sortTimestamp360(b.data_conclusao || b.data_aprovacao || b.timestamp) - sortTimestamp360(a.data_conclusao || a.data_aprovacao || a.timestamp));
+
+            const planos = listaChecklists.filter(c => {
+                if (!c) return false;
+                return matchIdRef(c.id_node);
+            });
+
+            const pecasObs = listaObsPecas.filter(p => matchEquipFallback(p));
+
+            const historicoTimeline = [];
+            programacoes.forEach(o => {
+                const ok = isStatusConcluidoManut(o.status);
+                const tipoN = String(o.tipo || 'preventiva').toUpperCase();
+                historicoTimeline.push({
+                    sortTs: sortTimestamp360(ok ? (o.concluidoEm || o.data || o.criadoEm) : (o.data || o.criadoEm)),
+                    dataTxt: `${o.semana ? 'S' + o.semana + ' • ' : ''}${formatDataBr360(ok ? (o.concluidoEm || o.data) : o.data)}`,
+                    modulo: o.origem === 'modulo_preventivas' ? 'Preventiva' : 'Agenda PCM',
+                    moduloCls: o.origem === 'modulo_preventivas' ? 'bg-sky-100 text-sky-800' : 'bg-emerald-100 text-emerald-800',
+                    statusLabel: o.status || 'pendente',
+                    statusCls: ok ? 'bg-emerald-100 text-emerald-800' : (normKey(o.status) === 'cancelado' ? 'bg-slate-200 text-slate-600' : 'bg-amber-100 text-amber-800'),
+                    titulo: o.titulo || `${tipoN} — ${o.conjunto || o.equipamento}`,
+                    detalhe: [o.conjunto, o.equipe, o.responsavel || o.concluidoPor ? `Resp.: ${o.concluidoPor || o.responsavel}` : '', o.descricao].filter(Boolean).join(' • ')
+                });
+            });
+
+            rotasAgendadas.forEach(r => {
+                const ok = normKey(r.status) === 'concluido';
+                const propQtd = Array.isArray(r.anomalias_propostas) ? r.anomalias_propostas.length : 0;
+                const respQtd = Array.isArray(r.checklist_respostas) ? r.checklist_respostas.length : 0;
+                historicoTimeline.push({
+                    sortTs: sortTimestamp360(r.data_conclusao || r.timestamp),
+                    dataTxt: `S${r.semana || '-'} • ${formatDataBr360(r.data_conclusao || r.timestamp)}`,
+                    modulo: 'Inspeção Rota',
+                    moduloCls: 'bg-indigo-100 text-indigo-800',
+                    statusLabel: ok ? (r.status_supervisao || 'Concluído') : (r.status || 'Pendente'),
+                    statusCls: ok ? 'bg-emerald-100 text-emerald-800' : 'bg-indigo-50 text-indigo-800',
+                    titulo: `Rota S${r.semana || '-'} — ${r.conjunto || r.equipamento || 'Conjunto'}`,
+                    detalhe: [`Téc.: ${r.nome_tecnico || 'Não definido'} (${r.role_tecnico || '-'})`, respQtd ? `${respQtd} item(ns) checados` : '', propQtd ? `${propQtd} anomalia(s) apontada(s)` : ''].filter(Boolean).join(' • ')
+                });
+            });
+
+            anomaliasTodas.forEach(a => {
+                const rej = isStatusAnomaliaRejeitada(a);
+                const ok = isStatusConcluidoManut(a.status);
+                historicoTimeline.push({
+                    sortTs: sortTimestamp360(a.data_validacao || a.data_rejeicao || a.timestamp),
+                    dataTxt: formatDataBr360(a.data_validacao || a.data_rejeicao || a.timestamp),
+                    modulo: 'Anomalia Insp.',
+                    moduloCls: rej ? 'bg-amber-100 text-amber-900' : 'bg-rose-100 text-rose-800',
+                    statusLabel: a.status || 'Pendente',
+                    statusCls: ok ? 'bg-emerald-100 text-emerald-800' : (rej ? 'bg-amber-100 text-amber-900' : 'bg-rose-100 text-rose-800'),
+                    titulo: `${a.componente || a.conjunto || 'Anomalia'} (${a.urgencia || 'Média'})`,
+                    detalhe: [a.descricao || a.defeito || '', a.equipe_responsavel ? `Equipe: ${a.equipe_responsavel}` : '', a.relator ? `Relator: ${a.relator}` : '', a.motivo_rejeicao ? `Motivo: ${a.motivo_rejeicao}` : ''].filter(Boolean).join(' • ')
+                });
+            });
+
+            historicoTimeline.sort((a, b) => b.sortTs - a.sortTs);
+
+            return {
+                anomalias: anomaliasAbertas,
+                anomaliasTodas,
+                anomaliasAbertas,
+                anomaliasHistorico,
+                rotasAgendadas,
+                rotasPendentes,
+                rotasHistorico,
+                planos,
+                planosPreventiva,
+                programacoes,
+                programacoesAbertas,
+                programacoesHistorico,
+                pecasObs,
+                historicoTimeline
+            };
+        }
+
+        window.setAbaHistorico360 = (tab) => {
+            active360Tab = ['programados', 'anomalias', 'execucoes', 'timeline'].includes(tab) ? tab : 'programados';
+            const wrap = document.getElementById('bloco360Wrapper');
+            if (wrap) wrap.innerHTML = renderBlocoCruzado360(last360Nodes, last360Level);
+        };
+
+        window.setFiltroAnom360 = (f) => {
+            active360AnomFilter = ['todas', 'abertas', 'concluidas', 'reprovadas'].includes(f) ? f : 'todas';
+            active360Tab = 'anomalias';
+            const wrap = document.getElementById('bloco360Wrapper');
+            if (wrap) wrap.innerHTML = renderBlocoCruzado360(last360Nodes, last360Level);
+        };
+
+        function renderBlocoCruzado360(nodes, scopeLevel = '') {
+            last360Nodes = Array.isArray(nodes) ? nodes : [];
+            last360Level = scopeLevel || '';
+            const d = getDadosCruzados360(last360Nodes, last360Level);
+            const qtdProgAbertas = d.programacoesAbertas.length + d.rotasPendentes.length;
+            const qtdExecucoes = d.programacoesHistorico.length + d.rotasHistorico.length;
+
+            let bodyHtml = '';
+
+            if (active360Tab === 'programados') {
+                const cardsProg = [];
+                d.programacoesAbertas.forEach(o => {
+                    const isPrev = o.origem === 'modulo_preventivas' || o.tipo === 'preventiva';
+                    cardsProg.push(`
+                    <div class="p-3 rounded-xl bg-white border border-slate-200 flex flex-wrap items-start justify-between gap-2">
+                        <div class="min-w-0 flex-1 space-y-0.5">
+                            <div class="flex flex-wrap items-center gap-1.5">
+                                <span class="px-2 py-0.5 rounded-full text-[9px] font-extrabold ${isPrev ? 'bg-sky-100 text-sky-800' : 'bg-emerald-100 text-emerald-800'}">${escapeHtml(isPrev ? 'Preventiva' : String(o.tipo || 'Agenda').toUpperCase())}</span>
+                                ${o.semana ? `<span class="px-2 py-0.5 rounded-full text-[9px] font-extrabold bg-slate-100 text-slate-700">S${escapeHtml(String(o.semana))}</span>` : ''}
+                                <span class="text-[10px] font-bold text-slate-500">${escapeHtml(formatDataBr360(o.data))}${o.hora ? ' às ' + escapeHtml(o.hora) : ''}</span>
+                            </div>
+                            <div class="text-xs font-extrabold text-slate-900 break-words">${escapeHtml(o.titulo || 'Programação')}</div>
+                            <div class="text-[11px] font-semibold text-slate-500">${escapeHtml([o.conjunto, o.subconjunto, o.equipe, o.responsavel ? 'Resp.: ' + o.responsavel : ''].filter(Boolean).join(' • '))}</div>
+                        </div>
+                        <span class="px-2.5 py-0.5 rounded-full text-[10px] font-extrabold bg-amber-100 text-amber-800 shrink-0">${escapeHtml(o.status || 'pendente')}</span>
+                    </div>`);
+                });
+                d.rotasPendentes.forEach(r => {
+                    cardsProg.push(`
+                    <div class="p-3 rounded-xl bg-white border border-indigo-200/80 flex flex-wrap items-start justify-between gap-2">
+                        <div class="min-w-0 flex-1 space-y-0.5">
+                            <div class="flex flex-wrap items-center gap-1.5">
+                                <span class="px-2 py-0.5 rounded-full text-[9px] font-extrabold bg-indigo-100 text-indigo-800">Inspeção de Rota</span>
+                                <span class="px-2 py-0.5 rounded-full text-[9px] font-extrabold bg-slate-100 text-slate-700">Semana ${escapeHtml(String(r.semana || '-'))}</span>
+                            </div>
+                            <div class="text-xs font-extrabold text-slate-900">${escapeHtml(r.conjunto || r.equipamento || 'Rota de Inspeção')}</div>
+                            <div class="text-[11px] font-semibold text-slate-500">Téc.: ${escapeHtml(r.nome_tecnico || 'Não definido')} • ${escapeHtml(r.role_tecnico || '-')}</div>
+                        </div>
+                        <span class="px-2.5 py-0.5 rounded-full text-[10px] font-extrabold bg-amber-100 text-amber-800 shrink-0">${escapeHtml(r.status || 'Pendente')}</span>
+                    </div>`);
+                });
+
+                const plansBadgeHtml = d.planosPreventiva.length ? `
+                    <div class="pt-2 space-y-1.5">
+                        <div class="text-[10px] font-extrabold uppercase text-sky-700">Planos Preventivos Vinculados (${d.planosPreventiva.length}):</div>
+                        ${d.planosPreventiva.map(p => `<div class="px-3 py-2 rounded-xl bg-sky-50/70 border border-sky-200 text-[11px] font-bold text-sky-950 flex flex-wrap items-center justify-between gap-2">
+                            <span>${escapeHtml(p.codigo ? p.codigo + ' — ' : '')}${escapeHtml(p.titulo || 'Plano')} (${escapeHtml(p.periodicidade || 'Mensal')})</span>
+                            <span class="text-[10px] text-sky-700">${Array.isArray(p.checklist) ? p.checklist.length : 0} itens no checklist</span>
+                        </div>`).join('')}
+                    </div>` : '';
+
+                bodyHtml = cardsProg.length
+                    ? `<div class="max-h-72 overflow-y-auto space-y-2 pr-1">${cardsProg.join('')}</div>${plansBadgeHtml}`
+                    : `<div class="p-4 rounded-xl bg-white border border-dashed border-slate-300 text-center text-xs font-bold text-slate-400">Nenhuma atividade pendente programada para este escopo no momento.</div>${plansBadgeHtml}`;
+            } else if (active360Tab === 'anomalias') {
+                const subPills = [
+                    { k: 'todas', lbl: `Todas (${d.anomaliasTodas.length})` },
+                    { k: 'abertas', lbl: `Abertas (${d.anomaliasAbertas.length})` },
+                    { k: 'concluidas', lbl: `Concluídas (${d.anomaliasHistorico.filter(x => !isStatusAnomaliaRejeitada(x)).length})` },
+                    { k: 'reprovadas', lbl: `Reprovadas (${d.anomaliasTodas.filter(isStatusAnomaliaRejeitada).length})` }
+                ];
+                let listAnom = d.anomaliasTodas;
+                if (active360AnomFilter === 'abertas') listAnom = d.anomaliasAbertas;
+                else if (active360AnomFilter === 'concluidas') listAnom = d.anomaliasHistorico.filter(x => !isStatusAnomaliaRejeitada(x));
+                else if (active360AnomFilter === 'reprovadas') listAnom = d.anomaliasTodas.filter(isStatusAnomaliaRejeitada);
+
+                const filterBar = `<div class="flex flex-wrap gap-1.5 mb-2">${subPills.map(sp => `
+                    <button type="button" onclick="setFiltroAnom360('${sp.k}')" class="px-2.5 py-1 rounded-full text-[10px] font-extrabold border transition-colors ${active360AnomFilter === sp.k ? 'bg-rose-600 text-white border-rose-600' : 'bg-white text-slate-600 border-slate-200 hover:bg-slate-100'}">${sp.lbl}</button>
+                `).join('')}</div>`;
+
+                bodyHtml = filterBar + (listAnom.length ? `<div class="max-h-72 overflow-y-auto space-y-2 pr-1">${listAnom.map(a => {
+                    const rej = isStatusAnomaliaRejeitada(a);
+                    const ok = isStatusConcluidoManut(a.status);
+                    const stCls = ok ? 'bg-emerald-100 text-emerald-800' : (rej ? 'bg-amber-100 text-amber-900' : 'bg-rose-100 text-rose-800');
+                    const dtTxt = formatDataBr360(a.data_validacao || a.data_rejeicao || a.timestamp);
+                    return `
+                    <div class="p-3 rounded-xl bg-white border ${ok ? 'border-emerald-200/80' : (rej ? 'border-amber-200' : 'border-rose-200/80')} space-y-1">
+                        <div class="flex flex-wrap items-center justify-between gap-1.5">
+                            <div class="flex flex-wrap items-center gap-1.5">
+                                <span class="px-2 py-0.5 rounded-full text-[9px] font-extrabold ${stCls}">${escapeHtml(a.status || 'Pendente')}</span>
+                                <span class="px-2 py-0.5 rounded-full text-[9px] font-extrabold bg-slate-100 text-slate-700">${escapeHtml(a.urgencia || 'Média')}</span>
+                                <span class="text-[10px] font-bold text-slate-500">${escapeHtml(a.origem || 'Inspeção')} • ${escapeHtml(dtTxt)}</span>
+                            </div>
+                            <span class="text-[10px] font-bold text-slate-500">${escapeHtml(a.equipe_responsavel || a.especialidade || '')}</span>
+                        </div>
+                        <div class="text-xs font-extrabold text-slate-900">${escapeHtml(a.conjunto || 'Conjunto')}${a.componente ? ' › ' + escapeHtml(a.componente) : ''}</div>
+                        <div class="text-[11px] font-medium text-slate-700">${escapeHtml(a.descricao || a.defeito || 'Sem descrição')}</div>
+                        <div class="text-[10px] font-semibold text-slate-500">
+                            ${[a.relator ? `Relator: ${a.relator}` : '', a.tecnico_designado ? `Exec.: ${a.tecnico_designado}` : '', a.validado_por ? `Validado por: ${a.validado_por}` : '', a.motivo_rejeicao ? `Motivo reprovação: ${a.motivo_rejeicao}` : ''].filter(Boolean).join(' • ')}
+                        </div>
+                    </div>`;
+                }).join('')}</div>` : `<div class="p-4 rounded-xl bg-white border border-dashed border-slate-300 text-center text-xs font-bold text-slate-400">Nenhuma anomalia encontrada neste filtro.</div>`);
+            } else if (active360Tab === 'execucoes') {
+                const execCards = [];
+                d.programacoesHistorico.forEach(o => {
+                    const chkTot = Array.isArray(o.checklistExec) ? o.checklistExec.length : 0;
+                    const chkOk = Array.isArray(o.checklistExec) ? o.checklistExec.filter(x => normKey(x.status) === 'ok' || normKey(x.status) === 'conforme').length : 0;
+                    execCards.push(`
+                    <div class="p-3 rounded-xl bg-white border border-emerald-200/80 space-y-1">
+                        <div class="flex flex-wrap items-center justify-between gap-1.5">
+                            <div class="flex flex-wrap items-center gap-1.5">
+                                <span class="px-2 py-0.5 rounded-full text-[9px] font-extrabold bg-emerald-100 text-emerald-800">${escapeHtml(o.status || 'Concluída')}</span>
+                                <span class="text-[10px] font-bold text-slate-500">${o.semana ? 'S' + o.semana + ' • ' : ''}${escapeHtml(formatDataBr360(o.concluidoEm || o.data))}</span>
+                            </div>
+                            <span class="text-[10px] font-bold text-slate-500">${escapeHtml(o.equipe || '')}</span>
+                        </div>
+                        <div class="text-xs font-extrabold text-slate-900">${escapeHtml(o.titulo || 'Ordem Executada')}</div>
+                        <div class="text-[10px] font-semibold text-slate-600">${[o.concluidoPor || o.responsavel ? `Executado por: ${o.concluidoPor || o.responsavel}` : '', chkTot ? `Checklist: ${chkOk}/${chkTot} OK` : '', Array.isArray(o.fotos) && o.fotos.length ? `${o.fotos.length} foto(s)` : ''].filter(Boolean).join(' • ')}</div>
+                    </div>`);
+                });
+                d.rotasHistorico.forEach(r => {
+                    const resp = Array.isArray(r.checklist_respostas) ? r.checklist_respostas : [];
+                    const propQtd = Array.isArray(r.anomalias_propostas) ? r.anomalias_propostas.length : 0;
+                    execCards.push(`
+                    <div class="p-3 rounded-xl bg-white border border-sky-200/80 space-y-1">
+                        <div class="flex flex-wrap items-center justify-between gap-1.5">
+                            <div class="flex flex-wrap items-center gap-1.5">
+                                <span class="px-2 py-0.5 rounded-full text-[9px] font-extrabold bg-sky-100 text-sky-800">Rota Concluída • S${escapeHtml(String(r.semana || '-'))}</span>
+                                <span class="px-2 py-0.5 rounded-full text-[9px] font-extrabold bg-slate-100 text-slate-700">${escapeHtml(r.status_supervisao || 'Validada')}</span>
+                                <span class="text-[10px] font-bold text-slate-500">${escapeHtml(formatDataBr360(r.data_conclusao || r.timestamp))}</span>
+                            </div>
+                        </div>
+                        <div class="text-xs font-extrabold text-slate-900">${escapeHtml(r.conjunto || r.equipamento || 'Inspeção de Rota')}</div>
+                        <div class="text-[10px] font-semibold text-slate-600">${[`Inspetor: ${r.nome_tecnico || '-'} (${r.role_tecnico || '-'})`, resp.length ? `${resp.length} verificação(ões)` : '', propQtd ? `${propQtd} anomalia(s) apontada(s)` : 'Sem anomalias na ficha'].filter(Boolean).join(' • ')}</div>
+                        ${r.observacoes_gerais ? `<div class="text-[10px] italic text-slate-500">Obs.: ${escapeHtml(r.observacoes_gerais)}</div>` : ''}
+                    </div>`);
+                });
+                bodyHtml = execCards.length
+                    ? `<div class="max-h-72 overflow-y-auto space-y-2 pr-1">${execCards.join('')}</div>`
+                    : `<div class="p-4 rounded-xl bg-white border border-dashed border-slate-300 text-center text-xs font-bold text-slate-400">Nenhuma preventiva ou inspeção concluída registrada ainda para este escopo.</div>`;
+            } else {
+                bodyHtml = d.historicoTimeline.length
+                    ? `<div class="max-h-72 overflow-y-auto space-y-2 pr-1">${d.historicoTimeline.map(ev => `
+                        <div class="p-3 rounded-xl bg-white border border-slate-200 space-y-1">
+                            <div class="flex flex-wrap items-center justify-between gap-1.5">
+                                <div class="flex flex-wrap items-center gap-1.5">
+                                    <span class="px-2 py-0.5 rounded-full text-[9px] font-extrabold ${ev.moduloCls}">${escapeHtml(ev.modulo)}</span>
+                                    <span class="px-2 py-0.5 rounded-full text-[9px] font-extrabold ${ev.statusCls}">${escapeHtml(ev.statusLabel)}</span>
+                                </div>
+                                <span class="text-[10px] font-bold text-slate-400">${escapeHtml(ev.dataTxt)}</span>
+                            </div>
+                            <div class="text-xs font-extrabold text-slate-900">${escapeHtml(ev.titulo)}</div>
+                            ${ev.detalhe ? `<div class="text-[11px] font-semibold text-slate-500">${escapeHtml(ev.detalhe)}</div>` : ''}
+                        </div>`).join('')}</div>`
+                    : `<div class="p-4 rounded-xl bg-white border border-dashed border-slate-300 text-center text-xs font-bold text-slate-400">Sem movimentações registradas no histórico deste ativo.</div>`;
+            }
+
+            const tabBtnCls = (k) => active360Tab === k
+                ? 'px-3 py-1.5 rounded-xl bg-slate-900 text-white text-[11px] font-extrabold shadow-sm'
+                : 'px-3 py-1.5 rounded-xl bg-white hover:bg-slate-100 text-slate-700 border border-slate-200 text-[11px] font-extrabold';
+
             return `<div class="p-4 rounded-2xl bg-slate-50 border border-slate-200/80 space-y-3">
-                <div class="flex items-center justify-between">
-                    <span class="text-[10px] font-extrabold uppercase tracking-wider text-slate-600">Integração 360° com a Central PCM (Tempo Real)</span>
-                    <span class="text-[10px] font-bold text-slate-400">Leitura cruzada</span>
+                <div class="flex flex-wrap items-center justify-between gap-2">
+                    <span class="text-[10px] font-extrabold uppercase tracking-wider text-slate-600">Visão 360° — Programados, Anomalias &amp; Histórico Completo</span>
+                    <span class="text-[10px] font-bold text-slate-400">Tempo Real • Todos os módulos</span>
                 </div>
-                <div class="grid grid-cols-2 sm:grid-cols-4 gap-2.5">
-                    <div class="bg-white p-3 rounded-xl border border-slate-200">
-                        <div class="text-[10px] font-bold text-slate-400 uppercase">Anomalias Abertas</div>
-                        <div class="text-lg font-extrabold ${anomalias.length ? 'text-rose-600' : 'text-emerald-600'}">${anomalias.length}</div>
-                    </div>
-                    <div class="bg-white p-3 rounded-xl border border-slate-200">
-                        <div class="text-[10px] font-bold text-slate-400 uppercase">Planos Cirúrgicos</div>
-                        <div class="text-lg font-extrabold text-indigo-600">${planos.length}</div>
-                    </div>
-                    <div class="bg-white p-3 rounded-xl border border-slate-200">
-                        <div class="text-[10px] font-bold text-slate-400 uppercase">Rotas 52 Sem.</div>
-                        <div class="text-lg font-extrabold text-sky-600">${rotasAgendadas.length}</div>
-                    </div>
-                    <div class="bg-white p-3 rounded-xl border border-slate-200">
-                        <div class="text-[10px] font-bold text-slate-400 uppercase">Peças Obsol./Prev.</div>
-                        <div class="text-lg font-extrabold text-amber-600">${pecasObs.length}</div>
-                    </div>
+                <div class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-2">
+                    <button type="button" onclick="setAbaHistorico360('programados')" class="text-left bg-white hover:border-sky-300 p-2.5 rounded-xl border border-slate-200 transition-colors">
+                        <div class="text-[9px] font-extrabold text-slate-400 uppercase">Programados</div>
+                        <div class="text-base font-extrabold ${qtdProgAbertas ? 'text-sky-600' : 'text-slate-700'}">${qtdProgAbertas}</div>
+                    </button>
+                    <button type="button" onclick="setFiltroAnom360('abertas')" class="text-left bg-white hover:border-rose-300 p-2.5 rounded-xl border border-slate-200 transition-colors">
+                        <div class="text-[9px] font-extrabold text-slate-400 uppercase">Anom. Abertas</div>
+                        <div class="text-base font-extrabold ${d.anomaliasAbertas.length ? 'text-rose-600' : 'text-emerald-600'}">${d.anomaliasAbertas.length}</div>
+                    </button>
+                    <button type="button" onclick="setFiltroAnom360('todas')" class="text-left bg-white hover:border-amber-300 p-2.5 rounded-xl border border-slate-200 transition-colors">
+                        <div class="text-[9px] font-extrabold text-slate-400 uppercase">Total Anom.</div>
+                        <div class="text-base font-extrabold text-amber-600">${d.anomaliasTodas.length}</div>
+                    </button>
+                    <button type="button" onclick="setAbaHistorico360('execucoes')" class="text-left bg-white hover:border-emerald-300 p-2.5 rounded-xl border border-slate-200 transition-colors">
+                        <div class="text-[9px] font-extrabold text-slate-400 uppercase">Concluídos</div>
+                        <div class="text-base font-extrabold text-emerald-600">${qtdExecucoes}</div>
+                    </button>
+                    <button type="button" onclick="setAbaHistorico360('programados')" class="text-left bg-white hover:border-indigo-300 p-2.5 rounded-xl border border-slate-200 transition-colors">
+                        <div class="text-[9px] font-extrabold text-slate-400 uppercase">Planos P/R</div>
+                        <div class="text-base font-extrabold text-indigo-600">${d.planosPreventiva.length + d.planos.length}</div>
+                    </button>
+                    <button type="button" onclick="setAbaHistorico360('timeline')" class="text-left bg-white hover:border-slate-400 p-2.5 rounded-xl border border-slate-200 transition-colors">
+                        <div class="text-[9px] font-extrabold text-slate-400 uppercase">Peças Obsol.</div>
+                        <div class="text-base font-extrabold text-slate-700">${d.pecasObs.length}</div>
+                    </button>
                 </div>
-                ${anomalias.length ? `<div class="space-y-1">
-                    <div class="text-[10px] font-extrabold uppercase text-rose-700">Últimas anomalias pendentes neste escopo:</div>
-                    ${anomalias.slice(0, 3).map(a => `<div class="text-[11px] font-semibold text-slate-700 bg-white px-3 py-1.5 rounded-lg border border-rose-200/70 truncate">• ${escapeHtml(a.descricao || a.defeito || 'Anomalia')} <span class="text-slate-400">(${escapeHtml(a.status || 'Aberto')})</span></div>`).join('')}
-                </div>` : ''}
+
+                <div class="flex flex-wrap items-center gap-1.5 pt-1">
+                    <button type="button" onclick="setAbaHistorico360('programados')" class="${tabBtnCls('programados')}">Já Programados (${qtdProgAbertas})</button>
+                    <button type="button" onclick="setAbaHistorico360('anomalias')" class="${tabBtnCls('anomalias')}">Anomalias Inspeção (${d.anomaliasTodas.length})</button>
+                    <button type="button" onclick="setAbaHistorico360('execucoes')" class="${tabBtnCls('execucoes')}">Concluídos / Rotas (${qtdExecucoes})</button>
+                    <button type="button" onclick="setAbaHistorico360('timeline')" class="${tabBtnCls('timeline')}">Histórico Completo (${d.historicoTimeline.length})</button>
+                </div>
+
+                <div class="pt-1">${bodyHtml}</div>
             </div>`;
         }
 
@@ -2271,7 +2742,7 @@
                         </div>
                     </form>
 
-                    ${renderBlocoCruzado360([node])}
+                    <div id="bloco360Wrapper">${renderBlocoCruzado360([node], 'leaf')}</div>
                 </div>`;
                 return;
             }
@@ -2342,7 +2813,7 @@
                     </div>
                 </div>
 
-                ${renderBlocoCruzado360(branchNodes)}
+                <div id="bloco360Wrapper">${renderBlocoCruzado360(branchNodes, selectedTarget.level)}</div>
 
                 <div class="space-y-2">
                     <div class="flex items-center justify-between">

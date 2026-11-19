@@ -2849,9 +2849,13 @@
                     temp.push(...expandidos);
                 });
                 arvLinhas = temp;
+                handoffInspLinhasOk = true;
                 atualizarStatusConexao('online');
                 atualizarBadgesArvore();
-                if (usuarioLogado) rotearTelas();
+                if (usuarioLogado) {
+                    rotearTelas();
+                    tentarAplicarHandoffInspecao();
+                }
             }, (err) => {
                 atualizarStatusConexao('erro', err?.code || 'permissão em ob_linhas');
             });
@@ -2926,6 +2930,80 @@
             }, (err) => {
                 atualizarStatusConexao('erro', err?.code || 'permissão');
             });
+        }
+
+        let handoffInspLinhasOk = false;
+        let handoffInspConsumido = false;
+
+        function tentarAplicarHandoffInspecao() {
+            if (handoffInspConsumido || !handoffInspLinhasOk || !usuarioLogado) return;
+            let raw = null;
+            try { raw = safeStorage.get('cepera_agendamento_handoff'); } catch (_) {}
+            if (!raw) return;
+
+            let h = null;
+            try { h = JSON.parse(raw); } catch (_) { safeStorage.remove('cepera_agendamento_handoff'); return; }
+            if (!h || h.targetApp !== 'inspecao_rota') return;
+            if (h.criadoEm && (Date.now() - Number(h.criadoEm)) > 5 * 60 * 1000) {
+                safeStorage.remove('cepera_agendamento_handoff');
+                return;
+            }
+
+            handoffInspConsumido = true;
+            safeStorage.remove('cepera_agendamento_handoff');
+
+            if (!isPerfilAdmin(usuarioLogado.role)) {
+                showToast('Apenas perfis Admin/Gerente podem programar rotas ou editar planos cirúrgicos.', 'error');
+                return;
+            }
+
+            const normM = (v) => String(v || '').normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase().trim();
+            const a = h.ativo || {};
+            const areaN = normM(a.area);
+            const maqN = normM(a.maquina);
+            const eqN = normM(a.equipamento);
+            const cjN = normM(a.conjunto);
+
+            const matchNode = arvLinhas.find(x => x.id === a.nodeId || x.id === a.docId)
+                || arvLinhas.find(x =>
+                    normM(x.area) === areaN &&
+                    normM(x.maquina) === maqN &&
+                    normM(x.equipamento) === eqN &&
+                    (!cjN || normM(getNomeConjunto(x)) === cjN || normM(getNomeConjunto(x)).startsWith(`${cjN} >`) || normM(getNomeConjunto(x)).startsWith(`${cjN} ›`))
+                );
+
+            if (h.action === 'inspecao_plano' || (matchNode && !isConjuntoInspecaoAtiva(matchNode))) {
+                const oculto = Boolean(matchNode && !isConjuntoInspecaoAtiva(matchNode));
+                switchTab('checklists');
+                if (matchNode) {
+                    const selA = document.getElementById('chkCfgArea');
+                    if (selA) selA.value = matchNode.area || '';
+                    onCfgAreaChange(true);
+                    const selM = document.getElementById('chkCfgMaquina');
+                    if (selM) selM.value = matchNode.maquina || '';
+                    onCfgMaquinaChange(true);
+                    const selE = document.getElementById('chkCfgEquipamento');
+                    if (selE) selE.value = matchNode.equipamento || '';
+                    selecionarConjuntoEditor(matchNode.id);
+                } else if (a.conjunto) {
+                    const b = document.getElementById('chkCfgBusca');
+                    if (b) b.value = a.conjunto;
+                    renderArvoreConjuntosEditor();
+                }
+                showToast(oculto
+                    ? `Conjunto "${a.conjunto}" está Não Ativo nas 52 semanas. Ative no cartão caso deseje incluí-lo.`
+                    : `Plano Cirúrgico aberto para "${a.conjunto || a.equipamento}".`);
+                return;
+            }
+
+            const areaAlvo = matchNode?.area || a.area || '';
+            const maqAlvo = matchNode?.maquina || a.maquina || '';
+            const eqAlvo = matchNode?.equipamento || a.equipamento || '';
+            if (areaAlvo) planAreasSelecionadas = [areaAlvo];
+            if (maqAlvo) planMaquinasSelecionadas = [maqAlvo];
+            if (eqAlvo) planEquipsSelecionados = [eqAlvo];
+            switchTab('planejamento');
+            showToast(`52 Semanas filtrada para "${a.equipamento || eqAlvo}${a.conjunto ? ' › ' + a.conjunto : ''}". Clique em qualquer semana para agendar.`);
         }
 
         window.voltarParaCentralPCM = () => {
@@ -3169,6 +3247,7 @@
             }
             atualizarBadgeMasterInsp();
             rotearTelas();
+            tentarAplicarHandoffInspecao();
         }
 
         window.switchTab = (t) => {
