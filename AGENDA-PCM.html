@@ -974,6 +974,7 @@
             </div>
             <form id="editForm" class="space-y-3.5 text-xs">
                 <input type="hidden" id="eId">
+                <div id="eMultiDiaInfo" hidden class="hidden p-2.5 rounded-xl bg-sky-50 border border-sky-200 text-sky-900 text-[11px] font-bold"></div>
                 <div>
                     <label class="block text-[10px] font-extrabold uppercase text-slate-500 mb-1">Título *</label>
                     <input class="input-clean py-2 text-xs font-bold" id="eTitulo" required>
@@ -1562,6 +1563,19 @@
             box.innerHTML = h;
         }
 
+        function getDatasLancamento(l) {
+            if (!l) return [];
+            const raw = Array.isArray(l.datas) && l.datas.length ? l.datas : (l.data ? [l.data] : []);
+            return [...new Set(raw.filter(d => typeof d === 'string' && /^\d{4}-\d{2}-\d{2}$/.test(d.slice(0, 10))).map(d => d.slice(0, 10)))].sort();
+        }
+
+        function formatPeriodoLancamentoBR(l) {
+            const dias = getDatasLancamento(l);
+            if (!dias.length) return '—';
+            if (dias.length === 1) return getDiaExtenso(dias[0]);
+            return `${dias.slice(0, 3).map(d => { const p = d.split('-'); return `${p[2]}/${p[1]}`; }).join(', ')}${dias.length > 3 ? ` +${dias.length - 3}` : ''} (${dias.length}d)`;
+        }
+
         window.renderNotificationsTable = renderNotificationsTable;
         function renderNotificationsTable() {
             const tbody = document.getElementById('notifTableBody');
@@ -1587,7 +1601,7 @@
                 else if (prazoDias === 180) prazoTxt = '6 meses antes';
 
                 html += `<tr class="hover:bg-slate-50/80 transition-colors">
-                    <td class="py-3.5 px-4 font-extrabold text-slate-900">${escapeHtml(getDiaExtenso(l.data))}</td>
+                    <td class="py-3.5 px-4 font-extrabold text-slate-900">${escapeHtml(formatPeriodoLancamentoBR(l))}</td>
                     <td class="py-3.5 px-4 font-bold text-slate-800">${escapeHtml(l.titulo)}</td>
                     <td class="py-3.5 px-4 text-slate-500 font-semibold">${escapeHtml(destTxt)}</td>
                     <td class="py-3.5 px-4"><span class="st-badge st-pendente">${escapeHtml(prazoTxt)}</span></td>
@@ -1616,7 +1630,7 @@
 
             const destinatarioFinal = emails.length ? emails.join(',') : 'pcm@cepera.com.br';
             const assunto = encodeURIComponent(`[Alerta PCM Cepera] Manutenção Programada: ${l.titulo}`);
-            const corpo = encodeURIComponent(`Olá,\n\nEste é um lembrete automático de manutenção industrial:\n\n- Atividade: ${l.titulo}\n- Data: ${getDiaExtenso(l.data)} às ${l.hora || '--:--'}\n- Equipe: ${l.equipe}\n- Responsável: ${l.responsavel || 'Geral'}\n- Descrição: ${l.descricao || 'N/A'}\n\nPor favor, garanta os preparativos.\nPCM - Cepera Alimentos`);
+            const corpo = encodeURIComponent(`Olá,\n\nEste é um lembrete automático de manutenção industrial:\n\n- Atividade: ${l.titulo}\n- Data(s): ${formatPeriodoLancamentoBR(l)} às ${l.hora || '--:--'}\n- Equipe: ${l.equipe}\n- Responsável: ${l.responsavel || 'Geral'}\n- Descrição: ${l.descricao || 'N/A'}\n\nPor favor, garanta os preparativos.\nPCM - Cepera Alimentos`);
 
             window.open(`mailto:${destinatarioFinal}?subject=${assunto}&body=${corpo}`);
             showToast("Cliente de e-mail aberto com mensagem pronta!");
@@ -1636,10 +1650,10 @@
         }
 
         function renderDashboard() {
+            const ymPrefix = `${viewAno}-${pad(viewMes + 1)}`;
             const mesAtual = getLancamentosCalendario().filter(l => {
-                if (!l.data) return false;
-                const [a, m] = l.data.split('-');
-                return parseInt(a) === viewAno && parseInt(m) === viewMes + 1;
+                const dias = getDatasLancamento(l);
+                return dias.some(d => d.startsWith(ymPrefix));
             });
 
             const listF = filtrados(mesAtual);
@@ -1691,14 +1705,17 @@
                 }
                 const dia = c - primeiro + 1;
                 const chave = chaveDia(viewAno, viewMes, dia);
-                const lants = filtrados(eventosCal.filter(l => l.data === chave));
+                const lants = filtrados(eventosCal.filter(l => getDatasLancamento(l).includes(chave)));
 
                 let cls = "cell" + (c % 7 === 0 || c % 7 === 6 ? " weekend" : "") + (chave === hojeChave ? " today" : "");
                 let chips = "";
                 lants.slice(0, 4).forEach(l => {
                     const isDone = l.status === 'concluido';
                     const tipoCor = (TIPOS[l.tipo] && TIPOS[l.tipo].cor) || '#0284c7';
-                    chips += `<div class="chip ${isDone ? 'done' : ''}"><span class="dot-sm" style="background:${tipoCor}"></span><span class="t">${escapeHtml(l.titulo)}</span></div>`;
+                    const diasOrd = getDatasLancamento(l);
+                    const idxDia = diasOrd.indexOf(chave);
+                    const multiTag = diasOrd.length > 1 && idxDia >= 0 ? `<span class="text-[9px] font-extrabold text-sky-700 mr-0.5">[D${idxDia + 1}/${diasOrd.length}]</span>` : '';
+                    chips += `<div class="chip ${isDone ? 'done' : ''}"><span class="dot-sm" style="background:${tipoCor}"></span><span class="t">${multiTag}${escapeHtml(l.titulo)}</span></div>`;
                 });
                 if (lants.length > 4) chips += `<span class="text-[10px] font-extrabold text-slate-400">+${lants.length - 4} mais</span>`;
                 const badge = lants.length ? `<span class="badge-count">${lants.length}</span>` : '';
@@ -1753,7 +1770,7 @@
         };
 
         function renderListaDia() {
-            const list = filtrados(getLancamentosCalendario().filter(l => l.data === diaAberto)).sort((a, b) => (a.hora || '').localeCompare(b.hora || ''));
+            const list = filtrados(getLancamentosCalendario().filter(l => getDatasLancamento(l).includes(diaAberto))).sort((a, b) => (a.hora || '').localeCompare(b.hora || ''));
             document.getElementById("dayCount").innerText = `${list.length} lançamentos programados`;
 
             const box = document.getElementById("dayList");
@@ -1766,6 +1783,12 @@
             list.forEach(l => {
                 const t = TIPOS[l.tipo] || TIPOS.preventiva;
                 const s = STATUSES[l.status || 'pendente'];
+                const diasOrd = getDatasLancamento(l);
+                const idxDia = diasOrd.indexOf(diaAberto);
+                const semBadge = l.semana ? `<span class="st-badge bg-slate-100 text-slate-800 border-slate-300">S${escapeHtml(String(l.semana))}</span>` : '';
+                const multiBadge = diasOrd.length > 1
+                    ? `<span class="st-badge bg-indigo-50 text-indigo-800 border-indigo-200">Dia ${idxDia >= 0 ? idxDia + 1 : 1}/${diasOrd.length} (${escapeHtml(formatPeriodoLancamentoBR(l))}) • Checklist único</span>`
+                    : '';
                 let statusOptions = "";
                 Object.keys(STATUSES).forEach(stKey => {
                     statusOptions += `<option value="${stKey}" ${stKey === (l.status || 'pendente') ? 'selected' : ''}>${STATUSES[stKey].nome}</option>`;
@@ -1776,10 +1799,12 @@
                     <div class="flex-1 min-w-0">
                         <div class="flex flex-wrap items-center gap-2">
                             <span class="font-extrabold text-xs text-slate-900">${escapeHtml(l.hora || '--:--')}</span>
+                            ${semBadge}
                             <span class="st-badge" style="border-color:${t.cor};color:${t.cor}">${t.nome}</span>
                             <select class="st-badge st-select ${s.badge}" onchange="mudarStatus('${escapeHtml(l.id)}', this.value)">${statusOptions}</select>
                             ${l.recadoOrigemId ? `<span class="st-badge bg-amber-50 text-amber-800 border-amber-200">Planejado via Mural</span>` : ''}
                             ${l.origem === 'modulo_preventivas' ? `<span class="st-badge bg-sky-50 text-sky-800 border-sky-200">Preventiva Integrada${l.planoCodigo ? ' • ' + escapeHtml(l.planoCodigo) : ''}</span>` : ''}
+                            ${multiBadge}
                         </div>
                         <p class="font-extrabold text-sm text-slate-900 mt-1">${escapeHtml(l.titulo)}</p>
                         <p class="text-xs text-slate-500 font-semibold mt-0.5"><strong class="text-slate-700">${escapeHtml(l.equipe || 'Geral')}</strong> • Resp: ${escapeHtml(l.responsavel || 'N/A')}</p>
@@ -1796,14 +1821,15 @@
 
         // Relatório A4 Mensal da Agenda
         window.imprimirAgendaMesA4 = function() {
-            const mesAtual = filtrados(getLancamentosCalendario().filter(l => l.data && l.data.startsWith(`${viewAno}-${pad(viewMes + 1)}`))).sort((a, b) => (a.data || '').localeCompare(b.data || '') || (a.hora || '').localeCompare(b.hora || ''));
+            const ymPrefix = `${viewAno}-${pad(viewMes + 1)}`;
+            const mesAtual = filtrados(getLancamentosCalendario().filter(l => getDatasLancamento(l).some(d => d.startsWith(ymPrefix)))).sort((a, b) => (a.data || '').localeCompare(b.data || '') || (a.hora || '').localeCompare(b.hora || ''));
             const dataHora = new Date().toLocaleString('pt-BR');
             let rowsHtml = '';
             mesAtual.forEach(l => {
                 const t = TIPOS[l.tipo] || TIPOS.preventiva;
                 const s = STATUSES[l.status || 'pendente'];
                 rowsHtml += `<tr>
-                    <td><strong>${escapeHtml(getDiaExtenso(l.data))}</strong> ${l.hora ? 'às ' + escapeHtml(l.hora) : ''}</td>
+                    <td>${l.semana ? `<strong>S${escapeHtml(String(l.semana))}</strong> • ` : ''}<strong>${escapeHtml(formatPeriodoLancamentoBR(l))}</strong> ${l.hora ? 'às ' + escapeHtml(l.hora) : ''}</td>
                     <td><strong>${escapeHtml(l.titulo)}</strong>${l.descricao ? '<br><span style="color:#64748b;font-size:10px;">' + escapeHtml(l.descricao) + '</span>' : ''}</td>
                     <td>${escapeHtml(t.nome)}</td>
                     <td>${escapeHtml(l.equipe || 'Geral')}<br><span style="color:#64748b;font-size:10px;">${escapeHtml(l.responsavel || '-')}</span></td>
@@ -1938,6 +1964,19 @@
             atualizarSelectRespEdit();
             document.getElementById('eResp').value = l.responsavel || '';
             document.getElementById('eDesc').value = l.descricao || '';
+            const infoMulti = document.getElementById('eMultiDiaInfo');
+            if (infoMulti) {
+                const diasOrd = getDatasLancamento(l);
+                if (diasOrd.length > 1) {
+                    infoMulti.hidden = false;
+                    infoMulti.classList.remove('hidden');
+                    infoMulti.innerText = `Preventiva programada em ${diasOrd.length} dias (${formatPeriodoLancamentoBR(l)}${l.semana ? ' • S' + l.semana : ''}) com checklist único. Alterações de status/detalhes refletem em todos os dias e no Calendário 52 Semanas.`;
+                } else {
+                    infoMulti.hidden = true;
+                    infoMulti.classList.add('hidden');
+                    infoMulti.innerText = '';
+                }
+            }
             abrirModal('editOverlay');
         };
 
