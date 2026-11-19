@@ -898,6 +898,7 @@
         const linhasColRef = collection(db, "ob_linhas");
 
         let items = [];
+        let rawLinhasDocsObs = [];
         let estruturas = [];
         let usuarioLogado = null;
         let itemToDeleteId = null;
@@ -1107,8 +1108,56 @@
                 document.getElementById('statusText').innerText = "Banco Sincronizado (Online)";
 
                 onSnapshot(colRef, (snap) => { items = []; snap.forEach(d => items.push({ id: d.id, ...d.data() })); renderAll(); });
-                onSnapshot(linhasColRef, (snap) => { estruturas = []; snap.forEach(d => estruturas.push({ id: d.id, ...d.data() })); renderAll(); });
+                onSnapshot(linhasColRef, (snap) => {
+                    rawLinhasDocsObs = [];
+                    snap.forEach(d => rawLinhasDocsObs.push({ id: d.id, ...d.data() }));
+                    estruturas = rebuildEstruturasAgrupadasObs(rawLinhasDocsObs);
+                    renderAll();
+                });
             } catch (err) { renderAll(); }
+        }
+
+        function normKeyObs(val) {
+            return String(val || '').normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase().trim().replace(/\s+/g, ' ');
+        }
+
+        function rebuildEstruturasAgrupadasObs(docs) {
+            const mapa = new Map();
+            (docs || []).forEach(d => {
+                const area = String(d.area || d.setor || '').trim();
+                const maq = String(d.maquina || d.linha || '').trim();
+                const eq = String(d.equipamento || '').trim();
+                if (!area && !maq && !eq) return;
+                const k = `${normKeyObs(area)}|${normKeyObs(maq)}|${normKeyObs(eq)}`;
+                if (!mapa.has(k)) {
+                    mapa.set(k, {
+                        id: d.id,
+                        docIds: [],
+                        area,
+                        maquina: maq,
+                        equipamento: eq,
+                        modelo: String(d.modelo || '').trim(),
+                        numeroSerie: String(d.numeroSerie || d.serie || d.n_serie || '').trim(),
+                        conjuntos: []
+                    });
+                }
+                const grp = mapa.get(k);
+                grp.docIds.push(d.id);
+                if (!grp.modelo && d.modelo) grp.modelo = String(d.modelo).trim();
+                const sn = String(d.numeroSerie || d.serie || d.n_serie || '').trim();
+                if (!grp.numeroSerie && sn) grp.numeroSerie = sn;
+
+                const conjFlat = String(d.conjunto || '').trim();
+                if (conjFlat) {
+                    if (!grp.conjuntos.some(x => normKeyObs(x) === normKeyObs(conjFlat))) grp.conjuntos.push(conjFlat);
+                } else if (Array.isArray(d.conjuntos)) {
+                    d.conjuntos.forEach(c => {
+                        const nome = typeof c === 'object' ? String(c?.conjunto || c?.nome || '').trim() : String(c || '').trim();
+                        if (nome && !grp.conjuntos.some(x => normKeyObs(x) === normKeyObs(nome))) grp.conjuntos.push(nome);
+                    });
+                }
+            });
+            return [...mapa.values()];
         }
 
         function renderAll() {
@@ -1129,7 +1178,7 @@
             document.getElementById('dlMaquinas').innerHTML = maquinas.map(x => `<option value="${x}">`).join('');
             const equips = [...new Set(estruturas.filter(x => (!a || x.area === a) && (!m || x.maquina === m)).map(x => x.equipamento))].filter(Boolean).sort();
             document.getElementById('dlEquipamentos').innerHTML = equips.map(x => `<option value="${x}">`).join('');
-            const obj = estruturas.find(x => x.area === a && x.maquina === m && x.equipamento === e);
+            const obj = estruturas.find(x => normKeyObs(x.area) === normKeyObs(a) && normKeyObs(x.maquina) === normKeyObs(m) && normKeyObs(x.equipamento) === normKeyObs(e));
             if (obj && obj.conjuntos) document.getElementById('dlConjuntos').innerHTML = obj.conjuntos.map(x => `<option value="${x}">`).join('');
             else document.getElementById('dlConjuntos').innerHTML = '';
         };
@@ -1200,8 +1249,16 @@
             if (!isFirebaseConnected) return;
             const obj = estruturas.find(x => x.id === id);
             if (!obj) return;
-            if (obj[campo] === valor.trim()) return;
-            try { await updateDoc(doc(db, "ob_linhas", id), { [campo]: valor.trim() }); showToast("Atributo atualizado!"); } catch (e) { showToast("Erro ao salvar atributo", "error"); }
+            const vTrim = valor.trim();
+            if (obj[campo] === vTrim) return;
+            const ids = Array.isArray(obj.docIds) && obj.docIds.length ? obj.docIds : [id];
+            const patch = campo === 'numeroSerie' ? { numeroSerie: vTrim, serie: vTrim } : { [campo]: vTrim };
+            try {
+                for (const dId of ids) {
+                    await updateDoc(doc(db, "ob_linhas", dId), patch);
+                }
+                showToast("Atributo atualizado!");
+            } catch (e) { showToast("Erro ao salvar atributo", "error"); }
         };
 
         // --- RENDERIZADORES DE ÁRVORE ---
@@ -1298,14 +1355,25 @@
             const cj = padronizarTexto(document.getElementById('fConjunto').value);
 
             if (isFirebaseConnected) {
-                let node = estruturas.find(x => x.area === area && x.maquina === maq && x.equipamento === eq);
-                if (node) {
-                    if (cj && (!node.conjuntos || !node.conjuntos.includes(cj))) {
-                        const nc = node.conjuntos ? [...node.conjuntos, cj] : [cj];
-                        await updateDoc(doc(db, "ob_linhas", node.id), { conjuntos: nc });
-                    }
-                } else {
-                    await addDoc(linhasColRef, { area, maquina: maq, equipamento: eq, modelo: '', numeroSerie: '', conjuntos: cj ? [cj] : [], timestamp: Date.now() });
+                const node = estruturas.find(x => normKeyObs(x.area) === normKeyObs(area) && normKeyObs(x.maquina) === normKeyObs(maq) && normKeyObs(x.equipamento) === normKeyObs(eq));
+                const cjAlvo = cj || 'Conjunto Geral';
+                const jaExiste = node && Array.isArray(node.conjuntos) && node.conjuntos.some(x => normKeyObs(x) === normKeyObs(cjAlvo));
+                if (!jaExiste) {
+                    await addDoc(linhasColRef, {
+                        setor: area,
+                        area,
+                        maquina: maq,
+                        equipamento: eq,
+                        conjunto: cjAlvo,
+                        subconjunto: '',
+                        modelo: node?.modelo || '',
+                        serie: node?.numeroSerie || '',
+                        numeroSerie: node?.numeroSerie || '',
+                        status_ativo: 'Ativo',
+                        inspecao_ativa: true,
+                        origem_cadastro: 'obsolescencia',
+                        timestamp: Date.now()
+                    });
                 }
             }
 
@@ -1393,7 +1461,14 @@
             btn.innerText = "Excluindo...";
             btn.disabled = true;
             try {
-                if (isDeletingLinha) { if (isFirebaseConnected) await deleteDoc(doc(db, "ob_linhas", itemToDeleteId)); showToast("Estrutura removida."); }
+                if (isDeletingLinha) {
+                    if (isFirebaseConnected) {
+                        const grp = estruturas.find(x => x.id === itemToDeleteId);
+                        const ids = (grp && Array.isArray(grp.docIds) && grp.docIds.length) ? grp.docIds : [itemToDeleteId];
+                        for (const dId of ids) await deleteDoc(doc(db, "ob_linhas", dId));
+                    }
+                    showToast("Estrutura removida.");
+                }
                 else { if (isFirebaseConnected) await deleteDoc(doc(db, "ob_equipamentos", itemToDeleteId)); showToast("Peça excluída."); }
                 closeModal('modalDelete');
             } catch (e) { showToast("Erro ao excluir.", "error"); closeModal('modalDelete'); } finally { btn.innerText = "Confirmar"; btn.disabled = false; }
@@ -1674,19 +1749,22 @@
                     if (!r.trim()) continue;
                     const cols = r.split('\t').map(x => padronizarTexto(x));
                     if (cols.length < 3) continue;
-                    const area = cols[0], maq = cols[1], eq = cols[2], cj = cols[3] || '';
+                    const area = cols[0], maq = cols[1], eq = cols[2], cj = cols[3] || 'Conjunto Geral';
 
-                    let node = estruturas.find(l => l.area === area && l.maquina === maq && l.equipamento === eq);
-                    if (node) {
-                        if (cj && (!node.conjuntos || !node.conjuntos.includes(cj))) {
-                            const nc = node.conjuntos ? [...node.conjuntos, cj] : [cj];
-                            if (isFirebaseConnected) await updateDoc(doc(db, "ob_linhas", node.id), { conjuntos: nc });
-                            node.conjuntos = nc;
+                    let node = estruturas.find(l => normKeyObs(l.area) === normKeyObs(area) && normKeyObs(l.maquina) === normKeyObs(maq) && normKeyObs(l.equipamento) === normKeyObs(eq));
+                    const jaTem = node && Array.isArray(node.conjuntos) && node.conjuntos.some(x => normKeyObs(x) === normKeyObs(cj));
+                    if (!jaTem) {
+                        const docPlano = {
+                            setor: area, area, maquina: maq, equipamento: eq, conjunto: cj, subconjunto: '',
+                            modelo: node?.modelo || '', serie: node?.numeroSerie || '', numeroSerie: node?.numeroSerie || '',
+                            status_ativo: 'Ativo', inspecao_ativa: true, origem_cadastro: 'obsolescencia_import', timestamp: Date.now()
+                        };
+                        if (isFirebaseConnected) {
+                            await addDoc(linhasColRef, docPlano);
+                        } else {
+                            if (node) node.conjuntos.push(cj);
+                            else estruturas.push({ area, maquina: maq, equipamento: eq, modelo: '', numeroSerie: '', conjuntos: [cj] });
                         }
-                    } else {
-                        const nova = { area, maquina: maq, equipamento: eq, modelo: '', numeroSerie: '', conjuntos: cj ? [cj] : [] };
-                        if (isFirebaseConnected) { const ref = await addDoc(linhasColRef, { ...nova, timestamp: Date.now() }); nova.id = ref.id; }
-                        estruturas.push(nova);
                     }
                 }
                 showToast("Árvore de equipamentos importada!");
@@ -1708,14 +1786,15 @@
             btn.innerText = "Processando...";
 
             if (isFirebaseConnected) {
-                let node = estruturas.find(x => x.area === a && x.maquina === m && x.equipamento === e);
-                if (node) {
-                    if (c && (!node.conjuntos || !node.conjuntos.includes(c))) {
-                        const nc = node.conjuntos ? [...node.conjuntos, c] : [c];
-                        await updateDoc(doc(db, "ob_linhas", node.id), { conjuntos: nc });
-                    }
-                } else {
-                    await addDoc(linhasColRef, { area: a, maquina: m, equipamento: e, modelo: '', numeroSerie: '', conjuntos: c ? [c] : [], timestamp: Date.now() });
+                const node = estruturas.find(x => normKeyObs(x.area) === normKeyObs(a) && normKeyObs(x.maquina) === normKeyObs(m) && normKeyObs(x.equipamento) === normKeyObs(e));
+                const cjAlvo = c || 'Conjunto Geral';
+                const jaTem = node && Array.isArray(node.conjuntos) && node.conjuntos.some(x => normKeyObs(x) === normKeyObs(cjAlvo));
+                if (!jaTem) {
+                    await addDoc(linhasColRef, {
+                        setor: a, area: a, maquina: m, equipamento: e, conjunto: cjAlvo, subconjunto: '',
+                        modelo: node?.modelo || '', serie: node?.numeroSerie || '', numeroSerie: node?.numeroSerie || '',
+                        status_ativo: 'Ativo', inspecao_ativa: true, origem_cadastro: 'obsolescencia_import', timestamp: Date.now()
+                    });
                 }
             }
 
