@@ -5013,13 +5013,9 @@
                     }">
                         <div class="flex items-start justify-between gap-2">
                             <button type="button" onclick="selecionarConjuntoEditor('${node.id}')" class="text-left flex-1 min-w-0">
-                                <div class="text-xs font-extrabold leading-snug truncate">${escapeHtml(conj)}</div>
+                                <div class="text-xs font-extrabold leading-snug break-words">${escapeHtml(conj)}</div>
                             </button>
                             <div class="flex items-center gap-1 shrink-0">
-                                <button type="button" onclick="toggleConjuntoInspecaoAtiva('${node.id}', event)" title="${ativoInsp ? 'Ativo para Inspeção — clique para ocultar do Calendário 52 Semanas' : 'Não Ativo (Oculto do Calendário 52 Semanas) — clique para reativar'}" class="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[9px] font-extrabold border transition-colors ${toggleCls}">
-                                    <span class="w-1.5 h-1.5 rounded-full ${ativoInsp ? 'bg-emerald-500' : 'bg-amber-500'}"></span>
-                                    <span>${ativoInsp ? 'Ativo' : 'Não Ativo'}</span>
-                                </button>
                                 <button type="button" onclick="abrirModalEditarConjunto('${node.id}')" title="Renomear ou editar conjunto" class="p-1 rounded-lg ${isSelected ? 'hover:bg-slate-800 text-slate-300' : 'hover:bg-slate-100 text-slate-400 hover:text-slate-700'}">
                                     <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z"/></svg>
                                 </button>
@@ -5028,8 +5024,7 @@
                                 </button>
                             </div>
                         </div>
-                        <div onclick="selecionarConjuntoEditor('${node.id}')" class="flex flex-wrap gap-1.5 mt-2 cursor-pointer">
-                            ${!ativoInsp ? `<span class="inline-flex items-center gap-1 text-[9px] font-extrabold px-2 py-0.5 rounded-full ${isSelected ? 'bg-amber-400 text-slate-950' : 'bg-amber-100 text-amber-800 border border-amber-200'}">Oculto 52s (Preventiva/Árvore)</span>` : ''}
+                        <div onclick="selecionarConjuntoEditor('${node.id}')" class="flex flex-wrap items-center gap-1.5 mt-2 cursor-pointer">
                             <span class="inline-flex items-center gap-1 text-[9px] font-extrabold px-2 py-0.5 rounded-full ${
                                 planMec
                                     ? (isSelected ? 'bg-sky-400 text-slate-950' : 'bg-sky-100 text-sky-800')
@@ -5046,6 +5041,10 @@
                                 <svg class="w-2.5 h-2.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M13 10V3L4 14h7v7l9-11h-7z"/></svg>
                                 ${planEle ? `Elét. (${qtdEle} pts)` : 'Elét. Padrão'}
                             </span>
+                            <button type="button" onclick="toggleConjuntoInspecaoAtiva('${node.id}', event)" title="${ativoInsp ? 'Ativo para Inspeção — clique para marcar como Não Ativo e ocultar do Calendário 52 Semanas' : 'Não Ativo (Oculto do Calendário 52 Semanas) — clique para reativar na inspeção'}" class="ml-auto inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[9px] font-extrabold border transition-colors ${toggleCls}">
+                                <span class="w-1.5 h-1.5 rounded-full ${ativoInsp ? 'bg-emerald-500' : 'bg-amber-500'}"></span>
+                                <span>${ativoInsp ? 'Ativo na Insp.' : 'Não Ativo (Oculto)'}</span>
+                            </button>
                         </div>
                     </div>`;
                 }).join('');
@@ -7965,7 +7964,7 @@
             const node = arvLinhas.find(x => x.id === nodeId);
             if (!node) return;
             if (String(node.id).includes('_')) {
-                showToast("Este item faz parte de um pacote aninhado. Use '+ Subconjunto' para adicionar novos.", "error");
+                showToast("Este conjunto vem de um pacote aninhado. Para ocultar/ativar na inspeção use o botão 'Ativo na Insp.' no cartão!", "error");
                 return;
             }
             document.getElementById('arvEditNodeId').value = node.id;

@@ -447,6 +447,9 @@
 
             <div class="flex items-center gap-2 shrink-0">
                 <span id="workspaceUserBadge" class="hidden md:inline-block text-[11px] font-bold text-slate-300 px-2.5 py-1 rounded-lg bg-slate-800/90 border border-slate-700"></span>
+                <button type="button" onclick="recarregarAppWorkspace()" title="Forçar recarregamento da versão mais recente do módulo" class="px-2.5 py-1.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-sky-300 text-xs font-bold border border-slate-700 flex items-center gap-1">
+                    <span>↻ Atualizar</span>
+                </button>
                 <button type="button" onclick="abrirAppAtualNovaGuia()" title="Abrir este aplicativo em uma nova guia" class="px-2.5 py-1.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-200 text-xs font-bold border border-slate-700 flex items-center gap-1">
                     <span>Nova Guia ↗</span>
                 </button>
@@ -1459,6 +1462,13 @@
         };
 
         // ================= WORKSPACE INTEGRADO (SSO + IFRAME) =================
+        let CENTRAL_RUNTIME_VER = String(Date.now());
+        function getAppUrlCacheBusted(file, forceNow = false) {
+            const ver = forceNow ? String(Date.now()) : CENTRAL_RUNTIME_VER;
+            const sep = String(file).includes('?') ? '&' : '?';
+            return `${encodeURI(file)}${sep}v=${encodeURIComponent(ver)}`;
+        }
+
         window.abrirAppWorkspace = (appId) => {
             if (!usuarioLogado) return;
             if (!usuarioPodeAcessarApp(usuarioLogado, appId)) {
@@ -1474,8 +1484,16 @@
             renderizarBarraWorkspace();
 
             const frame = document.getElementById('centralAppFrame');
-            frame.src = encodeURI(appObj.file);
+            frame.src = getAppUrlCacheBusted(appObj.file);
             document.getElementById('workspaceView').classList.remove('hidden');
+        };
+
+        window.recarregarAppWorkspace = () => {
+            if (!appAtualWorkspace) return;
+            CENTRAL_RUNTIME_VER = String(Date.now());
+            const frame = document.getElementById('centralAppFrame');
+            if (frame) frame.src = getAppUrlCacheBusted(appAtualWorkspace.file, true);
+            showToast(`Atualizando "${appAtualWorkspace.shortTitle}"...`);
         };
 
         function renderizarBarraWorkspace() {
@@ -1521,7 +1539,7 @@
             const appObj = APPS_CATALOG.find(a => a.id === appId);
             if (!appObj) return;
             sincronizarSessaoSSO(usuarioLogado);
-            window.open(encodeURI(appObj.file), '_blank');
+            window.open(getAppUrlCacheBusted(appObj.file, true), '_blank');
         };
 
         window.abrirAppAtualNovaGuia = () => {
