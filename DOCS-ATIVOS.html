@@ -833,6 +833,41 @@
         </div>
     </div>
 
+    <!-- ==================== MODAL ALERTA REGRAS FIRESTORE ==================== -->
+    <div id="modalAlertaRegrasFirestore" role="dialog" aria-modal="true" hidden class="hidden fixed inset-0 bg-slate-950/80 backdrop-blur-sm z-[95] flex items-end sm:items-center justify-center p-0 sm:p-4">
+        <div class="bg-white w-full max-w-xl rounded-t-3xl sm:rounded-3xl shadow-2xl border border-rose-200 p-6 space-y-4 text-xs">
+            <div class="flex items-start justify-between gap-3">
+                <div class="flex items-center gap-3">
+                    <div class="w-10 h-10 rounded-2xl bg-rose-100 text-rose-600 flex items-center justify-center text-xl shrink-0">⚠️</div>
+                    <div>
+                        <h2 class="text-base font-extrabold text-slate-950">Permissão Negada no Firestore (403)</h2>
+                        <p class="text-[11px] font-bold text-slate-500">As regras de segurança do Firebase bloquearam a gravação nas novas coleções.</p>
+                    </div>
+                </div>
+                <button type="button" onclick="fecharModal('modalAlertaRegrasFirestore')" class="w-8 h-8 rounded-full bg-slate-100 hover:bg-slate-200 font-bold text-slate-600">✕</button>
+            </div>
+            <div class="p-4 rounded-2xl bg-amber-50 border border-amber-200 text-amber-950 space-y-2">
+                <p class="font-extrabold text-amber-900">Como liberar em 30 segundos no Firebase Console:</p>
+                <ol class="list-decimal list-inside space-y-1 text-[11px] text-amber-800 font-medium">
+                    <li>Abra o Firebase Console na aba <b class="font-bold">Firestore Database → Regras (Rules)</b>.</li>
+                    <li>Cole as regras abaixo adicionando as coleções de documentos do PCM.</li>
+                    <li>Clique no botão <b class="font-bold text-emerald-700">Publicar (Publish)</b>.</li>
+                </ol>
+            </div>
+            <div class="space-y-1.5">
+                <div class="flex items-center justify-between">
+                    <span class="font-extrabold text-slate-700 uppercase tracking-wider text-[10px]">Snippet para colar no Firebase Console:</span>
+                    <button type="button" onclick="copiarRegrasFirestoreAlerta()" id="btnCopiarRegrasFirestore" class="px-2.5 py-1 rounded-lg bg-indigo-600 text-white font-extrabold text-[11px] hover:bg-indigo-700 transition-all flex items-center gap-1">📋 Copiar Regras</button>
+                </div>
+                <pre id="preRegrasFirestoreAlerta" class="p-3 rounded-xl bg-slate-900 text-emerald-400 font-mono text-[11px] overflow-x-auto select-all max-h-44 border border-slate-800 leading-relaxed"></pre>
+            </div>
+            <div class="pt-2 flex flex-wrap items-center justify-end gap-2 border-t border-slate-100">
+                <a href="https://console.firebase.google.com/project/pcm-cepera/firestore/rules" target="_blank" rel="noopener noreferrer" class="px-4 py-2 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-800 font-extrabold text-xs inline-flex items-center gap-1.5">↗ Abrir Firebase Console</a>
+                <button type="button" onclick="fecharModal('modalAlertaRegrasFirestore')" class="px-4 py-2 rounded-xl bg-slate-900 text-white font-extrabold text-xs hover:bg-slate-800">Entendi, vou publicar</button>
+            </div>
+        </div>
+    </div>
+
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
         import { getAuth, signInAnonymously } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
@@ -907,7 +942,81 @@
         };
 
         const MAX_DB_UPLOAD_BYTES = 7 * 1024 * 1024;
-        const CHUNK_B64_CHARS = 420000;
+        const CHUNK_B64_CHARS = 260000;
+        const SNIPPET_REGRAS_FIRESTORE = `// Cole nas Regras do Firestore (Firebase Console -> Firestore Database -> Regras)
+match /docs_ativos/{document=**} {
+  allow read, write: if true;
+}
+match /docs_revisoes/{document=**} {
+  allow read, write: if true;
+}
+match /docs_arquivos_partes/{document=**} {
+  allow read, write: if true;
+}
+match /config/{document=**} {
+  allow read, write: if true;
+}`;
+
+        function formatarErroFirestoreDocs(err) {
+            const code = err?.code || '';
+            const msg = err?.message || String(err || '');
+            if (code === 'permission-denied' || msg.includes('permission-denied') || msg.includes('Missing or insufficient permissions')) {
+                return {
+                    tipo: 'regras_firestore',
+                    titulo: 'Permissão Negada no Firestore (403)',
+                    resumo: 'Permissão negada no Firestore (permission-denied). Libere as coleções de documentos nas Regras do Firebase Console.',
+                    regraSugerida: SNIPPET_REGRAS_FIRESTORE
+                };
+            }
+            if (code === 'resource-exhausted' || msg.includes('exceeded') || msg.includes('too large')) {
+                return {
+                    tipo: 'tamanho',
+                    titulo: 'Limite de Tamanho Excedido',
+                    resumo: 'Arquivo excede a capacidade de gravação direta. Conecte sua pasta OneDrive ou insira o link SharePoint.',
+                    regraSugerida: ''
+                };
+            }
+            return {
+                tipo: 'generico',
+                titulo: 'Erro ao Gravar no Banco',
+                resumo: `${code ? '[' + code + '] ' : ''}${msg || 'Falha de comunicação com o Firestore.'}`,
+                regraSugerida: ''
+            };
+        }
+
+        window.abrirModalAlertaRegrasFirestore = (info = null) => {
+            const pre = document.getElementById('preRegrasFirestoreAlerta');
+            if (pre) pre.innerText = info?.regraSugerida || SNIPPET_REGRAS_FIRESTORE;
+            abrirModal('modalAlertaRegrasFirestore');
+        };
+
+        window.copiarRegrasFirestoreAlerta = async () => {
+            const snippet = SNIPPET_REGRAS_FIRESTORE;
+            await copiarTextoSimples(snippet);
+            const btn = document.getElementById('btnCopiarRegrasFirestore');
+            if (btn) {
+                const prev = btn.innerHTML;
+                btn.innerHTML = '✓ Copiado!';
+                setTimeout(() => { if (btn) btn.innerHTML = prev; }, 2000);
+            }
+            showToast('Regras copiadas! Cole na aba Regras do Firebase Console e clique em Publicar.', 'success');
+        };
+
+        function sanitizarPayloadFirestore(obj) {
+            if (!obj || typeof obj !== 'object') return obj;
+            if (Array.isArray(obj)) return obj.map(sanitizarPayloadFirestore);
+            const out = {};
+            for (const [k, v] of Object.entries(obj)) {
+                if (v === undefined) {
+                    out[k] = '';
+                } else if (v !== null && typeof v === 'object' && !(v instanceof Date)) {
+                    out[k] = sanitizarPayloadFirestore(v);
+                } else {
+                    out[k] = v;
+                }
+            }
+            return out;
+        }
 
         let usuarioLogado = null;
         let currentView = 'biblioteca';
@@ -1711,12 +1820,14 @@
                     atualizadoEm: agora
                 };
                 masterUpdate.searchText = construirSearchText({ ...master, ...masterUpdate });
-                await updateDoc(doc(db, 'docs_ativos', master.id), masterUpdate);
+                await updateDoc(doc(db, 'docs_ativos', master.id), sanitizarPayloadFirestore(masterUpdate));
 
                 showToast(`${master.codigo} • ${rev.revisaoLabel} aprovado e publicado como VIGENTE!`, 'success');
             } catch (err) {
-                console.error(err);
-                showToast('Erro ao aprovar revisão.', 'error');
+                console.error('Falha em aprovarRevisaoDoc:', err);
+                const info = formatarErroFirestoreDocs(err);
+                if (info.tipo === 'regras_firestore') abrirModalAlertaRegrasFirestore(info);
+                else showToast(info.resumo, 'error');
             }
         };
 
@@ -1733,27 +1844,30 @@
             const aprovRole = usuarioLogado?.role || 'Gestão';
 
             try {
-                await updateDoc(doc(db, 'docs_revisoes', rev.id), {
+                await updateDoc(doc(db, 'docs_revisoes', rev.id), sanitizarPayloadFirestore({
                     status: 'reprovada',
                     motivoReprovacao: motivo.trim(),
                     analisadoPor: aprovNome,
                     analisadoPorRole: aprovRole,
                     analisadoEm: agora
-                });
+                }));
                 if (master) {
                     const outrasPend = docsRevisoes.some(x => x.docMasterId === master.id && x.id !== rev.id && x.status === 'pendente_aprovacao');
                     const temVigente = master.revisaoVigenteNum !== null && master.revisaoVigenteNum !== undefined;
-                    await updateDoc(doc(db, 'docs_ativos', master.id), {
+                    await updateDoc(doc(db, 'docs_ativos', master.id), sanitizarPayloadFirestore({
                         status: temVigente ? 'vigente' : 'reprovado',
                         temRevisaoPendente: outrasPend,
                         ultimoMotivoReprovacao: motivo.trim(),
                         atualizadoPor: aprovNome,
                         atualizadoEm: agora
-                    });
+                    }));
                 }
                 showToast(`Revisão ${rev.revisaoLabel} de ${rev.codigoDoc} reprovada com motivo registrado.`);
-            } catch (_) {
-                showToast('Erro ao reprovar revisão.', 'error');
+            } catch (err) {
+                console.error('Falha em reprovarRevisaoDoc:', err);
+                const info = formatarErroFirestoreDocs(err);
+                if (info.tipo === 'regras_firestore') abrirModalAlertaRegrasFirestore(info);
+                else showToast(info.resumo, 'error');
             }
         };
 
@@ -1913,12 +2027,15 @@
                 if (viewParam) parsed.viewId = viewParam;
             } catch (_) {}
             try {
-                await setDoc(refSpConfig, { ...parsed, atualizadoEm: new Date().toISOString(), atualizadoPor: usuarioLogado?.nome || 'Admin' }, { merge: true });
+                await setDoc(refSpConfig, sanitizarPayloadFirestore({ ...parsed, atualizadoEm: new Date().toISOString(), atualizadoPor: usuarioLogado?.nome || 'Admin' }), { merge: true });
                 sharepointCfg = parsed;
                 showToast('Configuração SharePoint atualizada!', 'success');
                 renderSharePointView();
-            } catch (_) {
-                showToast('Erro ao salvar configuração SharePoint.', 'error');
+            } catch (err) {
+                console.error('Falha em salvarConfigSharePoint:', err);
+                const info = formatarErroFirestoreDocs(err);
+                if (info.tipo === 'regras_firestore') abrirModalAlertaRegrasFirestore(info);
+                else showToast(info.resumo, 'error');
             }
         };
 
@@ -2356,23 +2473,23 @@
             const agora = new Date().toISOString();
             for (let i = 0; i < totalParts; i++) {
                 const slice = rawB64.slice(i * CHUNK_B64_CHARS, (i + 1) * CHUNK_B64_CHARS);
-                await addDoc(refDocsArquivosPartes, {
+                await addDoc(refDocsArquivosPartes, sanitizarPayloadFirestore({
                     arquivoId,
                     docMasterId: masterId,
-                    revNum,
+                    revNum: Number(revNum || 0),
                     partIndex: i,
                     totalParts,
-                    fileName: draft.fileName,
-                    mimeType: draft.mimeType || inferMimeByFileName(draft.fileName),
+                    fileName: draft.fileName || 'documento.pdf',
+                    mimeType: draft.mimeType || inferMimeByFileName(draft.fileName || 'documento.pdf'),
                     sizeBytes: Number(draft.sizeBytes || 0),
                     chunkB64: slice,
                     criadoEm: agora
-                });
+                }));
             }
             return {
                 arquivoId,
-                arquivoNome: draft.fileName,
-                arquivoMime: draft.mimeType || inferMimeByFileName(draft.fileName),
+                arquivoNome: draft.fileName || 'documento.pdf',
+                arquivoMime: draft.mimeType || inferMimeByFileName(draft.fileName || 'documento.pdf'),
                 arquivoTamanhoBytes: Number(draft.sizeBytes || 0),
                 arquivoPartes: totalParts
             };
@@ -2885,6 +3002,9 @@
                 }
 
                 let targetMasterId = masterId;
+                const masterDocRef = (modo === 'novo') ? doc(refDocsAtivos) : doc(db, 'docs_ativos', masterId);
+                if (modo === 'novo') targetMasterId = masterDocRef.id;
+
                 const specs = {
                     ativoNodeId,
                     ativoDocId: matchNode?.docId || '',
@@ -2893,7 +3013,7 @@
                     modelo: matchNode?.modelo || ''
                 };
 
-                // Meta do arquivo direto (partes no Firestore caso <= 7MB)
+                let arqId = '';
                 let arquivoMeta = {
                     arquivoId: '',
                     arquivoNome: arquivoDiretoDraft?.fileName || '',
@@ -2906,6 +3026,7 @@
                 if (arquivoDiretoDraft) {
                     if (Number(arquivoDiretoDraft.sizeBytes || 0) <= MAX_DB_UPLOAD_BYTES) {
                         provider = arquivoUrl ? 'hibrido' : 'banco_interno';
+                        arqId = `arq_${Date.now()}_${Math.random().toString(36).slice(2, 7)}`;
                     } else if (arquivoUrl) {
                         provider = 'sharepoint';
                     } else {
@@ -2914,6 +3035,11 @@
                     }
                 } else if (fotoCampoB64Draft && !arquivoUrl) {
                     provider = 'foto_campo';
+                }
+
+                // 2. Se houver anexo direto <= 7MB, grava as partes antes no Firestore
+                if (arqId && arquivoDiretoDraft) {
+                    arquivoMeta = await gravarArquivoPartesFirestore(arqId, targetMasterId, revNum, arquivoDiretoDraft);
                 }
 
                 if (modo === 'novo') {
@@ -2954,22 +3080,16 @@
                         atualizadoEm: agora
                     };
                     masterPayload.searchText = construirSearchText(masterPayload);
-                    const mRef = await addDoc(refDocsAtivos, masterPayload);
-                    targetMasterId = mRef.id;
+                    await setDoc(masterDocRef, sanitizarPayloadFirestore(masterPayload));
                 } else if (targetMasterId) {
-                    await updateDoc(doc(db, 'docs_ativos', targetMasterId), {
+                    await updateDoc(doc(db, 'docs_ativos', targetMasterId), sanitizarPayloadFirestore({
                         temRevisaoPendente: true,
                         atualizadoPor: autor,
                         atualizadoEm: agora
-                    });
+                    }));
                 }
 
-                if (arquivoDiretoDraft && Number(arquivoDiretoDraft.sizeBytes || 0) <= MAX_DB_UPLOAD_BYTES) {
-                    const arqId = `arq_${Date.now()}_${Math.random().toString(36).slice(2, 7)}`;
-                    arquivoMeta = await gravarArquivoPartesFirestore(arqId, targetMasterId, revNum, arquivoDiretoDraft);
-                }
-
-                await addDoc(refDocsRevisoes, {
+                await addDoc(refDocsRevisoes, sanitizarPayloadFirestore({
                     schemaVersion: 1,
                     docMasterId: targetMasterId,
                     codigoDoc: codigo,
@@ -3003,7 +3123,7 @@
                     enviadoPor: autor,
                     enviadoPorRole: autorRole,
                     enviadoEm: agora
-                });
+                }));
 
                 fecharModal('modalNovoDoc');
                 showToast(
@@ -3013,8 +3133,14 @@
                     'success'
                 );
             } catch (err) {
-                console.error(err);
-                showToast('Erro ao gravar arquivo/submissão no banco de dados.', 'error');
+                console.error('Falha em salvarSubmissaoDocumento:', err);
+                const info = formatarErroFirestoreDocs(err);
+                if (info.tipo === 'regras_firestore') {
+                    abrirModalAlertaRegrasFirestore(info);
+                    showToast(info.resumo, 'error');
+                } else {
+                    showToast(info.resumo, 'error');
+                }
             } finally {
                 if (btn) { btn.disabled = false; btn.innerText = 'Enviar para Aprovação'; }
             }

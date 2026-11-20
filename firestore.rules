@@ -1,0 +1,55 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    // Coleções operacionais do Central PCM Cepêra
+    match /ob_linhas/{document=**} {
+      allow read, write: if true;
+    }
+    match /ob_equipamentos/{document=**} {
+      allow read, write: if true;
+    }
+    match /ir_funcionarios/{document=**} {
+      allow read, write: if true;
+    }
+    match /ir_anomalias/{document=**} {
+      allow read, write: if true;
+    }
+    match /ir_checklists/{document=**} {
+      allow read, write: if true;
+    }
+    match /ir_agenda/{document=**} {
+      allow read, write: if true;
+    }
+    match /ag_manutencao/{document=**} {
+      allow read, write: if true;
+    }
+    match /ag_responsaveis/{document=**} {
+      allow read, write: if true;
+    }
+    match /ag_equipes/{document=**} {
+      allow read, write: if true;
+    }
+    match /ag_setores/{document=**} {
+      allow read, write: if true;
+    }
+    match /mp_producao/{document=**} {
+      allow read, write: if true;
+    }
+
+    // Configurações do sistema (SharePoint, preferências, etc.)
+    match /config/{document=**} {
+      allow read, write: if true;
+    }
+
+    // Biblioteca e Controle de Documentos dos Ativos (DOCS-ATIVOS)
+    match /docs_ativos/{document=**} {
+      allow read, write: if true;
+    }
+    match /docs_revisoes/{document=**} {
+      allow read, write: if true;
+    }
+    match /docs_arquivos_partes/{document=**} {
+      allow read, write: if true;
+    }
+  }
+}
