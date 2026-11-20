@@ -954,6 +954,20 @@
 
                                     <div id="cfgGruposContainer" class="space-y-4"></div>
 
+                                    <div id="cfgDocsBibliotecaWrap" class="p-3.5 rounded-2xl bg-indigo-50/60 border border-indigo-200 space-y-2.5">
+                                        <div class="flex flex-wrap items-center justify-between gap-2">
+                                            <div>
+                                                <div class="text-[11px] font-extrabold text-indigo-900 uppercase">Docs &amp; Fotos Padrão do Conjunto (<span id="cfgDocsCount">0</span>)</div>
+                                                <p class="text-[10px] text-indigo-700 font-semibold">Vincule manuais, desenhos, lubrificação ou fotos vigentes para aparecerem automaticamente na rota do inspetor.</p>
+                                            </div>
+                                            <button type="button" onclick="abrirBibliotecaDocsDoEditorInsp()" class="px-3 py-1.5 rounded-xl bg-white border border-indigo-200 hover:bg-indigo-100 text-[10px] font-extrabold text-indigo-700 shrink-0">
+                                                Abrir Biblioteca ↗
+                                            </button>
+                                        </div>
+                                        <input type="text" id="cfgDocsBuscaInput" oninput="onCfgDocsBuscaInsp(this.value)" placeholder="Buscar documento vigente por código, título ou categoria..." class="input-clean py-1.5 text-xs">
+                                        <div id="cfgDocsPickerBox" class="max-h-40 overflow-y-auto space-y-1.5 pr-1"></div>
+                                    </div>
+
                                     <div class="pt-4 border-t border-slate-100 flex flex-col sm:flex-row items-center justify-between gap-3">
                                         <span class="text-xs text-slate-500 font-medium">Ao salvar, o técnico já visualizará este roteiro na próxima rota.</span>
                                         <button type="button" id="btnSalvarPlanoCirurgico" onclick="salvarPlanoCirurgico()" class="btn-pill-dark w-full sm:w-auto px-7 py-3 text-xs">
@@ -1280,6 +1294,8 @@
             </div>
 
             <div class="p-5 sm:p-7 overflow-y-auto flex-1 space-y-7">
+                <div id="execDocsInspWrap" class="hidden p-3.5 rounded-2xl bg-indigo-50/70 border border-indigo-200 space-y-2"></div>
+
                 <div class="bg-slate-50 border border-slate-200/80 p-4 rounded-2xl">
                     <div class="flex items-center justify-between text-xs font-extrabold text-slate-700 mb-2">
                         <span>Progresso do Checklist Técnico</span>
@@ -1920,6 +1936,7 @@
         const refAgenda = collection(db, "ir_agenda");
         const refAnomalias = collection(db, "ir_anomalias");
         const refChecklists = collection(db, "ir_checklists");
+        const refDocsAtivos = collection(db, "docs_ativos");
         const refMasterCfg = doc(db, "pcm_config", "admin_master");
 
         const DEFAULT_ADMIN = { id: 'default_admin', nome: 'Administrador PCM', user: 'admin', pass: 'admin', role: 'Admin' };
@@ -1931,6 +1948,7 @@
         let agendaRotas = [];
         let listaAnomalias = [];
         let mapaChecklists = {};
+        let listaDocsAtivos = [];
         let bancoConectado = false;
 
         let usuarioLogado = null;
@@ -1946,6 +1964,8 @@
         let editorSelectedNodeId = null;
         let editorEspecialidade = 'Mecânica';
         let editorGruposData = [];
+        let editorDocsIdsDraft = [];
+        let editorDocsBusca = '';
 
         const METODOS_INSPECAO = ['Visual', 'Sensitivo', 'Medição', 'Termografia', 'Lubrificação', 'Segurança'];
         const EQUIPES_RESPONSAVEIS_ANOMALIA = [
@@ -3194,6 +3214,18 @@
                 }
             });
 
+            onSnapshot(refDocsAtivos, (snap) => {
+                listaDocsAtivos = snap.docs.map(d => ({ id: d.id, ...d.data() }));
+                if (usuarioLogado) {
+                    if (editorSelectedNodeId && !document.getElementById('view-checklists')?.classList.contains('hidden')) {
+                        if (typeof renderEditorDocsPickerInsp === 'function') renderEditorDocsPickerInsp();
+                    }
+                    if (!document.getElementById('view-minharota')?.classList.contains('hidden')) {
+                        renderMinhaRota();
+                    }
+                }
+            });
+
             onSnapshot(refFunc, (snap) => {
                 const temp = [];
                 snap.forEach(d => temp.push({ id: d.id, ...d.data() }));
@@ -3414,6 +3446,153 @@
 
         function isPerfilGestor(role) {
             return isPerfilAdmin(role) || isPerfilSupervisor(role);
+        }
+
+        function normDocKeyInsp(str) {
+            return String(str || '').normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase().trim().replace(/\s+/g, ' ');
+        }
+
+        const DOCS_CAT_LABELS_INSP = {
+            manuais: 'Manual',
+            lubrificacao: 'Lubrificação',
+            desenhos: 'Desenho Técnico',
+            orcamentos: 'Orçamento (Gestão)',
+            fotos: 'Foto Ref.',
+            qualidade: 'Qualidade & Seg.'
+        };
+
+        function podeVerDocInsp(d) {
+            if (!d) return false;
+            if (d.categoria === 'orcamentos' || d.sigilo === 'gestao') {
+                return Boolean(usuarioLogado && isPerfilGestor(usuarioLogado.role));
+            }
+            return true;
+        }
+
+        function getDocsVigentesParaAtivoInsp(nodeOrRec, explicitIds = []) {
+            const area = normDocKeyInsp(nodeOrRec?.area || nodeOrRec?.setor || '');
+            const maq = normDocKeyInsp(nodeOrRec?.maquina || '');
+            const eq = normDocKeyInsp(nodeOrRec?.equipamento || '');
+            const conj = normDocKeyInsp(nodeOrRec?.conjunto || (typeof getNomeConjunto === 'function' && nodeOrRec ? getNomeConjunto(nodeOrRec) : ''));
+            const sub = normDocKeyInsp(nodeOrRec?.subconjunto || '');
+
+            const linkSet = new Set((Array.isArray(explicitIds) ? explicitIds : []).filter(Boolean));
+            const vinculados = [];
+            const seen = new Set();
+
+            listaDocsAtivos.forEach(d => {
+                if (d.status !== 'vigente' || !podeVerDocInsp(d)) return;
+                if (linkSet.has(d.id)) {
+                    seen.add(d.id);
+                    vinculados.push(d);
+                }
+            });
+
+            const relacionados = listaDocsAtivos.filter(d => {
+                if (d.status !== 'vigente' || !podeVerDocInsp(d) || seen.has(d.id)) return false;
+                const da = normDocKeyInsp(d.area);
+                const dm = normDocKeyInsp(d.maquina);
+                const de = normDocKeyInsp(d.equipamento);
+                const dc = normDocKeyInsp(d.conjunto);
+                const dsc = normDocKeyInsp(d.subconjunto);
+                if (area && da && da !== area) return false;
+                if (maq && dm && dm !== maq) return false;
+                if (eq && de && de !== eq) return false;
+                if (conj && dc && dc !== conj) return false;
+                if (sub && dsc && dsc !== sub) return false;
+                return Boolean((!area || da === area) && (!maq || dm === maq) && (!eq || !de || de === eq));
+            });
+
+            const cmp = (a, b) => String(a.codigo || '').localeCompare(String(b.codigo || ''));
+            vinculados.sort(cmp);
+            relacionados.sort(cmp);
+            return { vinculados, relacionados, todos: [...vinculados, ...relacionados] };
+        }
+
+        window.abrirBibliotecaDocsInsp = (area = '', maquina = '', equipamento = '', conjunto = '', subconjunto = '', categoria = '') => {
+            const handoff = {
+                targetApp: 'docs_ativos',
+                action: 'filtrar_ativo',
+                ativo: { area, maquina, equipamento, conjunto, subconjunto },
+                categoria: categoria || ''
+            };
+            try { localStorage.setItem('cepera_agendamento_handoff', JSON.stringify(handoff)); } catch (e) {}
+            if (window.parent && window.parent !== window) {
+                window.parent.postMessage({ type: 'CEPERA_NAVEGAR_APP', appId: 'docs_ativos', forceReload: true, handoff }, '*');
+                return;
+            }
+            const qs = new URLSearchParams();
+            if (area) qs.set('area', area);
+            if (maquina) qs.set('maquina', maquina);
+            if (equipamento) qs.set('equipamento', equipamento);
+            if (conjunto) qs.set('conjunto', conjunto);
+            window.location.href = `DOCS-ATIVOS.html${qs.toString() ? '?' + qs.toString() : ''}`;
+        };
+
+        window.abrirBibliotecaDocsDoEditorInsp = () => {
+            const node = arvLinhas.find(x => x.id === editorSelectedNodeId);
+            if (!node) return;
+            abrirBibliotecaDocsInsp(node.area || '', node.maquina || '', node.equipamento || '', getNomeConjunto(node), node.subconjunto || '');
+        };
+
+        window.abrirZoomFotoDocInsp = (docId) => {
+            const d = listaDocsAtivos.find(x => x.id === docId);
+            if (d?.fotoThumbB64 && typeof abrirZoomFoto === 'function') {
+                abrirZoomFoto(d.fotoThumbB64);
+            }
+        };
+
+        window.onCfgDocsBuscaInsp = (val) => {
+            editorDocsBusca = String(val || '');
+            renderEditorDocsPickerInsp();
+        };
+
+        window.toggleDocCirurgicoInsp = (docId) => {
+            const idx = editorDocsIdsDraft.indexOf(docId);
+            if (idx >= 0) editorDocsIdsDraft.splice(idx, 1);
+            else editorDocsIdsDraft.push(docId);
+            renderEditorDocsPickerInsp();
+        };
+
+        function renderEditorDocsPickerInsp() {
+            const box = document.getElementById('cfgDocsPickerBox');
+            const cntEl = document.getElementById('cfgDocsCount');
+            if (!box || !cntEl) return;
+            const node = arvLinhas.find(x => x.id === editorSelectedNodeId);
+            cntEl.innerText = String(editorDocsIdsDraft.length);
+            if (!node) { box.innerHTML = ''; return; }
+
+            const { todos } = getDocsVigentesParaAtivoInsp(node, editorDocsIdsDraft);
+            const q = normDocKeyInsp(editorDocsBusca);
+            const list = q
+                ? listaDocsAtivos.filter(d => d.status === 'vigente' && podeVerDocInsp(d) && normDocKeyInsp([d.codigo, d.titulo, d.categoria, d.area, d.maquina, d.equipamento, d.conjunto, ...(d.tags || [])].join(' ')).includes(q))
+                : todos;
+
+            if (!list.length) {
+                box.innerHTML = `<div class="p-3 rounded-xl bg-white border border-dashed border-indigo-200 text-[11px] font-semibold text-slate-500 text-center">${q ? 'Nenhum documento vigente encontrado.' : 'Nenhum documento vigente para este ativo ainda. Use "Abrir Biblioteca ↗" para buscar ou cadastrar.'}</div>`;
+                return;
+            }
+            const linkedSet = new Set(editorDocsIdsDraft);
+            box.innerHTML = list.map(d => {
+                const checked = linkedSet.has(d.id);
+                const catLbl = DOCS_CAT_LABELS_INSP[d.categoria] || d.categoria || 'Doc';
+                return `
+                    <label class="flex items-center justify-between gap-2 p-2 rounded-xl border cursor-pointer ${checked ? 'bg-indigo-100/80 border-indigo-400' : 'bg-white border-slate-200 hover:border-indigo-300'}">
+                        <div class="flex items-center gap-2 min-w-0 flex-1">
+                            <input type="checkbox" ${checked ? 'checked' : ''} onchange="toggleDocCirurgicoInsp('${d.id}')" class="accent-indigo-600 shrink-0">
+                            ${d.fotoThumbB64 ? `<img src="${d.fotoThumbB64}" onclick="event.preventDefault();abrirZoomFotoDocInsp('${d.id}')" class="w-8 h-8 rounded-lg object-cover border border-slate-200 shrink-0">` : ''}
+                            <div class="min-w-0">
+                                <div class="flex flex-wrap items-center gap-1">
+                                    <span class="text-[10px] font-extrabold text-indigo-700">${escapeHtml(d.codigo || 'DOC')}</span>
+                                    <span class="px-1.5 py-0.5 rounded bg-slate-100 text-slate-600 text-[9px] font-extrabold">${escapeHtml(d.revisaoVigenteLabel || 'REV 00')}</span>
+                                    <span class="px-1.5 py-0.5 rounded bg-indigo-50 text-indigo-700 text-[9px] font-extrabold uppercase">${escapeHtml(catLbl)}</span>
+                                </div>
+                                <div class="text-xs font-bold text-slate-800 truncate">${escapeHtml(d.titulo || '')}</div>
+                            </div>
+                        </div>
+                        ${d.arquivoUrl ? `<a href="${escapeHtml(d.arquivoUrl)}" target="_blank" rel="noopener noreferrer" onclick="event.stopPropagation()" class="px-2 py-1 rounded-lg bg-slate-100 hover:bg-indigo-200 text-[10px] font-extrabold text-slate-700 shrink-0">SharePoint ↗</a>` : ''}
+                    </label>`;
+            }).join('');
         }
 
         function setUsuarioLogado(u) {
@@ -5719,7 +5898,12 @@
             }
             if (btnMasterPlan) btnMasterPlan.classList.toggle('hidden', !(hasSavedPlan && isAdminMasterAtivo()));
 
+            editorDocsIdsDraft = Array.isArray(saved?.documentos_ids) ? [...saved.documentos_ids] : [];
+            editorDocsBusca = '';
+            const buscaEl = document.getElementById('cfgDocsBuscaInput');
+            if (buscaEl) buscaEl.value = '';
             renderGruposEditor();
+            renderEditorDocsPickerInsp();
         }
 
         function renderGruposEditor() {
@@ -5957,6 +6141,7 @@
                     equipamento: node.equipamento || '',
                     conjunto: getNomeConjunto(node),
                     grupos: gruposLimpos,
+                    documentos_ids: Array.isArray(editorDocsIdsDraft) ? [...editorDocsIdsDraft] : [],
                     atualizado_por: usuarioLogado.nome,
                     timestamp: Date.now()
                 });
@@ -6475,6 +6660,32 @@
                                 ${padEle ? `<span class="text-[10px] font-bold px-2 py-0.5 rounded-lg bg-slate-100 text-slate-700">Padrinho Elét: <strong>${escapeHtml(padEle)}</strong></span>` : ''}
                             </div>
                         ` : ''}
+                        ${(() => {
+                            const savedPl = typeof findChecklistCirurgicoParaNode === 'function' ? findChecklistCirurgicoParaNode(i.id_node, i.role_tecnico) : null;
+                            const { todos } = getDocsVigentesParaAtivoInsp({
+                                area: i.area || '',
+                                maquina: i.maquina || '',
+                                equipamento: i.equipamento || '',
+                                conjunto: conj || '',
+                                subconjunto: isConjInteiro ? '' : (nodeRef?.subconjunto || '')
+                            }, savedPl?.documentos_ids || []);
+                            const topDocs = todos.slice(0, 3);
+                            return `
+                                <div class="mt-2.5 p-2.5 rounded-2xl bg-indigo-50/60 border border-indigo-200/80 space-y-1.5">
+                                    <div class="flex items-center justify-between gap-2">
+                                        <span class="text-[10px] font-extrabold uppercase text-indigo-900">Docs &amp; Referências Visuais (${todos.length})</span>
+                                        <button type="button" onclick="abrirBibliotecaPorAgendaInsp('${escapeHtml(i.id)}')" class="text-[10px] font-extrabold text-indigo-700 hover:underline shrink-0">Biblioteca ↗</button>
+                                    </div>
+                                    ${topDocs.length ? `<div class="flex flex-wrap gap-1.5">${topDocs.map(d => {
+                                        if (d.fotoThumbB64) {
+                                            return `<button type="button" onclick="abrirZoomFotoDocInsp('${d.id}')" class="inline-flex items-center gap-1 px-2 py-0.5 rounded-lg bg-white border border-indigo-200 hover:bg-indigo-100 text-[10px] font-extrabold text-slate-700">📷 ${escapeHtml(d.codigo || 'Foto')}</button>`;
+                                        }
+                                        return d.arquivoUrl
+                                            ? `<a href="${escapeHtml(d.arquivoUrl)}" target="_blank" rel="noopener noreferrer" class="inline-flex items-center gap-1 px-2 py-0.5 rounded-lg bg-white border border-indigo-200 hover:bg-indigo-100 text-[10px] font-extrabold text-indigo-800">📄 ${escapeHtml(d.codigo || 'Doc')} ↗</a>`
+                                            : `<span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-lg bg-white border border-slate-200 text-[10px] font-bold text-slate-600">${escapeHtml(d.codigo || d.titulo)}</span>`;
+                                    }).join('')}${todos.length > 3 ? `<span class="text-[10px] font-bold text-indigo-700 self-center">+${todos.length - 3}</span>` : ''}</div>` : `<div class="text-[10px] text-slate-500 font-semibold">Consulte manuais/desenhos ou envie foto de referência na Biblioteca.</div>`}
+                                </div>`;
+                        })()}
                     </div>
                     <div class="space-y-2">
                         ${isDone
@@ -6494,6 +6705,25 @@
             }).join('');
         }
 
+        window.abrirBibliotecaPorAgendaInsp = (idAgenda) => {
+            const ag = agendaRotas.find(a => a.id === idAgenda);
+            if (!ag) { abrirBibliotecaDocsInsp(); return; }
+            const nodeRef = findNodeHibridoPorRegistro(ag)?.node || null;
+            const isConjInteiro = Boolean(
+                ag.escopo_inspecao === 'conjunto' ||
+                nodeRef?.isConjuntoGroup ||
+                String(ag.id_node || '').startsWith('CONJ__') ||
+                (Array.isArray(ag.subconjuntos_incluidos) && ag.subconjuntos_incluidos.length > 0 && !nodeRef?.subconjunto)
+            );
+            abrirBibliotecaDocsInsp(ag.area || '', ag.maquina || '', ag.equipamento || '', ag.conjunto || '', isConjInteiro ? '' : (nodeRef?.subconjunto || ''));
+        };
+
+        let inspExecDocsCtx = null;
+        window.abrirBibliotecaExecInsp = () => {
+            if (!inspExecDocsCtx) { abrirBibliotecaDocsInsp(); return; }
+            abrirBibliotecaDocsInsp(inspExecDocsCtx.area, inspExecDocsCtx.maquina, inspExecDocsCtx.equipamento, inspExecDocsCtx.conjunto, inspExecDocsCtx.subconjunto);
+        };
+
         // ================= EXECUÇÃO DO CHECKLIST + MÚLTIPLAS ANOMALIAS =================
         window.abrirChecklist = (idAgenda) => {
             const ag = agendaRotas.find(a => a.id === idAgenda);
@@ -6509,13 +6739,17 @@
                 ? ag.subconjuntos_incluidos
                 : (Array.isArray(nodeRef?.subconjuntosIncluidos) ? nodeRef.subconjuntosIncluidos : []);
             const plano = getChecklistParaExecucao(ag.id_node, ag.role_tecnico, ag);
+            const savedPlano = findChecklistCirurgicoParaNode(ag.id_node, ag.role_tecnico);
             renderModalChecklist({
                 isPreview: false,
                 idAgenda,
+                idNode: ag.id_node,
                 area: ag.area,
                 maquina: ag.maquina,
                 equipamento: ag.equipamento,
                 conjunto: ag.conjunto || 'Conjunto Geral',
+                subconjunto: isConjInteiro ? '' : (nodeRef?.subconjunto || ''),
+                documentosIds: Array.isArray(savedPlano?.documentos_ids) ? savedPlano.documentos_ids : [],
                 isConjInteiro,
                 subsIncluidos,
                 especialidade: ag.role_tecnico,
@@ -6530,8 +6764,8 @@
             document.getElementById('execEspecialidade').innerText = cfg.especialidade;
             document.getElementById('execObsGerais').value = '';
             const subWrap = document.getElementById('execSubconjuntosWrap');
+            const nodeSel = cfg.isPreview ? arvLinhas.find(x => x.id === editorSelectedNodeId) : null;
             if (subWrap) {
-                const nodeSel = cfg.isPreview ? arvLinhas.find(x => x.id === editorSelectedNodeId) : null;
                 const isConjInt = Boolean(cfg.isConjInteiro || nodeSel?.isConjuntoGroup);
                 const subsList = (Array.isArray(cfg.subsIncluidos) && cfg.subsIncluidos.length > 0)
                     ? cfg.subsIncluidos
@@ -6542,6 +6776,52 @@
                 } else {
                     subWrap.innerHTML = '';
                     subWrap.classList.add('hidden');
+                }
+            }
+
+            const docsExecWrap = document.getElementById('execDocsInspWrap');
+            if (docsExecWrap) {
+                const subExec = cfg.isPreview ? (nodeSel?.subconjunto || '') : (cfg.subconjunto || '');
+                const explicitDocs = cfg.isPreview ? editorDocsIdsDraft : (Array.isArray(cfg.documentosIds) ? cfg.documentosIds : []);
+                inspExecDocsCtx = { area: cfg.area || '', maquina: cfg.maquina || '', equipamento: cfg.equipamento || '', conjunto: cfg.conjunto || '', subconjunto: subExec };
+                const { vinculados, relacionados, todos } = getDocsVigentesParaAtivoInsp(inspExecDocsCtx, explicitDocs);
+                docsExecWrap.classList.remove('hidden');
+                if (!todos.length) {
+                    docsExecWrap.innerHTML = `
+                        <div class="flex flex-wrap items-center justify-between gap-2">
+                            <span class="text-[11px] font-bold text-indigo-900">Docs &amp; Referências Visuais: nenhum doc vigente vinculado</span>
+                            <button type="button" onclick="abrirBibliotecaExecInsp()" class="px-2.5 py-1 rounded-lg bg-white border border-indigo-200 hover:bg-indigo-100 text-[10px] font-extrabold text-indigo-700 shrink-0">Biblioteca / Sugerir Foto ↗</button>
+                        </div>`;
+                } else {
+                    const vincSet = new Set(vinculados.map(v => v.id));
+                    docsExecWrap.innerHTML = `
+                        <div class="flex flex-wrap items-center justify-between gap-2">
+                            <span class="text-[11px] font-extrabold uppercase text-indigo-900">Docs &amp; Referências Visuais Vigentes (${todos.length})</span>
+                            <button type="button" onclick="abrirBibliotecaExecInsp()" class="px-2.5 py-1 rounded-lg bg-white border border-indigo-200 hover:bg-indigo-100 text-[10px] font-extrabold text-indigo-700 shrink-0">Abrir Biblioteca ↗</button>
+                        </div>
+                        <div class="grid grid-cols-1 sm:grid-cols-2 gap-2">
+                            ${todos.map(d => {
+                                const catLbl = DOCS_CAT_LABELS_INSP[d.categoria] || d.categoria || 'Doc';
+                                return `
+                                <div class="flex items-center justify-between gap-2 p-2 rounded-xl bg-white border ${vincSet.has(d.id) ? 'border-indigo-300' : 'border-slate-200'}">
+                                    <div class="flex items-center gap-2 min-w-0">
+                                        ${d.fotoThumbB64 ? `<img src="${d.fotoThumbB64}" onclick="abrirZoomFotoDocInsp('${d.id}')" class="w-9 h-9 rounded-lg object-cover border border-slate-200 cursor-pointer shrink-0">` : `<div class="w-8 h-8 rounded-lg bg-indigo-50 text-indigo-700 flex items-center justify-center font-extrabold text-[10px] shrink-0">DOC</div>`}
+                                        <div class="min-w-0">
+                                            <div class="flex flex-wrap items-center gap-1">
+                                                <span class="text-[10px] font-extrabold text-indigo-700">${escapeHtml(d.codigo || 'DOC')}</span>
+                                                <span class="px-1 py-0.5 rounded bg-slate-100 text-slate-600 text-[9px] font-extrabold">${escapeHtml(d.revisaoVigenteLabel || 'REV 00')}</span>
+                                                <span class="text-[9px] font-bold text-indigo-600 uppercase">${escapeHtml(catLbl)}</span>
+                                            </div>
+                                            <div class="text-[11px] font-bold text-slate-800 truncate">${escapeHtml(d.titulo || '')}</div>
+                                        </div>
+                                    </div>
+                                    <div class="flex items-center gap-1 shrink-0">
+                                        ${d.fotoThumbB64 ? `<button type="button" onclick="abrirZoomFotoDocInsp('${d.id}')" class="px-2 py-1 rounded-lg bg-sky-50 hover:bg-sky-100 text-sky-700 text-[10px] font-extrabold">Foto</button>` : ''}
+                                        ${d.arquivoUrl ? `<a href="${escapeHtml(d.arquivoUrl)}" target="_blank" rel="noopener noreferrer" class="px-2 py-1 rounded-lg bg-indigo-600 hover:bg-indigo-700 text-white text-[10px] font-extrabold">Abrir ↗</a>` : ''}
+                                    </div>
+                                </div>`;
+                            }).join('')}
+                        </div>`;
                 }
             }
 

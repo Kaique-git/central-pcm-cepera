@@ -1179,6 +1179,8 @@
         const refAgenda = collection(db, "ir_agenda");
         const refManutencao = collection(db, "ag_manutencao");
         const refObsPecas = collection(db, "ob_equipamentos");
+        const refDocsAtivos = collection(db, "docs_ativos");
+        const refDocsRevisoes = collection(db, "docs_revisoes");
 
         // ================= DOMÍNIO DE ENGENHARIA =================
         const PERIODICIDADES = {
@@ -1218,6 +1220,8 @@
         let listaAgenda = [];
         let listaManutencao = [];
         let listaObsPecas = [];
+        let listaDocsAtivos = [];
+        let listaDocsRevisoes = [];
 
         let currentView = 'arvore';
         let expandedKeys = new Set();
@@ -1252,6 +1256,96 @@
             const r = String(role || '').trim();
             return r === 'Admin' || r === 'Gerente';
         }
+
+        const DOCS_CAT_META_GA = {
+            manuais: { label: 'Manuais', pastaSp: '01_MANUAIS', badge: 'bg-sky-50 text-sky-700 border-sky-200' },
+            lubrificacao: { label: 'Lubrificação', pastaSp: '02_LUBRIFICACAO', badge: 'bg-amber-50 text-amber-800 border-amber-200' },
+            desenhos: { label: 'Desenhos Técnicos', pastaSp: '03_DESENHOS_TECNICOS', badge: 'bg-indigo-50 text-indigo-700 border-indigo-200' },
+            orcamentos: { label: 'Orçamentos (Sigiloso)', pastaSp: '04_ORCAMENTOS_SIGILOSOS', badge: 'bg-rose-50 text-rose-700 border-rose-200' },
+            fotos: { label: 'Fotos & Ref.', pastaSp: '05_FOTOS_REFERENCIA', badge: 'bg-emerald-50 text-emerald-700 border-emerald-200' },
+            qualidade: { label: 'Qualidade & Seg.', pastaSp: '06_QUALIDADE_SEGURANCA', badge: 'bg-purple-50 text-purple-700 border-purple-200' }
+        };
+
+        function isPerfilGestaoDocsGa(role) {
+            const r = normKey(role);
+            return r === 'admin' || r === 'gerente' || r.startsWith('supervisor');
+        }
+
+        function podeVerDocGa(d) {
+            if (!d) return false;
+            if (d.categoria === 'orcamentos' || d.sigilo === 'gestao') {
+                return Boolean(usuarioLogado && isPerfilGestaoDocsGa(usuarioLogado.role));
+            }
+            return true;
+        }
+
+        function getValidadeStatusDocGa(validadeEm) {
+            if (!validadeEm || !/^\d{4}-\d{2}-\d{2}/.test(String(validadeEm))) return { kind: 'ok', label: '', dias: null };
+            const [y, m, d] = String(validadeEm).slice(0, 10).split('-').map(Number);
+            const dt = new Date(y, m - 1, d);
+            const now = new Date();
+            const hj = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+            const dias = Math.round((dt - hj) / 86400000);
+            if (dias < 0) return { kind: 'vencido', label: `Vencido há ${Math.abs(dias)}d`, dias };
+            if (dias <= 30) return { kind: 'alerta', label: `Vence em ${dias}d`, dias };
+            return { kind: 'ok', label: `Válido até ${String(d).padStart(2, '0')}/${String(m).padStart(2, '0')}/${y}`, dias };
+        }
+
+        function construirPastaSugeridaDocGa(catId, area, maquina, equipamento) {
+            const meta = DOCS_CAT_META_GA[catId] || DOCS_CAT_META_GA.manuais;
+            const slug = (s) => String(s || '').normalize('NFD').replace(/[\u0300-\u036f]/g, '').replace(/[^a-zA-Z0-9]+/g, '_').replace(/^_+|_+$/g, '').toUpperCase().slice(0, 28) || 'GERAL';
+            return ['SISTEMA', meta.pastaSp, area ? slug(area) : '', maquina ? slug(maquina) : '', equipamento ? slug(equipamento) : ''].filter(Boolean).join('/');
+        }
+
+        function construirSearchTextDocGa(d) {
+            return normKey([
+                d.codigo, d.titulo, d.categoria, d.subtipo, d.disciplina,
+                d.area, d.maquina, d.equipamento, d.conjunto, d.subconjunto,
+                d.tagAtivo, d.fabricante, d.modelo, d.resumoTecnico,
+                ...(Array.isArray(d.tags) ? d.tags : [])
+            ].join(' '));
+        }
+
+        window.abrirBibliotecaDocsGa = (action = 'filtrar_ativo', ativo = {}, categoria = '', docId = '') => {
+            const handoff = {
+                targetApp: 'docs_ativos',
+                action,
+                ativo: {
+                    area: ativo.area || '',
+                    maquina: ativo.maquina || '',
+                    equipamento: ativo.equipamento || '',
+                    conjunto: ativo.conjunto || '',
+                    subconjunto: ativo.subconjunto || ''
+                },
+                categoria: categoria || '',
+                docId: docId || ''
+            };
+            try { localStorage.setItem('cepera_agendamento_handoff', JSON.stringify(handoff)); } catch (e) {}
+            if (window.parent && window.parent !== window) {
+                window.parent.postMessage({ type: 'CEPERA_NAVEGAR_APP', appId: 'docs_ativos', forceReload: true, handoff }, '*');
+                return;
+            }
+            const qs = new URLSearchParams();
+            if (ativo.area) qs.set('area', ativo.area);
+            if (ativo.maquina) qs.set('maquina', ativo.maquina);
+            if (ativo.equipamento) qs.set('equipamento', ativo.equipamento);
+            if (ativo.conjunto) qs.set('conjunto', ativo.conjunto);
+            if (docId) qs.set('docId', docId);
+            window.location.href = `DOCS-ATIVOS.html${qs.toString() ? '?' + qs.toString() : ''}`;
+        };
+
+        window.abrirBiblioteca360ScopeGa = (action = 'filtrar_ativo') => {
+            const refNode = (Array.isArray(last360Nodes) && last360Nodes[0]) || selectedTarget || {};
+            const lvl = last360Level || selectedTarget?.level || '';
+            const ativo = {
+                area: refNode.area || '',
+                maquina: ['maquina', 'equipamento', 'conjunto', 'leaf'].includes(lvl) ? (refNode.maquina || '') : '',
+                equipamento: ['equipamento', 'conjunto', 'leaf'].includes(lvl) ? (refNode.equipamento || '') : '',
+                conjunto: ['conjunto', 'leaf'].includes(lvl) ? (refNode.conjunto || '') : '',
+                subconjunto: lvl === 'leaf' ? (refNode.subconjunto || '') : ''
+            };
+            abrirBibliotecaDocsGa(action, ativo);
+        };
 
         function normKey(str) {
             return String(str || '').normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase().trim().replace(/\s+/g, ' ');
@@ -1999,6 +2093,18 @@
                 onSnapshot(refManutencao, (snap) => {
                     listaManutencao = [];
                     snap.forEach(d => listaManutencao.push({ id: d.id, ...d.data() }));
+                    onDadosCruzadosUpdate();
+                });
+
+                onSnapshot(refDocsAtivos, (snap) => {
+                    listaDocsAtivos = [];
+                    snap.forEach(d => listaDocsAtivos.push({ id: d.id, ...d.data() }));
+                    onDadosCruzadosUpdate();
+                });
+
+                onSnapshot(refDocsRevisoes, (snap) => {
+                    listaDocsRevisoes = [];
+                    snap.forEach(d => listaDocsRevisoes.push({ id: d.id, ...d.data() }));
                     onDadosCruzadosUpdate();
                 });
             } catch (_) {
@@ -2769,6 +2875,34 @@
 
             const pecasObs = listaObsPecas.filter(p => matchEquipFallback(p));
 
+            const documentosTodos = listaDocsAtivos.filter(d => {
+                if (!d || !podeVerDocGa(d)) return false;
+                if (d.ativoNodeId && matchIdRef(d.ativoNodeId)) {
+                    return !isConjScope || !d.conjunto || matchConjValue(d.conjunto);
+                }
+                const da = normKey(d.area);
+                const dm = normKey(d.maquina);
+                const de = normKey(d.equipamento);
+                const dc = normKey(d.conjunto);
+                const dsc = normKey(d.subconjunto);
+                return lista.some(n => {
+                    if (da && normKey(n.area) !== da) return false;
+                    if (dm && normKey(n.maquina) !== dm) return false;
+                    if (de && normKey(n.equipamento) !== de) return false;
+                    if (scopeLevel === 'conjunto' || scopeLevel === 'leaf') {
+                        if (dc && normKey(n.conjunto) !== dc) return false;
+                    }
+                    if (scopeLevel === 'leaf' && n.subconjunto && dsc && normKey(n.subconjunto) !== dsc) return false;
+                    return Boolean((!da || normKey(n.area) === da) && (!dm || normKey(n.maquina) === dm));
+                });
+            }).sort((a, b) => {
+                const stOrd = (x) => x.status === 'vigente' ? 0 : (x.status === 'pendente_aprovacao' ? 1 : 2);
+                return (stOrd(a) - stOrd(b)) || String(a.codigo || '').localeCompare(String(b.codigo || ''));
+            });
+            const documentosVigentes = documentosTodos.filter(d => d.status === 'vigente');
+            const documentosPendentes = documentosTodos.filter(d => d.status === 'pendente_aprovacao' || d.temRevisaoPendente);
+            const documentosVencidos = documentosVigentes.filter(d => ['vencido', 'alerta'].includes(getValidadeStatusDocGa(d.validadeEm).kind));
+
             const historicoTimeline = [];
             programacoes.forEach(o => {
                 const ok = isStatusConcluidoManut(o.status);
@@ -2832,12 +2966,16 @@
                 programacoesAbertas,
                 programacoesHistorico,
                 pecasObs,
+                documentosTodos,
+                documentosVigentes,
+                documentosPendentes,
+                documentosVencidos,
                 historicoTimeline
             };
         }
 
         window.setAbaHistorico360 = (tab) => {
-            active360Tab = ['programados', 'anomalias', 'execucoes', 'timeline'].includes(tab) ? tab : 'programados';
+            active360Tab = ['programados', 'anomalias', 'execucoes', 'documentos', 'timeline'].includes(tab) ? tab : 'programados';
             const wrap = document.getElementById('bloco360Wrapper');
             if (wrap) wrap.innerHTML = renderBlocoCruzado360(last360Nodes, last360Level);
         };
@@ -2992,6 +3130,46 @@
                 bodyHtml = execCards.length
                     ? `<div class="max-h-72 overflow-y-auto space-y-2 pr-1">${execCards.join('')}</div>`
                     : `<div class="p-4 rounded-xl bg-white border border-dashed border-slate-300 text-center text-xs font-bold text-slate-400">Nenhuma preventiva ou inspeção concluída registrada ainda para este escopo.</div>`;
+            } else if (active360Tab === 'documentos') {
+                const barDocs = `
+                    <div class="flex flex-wrap items-center justify-between gap-2 mb-2.5 p-2.5 rounded-xl bg-indigo-50/70 border border-indigo-200">
+                        <div class="flex flex-wrap items-center gap-2 text-[11px] font-bold text-indigo-900">
+                            <span>${d.documentosVigentes.length} vigente(s)</span>
+                            ${d.documentosPendentes.length ? `<span class="px-2 py-0.5 rounded-full bg-amber-100 text-amber-800 text-[10px] font-extrabold">${d.documentosPendentes.length} em aprovação</span>` : ''}
+                            ${d.documentosVencidos.length ? `<span class="px-2 py-0.5 rounded-full bg-rose-100 text-rose-700 text-[10px] font-extrabold">${d.documentosVencidos.length} vencido/a vencer</span>` : ''}
+                        </div>
+                        <div class="flex flex-wrap items-center gap-1.5">
+                            <button type="button" onclick="abrirBiblioteca360ScopeGa('submeter_doc')" class="px-2.5 py-1 rounded-lg bg-indigo-600 hover:bg-indigo-700 text-white text-[10px] font-extrabold">+ Submeter Doc</button>
+                            <button type="button" onclick="abrirBiblioteca360ScopeGa('filtrar_ativo')" class="px-2.5 py-1 rounded-lg bg-white border border-indigo-200 hover:bg-indigo-100 text-indigo-700 text-[10px] font-extrabold">Ver Biblioteca ↗</button>
+                        </div>
+                    </div>`;
+                bodyHtml = barDocs + (d.documentosTodos.length ? `<div class="max-h-72 overflow-y-auto space-y-2 pr-1">${d.documentosTodos.map(docItem => {
+                    const catM = DOCS_CAT_META_GA[docItem.categoria] || { label: docItem.categoria || 'Doc', badge: 'bg-slate-100 text-slate-700 border-slate-200' };
+                    const valSt = getValidadeStatusDocGa(docItem.validadeEm);
+                    const stCls = docItem.status === 'vigente' ? 'bg-emerald-100 text-emerald-800' : (docItem.status === 'pendente_aprovacao' ? 'bg-amber-100 text-amber-800' : 'bg-rose-100 text-rose-800');
+                    const stTxt = docItem.status === 'vigente' ? 'VIGENTE' : (docItem.status === 'pendente_aprovacao' ? 'PENDENTE APROVAÇÃO' : 'REPROVADO');
+                    return `
+                        <div class="p-3 rounded-xl bg-white border ${docItem.status === 'vigente' ? 'border-slate-200' : 'border-amber-200'} flex items-center justify-between gap-2.5">
+                            <div class="flex items-center gap-2.5 min-w-0">
+                                ${docItem.fotoThumbB64 ? `<img src="${docItem.fotoThumbB64}" class="w-10 h-10 rounded-lg object-cover border border-slate-200 shrink-0">` : `<div class="w-9 h-9 rounded-lg bg-indigo-50 text-indigo-700 flex items-center justify-center font-extrabold text-[10px] shrink-0">GED</div>`}
+                                <div class="min-w-0">
+                                    <div class="flex flex-wrap items-center gap-1">
+                                        <span class="text-[10px] font-extrabold text-indigo-700">${escapeHtml(docItem.codigo || 'DOC')}</span>
+                                        <span class="px-1.5 py-0.5 rounded bg-slate-100 text-slate-700 text-[9px] font-extrabold">${escapeHtml(docItem.revisaoVigenteLabel || 'REV 00')}</span>
+                                        <span class="px-1.5 py-0.5 rounded border text-[9px] font-extrabold ${catM.badge}">${escapeHtml(catM.label)}</span>
+                                        <span class="px-1.5 py-0.5 rounded text-[9px] font-extrabold ${stCls}">${stTxt}</span>
+                                        ${valSt.kind !== 'ok' ? `<span class="px-1.5 py-0.5 rounded text-[9px] font-extrabold ${valSt.kind === 'vencido' ? 'bg-rose-100 text-rose-700' : 'bg-amber-100 text-amber-800'}">${escapeHtml(valSt.label)}</span>` : ''}
+                                    </div>
+                                    <div class="text-xs font-extrabold text-slate-900 truncate mt-0.5">${escapeHtml(docItem.titulo || '')}</div>
+                                    ${docItem.sharepointPastaSugerida ? `<div class="text-[10px] font-semibold text-slate-400 truncate">${escapeHtml(docItem.sharepointPastaSugerida)}</div>` : ''}
+                                </div>
+                            </div>
+                            <div class="flex items-center gap-1.5 shrink-0">
+                                ${docItem.arquivoUrl ? `<a href="${escapeHtml(docItem.arquivoUrl)}" target="_blank" rel="noopener noreferrer" class="px-2.5 py-1 rounded-lg bg-indigo-600 hover:bg-indigo-700 text-white text-[10px] font-extrabold">SharePoint ↗</a>` : ''}
+                                <button type="button" onclick="abrirBibliotecaDocsGa('abrir_doc', {}, '', '${escapeHtml(docItem.id)}')" class="px-2.5 py-1 rounded-lg bg-slate-100 hover:bg-slate-200 text-slate-700 text-[10px] font-extrabold">Revisões</button>
+                            </div>
+                        </div>`;
+                }).join('')}</div>` : `<div class="p-4 rounded-xl bg-white border border-dashed border-slate-300 text-center text-xs font-bold text-slate-400">Nenhum documento cadastrado para este ativo ainda. Clique em "+ Submeter Doc" para registrar manual, desenho, lubrificação ou foto.</div>`);
             } else {
                 bodyHtml = d.historicoTimeline.length
                     ? `<div class="max-h-72 overflow-y-auto space-y-2 pr-1">${d.historicoTimeline.map(ev => `
@@ -3015,10 +3193,10 @@
 
             return `<div class="p-4 rounded-2xl bg-slate-50 border border-slate-200/80 space-y-3">
                 <div class="flex flex-wrap items-center justify-between gap-2">
-                    <span class="text-[10px] font-extrabold uppercase tracking-wider text-slate-600">Visão 360° — Programados, Anomalias &amp; Histórico Completo</span>
+                    <span class="text-[10px] font-extrabold uppercase tracking-wider text-slate-600">Visão 360° — Programados, Anomalias, Documentos &amp; Histórico Completo</span>
                     <span class="text-[10px] font-bold text-slate-400">Tempo Real • Todos os módulos</span>
                 </div>
-                <div class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-2">
+                <div class="grid grid-cols-2 sm:grid-cols-4 lg:grid-cols-7 gap-2">
                     <button type="button" onclick="setAbaHistorico360('programados')" class="text-left bg-white hover:border-sky-300 p-2.5 rounded-xl border border-slate-200 transition-colors">
                         <div class="text-[9px] font-extrabold text-slate-400 uppercase">Programados</div>
                         <div class="text-base font-extrabold ${qtdProgAbertas ? 'text-sky-600' : 'text-slate-700'}">${qtdProgAbertas}</div>
@@ -3043,12 +3221,17 @@
                         <div class="text-[9px] font-extrabold text-slate-400 uppercase">Peças Obsol.</div>
                         <div class="text-base font-extrabold text-slate-700">${d.pecasObs.length}</div>
                     </button>
+                    <button type="button" onclick="setAbaHistorico360('documentos')" class="text-left bg-white hover:border-indigo-400 p-2.5 rounded-xl border border-slate-200 transition-colors">
+                        <div class="text-[9px] font-extrabold text-slate-400 uppercase">Docs Vigentes</div>
+                        <div class="text-base font-extrabold ${d.documentosVigentes.length ? 'text-indigo-600' : 'text-slate-700'}">${d.documentosVigentes.length}</div>
+                    </button>
                 </div>
 
                 <div class="flex flex-wrap items-center gap-1.5 pt-1">
                     <button type="button" onclick="setAbaHistorico360('programados')" class="${tabBtnCls('programados')}">Já Programados (${qtdProgAbertas})</button>
                     <button type="button" onclick="setAbaHistorico360('anomalias')" class="${tabBtnCls('anomalias')}">Anomalias Inspeção (${d.anomaliasTodas.length})</button>
                     <button type="button" onclick="setAbaHistorico360('execucoes')" class="${tabBtnCls('execucoes')}">Concluídos / Rotas (${qtdExecucoes})</button>
+                    <button type="button" onclick="setAbaHistorico360('documentos')" class="${tabBtnCls('documentos')}">Documentos (${d.documentosVigentes.length})</button>
                     <button type="button" onclick="setAbaHistorico360('timeline')" class="${tabBtnCls('timeline')}">Histórico Completo (${d.historicoTimeline.length})</button>
                 </div>
 
@@ -3876,9 +4059,37 @@
                 for (const id of pendingRenameCtx.docIds) {
                     await updateDoc(doc(db, "ob_linhas", id), patch);
                 }
+                const docField = pendingRenameCtx.level;
+                const docIdSet = new Set(pendingRenameCtx.docIds || []);
+                const docsAfetados = listaDocsAtivos.filter(d => {
+                    if (d.ativoNodeId && docIdSet.has(d.ativoNodeId)) return true;
+                    if (normKey(d.area) !== normKey(pendingRenameCtx.area)) return false;
+                    if (pendingRenameCtx.maquina && normKey(d.maquina) !== normKey(pendingRenameCtx.maquina)) return false;
+                    if (pendingRenameCtx.equipamento && normKey(d.equipamento) !== normKey(pendingRenameCtx.equipamento)) return false;
+                    if (pendingRenameCtx.conjunto && normKey(d.conjunto) !== normKey(pendingRenameCtx.conjunto)) return false;
+                    return Boolean(normKey(d[docField]) === normKey(pendingRenameCtx.atual));
+                });
+                const affectedMasterIds = new Set(docsAfetados.map(d => d.id));
+                for (const dRec of docsAfetados) {
+                    const updatedDoc = { ...dRec, [docField]: novo };
+                    const docPatch = {
+                        [docField]: novo,
+                        sharepointPastaSugerida: construirPastaSugeridaDocGa(updatedDoc.categoria, updatedDoc.area, updatedDoc.maquina, updatedDoc.equipamento),
+                        searchText: construirSearchTextDocGa(updatedDoc),
+                        atualizado_em: patch.atualizado_em
+                    };
+                    await updateDoc(doc(db, "docs_ativos", dRec.id), docPatch);
+                }
+                for (const rRec of listaDocsRevisoes.filter(r => affectedMasterIds.has(r.docMasterId))) {
+                    const updatedRev = { ...rRec, [docField]: novo };
+                    await updateDoc(doc(db, "docs_revisoes", rRec.id), {
+                        [docField]: novo,
+                        sharepointPastaSugerida: construirPastaSugeridaDocGa(updatedRev.categoria, updatedRev.area, updatedRev.maquina, updatedRev.equipamento)
+                    });
+                }
                 selectedTarget[pendingRenameCtx.level] = novo;
                 fecharModal('modalRenomear');
-                showToast(`Renomeado para "${novo}" em ${pendingRenameCtx.docIds.length} registro(s)!`);
+                showToast(`Renomeado para "${novo}" em ${pendingRenameCtx.docIds.length} ativo(s)${docsAfetados.length ? ` e ${docsAfetados.length} doc(s)` : ''}!`);
                 pendingRenameCtx = null;
             } catch (_) {
                 showToast("Erro ao renomear em cascata.", "error");
@@ -4577,7 +4788,58 @@
                 }
             }
 
-            return { cntRotas, cntPlanos, cntManut, cntAnom, total: cntRotas + cntPlanos + cntManut + cntAnom };
+            let cntDocs = 0;
+            const docsArrMig = typeof listaDocsAtivos !== 'undefined' && Array.isArray(listaDocsAtivos) ? listaDocsAtivos : [];
+            const docsRevMig = typeof listaDocsRevisoes !== 'undefined' && Array.isArray(listaDocsRevisoes) ? listaDocsRevisoes : [];
+            const mkPastaDoc = (c, a, m, e) => (typeof construirPastaSugeridaDocGa === 'function' ? construirPastaSugeridaDocGa(c, a, m, e) : '');
+            const mkSearchDoc = (o) => (typeof construirSearchTextDocGa === 'function' ? construirSearchTextDocGa(o) : '');
+            const docsAlvo = Array.isArray(opts.docs) ? opts.docs : docsArrMig.filter(d => d.ativoNodeId && oldSet.has(String(d.ativoNodeId)));
+            const migratedDocIds = new Set();
+            for (const dRec of docsAlvo) {
+                migratedDocIds.add(dRec.id);
+                const mergedDoc = {
+                    ...dRec,
+                    ativoNodeId: canonicalDocId,
+                    tagAtivo: targetNode.tag || dRec.tagAtivo || ''
+                };
+                if (updateNames) {
+                    mergedDoc.area = targetNode.area || dRec.area || '';
+                    mergedDoc.maquina = targetNode.maquina || dRec.maquina || '';
+                    mergedDoc.equipamento = targetNode.equipamento || dRec.equipamento || '';
+                    mergedDoc.conjunto = targetNode.conjunto || dRec.conjunto || '';
+                    mergedDoc.subconjunto = targetNode.subconjunto || '';
+                }
+                const docPatch = {
+                    ativoNodeId: mergedDoc.ativoNodeId,
+                    tagAtivo: mergedDoc.tagAtivo,
+                    reconciliado_em: agora
+                };
+                if (updateNames) {
+                    docPatch.area = mergedDoc.area;
+                    docPatch.maquina = mergedDoc.maquina;
+                    docPatch.equipamento = mergedDoc.equipamento;
+                    docPatch.conjunto = mergedDoc.conjunto;
+                    docPatch.subconjunto = mergedDoc.subconjunto;
+                    docPatch.sharepointPastaSugerida = mkPastaDoc(mergedDoc.categoria, mergedDoc.area, mergedDoc.maquina, mergedDoc.equipamento);
+                    docPatch.searchText = mkSearchDoc(mergedDoc);
+                }
+                await updateDoc(doc(db, "docs_ativos", dRec.id), docPatch);
+                cntDocs++;
+            }
+            for (const rRec of docsRevMig.filter(r => migratedDocIds.has(r.docMasterId) || (r.ativoNodeId && oldSet.has(String(r.ativoNodeId))))) {
+                const revPatch = { ativoNodeId: canonicalDocId, tagAtivo: targetNode.tag || rRec.tagAtivo || '' };
+                if (updateNames) {
+                    revPatch.area = targetNode.area || rRec.area || '';
+                    revPatch.maquina = targetNode.maquina || rRec.maquina || '';
+                    revPatch.equipamento = targetNode.equipamento || rRec.equipamento || '';
+                    revPatch.conjunto = targetNode.conjunto || rRec.conjunto || '';
+                    revPatch.subconjunto = targetNode.subconjunto || '';
+                    revPatch.sharepointPastaSugerida = mkPastaDoc(rRec.categoria, revPatch.area, revPatch.maquina, revPatch.equipamento);
+                }
+                await updateDoc(doc(db, "docs_revisoes", rRec.id), revPatch);
+            }
+
+            return { cntRotas, cntPlanos, cntManut, cntAnom, cntDocs, total: cntRotas + cntPlanos + cntManut + cntAnom + cntDocs };
         }
 
         async function atualizarArrayLegadoAposRemocao(rawEntry, removeIdx) {
@@ -5152,6 +5414,25 @@
                 for (const ag of listaAgenda.filter(a => a.id_node && affectedIds.has(String(a.id_node)))) {
                     await updateDoc(doc(db, "ir_agenda", ag.id), { [campo]: canonico });
                 }
+                const docsArrUni = typeof listaDocsAtivos !== 'undefined' && Array.isArray(listaDocsAtivos) ? listaDocsAtivos : [];
+                const docsRevUni = typeof listaDocsRevisoes !== 'undefined' && Array.isArray(listaDocsRevisoes) ? listaDocsRevisoes : [];
+                const mkPastaUni = (c, a, m, e) => (typeof construirPastaSugeridaDocGa === 'function' ? construirPastaSugeridaDocGa(c, a, m, e) : '');
+                const mkSearchUni = (o) => (typeof construirSearchTextDocGa === 'function' ? construirSearchTextDocGa(o) : '');
+                for (const dRec of docsArrUni.filter(d => normKey(d[campo]) === normVal && d[campo] !== canonico)) {
+                    const upd = { ...dRec, [campo]: canonico };
+                    await updateDoc(doc(db, "docs_ativos", dRec.id), {
+                        [campo]: canonico,
+                        sharepointPastaSugerida: mkPastaUni(upd.categoria, upd.area, upd.maquina, upd.equipamento),
+                        searchText: mkSearchUni(upd)
+                    });
+                }
+                for (const rRec of docsRevUni.filter(r => normKey(r[campo]) === normVal && r[campo] !== canonico)) {
+                    const updRev = { ...rRec, [campo]: canonico };
+                    await updateDoc(doc(db, "docs_revisoes", rRec.id), {
+                        [campo]: canonico,
+                        sharepointPastaSugerida: mkPastaUni(updRev.categoria, updRev.area, updRev.maquina, updRev.equipamento)
+                    });
+                }
                 showToast(`Padronizado para "${canonico}" em ${afetados.length} registro(s)!`);
             } catch (_) {
                 showToast("Erro ao unificar grafia.", "error");
@@ -5441,6 +5722,66 @@
                         `).join('')}
                     </div>` : `<div class="text-xs font-bold text-emerald-700 bg-emerald-50 border border-emerald-200 p-3.5 rounded-2xl">Parabéns! 100% dos ativos possuem Subconjunto, Criticidade e Periodicidade definidos.</div>`}
                 </div>
+
+                <!-- BLOCO 5: GOVERNANÇA DOCUMENTAL & BIBLIOTECA SHAREPOINT -->
+                ${(() => {
+                    const docsRevSafe = typeof listaDocsRevisoes !== 'undefined' && Array.isArray(listaDocsRevisoes) ? listaDocsRevisoes : [];
+                    const docsAtivosSafe = typeof listaDocsAtivos !== 'undefined' && Array.isArray(listaDocsAtivos) ? listaDocsAtivos : [];
+                    const canSeeDoc = (d) => (typeof podeVerDocGa === 'function' ? podeVerDocGa(d) : true);
+                    const getValKind = (v) => (typeof getValidadeStatusDocGa === 'function' ? getValidadeStatusDocGa(v).kind : 'ok');
+                    const docsPendSane = docsRevSafe.filter(r => r.status === 'pendente_aprovacao' && canSeeDoc(r));
+                    const docsValCrit = docsAtivosSafe.filter(d => d.status === 'vigente' && canSeeDoc(d) && ['vencido', 'alerta'].includes(getValKind(d.validadeEm)));
+                    const docsOrfaosSane = docsAtivosSafe.filter(d => {
+                        if (!canSeeDoc(d)) return false;
+                        return !assetNodes.some(n =>
+                            (d.ativoNodeId && n.docId === d.ativoNodeId) ||
+                            (normKey(d.area) === normKey(n.area) && (!d.maquina || normKey(d.maquina) === normKey(n.maquina)) && (!d.equipamento || normKey(d.equipamento) === normKey(n.equipamento)))
+                        );
+                    });
+                    const totalDocsAlertas = docsPendSane.length + docsValCrit.length + docsOrfaosSane.length;
+                    return `
+                    <div class="glass-card p-5 sm:p-6 rounded-3xl space-y-4">
+                        <div class="flex flex-wrap items-center justify-between gap-2">
+                            <div>
+                                <h3 class="text-sm font-extrabold text-slate-900">5. Governança Documental &amp; Qualidade (SharePoint / GED)</h3>
+                                <p class="text-xs text-slate-500">Controle de qualidade documental: aprovações pendentes, documentos vencidos/a vencer e documentos com ativo não encontrado na árvore.</p>
+                            </div>
+                            <span class="px-3 py-1 rounded-full text-xs font-extrabold ${totalDocsAlertas ? 'bg-amber-100 text-amber-800' : 'bg-emerald-100 text-emerald-700'}">${totalDocsAlertas} pendência(s)</span>
+                        </div>
+                        <div class="grid grid-cols-1 sm:grid-cols-3 gap-3 text-xs">
+                            <div class="p-3.5 rounded-2xl border ${docsPendSane.length ? 'bg-amber-50/70 border-amber-200' : 'bg-slate-50 border-slate-200'} flex items-center justify-between gap-2">
+                                <div>
+                                    <div class="text-[10px] font-extrabold uppercase text-slate-500">Fila de Aprovações</div>
+                                    <div class="text-lg font-extrabold ${docsPendSane.length ? 'text-amber-700' : 'text-emerald-700'}">${docsPendSane.length}</div>
+                                </div>
+                                <button type="button" onclick="abrirBibliotecaDocsGa('abrir_aprovacoes')" class="px-3 py-1.5 rounded-xl bg-white border border-slate-200 hover:bg-indigo-50 text-indigo-700 font-extrabold text-[11px] shrink-0">Aprovações ↗</button>
+                            </div>
+                            <div class="p-3.5 rounded-2xl border ${docsValCrit.length ? 'bg-rose-50/70 border-rose-200' : 'bg-slate-50 border-slate-200'} flex items-center justify-between gap-2">
+                                <div>
+                                    <div class="text-[10px] font-extrabold uppercase text-slate-500">Validade Crítica / 30d</div>
+                                    <div class="text-lg font-extrabold ${docsValCrit.length ? 'text-rose-700' : 'text-emerald-700'}">${docsValCrit.length}</div>
+                                </div>
+                                <button type="button" onclick="abrirBibliotecaDocsGa('abrir_revisoes')" class="px-3 py-1.5 rounded-xl bg-white border border-slate-200 hover:bg-indigo-50 text-indigo-700 font-extrabold text-[11px] shrink-0">Revisões ↗</button>
+                            </div>
+                            <div class="p-3.5 rounded-2xl border ${docsOrfaosSane.length ? 'bg-indigo-50/70 border-indigo-200' : 'bg-slate-50 border-slate-200'} flex items-center justify-between gap-2">
+                                <div>
+                                    <div class="text-[10px] font-extrabold uppercase text-slate-500">Docs sem Vínculo Ativo</div>
+                                    <div class="text-lg font-extrabold ${docsOrfaosSane.length ? 'text-indigo-700' : 'text-emerald-700'}">${docsOrfaosSane.length}</div>
+                                </div>
+                                <button type="button" onclick="abrirBibliotecaDocsGa('filtrar_ativo')" class="px-3 py-1.5 rounded-xl bg-white border border-slate-200 hover:bg-indigo-50 text-indigo-700 font-extrabold text-[11px] shrink-0">Biblioteca ↗</button>
+                            </div>
+                        </div>
+                        ${docsOrfaosSane.length ? `<div class="space-y-1.5 pt-1">${docsOrfaosSane.slice(0, 6).map(d => `
+                            <div class="p-2.5 rounded-xl bg-white border border-slate-200 flex items-center justify-between gap-2 text-xs">
+                                <div class="min-w-0">
+                                    <span class="font-extrabold text-indigo-700">${escapeHtml(d.codigo || 'DOC')}</span>
+                                    <span class="font-bold text-slate-800 ml-1">${escapeHtml(d.titulo || '')}</span>
+                                    <span class="text-[10px] text-slate-400 ml-2">${escapeHtml([d.area, d.maquina, d.equipamento].filter(Boolean).join(' › '))}</span>
+                                </div>
+                                <button type="button" onclick="abrirBibliotecaDocsGa('abrir_doc', {}, '', '${escapeHtml(d.id)}')" class="px-2.5 py-1 rounded-lg bg-indigo-50 hover:bg-indigo-100 text-indigo-700 text-[10px] font-extrabold shrink-0">Revisar ↗</button>
+                            </div>`).join('')}</div>` : ''}
+                    </div>`;
+                })()}
             `;
         }
 

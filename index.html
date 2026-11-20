@@ -718,6 +718,19 @@
                 description: 'Planos internos (colar do Excel), cronograma fixo ou flutuante integrado à Agenda PCM, execução em campo com checklist, fotos de evidência, KPIs e relatório A4.',
                 collections: ['ag_manutencao', 'ob_linhas', 'ir_anomalias', 'ir_funcionarios'],
                 defaultRoles: ['Admin', 'Gerente', 'Supervisor Mecânica', 'Supervisor Elétrica', 'Mecânica', 'Elétrica', 'Automação', 'Utilidades']
+            },
+            {
+                id: 'docs_ativos',
+                shortTitle: 'Biblioteca Docs',
+                title: 'Biblioteca Técnica & Documentos',
+                file: 'DOCS-ATIVOS.html',
+                category: 'Engenharia & Documentação',
+                badgeClass: 'bg-indigo-100 text-indigo-800 border-indigo-200',
+                accentColor: '#4f46e5',
+                iconHtml: '<svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253"/></svg>',
+                description: 'Biblioteca controlada com Manuais, Lubrificação, Desenhos, Orçamentos (Gestão), Fotos e Qualidade vinculados à árvore de ativos, com SharePoint, revisões e aprovações.',
+                collections: ['docs_ativos', 'docs_revisoes', 'ob_linhas'],
+                defaultRoles: ['Admin', 'Gerente', 'Supervisor Mecânica', 'Supervisor Elétrica', 'Mecânica', 'Elétrica', 'Automação', 'Utilidades']
             }
         ];
 

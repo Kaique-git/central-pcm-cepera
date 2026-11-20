@@ -873,6 +873,24 @@
         </div>
     </div>
 
+    <!-- MODAL DOCUMENTOS DO ATIVO (BIBLIOTECA / SHAREPOINT) -->
+    <div id="modalDocsObs" role="dialog" aria-modal="true" class="fixed inset-0 bg-slate-900/60 z-50 hidden flex items-end sm:items-center justify-center p-0 sm:p-4">
+        <div class="bg-white w-full sm:max-w-2xl sm:rounded-3xl rounded-t-3xl p-6 shadow-2xl border border-slate-200 space-y-4 max-h-[88vh] flex flex-col">
+            <div class="flex items-center justify-between border-b border-slate-100 pb-3 shrink-0">
+                <div>
+                    <span class="text-[10px] font-extrabold uppercase tracking-widest text-indigo-600">Biblioteca Técnica &amp; SharePoint</span>
+                    <h2 id="modalDocsObsTitulo" class="text-lg font-extrabold text-slate-900">Documentos do Equipamento</h2>
+                    <div id="modalDocsObsSub" class="text-[11px] font-semibold text-slate-500"></div>
+                </div>
+                <div class="flex items-center gap-2">
+                    <button type="button" id="btnAbrirBibObsModal" class="px-3 py-1.5 rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white text-xs font-extrabold">Abrir Biblioteca ↗</button>
+                    <button type="button" onclick="closeModal('modalDocsObs')" class="w-8 h-8 rounded-full bg-slate-100 text-slate-600 font-bold">✕</button>
+                </div>
+            </div>
+            <div id="modalDocsObsBody" class="overflow-y-auto space-y-2 pr-1 text-xs"></div>
+        </div>
+    </div>
+
     <div id="toastStack" aria-live="polite" class="fixed bottom-4 right-4 z-[9999] space-y-2 pointer-events-none"></div>
 
     <!-- Datalists Global -->
@@ -896,10 +914,12 @@
         const auth = getAuth(app);
         const colRef = collection(db, "ob_equipamentos");
         const linhasColRef = collection(db, "ob_linhas");
+        const docsColRef = collection(db, "docs_ativos");
 
         let items = [];
         let rawLinhasDocsObs = [];
         let estruturas = [];
+        let docsAtivosObs = [];
         let usuarioLogado = null;
         let itemToDeleteId = null;
         let isDeletingLinha = false;
@@ -916,6 +936,115 @@
             let s = txt.trim();
             return s.replace(/\w\S*/g, (w) => (w.replace(/^\w/, (c) => c.toUpperCase())));
         };
+
+        const DOCS_CAT_OBS = {
+            manuais: 'Manual',
+            lubrificacao: 'Lubrificação',
+            desenhos: 'Desenho Técnico',
+            orcamentos: 'Orçamento (Sigiloso)',
+            fotos: 'Foto Ref.',
+            qualidade: 'Qualidade & Seg.'
+        };
+
+        function normDocKeyObs(str) {
+            return String(str || '').normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase().trim().replace(/\s+/g, ' ');
+        }
+
+        function isPerfilGestaoDocsObs(role) {
+            const r = normDocKeyObs(role);
+            return r === 'admin' || r === 'gerente' || r.startsWith('supervisor');
+        }
+
+        function podeVerDocObs(d) {
+            if (!d) return false;
+            if (d.categoria === 'orcamentos' || d.sigilo === 'gestao') {
+                return Boolean(usuarioLogado && isPerfilGestaoDocsObs(usuarioLogado.role));
+            }
+            return true;
+        }
+
+        function escArgObs(str) {
+            return encodeURIComponent(String(str || '')).replace(/'/g, '%27');
+        }
+
+        function getDocsEquipamentoObs(area, maq, eq) {
+            const a = normDocKeyObs(area), m = normDocKeyObs(maq), e = normDocKeyObs(eq);
+            return docsAtivosObs.filter(d => {
+                if (d.status !== 'vigente' || !podeVerDocObs(d)) return false;
+                const da = normDocKeyObs(d.area), dm = normDocKeyObs(d.maquina), de = normDocKeyObs(d.equipamento);
+                if (a && da && da !== a) return false;
+                if (m && dm && dm !== m) return false;
+                if (e && de && de !== e) return false;
+                return Boolean((!a || da === a) && (!m || dm === m) && (!e || !de || de === e));
+            }).sort((x, y) => String(x.codigo || '').localeCompare(String(y.codigo || '')));
+        }
+
+        window.abrirBibliotecaDocsObs = (areaEnc = '', maqEnc = '', eqEnc = '') => {
+            const area = decodeURIComponent(areaEnc || '');
+            const maquina = decodeURIComponent(maqEnc || '');
+            const equipamento = decodeURIComponent(eqEnc || '');
+            const handoff = {
+                targetApp: 'docs_ativos',
+                action: 'filtrar_ativo',
+                ativo: { area, maquina, equipamento, conjunto: '', subconjunto: '' },
+                categoria: ''
+            };
+            try { safeStorage.set('cepera_agendamento_handoff', JSON.stringify(handoff)); } catch (_) {}
+            if (window.parent && window.parent !== window) {
+                window.parent.postMessage({ type: 'CEPERA_NAVEGAR_APP', appId: 'docs_ativos', forceReload: true, handoff }, '*');
+                return;
+            }
+            const qs = new URLSearchParams();
+            if (area) qs.set('area', area);
+            if (maquina) qs.set('maquina', maquina);
+            if (equipamento) qs.set('equipamento', equipamento);
+            window.location.href = `DOCS-ATIVOS.html${qs.toString() ? '?' + qs.toString() : ''}`;
+        };
+
+        window.abrirModalDocsEquipObs = (areaEnc, maqEnc, eqEnc) => {
+            const area = decodeURIComponent(areaEnc || '');
+            const maq = decodeURIComponent(maqEnc || '');
+            const eq = decodeURIComponent(eqEnc || '');
+            const docs = getDocsEquipamentoObs(area, maq, eq);
+            const tit = document.getElementById('modalDocsObsTitulo');
+            const sub = document.getElementById('modalDocsObsSub');
+            const body = document.getElementById('modalDocsObsBody');
+            const btnBib = document.getElementById('btnAbrirBibObsModal');
+            if (tit) tit.innerText = eq || maq || 'Documentos do Ativo';
+            if (sub) sub.innerText = [area, maq, eq].filter(Boolean).join(' › ');
+            if (btnBib) btnBib.onclick = () => abrirBibliotecaDocsObs(areaEnc, maqEnc, eqEnc);
+            if (body) {
+                const escObs = (v) => String(v ?? '').replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
+                body.innerHTML = docs.length ? docs.map(d => {
+                    const catLbl = DOCS_CAT_OBS[d.categoria] || d.categoria || 'Doc';
+                    const isSig = d.categoria === 'orcamentos' || d.sigilo === 'gestao';
+                    return `
+                        <div class="flex items-center justify-between gap-2.5 p-3 rounded-2xl border ${isSig ? 'bg-rose-50/50 border-rose-200' : 'bg-slate-50 border-slate-200'}">
+                            <div class="flex items-center gap-2.5 min-w-0">
+                                ${d.fotoThumbB64 ? `<img src="${d.fotoThumbB64}" class="w-10 h-10 rounded-xl object-cover border border-slate-200 shrink-0">` : `<div class="w-9 h-9 rounded-xl bg-indigo-100 text-indigo-700 font-extrabold text-[10px] flex items-center justify-center shrink-0">DOC</div>`}
+                                <div class="min-w-0">
+                                    <div class="flex flex-wrap items-center gap-1">
+                                        <span class="text-[10px] font-extrabold text-indigo-700">${escObs(d.codigo || 'DOC')}</span>
+                                        <span class="px-1.5 py-0.5 rounded bg-white border border-slate-200 text-slate-700 text-[9px] font-extrabold">${escObs(d.revisaoVigenteLabel || 'REV 00')}</span>
+                                        <span class="px-1.5 py-0.5 rounded ${isSig ? 'bg-rose-100 text-rose-700' : 'bg-indigo-100 text-indigo-700'} text-[9px] font-extrabold">${escObs(catLbl)}</span>
+                                    </div>
+                                    <div class="font-extrabold text-slate-900 truncate mt-0.5">${escObs(d.titulo || '')}</div>
+                                    ${d.sharepointPastaSugerida ? `<div class="text-[10px] text-slate-400 truncate">${escObs(d.sharepointPastaSugerida)}</div>` : ''}
+                                </div>
+                            </div>
+                            ${d.arquivoUrl ? `<a href="${escObs(d.arquivoUrl)}" target="_blank" rel="noopener noreferrer" class="px-3 py-1.5 rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white font-extrabold text-[11px] shrink-0">SharePoint ↗</a>` : ''}
+                        </div>`;
+                }).join('') : `<div class="p-6 text-center rounded-2xl bg-slate-50 border border-dashed border-slate-300 text-slate-500 font-bold">Nenhum documento vigente cadastrado para este equipamento ainda.<br>Use "Abrir Biblioteca ↗" para cadastrar manuais, orçamentos, desenhos ou fotos.</div>`;
+            }
+            document.getElementById('modalDocsObs')?.classList.remove('hidden');
+        };
+
+        function renderDocBadgeObs(area, maq, eq) {
+            const docs = getDocsEquipamentoObs(area, maq, eq);
+            const aEnc = escArgObs(area), mEnc = escArgObs(maq), eEnc = escArgObs(eq);
+            const hasOrc = docs.some(d => d.categoria === 'orcamentos' || d.sigilo === 'gestao');
+            return `<button type="button" onclick="abrirModalDocsEquipObs('${aEnc}','${mEnc}','${eEnc}')" class="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[10px] font-extrabold border transition-colors ${docs.length ? 'bg-indigo-50 text-indigo-700 border-indigo-200 hover:bg-indigo-100' : 'bg-slate-50 text-slate-500 border-slate-200 hover:bg-slate-100'}">${docs.length} Doc(s)${hasOrc ? ' • Orç.' : ''} ↗</button>`;
+        }
 
         window.switchTab = (t) => {
             ['dashboard', 'obs', 'prev', 'acoes', 'cadastros'].forEach(id => {
@@ -1114,6 +1243,11 @@
                     estruturas = rebuildEstruturasAgrupadasObs(rawLinhasDocsObs);
                     renderAll();
                 });
+                onSnapshot(docsColRef, (snap) => {
+                    docsAtivosObs = [];
+                    snap.forEach(d => docsAtivosObs.push({ id: d.id, ...d.data() }));
+                    renderAll();
+                });
             } catch (err) { renderAll(); }
         }
 
@@ -1224,7 +1358,10 @@
                     <button type="button" onclick="askDeleteLinha('${e.id}')" class="absolute top-3.5 right-3.5 p-1.5 text-rose-500 hover:bg-rose-50 rounded-xl transition-colors" title="Remover equipamento">
                         <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/></svg>
                     </button>
-                    <h4 class="font-extrabold text-sm text-slate-900 mb-3 pr-8">${e.equipamento}</h4>
+                    <div class="flex flex-wrap items-center justify-between gap-2 mb-3 pr-8">
+                        <h4 class="font-extrabold text-sm text-slate-900">${e.equipamento}</h4>
+                        ${renderDocBadgeObs(area, maq, e.equipamento)}
+                    </div>
                     <div class="grid grid-cols-2 gap-3 mb-3">
                         <div>
                             <label class="block text-[9px] font-extrabold uppercase text-slate-400 mb-1">Modelo</label>
@@ -1298,7 +1435,7 @@
                         const eqData = estruturas.find(x => x.area === area && x.maquina === maq && x.equipamento === eq);
                         const sub = eqData && (eqData.modelo || eqData.numeroSerie) ? `<span class="text-[10px] bg-slate-100 text-slate-600 px-2 py-0.5 rounded-full border border-slate-200 ml-2 font-mono font-bold">Mod: ${eqData.modelo || '-'} | SN: ${eqData.numeroSerie || '-'}</span>` : '';
 
-                        h += `<div class="tree-equip text-slate-800"><h4 class="font-extrabold text-xs uppercase mb-1.5 flex items-center gap-1.5"><svg class="w-3.5 h-3.5 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"/><circle cx="12" cy="12" r="3" stroke-width="2"/></svg> ${eq} ${sub}</h4>`;
+                        h += `<div class="tree-equip text-slate-800"><h4 class="font-extrabold text-xs uppercase mb-1.5 flex flex-wrap items-center gap-1.5"><svg class="w-3.5 h-3.5 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"/><circle cx="12" cy="12" r="3" stroke-width="2"/></svg> ${eq} ${sub} ${renderDocBadgeObs(area, maq, eq)}</h4>`;
                         Object.keys(arv[area][maq][eq]).sort().forEach(cj => {
                             h += `<div class="tree-assembly"><h5 class="font-extrabold text-[10px] text-slate-400 uppercase tracking-wider mb-2 flex items-center gap-1"><svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10"/></svg> Conjunto: ${cj}</h5>`;
 

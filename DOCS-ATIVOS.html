@@ -1,0 +1,2503 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0">
+    <title>Biblioteca Técnica & Documentação de Ativos — PCM Cepêra</title>
+    <link rel="icon" type="image/png" href="CEPERA_LOGO.png">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <style>
+        [hidden] { display: none !important; }
+        :root {
+            --primary: #0f172a;
+            --accent: #4f46e5;
+            --cepera: #dc2626;
+        }
+
+        html, body {
+            margin: 0 !important;
+            padding: 0 !important;
+            width: 100% !important;
+            min-height: 100vh !important;
+            overflow-x: hidden;
+            font-family: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, sans-serif;
+            color: #0f172a;
+            -webkit-tap-highlight-color: transparent;
+            background: linear-gradient(135deg, #f1f5f9 0%, #f8fafc 50%, #e2e8f0 100%);
+        }
+
+        .frosted-shell {
+            background: rgba(255, 255, 255, 0.94);
+            backdrop-filter: blur(8px);
+            -webkit-backdrop-filter: blur(8px);
+            border: 1px solid #e2e8f0;
+            box-shadow: 0 12px 32px -12px rgba(15, 23, 42, 0.06);
+        }
+
+        .glass-card {
+            background: #ffffff;
+            border: 1px solid #e2e8f0;
+            box-shadow: 0 4px 12px -4px rgba(15, 23, 42, 0.04);
+            transition: transform 0.15s ease, box-shadow 0.15s ease, border-color 0.15s ease;
+        }
+        .glass-card-hover:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 12px 24px -10px rgba(15, 23, 42, 0.09);
+            border-color: #cbd5e1;
+        }
+
+        .glass-rail {
+            background: #f8fafc;
+            border-right: 1px solid #e2e8f0;
+        }
+
+        .rail-btn {
+            width: 100%;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            gap: 0.25rem;
+            padding: 0.65rem 0.25rem;
+            border-radius: 0.95rem;
+            font-size: 10px;
+            font-weight: 800;
+            color: #64748b;
+            background: #ffffff;
+            border: 1px solid #e2e8f0;
+            transition: all 0.15s ease;
+            cursor: pointer;
+            position: relative;
+        }
+        .rail-btn:hover { color: #0f172a; border-color: #cbd5e1; background: #f1f5f9; }
+        .rail-btn.active {
+            background: var(--accent);
+            color: #ffffff;
+            border-color: var(--accent);
+            box-shadow: 0 6px 14px -4px rgba(79, 70, 229, 0.35);
+        }
+
+        .mob-tab {
+            padding: 0.45rem 0.95rem;
+            border-radius: 9999px;
+            font-size: 0.75rem;
+            font-weight: 800;
+            white-space: nowrap;
+            background: #ffffff;
+            color: #475569;
+            border: 1px solid #e2e8f0;
+            cursor: pointer;
+            transition: all 0.15s ease;
+        }
+        .mob-tab.active {
+            background: var(--accent);
+            color: #ffffff;
+            border-color: var(--accent);
+        }
+
+        .input-clean {
+            padding: 0.65rem 0.85rem;
+            font-size: 0.85rem;
+            border-radius: 0.85rem;
+            border: 1px solid #cbd5e1;
+            background: #ffffff;
+            transition: border-color 0.15s;
+            width: 100%;
+            color: #0f172a;
+        }
+        .input-clean:focus {
+            outline: none;
+            border-color: var(--accent);
+            box-shadow: 0 0 0 3px rgba(79, 70, 229, 0.14);
+        }
+
+        .btn-pill-dark {
+            background: var(--accent);
+            color: #ffffff;
+            font-weight: 700;
+            border-radius: 9999px;
+            padding: 0.65rem 1.25rem;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.45rem;
+            transition: opacity 0.15s ease, transform 0.15s ease;
+            cursor: pointer;
+            box-shadow: 0 6px 14px -4px rgba(15, 23, 42, 0.25);
+        }
+        .btn-pill-dark:hover { opacity: 0.92; transform: translateY(-1px); }
+        .btn-pill-dark:active { transform: scale(0.98); }
+
+        .btn-touch {
+            padding: 0.6rem 1.05rem;
+            font-weight: 700;
+            border-radius: 0.85rem;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.4rem;
+            transition: all 0.15s ease;
+            cursor: pointer;
+        }
+        .btn-touch:active { transform: scale(0.98); }
+
+        .pill {
+            padding: 0.42rem 0.9rem;
+            border-radius: 9999px;
+            border: 1px solid #e2e8f0;
+            background: #ffffff;
+            color: #64748b;
+            cursor: pointer;
+            font-size: 0.72rem;
+            font-weight: 800;
+            white-space: nowrap;
+            transition: all 0.15s ease;
+        }
+        .pill:hover { border-color: #cbd5e1; color: #0f172a; }
+        .pill.active {
+            background: var(--accent);
+            color: #ffffff;
+            border-color: var(--accent);
+            box-shadow: 0 4px 10px -2px rgba(79, 70, 229, 0.25);
+        }
+
+        .cat-manuais { background: #e0f2fe; color: #0369a1; border: 1px solid #bae6fd; }
+        .cat-lubrificacao { background: #fef3c7; color: #b45309; border: 1px solid #fde68a; }
+        .cat-desenhos { background: #ede9fe; color: #5b21b6; border: 1px solid #ddd6fe; }
+        .cat-orcamentos { background: #ffe4e6; color: #be123c; border: 1px solid #fecdd3; }
+        .cat-fotos { background: #d1fae5; color: #047857; border: 1px solid #a7f3d0; }
+        .cat-qualidade { background: #ccfbf1; color: #0f766e; border: 1px solid #99f6e4; }
+
+        .st-vigente { background: #dcfce7; color: #15803d; border: 1px solid #86efac; }
+        .st-pendente { background: #fef3c7; color: #b45309; border: 1px solid #fcd34d; }
+        .st-reprovado { background: #ffe4e6; color: #be123c; border: 1px solid #fda4af; }
+        .st-obsoleto { background: #f1f5f9; color: #475569; border: 1px solid #cbd5e1; }
+
+        *:focus-visible { outline: 3px solid var(--accent) !important; outline-offset: 2px; }
+
+        /* TEMAS ACESSÍVEIS */
+        body.theme-solid { background: #f8fafc !important; }
+        body.theme-solid .frosted-shell,
+        body.theme-solid .glass-card,
+        body.theme-solid .glass-rail {
+            background: #ffffff !important;
+            backdrop-filter: none !important;
+            box-shadow: none !important;
+            border: 1px solid #cbd5e1 !important;
+        }
+        body.theme-dark { background: #090d16 !important; color: #f1f5f9 !important; }
+        body.theme-dark .frosted-shell { background: #0f172a !important; border-color: #1e293b !important; backdrop-filter: none !important; }
+        body.theme-dark .glass-card,
+        body.theme-dark .glass-rail { background: #1e293b !important; border-color: #334155 !important; color: #f1f5f9 !important; backdrop-filter: none !important; }
+        body.theme-dark .text-slate-900,
+        body.theme-dark .text-slate-800,
+        body.theme-dark .text-slate-700 { color: #f8fafc !important; }
+        body.theme-dark .text-slate-600,
+        body.theme-dark .text-slate-500,
+        body.theme-dark .text-slate-400 { color: #94a3b8 !important; }
+        body.theme-dark .bg-white,
+        body.theme-dark .bg-slate-50,
+        body.theme-dark .bg-slate-100 { background-color: #0f172a !important; border-color: #334155 !important; color: #f1f5f9 !important; }
+        body.theme-dark .input-clean { background: #0f172a !important; border-color: #475569 !important; color: #ffffff !important; }
+        body.theme-dark .rail-btn { background: #0f172a !important; border-color: #334155 !important; color: #cbd5e1 !important; }
+        body.theme-dark .rail-btn.active { background: var(--accent) !important; color: #ffffff !important; }
+        body.theme-dark .pill { background: #0f172a !important; border-color: #334155 !important; color: #cbd5e1 !important; }
+        body.theme-dark .pill.active { background: var(--accent) !important; color: #ffffff !important; }
+        body.high-contrast { background: #ffffff !important; color: #000000 !important; }
+        body.high-contrast .frosted-shell,
+        body.high-contrast .glass-card { background: #ffffff !important; border: 2px solid #000000 !important; box-shadow: none !important; backdrop-filter: none !important; }
+        body.tablet-mode * { transition: none !important; animation: none !important; }
+        body.tablet-mode .btn-touch, body.tablet-mode .btn-pill-dark { min-height: 44px; }
+    </style>
+</head>
+<body class="antialiased selection:bg-indigo-100 selection:text-indigo-900">
+    <div id="toastStack" class="fixed bottom-4 right-4 z-[95] flex flex-col gap-2 max-w-sm"></div>
+
+    <!-- TELA ACESSO BLOQUEADO / SESSÃO -->
+    <div id="accessDeniedScreen" hidden class="hidden min-h-screen flex items-center justify-center p-4">
+        <div class="frosted-shell max-w-md w-full rounded-3xl p-8 text-center space-y-5">
+            <img src="CEPERA_LOGO.png" alt="Cepêra" class="h-12 w-auto object-contain mx-auto">
+            <div class="w-14 h-14 mx-auto rounded-2xl bg-indigo-100 text-indigo-700 flex items-center justify-center">
+                <svg class="w-7 h-7" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"/></svg>
+            </div>
+            <h1 class="text-xl font-extrabold text-slate-900">Acesso pela Central PCM</h1>
+            <p id="accessDeniedMsg" class="text-xs font-medium text-slate-600 leading-relaxed">
+                Faça login na Central de Sistemas PCM Cepêra para consultar manuais, desenhos, cartas de lubrificação e fotos dos ativos.
+            </p>
+            <button type="button" onclick="voltarParaCentralPCM()" class="btn-pill-dark w-full text-xs">Voltar para Login da Central PCM</button>
+        </div>
+    </div>
+
+    <!-- APP PRINCIPAL -->
+    <div id="mainApp" hidden class="hidden min-h-screen flex flex-col lg:flex-row">
+        <!-- RAIL LATERAL DESKTOP -->
+        <aside class="glass-rail hidden lg:flex flex-col w-24 shrink-0 p-3 justify-between sticky top-0 h-screen z-30">
+            <div class="space-y-4">
+                <button type="button" onclick="voltarParaCentralPCM()" title="Voltar ao Portal PCM" class="w-full p-2 rounded-2xl bg-white border border-slate-200 hover:border-indigo-400 transition-colors flex flex-col items-center gap-1">
+                    <img src="CEPERA_LOGO.png" alt="Cepêra" class="h-8 w-auto object-contain">
+                    <span class="text-[9px] font-extrabold text-slate-500 uppercase">Portal</span>
+                </button>
+
+                <nav class="space-y-2" aria-label="Menu Biblioteca de Documentos">
+                    <button type="button" id="rail-biblioteca" onclick="switchView('biblioteca')" class="rail-btn active">
+                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253"/></svg>
+                        <span>Biblioteca</span>
+                    </button>
+                    <button type="button" id="rail-aprovacoes" onclick="switchView('aprovacoes')" hidden class="rail-btn hidden">
+                        <span id="badgeRailAprov" hidden class="hidden absolute -top-1 -right-1 px-1.5 py-0.5 rounded-full text-[9px] font-extrabold bg-rose-600 text-white shadow">0</span>
+                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+                        <span>Aprovações</span>
+                    </button>
+                    <button type="button" id="rail-revisoes" onclick="switchView('revisoes')" class="rail-btn">
+                        <span id="badgeRailValidade" hidden class="hidden absolute -top-1 -right-1 px-1.5 py-0.5 rounded-full text-[9px] font-extrabold bg-amber-500 text-white shadow">0</span>
+                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+                        <span>Revisões</span>
+                    </button>
+                    <button type="button" id="rail-sharepoint" onclick="switchView('sharepoint')" hidden class="rail-btn hidden">
+                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 7v10a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2h-6l-2-2H5a2 2 0 00-2 2z"/></svg>
+                        <span>SharePoint</span>
+                    </button>
+                </nav>
+            </div>
+
+            <div class="space-y-2">
+                <button type="button" onclick="abrirEspacoUsuario()" title="Preferências (Alt + U)" class="rail-btn">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"/><circle cx="12" cy="12" r="3" stroke-width="2"/></svg>
+                    <span>Visual</span>
+                </button>
+                <button type="button" onclick="fazerLogout()" title="Sair da Sessão" class="rail-btn text-rose-600">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"/></svg>
+                    <span>Sair</span>
+                </button>
+            </div>
+        </aside>
+
+        <!-- CONTEÚDO PRINCIPAL -->
+        <div class="flex-1 min-w-0 flex flex-col">
+            <!-- HEADER -->
+            <header class="frosted-shell border-x-0 border-t-0 sticky top-0 z-20 px-4 sm:px-6 py-3">
+                <div class="max-w-7xl mx-auto flex flex-wrap items-center justify-between gap-3">
+                    <div class="flex items-center gap-3 min-w-0">
+                        <button type="button" onclick="voltarParaCentralPCM()" class="lg:hidden p-2 rounded-xl bg-white border border-slate-200 text-slate-700 font-extrabold text-xs">← Portal</button>
+                        <div class="min-w-0">
+                            <div class="flex flex-wrap items-center gap-2">
+                                <span class="text-[10px] font-extrabold uppercase tracking-widest text-indigo-700">GED PCM Cepêra • SharePoint + ob_linhas</span>
+                                <span id="syncPill" class="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-[10px] font-extrabold bg-slate-100 text-slate-600">
+                                    <span id="statusDot" class="w-2 h-2 rounded-full bg-amber-400"></span>
+                                    <span id="statusText">Conectando...</span>
+                                </span>
+                            </div>
+                            <h1 id="pageTitle" class="text-base sm:text-xl font-extrabold text-slate-900 truncate">Biblioteca Técnica de Documentos</h1>
+                        </div>
+                    </div>
+
+                    <div class="flex flex-wrap items-center gap-2">
+                        <div id="userChip" class="hidden sm:flex items-center gap-2 px-3 py-1.5 rounded-full bg-slate-100 border border-slate-200 text-[11px] font-extrabold text-slate-700">
+                            <span class="w-2 h-2 rounded-full bg-indigo-500"></span>
+                            <span id="userChipLabel">Usuário</span>
+                        </div>
+                        <button type="button" onclick="abrirModalNovoDocumento('doc')" id="btnNovoDocHeader" class="btn-pill-dark text-xs py-2 px-4">
+                            <span>+ Novo Documento / Foto</span>
+                        </button>
+                        <button type="button" onclick="abrirPastaSharePointAtual()" title="Abrir pasta raiz SISTEMA no SharePoint" class="btn-touch bg-sky-50 hover:bg-sky-100 text-sky-800 border border-sky-200 text-xs py-2 px-3">
+                            <span>SharePoint ↗</span>
+                        </button>
+                    </div>
+                </div>
+
+                <!-- NAVEGAÇÃO MOBILE -->
+                <div class="lg:hidden flex items-center gap-1.5 overflow-x-auto pt-2.5 pb-0.5">
+                    <button type="button" id="mob-biblioteca" onclick="switchView('biblioteca')" class="mob-tab active">Biblioteca</button>
+                    <button type="button" id="mob-aprovacoes" onclick="switchView('aprovacoes')" hidden class="mob-tab hidden">Aprovações <span id="badgeMobAprov" class="ml-1 px-1.5 py-0.2 rounded-full bg-rose-600 text-white text-[10px]">0</span></button>
+                    <button type="button" id="mob-revisoes" onclick="switchView('revisoes')" class="mob-tab">Revisões &amp; Validades</button>
+                    <button type="button" id="mob-sharepoint" onclick="switchView('sharepoint')" hidden class="mob-tab hidden">SharePoint</button>
+                </div>
+            </header>
+
+            <main class="flex-1 p-4 sm:p-6 max-w-7xl w-full mx-auto space-y-6">
+                <!-- ================= VIEW 1: BIBLIOTECA TÉCNICA ================= -->
+                <section id="viewBiblioteca" class="space-y-5">
+                    <!-- Barra de Busca Dinâmica (Spotlight Industrial) + KPIs Rápidos -->
+                    <div class="glass-card rounded-3xl p-4 sm:p-5 space-y-4">
+                        <div class="flex flex-col md:flex-row md:items-center gap-3">
+                            <div class="relative flex-1">
+                                <svg class="w-5 h-5 text-indigo-500 absolute left-3.5 top-1/2 -translate-y-1/2 pointer-events-none" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/></svg>
+                                <input type="text" id="docSearchInput" oninput="onFiltroBibliotecaChange()" class="input-clean pl-11 pr-24 py-3 text-sm font-bold" placeholder="Busca rápida: código DOC-, título, inversor CFW11, rolamento, lubrificante, TAG, linha ou máquina...">
+                                <button type="button" onclick="limparFiltrosBiblioteca()" class="absolute right-2.5 top-1/2 -translate-y-1/2 px-2.5 py-1 rounded-lg bg-slate-100 hover:bg-slate-200 text-[11px] font-extrabold text-slate-600">Limpar</button>
+                            </div>
+                            <div class="flex flex-wrap items-center gap-2 shrink-0">
+                                <select id="docFiltroDisciplina" onchange="onFiltroBibliotecaChange()" class="input-clean py-2.5 text-xs font-extrabold w-auto">
+                                    <option value="">Todas Disciplinas</option>
+                                    <option value="Mecânica">Mecânica</option>
+                                    <option value="Elétrica">Elétrica</option>
+                                    <option value="Automação">Automação</option>
+                                    <option value="Lubrificação">Lubrificação</option>
+                                    <option value="Utilidades">Utilidades</option>
+                                    <option value="Qualidade">Qualidade</option>
+                                    <option value="Multidisciplinar">Multidisciplinar</option>
+                                </select>
+                                <select id="docFiltroOrdem" onchange="onFiltroBibliotecaChange()" class="input-clean py-2.5 text-xs font-extrabold w-auto">
+                                    <option value="recentes">Mais Recentes</option>
+                                    <option value="codigo">Código (A–Z)</option>
+                                    <option value="titulo">Título (A–Z)</option>
+                                    <option value="validade">Próximos Vencimentos</option>
+                                </select>
+                            </div>
+                        </div>
+
+                        <!-- Categorias Rápidas -->
+                        <div id="docCategoriasPills" class="flex flex-wrap items-center gap-1.5"></div>
+
+                        <!-- Filtro Cascata na Árvore Mestre (ob_linhas) -->
+                        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-2.5 pt-2 border-t border-slate-100">
+                            <div>
+                                <label class="block text-[10px] font-extrabold uppercase text-slate-500 mb-1">1. Setor / Área</label>
+                                <select id="docFiltroArea" onchange="onDocAreaChange()" class="input-clean py-2 text-xs font-bold"></select>
+                            </div>
+                            <div>
+                                <label class="block text-[10px] font-extrabold uppercase text-slate-500 mb-1">2. Máquina / Linha</label>
+                                <select id="docFiltroMaquina" onchange="onDocMaquinaChange()" class="input-clean py-2 text-xs font-bold"></select>
+                            </div>
+                            <div>
+                                <label class="block text-[10px] font-extrabold uppercase text-slate-500 mb-1">3. Equipamento</label>
+                                <select id="docFiltroEquipamento" onchange="onDocEquipChange()" class="input-clean py-2 text-xs font-bold"></select>
+                            </div>
+                            <div>
+                                <label class="block text-[10px] font-extrabold uppercase text-slate-500 mb-1">4. Conjunto</label>
+                                <select id="docFiltroConjunto" onchange="onFiltroBibliotecaChange()" class="input-clean py-2 text-xs font-bold"></select>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Resumo de KPIs -->
+                    <div id="docKpisStrip" class="grid grid-cols-2 sm:grid-cols-4 gap-3"></div>
+
+                    <!-- Resultados da Biblioteca -->
+                    <div class="flex flex-wrap items-center justify-between gap-2">
+                        <h2 class="text-sm font-extrabold text-slate-800" id="docResultadosHeading">0 documento(s) vigente(s)</h2>
+                        <span class="text-[11px] font-bold text-slate-500" id="docSigiloAviso">Apenas revisões aprovadas e vigentes são exibidas para consulta em campo.</span>
+                    </div>
+
+                    <div id="docCardsGrid" class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4"></div>
+                </section>
+
+                <!-- ================= VIEW 2: FILA DE APROVAÇÕES & QUALIDADE DE DADOS ================= -->
+                <section id="viewAprovacoes" hidden class="hidden space-y-5">
+                    <div class="glass-card rounded-3xl p-5 flex flex-wrap items-center justify-between gap-3">
+                        <div>
+                            <span class="text-[10px] font-extrabold uppercase tracking-widest text-rose-600">Controle de Qualidade de Dados • Admin, Gerente &amp; Supervisores</span>
+                            <h2 class="text-lg font-extrabold text-slate-900">Fila de Aprovações Pendentes</h2>
+                            <p class="text-xs text-slate-500 font-medium">Todo documento novo, foto de campo ou nova revisão passa por conferência aqui antes de ficar vigente para a fábrica.</p>
+                        </div>
+                        <div class="flex flex-wrap items-center gap-2">
+                            <span id="aprovCountBadge" class="px-3 py-1.5 rounded-full text-xs font-extrabold bg-amber-100 text-amber-900 border border-amber-200">0 pendente(s)</span>
+                        </div>
+                    </div>
+
+                    <div id="aprovacoesLista" class="space-y-4"></div>
+
+                    <div class="glass-card rounded-3xl p-5 space-y-3">
+                        <h3 class="text-sm font-extrabold text-slate-900">Histórico Recente de Aprovações &amp; Reprovações</h3>
+                        <div id="aprovacoesHistoricoLista" class="space-y-2"></div>
+                    </div>
+                </section>
+
+                <!-- ================= VIEW 3: REVISÕES & VALIDADES ================= -->
+                <section id="viewRevisoes" hidden class="hidden space-y-5">
+                    <div class="glass-card rounded-3xl p-5 flex flex-wrap items-center justify-between gap-3">
+                        <div>
+                            <span class="text-[10px] font-extrabold uppercase tracking-widest text-indigo-600">Rastreabilidade SGQ • Controle de Versões</span>
+                            <h2 class="text-lg font-extrabold text-slate-900">Log de Revisões &amp; Alertas de Validade</h2>
+                            <p class="text-xs text-slate-500 font-medium">Acompanhamento de validade (30 dias / vencidos) e trilha completa entre revisões vigentes e obsoletas.</p>
+                        </div>
+                        <div class="flex flex-wrap items-center gap-2">
+                            <button type="button" onclick="setFiltroRevisoesTab('validades')" id="btnRevTab_validades" class="pill active">Vencidos &amp; A Vencer</button>
+                            <button type="button" onclick="setFiltroRevisoesTab('historico')" id="btnRevTab_historico" class="pill">Todas as Revisões</button>
+                            <button type="button" onclick="setFiltroRevisoesTab('obsoletas')" id="btnRevTab_obsoletas" class="pill">Revisões Obsoletas</button>
+                        </div>
+                    </div>
+                    <div id="revisoesViewContent" class="space-y-3"></div>
+                </section>
+
+                <!-- ================= VIEW 4: ESTRUTURA SHAREPOINT (SISTEMA) ================= -->
+                <section id="viewSharepoint" hidden class="hidden space-y-5">
+                    <div class="glass-card rounded-3xl p-5 space-y-4">
+                        <div class="flex flex-wrap items-start justify-between gap-3 border-b border-slate-100 pb-4">
+                            <div>
+                                <span class="text-[10px] font-extrabold uppercase tracking-widest text-sky-700">Integração Estruturada • Microsoft SharePoint</span>
+                                <h2 class="text-lg font-extrabold text-slate-900">Arquitetura de Pastas &amp; Nomenclatura dentro de SISTEMA</h2>
+                                <p class="text-xs text-slate-500 font-medium mt-0.5">
+                                    Organize a biblioteca <code>Documentos Compartilhados / SISTEMA</code> espelhando exatamente as categorias e os equipamentos da árvore <code>ob_linhas</code>.
+                                </p>
+                            </div>
+                            <div class="flex flex-wrap items-center gap-2">
+                                <button type="button" onclick="baixarScriptPastasSharePoint('bat')" class="btn-pill-dark text-xs py-2 px-4">
+                                    <span>↓ Baixar Gerador Pastas OneDrive (.bat)</span>
+                                </button>
+                                <button type="button" onclick="baixarScriptPastasSharePoint('ps1')" class="btn-touch bg-slate-100 hover:bg-slate-200 text-slate-800 border border-slate-200 text-xs py-2 px-3">
+                                    <span>↓ Script PnP (.ps1)</span>
+                                </button>
+                                <button type="button" onclick="abrirPastaSharePointAtual()" class="btn-touch bg-sky-600 hover:bg-sky-700 text-white text-xs py-2 px-3.5">
+                                    <span>Abrir Pasta SISTEMA ↗</span>
+                                </button>
+                            </div>
+                        </div>
+
+                        <div class="p-4 rounded-2xl bg-sky-50/70 border border-sky-200 space-y-3 text-xs">
+                            <div class="font-extrabold text-sky-900">Como criar todas as pastas em 30 segundos dentro do SharePoint da Cepêra:</div>
+                            <ol class="list-decimal pl-5 space-y-1 text-slate-700 font-medium">
+                                <li>Abra a pasta <a id="linkSharepointRaiz" href="#" target="_blank" rel="noopener" class="font-extrabold text-sky-700 underline">SISTEMA no SharePoint</a> e clique no botão <strong>Sincronizar</strong> (OneDrive do Windows) — ou peça à TI via PowerShell PnP.</li>
+                                <li>Baixe o arquivo <strong><code>criar_estrutura_SISTEMA.bat</code></strong> acima, coloque dentro da pasta sincronizada <code>SISTEMA</code> e dê dois cliques: todas as pastas abaixo (por Categoria, Setor, Linha e Equipamento) serão criadas e sincronizadas na nuvem automaticamente.</li>
+                                <li>Restrinja as permissões da subpasta <code>04_ORCAMENTOS_SIGILOSOS</code> no SharePoint apenas para o grupo de Gestão/Supervisão.</li>
+                            </ol>
+                            <div class="grid grid-cols-1 md:grid-cols-2 gap-3 pt-2 border-t border-sky-200/80">
+                                <div>
+                                    <label class="block text-[10px] font-extrabold uppercase text-slate-600 mb-1">URL Raiz da Pasta SISTEMA no SharePoint</label>
+                                    <input type="url" id="spCfgUrlRaiz" class="input-clean py-2 text-xs font-mono">
+                                </div>
+                                <div class="flex items-end gap-2">
+                                    <button type="button" onclick="salvarConfigSharePoint()" class="btn-touch bg-slate-900 hover:bg-slate-800 text-white text-xs py-2 px-4">Salvar Configuração SharePoint</button>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div id="sharepointArvorePreview" class="space-y-3"></div>
+                    </div>
+                </section>
+            </main>
+        </div>
+    </div>
+
+    <!-- ==================== MODAL NOVO DOCUMENTO / SUGESTÃO CAMPO ==================== -->
+    <div id="modalNovoDoc" role="dialog" aria-modal="true" hidden class="hidden fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-50 flex items-end sm:items-center justify-center p-0 sm:p-4">
+        <div class="bg-white w-full max-w-3xl rounded-t-3xl sm:rounded-3xl shadow-2xl border border-slate-200 max-h-[94vh] flex flex-col overflow-hidden">
+            <div class="px-6 py-4 border-b border-slate-100 bg-slate-50/70 flex items-center justify-between gap-3">
+                <div>
+                    <span id="modalDocKicker" class="text-[10px] font-extrabold uppercase tracking-widest text-indigo-700">Qualidade de Dados • Entra na Fila de Aprovação</span>
+                    <h2 id="modalDocTituloModal" class="text-lg font-extrabold text-slate-900">Inserir Novo Documento / Referência</h2>
+                </div>
+                <button type="button" onclick="fecharModal('modalNovoDoc')" class="w-8 h-8 rounded-full bg-white border border-slate-200 text-slate-600 font-bold">✕</button>
+            </div>
+
+            <form id="formNovoDoc" onsubmit="salvarSubmissaoDocumento(event)" class="flex-1 overflow-y-auto p-5 sm:p-6 space-y-4 text-xs">
+                <input type="hidden" id="docFormModo" value="novo">
+                <input type="hidden" id="docMasterEditId" value="">
+
+                <!-- Passo 1: Vínculo na Árvore -->
+                <div class="p-4 rounded-2xl bg-slate-50 border border-slate-200 space-y-3">
+                    <div class="flex flex-wrap items-center justify-between gap-2">
+                        <span class="text-[10px] font-extrabold uppercase tracking-wider text-slate-700">1. Onde na Árvore de Ativos (ob_linhas) *</span>
+                        <span id="docFormAtivoPreview" class="text-[10px] font-extrabold text-indigo-700"></span>
+                    </div>
+                    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-2.5">
+                        <div>
+                            <label class="block text-[10px] font-extrabold uppercase text-slate-500 mb-1">Setor / Área *</label>
+                            <select id="ndArea" required onchange="onNdAreaChange()" class="input-clean py-2 text-xs font-bold"></select>
+                        </div>
+                        <div>
+                            <label class="block text-[10px] font-extrabold uppercase text-slate-500 mb-1">Máquina / Linha *</label>
+                            <select id="ndMaquina" required onchange="onNdMaquinaChange()" class="input-clean py-2 text-xs font-bold"></select>
+                        </div>
+                        <div>
+                            <label class="block text-[10px] font-extrabold uppercase text-slate-500 mb-1">Equipamento *</label>
+                            <select id="ndEquipamento" required onchange="onNdEquipChange()" class="input-clean py-2 text-xs font-bold"></select>
+                        </div>
+                        <div>
+                            <label class="block text-[10px] font-extrabold uppercase text-slate-500 mb-1">Conjunto (Opcional)</label>
+                            <select id="ndConjunto" onchange="onNdConjChange()" class="input-clean py-2 text-xs font-bold"></select>
+                        </div>
+                        <div>
+                            <label class="block text-[10px] font-extrabold uppercase text-slate-500 mb-1">Subconjunto (Opcional)</label>
+                            <select id="ndSubconjunto" onchange="atualizarPreviewNomenclaturaDoc()" class="input-clean py-2 text-xs font-bold"></select>
+                        </div>
+                        <div>
+                            <label class="block text-[10px] font-extrabold uppercase text-slate-500 mb-1">TAG / Fabricante / Modelo</label>
+                            <input type="text" id="ndAtivoSpecs" class="input-clean py-2 text-xs font-mono font-bold bg-white" placeholder="Auto ou informe">
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Passo 2: Categoria, Código & Título -->
+                <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
+                    <div>
+                        <label class="block text-[10px] font-extrabold uppercase text-slate-500 mb-1">Categoria *</label>
+                        <select id="ndCategoria" required onchange="onNdCategoriaChange()" class="input-clean py-2 text-xs font-extrabold"></select>
+                    </div>
+                    <div>
+                        <label class="block text-[10px] font-extrabold uppercase text-slate-500 mb-1">Subtipo *</label>
+                        <select id="ndSubtipo" required class="input-clean py-2 text-xs font-bold"></select>
+                    </div>
+                    <div>
+                        <label class="block text-[10px] font-extrabold uppercase text-slate-500 mb-1">Disciplina</label>
+                        <select id="ndDisciplina" class="input-clean py-2 text-xs font-bold">
+                            <option value="Mecânica">Mecânica</option>
+                            <option value="Elétrica">Elétrica</option>
+                            <option value="Automação">Automação</option>
+                            <option value="Lubrificação">Lubrificação</option>
+                            <option value="Utilidades">Utilidades</option>
+                            <option value="Qualidade">Qualidade</option>
+                            <option value="Multidisciplinar">Multidisciplinar</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label class="block text-[10px] font-extrabold uppercase text-slate-500 mb-1">Código Padronizado *</label>
+                        <input type="text" id="ndCodigo" required oninput="atualizarPreviewNomenclaturaDoc()" class="input-clean py-2 text-xs font-mono font-extrabold bg-slate-50" placeholder="DOC-ENV-0001">
+                    </div>
+                </div>
+
+                <div class="grid grid-cols-1 sm:grid-cols-3 gap-3">
+                    <div class="sm:col-span-2">
+                        <label class="block text-[10px] font-extrabold uppercase text-slate-500 mb-1">Título do Documento *</label>
+                        <input type="text" id="ndTitulo" required oninput="atualizarPreviewNomenclaturaDoc()" class="input-clean py-2 text-xs font-bold" placeholder="Ex: Manual de Manutenção Sopradora + Diagrama Elétrico Painel Principal">
+                    </div>
+                    <div>
+                        <label class="block text-[10px] font-extrabold uppercase text-slate-500 mb-1">Revisão</label>
+                        <input type="text" id="ndRevisaoLabel" readonly class="input-clean py-2 text-xs font-mono font-extrabold bg-slate-100 text-indigo-700" value="REV 00">
+                    </div>
+                </div>
+
+                <div id="ndAvisoSigiloOrcamento" hidden class="hidden p-3 rounded-2xl bg-rose-50 border border-rose-200 text-rose-900 text-[11px] font-bold">
+                    Sigilo ativo: documentos da categoria <strong>Orçamentos</strong> ficam visíveis apenas para Administração, Gerência e Supervisores (ocultos para técnicos de campo).
+                </div>
+
+                <!-- Guia Estruturado de Pasta & Nome no SharePoint -->
+                <div class="p-3.5 rounded-2xl bg-sky-50/70 border border-sky-200 space-y-2">
+                    <div class="flex flex-wrap items-center justify-between gap-2">
+                        <span class="text-[10px] font-extrabold uppercase tracking-wider text-sky-800">Pasta e Nome Padrão no SharePoint (SISTEMA)</span>
+                        <div class="flex flex-wrap items-center gap-1.5">
+                            <button type="button" onclick="copiarTextoSimples(document.getElementById('ndSpNomeArquivo').innerText, 'Nome padrão do arquivo copiado!')" class="px-2.5 py-1 rounded-lg bg-white hover:bg-sky-100 border border-sky-200 text-[10px] font-extrabold text-sky-800">Copiar Nome</button>
+                            <button type="button" onclick="abrirPastaDestinoModalSharePoint()" class="px-2.5 py-1 rounded-lg bg-sky-600 hover:bg-sky-700 text-white text-[10px] font-extrabold">Abrir Pasta SharePoint ↗</button>
+                        </div>
+                    </div>
+                    <div class="grid grid-cols-1 gap-1 text-[11px] font-mono bg-white p-2.5 rounded-xl border border-sky-200/80">
+                        <div class="truncate text-slate-600"><strong class="text-slate-800">Pasta:</strong> <span id="ndSpPastaPath">SISTEMA/...</span></div>
+                        <div class="truncate text-indigo-700"><strong class="text-slate-800">Arquivo:</strong> <span id="ndSpNomeArquivo">DOC-...</span></div>
+                    </div>
+                </div>
+
+                <!-- Passo 3: Arquivo SharePoint OU Foto Direta de Campo -->
+                <div class="p-4 rounded-2xl bg-slate-50 border border-slate-200 space-y-3">
+                    <div class="flex flex-wrap items-center justify-between gap-2">
+                        <span class="text-[10px] font-extrabold uppercase tracking-wider text-slate-700">2. Anexo: Link Oficial SharePoint e/ou Foto Direta</span>
+                        <div class="flex items-center gap-1.5">
+                            <button type="button" id="btnModoSp" onclick="setModoAnexoDoc('sharepoint')" class="pill active">Link SharePoint</button>
+                            <button type="button" id="btnModoFoto" onclick="setModoAnexoDoc('foto_campo')" class="pill">Foto Direta (Câmera / Tablet)</button>
+                        </div>
+                    </div>
+
+                    <div id="boxAnexoSharePoint" class="space-y-2.5">
+                        <div>
+                            <label class="block text-[10px] font-extrabold uppercase text-slate-500 mb-1">URL do Arquivo ou Pasta no SharePoint *</label>
+                            <input type="url" id="ndArquivoUrl" oninput="onSharePointUrlInput(this.value)" class="input-clean py-2 text-xs font-mono" placeholder="https://ceperaind.sharepoint.com/sites/PCMCEPERA-LevantamentoManutenoPreventiva/...">
+                        </div>
+                        <div>
+                            <label class="block text-[10px] font-extrabold uppercase text-slate-500 mb-1">Código/Link Embed p/ Pré-Visualizar na Tela (Opcional — SharePoint &gt; Compartilhar &gt; Incorporar)</label>
+                            <input type="text" id="ndArquivoEmbedUrl" oninput="normalizarEmbedInput(this)" class="input-clean py-2 text-xs font-mono" placeholder="Cole a URL embed ou a tag &lt;iframe src=&quot;...&quot;&gt; que o sistema extrai sozinho">
+                        </div>
+                    </div>
+
+                    <div id="boxAnexoFoto" hidden class="hidden space-y-2.5">
+                        <div class="flex flex-wrap items-center gap-3">
+                            <label class="btn-touch bg-emerald-600 hover:bg-emerald-700 text-white text-xs py-2 px-4 cursor-pointer">
+                                <span>Tirar Foto / Escolher Imagem</span>
+                                <input type="file" id="ndFotoFile" accept="image/*" capture="environment" onchange="onFotoCampoSelecionada(event)" class="hidden">
+                            </label>
+                            <span id="ndFotoStatus" class="text-[11px] font-bold text-slate-500">Nenhuma foto selecionada (otimização automática p/ Cosmo/Firestore).</span>
+                        </div>
+                        <div id="ndFotoPreviewBox" hidden class="hidden relative inline-block">
+                            <img id="ndFotoPreviewImg" src="" alt="Preview" class="h-36 w-auto rounded-2xl border border-slate-300 object-cover shadow-sm">
+                            <button type="button" onclick="limparFotoCampoDoc()" class="absolute -top-2 -right-2 w-6 h-6 rounded-full bg-slate-900 text-white text-xs font-bold">✕</button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Passo 4: Busca, Parâmetros Técnicos, Revisão e Validade -->
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                    <div>
+                        <label class="block text-[10px] font-extrabold uppercase text-slate-500 mb-1">Tags / Palavras-chave para Busca *</label>
+                        <input type="text" id="ndTags" required class="input-clean py-2 text-xs font-bold" placeholder="Ex: SEW, redutor, inversor CFW11, óleo VG 220, retentor">
+                    </div>
+                    <div class="grid grid-cols-2 gap-2">
+                        <div>
+                            <label class="block text-[10px] font-extrabold uppercase text-slate-500 mb-1">Validade (Opcional)</label>
+                            <input type="date" id="ndValidadeEm" class="input-clean py-2 text-xs font-bold">
+                        </div>
+                        <div>
+                            <label class="block text-[10px] font-extrabold uppercase text-slate-500 mb-1">Revalidação (Meses)</label>
+                            <select id="ndRevalidacaoMeses" onchange="aplicarSugestaoValidadeMeses(this.value)" class="input-clean py-2 text-xs font-bold">
+                                <option value="0">Sem vencimento</option>
+                                <option value="3">3 meses</option>
+                                <option value="6">6 meses</option>
+                                <option value="12">12 meses (Anual)</option>
+                                <option value="24">24 meses</option>
+                            </select>
+                        </div>
+                    </div>
+                </div>
+
+                <div>
+                    <label class="block text-[10px] font-extrabold uppercase text-slate-500 mb-1">Resumo Técnico / Parâmetros Principais (aparece direto na busca do mecânico)</label>
+                    <textarea id="ndResumoTecnico" rows="2" class="input-clean py-2 text-xs font-semibold" placeholder="Ex: Torque parafusos M12 = 85 Nm • Graxa H1 NLGI 2 • Código rolamento 6205-2Z"></textarea>
+                </div>
+
+                <div>
+                    <label class="block text-[10px] font-extrabold uppercase text-slate-500 mb-1">Motivo da Emissão / O que mudou nesta Revisão *</label>
+                    <input type="text" id="ndMotivoAlteracao" required class="input-clean py-2 text-xs font-bold" value="Emissão inicial" placeholder="Ex: Emissão inicial ou Atualização do esquema página 4">
+                </div>
+            </form>
+
+            <div class="px-6 py-4 border-t border-slate-100 bg-slate-50 flex flex-wrap items-center justify-between gap-2">
+                <span class="text-[11px] font-bold text-slate-500">Será enviado para validação e aprovação de Gestão/Supervisão.</span>
+                <div class="flex items-center gap-2">
+                    <button type="button" onclick="fecharModal('modalNovoDoc')" class="btn-touch bg-white border border-slate-200 text-slate-700 text-xs">Cancelar</button>
+                    <button type="submit" form="formNovoDoc" id="btnSalvarSubmissaoDoc" class="btn-pill-dark text-xs px-6">Enviar para Aprovação</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- ==================== MODAL DETALHE DO DOCUMENTO + PREVIEW + HISTÓRICO REVISÕES ==================== -->
+    <div id="modalDetalheDoc" role="dialog" aria-modal="true" hidden class="hidden fixed inset-0 bg-slate-900/65 backdrop-blur-sm z-[60] flex items-end sm:items-center justify-center p-0 sm:p-4">
+        <div class="bg-white w-full max-w-4xl rounded-t-3xl sm:rounded-3xl shadow-2xl border border-slate-200 max-h-[94vh] flex flex-col overflow-hidden">
+            <div class="px-6 py-4 border-b border-slate-100 bg-slate-50/80 flex items-start justify-between gap-3">
+                <div class="min-w-0 space-y-1">
+                    <div id="detDocBadges" class="flex flex-wrap items-center gap-1.5"></div>
+                    <h2 id="detDocTitulo" class="text-base sm:text-xl font-extrabold text-slate-900 leading-tight">—</h2>
+                    <p id="detDocAtivoPath" class="text-xs font-bold text-slate-500">—</p>
+                </div>
+                <button type="button" onclick="fecharModal('modalDetalheDoc')" class="w-8 h-8 rounded-full bg-white border border-slate-200 text-slate-600 font-bold shrink-0">✕</button>
+            </div>
+            <div id="detDocBody" class="flex-1 overflow-y-auto p-5 sm:p-6 space-y-5 text-xs"></div>
+            <div id="detDocFooter" class="px-6 py-3.5 border-t border-slate-100 bg-slate-50 flex flex-wrap items-center justify-between gap-2"></div>
+        </div>
+    </div>
+
+    <!-- ==================== MODAL ZOOM DE FOTO ==================== -->
+    <div id="modalZoomFotoDoc" role="dialog" aria-modal="true" hidden onclick="if(event.target===this) fecharModal('modalZoomFotoDoc')" class="hidden fixed inset-0 bg-slate-950/90 z-[85] flex items-center justify-center p-4">
+        <div class="max-w-4xl w-full space-y-3 text-center">
+            <img id="zoomFotoDocImg" src="" alt="Foto Ampliada" class="max-h-[82vh] w-auto mx-auto rounded-2xl shadow-2xl border border-slate-700 object-contain">
+            <div class="flex items-center justify-center gap-3">
+                <span id="zoomFotoDocLegenda" class="text-xs font-bold text-slate-300"></span>
+                <button type="button" onclick="fecharModal('modalZoomFotoDoc')" class="px-4 py-2 rounded-full bg-white text-slate-900 font-extrabold text-xs">Fechar</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- ==================== MODAL ESPAÇO DO USUÁRIO ==================== -->
+    <div id="modalEspacoUsuario" role="dialog" aria-modal="true" hidden class="hidden fixed inset-0 bg-slate-900/60 z-[75] flex items-end sm:items-center justify-center p-0 sm:p-4">
+        <div class="bg-white w-full sm:max-w-lg sm:rounded-3xl rounded-t-3xl shadow-2xl border border-slate-200 p-6 space-y-5 text-xs">
+            <div class="flex items-center justify-between border-b border-slate-100 pb-3">
+                <div>
+                    <span class="text-[10px] font-extrabold uppercase tracking-widest text-indigo-600">Preferências Sincronizadas</span>
+                    <h2 class="text-base font-extrabold text-slate-900">Preferências Visuais</h2>
+                </div>
+                <button type="button" onclick="fecharModal('modalEspacoUsuario')" class="w-8 h-8 rounded-full bg-slate-100 font-bold">✕</button>
+            </div>
+            <div class="p-3.5 rounded-2xl bg-slate-50 border border-slate-200 flex items-center justify-between gap-3">
+                <div>
+                    <div class="font-extrabold text-slate-900">Modo Tablet (Campo)</div>
+                    <div class="text-[11px] text-slate-500">Botões maiores e sem animações</div>
+                </div>
+                <button type="button" id="btnToggleTabletMode" onclick="toggleModoTablet()" class="px-4 py-2 rounded-xl font-extrabold bg-slate-200 text-slate-800">DESATIVADO</button>
+            </div>
+            <div class="grid grid-cols-2 sm:grid-cols-4 gap-2">
+                <button type="button" onclick="definirTemaUsuario('padrao')" id="btnTema_padrao" class="p-2.5 rounded-xl border border-slate-200 font-extrabold">Claro</button>
+                <button type="button" onclick="definirTemaUsuario('solido')" id="btnTema_solido" class="p-2.5 rounded-xl border border-slate-200 font-extrabold">Sólido</button>
+                <button type="button" onclick="definirTemaUsuario('dark')" id="btnTema_dark" class="p-2.5 rounded-xl border border-slate-200 font-extrabold">Escuro</button>
+                <button type="button" onclick="definirTemaUsuario('contraste')" id="btnTema_contraste" class="p-2.5 rounded-xl border border-slate-200 font-extrabold">Contraste</button>
+            </div>
+        </div>
+    </div>
+
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
+        import { getAuth, signInAnonymously } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
+        import { initializeFirestore, collection, addDoc, setDoc, onSnapshot, doc, updateDoc, deleteDoc } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
+
+        const memoryStorage = {};
+        const safeStorage = {
+            get: (k) => { try { return window.localStorage.getItem(k); } catch (_) { return memoryStorage[k] ?? null; } },
+            set: (k, v) => { memoryStorage[k] = String(v); try { window.localStorage.setItem(k, String(v)); } catch (_) {} },
+            remove: (k) => { delete memoryStorage[k]; try { window.localStorage.removeItem(k); } catch (_) {} }
+        };
+        function safeSessionGet(k) {
+            try { return window.sessionStorage.getItem(k); } catch (_) { return null; }
+        }
+
+        const firebaseConfig = {
+            apiKey: "AIzaSyAGbFTTCgbqe9XFKFSb6ltB5lYj5O6QipE",
+            authDomain: "pcm-cepera.firebaseapp.com",
+            projectId: "pcm-cepera",
+            storageBucket: "pcm-cepera.firebasestorage.app",
+            messagingSenderId: "483278589909",
+            appId: "1:483278589909:web:9f69f8a32f50e4e186f75c",
+            measurementId: "G-LW29TG8TJ4"
+        };
+
+        const app = initializeApp(firebaseConfig);
+        const db = initializeFirestore(app, { experimentalForceLongPolling: true });
+        const auth = getAuth(app);
+
+        const refDocsAtivos = collection(db, "docs_ativos");
+        const refDocsRevisoes = collection(db, "docs_revisoes");
+        const refLinhas = collection(db, "ob_linhas");
+        const refFunc = collection(db, "ir_funcionarios");
+        const refSpConfig = doc(db, "config", "docs_sharepoint");
+
+        const DEFAULT_SHAREPOINT_CFG = {
+            tenantUrl: "https://ceperaind.sharepoint.com",
+            sitePath: "/sites/PCMCEPERA-LevantamentoManutenoPreventiva",
+            biblioteca: "Documentos Compartilhados",
+            pastaRaiz: "SISTEMA",
+            viewId: "da8a2e7e-0d98-46b8-b619-61b655535ada",
+            urlPastaRaiz: "https://ceperaind.sharepoint.com/sites/PCMCEPERA-LevantamentoManutenoPreventiva/Documentos%20Compartilhados/Forms/AllItems.aspx?id=%2Fsites%2FPCMCEPERA%2DLevantamentoManutenoPreventiva%2FDocumentos%20Compartilhados%2FSISTEMA&viewid=da8a2e7e%2D0d98%2D46b8%2Db619%2D61b655535ada"
+        };
+
+        const CATEGORIAS_DOCS = {
+            manuais: {
+                id: 'manuais', label: 'Manuais', pastaSp: '01_MANUAIS', sigilo: 'geral', badgeCls: 'cat-manuais',
+                subtipos: ['Manual de Manutenção', 'Manual de Operação', 'Catálogo de Peças / Vista Explodida', 'Manual do Fabricante', 'Parâmetros / IHM / CLP']
+            },
+            lubrificacao: {
+                id: 'lubrificacao', label: 'Lubrificação', pastaSp: '02_LUBRIFICACAO', sigilo: 'geral', badgeCls: 'cat-lubrificacao',
+                subtipos: ['Carta de Lubrificação', 'Mapa de Pontos de Graxa/Óleo', 'FISPQ / FDS Grau Alimentício', 'Tabela de Equivalência de Óleos']
+            },
+            desenhos: {
+                id: 'desenhos', label: 'Desenhos Técnicos', pastaSp: '03_DESENHOS_TECNICOS', sigilo: 'geral', badgeCls: 'cat-desenhos',
+                subtipos: ['Esquema Elétrico', 'Desenho Mecânico / Conjunto', 'Diagrama Pneumático / Hidráulico', 'P&ID / Fluxograma de Processo', 'Layout / Dimensional']
+            },
+            orcamentos: {
+                id: 'orcamentos', label: 'Orçamentos', pastaSp: '04_ORCAMENTOS_SIGILOSOS', sigilo: 'gestao', badgeCls: 'cat-orcamentos',
+                subtipos: ['Cotação de Fornecedor', 'Proposta Técnica / Escopo', 'Datasheet Comercial', 'Orçamento de Reforma / Retrofitting']
+            },
+            fotos: {
+                id: 'fotos', label: 'Fotos & Referências', pastaSp: '05_FOTOS_REFERENCIA', sigilo: 'geral', badgeCls: 'cat-fotos',
+                subtipos: ['Foto Padrão (Como Deve Ficar)', 'Plaqueta / TAG / Dados de Motor', 'Montagem / Desmontagem Passo a Passo', 'Ponto Crítico de Inspeção', 'Sugestão de Campo']
+            },
+            qualidade: {
+                id: 'qualidade', label: 'Qualidade & Segurança', pastaSp: '06_QUALIDADE_SEGURANCA', sigilo: 'geral', badgeCls: 'cat-qualidade',
+                subtipos: ['POP / Instrução de Trabalho (IT)', 'Procedimento BPF / APPCC', 'Laudo NR-12 / Integridade', 'Certificado de Calibração', 'Procedimento LOTO (Bloqueio)']
+            }
+        };
+
+        let usuarioLogado = null;
+        let currentView = 'biblioteca';
+        let revTabFiltro = 'validades';
+        let categoriaFiltro = '';
+        let modoAnexoAtual = 'sharepoint';
+        let fotoCampoB64Draft = '';
+        let sharepointCfg = { ...DEFAULT_SHAREPOINT_CFG };
+
+        let rawLinhasDocs = [];
+        let assetNodes = [];
+        let docsAtivos = [];
+        let docsRevisoes = [];
+        let listaFunc = [];
+        let handoffDocsConsumido = false;
+        let handoffDocsLinhasOk = false;
+        let handoffDocsLoaded = false;
+        let userPrefs = { tema: 'padrao', accent: '#4f46e5', tabletMode: false, fontLevel: 0 };
+
+        function escapeHtml(val) {
+            return String(val ?? '')
+                .replace(/&/g, '&amp;')
+                .replace(/</g, '&lt;')
+                .replace(/>/g, '&gt;')
+                .replace(/"/g, '&quot;')
+                .replace(/'/g, '&#39;');
+        }
+
+        function normKey(str) {
+            return String(str || '').normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase().trim().replace(/\s+/g, ' ');
+        }
+
+        function slugSegmentSp(str) {
+            const clean = String(str || '')
+                .normalize('NFD')
+                .replace(/[\u0300-\u036f]/g, '')
+                .toUpperCase()
+                .replace(/[^A-Z0-9]+/g, '_')
+                .replace(/^_+|_+$/g, '');
+            return clean || 'GERAL';
+        }
+
+        function pickField(raw, candidatos) {
+            if (!raw || typeof raw !== 'object') return '';
+            for (const k of candidatos) {
+                if (raw[k] !== undefined && raw[k] !== null && String(raw[k]).trim() !== '') return String(raw[k]).trim();
+            }
+            const nm = {};
+            for (const [k, v] of Object.entries(raw)) nm[normKey(k)] = v;
+            for (const k of candidatos) {
+                const tk = normKey(k);
+                if (nm[tk] !== undefined && nm[tk] !== null && String(nm[tk]).trim() !== '') return String(nm[tk]).trim();
+            }
+            return '';
+        }
+
+        function isPerfilAdmin(role) {
+            const r = String(role || '').trim();
+            return r === 'Admin' || r === 'Gerente';
+        }
+
+        function isPerfilGestaoDocs(role) {
+            const r = normKey(role);
+            return r === 'admin' || r === 'gerente' || r.includes('supervisor') || r.includes('gestor');
+        }
+
+        function isPerfilAprovadorDocs(user) {
+            return Boolean(user && isPerfilGestaoDocs(user.role));
+        }
+
+        function podeVerDocumento(docObj, user = usuarioLogado) {
+            if (!docObj) return false;
+            if (docObj.categoria === 'orcamentos' || docObj.sigilo === 'gestao') {
+                return Boolean(user && isPerfilGestaoDocs(user.role));
+            }
+            return true;
+        }
+
+        function getCategoriasPermitidas(user = usuarioLogado) {
+            const gestor = Boolean(user && isPerfilGestaoDocs(user.role));
+            return Object.values(CATEGORIAS_DOCS).filter(c => gestor || c.sigilo !== 'gestao');
+        }
+
+        function formatDataBR(iso) {
+            if (!iso) return '—';
+            const s = String(iso).trim();
+            if (/^\d{4}-\d{2}-\d{2}/.test(s)) {
+                const [y, m, d] = s.slice(0, 10).split('-');
+                return `${d}/${m}/${y}`;
+            }
+            const dt = new Date(s);
+            return Number.isNaN(dt.getTime()) ? s.slice(0, 16) : dt.toLocaleDateString('pt-BR');
+        }
+
+        function getStatusValidade(validadeEm) {
+            if (!validadeEm || !/^\d{4}-\d{2}-\d{2}/.test(String(validadeEm))) return { kind: 'ok', label: '', dias: null };
+            const hoje = new Date();
+            const hMid = new Date(hoje.getFullYear(), hoje.getMonth(), hoje.getDate()).getTime();
+            const [y, m, d] = String(validadeEm).slice(0, 10).split('-').map(Number);
+            const vMid = new Date(y, m - 1, d).getTime();
+            const dias = Math.round((vMid - hMid) / 86400000);
+            if (dias < 0) return { kind: 'vencido', label: `Vencido há ${Math.abs(dias)}d`, dias };
+            if (dias <= 30) return { kind: 'alerta', label: dias === 0 ? 'Vence hoje' : `Vence em ${dias}d`, dias };
+            return { kind: 'ok', label: `Válido até ${formatDataBR(validadeEm)}`, dias };
+        }
+
+        function hash32FNV1aDocs(str, seed = 2166136261) {
+            let h = seed >>> 0;
+            const s = String(str || '');
+            for (let i = 0; i < s.length; i++) {
+                h ^= s.charCodeAt(i);
+                h = Math.imul(h, 16777619) >>> 0;
+            }
+            return h.toString(36);
+        }
+
+        function makeConjuntoNodeIdDocs(area, maquina, equipamento, conjunto) {
+            const base = [normKey(area), normKey(maquina), normKey(equipamento), normKey(conjunto)].join('||');
+            return `CONJ__${hash32FNV1aDocs(base, 2166136261)}_${hash32FNV1aDocs(base.split('').reverse().join(''), 374761393)}`;
+        }
+
+        function expandirDocParaNodes(docId, raw) {
+            const area = pickField(raw, ['setor', 'area', 'área']) || 'Sem Setor';
+            const maquina = pickField(raw, ['maquina', 'máquina', 'linha']) || 'Linha Geral';
+            const equipamento = pickField(raw, ['equipamento']) || 'Equipamento';
+            const tag = pickField(raw, ['tag', 'codigo', 'patrimonio']);
+            const fabricante = pickField(raw, ['fabricante']);
+            const modelo = pickField(raw, ['modelo']);
+            const conjuntoFlat = pickField(raw, ['conjunto']);
+            const subconjuntoFlat = pickField(raw, ['subconjunto']);
+
+            if (!conjuntoFlat && Array.isArray(raw.conjuntos) && raw.conjuntos.length > 0) {
+                return raw.conjuntos.map((cItem, idx) => {
+                    const isObj = cItem && typeof cItem === 'object';
+                    const cj = isObj ? (pickField(cItem, ['conjunto', 'nome']) || 'Conjunto Geral') : String(cItem || 'Conjunto Geral').trim();
+                    const sub = isObj ? pickField(cItem, ['subconjunto']) : '';
+                    return {
+                        nodeId: `${docId}__leg_${idx}`, docId, area, maquina, equipamento,
+                        conjunto: cj || 'Conjunto Geral', subconjunto: sub, tag, fabricante, modelo
+                    };
+                });
+            }
+            return [{
+                nodeId: docId, docId, area, maquina, equipamento,
+                conjunto: conjuntoFlat || 'Conjunto Geral', subconjunto: subconjuntoFlat, tag, fabricante, modelo
+            }];
+        }
+
+        function gerarSiglaSetor(area) {
+            const stop = new Set(['DE', 'DA', 'DO', 'DAS', 'DOS', 'E', 'SETOR', 'AREA']);
+            const words = String(area || 'GEN').normalize('NFD').replace(/[\u0300-\u036f]/g, '').toUpperCase().replace(/[^A-Z0-9\s]/g, ' ').split(/\s+/).filter(w => w && !stop.has(w));
+            const base = (words[0] || 'GEN').slice(0, 3);
+            return base.padEnd(3, 'X').slice(0, 3);
+        }
+
+        function gerarProximoCodigoDoc(area) {
+            const sigla = gerarSiglaSetor(area);
+            const prefix = `DOC-${sigla}-`;
+            let maxNum = 0;
+            docsAtivos.forEach(d => {
+                const cod = String(d.codigo || '').toUpperCase().trim();
+                if (cod.startsWith(prefix)) {
+                    const m = cod.slice(prefix.length).match(/^(\d+)/);
+                    if (m) maxNum = Math.max(maxNum, parseInt(m[1], 10));
+                }
+            });
+            return `${prefix}${String(maxNum + 1).padStart(4, '0')}`;
+        }
+
+        function montarPastaSharePointRelativa({ categoria, area, maquina, equipamento }) {
+            const catMeta = CATEGORIAS_DOCS[categoria] || CATEGORIAS_DOCS.manuais;
+            const segs = [sharepointCfg.pastaRaiz || 'SISTEMA', catMeta.pastaSp];
+            if (area) segs.push(slugSegmentSp(area));
+            if (maquina) segs.push(slugSegmentSp(maquina));
+            if (equipamento && catMeta.id !== 'orcamentos') segs.push(slugSegmentSp(equipamento));
+            return segs.join('/');
+        }
+
+        function montarUrlSharePointPasta(relPath) {
+            const site = String(sharepointCfg.sitePath || DEFAULT_SHAREPOINT_CFG.sitePath).replace(/\/+$/, '');
+            const lib = String(sharepointCfg.biblioteca || 'Documentos Compartilhados').replace(/^\/+|\/+$/g, '');
+            const tenant = String(sharepointCfg.tenantUrl || DEFAULT_SHAREPOINT_CFG.tenantUrl).replace(/\/+$/, '');
+            const serverRel = `${site}/${lib}/${relPath}`;
+            const encodedLib = encodeURIComponent(lib).replace(/%20/g, '%20');
+            const viewQ = sharepointCfg.viewId ? `&viewid=${encodeURIComponent(sharepointCfg.viewId)}` : '';
+            return `${tenant}${site}/${encodedLib.replace(/%20/g, '%20')}/Forms/AllItems.aspx?id=${encodeURIComponent(serverRel)}${viewQ}`;
+        }
+
+        function montarNomePadraoArquivoSp(codigo, revLabel, titulo, ext = 'pdf') {
+            const cod = String(codigo || 'DOC-GEN-0001').toUpperCase().replace(/[^A-Z0-9-]/g, '');
+            const rev = String(revLabel || 'REV 00').toUpperCase().replace(/\s+/g, '');
+            const slugTit = String(titulo || 'Documento')
+                .normalize('NFD').replace(/[\u0300-\u036f]/g, '')
+                .replace(/[^a-zA-Z0-9]+/g, '_').replace(/^_+|_+$/g, '').slice(0, 48) || 'Documento';
+            return `${cod}-${rev}_${slugTit}.${ext}`;
+        }
+
+        function construirSearchText(obj) {
+            const tagsArr = Array.isArray(obj.tags) ? obj.tags : [];
+            return normKey([
+                obj.codigo, obj.titulo, obj.categoria, CATEGORIAS_DOCS[obj.categoria]?.label, obj.subtipo,
+                obj.disciplina, obj.area, obj.maquina, obj.equipamento, obj.conjunto, obj.subconjunto,
+                obj.tagAtivo, obj.fabricante, obj.modelo, obj.resumoTecnico, obj.revisaoVigenteLabel,
+                tagsArr.join(' ')
+            ].filter(Boolean).join(' '));
+        }
+
+        window.showToast = (msg, type = 'info') => {
+            const stack = document.getElementById('toastStack');
+            if (!stack) return;
+            const el = document.createElement('div');
+            el.className = `px-4 py-3 rounded-2xl text-xs font-bold shadow-xl transition-all flex items-center gap-2 ${type === 'error' ? 'bg-rose-600 text-white' : (type === 'success' ? 'bg-emerald-600 text-white' : 'bg-slate-900 text-white')}`;
+            el.innerText = msg;
+            stack.appendChild(el);
+            setTimeout(() => el.remove(), 3500);
+        };
+
+        window.abrirModal = (id) => {
+            const el = document.getElementById(id);
+            if (!el) return;
+            el.hidden = false;
+            el.classList.remove('hidden');
+        };
+        window.fecharModal = (id) => {
+            const el = document.getElementById(id);
+            if (!el) return;
+            el.hidden = true;
+            el.classList.add('hidden');
+        };
+
+        window.copiarTextoSimples = async (txt, msgOk = 'Copiado!') => {
+            try {
+                if (navigator.clipboard && navigator.clipboard.writeText) {
+                    await navigator.clipboard.writeText(String(txt || ''));
+                }
+                showToast(msgOk, 'success');
+            } catch (_) {
+                showToast(String(txt || ''), 'info');
+            }
+        };
+
+        // ================= PREFERÊNCIAS & SESSÃO =================
+        function aplicarPreferenciasVisuais() {
+            document.body.classList.remove('theme-solid', 'theme-dark', 'high-contrast', 'tablet-mode');
+            if (userPrefs.tema === 'solido') document.body.classList.add('theme-solid');
+            if (userPrefs.tema === 'dark') document.body.classList.add('theme-dark');
+            if (userPrefs.tema === 'contraste') document.body.classList.add('high-contrast');
+            if (userPrefs.tabletMode) document.body.classList.add('tablet-mode');
+            document.documentElement.style.setProperty('--accent', userPrefs.accent || '#4f46e5');
+            const bTab = document.getElementById('btnToggleTabletMode');
+            if (bTab) {
+                bTab.innerText = userPrefs.tabletMode ? 'ATIVADO' : 'DESATIVADO';
+                bTab.className = userPrefs.tabletMode
+                    ? 'px-4 py-2 rounded-xl font-extrabold bg-emerald-600 text-white'
+                    : 'px-4 py-2 rounded-xl font-extrabold bg-slate-200 text-slate-800';
+            }
+        }
+        function carregarPreferenciasUsuario(u) {
+            try {
+                const raw = safeStorage.get(u ? ('cepera_prefs_' + u.user) : 'cepera_prefs_guest');
+                if (raw) userPrefs = { ...userPrefs, ...JSON.parse(raw) };
+            } catch (_) {}
+            aplicarPreferenciasVisuais();
+        }
+        window.abrirEspacoUsuario = () => abrirModal('modalEspacoUsuario');
+        window.toggleModoTablet = () => {
+            userPrefs.tabletMode = !userPrefs.tabletMode;
+            aplicarPreferenciasVisuais();
+            if (usuarioLogado) safeStorage.set('cepera_prefs_' + usuarioLogado.user, JSON.stringify(userPrefs));
+        };
+        window.definirTemaUsuario = (t) => {
+            userPrefs.tema = t;
+            aplicarPreferenciasVisuais();
+            if (usuarioLogado) safeStorage.set('cepera_prefs_' + usuarioLogado.user, JSON.stringify(userPrefs));
+        };
+
+        window.voltarParaCentralPCM = () => {
+            if (window.parent && window.parent !== window) {
+                window.parent.postMessage({ type: 'CEPERA_VOLTAR_CENTRAL' }, '*');
+            } else {
+                window.location.href = 'index.html';
+            }
+        };
+        window.fazerLogout = () => {
+            safeStorage.remove('cepera_ir_user');
+            safeStorage.remove('cepera_central_session');
+            if (window.parent && window.parent !== window) {
+                window.parent.postMessage({ type: 'CEPERA_LOGOUT_CENTRAL' }, '*');
+            } else {
+                window.location.href = 'index.html?app=docs_ativos';
+            }
+        };
+
+        function lerSessaoCentral() {
+            const uKey = safeStorage.get('cepera_ir_user');
+            if (!uKey) return null;
+            if (uKey.toLowerCase() === 'master') {
+                if (safeSessionGet('cepera_admin_master_auth')) {
+                    return { id: 'admin_master', nome: 'Admin Master PCM', user: 'master', role: 'Admin', isMaster: true };
+                }
+                return null;
+            }
+            try {
+                const cached = JSON.parse(safeStorage.get('cepera_central_session') || 'null');
+                if (cached && normKey(cached.user) === normKey(uKey)) return cached;
+            } catch (_) {}
+            const match = listaFunc.find(f => normKey(f.user) === normKey(uKey));
+            return match || null;
+        }
+
+        function aplicarPerfilInterface() {
+            const aprovador = isPerfilAprovadorDocs(usuarioLogado);
+            const gestorSp = isPerfilAdmin(usuarioLogado?.role) || aprovador;
+            ['rail-aprovacoes', 'mob-aprovacoes'].forEach(id => {
+                const el = document.getElementById(id);
+                if (el) { el.hidden = !aprovador; el.classList.toggle('hidden', !aprovador); }
+            });
+            ['rail-sharepoint', 'mob-sharepoint'].forEach(id => {
+                const el = document.getElementById(id);
+                if (el) { el.hidden = !gestorSp; el.classList.toggle('hidden', !gestorSp); }
+            });
+            const uLbl = document.getElementById('userChipLabel');
+            if (uLbl && usuarioLogado) uLbl.innerText = `${usuarioLogado.nome || usuarioLogado.user} (${usuarioLogado.role})`;
+            const btnNew = document.getElementById('btnNovoDocHeader');
+            if (btnNew) {
+                btnNew.innerText = aprovador ? '+ Novo Documento / Foto' : '+ Enviar Foto / Sugestão';
+            }
+            const aviso = document.getElementById('docSigiloAviso');
+            if (aviso) {
+                aviso.innerText = isPerfilGestaoDocs(usuarioLogado?.role)
+                    ? 'Exibindo revisões vigentes e aprovadas (incluindo Orçamentos da Gestão).'
+                    : 'Exibindo apenas revisões vigentes aprovadas para campo (Manuais, Lubrificação, Desenhos, Fotos e Qualidade).';
+            }
+            renderCategoriasPills();
+        }
+
+        window.switchView = (v) => {
+            if (v === 'aprovacoes' && !isPerfilAprovadorDocs(usuarioLogado)) v = 'biblioteca';
+            if (v === 'sharepoint' && !isPerfilAprovadorDocs(usuarioLogado)) v = 'biblioteca';
+            currentView = v;
+            ['biblioteca', 'aprovacoes', 'revisoes', 'sharepoint'].forEach(id => {
+                const sec = document.getElementById('view' + id.charAt(0).toUpperCase() + id.slice(1));
+                if (sec) { sec.hidden = (id !== v); sec.classList.toggle('hidden', id !== v); }
+                document.getElementById('rail-' + id)?.classList.toggle('active', id === v);
+                document.getElementById('mob-' + id)?.classList.toggle('active', id === v);
+            });
+            renderCurrentView();
+        };
+
+        function renderCurrentView() {
+            atualizarBadgesContadores();
+            if (currentView === 'biblioteca') renderBiblioteca();
+            else if (currentView === 'aprovacoes') renderAprovacoes();
+            else if (currentView === 'revisoes') renderRevisoesView();
+            else if (currentView === 'sharepoint') renderSharePointView();
+        }
+
+        // ================= FILTROS & BIBLIOTECA =================
+        function renderCategoriasPills() {
+            const box = document.getElementById('docCategoriasPills');
+            if (!box) return;
+            const permitidas = getCategoriasPermitidas(usuarioLogado);
+            const vigentesVisiveis = docsAtivos.filter(d => d.status === 'vigente' && d.revisaoVigenteNum !== null && podeVerDocumento(d));
+
+            const pills = [
+                `<button type="button" onclick="setCategoriaFiltro('')" class="pill ${categoriaFiltro === '' ? 'active' : ''}">Todas (${vigentesVisiveis.length})</button>`
+            ];
+            permitidas.forEach(cat => {
+                const qtd = vigentesVisiveis.filter(d => d.categoria === cat.id).length;
+                pills.push(`<button type="button" onclick="setCategoriaFiltro('${cat.id}')" class="pill ${categoriaFiltro === cat.id ? 'active' : ''}">${escapeHtml(cat.label)} (${qtd})</button>`);
+            });
+            box.innerHTML = pills.join('');
+        }
+
+        window.setCategoriaFiltro = (catId) => {
+            categoriaFiltro = catId || '';
+            renderCategoriasPills();
+            renderBiblioteca();
+        };
+
+        function popularSelectFiltro(selId, vals, todosLabel, prevVal = '') {
+            const sel = document.getElementById(selId);
+            if (!sel) return;
+            const unicos = [...new Set(vals.filter(Boolean))].sort((a, b) => a.localeCompare(b, 'pt-BR'));
+            sel.innerHTML = `<option value="">${escapeHtml(todosLabel)}</option>` +
+                unicos.map(v => `<option value="${escapeHtml(v)}" ${v === prevVal ? 'selected' : ''}>${escapeHtml(v)}</option>`).join('');
+            if (prevVal && unicos.includes(prevVal)) sel.value = prevVal;
+        }
+
+        function popularFiltrosArvoreBiblioteca(preserve = true) {
+            const aEl = document.getElementById('docFiltroArea');
+            const mEl = document.getElementById('docFiltroMaquina');
+            const eEl = document.getElementById('docFiltroEquipamento');
+            const cEl = document.getElementById('docFiltroConjunto');
+            const prevA = preserve ? (aEl?.value || '') : '';
+            const prevM = preserve ? (mEl?.value || '') : '';
+            const prevE = preserve ? (eEl?.value || '') : '';
+            const prevC = preserve ? (cEl?.value || '') : '';
+
+            popularSelectFiltro('docFiltroArea', assetNodes.map(n => n.area), 'Todos os Setores', prevA);
+            const curA = aEl?.value || '';
+            const nA = curA ? assetNodes.filter(n => n.area === curA) : assetNodes;
+            popularSelectFiltro('docFiltroMaquina', nA.map(n => n.maquina), 'Todas as Linhas / Máquinas', prevM);
+
+            const curM = mEl?.value || '';
+            const nM = curM ? nA.filter(n => n.maquina === curM) : nA;
+            popularSelectFiltro('docFiltroEquipamento', nM.map(n => n.equipamento), 'Todos Equipamentos', prevE);
+
+            const curE = eEl?.value || '';
+            const nE = curE ? nM.filter(n => n.equipamento === curE) : nM;
+            popularSelectFiltro('docFiltroConjunto', nE.map(n => n.conjunto), 'Todos Conjuntos', prevC);
+        }
+
+        window.onDocAreaChange = () => {
+            if (document.getElementById('docFiltroMaquina')) document.getElementById('docFiltroMaquina').value = '';
+            if (document.getElementById('docFiltroEquipamento')) document.getElementById('docFiltroEquipamento').value = '';
+            if (document.getElementById('docFiltroConjunto')) document.getElementById('docFiltroConjunto').value = '';
+            popularFiltrosArvoreBiblioteca(true);
+            renderBiblioteca();
+        };
+        window.onDocMaquinaChange = () => {
+            if (document.getElementById('docFiltroEquipamento')) document.getElementById('docFiltroEquipamento').value = '';
+            if (document.getElementById('docFiltroConjunto')) document.getElementById('docFiltroConjunto').value = '';
+            popularFiltrosArvoreBiblioteca(true);
+            renderBiblioteca();
+        };
+        window.onDocEquipChange = () => {
+            if (document.getElementById('docFiltroConjunto')) document.getElementById('docFiltroConjunto').value = '';
+            popularFiltrosArvoreBiblioteca(true);
+            renderBiblioteca();
+        };
+        window.onFiltroBibliotecaChange = () => renderBiblioteca();
+
+        window.limparFiltrosBiblioteca = () => {
+            document.getElementById('docSearchInput').value = '';
+            document.getElementById('docFiltroDisciplina').value = '';
+            document.getElementById('docFiltroArea').value = '';
+            document.getElementById('docFiltroMaquina').value = '';
+            document.getElementById('docFiltroEquipamento').value = '';
+            document.getElementById('docFiltroConjunto').value = '';
+            categoriaFiltro = '';
+            renderCategoriasPills();
+            popularFiltrosArvoreBiblioteca(false);
+            renderBiblioteca();
+        };
+
+        function getDocsVigentesFiltrados() {
+            const busca = normKey(document.getElementById('docSearchInput')?.value || '');
+            const disc = document.getElementById('docFiltroDisciplina')?.value || '';
+            const area = document.getElementById('docFiltroArea')?.value || '';
+            const maq = document.getElementById('docFiltroMaquina')?.value || '';
+            const eq = document.getElementById('docFiltroEquipamento')?.value || '';
+            const cj = document.getElementById('docFiltroConjunto')?.value || '';
+            const ordem = document.getElementById('docFiltroOrdem')?.value || 'recentes';
+
+            const tokens = busca ? busca.split(' ').filter(Boolean) : [];
+            let lista = docsAtivos.filter(d => {
+                if (!d || d.status !== 'vigente' || d.revisaoVigenteNum === null || d.revisaoVigenteNum === undefined) return false;
+                if (!podeVerDocumento(d)) return false;
+                if (categoriaFiltro && d.categoria !== categoriaFiltro) return false;
+                if (disc && normKey(d.disciplina) !== normKey(disc)) return false;
+                if (area && normKey(d.area) !== normKey(area)) return false;
+                if (maq && normKey(d.maquina) !== normKey(maq)) return false;
+                if (eq && normKey(d.equipamento) !== normKey(eq)) return false;
+                if (cj && normKey(d.conjunto) !== normKey(cj)) return false;
+                if (tokens.length) {
+                    const txt = d.searchText || construirSearchText(d);
+                    if (!tokens.every(t => txt.includes(t))) return false;
+                }
+                return true;
+            });
+
+            if (ordem === 'codigo') lista.sort((a, b) => String(a.codigo || '').localeCompare(String(b.codigo || '')));
+            else if (ordem === 'titulo') lista.sort((a, b) => String(a.titulo || '').localeCompare(String(b.titulo || ''), 'pt-BR'));
+            else if (ordem === 'validade') {
+                lista.sort((a, b) => {
+                    const va = a.validadeEm ? new Date(a.validadeEm).getTime() : 9e15;
+                    const vb = b.validadeEm ? new Date(b.validadeEm).getTime() : 9e15;
+                    return va - vb;
+                });
+            } else {
+                lista.sort((a, b) => new Date(b.aprovadoEm || b.atualizadoEm || 0).getTime() - new Date(a.aprovadoEm || a.atualizadoEm || 0).getTime());
+            }
+            return lista;
+        }
+
+        function atualizarBadgesContadores() {
+            const pendentes = docsRevisoes.filter(r => r.status === 'pendente_aprovacao' && podeVerDocumento(r));
+            const aprovEl = document.getElementById('badgeRailAprov');
+            const mobAp = document.getElementById('badgeMobAprov');
+            if (aprovEl) {
+                aprovEl.innerText = String(pendentes.length);
+                aprovEl.hidden = pendentes.length === 0;
+                aprovEl.classList.toggle('hidden', pendentes.length === 0);
+            }
+            if (mobAp) mobAp.innerText = String(pendentes.length);
+
+            const alertasVal = docsAtivos.filter(d => {
+                if (d.status !== 'vigente' || !podeVerDocumento(d)) return false;
+                const sv = getStatusValidade(d.validadeEm);
+                return sv.kind === 'vencido' || sv.kind === 'alerta';
+            }).length;
+            const bVal = document.getElementById('badgeRailValidade');
+            if (bVal) {
+                bVal.innerText = String(alertasVal);
+                bVal.hidden = alertasVal === 0;
+                bVal.classList.toggle('hidden', alertasVal === 0);
+            }
+        }
+
+        function renderBiblioteca() {
+            renderCategoriasPills();
+            const vigentesTotais = docsAtivos.filter(d => d.status === 'vigente' && d.revisaoVigenteNum !== null && podeVerDocumento(d));
+            const filtrados = getDocsVigentesFiltrados();
+            const pendentesCount = docsRevisoes.filter(r => r.status === 'pendente_aprovacao' && podeVerDocumento(r)).length;
+            const vencAlertas = vigentesTotais.filter(d => ['vencido', 'alerta'].includes(getStatusValidade(d.validadeEm).kind)).length;
+            const equipCobertos = new Set(vigentesTotais.map(d => normKey(`${d.area}|${d.maquina}|${d.equipamento}`))).size;
+
+            const kpis = document.getElementById('docKpisStrip');
+            if (kpis) {
+                kpis.innerHTML = `
+                    <div class="glass-card p-3.5 rounded-2xl">
+                        <div class="text-[10px] font-extrabold uppercase text-slate-400">Docs Vigentes</div>
+                        <div class="text-2xl font-extrabold text-indigo-700">${vigentesTotais.length}</div>
+                    </div>
+                    <div class="glass-card p-3.5 rounded-2xl">
+                        <div class="text-[10px] font-extrabold uppercase text-slate-400">Equipamentos Documentados</div>
+                        <div class="text-2xl font-extrabold text-slate-900">${equipCobertos}</div>
+                    </div>
+                    <div class="glass-card p-3.5 rounded-2xl">
+                        <div class="text-[10px] font-extrabold uppercase text-slate-400">Fila de Aprovação</div>
+                        <div class="text-2xl font-extrabold ${pendentesCount ? 'text-amber-600' : 'text-emerald-600'}">${pendentesCount}</div>
+                    </div>
+                    <div class="glass-card p-3.5 rounded-2xl">
+                        <div class="text-[10px] font-extrabold uppercase text-slate-400">Validades (Venc./30d)</div>
+                        <div class="text-2xl font-extrabold ${vencAlertas ? 'text-rose-600' : 'text-emerald-600'}">${vencAlertas}</div>
+                    </div>`;
+            }
+
+            document.getElementById('docResultadosHeading').innerText = `${filtrados.length} documento(s) vigente(s) encontrado(s)`;
+            const grid = document.getElementById('docCardsGrid');
+            if (!filtrados.length) {
+                grid.innerHTML = `<div class="col-span-full glass-card p-10 rounded-3xl text-center space-y-3 border-2 border-dashed border-slate-300">
+                    <div class="text-sm font-extrabold text-slate-700">Nenhum documento vigente encontrado para este filtro.</div>
+                    <p class="text-xs text-slate-500">Cadastre manuais, desenhos, cartas de lubrificação ou fotos deste equipamento para liberar consulta após aprovação.</p>
+                    <div class="flex justify-center gap-2">
+                        <button type="button" onclick="abrirModalNovoDocumento('doc')" class="btn-pill-dark text-xs py-2 px-5">+ Inserir Documento / Foto</button>
+                    </div>
+                </div>`;
+                return;
+            }
+
+            grid.innerHTML = filtrados.map(d => {
+                const cat = CATEGORIAS_DOCS[d.categoria] || CATEGORIAS_DOCS.manuais;
+                const valSt = getStatusValidade(d.validadeEm);
+                const valBadge = valSt.kind === 'vencido'
+                    ? `<span class="px-2 py-0.5 rounded-full text-[9px] font-extrabold bg-rose-100 text-rose-800 border border-rose-200">${escapeHtml(valSt.label)}</span>`
+                    : (valSt.kind === 'alerta'
+                        ? `<span class="px-2 py-0.5 rounded-full text-[9px] font-extrabold bg-amber-100 text-amber-800 border border-amber-200">${escapeHtml(valSt.label)}</span>`
+                        : '');
+                const pathTxt = [d.area, d.maquina, d.equipamento, d.conjunto, d.subconjunto].filter(Boolean).map(escapeHtml).join(' › ');
+                const tagsHtml = (Array.isArray(d.tags) ? d.tags : []).slice(0, 4).map(t =>
+                    `<span class="px-2 py-0.5 rounded-md bg-slate-100 text-slate-600 text-[10px] font-bold">#${escapeHtml(t)}</span>`
+                ).join('');
+
+                return `
+                <article class="glass-card glass-card-hover p-4 sm:p-5 rounded-3xl flex flex-col justify-between gap-3">
+                    <div class="space-y-2.5">
+                        <div class="flex flex-wrap items-center justify-between gap-1.5">
+                            <div class="flex flex-wrap items-center gap-1.5">
+                                <span class="px-2.5 py-0.5 rounded-full text-[10px] font-extrabold ${cat.badgeCls}">${escapeHtml(cat.label)}</span>
+                                <span class="px-2 py-0.5 rounded-full text-[10px] font-mono font-extrabold bg-slate-900 text-white">${escapeHtml(d.codigo)} • ${escapeHtml(d.revisaoVigenteLabel || 'REV 00')}</span>
+                            </div>
+                            <span class="px-2 py-0.5 rounded-full text-[9px] font-extrabold st-vigente">Vigente</span>
+                        </div>
+
+                        <div>
+                            <h3 class="text-sm font-extrabold text-slate-900 leading-snug line-clamp-2">${escapeHtml(d.titulo)}</h3>
+                            <div class="text-[11px] font-bold text-sky-700 mt-0.5">${escapeHtml(d.subtipo || '')}${d.disciplina ? ' • ' + escapeHtml(d.disciplina) : ''}</div>
+                        </div>
+
+                        <div class="p-2.5 rounded-2xl bg-slate-50 border border-slate-200/80 text-[11px] font-bold text-slate-700">
+                            ${pathTxt}
+                            ${d.tagAtivo ? `<div class="text-[10px] font-mono text-slate-500 mt-0.5">TAG: ${escapeHtml(d.tagAtivo)}</div>` : ''}
+                        </div>
+
+                        ${d.fotoThumbB64 ? `<img src="${d.fotoThumbB64}" onclick="abrirZoomFotoDoc('${d.id}')" alt="${escapeHtml(d.titulo)}" class="w-full h-36 object-cover rounded-2xl border border-slate-200 cursor-zoom-in">` : ''}
+
+                        ${d.resumoTecnico ? `<p class="text-[11px] text-slate-600 font-medium line-clamp-2">${escapeHtml(d.resumoTecnico)}</p>` : ''}
+
+                        <div class="flex flex-wrap items-center gap-1">
+                            ${tagsHtml}
+                            ${valBadge}
+                            ${d.temRevisaoPendente ? '<span class="px-2 py-0.5 rounded-full text-[9px] font-extrabold bg-amber-100 text-amber-800 border border-amber-200">Nova Rev. em aprovação</span>' : ''}
+                        </div>
+                    </div>
+
+                    <div class="pt-3 border-t border-slate-100 flex flex-wrap items-center gap-2">
+                        ${d.arquivoUrl ? `<a href="${escapeHtml(d.arquivoUrl)}" target="_blank" rel="noopener" class="btn-pill-dark flex-1 text-[11px] py-2 px-3">Abrir Arquivo ↗</a>` : ''}
+                        <button type="button" onclick="abrirDetalheDoc('${d.id}')" class="btn-touch ${d.arquivoUrl ? 'bg-slate-100 hover:bg-slate-200 text-slate-800' : 'btn-pill-dark flex-1'} text-[11px] py-2 px-3">Detalhes &amp; Revisões</button>
+                    </div>
+                </article>`;
+            }).join('');
+        }
+
+        // ================= APROVAÇÕES & QUALIDADE DE DADOS =================
+        function renderAprovacoes() {
+            if (!isPerfilAprovadorDocs(usuarioLogado)) return;
+            const pendentes = docsRevisoes
+                .filter(r => r.status === 'pendente_aprovacao' && podeVerDocumento(r))
+                .sort((a, b) => new Date(b.enviadoEm || 0).getTime() - new Date(a.enviadoEm || 0).getTime());
+
+            const badge = document.getElementById('aprovCountBadge');
+            if (badge) badge.innerText = `${pendentes.length} pendente(s)`;
+
+            const box = document.getElementById('aprovacoesLista');
+            if (!pendentes.length) {
+                box.innerHTML = `<div class="glass-card p-8 rounded-3xl text-center text-xs font-bold text-slate-500 border-2 border-dashed border-emerald-200 bg-emerald-50/30">
+                    ✓ Fila de aprovações zerada! Todos os documentos enviados já foram analisados.
+                </div>`;
+            } else {
+                box.innerHTML = pendentes.map(rev => {
+                    const cat = CATEGORIAS_DOCS[rev.categoria] || CATEGORIAS_DOCS.manuais;
+                    const master = docsAtivos.find(d => d.id === rev.docMasterId) || {};
+                    const pathTxt = [rev.area, rev.maquina, rev.equipamento, rev.conjunto, rev.subconjunto].filter(Boolean).map(escapeHtml).join(' › ');
+                    const chkAtivo = Boolean(rev.area && rev.maquina && rev.equipamento);
+                    const chkArq = Boolean(rev.arquivoUrl || rev.fotoThumbB64);
+                    const chkTags = Boolean(Array.isArray(rev.tags) && rev.tags.length > 0);
+                    const selfNote = normKey(rev.enviadoPor) === normKey(usuarioLogado?.nome)
+                        ? '<span class="px-2 py-0.5 rounded-full text-[9px] font-extrabold bg-slate-100 text-slate-600">Enviado por você</span>'
+                        : '';
+
+                    return `
+                    <div class="glass-card p-5 rounded-3xl border border-amber-200 space-y-3">
+                        <div class="flex flex-wrap items-start justify-between gap-3">
+                            <div class="space-y-1">
+                                <div class="flex flex-wrap items-center gap-1.5">
+                                    <span class="px-2.5 py-0.5 rounded-full text-[10px] font-extrabold st-pendente">Aguardando Aprovação</span>
+                                    <span class="px-2.5 py-0.5 rounded-full text-[10px] font-extrabold ${cat.badgeCls}">${escapeHtml(cat.label)}</span>
+                                    <span class="px-2 py-0.5 rounded-full text-[10px] font-mono font-extrabold bg-slate-900 text-white">${escapeHtml(rev.codigoDoc)} • ${escapeHtml(rev.revisaoLabel)}</span>
+                                    ${rev.origemEnvio === 'campo_sugestao' ? '<span class="px-2 py-0.5 rounded-full text-[9px] font-extrabold bg-emerald-100 text-emerald-800">Sugestão de Campo</span>' : ''}
+                                    ${selfNote}
+                                </div>
+                                <h3 class="text-base font-extrabold text-slate-900">${escapeHtml(rev.titulo)}</h3>
+                                <div class="text-xs font-bold text-slate-500">${pathTxt}</div>
+                            </div>
+                            <div class="text-right text-[11px] font-bold text-slate-500">
+                                <div>Enviado por: <strong class="text-slate-800">${escapeHtml(rev.enviadoPor || '-')}</strong> (${escapeHtml(rev.enviadoPorRole || '')})</div>
+                                <div>Em: ${escapeHtml(formatDataBR(rev.enviadoEm))}</div>
+                            </div>
+                        </div>
+
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-3 bg-slate-50 p-3.5 rounded-2xl border border-slate-200 text-xs">
+                            <div class="space-y-1.5">
+                                <div><strong class="text-slate-600">Motivo / Alteração:</strong> ${escapeHtml(rev.motivoAlteracao || '-')}</div>
+                                ${rev.resumoTecnico ? `<div><strong class="text-slate-600">Resumo Técnico:</strong> ${escapeHtml(rev.resumoTecnico)}</div>` : ''}
+                                ${master.revisaoVigenteLabel ? `<div class="text-indigo-700 font-bold">Substituirá a revisão vigente atual: ${escapeHtml(master.revisaoVigenteLabel)}</div>` : '<div class="text-sky-700 font-bold">Emissão inicial — ainda sem versão pública para campo</div>'}
+                            </div>
+                            <div class="space-y-2">
+                                <div class="text-[10px] font-extrabold uppercase text-slate-500">Checklist Qualidade de Dados</div>
+                                <div class="flex flex-wrap gap-1.5 text-[10px] font-extrabold">
+                                    <span class="px-2 py-0.5 rounded-md ${chkAtivo ? 'bg-emerald-100 text-emerald-800' : 'bg-rose-100 text-rose-800'}">${chkAtivo ? '✓' : '✗'} Vínculo Ativo</span>
+                                    <span class="px-2 py-0.5 rounded-md ${chkArq ? 'bg-emerald-100 text-emerald-800' : 'bg-rose-100 text-rose-800'}">${chkArq ? '✓' : '✗'} Arquivo/Foto</span>
+                                    <span class="px-2 py-0.5 rounded-md ${chkTags ? 'bg-emerald-100 text-emerald-800' : 'bg-amber-100 text-amber-800'}">${chkTags ? '✓' : '!'} Tags de Busca</span>
+                                </div>
+                                ${rev.fotoThumbB64 ? `<img src="${rev.fotoThumbB64}" onclick="abrirZoomFotoSrc('${rev.fotoThumbB64}', '${escapeHtml(rev.titulo)}')" class="h-24 rounded-xl border border-slate-300 cursor-zoom-in object-cover">` : ''}
+                                ${rev.arquivoUrl ? `<a href="${escapeHtml(rev.arquivoUrl)}" target="_blank" rel="noopener" class="inline-flex items-center gap-1 font-extrabold text-sky-700 underline">Conferir arquivo no SharePoint ↗</a>` : ''}
+                            </div>
+                        </div>
+
+                        <div class="flex flex-wrap items-center justify-end gap-2 pt-2 border-t border-slate-100">
+                            <button type="button" onclick="reprovarRevisaoDoc('${rev.id}')" class="btn-touch bg-rose-50 hover:bg-rose-100 text-rose-700 border border-rose-200 text-xs py-2 px-4">✕ Reprovar com Motivo</button>
+                            <button type="button" onclick="aprovarRevisaoDoc('${rev.id}')" class="btn-touch bg-emerald-600 hover:bg-emerald-700 text-white text-xs py-2 px-5 shadow-sm">✓ Aprovar e Publicar Vigente</button>
+                        </div>
+                    </div>`;
+                }).join('');
+            }
+
+            const hist = docsRevisoes
+                .filter(r => r.status !== 'pendente_aprovacao' && podeVerDocumento(r))
+                .sort((a, b) => new Date(b.analisadoEm || b.enviadoEm || 0).getTime() - new Date(a.analisadoEm || a.enviadoEm || 0).getTime())
+                .slice(0, 15);
+            const hBox = document.getElementById('aprovacoesHistoricoLista');
+            if (hBox) {
+                hBox.innerHTML = hist.length
+                    ? hist.map(r => `
+                        <div class="p-3 rounded-2xl bg-slate-50 border border-slate-200 flex flex-wrap items-center justify-between gap-2 text-xs">
+                            <div class="min-w-0">
+                                <span class="font-mono font-extrabold text-slate-800">${escapeHtml(r.codigoDoc)} • ${escapeHtml(r.revisaoLabel)}</span>
+                                <span class="font-bold text-slate-700 ml-1">${escapeHtml(r.titulo)}</span>
+                                <div class="text-[10px] text-slate-500">Enviado: ${escapeHtml(r.enviadoPor || '-')} • Analisado: ${escapeHtml(r.analisadoPor || '-')} (${escapeHtml(formatDataBR(r.analisadoEm))})${r.motivoReprovacao ? ` • Motivo: ${escapeHtml(r.motivoReprovacao)}` : ''}</div>
+                            </div>
+                            <span class="px-2.5 py-0.5 rounded-full text-[10px] font-extrabold ${r.status === 'vigente' ? 'st-vigente' : (r.status === 'reprovada' ? 'st-reprovado' : 'st-obsoleto')}">${escapeHtml(r.status.toUpperCase())}</span>
+                        </div>`).join('')
+                    : '<div class="text-xs text-slate-400 font-bold">Nenhuma aprovação/reprovação registrada ainda.</div>';
+            }
+        }
+
+        window.aprovarRevisaoDoc = async (revId) => {
+            if (!isPerfilAprovadorDocs(usuarioLogado)) return showToast('Apenas Gestão/Supervisão pode aprovar documentos.', 'error');
+            const rev = docsRevisoes.find(r => r.id === revId);
+            if (!rev) return;
+            const master = docsAtivos.find(d => d.id === rev.docMasterId);
+            if (!master) return showToast('Documento mestre não encontrado.', 'error');
+
+            if (!rev.area || !rev.maquina || !rev.equipamento) {
+                return showToast('Validação reprovada: documento sem vínculo completo na árvore de ativos.', 'error');
+            }
+            if (!rev.arquivoUrl && !rev.fotoThumbB64) {
+                return showToast('Validação reprovada: anexe link do SharePoint ou foto antes de aprovar.', 'error');
+            }
+
+            const agora = new Date().toISOString();
+            const aprovNome = usuarioLogado?.nome || usuarioLogado?.user || 'Supervisor';
+            const aprovRole = usuarioLogado?.role || 'Gestão';
+            const catMeta = CATEGORIAS_DOCS[rev.categoria] || CATEGORIAS_DOCS.manuais;
+
+            try {
+                // 1. Rebaixa revisões vigentes anteriores deste documento para obsoleta
+                const antigasVigentes = docsRevisoes.filter(x => x.docMasterId === master.id && x.id !== rev.id && x.status === 'vigente');
+                for (const ant of antigasVigentes) {
+                    await updateDoc(doc(db, 'docs_revisoes', ant.id), {
+                        status: 'obsoleta',
+                        superadaPorRevisao: rev.revisaoLabel,
+                        obsoletaEm: agora
+                    });
+                }
+
+                // 2. Promove a revisão aprovada a vigente
+                await updateDoc(doc(db, 'docs_revisoes', rev.id), {
+                    status: 'vigente',
+                    analisadoPor: aprovNome,
+                    analisadoPorRole: aprovRole,
+                    analisadoEm: agora
+                });
+
+                // 3. Verifica se sobrou alguma outra revisão pendente
+                const outrasPend = docsRevisoes.some(x => x.docMasterId === master.id && x.id !== rev.id && x.status === 'pendente_aprovacao');
+
+                const masterUpdate = {
+                    titulo: rev.titulo,
+                    categoria: rev.categoria,
+                    subtipo: rev.subtipo,
+                    sigilo: catMeta.sigilo,
+                    disciplina: rev.disciplina || master.disciplina || 'Mecânica',
+                    area: rev.area,
+                    maquina: rev.maquina,
+                    equipamento: rev.equipamento,
+                    conjunto: rev.conjunto || '',
+                    subconjunto: rev.subconjunto || '',
+                    ativoNodeId: rev.ativoNodeId || master.ativoNodeId || '',
+                    tagAtivo: rev.tagAtivo || master.tagAtivo || '',
+                    fabricante: rev.fabricante || master.fabricante || '',
+                    modelo: rev.modelo || master.modelo || '',
+                    tags: Array.isArray(rev.tags) ? rev.tags : [],
+                    resumoTecnico: rev.resumoTecnico || '',
+                    validadeEm: rev.validadeEm || '',
+                    periodicidadeRevalidacaoMeses: Number(rev.periodicidadeRevalidacaoMeses || 0),
+                    arquivoProvider: rev.arquivoProvider || 'sharepoint',
+                    arquivoUrl: rev.arquivoUrl || '',
+                    arquivoEmbedUrl: rev.arquivoEmbedUrl || '',
+                    fotoThumbB64: rev.fotoThumbB64 || '',
+                    sharepointPastaSugerida: rev.sharepointPastaSugerida || '',
+                    sharepointNomeSugerido: rev.sharepointNomeSugerido || '',
+                    status: 'vigente',
+                    revisaoVigenteNum: rev.revisaoNum,
+                    revisaoVigenteLabel: rev.revisaoLabel,
+                    revisaoVigenteId: rev.id,
+                    temRevisaoPendente: outrasPend,
+                    aprovadoPor: aprovNome,
+                    aprovadoPorRole: aprovRole,
+                    aprovadoEm: agora,
+                    atualizadoPor: aprovNome,
+                    atualizadoEm: agora
+                };
+                masterUpdate.searchText = construirSearchText({ ...master, ...masterUpdate });
+                await updateDoc(doc(db, 'docs_ativos', master.id), masterUpdate);
+
+                showToast(`${master.codigo} • ${rev.revisaoLabel} aprovado e publicado como VIGENTE!`, 'success');
+            } catch (err) {
+                console.error(err);
+                showToast('Erro ao aprovar revisão.', 'error');
+            }
+        };
+
+        window.reprovarRevisaoDoc = async (revId) => {
+            if (!isPerfilAprovadorDocs(usuarioLogado)) return;
+            const rev = docsRevisoes.find(r => r.id === revId);
+            if (!rev) return;
+            const motivo = prompt(`Informe o motivo da reprovação para "${rev.codigoDoc} ${rev.revisaoLabel}":`, 'Link inválido / faltam informações técnicas ou tags');
+            if (!motivo || !motivo.trim()) return;
+
+            const master = docsAtivos.find(d => d.id === rev.docMasterId);
+            const agora = new Date().toISOString();
+            const aprovNome = usuarioLogado?.nome || usuarioLogado?.user || 'Supervisor';
+            const aprovRole = usuarioLogado?.role || 'Gestão';
+
+            try {
+                await updateDoc(doc(db, 'docs_revisoes', rev.id), {
+                    status: 'reprovada',
+                    motivoReprovacao: motivo.trim(),
+                    analisadoPor: aprovNome,
+                    analisadoPorRole: aprovRole,
+                    analisadoEm: agora
+                });
+                if (master) {
+                    const outrasPend = docsRevisoes.some(x => x.docMasterId === master.id && x.id !== rev.id && x.status === 'pendente_aprovacao');
+                    const temVigente = master.revisaoVigenteNum !== null && master.revisaoVigenteNum !== undefined;
+                    await updateDoc(doc(db, 'docs_ativos', master.id), {
+                        status: temVigente ? 'vigente' : 'reprovado',
+                        temRevisaoPendente: outrasPend,
+                        ultimoMotivoReprovacao: motivo.trim(),
+                        atualizadoPor: aprovNome,
+                        atualizadoEm: agora
+                    });
+                }
+                showToast(`Revisão ${rev.revisaoLabel} de ${rev.codigoDoc} reprovada com motivo registrado.`);
+            } catch (_) {
+                showToast('Erro ao reprovar revisão.', 'error');
+            }
+        };
+
+        // ================= REVISÕES & VALIDADES =================
+        window.setFiltroRevisoesTab = (tab) => {
+            revTabFiltro = tab;
+            ['validades', 'historico', 'obsoletas'].forEach(t => {
+                document.getElementById('btnRevTab_' + t)?.classList.toggle('active', t === tab);
+            });
+            renderRevisoesView();
+        };
+
+        function renderRevisoesView() {
+            const box = document.getElementById('revisoesViewContent');
+            if (!box) return;
+
+            if (revTabFiltro === 'validades') {
+                const comVal = docsAtivos
+                    .filter(d => d.status === 'vigente' && d.validadeEm && podeVerDocumento(d))
+                    .map(d => ({ doc: d, val: getStatusValidade(d.validadeEm) }))
+                    .sort((a, b) => (a.val.dias ?? 9999) - (b.val.dias ?? 9999));
+
+                if (!comVal.length) {
+                    box.innerHTML = `<div class="glass-card p-8 rounded-3xl text-center text-xs font-bold text-slate-500">Nenhum documento vigente possui data de validade/revalidação cadastrada.</div>`;
+                    return;
+                }
+                box.innerHTML = comVal.map(({ doc: d, val }) => {
+                    const cls = val.kind === 'vencido' ? 'border-rose-300 bg-rose-50/40' : (val.kind === 'alerta' ? 'border-amber-300 bg-amber-50/40' : 'border-slate-200');
+                    const pillCls = val.kind === 'vencido' ? 'bg-rose-600 text-white' : (val.kind === 'alerta' ? 'bg-amber-500 text-white' : 'bg-emerald-100 text-emerald-800');
+                    return `
+                    <div class="glass-card p-4 rounded-2xl ${cls} flex flex-wrap items-center justify-between gap-3 text-xs">
+                        <div class="space-y-0.5">
+                            <div class="flex flex-wrap items-center gap-1.5">
+                                <span class="px-2 py-0.5 rounded-full text-[10px] font-extrabold ${pillCls}">${escapeHtml(val.label)}</span>
+                                <span class="font-mono font-extrabold text-slate-900">${escapeHtml(d.codigo)} • ${escapeHtml(d.revisaoVigenteLabel)}</span>
+                            </div>
+                            <div class="font-extrabold text-slate-900 text-sm">${escapeHtml(d.titulo)}</div>
+                            <div class="text-[11px] font-semibold text-slate-500">${[d.area, d.maquina, d.equipamento, d.conjunto].filter(Boolean).map(escapeHtml).join(' › ')}</div>
+                        </div>
+                        <div class="flex items-center gap-2">
+                            <button type="button" onclick="abrirDetalheDoc('${d.id}')" class="btn-touch bg-white border border-slate-200 text-slate-700 text-xs py-1.5 px-3">Ver / Revisar</button>
+                            <button type="button" onclick="abrirModalNovaRevisao('${d.id}')" class="btn-pill-dark text-xs py-1.5 px-3.5">+ Nova Revisão</button>
+                        </div>
+                    </div>`;
+                }).join('');
+                return;
+            }
+
+            const revs = docsRevisoes
+                .filter(r => podeVerDocumento(r) && (revTabFiltro === 'obsoletas' ? r.status === 'obsoleta' : true))
+                .sort((a, b) => new Date(b.analisadoEm || b.enviadoEm || 0).getTime() - new Date(a.analisadoEm || a.enviadoEm || 0).getTime());
+
+            if (!revs.length) {
+                box.innerHTML = `<div class="glass-card p-8 rounded-3xl text-center text-xs font-bold text-slate-500">Nenhuma revisão encontrada nesta aba.</div>`;
+                return;
+            }
+            box.innerHTML = revs.map(r => `
+                <div class="glass-card p-4 rounded-2xl flex flex-wrap items-center justify-between gap-3 text-xs">
+                    <div class="space-y-0.5 min-w-0 flex-1">
+                        <div class="flex flex-wrap items-center gap-1.5">
+                            <span class="px-2 py-0.5 rounded-full text-[10px] font-extrabold ${r.status === 'vigente' ? 'st-vigente' : (r.status === 'pendente_aprovacao' ? 'st-pendente' : (r.status === 'reprovada' ? 'st-reprovado' : 'st-obsoleto'))}">${escapeHtml(r.status.toUpperCase())}</span>
+                            <span class="font-mono font-extrabold text-slate-900">${escapeHtml(r.codigoDoc)} • ${escapeHtml(r.revisaoLabel)}</span>
+                            <span class="text-[11px] font-bold text-slate-500">${escapeHtml(CATEGORIAS_DOCS[r.categoria]?.label || r.categoria)}</span>
+                        </div>
+                        <div class="font-extrabold text-slate-900 truncate">${escapeHtml(r.titulo)}</div>
+                        <div class="text-[11px] font-semibold text-slate-500">Alteração: ${escapeHtml(r.motivoAlteracao || '-')} • Enviado por ${escapeHtml(r.enviadoPor || '-')} (${escapeHtml(formatDataBR(r.enviadoEm))})</div>
+                    </div>
+                    <button type="button" onclick="abrirDetalheDoc('${r.docMasterId}')" class="btn-touch bg-slate-100 hover:bg-slate-200 text-slate-800 text-xs py-1.5 px-3">Abrir Ficha</button>
+                </div>`).join('');
+        }
+
+        // ================= ESTRUTURA SHAREPOINT & GERADOR DE SCRIPTS =================
+        function getListaPastasSharePointEsperadas() {
+            const equipPaths = new Set();
+            const maqPaths = new Set();
+            assetNodes.forEach(n => {
+                if (!n.area || !n.maquina) return;
+                maqPaths.add(`${slugSegmentSp(n.area)}|${slugSegmentSp(n.maquina)}`);
+                if (n.equipamento) equipPaths.add(`${slugSegmentSp(n.area)}|${slugSegmentSp(n.maquina)}|${slugSegmentSp(n.equipamento)}`);
+            });
+            const pastas = [];
+            const raiz = sharepointCfg.pastaRaiz || 'SISTEMA';
+            Object.values(CATEGORIAS_DOCS).forEach(cat => {
+                const baseCat = `${raiz}/${cat.pastaSp}`;
+                pastas.push(baseCat);
+                if (cat.id === 'orcamentos') {
+                    [...maqPaths].sort().forEach(k => {
+                        const [a, m] = k.split('|');
+                        pastas.push(`${baseCat}/${a}/${m}`);
+                    });
+                } else {
+                    [...equipPaths].sort().forEach(k => {
+                        const [a, m, eq] = k.split('|');
+                        pastas.push(`${baseCat}/${a}/${m}/${eq}`);
+                    });
+                }
+            });
+            pastas.push(`${raiz}/99_ARQUIVO_OBSOLETOS`);
+            return [...new Set(pastas)];
+        }
+
+        function renderSharePointView() {
+            const inpUrl = document.getElementById('spCfgUrlRaiz');
+            if (inpUrl) inpUrl.value = sharepointCfg.urlPastaRaiz || DEFAULT_SHAREPOINT_CFG.urlPastaRaiz;
+            const linkEl = document.getElementById('linkSharepointRaiz');
+            if (linkEl) linkEl.href = sharepointCfg.urlPastaRaiz || DEFAULT_SHAREPOINT_CFG.urlPastaRaiz;
+
+            const box = document.getElementById('sharepointArvorePreview');
+            if (!box) return;
+            const pastas = getListaPastasSharePointEsperadas();
+            const resumoCats = Object.values(CATEGORIAS_DOCS).map(c => {
+                const subCount = pastas.filter(p => p.startsWith(`${sharepointCfg.pastaRaiz || 'SISTEMA'}/${c.pastaSp}/`)).length;
+                const urlCat = montarUrlSharePointPasta(`${sharepointCfg.pastaRaiz || 'SISTEMA'}/${c.pastaSp}`);
+                return `
+                <div class="p-3.5 rounded-2xl bg-slate-50 border border-slate-200 flex flex-wrap items-center justify-between gap-2">
+                    <div>
+                        <div class="flex items-center gap-2">
+                            <span class="px-2 py-0.5 rounded-full text-[10px] font-extrabold ${c.badgeCls}">${escapeHtml(c.label)}</span>
+                            <code class="text-xs font-extrabold text-slate-900">${escapeHtml(sharepointCfg.pastaRaiz || 'SISTEMA')}/${escapeHtml(c.pastaSp)}/</code>
+                        </div>
+                        <div class="text-[11px] font-semibold text-slate-500 mt-1">
+                            ${subCount} subpasta(s) mapeadas automaticamente de <code>ob_linhas</code>${c.sigilo === 'gestao' ? ' • Restringir no SharePoint apenas para Gestão' : ''}
+                        </div>
+                    </div>
+                    <a href="${escapeHtml(urlCat)}" target="_blank" rel="noopener" class="px-3 py-1.5 rounded-xl bg-white hover:bg-sky-50 border border-slate-200 text-sky-700 font-extrabold text-[11px]">Abrir no SharePoint ↗</a>
+                </div>`;
+            }).join('');
+
+            box.innerHTML = `
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-3">${resumoCats}</div>
+                <div class="p-4 rounded-2xl bg-slate-900 text-slate-100 text-[11px] font-mono space-y-1 max-h-64 overflow-y-auto">
+                    <div class="text-sky-300 font-bold mb-1.5">// Prévia completa da árvore de pastas gerada (${pastas.length} pastas):</div>
+                    ${pastas.slice(0, 80).map(p => `<div>📁 ${escapeHtml(p)}</div>`).join('')}
+                    ${pastas.length > 80 ? `<div class="text-slate-400">... e mais ${pastas.length - 80} pasta(s)</div>` : ''}
+                </div>`;
+        }
+
+        window.salvarConfigSharePoint = async () => {
+            const url = (document.getElementById('spCfgUrlRaiz')?.value || '').trim();
+            if (!url) return showToast('Informe a URL da pasta SISTEMA no SharePoint.', 'error');
+            const parsed = { ...sharepointCfg, urlPastaRaiz: url };
+            try {
+                const u = new URL(url);
+                parsed.tenantUrl = `${u.protocol}//${u.host}`;
+                const mSite = u.pathname.match(/^(\/sites\/[^/]+)/i);
+                if (mSite) parsed.sitePath = mSite[1];
+                const idParam = u.searchParams.get('id');
+                if (idParam) {
+                    const lastSeg = idParam.split('/').filter(Boolean).pop();
+                    if (lastSeg) parsed.pastaRaiz = lastSeg;
+                }
+                const viewParam = u.searchParams.get('viewid');
+                if (viewParam) parsed.viewId = viewParam;
+            } catch (_) {}
+            try {
+                await setDoc(refSpConfig, { ...parsed, atualizadoEm: new Date().toISOString(), atualizadoPor: usuarioLogado?.nome || 'Admin' }, { merge: true });
+                sharepointCfg = parsed;
+                showToast('Configuração SharePoint atualizada!', 'success');
+                renderSharePointView();
+            } catch (_) {
+                showToast('Erro ao salvar configuração SharePoint.', 'error');
+            }
+        };
+
+        window.abrirPastaSharePointAtual = () => {
+            const url = sharepointCfg.urlPastaRaiz || DEFAULT_SHAREPOINT_CFG.urlPastaRaiz;
+            if (typeof window.open === 'function') window.open(url, '_blank', 'noopener');
+        };
+
+        window.baixarScriptPastasSharePoint = (tipo = 'bat') => {
+            const pastas = getListaPastasSharePointEsperadas();
+            const raiz = sharepointCfg.pastaRaiz || 'SISTEMA';
+            let conteudo = '';
+            let nomeArq = '';
+            if (tipo === 'ps1') {
+                nomeArq = 'criar_estrutura_SISTEMA_sharepoint.ps1';
+                const siteFull = `${sharepointCfg.tenantUrl}${sharepointCfg.sitePath}`;
+                const libName = sharepointCfg.biblioteca || 'Documentos Compartilhados';
+                const psLines = [
+                    `# Script PowerShell PnP para criar a estrutura organizada dentro de SISTEMA no SharePoint`,
+                    `# Execute: Install-Module PnP.PowerShell (se necessário)`,
+                    `Connect-PnPOnline -Url "${siteFull}" -Interactive`,
+                    `$folders = @(`
+                ];
+                pastas.forEach((p, idx) => {
+                    const relInsideLib = p; // e.g. SISTEMA/01_MANUAIS/...
+                    psLines.push(`    "${libName}/${relInsideLib}"${idx < pastas.length - 1 ? ',' : ''}`);
+                });
+                psLines.push(`)`);
+                psLines.push(`foreach ($f in $folders) {`);
+                psLines.push(`    Resolve-PnPFolder -SiteRelativePath $f | Out-Null`);
+                psLines.push(`    Write-Host "OK: $f"`);
+                psLines.push(`}`);
+                psLines.push(`Write-Host "Estrutura completa criada dentro de ${raiz}!" -ForegroundColor Green`);
+                conteudo = psLines.join('\r\n');
+            } else {
+                nomeArq = 'criar_estrutura_SISTEMA.bat';
+                const winLines = [
+                    `@echo off`,
+                    `chcp 65001 >nul`,
+                    `echo Criando estrutura organizada de pastas PCM Cepera para SharePoint / OneDrive...`,
+                    ...pastas.map(p => {
+                        const relFromRaiz = p.startsWith(`${raiz}/`) ? p.slice(raiz.length + 1) : p;
+                        const winSub = relFromRaiz.replace(/\//g, '\\');
+                        return relFromRaiz === raiz ? '' : `if not exist "%~dp0${winSub}" mkdir "%~dp0${winSub}"`;
+                    }).filter(Boolean),
+                    `echo Concluido! Se este arquivo estiver dentro da pasta SISTEMA sincronizada via OneDrive, as pastas subirão automaticamente para o SharePoint.`,
+                    `pause`
+                ];
+                conteudo = winLines.join('\r\n');
+            }
+
+            try {
+                const blob = new Blob([conteudo], { type: 'text/plain;charset=utf-8' });
+                const urlObj = URL.createObjectURL(blob);
+                const a = document.createElement('a');
+                a.href = urlObj;
+                a.download = nomeArq;
+                document.body.appendChild(a);
+                a.click();
+                a.remove();
+                setTimeout(() => URL.revokeObjectURL(urlObj), 1000);
+                showToast(`Script "${nomeArq}" baixado!`, 'success');
+            } catch (_) {
+                copiarTextoSimples(conteudo, 'Conteúdo do script copiado para área de transferência!');
+            }
+        };
+
+        // ================= FORMULÁRIO NOVO DOCUMENTO / SUGESTÃO / NOVA REVISÃO =================
+        function popularCategoriasSelectModal() {
+            const sel = document.getElementById('ndCategoria');
+            if (!sel) return;
+            const permitidas = getCategoriasPermitidas(usuarioLogado);
+            sel.innerHTML = permitidas.map(c => `<option value="${c.id}">${escapeHtml(c.label)}</option>`).join('');
+            onNdCategoriaChange();
+        }
+
+        window.onNdCategoriaChange = () => {
+            const catId = document.getElementById('ndCategoria')?.value || 'manuais';
+            const cat = CATEGORIAS_DOCS[catId] || CATEGORIAS_DOCS.manuais;
+            const subSel = document.getElementById('ndSubtipo');
+            if (subSel) {
+                subSel.innerHTML = cat.subtipos.map(s => `<option value="${escapeHtml(s)}">${escapeHtml(s)}</option>`).join('');
+            }
+            const sigBox = document.getElementById('ndAvisoSigiloOrcamento');
+            if (sigBox) {
+                const isOrc = cat.id === 'orcamentos';
+                sigBox.hidden = !isOrc;
+                sigBox.classList.toggle('hidden', !isOrc);
+            }
+            if (cat.id === 'fotos' && !isPerfilAprovadorDocs(usuarioLogado)) {
+                setModoAnexoDoc('foto_campo');
+            }
+            atualizarPreviewNomenclaturaDoc();
+        };
+
+        function popularNdSelects(prefill = {}) {
+            popularSelectFiltro('ndArea', assetNodes.map(n => n.area), '-- Selecione o Setor --', prefill.area || '');
+            onNdAreaChange(prefill);
+        }
+
+        window.onNdAreaChange = (prefill = {}) => {
+            const a = document.getElementById('ndArea')?.value || '';
+            const nA = assetNodes.filter(n => !a || n.area === a);
+            popularSelectFiltro('ndMaquina', nA.map(n => n.maquina), '-- Selecione a Linha/Máquina --', prefill.maquina || '');
+            if (document.getElementById('docFormModo')?.value === 'novo') {
+                document.getElementById('ndCodigo').value = gerarProximoCodigoDoc(a);
+            }
+            onNdMaquinaChange(prefill);
+        };
+
+        window.onNdMaquinaChange = (prefill = {}) => {
+            const a = document.getElementById('ndArea')?.value || '';
+            const m = document.getElementById('ndMaquina')?.value || '';
+            const nM = assetNodes.filter(n => (!a || n.area === a) && (!m || n.maquina === m));
+            popularSelectFiltro('ndEquipamento', nM.map(n => n.equipamento), '-- Selecione o Equipamento --', prefill.equipamento || '');
+            onNdEquipChange(prefill);
+        };
+
+        window.onNdEquipChange = (prefill = {}) => {
+            const a = document.getElementById('ndArea')?.value || '';
+            const m = document.getElementById('ndMaquina')?.value || '';
+            const e = document.getElementById('ndEquipamento')?.value || '';
+            const nE = assetNodes.filter(n => (!a || n.area === a) && (!m || n.maquina === m) && (!e || n.equipamento === e));
+            popularSelectFiltro('ndConjunto', nE.map(n => n.conjunto), 'Equipamento inteiro (Todos conjuntos)', prefill.conjunto || '');
+            onNdConjChange(prefill);
+        };
+
+        window.onNdConjChange = (prefill = {}) => {
+            const a = document.getElementById('ndArea')?.value || '';
+            const m = document.getElementById('ndMaquina')?.value || '';
+            const e = document.getElementById('ndEquipamento')?.value || '';
+            const c = document.getElementById('ndConjunto')?.value || '';
+            const nC = assetNodes.filter(n => (!a || n.area === a) && (!m || n.maquina === m) && (!e || n.equipamento === e) && (!c || n.conjunto === c));
+            popularSelectFiltro('ndSubconjunto', nC.map(n => n.subconjunto).filter(Boolean), 'Conjunto inteiro / Sem subconjunto', prefill.subconjunto || '');
+
+            const rep = nC.find(n => (!prefill.subconjunto || n.subconjunto === prefill.subconjunto)) || nC[0];
+            const specEl = document.getElementById('ndAtivoSpecs');
+            if (specEl && rep) {
+                specEl.value = [rep.tag ? `TAG ${rep.tag}` : '', rep.fabricante, rep.modelo].filter(Boolean).join(' • ');
+            }
+            atualizarPreviewNomenclaturaDoc();
+        };
+
+        window.atualizarPreviewNomenclaturaDoc = () => {
+            const categoria = document.getElementById('ndCategoria')?.value || 'manuais';
+            const area = document.getElementById('ndArea')?.value || '';
+            const maquina = document.getElementById('ndMaquina')?.value || '';
+            const equipamento = document.getElementById('ndEquipamento')?.value || '';
+            const conjunto = document.getElementById('ndConjunto')?.value || '';
+            const subconjunto = document.getElementById('ndSubconjunto')?.value || '';
+            const codigo = document.getElementById('ndCodigo')?.value || 'DOC-GEN-0001';
+            const revLabel = document.getElementById('ndRevisaoLabel')?.value || 'REV 00';
+            const titulo = document.getElementById('ndTitulo')?.value || 'Documento';
+
+            const pasta = montarPastaSharePointRelativa({ categoria, area, maquina, equipamento });
+            const ext = modoAnexoAtual === 'foto_campo' ? 'jpg' : 'pdf';
+            const arq = montarNomePadraoArquivoSp(codigo, revLabel, titulo, ext);
+
+            const pEl = document.getElementById('ndSpPastaPath');
+            const aEl = document.getElementById('ndSpNomeArquivo');
+            const prevEl = document.getElementById('docFormAtivoPreview');
+            if (pEl) pEl.innerText = pasta;
+            if (aEl) aEl.innerText = arq;
+            if (prevEl) prevEl.innerText = [area, maquina, equipamento, conjunto, subconjunto].filter(Boolean).join(' › ');
+        };
+
+        window.abrirPastaDestinoModalSharePoint = () => {
+            const pasta = document.getElementById('ndSpPastaPath')?.innerText || sharepointCfg.pastaRaiz || 'SISTEMA';
+            const url = montarUrlSharePointPasta(pasta);
+            if (typeof window.open === 'function') window.open(url, '_blank', 'noopener');
+        };
+
+        window.setModoAnexoDoc = (modo) => {
+            modoAnexoAtual = modo === 'foto_campo' ? 'foto_campo' : 'sharepoint';
+            document.getElementById('btnModoSp')?.classList.toggle('active', modoAnexoAtual === 'sharepoint');
+            document.getElementById('btnModoFoto')?.classList.toggle('active', modoAnexoAtual === 'foto_campo');
+            const bSp = document.getElementById('boxAnexoSharePoint');
+            const bFt = document.getElementById('boxAnexoFoto');
+            if (bSp) { bSp.hidden = modoAnexoAtual !== 'sharepoint'; bSp.classList.toggle('hidden', modoAnexoAtual !== 'sharepoint'); }
+            if (bFt) { bFt.hidden = modoAnexoAtual !== 'foto_campo'; bFt.classList.toggle('hidden', modoAnexoAtual !== 'foto_campo'); }
+            atualizarPreviewNomenclaturaDoc();
+        };
+
+        window.onSharePointUrlInput = (val) => {
+            const url = String(val || '').trim();
+            if (!url) return;
+            try {
+                const u = new URL(url);
+                if (u.host.includes('sharepoint.com') && !document.getElementById('ndArquivoEmbedUrl').value) {
+                    if (u.searchParams.get('action') === 'embedview') {
+                        document.getElementById('ndArquivoEmbedUrl').value = url;
+                    }
+                }
+            } catch (_) {}
+        };
+
+        window.normalizarEmbedInput = (inp) => {
+            const raw = String(inp.value || '').trim();
+            const m = raw.match(/src=["']([^"']+)["']/i);
+            if (m && m[1]) inp.value = m[1];
+        };
+
+        window.onFotoCampoSelecionada = (ev) => {
+            const file = ev?.target?.files?.[0];
+            if (!file) return;
+            const reader = new FileReader();
+            reader.onload = (e) => {
+                const img = new Image();
+                img.onload = () => {
+                    const cvs = document.createElement('canvas');
+                    let w = img.width, h = img.height;
+                    const MAX = 1024;
+                    if (w > h && w > MAX) { h = Math.round(h * MAX / w); w = MAX; }
+                    else if (h >= w && h > MAX) { w = Math.round(w * MAX / h); h = MAX; }
+                    cvs.width = w; cvs.height = h;
+                    const ctx = cvs.getContext('2d');
+                    ctx.drawImage(img, 0, 0, w, h);
+                    fotoCampoB64Draft = cvs.toDataURL('image/jpeg', 0.72);
+                    document.getElementById('ndFotoPreviewImg').src = fotoCampoB64Draft;
+                    const box = document.getElementById('ndFotoPreviewBox');
+                    if (box) { box.hidden = false; box.classList.remove('hidden'); }
+                    document.getElementById('ndFotoStatus').innerText = `✓ Foto otimizada (${Math.round(fotoCampoB64Draft.length / 1024)} KB) pronta para aprovação`;
+                };
+                img.src = e.target.result;
+            };
+            reader.readAsDataURL(file);
+        };
+
+        window.limparFotoCampoDoc = () => {
+            fotoCampoB64Draft = '';
+            const inp = document.getElementById('ndFotoFile');
+            if (inp) inp.value = '';
+            const box = document.getElementById('ndFotoPreviewBox');
+            if (box) { box.hidden = true; box.classList.add('hidden'); }
+            document.getElementById('ndFotoStatus').innerText = 'Nenhuma foto selecionada.';
+        };
+
+        window.aplicarSugestaoValidadeMeses = (mesesStr) => {
+            const meses = parseInt(mesesStr || '0', 10);
+            if (!meses) return;
+            const dt = new Date();
+            dt.setMonth(dt.getMonth() + meses);
+            const iso = `${dt.getFullYear()}-${String(dt.getMonth() + 1).padStart(2, '0')}-${String(dt.getDate()).padStart(2, '0')}`;
+            const inp = document.getElementById('ndValidadeEm');
+            if (inp) inp.value = iso;
+        };
+
+        window.abrirModalNovoDocumento = (tipo = 'doc', prefill = {}) => {
+            const form = document.getElementById('formNovoDoc');
+            if (form) form.reset();
+            fotoCampoB64Draft = '';
+            limparFotoCampoDoc();
+            document.getElementById('docFormModo').value = 'novo';
+            document.getElementById('docMasterEditId').value = '';
+            document.getElementById('ndRevisaoLabel').value = 'REV 00';
+            document.getElementById('ndMotivoAlteracao').value = isPerfilAprovadorDocs(usuarioLogado) ? 'Emissão inicial' : 'Sugestão de campo enviada para aprovação';
+            document.getElementById('ndCodigo').readOnly = false;
+            document.getElementById('modalDocTituloModal').innerText = isPerfilAprovadorDocs(usuarioLogado)
+                ? 'Inserir Novo Documento na Biblioteca (Vai p/ Aprovação)'
+                : 'Enviar Foto / Sugestão de Documento (Vai p/ Aprovação)';
+
+            popularCategoriasSelectModal();
+            if (prefill.categoria && CATEGORIAS_DOCS[prefill.categoria]) {
+                const catSel = document.getElementById('ndCategoria');
+                if (catSel && [...catSel.options].some(o => o.value === prefill.categoria)) {
+                    catSel.value = prefill.categoria;
+                    onNdCategoriaChange();
+                }
+            } else if (!isPerfilAprovadorDocs(usuarioLogado)) {
+                document.getElementById('ndCategoria').value = 'fotos';
+                onNdCategoriaChange();
+            }
+
+            const prefAtivo = {
+                area: prefill.area || document.getElementById('docFiltroArea')?.value || '',
+                maquina: prefill.maquina || document.getElementById('docFiltroMaquina')?.value || '',
+                equipamento: prefill.equipamento || document.getElementById('docFiltroEquipamento')?.value || '',
+                conjunto: prefill.conjunto || document.getElementById('docFiltroConjunto')?.value || '',
+                subconjunto: prefill.subconjunto || ''
+            };
+            popularNdSelects(prefAtivo);
+            setModoAnexoDoc((!isPerfilAprovadorDocs(usuarioLogado) || document.getElementById('ndCategoria').value === 'fotos') ? 'foto_campo' : 'sharepoint');
+            abrirModal('modalNovoDoc');
+        };
+
+        window.abrirModalNovaRevisao = (masterId) => {
+            const d = docsAtivos.find(x => x.id === masterId);
+            if (!d) return;
+            fecharModal('modalDetalheDoc');
+            const form = document.getElementById('formNovoDoc');
+            if (form) form.reset();
+            fotoCampoB64Draft = d.fotoThumbB64 || '';
+            if (fotoCampoB64Draft) {
+                document.getElementById('ndFotoPreviewImg').src = fotoCampoB64Draft;
+                const b = document.getElementById('ndFotoPreviewBox');
+                if (b) { b.hidden = false; b.classList.remove('hidden'); }
+            } else {
+                limparFotoCampoDoc();
+            }
+
+            const maxRev = docsRevisoes
+                .filter(r => r.docMasterId === d.id)
+                .reduce((mx, r) => Math.max(mx, Number(r.revisaoNum || 0)), Number(d.revisaoVigenteNum ?? 0));
+            const nextNum = maxRev + 1;
+            const nextLbl = `REV ${String(nextNum).padStart(2, '0')}`;
+
+            document.getElementById('docFormModo').value = 'revisao';
+            document.getElementById('docMasterEditId').value = d.id;
+            document.getElementById('modalDocTituloModal').innerText = `Nova Revisão — ${d.codigo} (${nextLbl})`;
+            popularCategoriasSelectModal();
+            document.getElementById('ndCategoria').value = d.categoria;
+            onNdCategoriaChange();
+            if (d.subtipo) document.getElementById('ndSubtipo').value = d.subtipo;
+            document.getElementById('ndDisciplina').value = d.disciplina || 'Mecânica';
+            document.getElementById('ndCodigo').value = d.codigo;
+            document.getElementById('ndCodigo').readOnly = true;
+            document.getElementById('ndTitulo').value = d.titulo;
+            document.getElementById('ndRevisaoLabel').value = nextLbl;
+            document.getElementById('ndTags').value = (Array.isArray(d.tags) ? d.tags : []).join(', ');
+            document.getElementById('ndValidadeEm').value = d.validadeEm || '';
+            document.getElementById('ndRevalidacaoMeses').value = String(d.periodicidadeRevalidacaoMeses || 0);
+            document.getElementById('ndResumoTecnico').value = d.resumoTecnico || '';
+            document.getElementById('ndArquivoUrl').value = d.arquivoUrl || '';
+            document.getElementById('ndArquivoEmbedUrl').value = d.arquivoEmbedUrl || '';
+            document.getElementById('ndMotivoAlteracao').value = '';
+
+            popularNdSelects({
+                area: d.area, maquina: d.maquina, equipamento: d.equipamento,
+                conjunto: d.conjunto || '', subconjunto: d.subconjunto || ''
+            });
+            setModoAnexoDoc(d.arquivoProvider === 'foto_campo' && !d.arquivoUrl ? 'foto_campo' : 'sharepoint');
+            abrirModal('modalNovoDoc');
+            setTimeout(() => document.getElementById('ndMotivoAlteracao')?.focus(), 80);
+        };
+
+        window.salvarSubmissaoDocumento = async (e) => {
+            e.preventDefault();
+            const modo = document.getElementById('docFormModo').value;
+            const masterId = document.getElementById('docMasterEditId').value;
+            const area = document.getElementById('ndArea').value.trim();
+            const maquina = document.getElementById('ndMaquina').value.trim();
+            const equipamento = document.getElementById('ndEquipamento').value.trim();
+            const conjunto = document.getElementById('ndConjunto').value.trim();
+            const subconjunto = document.getElementById('ndSubconjunto').value.trim();
+            const categoria = document.getElementById('ndCategoria').value;
+            const subtipo = document.getElementById('ndSubtipo').value;
+            const disciplina = document.getElementById('ndDisciplina').value;
+            const codigo = document.getElementById('ndCodigo').value.trim().toUpperCase();
+            const titulo = document.getElementById('ndTitulo').value.trim();
+            const revLabel = document.getElementById('ndRevisaoLabel').value.trim() || 'REV 00';
+            const revNum = parseInt(revLabel.replace(/\D/g, ''), 10) || 0;
+            const arquivoUrl = document.getElementById('ndArquivoUrl').value.trim();
+            const arquivoEmbedUrl = document.getElementById('ndArquivoEmbedUrl').value.trim();
+            const tagsRaw = document.getElementById('ndTags').value;
+            const tags = [...new Set(tagsRaw.split(/[,;]+/).map(t => t.trim()).filter(Boolean))];
+            const validadeEm = document.getElementById('ndValidadeEm').value || '';
+            const periodicidadeRevalidacaoMeses = parseInt(document.getElementById('ndRevalidacaoMeses').value || '0', 10) || 0;
+            const resumoTecnico = document.getElementById('ndResumoTecnico').value.trim();
+            const motivoAlteracao = document.getElementById('ndMotivoAlteracao').value.trim() || 'Emissão inicial';
+
+            if (!area || !maquina || !equipamento || !codigo || !titulo) {
+                return showToast('Preencha Setor, Linha, Equipamento, Código e Título.', 'error');
+            }
+            if (!arquivoUrl && !fotoCampoB64Draft) {
+                return showToast('Informe o Link do SharePoint ou anexe uma foto antes de enviar.', 'error');
+            }
+
+            if (modo === 'novo' && docsAtivos.some(d => normKey(d.codigo) === normKey(codigo))) {
+                return showToast(`O código "${codigo}" já existe. Use "Nova Revisão" nele ou ajuste a numeração.`, 'error');
+            }
+
+            const matchNode = assetNodes.find(n =>
+                normKey(n.area) === normKey(area) &&
+                normKey(n.maquina) === normKey(maquina) &&
+                normKey(n.equipamento) === normKey(equipamento) &&
+                (!conjunto || normKey(n.conjunto) === normKey(conjunto)) &&
+                (!subconjunto || normKey(n.subconjunto) === normKey(subconjunto))
+            );
+            const ativoNodeId = (conjunto && !subconjunto && assetNodes.some(n => normKey(n.area) === normKey(area) && normKey(n.maquina) === normKey(maquina) && normKey(n.equipamento) === normKey(equipamento) && normKey(n.conjunto) === normKey(conjunto) && (n.subconjunto || '').trim()))
+                ? makeConjuntoNodeIdDocs(area, maquina, equipamento, conjunto)
+                : (matchNode?.nodeId || '');
+
+            const catMeta = CATEGORIAS_DOCS[categoria] || CATEGORIAS_DOCS.manuais;
+            const pastaSug = montarPastaSharePointRelativa({ categoria, area, maquina, equipamento });
+            const nomeSug = montarNomePadraoArquivoSp(codigo, revLabel, titulo, modoAnexoAtual === 'foto_campo' && !arquivoUrl ? 'jpg' : 'pdf');
+            const agora = new Date().toISOString();
+            const autor = usuarioLogado?.nome || usuarioLogado?.user || 'Usuário';
+            const autorRole = usuarioLogado?.role || 'Técnico';
+            const origemEnvio = isPerfilAprovadorDocs(usuarioLogado) ? 'gestao' : 'campo_sugestao';
+
+            const btn = document.getElementById('btnSalvarSubmissaoDoc');
+            if (btn) { btn.disabled = true; btn.innerText = 'Enviando p/ Aprovação...'; }
+
+            try {
+                let targetMasterId = masterId;
+                const specs = {
+                    ativoNodeId,
+                    ativoDocId: matchNode?.docId || '',
+                    tagAtivo: matchNode?.tag || '',
+                    fabricante: matchNode?.fabricante || '',
+                    modelo: matchNode?.modelo || ''
+                };
+
+                if (modo === 'novo') {
+                    const masterPayload = {
+                        schemaVersion: 1,
+                        codigo,
+                        titulo,
+                        categoria,
+                        subtipo,
+                        sigilo: catMeta.sigilo,
+                        disciplina,
+                        escopoNivel: subconjunto ? 'subconjunto' : (conjunto ? 'conjunto' : 'equipamento'),
+                        ...specs,
+                        area,
+                        maquina,
+                        equipamento,
+                        conjunto,
+                        subconjunto,
+                        tags,
+                        resumoTecnico,
+                        status: 'pendente_aprovacao',
+                        revisaoVigenteNum: null,
+                        revisaoVigenteLabel: `Pendente (${revLabel})`,
+                        revisaoVigenteId: '',
+                        temRevisaoPendente: true,
+                        validadeEm,
+                        periodicidadeRevalidacaoMeses,
+                        arquivoProvider: (fotoCampoB64Draft && !arquivoUrl) ? 'foto_campo' : 'sharepoint',
+                        arquivoUrl,
+                        arquivoEmbedUrl,
+                        fotoThumbB64: fotoCampoB64Draft || '',
+                        sharepointPastaSugerida: pastaSug,
+                        sharepointNomeSugerido: nomeSug,
+                        criadoPor: autor,
+                        criadoEm: agora,
+                        atualizadoPor: autor,
+                        atualizadoEm: agora
+                    };
+                    masterPayload.searchText = construirSearchText(masterPayload);
+                    const mRef = await addDoc(refDocsAtivos, masterPayload);
+                    targetMasterId = mRef.id;
+                } else if (targetMasterId) {
+                    await updateDoc(doc(db, 'docs_ativos', targetMasterId), {
+                        temRevisaoPendente: true,
+                        atualizadoPor: autor,
+                        atualizadoEm: agora
+                    });
+                }
+
+                await addDoc(refDocsRevisoes, {
+                    schemaVersion: 1,
+                    docMasterId: targetMasterId,
+                    codigoDoc: codigo,
+                    titulo,
+                    categoria,
+                    subtipo,
+                    sigilo: catMeta.sigilo,
+                    disciplina,
+                    ...specs,
+                    area,
+                    maquina,
+                    equipamento,
+                    conjunto,
+                    subconjunto,
+                    tags,
+                    resumoTecnico,
+                    validadeEm,
+                    periodicidadeRevalidacaoMeses,
+                    revisaoNum: revNum,
+                    revisaoLabel: revLabel,
+                    status: 'pendente_aprovacao',
+                    motivoAlteracao,
+                    arquivoProvider: (fotoCampoB64Draft && !arquivoUrl) ? 'foto_campo' : 'sharepoint',
+                    arquivoUrl,
+                    arquivoEmbedUrl,
+                    fotoThumbB64: fotoCampoB64Draft || '',
+                    sharepointPastaSugerida: pastaSug,
+                    sharepointNomeSugerido: nomeSug,
+                    origemEnvio,
+                    enviadoPor: autor,
+                    enviadoPorRole: autorRole,
+                    enviadoEm: agora
+                });
+
+                fecharModal('modalNovoDoc');
+                showToast(
+                    modo === 'novo'
+                        ? `"${codigo} (${revLabel})" enviado para Aprovação! Após aprovado ficará visível na Biblioteca.`
+                        : `Nova revisão "${revLabel}" de "${codigo}" enviada para Aprovação (versão anterior segue vigente).`,
+                    'success'
+                );
+            } catch (err) {
+                console.error(err);
+                showToast('Erro ao gravar submissão no Firestore.', 'error');
+            } finally {
+                if (btn) { btn.disabled = false; btn.innerText = 'Enviar para Aprovação'; }
+            }
+        };
+
+        // ================= DETALHE DO DOCUMENTO & PREVIEW =================
+        window.abrirZoomFotoDoc = (docId) => {
+            const d = docsAtivos.find(x => x.id === docId);
+            if (d && d.fotoThumbB64) abrirZoomFotoSrc(d.fotoThumbB64, `${d.codigo} — ${d.titulo}`);
+        };
+        window.abrirZoomFotoSrc = (src, legenda = '') => {
+            document.getElementById('zoomFotoDocImg').src = src;
+            document.getElementById('zoomFotoDocLegenda').innerText = legenda;
+            abrirModal('modalZoomFotoDoc');
+        };
+
+        window.abrirDetalheDoc = (masterId) => {
+            const d = docsAtivos.find(x => x.id === masterId);
+            if (!d || !podeVerDocumento(d)) return;
+            const cat = CATEGORIAS_DOCS[d.categoria] || CATEGORIAS_DOCS.manuais;
+            const revs = docsRevisoes
+                .filter(r => r.docMasterId === d.id)
+                .sort((a, b) => Number(b.revisaoNum || 0) - Number(a.revisaoNum || 0));
+
+            document.getElementById('detDocBadges').innerHTML = `
+                <span class="px-2.5 py-0.5 rounded-full text-[10px] font-extrabold ${cat.badgeCls}">${escapeHtml(cat.label)}</span>
+                <span class="px-2 py-0.5 rounded-full text-[10px] font-mono font-extrabold bg-slate-900 text-white">${escapeHtml(d.codigo)} • ${escapeHtml(d.revisaoVigenteLabel || 'REV 00')}</span>
+                <span class="px-2 py-0.5 rounded-full text-[10px] font-extrabold ${d.status === 'vigente' ? 'st-vigente' : 'st-pendente'}">${escapeHtml(String(d.status || '').toUpperCase())}</span>`;
+            document.getElementById('detDocTitulo').innerText = d.titulo;
+            document.getElementById('detDocAtivoPath').innerText = [d.area, d.maquina, d.equipamento, d.conjunto, d.subconjunto].filter(Boolean).join(' › ');
+
+            const spFolderUrl = d.sharepointPastaSugerida ? montarUrlSharePointPasta(d.sharepointPastaSugerida) : (sharepointCfg.urlPastaRaiz || DEFAULT_SHAREPOINT_CFG.urlPastaRaiz);
+            const embedHtml = d.arquivoEmbedUrl
+                ? `<div class="rounded-2xl overflow-hidden border border-slate-200 bg-slate-100 space-y-1.5">
+                        <div class="px-3 py-2 bg-slate-50 border-b border-slate-200 flex items-center justify-between text-[11px] font-bold">
+                            <span>Pré-visualização Incorporada (SharePoint)</span>
+                            ${d.arquivoUrl ? `<a href="${escapeHtml(d.arquivoUrl)}" target="_blank" rel="noopener" class="text-sky-700 underline">Abrir em Tela Cheia ↗</a>` : ''}
+                        </div>
+                        <iframe src="${escapeHtml(d.arquivoEmbedUrl)}" class="w-full h-96 border-0 bg-white" title="${escapeHtml(d.titulo)}"></iframe>
+                   </div>`
+                : '';
+
+            document.getElementById('detDocBody').innerHTML = `
+                <div class="grid grid-cols-1 sm:grid-cols-3 gap-3">
+                    <div class="p-3 rounded-2xl bg-slate-50 border border-slate-200">
+                        <div class="text-[10px] font-extrabold uppercase text-slate-400">Disciplina / Subtipo</div>
+                        <div class="font-extrabold text-slate-900 mt-0.5">${escapeHtml(d.disciplina || 'Geral')} • ${escapeHtml(d.subtipo || '-')}</div>
+                    </div>
+                    <div class="p-3 rounded-2xl bg-slate-50 border border-slate-200">
+                        <div class="text-[10px] font-extrabold uppercase text-slate-400">Aprovação Vigente</div>
+                        <div class="font-extrabold text-slate-900 mt-0.5">${escapeHtml(d.aprovadoPor || 'Aguardando')} ${d.aprovadoEm ? '• ' + formatDataBR(d.aprovadoEm) : ''}</div>
+                    </div>
+                    <div class="p-3 rounded-2xl bg-slate-50 border border-slate-200">
+                        <div class="text-[10px] font-extrabold uppercase text-slate-400">Validade / Revalidação</div>
+                        <div class="font-extrabold text-slate-900 mt-0.5">${d.validadeEm ? formatDataBR(d.validadeEm) : 'Sem vencimento'}</div>
+                    </div>
+                </div>
+
+                ${d.resumoTecnico ? `<div class="p-3.5 rounded-2xl bg-indigo-50/70 border border-indigo-200 font-semibold text-indigo-950"><span class="text-[10px] font-extrabold uppercase text-indigo-700 block mb-0.5">Parâmetros &amp; Resumo Técnico</span>${escapeHtml(d.resumoTecnico)}</div>` : ''}
+                ${d.fotoThumbB64 ? `<div><img src="${d.fotoThumbB64}" onclick="abrirZoomFotoDoc('${d.id}')" class="max-h-72 rounded-2xl border border-slate-200 object-contain cursor-zoom-in mx-auto"></div>` : ''}
+                ${embedHtml}
+
+                <div class="p-3.5 rounded-2xl bg-sky-50/70 border border-sky-200 flex flex-wrap items-center justify-between gap-2">
+                    <div class="min-w-0">
+                        <div class="text-[10px] font-extrabold uppercase text-sky-800">Padrão SharePoint</div>
+                        <div class="text-[11px] font-mono text-slate-700 truncate">${escapeHtml(d.sharepointPastaSugerida || sharepointCfg.pastaRaiz)}/${escapeHtml(d.sharepointNomeSugerido || '')}</div>
+                    </div>
+                    <div class="flex flex-wrap items-center gap-1.5">
+                        ${d.arquivoUrl ? `<a href="${escapeHtml(d.arquivoUrl)}" target="_blank" rel="noopener" class="px-3 py-1.5 rounded-xl bg-sky-600 hover:bg-sky-700 text-white font-extrabold text-[11px]">Abrir Arquivo no SharePoint ↗</a>` : ''}
+                        <a href="${escapeHtml(spFolderUrl)}" target="_blank" rel="noopener" class="px-3 py-1.5 rounded-xl bg-white hover:bg-sky-50 border border-sky-200 text-sky-800 font-extrabold text-[11px]">Abrir Pasta ↗</a>
+                    </div>
+                </div>
+
+                <div class="space-y-2">
+                    <h3 class="text-xs font-extrabold uppercase tracking-wider text-slate-600">Histórico Completo de Revisões (${revs.length})</h3>
+                    <div class="space-y-2 max-h-60 overflow-y-auto pr-1">
+                        ${revs.map(r => `
+                            <div class="p-3 rounded-2xl border ${r.status === 'vigente' ? 'border-emerald-300 bg-emerald-50/40' : 'border-slate-200 bg-white'} flex flex-wrap items-center justify-between gap-2">
+                                <div class="space-y-0.5 min-w-0">
+                                    <div class="flex flex-wrap items-center gap-1.5">
+                                        <span class="font-mono font-extrabold text-slate-900">${escapeHtml(r.revisaoLabel)}</span>
+                                        <span class="px-2 py-0.5 rounded-full text-[9px] font-extrabold ${r.status === 'vigente' ? 'st-vigente' : (r.status === 'pendente_aprovacao' ? 'st-pendente' : (r.status === 'reprovada' ? 'st-reprovado' : 'st-obsoleto'))}">${escapeHtml(r.status.toUpperCase())}</span>
+                                        <span class="text-[10px] font-bold text-slate-500">Enviado em ${formatDataBR(r.enviadoEm)} por ${escapeHtml(r.enviadoPor || '-')}</span>
+                                    </div>
+                                    <div class="text-[11px] font-semibold text-slate-700">${escapeHtml(r.motivoAlteracao || '-')}</div>
+                                    ${r.analisadoPor ? `<div class="text-[10px] text-slate-500">Análise: ${escapeHtml(r.analisadoPor)} (${formatDataBR(r.analisadoEm)})${r.motivoReprovacao ? ' • Motivo: ' + escapeHtml(r.motivoReprovacao) : ''}</div>` : ''}
+                                </div>
+                                ${r.arquivoUrl ? `<a href="${escapeHtml(r.arquivoUrl)}" target="_blank" rel="noopener" class="px-2.5 py-1 rounded-lg bg-slate-100 hover:bg-slate-200 text-slate-700 font-extrabold text-[10px] shrink-0">Arquivo ↗</a>` : ''}
+                            </div>`).join('')}
+                    </div>
+                </div>`;
+
+            document.getElementById('detDocFooter').innerHTML = `
+                <div class="flex flex-wrap items-center gap-2">
+                    <button type="button" onclick="abrirModalNovaRevisao('${d.id}')" class="btn-pill-dark text-xs py-2 px-4">+ Submeter Nova Revisão</button>
+                </div>
+                <button type="button" onclick="fecharModal('modalDetalheDoc')" class="btn-touch bg-white border border-slate-200 text-slate-700 text-xs">Fechar</button>`;
+
+            abrirModal('modalDetalheDoc');
+        };
+
+        // ================= HANDOFF INTEGRADO DE OUTROS MÓDULOS =================
+        function tentarAplicarHandoffDocs() {
+            if (handoffDocsConsumido || !handoffDocsLinhasOk || !handoffDocsLoaded || !usuarioLogado) return;
+            let h = null;
+            try {
+                const raw = safeStorage.get('cepera_agendamento_handoff');
+                if (raw) {
+                    const parsed = JSON.parse(raw);
+                    if (parsed && parsed.targetApp === 'docs_ativos') h = parsed;
+                }
+            } catch (_) {}
+
+            if (!h) {
+                try {
+                    const params = new URLSearchParams(window.location.search || '');
+                    const docIdParam = params.get('docId');
+                    const areaParam = params.get('area');
+                    if (docIdParam || areaParam) {
+                        h = {
+                            targetApp: 'docs_ativos',
+                            action: docIdParam ? 'abrir_doc' : 'filtrar_ativo',
+                            docId: docIdParam || '',
+                            ativo: {
+                                area: areaParam || '',
+                                maquina: params.get('maquina') || '',
+                                equipamento: params.get('equipamento') || '',
+                                conjunto: params.get('conjunto') || ''
+                            },
+                            categoria: params.get('categoria') || ''
+                        };
+                    }
+                } catch (_) {}
+            }
+            if (!h) return;
+
+            handoffDocsConsumido = true;
+            safeStorage.remove('cepera_agendamento_handoff');
+
+            const a = h.ativo || {};
+            if (h.action === 'aprovar_fila' && isPerfilAprovadorDocs(usuarioLogado)) {
+                switchView('aprovacoes');
+                return;
+            }
+            if (h.action === 'novo_doc') {
+                switchView('biblioteca');
+                abrirModalNovoDocumento('doc', { area: a.area, maquina: a.maquina, equipamento: a.equipamento, conjunto: a.conjunto, categoria: h.categoria || '' });
+                return;
+            }
+            switchView('biblioteca');
+            if (a.area) document.getElementById('docFiltroArea').value = a.area;
+            popularFiltrosArvoreBiblioteca(true);
+            if (a.maquina) document.getElementById('docFiltroMaquina').value = a.maquina;
+            popularFiltrosArvoreBiblioteca(true);
+            if (a.equipamento) document.getElementById('docFiltroEquipamento').value = a.equipamento;
+            popularFiltrosArvoreBiblioteca(true);
+            if (a.conjunto) document.getElementById('docFiltroConjunto').value = a.conjunto;
+            if (h.categoria && CATEGORIAS_DOCS[h.categoria] && podeVerDocumento({ categoria: h.categoria })) {
+                categoriaFiltro = h.categoria;
+            }
+            renderBiblioteca();
+            if (h.docId && docsAtivos.some(d => d.id === h.docId)) {
+                abrirDetalheDoc(h.docId);
+            }
+        }
+
+        // ================= BOOT & FIREBASE =================
+        async function iniciarAplicacao() {
+            usuarioLogado = lerSessaoCentral();
+            carregarPreferenciasUsuario(usuarioLogado);
+
+            try {
+                await Promise.race([
+                    signInAnonymously(auth),
+                    new Promise(resolve => setTimeout(resolve, 2000))
+                ]);
+            } catch (_) {}
+
+            onSnapshot(refFunc, (snap) => {
+                listaFunc = snap.docs.map(d => ({ id: d.id, ...d.data() }));
+                if (!usuarioLogado) {
+                    usuarioLogado = lerSessaoCentral();
+                } else if (usuarioLogado.user && !usuarioLogado.isMaster) {
+                    const match = listaFunc.find(f => normKey(f.user) === normKey(usuarioLogado.user));
+                    if (match) usuarioLogado = { ...usuarioLogado, id: match.id, nome: match.nome || usuarioLogado.nome, role: match.role || usuarioLogado.role };
+                }
+                if (!usuarioLogado) {
+                    const den = document.getElementById('accessDeniedScreen');
+                    if (den) { den.hidden = false; den.classList.remove('hidden'); }
+                    return;
+                }
+                const den = document.getElementById('accessDeniedScreen');
+                const main = document.getElementById('mainApp');
+                if (den) { den.hidden = true; den.classList.add('hidden'); }
+                if (main) { main.hidden = false; main.classList.remove('hidden'); }
+                aplicarPerfilInterface();
+                renderCurrentView();
+                tentarAplicarHandoffDocs();
+            });
+
+            if (usuarioLogado) {
+                const main = document.getElementById('mainApp');
+                if (main) { main.hidden = false; main.classList.remove('hidden'); }
+                aplicarPerfilInterface();
+            }
+
+            onSnapshot(refSpConfig, (snapDoc) => {
+                if (snapDoc.exists()) sharepointCfg = { ...DEFAULT_SHAREPOINT_CFG, ...(snapDoc.data() || {}) };
+                if (currentView === 'sharepoint') renderSharePointView();
+            }, () => {});
+
+            onSnapshot(refLinhas, (snap) => {
+                rawLinhasDocs = snap.docs.map(d => ({ id: d.id, ...d.data() }));
+                assetNodes = rawLinhasDocs.flatMap(d => expandirDocParaNodes(d.id, d));
+                handoffDocsLinhasOk = true;
+                document.getElementById('statusDot').className = 'w-2 h-2 rounded-full bg-emerald-500';
+                document.getElementById('statusText').innerText = `Ativos (${assetNodes.length})`;
+                popularFiltrosArvoreBiblioteca(true);
+                renderCurrentView();
+                tentarAplicarHandoffDocs();
+            }, () => {
+                document.getElementById('statusDot').className = 'w-2 h-2 rounded-full bg-rose-500';
+                document.getElementById('statusText').innerText = 'Erro Firestore';
+            });
+
+            onSnapshot(refDocsAtivos, (snap) => {
+                docsAtivos = snap.docs.map(d => ({ id: d.id, ...d.data() }));
+                handoffDocsLoaded = true;
+                renderCurrentView();
+                tentarAplicarHandoffDocs();
+            });
+
+            onSnapshot(refDocsRevisoes, (snap) => {
+                docsRevisoes = snap.docs.map(d => ({ id: d.id, ...d.data() }));
+                renderCurrentView();
+            });
+        }
+
+        if (document.readyState === 'loading') {
+            document.addEventListener('DOMContentLoaded', iniciarAplicacao, { once: true });
+        } else {
+            iniciarAplicacao();
+        }
+    </script>
+</body>
+</html>

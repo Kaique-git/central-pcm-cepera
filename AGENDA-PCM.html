@@ -903,8 +903,9 @@
                     </div>
                     <div>
                         <label class="block text-[10px] font-extrabold uppercase text-slate-500 mb-1">Descrição / Escopo Técnico</label>
-                        <textarea class="input-clean py-2 text-xs" rows="2" id="fDesc" placeholder="Detalhes da ordem, peças ou observações..."></textarea>
+                        <textarea class="input-clean py-2 text-xs" rows="2" id="fDesc" oninput="renderAgendaDocsContextBox()" placeholder="Detalhes da ordem, peças ou observações..."></textarea>
                     </div>
+                    <div id="agDocsContextBar" class="p-3 rounded-2xl bg-indigo-50/70 border border-indigo-200 space-y-2 text-xs"></div>
 
                     <!-- Configuração de Notificação -->
                     <div class="p-3.5 bg-slate-50 border border-slate-200/80 rounded-2xl space-y-2.5">
@@ -1185,6 +1186,7 @@
         const teamColRef = collection(db, "ag_responsaveis");
         const eqColRef = collection(db, "ag_equipes");
         const setColRef = collection(db, "ag_setores");
+        const docsColRef = collection(db, "docs_ativos");
 
         const TIPOS = {
             preventiva: { nome: "Preventiva", cor: "#0284c7" },
@@ -1243,6 +1245,8 @@
         let buscaRecado = "";
         let usuarioLogado = null;
         let pendingAgendaHandoffEquipe = null;
+        let docsAtivosAgenda = [];
+        let agendaDocsBusca = '';
 
         function getLancamentosCalendario() {
             return lancamentos.filter(l => !isRecadoDoc(l) && !isPlanoPreventivaDoc(l) && Boolean(l.data));
@@ -1251,6 +1255,133 @@
         function getRecadosMural() {
             return lancamentos.filter(l => isRecadoDoc(l) && !isPlanoPreventivaDoc(l));
         }
+
+        function normDocKeyAg(str) {
+            return String(str || '').normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase().trim().replace(/\s+/g, ' ');
+        }
+
+        function isPerfilGestaoDocsAg(role) {
+            const r = normDocKeyAg(role);
+            return r === 'admin' || r === 'gerente' || r.startsWith('supervisor');
+        }
+
+        function podeVerDocAg(d) {
+            if (!d) return false;
+            if (d.categoria === 'orcamentos' || d.sigilo === 'gestao') {
+                return Boolean(usuarioLogado && isPerfilGestaoDocsAg(usuarioLogado.role));
+            }
+            return true;
+        }
+
+        const DOCS_CAT_AGENDA = {
+            manuais: 'Manual',
+            lubrificacao: 'Lubrificação',
+            desenhos: 'Desenho Técnico',
+            orcamentos: 'Orçamento (Sigiloso)',
+            fotos: 'Foto Ref.',
+            qualidade: 'Qualidade & Seg.'
+        };
+
+        function getAtivoFormAgenda() {
+            try {
+                const raw = (document.getElementById('fAtivoContextoJson')?.value || '').trim();
+                return raw ? JSON.parse(raw) : {};
+            } catch (_) { return {}; }
+        }
+
+        window.abrirBibliotecaDocsAgenda = (categoria = '') => {
+            const a = getAtivoFormAgenda();
+            const handoff = {
+                targetApp: 'docs_ativos',
+                action: 'filtrar_ativo',
+                ativo: {
+                    area: a.area || '',
+                    maquina: a.maquina || '',
+                    equipamento: a.equipamento || '',
+                    conjunto: a.conjunto || '',
+                    subconjunto: a.subconjunto || ''
+                },
+                categoria: categoria || ''
+            };
+            try { localStorage.setItem('cepera_agendamento_handoff', JSON.stringify(handoff)); } catch (_) {}
+            if (window.parent && window.parent !== window) {
+                window.parent.postMessage({ type: 'CEPERA_NAVEGAR_APP', appId: 'docs_ativos', forceReload: true, handoff }, '*');
+                return;
+            }
+            const qs = new URLSearchParams();
+            if (a.area) qs.set('area', a.area);
+            if (a.maquina) qs.set('maquina', a.maquina);
+            if (a.equipamento) qs.set('equipamento', a.equipamento);
+            window.location.href = `DOCS-ATIVOS.html${qs.toString() ? '?' + qs.toString() : ''}`;
+        };
+
+        window.onAgendaDocsBusca = (val) => {
+            agendaDocsBusca = String(val || '');
+            renderAgendaDocsContextBox();
+        };
+
+        window.renderAgendaDocsContextBox = () => {
+            const box = document.getElementById('agDocsContextBar');
+            if (!box) return;
+            const a = getAtivoFormAgenda();
+            const qCustom = normDocKeyAg(agendaDocsBusca);
+            const titQ = normDocKeyAg(document.getElementById('fTitulo')?.value || '');
+            const vigentesVisiveis = docsAtivosAgenda.filter(d => d.status === 'vigente' && podeVerDocAg(d));
+
+            let matched = [];
+            if (a.area || a.maquina || a.equipamento) {
+                const aa = normDocKeyAg(a.area), mm = normDocKeyAg(a.maquina), ee = normDocKeyAg(a.equipamento), cc = normDocKeyAg(a.conjunto);
+                matched = vigentesVisiveis.filter(d => {
+                    const da = normDocKeyAg(d.area), dm = normDocKeyAg(d.maquina), de = normDocKeyAg(d.equipamento), dc = normDocKeyAg(d.conjunto);
+                    if (aa && da && da !== aa) return false;
+                    if (mm && dm && dm !== mm) return false;
+                    if (ee && de && de !== ee) return false;
+                    if (cc && dc && dc !== cc) return false;
+                    return Boolean((!aa || da === aa) && (!mm || dm === mm));
+                });
+            }
+            if (qCustom) {
+                matched = vigentesVisiveis.filter(d => normDocKeyAg([d.codigo, d.titulo, d.categoria, d.area, d.maquina, d.equipamento, d.conjunto, ...(d.tags || [])].join(' ')).includes(qCustom));
+            } else if (!matched.length && titQ.length >= 3) {
+                const tokens = titQ.split(/\s+/).filter(t => t.length >= 3);
+                if (tokens.length) {
+                    matched = vigentesVisiveis.filter(d => {
+                        const hay = normDocKeyAg([d.codigo, d.titulo, d.equipamento, d.maquina, d.conjunto].join(' '));
+                        return tokens.some(tk => hay.includes(tk));
+                    });
+                }
+            }
+
+            const gestorAllowed = Boolean(usuarioLogado && isPerfilGestaoDocsAg(usuarioLogado.role));
+            const orcsCount = matched.filter(d => d.categoria === 'orcamentos' || d.sigilo === 'gestao').length;
+
+            box.innerHTML = `
+                <div class="flex flex-wrap items-center justify-between gap-2">
+                    <div class="flex flex-wrap items-center gap-1.5">
+                        <span class="text-[10px] font-extrabold uppercase text-indigo-900">Docs Técnicos &amp; Orçamentos do Ativo (${matched.length})</span>
+                        ${gestorAllowed && orcsCount ? `<span class="px-1.5 py-0.5 rounded bg-rose-100 text-rose-800 text-[9px] font-extrabold">${orcsCount} Orçamento(s)</span>` : ''}
+                    </div>
+                    <button type="button" onclick="abrirBibliotecaDocsAgenda()" class="px-2.5 py-1 rounded-lg bg-white border border-indigo-200 hover:bg-indigo-100 text-[10px] font-extrabold text-indigo-700 shrink-0">Biblioteca ↗</button>
+                </div>
+                <input type="text" value="${escapeHtml(agendaDocsBusca)}" oninput="onAgendaDocsBusca(this.value)" placeholder="Filtrar manual, desenho${gestorAllowed ? ', orçamento' : ''} ou DOC-..." class="input-clean py-1.5 text-[11px]">
+                ${matched.length ? `<div class="space-y-1 max-h-32 overflow-y-auto pr-1">${matched.slice(0, 6).map(d => {
+                    const catLbl = DOCS_CAT_AGENDA[d.categoria] || d.categoria || 'Doc';
+                    const isSig = d.categoria === 'orcamentos' || d.sigilo === 'gestao';
+                    return `
+                        <div class="flex items-center justify-between gap-2 p-2 rounded-xl bg-white border ${isSig ? 'border-rose-200' : 'border-slate-200'}">
+                            <div class="min-w-0">
+                                <div class="flex flex-wrap items-center gap-1">
+                                    <span class="text-[10px] font-extrabold text-indigo-700">${escapeHtml(d.codigo || 'DOC')}</span>
+                                    <span class="px-1 py-0.5 rounded bg-slate-100 text-slate-600 text-[9px] font-extrabold">${escapeHtml(d.revisaoVigenteLabel || 'REV 00')}</span>
+                                    <span class="px-1 py-0.5 rounded ${isSig ? 'bg-rose-100 text-rose-700' : 'bg-indigo-50 text-indigo-700'} text-[9px] font-extrabold">${escapeHtml(catLbl)}</span>
+                                </div>
+                                <div class="text-[11px] font-bold text-slate-800 truncate">${escapeHtml(d.titulo || '')}</div>
+                            </div>
+                            ${d.arquivoUrl ? `<a href="${escapeHtml(d.arquivoUrl)}" target="_blank" rel="noopener noreferrer" class="px-2 py-1 rounded-lg bg-indigo-600 hover:bg-indigo-700 text-white text-[10px] font-extrabold shrink-0">Abrir ↗</a>` : ''}
+                        </div>`;
+                }).join('')}</div>` : `<div class="text-[10px] font-semibold text-slate-500">${(a.area || qCustom) ? 'Nenhum documento vigente correspondente.' : 'Vincule um conjunto da Árvore ou digite acima para consultar manuais e orçamentos.'}</div>`}
+            `;
+        };
 
         const ICONS = {
             edit: `<svg class="svg-icon" viewBox="0 0 24 24"><path d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z"/></svg>`,
@@ -1464,6 +1595,12 @@
                     snap.forEach(d => listaSetores.push({ id: d.id, ...d.data() }));
                     atualizarSelectsDominio();
                     renderListaSetores();
+                });
+
+                onSnapshot(docsColRef, snap => {
+                    docsAtivosAgenda = [];
+                    snap.forEach(d => docsAtivosAgenda.push({ id: d.id, ...d.data() }));
+                    if (typeof renderAgendaDocsContextBox === 'function') renderAgendaDocsContextBox();
                 });
 
             } catch (e) {
@@ -1776,6 +1913,8 @@
             const ativoRes = document.getElementById('ativoOrigemResumo');
             if (ativoRes) ativoRes.innerText = '';
             pendingAgendaHandoffEquipe = null;
+            agendaDocsBusca = '';
+            if (typeof renderAgendaDocsContextBox === 'function') renderAgendaDocsContextBox();
             showToast("Vínculo com o conjunto removido.");
         };
 
@@ -1802,9 +1941,11 @@
             const rm = document.getElementById('recMenu');
             if (rm) { rm.hidden = true; rm.classList.add('hidden'); }
             resetFormPlanejamento();
+            agendaDocsBusca = '';
             abrirModal('dayOverlay');
             atualizarSelectRespAdd();
             renderListaDia();
+            if (typeof renderAgendaDocsContextBox === 'function') renderAgendaDocsContextBox();
         };
 
         window.mudarStatus = async (id, novoStatus) => {
@@ -2757,10 +2898,14 @@
                 fDesc.value = detalhes.join(' • ');
             }
 
+            if (typeof renderAgendaDocsContextBox === 'function') renderAgendaDocsContextBox();
             showToast(`Formulário pré-preenchido para "${a.conjunto || a.equipamento}". Escolha a data e salve.`);
         }
 
         document.addEventListener('DOMContentLoaded', () => {
+            document.getElementById('fTitulo')?.addEventListener('input', () => {
+                if (typeof renderAgendaDocsContextBox === 'function') renderAgendaDocsContextBox();
+            });
             initFirebase();
             aplicarHandoffAgendamentoAgenda();
         });
