@@ -487,11 +487,27 @@
                                 <button type="button" onclick="conectarPastaOneDriveLocal()" class="btn-touch bg-emerald-600 hover:bg-emerald-700 text-white text-xs py-2 px-4 shadow-sm">
                                     <span>📁 Selecionar Pasta OneDrive Sincronizada</span>
                                 </button>
+                                <button type="button" id="btnEspelharPendentesSp" onclick="espelharTodosPendentesSharePoint()" class="btn-touch bg-white hover:bg-emerald-100 text-emerald-900 border border-emerald-300 text-xs py-2 px-3.5 font-extrabold">
+                                    ☁️ Espelhar Docs Aprovados Pendentes (<span id="spBacklogCount">0</span>)
+                                </button>
                                 <button type="button" id="btnDesconectarOneDrive" onclick="desconectarPastaOneDriveLocal()" hidden class="hidden btn-touch bg-white hover:bg-rose-50 text-rose-700 border border-rose-200 text-xs py-2 px-3">
                                     Desvincular Pasta
                                 </button>
                             </div>
+                            <div id="spBacklogInfoTxt" class="text-[11px] font-semibold text-emerald-950/80"></div>
                         </div>
+
+                        <details class="p-4 rounded-2xl bg-indigo-50/70 border border-indigo-200 text-xs text-slate-800">
+                            <summary class="cursor-pointer font-extrabold text-indigo-900 select-none">🤖 Não consegue sincronizar o OneDrive no PC? Use o Webhook Power Automate (100% Nuvem)</summary>
+                            <div class="pt-3 space-y-2 text-[11px] leading-relaxed">
+                                <p>Se o OneDrive Desktop estiver bloqueado na sua máquina, os documentos até 7 MB <strong>já funcionam normalmente salvos no banco do sistema</strong>. Se desejar que cada arquivo enviado/aprovado também seja gravado automaticamente dentro das pastas do SharePoint pela nuvem:</p>
+                                <ol class="list-decimal pl-5 space-y-1 font-medium">
+                                    <li>No <strong>Power Automate</strong>, crie um fluxo <em>Instantâneo</em> com gatilho <strong>"Quando uma solicitação HTTP for recebida"</strong> (JSON com campos <code>pastaRelativa</code>, <code>nomeArquivo</code>, <code>conteudoBase64</code>, <code>mimeType</code>).</li>
+                                    <li>Adicione a ação <strong>SharePoint → Criar arquivo</strong> apontando para este site, pasta <code>Documentos Compartilhados/@{triggerBody()?['pastaRelativa']}</code>, nome <code>@{triggerBody()?['nomeArquivo']}</code> e conteúdo <code>@{base64ToBinary(triggerBody()?['conteudoBase64'])}</code>.</li>
+                                    <li>Adicione uma ação <strong>Resposta HTTP (200)</strong> devolvendo <code>{"arquivoUrl": "https://ceperaind.sharepoint.com..."}</code> e cole a URL do gatilho no campo <strong>Webhook Power Automate</strong> abaixo.</li>
+                                </ol>
+                            </div>
+                        </details>
 
                         <details class="p-4 rounded-2xl bg-amber-50/80 border border-amber-200 text-xs text-amber-950">
                             <summary class="cursor-pointer font-extrabold select-none">⚠️ Ajuda rápida para sincronização inicial de pastas no SharePoint / OneDrive</summary>
@@ -718,10 +734,11 @@
                     <!-- Guia Opcional Recolhido para Padrão SharePoint -->
                     <details class="p-2.5 rounded-xl bg-white/80 border border-slate-200 text-[11px]">
                         <summary class="cursor-pointer font-extrabold text-sky-800 select-none flex flex-wrap items-center justify-between gap-2">
-                            <span>📂 Organização automática SharePoint (Pasta &amp; Nome padrão gerado)</span>
+                            <span>📂 Padrão de Pasta e Nome SharePoint (opcional — arquivo já é salvo no sistema)</span>
                             <span class="text-[10px] font-mono text-slate-500" id="ndSpNomeResumoBadge">Ver detalhes</span>
                         </summary>
                         <div class="pt-2.5 space-y-2">
+                            <p class="text-[10px] text-slate-500 font-semibold">O arquivo arrastado já fica salvo no banco do aplicativo. Conecte sua pasta OneDrive (ou Webhook) abaixo caso também queira espelhá-lo automaticamente dentro desta subpasta do SharePoint:</p>
                             <div class="grid grid-cols-1 gap-1 text-[11px] font-mono bg-slate-50 p-2.5 rounded-xl border border-slate-200">
                                 <div class="truncate text-slate-600"><strong class="text-slate-800">Pasta:</strong> <span id="ndSpPastaPath">SISTEMA/...</span></div>
                                 <div class="truncate text-indigo-700"><strong class="text-slate-800">Arquivo:</strong> <span id="ndSpNomeArquivo">DOC-...</span></div>
@@ -1630,7 +1647,9 @@ match /config/{document=**} {
                         <div class="flex flex-wrap items-center gap-1">
                             ${tagsHtml}
                             ${valBadge}
-                            ${d.arquivoNome && !d.arquivoUrl ? `<span class="px-2 py-0.5 rounded-md bg-indigo-50 text-indigo-700 border border-indigo-200 text-[10px] font-extrabold">📎 ${escapeHtml(d.arquivoNome.split('.').pop()?.toUpperCase() || 'DOC')} • ${formatarTamanhoBytes(d.arquivoTamanhoBytes)}</span>` : ''}
+                            ${d.arquivoUrl
+                                ? `<span class="px-2 py-0.5 rounded-md bg-sky-50 text-sky-800 border border-sky-200 text-[10px] font-extrabold">${d.arquivoId ? '☁️ Banco + SharePoint' : '🔗 Link SharePoint'}</span>`
+                                : (d.arquivoNome ? `<span class="px-2 py-0.5 rounded-md bg-indigo-50 text-indigo-700 border border-indigo-200 text-[10px] font-extrabold">💾 Banco (${escapeHtml(d.arquivoNome.split('.').pop()?.toUpperCase() || 'DOC')} • ${formatarTamanhoBytes(d.arquivoTamanhoBytes)})</span>` : '')}
                             ${d.temRevisaoPendente ? '<span class="px-2 py-0.5 rounded-full text-[9px] font-extrabold bg-amber-100 text-amber-800 border border-amber-200">Nova Rev. em aprovação</span>' : ''}
                         </div>
                     </div>
@@ -1757,6 +1776,23 @@ match /config/{document=**} {
             const catMeta = CATEGORIAS_DOCS[rev.categoria] || CATEGORIAS_DOCS.manuais;
 
             try {
+                // 0. Se ainda não tem URL no SharePoint mas há OneDrive local ou Webhook ativo neste navegador, espelha na aprovação
+                let finalArquivoUrl = rev.arquivoUrl || '';
+                let finalArquivoEmbedUrl = rev.arquivoEmbedUrl || '';
+                let finalProvider = rev.arquivoProvider || (rev.arquivoId ? 'banco_interno' : 'sharepoint');
+                if (!finalArquivoUrl && (rev.arquivoId || rev.fotoThumbB64) && (pastaOneDriveHandle || sharepointCfg.webhookUploadUrl)) {
+                    try {
+                        const mir = await espelharDocLikeParaSharePoint(rev);
+                        if (mir?.arquivoUrl) {
+                            finalArquivoUrl = mir.arquivoUrl;
+                            if (mir.arquivoEmbedUrl && !finalArquivoEmbedUrl) finalArquivoEmbedUrl = mir.arquivoEmbedUrl;
+                            finalProvider = rev.arquivoId ? 'hibrido' : 'sharepoint';
+                        }
+                    } catch (errMir) {
+                        console.warn('Espelhamento opcional durante aprovação falhou (seguindo aprovação no banco):', errMir);
+                    }
+                }
+
                 // 1. Rebaixa revisões vigentes anteriores deste documento para obsoleta
                 const antigasVigentes = docsRevisoes.filter(x => x.docMasterId === master.id && x.id !== rev.id && x.status === 'vigente');
                 for (const ant of antigasVigentes) {
@@ -1768,12 +1804,15 @@ match /config/{document=**} {
                 }
 
                 // 2. Promove a revisão aprovada a vigente
-                await updateDoc(doc(db, 'docs_revisoes', rev.id), {
+                await updateDoc(doc(db, 'docs_revisoes', rev.id), sanitizarPayloadFirestore({
                     status: 'vigente',
+                    arquivoProvider: finalProvider,
+                    arquivoUrl: finalArquivoUrl,
+                    arquivoEmbedUrl: finalArquivoEmbedUrl,
                     analisadoPor: aprovNome,
                     analisadoPorRole: aprovRole,
                     analisadoEm: agora
-                });
+                }));
 
                 // 3. Verifica se sobrou alguma outra revisão pendente
                 const outrasPend = docsRevisoes.some(x => x.docMasterId === master.id && x.id !== rev.id && x.status === 'pendente_aprovacao');
@@ -1797,14 +1836,14 @@ match /config/{document=**} {
                     resumoTecnico: rev.resumoTecnico || '',
                     validadeEm: rev.validadeEm || '',
                     periodicidadeRevalidacaoMeses: Number(rev.periodicidadeRevalidacaoMeses || 0),
-                    arquivoProvider: rev.arquivoProvider || (rev.arquivoId ? 'banco_interno' : 'sharepoint'),
+                    arquivoProvider: finalProvider,
                     arquivoId: rev.arquivoId || '',
                     arquivoNome: rev.arquivoNome || '',
                     arquivoMime: rev.arquivoMime || '',
                     arquivoTamanhoBytes: Number(rev.arquivoTamanhoBytes || 0),
                     arquivoPartes: Number(rev.arquivoPartes || 0),
-                    arquivoUrl: rev.arquivoUrl || '',
-                    arquivoEmbedUrl: rev.arquivoEmbedUrl || '',
+                    arquivoUrl: finalArquivoUrl,
+                    arquivoEmbedUrl: finalArquivoEmbedUrl,
                     fotoThumbB64: rev.fotoThumbB64 || '',
                     sharepointPastaSugerida: rev.sharepointPastaSugerida || '',
                     sharepointNomeSugerido: rev.sharepointNomeSugerido || '',
@@ -1822,7 +1861,7 @@ match /config/{document=**} {
                 masterUpdate.searchText = construirSearchText({ ...master, ...masterUpdate });
                 await updateDoc(doc(db, 'docs_ativos', master.id), sanitizarPayloadFirestore(masterUpdate));
 
-                showToast(`${master.codigo} • ${rev.revisaoLabel} aprovado e publicado como VIGENTE!`, 'success');
+                showToast(`${master.codigo} • ${rev.revisaoLabel} aprovado e publicado como VIGENTE!${finalArquivoUrl && !rev.arquivoUrl ? ' (Espelhado no SharePoint/OneDrive)' : ''}`, 'success');
             } catch (err) {
                 console.error('Falha em aprovarRevisaoDoc:', err);
                 const info = formatarErroFirestoreDocs(err);
@@ -2331,6 +2370,15 @@ match /config/{document=**} {
             } catch (_) {}
         }
 
+        function getDocsVigentesPendentesEspelho() {
+            return docsAtivos.filter(d =>
+                d &&
+                d.status === 'vigente' &&
+                !d.arquivoUrl &&
+                (d.arquivoId || d.fotoThumbB64)
+            );
+        }
+
         function atualizarBadgesOneDriveUI() {
             const conectado = Boolean(pastaOneDriveHandle);
             const nomePasta = pastaOneDriveHandle?.name || '';
@@ -2355,11 +2403,22 @@ match /config/{document=**} {
             }
             const btnNd = document.getElementById('btnNdConectarOneDrive');
             if (btnNd) btnNd.innerText = conectado ? `✓ OneDrive: ${nomePasta}` : '📁 Vincular Pasta OneDrive';
+
+            const pendentes = getDocsVigentesPendentesEspelho();
+            const cntEl = document.getElementById('spBacklogCount');
+            if (cntEl) cntEl.innerText = String(pendentes.length);
+            const infoEl = document.getElementById('spBacklogInfoTxt');
+            if (infoEl) {
+                infoEl.innerHTML = pendentes.length
+                    ? `Existem <strong>${pendentes.length}</strong> documento(s) aprovados salvos no <strong>Banco do App</strong> que ainda não possuem cópia/link nas pastas do SharePoint.`
+                    : '✓ Todos os documentos aprovados já possuem vínculo/cópia apontada para o SharePoint!';
+            }
         }
 
         window.conectarPastaOneDriveLocal = async () => {
             if (typeof window.showDirectoryPicker !== 'function') {
-                return showToast('Seu navegador/celular não suporta vínculo de pasta local. Sem problema: arraste o arquivo normalmente até 7 MB!', 'info');
+                showToast('Seu navegador/celular não suporta vínculo de pasta local. Sem problema: arraste o arquivo normalmente até 7 MB!', 'info');
+                return false;
             }
             try {
                 const dirHandle = await window.showDirectoryPicker({ mode: 'readwrite' });
@@ -2367,8 +2426,10 @@ match /config/{document=**} {
                 await salvarHandleOneDriveIdb(dirHandle);
                 atualizarBadgesOneDriveUI();
                 showToast(`Pasta OneDrive "${dirHandle.name}" conectada! Arquivos arrastados serão gravados direto nela.`, 'success');
+                return true;
             } catch (err) {
                 if (err?.name !== 'AbortError') showToast('Não foi possível acessar a pasta selecionada.', 'error');
+                return false;
             }
         };
 
@@ -2452,6 +2513,163 @@ match /config/{document=**} {
                 return null;
             }
         }
+
+        async function carregarBase64ParaEspelho(docLike) {
+            if (!docLike) return null;
+            if (docLike.arquivoId) {
+                const q = query(refDocsArquivosPartes, where('arquivoId', '==', docLike.arquivoId));
+                const snap = await getDocs(q);
+                const partes = snap.docs.map(x => x.data()).sort((a, b) => Number(a.partIndex || 0) - Number(b.partIndex || 0));
+                if (!partes.length) return null;
+                const b64 = partes.map(p => p.chunkB64 || '').join('');
+                const mimeType = docLike.arquivoMime || partes[0].mimeType || inferMimeByFileName(docLike.arquivoNome || partes[0].fileName);
+                const origName = docLike.arquivoNome || partes[0].fileName || 'documento.pdf';
+                const sizeBytes = Number(docLike.arquivoTamanhoBytes || partes[0].sizeBytes || Math.round(b64.length * 0.75));
+                return { base64Body: b64, mimeType, origName, sizeBytes };
+            }
+            if (docLike.fotoThumbB64) {
+                const b64 = extrairBase64Puro(docLike.fotoThumbB64);
+                return { base64Body: b64, mimeType: 'image/jpeg', origName: `${docLike.codigo || docLike.codigoDoc || 'foto'}.jpg`, sizeBytes: Math.round(b64.length * 0.75) };
+            }
+            return null;
+        }
+
+        async function espelharDocLikeParaSharePoint(docLike) {
+            if (!docLike || (!pastaOneDriveHandle && !sharepointCfg.webhookUploadUrl)) return null;
+            const loaded = await carregarBase64ParaEspelho(docLike);
+            if (!loaded || !loaded.base64Body) return null;
+
+            const pastaSug = docLike.sharepointPastaSugerida || montarPastaSharePointRelativa({
+                categoria: docLike.categoria, area: docLike.area, maquina: docLike.maquina, equipamento: docLike.equipamento
+            });
+            const ext = loaded.origName?.includes('.') ? loaded.origName.split('.').pop().toLowerCase().replace(/[^a-z0-9]/g, '') : 'pdf';
+            const nomeSug = docLike.sharepointNomeSugerido || montarNomePadraoArquivoSp(docLike.codigo || docLike.codigoDoc, docLike.revisaoVigenteLabel || docLike.revisaoLabel || 'REV00', docLike.titulo, ext || 'pdf');
+
+            if (pastaOneDriveHandle) {
+                const bytes = base64ToUint8Array(loaded.base64Body);
+                const blobFile = new Blob([bytes], { type: loaded.mimeType });
+                const resOd = await salvarArquivoEmPastaOneDriveLocal(pastaSug, nomeSug, loaded.base64Body, blobFile);
+                if (resOd?.ok && resOd.sharepointUrl) {
+                    return { arquivoUrl: resOd.sharepointUrl, arquivoEmbedUrl: '', pastaSug, nomeSug };
+                }
+            }
+            if (sharepointCfg.webhookUploadUrl) {
+                const resWh = await enviarArquivoViaWebhookSharePoint({
+                    pastaRelativa: pastaSug,
+                    nomeArquivo: nomeSug,
+                    mimeType: loaded.mimeType,
+                    tamanhoBytes: loaded.sizeBytes,
+                    conteudoBase64: loaded.base64Body,
+                    codigo: docLike.codigo || docLike.codigoDoc,
+                    revisao: docLike.revisaoVigenteLabel || docLike.revisaoLabel || 'REV 00'
+                });
+                if (resWh?.arquivoUrl) {
+                    return { arquivoUrl: resWh.arquivoUrl, arquivoEmbedUrl: resWh.arquivoEmbedUrl || '', pastaSug, nomeSug };
+                }
+            }
+            return null;
+        }
+
+        window.espelharDocNoSharePointAgora = async (masterId) => {
+            if (!isPerfilAprovadorDocs(usuarioLogado)) return showToast('Apenas Gestão/Supervisão pode gerenciar espelhamento no SharePoint.', 'error');
+            const d = docsAtivos.find(x => x.id === masterId);
+            if (!d) return;
+            if (!pastaOneDriveHandle && !sharepointCfg.webhookUploadUrl) {
+                const conectou = await conectarPastaOneDriveLocal();
+                if (!conectou && !sharepointCfg.webhookUploadUrl) return;
+            }
+            try {
+                showToast('Espelhando arquivo para o SharePoint/OneDrive...', 'info');
+                const mir = await espelharDocLikeParaSharePoint(d);
+                if (!mir?.arquivoUrl) {
+                    return showToast('Não foi possível gravar na pasta selecionada/Webhook. Verifique as permissões ou baixe c/ Nome Padrão.', 'error');
+                }
+                const agora = new Date().toISOString();
+                const novoProvider = d.arquivoId ? 'hibrido' : 'sharepoint';
+                await updateDoc(doc(db, 'docs_ativos', d.id), sanitizarPayloadFirestore({
+                    arquivoUrl: mir.arquivoUrl,
+                    arquivoEmbedUrl: mir.arquivoEmbedUrl || d.arquivoEmbedUrl || '',
+                    arquivoProvider: novoProvider,
+                    atualizadoEm: agora
+                }));
+                if (d.revisaoVigenteId) {
+                    await updateDoc(doc(db, 'docs_revisoes', d.revisaoVigenteId), sanitizarPayloadFirestore({
+                        arquivoUrl: mir.arquivoUrl,
+                        arquivoEmbedUrl: mir.arquivoEmbedUrl || d.arquivoEmbedUrl || '',
+                        arquivoProvider: novoProvider
+                    }));
+                }
+                showToast(`"${d.codigo}" espelhado com sucesso!`, 'success');
+                setTimeout(() => abrirDetalheDoc(d.id), 150);
+            } catch (err) {
+                console.error('Erro ao espelhar documento:', err);
+                const info = formatarErroFirestoreDocs(err);
+                showToast(info.resumo, 'error');
+            }
+        };
+
+        window.vincularUrlSharePointDoc = async (masterId) => {
+            if (!isPerfilAprovadorDocs(usuarioLogado)) return showToast('Apenas Gestão/Supervisão pode vincular URL externa.', 'error');
+            const d = docsAtivos.find(x => x.id === masterId);
+            if (!d) return;
+            const spUrl = prompt(`Cole a URL do arquivo "${d.sharepointNomeSugerido || d.codigo}" já colocado no SharePoint:`, d.arquivoUrl || '');
+            if (!spUrl || !spUrl.trim()) return;
+            try {
+                const novoProvider = d.arquivoId ? 'hibrido' : 'sharepoint';
+                await updateDoc(doc(db, 'docs_ativos', d.id), sanitizarPayloadFirestore({
+                    arquivoUrl: spUrl.trim(),
+                    arquivoProvider: novoProvider,
+                    atualizadoEm: new Date().toISOString()
+                }));
+                if (d.revisaoVigenteId) {
+                    await updateDoc(doc(db, 'docs_revisoes', d.revisaoVigenteId), sanitizarPayloadFirestore({
+                        arquivoUrl: spUrl.trim(),
+                        arquivoProvider: novoProvider
+                    }));
+                }
+                showToast(`Link do SharePoint vinculado em "${d.codigo}"!`, 'success');
+                setTimeout(() => abrirDetalheDoc(d.id), 150);
+            } catch (err) {
+                const info = formatarErroFirestoreDocs(err);
+                showToast(info.resumo, 'error');
+            }
+        };
+
+        window.espelharTodosPendentesSharePoint = async () => {
+            if (!isPerfilAprovadorDocs(usuarioLogado)) return showToast('Apenas Gestão/Supervisão pode executar sincronização em lote.', 'error');
+            const pend = getDocsVigentesPendentesEspelho();
+            if (!pend.length) return showToast('Todos os documentos aprovados já possuem cópia/vínculo no SharePoint!', 'success');
+            if (!pastaOneDriveHandle && !sharepointCfg.webhookUploadUrl) {
+                const conectou = await conectarPastaOneDriveLocal();
+                if (!conectou && !sharepointCfg.webhookUploadUrl) return;
+            }
+            let okCount = 0;
+            showToast(`Espelhando ${pend.length} documento(s)... aguarde`, 'info');
+            for (const d of pend) {
+                try {
+                    const mir = await espelharDocLikeParaSharePoint(d);
+                    if (mir?.arquivoUrl) {
+                        const novoProvider = d.arquivoId ? 'hibrido' : 'sharepoint';
+                        await updateDoc(doc(db, 'docs_ativos', d.id), sanitizarPayloadFirestore({
+                            arquivoUrl: mir.arquivoUrl,
+                            arquivoEmbedUrl: mir.arquivoEmbedUrl || d.arquivoEmbedUrl || '',
+                            arquivoProvider: novoProvider,
+                            atualizadoEm: new Date().toISOString()
+                        }));
+                        if (d.revisaoVigenteId) {
+                            await updateDoc(doc(db, 'docs_revisoes', d.revisaoVigenteId), sanitizarPayloadFirestore({
+                                arquivoUrl: mir.arquivoUrl,
+                                arquivoEmbedUrl: mir.arquivoEmbedUrl || d.arquivoEmbedUrl || '',
+                                arquivoProvider: novoProvider
+                            }));
+                        }
+                        okCount++;
+                    }
+                } catch (_) {}
+            }
+            atualizarBadgesOneDriveUI();
+            showToast(`${okCount} de ${pend.length} documento(s) espelhados com sucesso para a pasta!`, okCount > 0 ? 'success' : 'error');
+        };
 
         // ================= CONVERSÃO BASE64 / UPLOAD EM PARTES / VISUALIZAÇÃO =================
         function extrairBase64Puro(dataUrl) {
@@ -2560,22 +2778,25 @@ match /config/{document=**} {
             }
         };
 
-        window.baixarArquivoDoc = async (masterId, revId = '') => {
+        window.baixarArquivoDoc = async (masterId, revId = '', usarNomePadraoSp = false) => {
             const rev = revId ? docsRevisoes.find(r => r.id === revId) : null;
             const d = rev || docsAtivos.find(x => x.id === masterId);
             if (!d || !podeVerDocumento(d)) return;
+            const nomePadrao = d.sharepointNomeSugerido || `${d.codigo || d.codigoDoc || 'documento'}.pdf`;
             if (d.arquivoId) {
                 try {
                     const rec = await carregarArquivoBlobPorId(d.arquivoId, d.arquivoMime, d.arquivoNome);
                     if (rec) {
-                        dispararDownloadBlob(rec.blobUrl, rec.fileName);
-                        showToast(`Download de "${rec.fileName}" iniciado!`, 'success');
+                        const nomeFinal = usarNomePadraoSp ? nomePadrao : rec.fileName;
+                        dispararDownloadBlob(rec.blobUrl, nomeFinal);
+                        showToast(`Download de "${nomeFinal}" iniciado!`, 'success');
                     }
                 } catch (_) {
                     showToast('Erro ao baixar arquivo.', 'error');
                 }
             } else if (d.fotoThumbB64) {
-                dispararDownloadBlob(d.fotoThumbB64, `${d.codigo || 'foto'}.jpg`);
+                const nomeFinal = usarNomePadraoSp ? (d.sharepointNomeSugerido || `${d.codigo || 'foto'}.jpg`) : `${d.codigo || 'foto'}.jpg`;
+                dispararDownloadBlob(d.fotoThumbB64, nomeFinal);
             } else if (d.arquivoUrl && typeof window.open === 'function') {
                 window.open(d.arquivoUrl, '_blank', 'noopener');
             }
@@ -3199,6 +3420,42 @@ match /config/{document=**} {
                    </div>`
                 : '';
 
+            const ehAprovadorSp = isPerfilAprovadorDocs(usuarioLogado);
+            const nomePadraoSp = d.sharepointNomeSugerido || `${d.codigo || 'DOC'}.pdf`;
+            const pastaPadraoSp = d.sharepointPastaSugerida || sharepointCfg.pastaRaiz || 'SISTEMA';
+            const spBoxHtml = d.arquivoUrl
+                ? `<div class="p-3.5 rounded-2xl bg-emerald-50/75 border border-emerald-200 flex flex-wrap items-center justify-between gap-2">
+                        <div class="min-w-0 space-y-0.5">
+                            <div class="text-[10px] font-extrabold uppercase text-emerald-800">✓ Arquivo Sincronizado / Link no SharePoint</div>
+                            <div class="text-[11px] font-mono text-slate-700 truncate">${escapeHtml(pastaPadraoSp)}/${escapeHtml(nomePadraoSp)}</div>
+                        </div>
+                        <div class="flex flex-wrap items-center gap-1.5">
+                            <a href="${escapeHtml(d.arquivoUrl)}" target="_blank" rel="noopener" class="px-3 py-1.5 rounded-xl bg-sky-600 hover:bg-sky-700 text-white font-extrabold text-[11px]">Abrir no SharePoint ↗</a>
+                            <a href="${escapeHtml(spFolderUrl)}" target="_blank" rel="noopener" class="px-3 py-1.5 rounded-xl bg-white hover:bg-sky-50 border border-sky-200 text-sky-800 font-extrabold text-[11px]">Abrir Pasta ↗</a>
+                            ${d.arquivoId ? `<button type="button" onclick="baixarArquivoDoc('${d.id}', '', true)" class="px-2.5 py-1.5 rounded-xl bg-white hover:bg-slate-100 border border-slate-200 text-slate-700 font-extrabold text-[11px]">⬇ Nome Padrão</button>` : ''}
+                        </div>
+                   </div>`
+                : `<div class="p-3.5 rounded-2xl bg-amber-50/75 border border-amber-200 space-y-2.5">
+                        <div class="flex flex-wrap items-start justify-between gap-2">
+                            <div class="min-w-0 space-y-1">
+                                <div class="text-[10px] font-extrabold uppercase text-amber-900">💾 Salvo no Banco do App (Cópia no SharePoint Pendente)</div>
+                                <p class="text-[11px] text-slate-700 font-medium leading-snug">
+                                    O documento já está salvo no sistema e disponível para todo o time no campo. A pasta SharePoint indicada abaixo permanece vazia até conectar seu OneDrive/Webhook ou copiar manualmente com o nome padrão:
+                                </p>
+                            </div>
+                        </div>
+                        <div class="p-2.5 rounded-xl bg-white/90 border border-amber-200/80 font-mono text-[11px] space-y-0.5 text-slate-700">
+                            <div class="truncate"><strong>Pasta destino:</strong> ${escapeHtml(pastaPadraoSp)}</div>
+                            <div class="truncate text-indigo-800"><strong>Nome padrão:</strong> ${escapeHtml(nomePadraoSp)}</div>
+                        </div>
+                        <div class="flex flex-wrap items-center gap-1.5">
+                            ${(d.arquivoId || d.fotoThumbB64) ? `<button type="button" onclick="baixarArquivoDoc('${d.id}', '', true)" class="px-3 py-1.5 rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white font-extrabold text-[11px]">⬇ Baixar c/ Nome Padrão</button>` : ''}
+                            <a href="${escapeHtml(spFolderUrl)}" target="_blank" rel="noopener" class="px-3 py-1.5 rounded-xl bg-white hover:bg-sky-50 border border-sky-200 text-sky-800 font-extrabold text-[11px]">Abrir Pasta SharePoint ↗</a>
+                            ${ehAprovadorSp && (d.arquivoId || d.fotoThumbB64) ? `<button type="button" onclick="espelharDocNoSharePointAgora('${d.id}')" class="px-3 py-1.5 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white font-extrabold text-[11px]">☁️ Enviar p/ Pasta OneDrive</button>` : ''}
+                            ${ehAprovadorSp ? `<button type="button" onclick="vincularUrlSharePointDoc('${d.id}')" class="px-3 py-1.5 rounded-xl bg-white hover:bg-slate-100 border border-slate-200 text-slate-700 font-extrabold text-[11px]">🔗 Colar Link SharePoint</button>` : ''}
+                        </div>
+                   </div>`;
+
             document.getElementById('detDocBody').innerHTML = `
                 <div class="grid grid-cols-1 sm:grid-cols-3 gap-3">
                     <div class="p-3 rounded-2xl bg-slate-50 border border-slate-200">
@@ -3219,17 +3476,7 @@ match /config/{document=**} {
                 ${d.fotoThumbB64 ? `<div><img src="${d.fotoThumbB64}" onclick="abrirZoomFotoDoc('${d.id}')" class="max-h-72 rounded-2xl border border-slate-200 object-contain cursor-zoom-in mx-auto"></div>` : ''}
                 ${arquivoDiretoSlotHtml}
                 ${embedHtml}
-
-                <div class="p-3.5 rounded-2xl bg-sky-50/70 border border-sky-200 flex flex-wrap items-center justify-between gap-2">
-                    <div class="min-w-0">
-                        <div class="text-[10px] font-extrabold uppercase text-sky-800">Pasta / Padrão SharePoint</div>
-                        <div class="text-[11px] font-mono text-slate-700 truncate">${escapeHtml(d.sharepointPastaSugerida || sharepointCfg.pastaRaiz)}/${escapeHtml(d.sharepointNomeSugerido || '')}</div>
-                    </div>
-                    <div class="flex flex-wrap items-center gap-1.5">
-                        ${d.arquivoUrl ? `<a href="${escapeHtml(d.arquivoUrl)}" target="_blank" rel="noopener" class="px-3 py-1.5 rounded-xl bg-sky-600 hover:bg-sky-700 text-white font-extrabold text-[11px]">Abrir no SharePoint ↗</a>` : ''}
-                        <a href="${escapeHtml(spFolderUrl)}" target="_blank" rel="noopener" class="px-3 py-1.5 rounded-xl bg-white hover:bg-sky-50 border border-sky-200 text-sky-800 font-extrabold text-[11px]">Abrir Pasta ↗</a>
-                    </div>
-                </div>
+                ${spBoxHtml}
 
                 <div class="space-y-2">
                     <h3 class="text-xs font-extrabold uppercase tracking-wider text-slate-600">Histórico Completo de Revisões (${revs.length})</h3>
