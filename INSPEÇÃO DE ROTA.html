@@ -904,16 +904,21 @@
                                         </div>
 
                                         <div class="flex flex-col sm:items-end gap-2 self-start shrink-0">
-                                            <button type="button" id="btnToggleInspAtivaEditor" onclick="toggleConjuntoInspecaoAtiva(editorSelectedNodeId)" class="inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-full text-xs font-extrabold border transition-all bg-emerald-50 text-emerald-800 border-emerald-200 hover:bg-emerald-100" title="Alternar visibilidade deste conjunto no Calendário de 52 Semanas de Inspeção">
-                                                <span id="dotToggleInspAtivaEditor" class="w-2 h-2 rounded-full bg-emerald-500"></span>
-                                                <span id="lblToggleInspAtivaEditor">Inspeção Ativa</span>
-                                            </button>
+                                            <div class="flex flex-wrap items-center justify-end gap-1.5">
+                                                <button type="button" id="btnToggleInspAtivaEditor" onclick="toggleConjuntoInspecaoAtiva(editorSelectedNodeId)" class="inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-full text-xs font-extrabold border transition-all bg-emerald-50 text-emerald-800 border-emerald-200 hover:bg-emerald-100" title="Alternar visibilidade deste item no Calendário de 52 Semanas e Minhas Inspeções">
+                                                    <span id="dotToggleInspAtivaEditor" class="w-2 h-2 rounded-full bg-emerald-500"></span>
+                                                    <span id="lblToggleInspAtivaEditor">Inspeção Ativa</span>
+                                                </button>
+                                                <button type="button" id="btnSoConjuntoInteiroEditor" class="hidden px-3 py-1.5 rounded-full text-[11px] font-extrabold border border-indigo-200 bg-indigo-50 text-indigo-800 hover:bg-indigo-100 transition-colors">Ativar Só Conj. Inteiro</button>
+                                            </div>
                                             <div class="flex items-center gap-1.5 bg-slate-100 p-1.5 rounded-full">
                                                 <button type="button" id="btnEdEspMec" onclick="trocarEspecialidadeEditor('Mecânica')" class="px-4 py-1.5 rounded-full text-xs font-extrabold bg-slate-900 text-white transition-all">Mecânica</button>
                                                 <button type="button" id="btnEdEspEle" onclick="trocarEspecialidadeEditor('Elétrica')" class="px-4 py-1.5 rounded-full text-xs font-extrabold text-slate-600 hover:text-slate-900 transition-all">Elétrica</button>
                                             </div>
                                         </div>
                                     </div>
+
+                                    <div id="cfgEdEscopoBanner" class="hidden"></div>
 
                                     <div id="cfgEdAvisoOculto" class="hidden p-3.5 rounded-2xl bg-amber-50 border border-amber-200 text-amber-900 text-xs font-semibold">
                                         <div class="flex flex-wrap items-center justify-between gap-2">
@@ -1269,6 +1274,7 @@
                         <span class="text-[11px] font-bold text-slate-500" id="execCaminho">Setor &gt; Máquina &gt; Equipamento</span>
                     </div>
                     <h2 class="text-xl font-extrabold text-slate-900 leading-tight" id="execConjunto">Conjunto</h2>
+                    <div id="execSubconjuntosWrap" class="hidden mt-1.5 text-[11px] font-bold text-indigo-800 bg-indigo-50 border border-indigo-200 rounded-xl px-3 py-1.5"></div>
                 </div>
                 <button type="button" onclick="fecharModal('modalExecutarInsp')" aria-label="Fechar janela" class="w-9 h-9 bg-white border border-slate-200 hover:bg-slate-100 rounded-full text-slate-600 font-bold flex items-center justify-center shrink-0">✕</button>
             </div>
@@ -2454,8 +2460,179 @@
 
         let rawDocsObLinhas = {};
 
+        function hash32FNV1aInsp(str, seed = 2166136261) {
+            let h = seed >>> 0;
+            const s = String(str || '');
+            for (let i = 0; i < s.length; i++) {
+                h ^= s.charCodeAt(i);
+                h = Math.imul(h, 16777619) >>> 0;
+            }
+            return h.toString(36);
+        }
+
+        function normConjMapKeyInsp(conj) {
+            return normTextoReligacao(conj).replace(/[.$[\]/~*]/g, '_');
+        }
+
+        function normParaHashConjuntoInsp(str) {
+            return String(str || '').normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase().trim().replace(/\s+/g, ' ');
+        }
+
+        function makeConjuntoNodeId(area, maquina, equipamento, conjunto) {
+            const base = [
+                normParaHashConjuntoInsp(area),
+                normParaHashConjuntoInsp(maquina),
+                normParaHashConjuntoInsp(equipamento),
+                normParaHashConjuntoInsp(conjunto)
+            ].join('||');
+            const h1 = hash32FNV1aInsp(base, 2166136261);
+            const h2 = hash32FNV1aInsp(base.split('').reverse().join(''), 374761393);
+            return `CONJ__${h1}_${h2}`;
+        }
+
+        function getConjuntoInteiroAtivoFromRaw(raw, conjuntoNome) {
+            if (!raw || typeof raw !== 'object') return false;
+            if (Array.isArray(raw.conjuntos) && raw.conjuntos.length > 0) {
+                const map = raw.conjuntos_insp_inteiros_map;
+                const k = normConjMapKeyInsp(conjuntoNome);
+                if (map && typeof map === 'object' && k && map[k] !== undefined) {
+                    return map[k] === true || map[k] === 'true';
+                }
+                const normC = normTextoReligacao(conjuntoNome);
+                const found = raw.conjuntos.find(c => {
+                    const nm = typeof c === 'string' ? c : (c?.nome || c?.conjunto || '');
+                    return normTextoReligacao(nm) === normC;
+                });
+                if (found && typeof found === 'object' && found.inspecao_conjunto_ativa !== undefined) {
+                    return found.inspecao_conjunto_ativa === true || found.inspecao_conjunto_ativa === 'true';
+                }
+            }
+            if (raw.inspecao_conjunto_ativa !== undefined) {
+                return raw.inspecao_conjunto_ativa === true || raw.inspecao_conjunto_ativa === 'true';
+            }
+            return false;
+        }
+
+        function construirArvoreComConjuntosInteiros(expandedNodes) {
+            const lista = Array.isArray(expandedNodes) ? expandedNodes : [];
+            const grupos = new Map();
+            const gruposOrdem = [];
+
+            lista.forEach(item => {
+                if (!item) return;
+                const cNome = (item.conjunto || '').trim() || 'Conjunto Geral';
+                const gKey = [
+                    normTextoReligacao(item.area),
+                    normTextoReligacao(item.maquina),
+                    normTextoReligacao(item.equipamento),
+                    normTextoReligacao(cNome)
+                ].join('||');
+                if (!grupos.has(gKey)) {
+                    grupos.set(gKey, { key: gKey, cNome, membros: [] });
+                    gruposOrdem.push(gKey);
+                }
+                grupos.get(gKey).membros.push(item);
+            });
+
+            const resultado = [];
+            gruposOrdem.forEach(gKey => {
+                const g = grupos.get(gKey);
+                const membros = g.membros;
+                const rep = membros[0];
+                const subsComNome = [];
+                const subsSeen = new Set();
+                let temBaseSemSub = false;
+
+                membros.forEach(m => {
+                    const s = (m.subconjunto || '').trim();
+                    if (s) {
+                        const sN = normTextoReligacao(s);
+                        if (!subsSeen.has(sN)) {
+                            subsSeen.add(sN);
+                            subsComNome.push(s);
+                        }
+                    } else {
+                        temBaseSemSub = true;
+                    }
+                });
+
+                const conjGroupId = makeConjuntoNodeId(rep.area, rep.maquina, rep.equipamento, rep.conjunto || g.cNome);
+
+                if (subsComNome.length > 0 && !temBaseSemSub) {
+                    const docIdsMembros = [...new Set(membros.map(m => m.docId || m.id).filter(Boolean))];
+                    const rawMembros = docIdsMembros.map(did => rawDocsObLinhas[did]).filter(Boolean);
+                    const conjAtivo = membros.some(m => m.inspecao_conjunto_ativa === true)
+                        || rawMembros.some(r => getConjuntoInteiroAtivoFromRaw(r, rep.conjunto || g.cNome));
+
+                    const critPeso = { A: 3, B: 2, C: 1 };
+                    let melhorCrit = '';
+                    let melhorCritLinha = '';
+                    membros.forEach(m => {
+                        const c = String(m.criticidade || '').toUpperCase();
+                        if ((critPeso[c] || 0) > (critPeso[melhorCrit] || 0)) melhorCrit = c;
+                        const cl = String(m.criticidade_linha || '').toUpperCase();
+                        if ((critPeso[cl] || 0) > (critPeso[melhorCritLinha] || 0)) melhorCritLinha = cl;
+                    });
+
+                    resultado.push({
+                        id: conjGroupId,
+                        docId: docIdsMembros[0] || rep.docId || rep.id,
+                        docIdsMembros,
+                        isConjuntoGroup: true,
+                        conjuntoInteiro: true,
+                        isSubconjuntoNode: false,
+                        area: rep.area,
+                        setor: rep.setor || rep.area,
+                        maquina: rep.maquina,
+                        equipamento: rep.equipamento,
+                        conjunto: rep.conjunto || g.cNome,
+                        subconjunto: '',
+                        subconjuntosIncluidos: subsComNome,
+                        qtdSubconjuntos: subsComNome.length,
+                        modelo: membros.map(m => m.modelo).find(Boolean) || '',
+                        serie: membros.map(m => m.serie).find(Boolean) || '',
+                        tag: membros.map(m => m.tag).find(Boolean) || '',
+                        criticidade: melhorCrit || rep.criticidade || '',
+                        criticidade_linha: melhorCritLinha || rep.criticidade_linha || '',
+                        disciplina: membros.map(m => m.disciplina).find(Boolean) || '',
+                        padrinho_mec: membros.map(m => m.padrinho_mec).find(Boolean) || '',
+                        padrinho_ele: membros.map(m => m.padrinho_ele).find(Boolean) || '',
+                        inspecao_ativa: Boolean(conjAtivo),
+                        inspecao_conjunto_ativa: Boolean(conjAtivo)
+                    });
+
+                    membros.forEach(m => {
+                        m.isSubconjuntoNode = true;
+                        m.conjuntoGroupId = conjGroupId;
+                        m.inspecao_conjunto_ativa = Boolean(conjAtivo);
+                        resultado.push(m);
+                    });
+                } else {
+                    membros.forEach(m => {
+                        const s = (m.subconjunto || '').trim();
+                        if (!s && subsComNome.length > 0) {
+                            m.isConjuntoGroup = true;
+                            m.conjuntoInteiro = true;
+                            m.subconjuntosIncluidos = subsComNome;
+                            m.qtdSubconjuntos = subsComNome.length;
+                            m.docIdsMembros = [...new Set(membros.map(x => x.docId || x.id).filter(Boolean))];
+                        } else if (s) {
+                            m.isSubconjuntoNode = true;
+                            m.conjuntoGroupId = conjGroupId;
+                        }
+                        resultado.push(m);
+                    });
+                }
+            });
+
+            return resultado;
+        }
+
         window.isConjuntoInspecaoAtiva = (node) => {
             if (!node) return false;
+            if (node.isConjuntoGroup) {
+                return node.inspecao_ativa === true || node.inspecao_ativa === 'true';
+            }
             return node.inspecao_ativa !== false && node.inspecao_ativa !== 'false';
         };
 
@@ -2476,6 +2653,7 @@
                         const inspAtiva = sub.inspecao_ativa !== undefined
                             ? (sub.inspecao_ativa !== false && sub.inspecao_ativa !== 'false')
                             : (raw.inspecao_ativa !== false && raw.inspecao_ativa !== 'false');
+                        const cjExpanded = subConj || subSubc || 'Conjunto Geral';
                         out.push({
                             id: `${docId}_${idx}`,
                             _parentDocId: docId,
@@ -2484,7 +2662,7 @@
                             area: pickField(sub, ['setor', 'area']) || baseArea || 'Geral',
                             maquina: pickField(sub, ['maquina', 'linha', 'nome']) || baseMaq || 'Linha Geral',
                             equipamento: pickField(sub, ['equipamento', 'nome']) || baseEq,
-                            conjunto: subConj || subSubc || 'Conjunto Geral',
+                            conjunto: cjExpanded,
                             subconjunto: subConj ? subSubc : '',
                             tag: pickField(sub, ['tag', 'TAG', 'codigo_ativo']) || pickField(raw, ['tag', 'TAG', 'codigo_ativo']),
                             criticidade: pickField(sub, ['criticidade', 'Criticidade']) || pickField(raw, ['criticidade', 'Criticidade']),
@@ -2493,11 +2671,13 @@
                             disciplina: pickField(sub, ['disciplina', 'Disciplina']) || pickField(raw, ['disciplina', 'Disciplina']),
                             status_ativo: pickField(sub, ['status_ativo', 'status']) || pickField(raw, ['status_ativo', 'status']),
                             inspecao_ativa: inspAtiva,
+                            inspecao_conjunto_ativa: getConjuntoInteiroAtivoFromRaw(raw, cjExpanded),
                             modelo: pickField(sub, ['modelo']),
                             serie: pickField(sub, ['serie', 'n_serie', 'numero_serie'])
                         });
                     } else if (typeof sub === 'string' && sub.trim()) {
                         const inspAtiva = !inatList.includes(idx) && raw.inspecao_ativa !== false && raw.inspecao_ativa !== 'false';
+                        const cjStr = sub.trim();
                         out.push({
                             id: `${docId}_${idx}`,
                             _parentDocId: docId,
@@ -2506,7 +2686,7 @@
                             area: baseArea || 'Geral',
                             maquina: baseMaq || 'Linha Geral',
                             equipamento: baseEq,
-                            conjunto: sub.trim(),
+                            conjunto: cjStr,
                             subconjunto: '',
                             tag: pickField(raw, ['tag', 'TAG', 'codigo_ativo']),
                             criticidade: pickField(raw, ['criticidade', 'Criticidade']),
@@ -2515,6 +2695,7 @@
                             disciplina: pickField(raw, ['disciplina', 'Disciplina']),
                             status_ativo: pickField(raw, ['status_ativo', 'status']),
                             inspecao_ativa: inspAtiva,
+                            inspecao_conjunto_ativa: getConjuntoInteiroAtivoFromRaw(raw, cjStr),
                             modelo: pickField(raw, ['modelo', 'Modelo', 'MODELO']),
                             serie: pickField(raw, ['serie', 'n_serie', 'numero_serie'])
                         });
@@ -2537,6 +2718,7 @@
             const disciplina = pickField(raw, ['disciplina', 'Disciplina']);
             const status_ativo = pickField(raw, ['status_ativo', 'status']);
             const inspecao_ativa = raw.inspecao_ativa !== false && raw.inspecao_ativa !== 'false';
+            const inspecao_conjunto_ativa = getConjuntoInteiroAtivoFromRaw(raw, conjunto);
             const modelo = pickField(raw, ['modelo', 'Modelo', 'MODELO']);
             const serie = pickField(raw, ['serie', 'Serie', 'SERIE', 'série', 'Série', 'n_serie', 'num_serie', 'numero_serie']);
 
@@ -2554,14 +2736,17 @@
                 disciplina,
                 status_ativo,
                 inspecao_ativa,
+                inspecao_conjunto_ativa,
                 modelo,
                 serie
             }];
         }
 
         function getNomeConjunto(item) {
-            const c = (item.conjunto && item.conjunto.trim()) || '';
-            const s = (item.subconjunto && item.subconjunto.trim()) || '';
+            if (!item) return 'Conjunto Geral';
+            const c = (item.conjunto && String(item.conjunto).trim()) || '';
+            const s = (item.subconjunto && String(item.subconjunto).trim()) || '';
+            if (item.isConjuntoGroup) return c || 'Conjunto Geral';
             if (c && s && c.toLowerCase() !== s.toLowerCase()) return `${c} › ${s}`;
             return c || s || 'Conjunto Geral';
         }
@@ -2580,10 +2765,33 @@
             const nFull = normTextoReligacao(getNomeConjunto(node));
             const nConj = normTextoReligacao(node?.conjunto);
             if (nFull && rC === nFull) return true;
-            if (nConj && rC === nConj) return true;
-            const rBase = rC.split(/\s*[›>]\s*/)[0].trim();
             if (rC.includes('›') || rC.includes('>')) {
-                return Boolean(nFull === rC || (nConj === rBase && !node?.subconjunto));
+                const rBase = rC.split(/\s*[›>]\s*/)[0].trim();
+                if (nFull === rC) return true;
+                if (nConj === rBase && !node?.subconjunto) {
+                    const temSubExato = arvLinhas.some(x =>
+                        !x.isConjuntoGroup &&
+                        normTextoReligacao(x.area) === normTextoReligacao(node?.area) &&
+                        normTextoReligacao(x.maquina) === normTextoReligacao(node?.maquina) &&
+                        normTextoReligacao(x.equipamento) === normTextoReligacao(node?.equipamento) &&
+                        normTextoReligacao(getNomeConjunto(x)) === rC
+                    );
+                    return !temSubExato;
+                }
+                return false;
+            }
+            if (nConj && rC === nConj) {
+                if (node?.isConjuntoGroup || !(node?.subconjunto && String(node.subconjunto).trim())) {
+                    return true;
+                }
+                const temConjInteiroNoGrupo = arvLinhas.some(x =>
+                    (x.isConjuntoGroup || !(x.subconjunto && String(x.subconjunto).trim())) &&
+                    normTextoReligacao(x.area) === normTextoReligacao(node.area) &&
+                    normTextoReligacao(x.maquina) === normTextoReligacao(node.maquina) &&
+                    normTextoReligacao(x.equipamento) === normTextoReligacao(node.equipamento) &&
+                    normTextoReligacao(x.conjunto) === nConj
+                );
+                return !temConjInteiroNoGrupo;
             }
             return false;
         }
@@ -2635,23 +2843,27 @@
         }
 
         function atualizarBadgesArvore() {
-            const total = arvLinhas.length;
+            const total = arvLinhas.filter(x => !x.isConjuntoGroup).length;
             const ativosInsp = arvLinhas.filter(isConjuntoInspecaoAtiva).length;
-            const ocultosInsp = total - ativosInsp;
+            const conjIntAtivos = arvLinhas.filter(x => x.isConjuntoGroup && isConjuntoInspecaoAtiva(x)).length;
+            const subsAtivos = arvLinhas.filter(x => !x.isConjuntoGroup && isConjuntoInspecaoAtiva(x)).length;
+            const ocultosFisicos = Math.max(0, total - subsAtivos);
             const bPlan = document.getElementById('badgeArvorePlan');
             const bCfg = document.getElementById('badgeArvoreCfg');
             const dTot = document.getElementById('dashTotalArvore');
             const dSub = document.getElementById('dashPlanosCirurgicosSub');
 
-            if (bPlan) bPlan.innerText = ocultosInsp > 0
-                ? ` ${ativosInsp} ativo(s) insp. • ${ocultosInsp} oculto(s)`
-                : ` ${ativosInsp} ativo(s) da árvore carregados`;
-            if (bCfg) bCfg.innerText = ocultosInsp > 0
-                ? ` ${total} em ob_linhas (${ocultosInsp} oculto(s) insp.)`
+            if (bPlan) bPlan.innerText = conjIntAtivos > 0
+                ? ` ${ativosInsp} ativo(s) insp. (${conjIntAtivos} conj. inteiro • ${subsAtivos} sub)`
+                : (ocultosFisicos > 0
+                    ? ` ${ativosInsp} ativo(s) insp. • ${ocultosFisicos} oculto(s)`
+                    : ` ${ativosInsp} ativo(s) da árvore carregados`);
+            if (bCfg) bCfg.innerText = ocultosFisicos > 0
+                ? ` ${total} em ob_linhas (${conjIntAtivos} conj. inteiro ativos • ${ocultosFisicos} sub ocultos)`
                 : ` ${total} ativo(s) em ob_linhas`;
             if (dTot) dTot.innerText = total;
-            if (dSub) dSub.innerText = ocultosInsp > 0
-                ? `${Object.keys(mapaChecklists).length} planos cirúrgicos • ${ocultosInsp} conj. oculto(s)`
+            if (dSub) dSub.innerText = ocultosFisicos > 0
+                ? `${Object.keys(mapaChecklists).length} planos cirúrgicos • ${ativosInsp} rota(s) ativa(s)`
                 : `${Object.keys(mapaChecklists).length} planos cirúrgicos ativos`;
         }
 
@@ -2920,7 +3132,7 @@
                     const expandidos = expandirDocumentoArvore(d.id, d.data());
                     temp.push(...expandidos);
                 });
-                arvLinhas = temp;
+                arvLinhas = construirArvoreComConjuntosInteiros(temp);
                 handoffInspLinhasOk = true;
                 atualizarStatusConexao('online');
                 atualizarBadgesArvore();
@@ -3036,7 +3248,16 @@
             const eqN = normM(a.equipamento);
             const cjN = normM(a.conjunto);
 
-            const matchNode = arvLinhas.find(x => x.id === a.nodeId || x.id === a.docId)
+            const conjGroupMatch = (a.conjuntoGroupId || (a.escopo !== 'subconjunto' && areaN && maqN && eqN && cjN))
+                ? (arvLinhas.find(x => x.id === a.conjuntoGroupId)
+                    || arvLinhas.find(x =>
+                        x.isConjuntoGroup &&
+                        normM(x.area) === areaN &&
+                        normM(x.maquina) === maqN &&
+                        normM(x.equipamento) === eqN &&
+                        normM(x.conjunto) === cjN))
+                : null;
+            const matchNode = (a.escopo === 'conjunto' ? (conjGroupMatch || arvLinhas.find(x => x.id === a.nodeId || x.id === a.docId)) : (arvLinhas.find(x => x.id === a.nodeId || x.id === a.docId) || conjGroupMatch))
                 || arvLinhas.find(x =>
                     normM(x.area) === areaN &&
                     normM(x.maquina) === maqN &&
@@ -3047,6 +3268,7 @@
             if (h.action === 'inspecao_plano' || (matchNode && !isConjuntoInspecaoAtiva(matchNode))) {
                 const oculto = Boolean(matchNode && !isConjuntoInspecaoAtiva(matchNode));
                 switchTab('checklists');
+                setCfgFiltroInsp('todos');
                 if (matchNode) {
                     const selA = document.getElementById('chkCfgArea');
                     if (selA) selA.value = matchNode.area || '';
@@ -3063,7 +3285,7 @@
                     renderArvoreConjuntosEditor();
                 }
                 showToast(oculto
-                    ? `Conjunto "${a.conjunto}" está Não Ativo nas 52 semanas. Ative no cartão caso deseje incluí-lo.`
+                    ? `Conjunto "${a.conjunto}" está Não Ativo nas 52 semanas. Ative no cartão ou no editor ao lado.`
                     : `Plano Cirúrgico aberto para "${a.conjunto || a.equipamento}".`);
                 return;
             }
@@ -4032,6 +4254,10 @@
                 if (cmpMaq !== 0) return cmpMaq;
                 const cmpEq = (a.equipamento || '').localeCompare(b.equipamento || '');
                 if (cmpEq !== 0) return cmpEq;
+                const cA = normTextoReligacao(a.conjunto);
+                const cB = normTextoReligacao(b.conjunto);
+                if (cA !== cB) return cA.localeCompare(cB);
+                if (Boolean(a.isConjuntoGroup) !== Boolean(b.isConjuntoGroup)) return a.isConjuntoGroup ? -1 : 1;
                 return getNomeConjunto(a).localeCompare(getNomeConjunto(b));
             });
 
@@ -4107,8 +4333,12 @@
                     <td style="min-width:320px; max-width:320px; position:sticky; left:0; z-index:20;" class="!text-left bg-white shadow-[3px_0_8px_-2px_rgba(15,23,42,0.08)] !py-2.5 !px-3.5">
                         <div class="flex items-start justify-between gap-2">
                             <div class="min-w-0 flex-1">
-                                <div class="text-[10px] font-extrabold uppercase text-sky-600 tracking-wider leading-tight break-words">${escapeHtml(node.equipamento || 'Equipamento')}</div>
+                                <div class="flex flex-wrap items-center gap-1">
+                                    <span class="text-[10px] font-extrabold uppercase text-sky-600 tracking-wider leading-tight break-words">${escapeHtml(node.equipamento || 'Equipamento')}</span>
+                                    ${node.isConjuntoGroup ? `<span class="text-[8.5px] font-extrabold uppercase px-1.5 py-0.5 rounded bg-indigo-100 text-indigo-800 border border-indigo-200" title="Inspeção abrange todo o conjunto">Conj. Inteiro (${node.qtdSubconjuntos || 0})</span>` : (node.isSubconjuntoNode ? `<span class="text-[8.5px] font-extrabold uppercase px-1.5 py-0.5 rounded bg-amber-50 text-amber-800 border border-amber-200" title="Inspeção filtrada apenas deste subconjunto">Sub</span>` : '')}
+                                </div>
                                 <div class="text-xs font-extrabold text-slate-900 leading-snug mt-0.5 break-words">${escapeHtml(nomeConjunto)}</div>
+                                ${node.isConjuntoGroup && Array.isArray(node.subconjuntosIncluidos) && node.subconjuntosIncluidos.length ? `<div class="text-[10px] font-medium text-slate-500 leading-tight mt-0.5 truncate" title="${escapeHtml(node.subconjuntosIncluidos.join(', '))}">Inclui: ${escapeHtml(node.subconjuntosIncluidos.join(', '))}</div>` : ''}
                             </div>
                             <div class="flex items-center gap-1 shrink-0 pt-0.5">
                                 <button type="button" onclick="abrirModalPadrinhoPlan('${node.id}')" title="Definir Padrinho Mecânico e/ou Eletricista deste equipamento" class="text-[9px] font-extrabold px-2 py-0.5 rounded-full transition-colors inline-flex items-center gap-1 bg-sky-50 text-sky-700 hover:bg-sky-100 border border-sky-200/80">
@@ -4287,7 +4517,13 @@
                 x.maquina === node.maquina &&
                 x.equipamento === node.equipamento &&
                 (isConjuntoInspecaoAtiva(x) || x.id === idNode)
-            ).sort((a, b) => getNomeConjunto(a).localeCompare(getNomeConjunto(b)));
+            ).sort((a, b) => {
+                const cA = normTextoReligacao(a.conjunto);
+                const cB = normTextoReligacao(b.conjunto);
+                if (cA !== cB) return cA.localeCompare(cB);
+                if (Boolean(a.isConjuntoGroup) !== Boolean(b.isConjuntoGroup)) return a.isConjuntoGroup ? -1 : 1;
+                return getNomeConjunto(a).localeCompare(getNomeConjunto(b));
+            });
 
             const boxConj = document.getElementById('agListaConjuntosEquip');
             boxConj.innerHTML = irmaos.map(ir => {
@@ -4295,11 +4531,18 @@
                 const checked = ir.id === idNode ? 'checked' : '';
                 const temMec = Boolean(findChecklistCirurgicoParaNode(ir.id, 'Mecânica', validArvIds));
                 const temEle = Boolean(findChecklistCirurgicoParaNode(ir.id, 'Elétrica', validArvIds));
+                const escBadge = ir.isConjuntoGroup
+                    ? `<span class="text-[9px] font-extrabold px-1.5 py-0.5 rounded bg-indigo-100 text-indigo-800 shrink-0">Conj. Inteiro (${ir.qtdSubconjuntos || 0})</span>`
+                    : (ir.isSubconjuntoNode ? `<span class="text-[9px] font-extrabold px-1.5 py-0.5 rounded bg-amber-50 text-amber-800 border border-amber-200 shrink-0">Sub</span>` : '');
                 return `
                 <label class="flex items-center justify-between gap-2 p-2 rounded-xl bg-white border border-slate-200 cursor-pointer hover:border-sky-400">
-                    <div class="flex items-center gap-2 min-w-0">
-                        <input type="checkbox" name="chkAgConjuntoNode" value="${ir.id}" ${checked} class="w-4 h-4 accent-sky-600 rounded">
-                        <span class="text-xs font-extrabold text-slate-800 truncate">${escapeHtml(getNomeConjunto(ir))}</span>
+                    <div class="min-w-0">
+                        <div class="flex items-center gap-2 min-w-0">
+                            <input type="checkbox" name="chkAgConjuntoNode" value="${ir.id}" ${checked} class="w-4 h-4 accent-sky-600 rounded shrink-0">
+                            <span class="text-xs font-extrabold text-slate-800 truncate">${escapeHtml(getNomeConjunto(ir))}</span>
+                            ${escBadge}
+                        </div>
+                        ${ir.isConjuntoGroup && Array.isArray(ir.subconjuntosIncluidos) && ir.subconjuntosIncluidos.length ? `<div class="text-[10px] text-slate-500 pl-6 truncate">Inclui: ${ir.subconjuntosIncluidos.map(s => escapeHtml(s)).join(', ')}</div>` : ''}
                     </div>
                     <div class="flex items-center gap-1 shrink-0">
                         ${temMec ? '<span class="text-[9px] font-extrabold px-1.5 py-0.5 rounded bg-sky-100 text-sky-800">Mec</span>' : ''}
@@ -4352,6 +4595,8 @@
                         maquina: node.maquina || '',
                         equipamento: node.equipamento || '',
                         conjunto: getNomeConjunto(node),
+                        escopo_inspecao: node.isConjuntoGroup ? 'conjunto' : ((node.subconjunto || '').trim() ? 'subconjunto' : 'conjunto'),
+                        subconjuntos_incluidos: Array.isArray(node.subconjuntosIncluidos) ? [...node.subconjuntosIncluidos] : [],
                         status: 'Pendente',
                         timestamp: Date.now()
                     };
@@ -4626,6 +4871,14 @@
             const isDone = ag.status === 'Concluído';
             const conj = ag.conjunto || 'Conjunto Geral';
             const nodeInfo = findNodeHibridoPorRegistro(ag)?.node || null;
+            const isConjInteiro = Boolean(
+                ag.escopo_inspecao === 'conjunto' ||
+                nodeInfo?.isConjuntoGroup ||
+                (Array.isArray(ag.subconjuntos_incluidos) && ag.subconjuntos_incluidos.length > 0 && !nodeInfo?.subconjunto)
+            );
+            const subsIncluidos = (Array.isArray(ag.subconjuntos_incluidos) && ag.subconjuntos_incluidos.length > 0)
+                ? ag.subconjuntos_incluidos
+                : (Array.isArray(nodeInfo?.subconjuntosIncluidos) ? nodeInfo.subconjuntosIncluidos : []);
             const anoms = getAnomaliasOficiais().filter(a => a.id_agenda === ag.id);
             const planoAtual = getChecklistParaExecucao(ag.id_node, ag.role_tecnico, ag);
 
@@ -4764,7 +5017,11 @@
                         <td><span class="lbl">3. Equipamento</span><div class="val">${escapeHtml(ag.equipamento)}</div></td>
                     </tr>
                     <tr>
-                        <td><span class="lbl">4. Conjunto Inspecionado</span><div class="val" style="color:#0369a1;">${escapeHtml(conj)}</div></td>
+                        <td>
+                            <span class="lbl">4. Conjunto Inspecionado</span>
+                            <div class="val" style="color:#0369a1;">${escapeHtml(conj)}${isConjInteiro ? ' <span style="display:inline-block;margin-left:4px;padding:1px 6px;border-radius:999px;background:#e0f2fe;color:#0369a1;font-size:8.5px;font-weight:800;border:1px solid #bae6fd;">CONJUNTO INTEIRO</span>' : ''}</div>
+                            ${isConjInteiro && subsIncluidos.length ? `<div style="font-size:9px;color:#475569;margin-top:3px;">Inclui: ${subsIncluidos.map(s => escapeHtml(s)).join(', ')}</div>` : ''}
+                        </td>
                         <td><span class="lbl">Modelo / N° de Série</span><div class="val">${nodeInfo && (nodeInfo.modelo || nodeInfo.serie) ? `${escapeHtml(nodeInfo.modelo || '-')} / ${escapeHtml(nodeInfo.serie || '-')}` : 'Não informado'}</div></td>
                         <td><span class="lbl">Inspetor & Data</span><div class="val">${escapeHtml(ag.nome_tecnico || '-')} &bull; ${dataExecStr}</div></td>
                     </tr>
@@ -5094,15 +5351,65 @@
             renderArvoreConjuntosEditor();
         };
 
-        window.toggleConjuntoInspecaoAtiva = async (nodeId, ev) => {
+        window.toggleConjuntoInspecaoAtiva = async (nodeId, ev, modo = 'toggle') => {
             if (ev && ev.stopPropagation) ev.stopPropagation();
             const node = arvLinhas.find(x => x.id === nodeId);
             if (!node) return;
-            const novo = !isConjuntoInspecaoAtiva(node);
+            const ocultarSubs = modo === 'ativar_conjunto_ocultar_subs';
+            const novo = ocultarSubs ? true : !isConjuntoInspecaoAtiva(node);
             const nomeConj = getNomeConjunto(node);
 
             try {
-                if (node._nestedKey && node._parentDocId !== undefined && Number.isInteger(node._nestedIdx)) {
+                if (node.isConjuntoGroup) {
+                    const docIdsMembros = [...new Set((node.docIdsMembros || [node.docId || node.id]).filter(Boolean))];
+                    const conjMapKey = normConjMapKeyInsp(node.conjunto);
+                    const conjNorm = normTextoReligacao(node.conjunto);
+
+                    for (const did of docIdsMembros) {
+                        const rawDoc = rawDocsObLinhas[did];
+                        if (!rawDoc) continue;
+                        const nestedKey = ['maquinas', 'equipamentos', 'conjuntos', 'itens'].find(k => Array.isArray(rawDoc[k]) && rawDoc[k].length > 0);
+                        if (nestedKey) {
+                            const prevMap = (rawDoc.conjuntos_insp_inteiros_map && typeof rawDoc.conjuntos_insp_inteiros_map === 'object')
+                                ? { ...rawDoc.conjuntos_insp_inteiros_map }
+                                : {};
+                            prevMap[conjMapKey] = novo;
+                            const upd = { conjuntos_insp_inteiros_map: prevMap };
+                            if (ocultarSubs) {
+                                const arr = JSON.parse(JSON.stringify(rawDoc[nestedKey]));
+                                const inat = new Set(Array.isArray(rawDoc.conjuntos_insp_inativos) ? rawDoc.conjuntos_insp_inativos : []);
+                                arr.forEach((sub, idx) => {
+                                    if (sub && typeof sub === 'object') {
+                                        const cN = pickField(sub, ['conjunto', 'Conjunto', 'CONJUNTO']) || '';
+                                        if (normTextoReligacao(cN) === conjNorm) sub.inspecao_ativa = false;
+                                    } else if (typeof sub === 'string' && normTextoReligacao(sub) === conjNorm) {
+                                        inat.add(idx);
+                                    }
+                                });
+                                upd[nestedKey] = arr;
+                                upd.conjuntos_insp_inativos = [...inat];
+                            }
+                            await updateDoc(doc(db, "ob_linhas", did), upd);
+                        } else {
+                            const upd = { inspecao_conjunto_ativa: novo };
+                            if (ocultarSubs && (rawDoc.subconjunto || '').trim()) {
+                                upd.inspecao_ativa = false;
+                            } else if (!ocultarSubs && !(rawDoc.subconjunto || '').trim()) {
+                                upd.inspecao_ativa = novo;
+                            }
+                            await updateDoc(doc(db, "ob_linhas", did), upd);
+                        }
+                    }
+
+                    node.inspecao_ativa = novo;
+                    node.inspecao_conjunto_ativa = novo;
+                    arvLinhas.forEach(m => {
+                        if (m.conjuntoGroupId === node.id || (m.id === node.id)) {
+                            m.inspecao_conjunto_ativa = novo;
+                            if (ocultarSubs && m.id !== node.id) m.inspecao_ativa = false;
+                        }
+                    });
+                } else if (node._nestedKey && node._parentDocId !== undefined && Number.isInteger(node._nestedIdx)) {
                     const rawDoc = rawDocsObLinhas[node._parentDocId];
                     if (!rawDoc) return;
                     const arr = Array.isArray(rawDoc[node._nestedKey]) ? JSON.parse(JSON.stringify(rawDoc[node._nestedKey])) : [];
@@ -5116,21 +5423,45 @@
                         else inat.add(node._nestedIdx);
                         await updateDoc(doc(db, "ob_linhas", node._parentDocId), { conjuntos_insp_inativos: [...inat] });
                     }
+                    node.inspecao_ativa = novo;
                 } else {
                     await updateDoc(doc(db, "ob_linhas", node.id), { inspecao_ativa: novo });
+                    node.inspecao_ativa = novo;
                 }
-                node.inspecao_ativa = novo;
+
                 atualizarBadgesArvore();
                 renderArvoreConjuntosEditor();
-                if (editorSelectedNodeId === node.id) atualizarBotaoInspEditor(node);
+                if (editorSelectedNodeId) {
+                    const edNode = arvLinhas.find(x => x.id === editorSelectedNodeId);
+                    if (edNode) atualizarBotaoInspEditor(edNode);
+                }
                 if (!document.getElementById('view-planejamento')?.classList.contains('hidden')) {
                     initPlanejamento();
                 }
-                showToast(novo
-                    ? `"${nomeConj}" ativado para Inspeção (visível no Calendário 52 Semanas).`
-                    : `"${nomeConj}" marcado como Não Ativo — oculto das inspeções e mantido mapeado na árvore.`);
+                if (node.isConjuntoGroup) {
+                    showToast(ocultarSubs
+                        ? `Conjunto Inteiro "${nomeConj}" ATIVADO e subconjuntos ocultados (visão unificada em 52 Semanas e Minhas Inspeções).`
+                        : (novo
+                            ? `Inspeção do Conjunto Inteiro "${nomeConj}" ATIVADA (aparece completo em 52 Semanas e Minhas Inspeções).`
+                            : `Inspeção do Conjunto Inteiro "${nomeConj}" ocultada.`));
+                } else {
+                    showToast(novo
+                        ? `Subconjunto "${nomeConj}" ativado para inspeção filtrada (52 Semanas e Minhas Inspeções).`
+                        : `Subconjunto "${nomeConj}" marcado como Não Ativo (oculto das inspeções).`);
+                }
             } catch (err) {
                 showToast("Erro ao atualizar status de inspeção do conjunto.", "error");
+            }
+        };
+
+        window.ativarSomenteConjuntoInteiro = async (nodeId, ev) => {
+            if (ev && ev.stopPropagation) ev.stopPropagation();
+            const node = arvLinhas.find(x => x.id === nodeId);
+            if (!node) return;
+            const targetId = node.isConjuntoGroup ? node.id : (node.conjuntoGroupId || node.id);
+            await toggleConjuntoInspecaoAtiva(targetId, ev, 'ativar_conjunto_ocultar_subs');
+            if (!node.isConjuntoGroup && targetId && arvLinhas.some(x => x.id === targetId)) {
+                selecionarConjuntoEditor(targetId);
             }
         };
 
@@ -5139,16 +5470,51 @@
             const dot = document.getElementById('dotToggleInspAtivaEditor');
             const lbl = document.getElementById('lblToggleInspAtivaEditor');
             const aviso = document.getElementById('cfgEdAvisoOculto');
+            const btnSoConj = document.getElementById('btnSoConjuntoInteiroEditor');
+            const escopoBanner = document.getElementById('cfgEdEscopoBanner');
             if (!btn || !dot || !lbl) return;
             const ativo = isConjuntoInspecaoAtiva(node);
             if (ativo) {
                 btn.className = 'inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-full text-xs font-extrabold border transition-all bg-emerald-50 text-emerald-800 border-emerald-200 hover:bg-emerald-100';
                 dot.className = 'w-2 h-2 rounded-full bg-emerald-500';
-                lbl.innerText = 'Ativo na Inspeção';
+                lbl.innerText = node.isConjuntoGroup ? 'Conj. Inteiro Ativo' : (node.isSubconjuntoNode ? 'Subconjunto Ativo' : 'Ativo na Inspeção');
             } else {
                 btn.className = 'inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-full text-xs font-extrabold border transition-all bg-amber-100 text-amber-900 border-amber-300 hover:bg-amber-200';
                 dot.className = 'w-2 h-2 rounded-full bg-amber-500';
-                lbl.innerText = 'Não Ativo (Oculto Insp.)';
+                lbl.innerText = node.isConjuntoGroup ? 'Conj. Inteiro Oculto' : (node.isSubconjuntoNode ? 'Subconjunto Oculto' : 'Não Ativo (Oculto Insp.)');
+            }
+            if (btnSoConj) {
+                if (node.isConjuntoGroup) {
+                    btnSoConj.classList.remove('hidden');
+                    btnSoConj.innerText = 'Ativar Só Conj. Inteiro (Ocultar Subs)';
+                    btnSoConj.onclick = (e) => ativarSomenteConjuntoInteiro(node.id, e);
+                } else if (node.isSubconjuntoNode && node.conjuntoGroupId) {
+                    btnSoConj.classList.remove('hidden');
+                    btnSoConj.innerText = `Ir para Conjunto Inteiro (${node.conjunto}) →`;
+                    btnSoConj.onclick = () => selecionarConjuntoEditor(node.conjuntoGroupId);
+                } else {
+                    btnSoConj.classList.add('hidden');
+                }
+            }
+            if (escopoBanner) {
+                if (node.isConjuntoGroup) {
+                    const subs = Array.isArray(node.subconjuntosIncluidos) ? node.subconjuntosIncluidos : [];
+                    escopoBanner.className = 'p-3.5 rounded-2xl bg-indigo-50/70 border border-indigo-200 text-xs text-indigo-950 space-y-1.5';
+                    escopoBanner.innerHTML = `<div class="flex flex-wrap items-center justify-between gap-2">
+                        <span class="text-[10px] font-extrabold uppercase tracking-wider text-indigo-700">Escopo: Inspeção do Conjunto Inteiro (${subs.length} subconjunto(s))</span>
+                        <span class="text-[10px] font-bold text-indigo-700">${ativo ? 'Visível em 52S e Minhas Inspeções' : 'Clique em Conj. Inteiro Oculto para ativar'}</span>
+                    </div>
+                    ${subs.length ? `<div class="text-[11px] font-semibold text-slate-700">Subconjuntos abrangidos: <strong>${subs.map(s => escapeHtml(s)).join(', ')}</strong></div>` : ''}`;
+                    escopoBanner.classList.remove('hidden');
+                } else if (node.isSubconjuntoNode && node.conjuntoGroupId) {
+                    escopoBanner.className = 'p-3 rounded-2xl bg-amber-50/60 border border-amber-200 text-xs text-amber-950 flex flex-wrap items-center justify-between gap-2';
+                    escopoBanner.innerHTML = `<span><strong>Subconjunto Filtrado:</strong> Parte do conjunto <strong>${escapeHtml(node.conjunto)}</strong>. Ative aqui somente se quiser uma rota separada apenas para este subconjunto.</span>
+                        <button type="button" onclick="selecionarConjuntoEditor('${node.conjuntoGroupId}')" class="px-2.5 py-1 rounded-xl bg-white hover:bg-indigo-50 border border-indigo-200 text-indigo-800 text-[11px] font-extrabold shrink-0">Abrir Conjunto Inteiro →</button>`;
+                    escopoBanner.classList.remove('hidden');
+                } else {
+                    escopoBanner.classList.add('hidden');
+                    escopoBanner.innerHTML = '';
+                }
             }
             if (aviso) aviso.classList.toggle('hidden', ativo);
         }
@@ -5165,7 +5531,7 @@
             if (eq) filtrados = filtrados.filter(x => x.equipamento === eq);
             if (busca) {
                 filtrados = filtrados.filter(x =>
-                    `${x.area} ${x.maquina} ${x.equipamento} ${getNomeConjunto(x)} ${x.modelo || ''} ${x.serie || ''}`.toLowerCase().includes(busca)
+                    `${x.area} ${x.maquina} ${x.equipamento} ${getNomeConjunto(x)} ${(x.subconjuntosIncluidos || []).join(' ')} ${x.modelo || ''} ${x.serie || ''}`.toLowerCase().includes(busca)
                 );
             }
 
@@ -5194,8 +5560,14 @@
 
             const validArvIds = getValidArvIdsSet();
             listEl.innerHTML = chavesOrdenadas.map(chave => {
-                const nodes = gruposEquip[chave].sort((a, b) => getNomeConjunto(a).localeCompare(getNomeConjunto(b)));
-                const refSample = nodes[0];
+                const nodes = gruposEquip[chave].sort((a, b) => {
+                    const cA = normTextoReligacao(a.conjunto);
+                    const cB = normTextoReligacao(b.conjunto);
+                    if (cA !== cB) return cA.localeCompare(cB);
+                    if (Boolean(a.isConjuntoGroup) !== Boolean(b.isConjuntoGroup)) return a.isConjuntoGroup ? -1 : 1;
+                    return getNomeConjunto(a).localeCompare(getNomeConjunto(b));
+                });
+                const refSample = nodes.find(n => !n.isConjuntoGroup) || nodes[0];
 
                 const itensHtml = nodes.map(node => {
                     const conj = getNomeConjunto(node);
@@ -5208,24 +5580,36 @@
                     const toggleCls = ativoInsp
                         ? (isSelected ? 'bg-emerald-500/20 text-emerald-200 border-emerald-400/50 hover:bg-emerald-500/30' : 'bg-emerald-50 text-emerald-700 border-emerald-200 hover:bg-emerald-100')
                         : (isSelected ? 'bg-amber-500/20 text-amber-200 border-amber-400/50 hover:bg-amber-500/30' : 'bg-amber-50 text-amber-800 border-amber-200 hover:bg-amber-100');
+                    const subsSummary = (node.isConjuntoGroup && Array.isArray(node.subconjuntosIncluidos) && node.subconjuntosIncluidos.length)
+                        ? `Inclui ${node.subconjuntosIncluidos.length}: ${node.subconjuntosIncluidos.join(', ')}`
+                        : '';
+                    const cardIndentCls = node.isSubconjuntoNode ? 'ml-3 border-l-4 border-l-amber-300' : (node.isConjuntoGroup ? 'ring-1 ring-indigo-200/80' : '');
 
                     return `
-                    <div class="p-3 rounded-xl border transition-all ${
+                    <div class="p-3 rounded-xl border transition-all ${cardIndentCls} ${
                         isSelected
                             ? 'bg-slate-900 text-white border-slate-900 shadow-md'
                             : (ativoInsp ? 'bg-white hover:bg-slate-50 text-slate-900 border-slate-200/90' : 'bg-slate-50/80 hover:bg-slate-100/80 text-slate-600 border-dashed border-slate-300')
                     }">
                         <div class="flex items-start justify-between gap-2">
                             <button type="button" onclick="selecionarConjuntoEditor('${node.id}')" class="text-left flex-1 min-w-0">
+                                <div class="flex flex-wrap items-center gap-1.5 mb-0.5">
+                                    ${node.isConjuntoGroup ? `<span class="text-[9px] font-extrabold uppercase px-1.5 py-0.5 rounded-md ${isSelected ? 'bg-indigo-500 text-white' : 'bg-indigo-100 text-indigo-800'}">Conjunto Inteiro</span>` : ''}
+                                    ${node.isSubconjuntoNode ? `<span class="text-[9px] font-extrabold uppercase px-1.5 py-0.5 rounded-md ${isSelected ? 'bg-amber-500 text-slate-950' : 'bg-amber-100 text-amber-800'}">Subconjunto</span>` : ''}
+                                </div>
                                 <div class="text-xs font-extrabold leading-snug break-words">${escapeHtml(conj)}</div>
+                                ${subsSummary ? `<div class="text-[10px] font-medium mt-0.5 leading-snug line-clamp-2 ${isSelected ? 'text-slate-300' : 'text-slate-500'}">${escapeHtml(subsSummary)}</div>` : ''}
                             </button>
                             <div class="flex items-center gap-1 shrink-0">
+                                ${node.isConjuntoGroup ? `
+                                <button type="button" onclick="ativarSomenteConjuntoInteiro('${node.id}', event)" title="Ativar Conjunto Inteiro e ocultar todos os subconjuntos individuais" class="px-2 py-0.5 rounded-lg text-[9px] font-extrabold transition-colors ${isSelected ? 'bg-indigo-500/30 text-indigo-100 hover:bg-indigo-500/50' : 'bg-indigo-50 text-indigo-700 hover:bg-indigo-100 border border-indigo-200'}">Só Conj.</button>
+                                ` : `
                                 <button type="button" onclick="abrirModalEditarConjunto('${node.id}')" title="Renomear ou editar conjunto" class="p-1 rounded-lg ${isSelected ? 'hover:bg-slate-800 text-slate-300' : 'hover:bg-slate-100 text-slate-400 hover:text-slate-700'}">
                                     <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z"/></svg>
                                 </button>
                                 <button type="button" onclick="excluirConjuntoArvore('${node.id}')" title="Excluir conjunto da árvore" class="p-1 rounded-lg ${isSelected ? 'hover:bg-rose-900/60 text-rose-300' : 'hover:bg-rose-50 text-slate-400 hover:text-rose-600'}">
                                     <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/></svg>
-                                </button>
+                                </button>`}
                             </div>
                         </div>
                         <div onclick="selecionarConjuntoEditor('${node.id}')" class="flex flex-wrap items-center gap-1.5 mt-2 cursor-pointer">
@@ -5245,9 +5629,9 @@
                                 <svg class="w-2.5 h-2.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M13 10V3L4 14h7v7l9-11h-7z"/></svg>
                                 ${planEle ? `Elét. (${qtdEle} pts)` : 'Elét. Padrão'}
                             </span>
-                            <button type="button" onclick="toggleConjuntoInspecaoAtiva('${node.id}', event)" title="${ativoInsp ? 'Ativo para Inspeção — clique para marcar como Não Ativo e ocultar do Calendário 52 Semanas' : 'Não Ativo (Oculto do Calendário 52 Semanas) — clique para reativar na inspeção'}" class="ml-auto inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[9px] font-extrabold border transition-colors ${toggleCls}">
+                            <button type="button" onclick="toggleConjuntoInspecaoAtiva('${node.id}', event)" title="${ativoInsp ? 'Ativo para Inspeção — clique para marcar como Não Ativo e ocultar do Calendário 52 Semanas e Minhas Inspeções' : 'Não Ativo (Oculto) — clique para ativar na inspeção'}" class="ml-auto inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[9px] font-extrabold border transition-colors ${toggleCls}">
                                 <span class="w-1.5 h-1.5 rounded-full ${ativoInsp ? 'bg-emerald-500' : 'bg-amber-500'}"></span>
-                                <span>${ativoInsp ? 'Ativo na Insp.' : 'Não Ativo (Oculto)'}</span>
+                                <span>${node.isConjuntoGroup ? (ativoInsp ? 'Conj. Ativo' : 'Conj. Oculto') : (node.isSubconjuntoNode ? (ativoInsp ? 'Sub Ativo' : 'Não Ativo (Oculto)') : (ativoInsp ? 'Ativo na Insp.' : 'Não Ativo (Oculto)'))}</span>
                             </button>
                         </div>
                     </div>`;
@@ -5600,7 +5984,8 @@
             const irmaos = arvLinhas.filter(x =>
                 x.area === node.area &&
                 x.maquina === node.maquina &&
-                x.equipamento === node.equipamento
+                x.equipamento === node.equipamento &&
+                (node.isConjuntoGroup ? !x.isSubconjuntoNode : !x.isConjuntoGroup)
             );
 
             if (!confirm(`Aplicar este plano cirúrgico de ${editorEspecialidade} em todos os ${irmaos.length} conjuntos de "${node.equipamento}"?`)) {
@@ -6025,12 +6410,25 @@
                 const padEle = nodeRef?.padrinho_ele || padInfo.padrinho_ele || '';
                 const dataConcStr = isDone && i.data_conclusao ? new Date(i.data_conclusao).toLocaleDateString('pt-BR') : '';
 
+                const isConjInteiro = Boolean(
+                    i.escopo_inspecao === 'conjunto' ||
+                    nodeRef?.isConjuntoGroup ||
+                    String(i.id_node || '').startsWith('CONJ__') ||
+                    (Array.isArray(i.subconjuntos_incluidos) && i.subconjuntos_incluidos.length > 0 && !nodeRef?.subconjunto)
+                );
+                const subsIncluidos = (Array.isArray(i.subconjuntos_incluidos) && i.subconjuntos_incluidos.length > 0)
+                    ? i.subconjuntos_incluidos
+                    : (Array.isArray(nodeRef?.subconjuntosIncluidos) ? nodeRef.subconjuntosIncluidos : []);
+                const isSubFiltrado = Boolean(!isConjInteiro && (i.escopo_inspecao === 'subconjunto' || nodeRef?.isSubconjuntoNode || (nodeRef?.subconjunto || '').trim()));
+
                 return `
                 <div class="glass-card glass-card-hover p-6 rounded-3xl flex flex-col justify-between">
                     <div class="mb-4">
                         <div class="flex flex-wrap items-center justify-between gap-2 mb-2.5">
                             <div class="flex flex-wrap items-center gap-1.5">
                                 <span class="text-[10px] font-extrabold uppercase tracking-wider px-2.5 py-0.5 rounded-full ${isEle ? 'bg-amber-100 text-amber-800' : 'bg-sky-100 text-sky-800'}">${escapeHtml(i.role_tecnico || 'Mecânica')}</span>
+                                ${isConjInteiro ? `<span class="text-[10px] font-extrabold uppercase px-2 py-0.5 rounded-full bg-indigo-600 text-white" title="Inspeção abrange todo o conjunto">Conjunto Inteiro${subsIncluidos.length ? ` (${subsIncluidos.length})` : ''}</span>` : ''}
+                                ${isSubFiltrado ? '<span class="text-[10px] font-extrabold uppercase px-2 py-0.5 rounded-full bg-amber-50 text-amber-900 border border-amber-200">Subconjunto</span>' : ''}
                                 ${hasCustom ? '<span class="text-[10px] font-extrabold px-2 py-0.5 rounded-full bg-indigo-100 text-indigo-800">Plano Cirúrgico</span>' : ''}
                                 ${isOrphanLink ? '<span class="text-[10px] font-extrabold px-2 py-0.5 rounded-full bg-amber-100 text-amber-800 border border-amber-200">Vínculo antigo</span>' : ''}
                                 <span class="text-[10px] font-extrabold uppercase px-2 py-0.5 rounded-full ${isDone ? 'bg-emerald-100 text-emerald-800' : 'bg-amber-100 text-amber-800'}">${isDone ? '✓ Concluído' : 'Pendente'}</span>
@@ -6046,9 +6444,10 @@
                             </div>
                             <p class="text-xs font-extrabold text-slate-800">${escapeHtml(i.area || '-')} &rsaquo; <span class="text-sky-700">${escapeHtml(i.maquina || '-')}</span></p>
                             <div class="pt-1 border-t border-slate-200/60">
-                                <span class="text-[10px] font-extrabold uppercase text-slate-400 block">Equipamento &bull; Conjunto</span>
+                                <span class="text-[10px] font-extrabold uppercase text-slate-400 block">${isConjInteiro ? 'Equipamento &bull; Conjunto Inteiro' : 'Equipamento &bull; Conjunto'}</span>
                                 <p class="text-xs font-extrabold text-sky-700">${escapeHtml(i.equipamento || '-')}</p>
                                 <h3 class="text-base font-extrabold text-slate-900 leading-snug mt-0.5">${escapeHtml(conj)}</h3>
+                                ${isConjInteiro && subsIncluidos.length ? `<div class="mt-1.5 text-[11px] font-semibold text-indigo-900 bg-indigo-50/80 border border-indigo-200/80 rounded-xl px-2.5 py-1.5 leading-snug"><span class="font-extrabold uppercase text-[9px] text-indigo-700 block">Subconjuntos incluídos na inspeção:</span>${subsIncluidos.map(s => escapeHtml(s)).join(' • ')}</div>` : ''}
                             </div>
                         </div>
 
@@ -6099,6 +6498,16 @@
         window.abrirChecklist = (idAgenda) => {
             const ag = agendaRotas.find(a => a.id === idAgenda);
             if (!ag) return;
+            const nodeRef = findNodeHibridoPorRegistro(ag)?.node || null;
+            const isConjInteiro = Boolean(
+                ag.escopo_inspecao === 'conjunto' ||
+                nodeRef?.isConjuntoGroup ||
+                String(ag.id_node || '').startsWith('CONJ__') ||
+                (Array.isArray(ag.subconjuntos_incluidos) && ag.subconjuntos_incluidos.length > 0 && !nodeRef?.subconjunto)
+            );
+            const subsIncluidos = (Array.isArray(ag.subconjuntos_incluidos) && ag.subconjuntos_incluidos.length > 0)
+                ? ag.subconjuntos_incluidos
+                : (Array.isArray(nodeRef?.subconjuntosIncluidos) ? nodeRef.subconjuntosIncluidos : []);
             const plano = getChecklistParaExecucao(ag.id_node, ag.role_tecnico, ag);
             renderModalChecklist({
                 isPreview: false,
@@ -6107,6 +6516,8 @@
                 maquina: ag.maquina,
                 equipamento: ag.equipamento,
                 conjunto: ag.conjunto || 'Conjunto Geral',
+                isConjInteiro,
+                subsIncluidos,
                 especialidade: ag.role_tecnico,
                 isCustom: plano.isCustom,
                 grupos: plano.grupos
@@ -6118,6 +6529,21 @@
             document.getElementById('execCaminho').innerText = `${cfg.area} > ${cfg.maquina} > ${cfg.equipamento}`;
             document.getElementById('execEspecialidade').innerText = cfg.especialidade;
             document.getElementById('execObsGerais').value = '';
+            const subWrap = document.getElementById('execSubconjuntosWrap');
+            if (subWrap) {
+                const nodeSel = cfg.isPreview ? arvLinhas.find(x => x.id === editorSelectedNodeId) : null;
+                const isConjInt = Boolean(cfg.isConjInteiro || nodeSel?.isConjuntoGroup);
+                const subsList = (Array.isArray(cfg.subsIncluidos) && cfg.subsIncluidos.length > 0)
+                    ? cfg.subsIncluidos
+                    : (Array.isArray(nodeSel?.subconjuntosIncluidos) ? nodeSel.subconjuntosIncluidos : []);
+                if (isConjInt && subsList.length > 0) {
+                    subWrap.innerHTML = `<span class="font-extrabold uppercase text-[9px] text-indigo-700 mr-1">Conjunto Inteiro • Inclui:</span> ${subsList.map(s => escapeHtml(s)).join(' • ')}`;
+                    subWrap.classList.remove('hidden');
+                } else {
+                    subWrap.innerHTML = '';
+                    subWrap.classList.add('hidden');
+                }
+            }
 
             const modal = document.getElementById('modalExecutarInsp');
             modal.setAttribute('data-idagenda', cfg.idAgenda || '');
@@ -8179,6 +8605,10 @@
         window.abrirModalEditarConjunto = (nodeId) => {
             const node = arvLinhas.find(x => x.id === nodeId);
             if (!node) return;
+            if (node.isConjuntoGroup && String(node.id).startsWith('CONJ__')) {
+                showToast(`"${node.conjunto}" agrupa ${node.qtdSubconjuntos || 0} subconjunto(s). Edite os subconjuntos individualmente ou renomeie o galho na Gestão de Ativos.`, "error");
+                return;
+            }
             if (String(node.id).includes('_')) {
                 showToast("Este conjunto vem de um pacote aninhado. Para ocultar/ativar na inspeção use o botão 'Ativo na Insp.' no cartão!", "error");
                 return;
@@ -8270,6 +8700,10 @@
         window.excluirConjuntoArvore = (nodeId) => {
             const node = arvLinhas.find(x => x.id === nodeId);
             if (!node) return;
+            if (node.isConjuntoGroup && String(node.id).startsWith('CONJ__')) {
+                showToast(`"${node.conjunto}" é o agrupamento do Conjunto Inteiro (${node.qtdSubconjuntos || 0} subconjunto(s)). Para desativá-lo das rotas, clique em "Ocultar".`, "error");
+                return;
+            }
 
             let modal = document.getElementById('modalConfirmarExclusaoArvore');
             if (!modal) {
@@ -8349,9 +8783,12 @@
             if (!nodeRef) return;
 
             const conjuntosOrigem = arvLinhas.filter(function(x) {
-                return x.area === nodeRef.area && x.maquina === nodeRef.maquina && x.equipamento === nodeRef.equipamento;
+                return !x.isConjuntoGroup && x.area === nodeRef.area && x.maquina === nodeRef.maquina && x.equipamento === nodeRef.equipamento;
             }).sort(function(a, b) {
                 return getNomeConjunto(a).localeCompare(getNomeConjunto(b));
+            });
+            const conjGruposOrigem = arvLinhas.filter(function(x) {
+                return x.isConjuntoGroup && x.area === nodeRef.area && x.maquina === nodeRef.maquina && x.equipamento === nodeRef.equipamento;
             });
 
             let modal = document.getElementById('modalCopiarEquipamentoInteiro');
@@ -8468,6 +8905,7 @@
 
             let conjuntosCriados = 0;
             let planosCopiados = 0;
+            const conjGruposClonados = new Set();
 
             try {
                 for (let i = 0; i < marcados.length; i++) {
@@ -8475,23 +8913,30 @@
                     const oldNode = arvLinhas.find(function(x) { return x.id === oldId; });
                     if (!oldNode) continue;
 
-                    const nomeConj = getNomeConjunto(oldNode);
+                    const nomeConjBase = (oldNode.conjunto || '').trim() || getNomeConjunto(oldNode);
+                    const subConjVal = (oldNode.subconjunto || '').trim();
+                    const conjInteiroAtivo = oldNode.conjuntoGroupId
+                        ? isConjuntoInspecaoAtiva(arvLinhas.find(x => x.id === oldNode.conjuntoGroupId))
+                        : Boolean(oldNode.inspecao_conjunto_ativa);
 
-                    // 1. Cria o novo conjunto na coleção ob_linhas
-                    const novoDocRef = await addDoc(refLinhas, {
+                    // 1. Cria o novo conjunto na coleção ob_linhas preservando conjunto, subconjunto e flag do Conjunto Inteiro
+                    const novoDocPayload = {
                         setor: novaArea,
                         area: novaArea,
                         maquina: novaMaquina,
                         equipamento: novoEquip,
-                        conjunto: nomeConj,
+                        conjunto: nomeConjBase,
                         modelo: oldNode.modelo || '',
                         serie: oldNode.serie || '',
                         inspecao_ativa: isConjuntoInspecaoAtiva(oldNode),
+                        inspecao_conjunto_ativa: conjInteiroAtivo,
                         timestamp: Date.now()
-                    });
+                    };
+                    if (subConjVal) novoDocPayload.subconjunto = subConjVal;
+                    const novoDocRef = await addDoc(refLinhas, novoDocPayload);
                     conjuntosCriados++;
 
-                    // 2. Se marcado, clona também os Planos Cirúrgicos (Mecânica e Elétrica) para o novo conjunto
+                    // 2. Se marcado, clona também os Planos Cirúrgicos (Mecânica e Elétrica)
                     if (copiarPlanos) {
                         const especialidades = ['Mecânica', 'Elétrica'];
                         for (let j = 0; j < especialidades.length; j++) {
@@ -8512,11 +8957,38 @@
                                     area: novaArea,
                                     maquina: novaMaquina,
                                     equipamento: novoEquip,
-                                    conjunto: nomeConj,
+                                    conjunto: getNomeConjunto(oldNode),
                                     itens: itensClonados,
                                     timestamp: Date.now()
                                 });
                                 planosCopiados++;
+                            }
+                        }
+
+                        if (oldNode.conjuntoGroupId && !conjGruposClonados.has(oldNode.conjuntoGroupId)) {
+                            conjGruposClonados.add(oldNode.conjuntoGroupId);
+                            const novoConjGroupId = makeConjuntoNodeId(novaArea, novaMaquina, novoEquip, nomeConjBase);
+                            for (let j = 0; j < especialidades.length; j++) {
+                                const esp = especialidades[j];
+                                const planoConjAntigo = mapaChecklists[oldNode.conjuntoGroupId + '_' + esp];
+                                if (!planoConjAntigo) continue;
+                                const itensConj = Array.isArray(planoConjAntigo)
+                                    ? planoConjAntigo
+                                    : (Array.isArray(planoConjAntigo.itens) ? planoConjAntigo.itens : null);
+                                if (itensConj && itensConj.length > 0) {
+                                    await setDoc(doc(db, "ir_checklists", novoConjGroupId + '_' + esp), {
+                                        id_node: novoConjGroupId,
+                                        especialidade: esp,
+                                        area: novaArea,
+                                        maquina: novaMaquina,
+                                        equipamento: novoEquip,
+                                        conjunto: nomeConjBase,
+                                        escopo_inspecao: 'conjunto',
+                                        itens: JSON.parse(JSON.stringify(itensConj)),
+                                        timestamp: Date.now()
+                                    });
+                                    planosCopiados++;
+                                }
                             }
                         }
                     }
