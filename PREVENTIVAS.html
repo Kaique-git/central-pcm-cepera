@@ -1513,7 +1513,7 @@
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
         import { getAuth, signInAnonymously } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
-        import { initializeFirestore, collection, addDoc, onSnapshot, doc, updateDoc, deleteDoc } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
+        import { initializeFirestore, collection, addDoc, onSnapshot, doc, updateDoc, deleteDoc, getDocs, query, where } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
 
         const memStore = {};
         const safeStorage = {
@@ -1544,6 +1544,8 @@
         const colSetores = collection(db, "ag_setores");
         const colAnomalias = collection(db, "ir_anomalias");
         const colDocsAtivos = collection(db, "docs_ativos");
+        const colDocsArquivosPartes = collection(db, "docs_arquivos_partes");
+        const blobCacheDocsPrev = new Map();
 
         const PERIODICIDADES = {
             'Diária': { dias: 1, meses: 0, semanas: 0.14 },
@@ -1751,6 +1753,47 @@
             if (d?.fotoThumbB64) abrirZoomFoto(d.fotoThumbB64, `${d.codigo || 'Foto'} • ${d.titulo || ''}`);
         };
 
+        window.abrirDocBibliotecaPrev = async (docId) => {
+            const d = docsAtivosList.find(x => x.id === docId);
+            if (!d || !podeVerDocPrev(d)) return;
+            if (d.arquivoId) {
+                try {
+                    if (blobCacheDocsPrev.has(d.arquivoId)) {
+                        const c = blobCacheDocsPrev.get(d.arquivoId);
+                        if (c.mimeType.startsWith('image/')) return abrirZoomFoto(c.blobUrl, `${d.codigo || 'Doc'} • ${d.titulo || ''}`);
+                        const w = typeof window.open === 'function' ? window.open(c.blobUrl, '_blank', 'noopener') : null;
+                        if (!w) { const a = document.createElement('a'); a.href = c.blobUrl; a.download = c.fileName; document.body.appendChild(a); a.click(); a.remove(); }
+                        return;
+                    }
+                    const snap = await getDocs(query(colDocsArquivosPartes, where('arquivoId', '==', d.arquivoId)));
+                    const partes = snap.docs.map(x => x.data()).sort((a, b) => Number(a.partIndex || 0) - Number(b.partIndex || 0));
+                    if (!partes.length) return showToast('Arquivo não encontrado.', 'error');
+                    const b64 = partes.map(p => p.chunkB64 || '').join('');
+                    const bin = atob(b64);
+                    const arr = new Uint8Array(bin.length);
+                    for (let i = 0; i < bin.length; i++) arr[i] = bin.charCodeAt(i);
+                    const mimeType = d.arquivoMime || partes[0].mimeType || 'application/pdf';
+                    const fileName = d.arquivoNome || partes[0].fileName || 'documento.pdf';
+                    const blob = new Blob([arr], { type: mimeType });
+                    const blobUrl = URL.createObjectURL(blob);
+                    blobCacheDocsPrev.set(d.arquivoId, { blobUrl, mimeType, fileName });
+                    if (mimeType.startsWith('image/')) {
+                        abrirZoomFoto(blobUrl, `${d.codigo || 'Doc'} • ${d.titulo || ''}`);
+                    } else if (mimeType.includes('pdf') || mimeType.startsWith('text/')) {
+                        const w = typeof window.open === 'function' ? window.open(blobUrl, '_blank', 'noopener') : null;
+                        if (!w) { const a = document.createElement('a'); a.href = blobUrl; a.download = fileName; document.body.appendChild(a); a.click(); a.remove(); }
+                    } else {
+                        const a = document.createElement('a'); a.href = blobUrl; a.download = fileName; document.body.appendChild(a); a.click(); a.remove();
+                    }
+                } catch (_) {
+                    showToast('Erro ao abrir documento anexado.', 'error');
+                }
+                return;
+            }
+            if (d.arquivoUrl && typeof window.open === 'function') window.open(d.arquivoUrl, '_blank', 'noopener');
+            else if (d.fotoThumbB64) abrirZoomDocFotoPrev(d.id);
+        };
+
         window.onPlDocsBuscaInput = (val) => {
             planoDocsBuscaDraft = String(val || '');
             renderPlanoDocsPicker();
@@ -1817,7 +1860,7 @@
                                 ${pathTxt ? `<div class="text-[10px] text-slate-400 truncate">${escapeHtml(pathTxt)}</div>` : ''}
                             </div>
                         </div>
-                        ${d.arquivoUrl ? `<a href="${escapeHtml(d.arquivoUrl)}" target="_blank" rel="noopener noreferrer" onclick="event.stopPropagation()" class="px-2 py-1 rounded-lg bg-slate-100 hover:bg-indigo-200 text-[10px] font-extrabold text-slate-700 shrink-0">SharePoint ↗</a>` : ''}
+                        ${d.arquivoId ? `<button type="button" onclick="event.preventDefault();event.stopPropagation();abrirDocBibliotecaPrev('${d.id}')" class="px-2 py-1 rounded-lg bg-slate-100 hover:bg-indigo-200 text-[10px] font-extrabold text-slate-700 shrink-0">Abrir ↗</button>` : (d.arquivoUrl ? `<a href="${escapeHtml(d.arquivoUrl)}" target="_blank" rel="noopener noreferrer" onclick="event.stopPropagation()" class="px-2 py-1 rounded-lg bg-slate-100 hover:bg-indigo-200 text-[10px] font-extrabold text-slate-700 shrink-0">SharePoint ↗</a>` : '')}
                     </label>`;
             }).join('');
         }
@@ -4654,7 +4697,7 @@
                             </div>
                             <div class="flex items-center gap-1.5 shrink-0">
                                 ${d.fotoThumbB64 ? `<button type="button" onclick="abrirZoomDocFotoPrev('${d.id}')" class="px-2.5 py-1 rounded-lg bg-sky-50 hover:bg-sky-100 text-sky-700 text-[10px] font-extrabold">Ver Foto</button>` : ''}
-                                ${d.arquivoUrl ? `<a href="${escapeHtml(d.arquivoUrl)}" target="_blank" rel="noopener noreferrer" class="px-2.5 py-1 rounded-lg bg-indigo-600 hover:bg-indigo-700 text-white text-[10px] font-extrabold">Abrir Doc ↗</a>` : ''}
+                                ${d.arquivoId ? `<button type="button" onclick="abrirDocBibliotecaPrev('${d.id}')" class="px-2.5 py-1 rounded-lg bg-indigo-600 hover:bg-indigo-700 text-white text-[10px] font-extrabold">Abrir Doc ↗</button>` : (d.arquivoUrl ? `<a href="${escapeHtml(d.arquivoUrl)}" target="_blank" rel="noopener noreferrer" class="px-2.5 py-1 rounded-lg bg-indigo-600 hover:bg-indigo-700 text-white text-[10px] font-extrabold">Abrir Doc ↗</a>` : '')}
                             </div>
                         </div>`;
                 };

@@ -174,6 +174,26 @@
         .st-reprovado { background: #ffe4e6; color: #be123c; border: 1px solid #fda4af; }
         .st-obsoleto { background: #f1f5f9; color: #475569; border: 1px solid #cbd5e1; }
 
+        .dropzone-docs {
+            border: 2px dashed #94a3b8;
+            background: linear-gradient(135deg, #f8fafc 0%, #eef2ff 100%);
+            transition: all 0.16s ease;
+        }
+        .dropzone-docs:hover,
+        .dropzone-docs.drag-over {
+            border-color: var(--accent);
+            background: #e0e7ff;
+            transform: scale(1.005);
+        }
+        body.theme-dark .dropzone-docs {
+            background: #0f172a !important;
+            border-color: #475569 !important;
+        }
+        body.theme-dark .dropzone-docs.drag-over {
+            background: #1e1b4b !important;
+            border-color: #818cf8 !important;
+        }
+
         *:focus-visible { outline: 3px solid var(--accent) !important; outline-offset: 2px; }
 
         /* TEMAS ACESSÍVEIS */
@@ -432,11 +452,17 @@
                                 </p>
                             </div>
                             <div class="flex flex-wrap items-center gap-2">
-                                <button type="button" onclick="baixarScriptPastasSharePoint('bat')" class="btn-pill-dark text-xs py-2 px-4">
-                                    <span>↓ Baixar Gerador Pastas OneDrive (.bat)</span>
+                                <button type="button" onclick="copiarScriptConsoleSharePoint()" class="btn-touch bg-emerald-600 hover:bg-emerald-700 text-white text-xs py-2 px-3.5 shadow-sm font-extrabold flex items-center gap-1.5" title="Copia o script para rodar no Console F12 do SharePoint sem precisar de OneDrive">
+                                    <span>⚡ Copiar Script Console Web (Sem OneDrive)</span>
                                 </button>
-                                <button type="button" onclick="baixarScriptPastasSharePoint('ps1')" class="btn-touch bg-slate-100 hover:bg-slate-200 text-slate-800 border border-slate-200 text-xs py-2 px-3">
+                                <button type="button" onclick="baixarScriptPastasSharePoint('bat')" class="btn-pill-dark text-xs py-2 px-3" title="Baixa script .bat para rodar dentro da pasta sincronizada">
+                                    <span>↓ Gerador (.bat)</span>
+                                </button>
+                                <button type="button" onclick="baixarScriptPastasSharePoint('ps1')" class="btn-touch bg-slate-100 hover:bg-slate-200 text-slate-800 border border-slate-200 text-xs py-2 px-3" title="Script PowerShell PnP">
                                     <span>↓ Script PnP (.ps1)</span>
+                                </button>
+                                <button type="button" onclick="baixarScriptPastasSharePoint('js')" class="btn-touch bg-slate-100 hover:bg-slate-200 text-slate-800 border border-slate-200 text-xs py-2 px-2.5" title="Baixar script JavaScript para Console">
+                                    <span>↓ .js</span>
                                 </button>
                                 <button type="button" onclick="abrirPastaSharePointAtual()" class="btn-touch bg-sky-600 hover:bg-sky-700 text-white text-xs py-2 px-3.5">
                                     <span>Abrir Pasta SISTEMA ↗</span>
@@ -444,21 +470,67 @@
                             </div>
                         </div>
 
+                        <!-- Integração Direta Sem Precisar Copiar Links -->
+                        <div class="p-4 rounded-2xl bg-emerald-50/80 border border-emerald-200 space-y-3 text-xs">
+                            <div class="flex flex-wrap items-center justify-between gap-2">
+                                <div>
+                                    <span class="text-[10px] font-extrabold uppercase tracking-wider text-emerald-800">Upload Automático ao Arrastar (Zero Links Manuais)</span>
+                                    <h3 class="text-sm font-extrabold text-slate-900">Conecte sua Pasta OneDrive Local ou Webhook do SharePoint</h3>
+                                </div>
+                                <span id="spOneDriveStatusBadge" class="px-3 py-1 rounded-full text-[11px] font-extrabold bg-white border border-slate-200 text-slate-600">Pasta OneDrive: Não vinculada neste navegador</span>
+                            </div>
+                            <p class="text-slate-700 font-medium leading-relaxed">
+                                Agora qualquer usuário pode simplesmente <strong>arrastar e soltar PDFs, Fotos ou Planilhas direto no sistema</strong> (sem copiar link do SharePoint!).
+                                Se você vincular abaixo a sua pasta já sincronizada no OneDrive (<code>PCM CEPERA - Levantamento Manutenção Preventiva - Documentos</code>), tudo que você arrastar no sistema também será salvo e renomeado automaticamente dentro da pasta correta do SharePoint!
+                            </p>
+                            <div class="flex flex-wrap items-center gap-2">
+                                <button type="button" onclick="conectarPastaOneDriveLocal()" class="btn-touch bg-emerald-600 hover:bg-emerald-700 text-white text-xs py-2 px-4 shadow-sm">
+                                    <span>📁 Selecionar Pasta OneDrive Sincronizada</span>
+                                </button>
+                                <button type="button" id="btnDesconectarOneDrive" onclick="desconectarPastaOneDriveLocal()" hidden class="hidden btn-touch bg-white hover:bg-rose-50 text-rose-700 border border-rose-200 text-xs py-2 px-3">
+                                    Desvincular Pasta
+                                </button>
+                            </div>
+                        </div>
+
+                        <details class="p-4 rounded-2xl bg-amber-50/80 border border-amber-200 text-xs text-amber-950">
+                            <summary class="cursor-pointer font-extrabold select-none">⚠️ Ajuda rápida para sincronização inicial de pastas no SharePoint / OneDrive</summary>
+                            <div class="grid grid-cols-1 md:grid-cols-2 gap-3 pt-3">
+                                <div class="p-3 rounded-xl bg-white/90 border border-emerald-200 space-y-1.5 shadow-sm">
+                                    <div class="font-extrabold text-emerald-800">⚡ Criar árvore via Web Console (F12):</div>
+                                    <p class="text-[11px] text-slate-600 leading-relaxed font-medium">
+                                        1. Clique em <strong>"⚡ Copiar Script Console Web"</strong> acima.<br>
+                                        2. No SharePoint, aperte <code>F12</code> &gt; <strong>Console</strong>, cole (<code>Ctrl+V</code>) e dê <code>Enter</code>.
+                                    </p>
+                                </div>
+                                <div class="p-3 rounded-xl bg-white/90 border border-amber-200 space-y-1.5 shadow-sm">
+                                    <div class="font-extrabold text-amber-900">🔄 Destravar erro "Você já está sincronizando um atalho":</div>
+                                    <p class="text-[11px] text-slate-600 leading-relaxed font-medium">
+                                        Abra seu <strong>OneDrive</strong>, clique com botão direito na pasta com ícone de correntinha azul e escolha <strong>"Remover atalho"</strong>. Depois clique em <strong>Sincronizar</strong> no SharePoint.
+                                    </p>
+                                </div>
+                            </div>
+                        </details>
+
                         <div class="p-4 rounded-2xl bg-sky-50/70 border border-sky-200 space-y-3 text-xs">
-                            <div class="font-extrabold text-sky-900">Como criar todas as pastas em 30 segundos dentro do SharePoint da Cepêra:</div>
+                            <div class="font-extrabold text-sky-900">Configurações da Biblioteca SharePoint &amp; Automação</div>
                             <ol class="list-decimal pl-5 space-y-1 text-slate-700 font-medium">
-                                <li>Abra a pasta <a id="linkSharepointRaiz" href="#" target="_blank" rel="noopener" class="font-extrabold text-sky-700 underline">SISTEMA no SharePoint</a> e clique no botão <strong>Sincronizar</strong> (OneDrive do Windows) — ou peça à TI via PowerShell PnP.</li>
-                                <li>Baixe o arquivo <strong><code>criar_estrutura_SISTEMA.bat</code></strong> acima, coloque dentro da pasta sincronizada <code>SISTEMA</code> e dê dois cliques: todas as pastas abaixo (por Categoria, Setor, Linha e Equipamento) serão criadas e sincronizadas na nuvem automaticamente.</li>
-                                <li>Restrinja as permissões da subpasta <code>04_ORCAMENTOS_SIGILOSOS</code> no SharePoint apenas para o grupo de Gestão/Supervisão.</li>
+                                <li>Pasta raiz configurada: <a id="linkSharepointRaiz" href="#" target="_blank" rel="noopener" class="font-extrabold text-sky-700 underline">Abrir no SharePoint ↗</a>.</li>
+                                <li>Arquivos até <strong>7 MB</strong> (PDF, Fotos, Excel, Word) são salvos direto no sistema com abertura em 1 clique pelos mecânicos no campo.</li>
+                                <li>Restrinja as permissões da subpasta <code>04_ORCAMENTOS_SIGILOSOS</code> no SharePoint apenas para Gestão/Supervisão.</li>
                             </ol>
                             <div class="grid grid-cols-1 md:grid-cols-2 gap-3 pt-2 border-t border-sky-200/80">
                                 <div>
-                                    <label class="block text-[10px] font-extrabold uppercase text-slate-600 mb-1">URL Raiz da Pasta SISTEMA no SharePoint</label>
+                                    <label class="block text-[10px] font-extrabold uppercase text-slate-600 mb-1">URL Raiz da Biblioteca / Pasta no SharePoint</label>
                                     <input type="url" id="spCfgUrlRaiz" class="input-clean py-2 text-xs font-mono">
                                 </div>
-                                <div class="flex items-end gap-2">
-                                    <button type="button" onclick="salvarConfigSharePoint()" class="btn-touch bg-slate-900 hover:bg-slate-800 text-white text-xs py-2 px-4">Salvar Configuração SharePoint</button>
+                                <div>
+                                    <label class="block text-[10px] font-extrabold uppercase text-slate-600 mb-1">Webhook Power Automate p/ Upload Automático Nuvem (Opcional)</label>
+                                    <input type="url" id="spCfgWebhookUrl" class="input-clean py-2 text-xs font-mono" placeholder="https://prod-xx.brazilsouth.logic.azure.com/...">
                                 </div>
+                            </div>
+                            <div class="flex justify-end">
+                                <button type="button" onclick="salvarConfigSharePoint()" class="btn-touch bg-slate-900 hover:bg-slate-800 text-white text-xs py-2 px-4">Salvar Configuração SharePoint</button>
                             </div>
                         </div>
 
@@ -561,62 +633,113 @@
                     Sigilo ativo: documentos da categoria <strong>Orçamentos</strong> ficam visíveis apenas para Administração, Gerência e Supervisores (ocultos para técnicos de campo).
                 </div>
 
-                <!-- Guia Estruturado de Pasta & Nome no SharePoint -->
-                <div class="p-3.5 rounded-2xl bg-sky-50/70 border border-sky-200 space-y-2">
-                    <div class="flex flex-wrap items-center justify-between gap-2">
-                        <span class="text-[10px] font-extrabold uppercase tracking-wider text-sky-800">Pasta e Nome Padrão no SharePoint (SISTEMA)</span>
-                        <div class="flex flex-wrap items-center gap-1.5">
-                            <button type="button" onclick="copiarTextoSimples(document.getElementById('ndSpNomeArquivo').innerText, 'Nome padrão do arquivo copiado!')" class="px-2.5 py-1 rounded-lg bg-white hover:bg-sky-100 border border-sky-200 text-[10px] font-extrabold text-sky-800">Copiar Nome</button>
-                            <button type="button" onclick="abrirPastaDestinoModalSharePoint()" class="px-2.5 py-1 rounded-lg bg-sky-600 hover:bg-sky-700 text-white text-[10px] font-extrabold">Abrir Pasta SharePoint ↗</button>
-                        </div>
-                    </div>
-                    <div class="grid grid-cols-1 gap-1 text-[11px] font-mono bg-white p-2.5 rounded-xl border border-sky-200/80">
-                        <div class="truncate text-slate-600"><strong class="text-slate-800">Pasta:</strong> <span id="ndSpPastaPath">SISTEMA/...</span></div>
-                        <div class="truncate text-indigo-700"><strong class="text-slate-800">Arquivo:</strong> <span id="ndSpNomeArquivo">DOC-...</span></div>
-                    </div>
-                </div>
-
-                <!-- Passo 3: Arquivo SharePoint OU Foto Direta de Campo -->
+                <!-- Passo 2: Anexo Direto (Arrastar e Soltar PDF / Foto / Excel / Word) + Opção Link SharePoint -->
                 <div class="p-4 rounded-2xl bg-slate-50 border border-slate-200 space-y-3">
                     <div class="flex flex-wrap items-center justify-between gap-2">
-                        <span class="text-[10px] font-extrabold uppercase tracking-wider text-slate-700">2. Anexo: Link Oficial SharePoint e/ou Foto Direta</span>
+                        <span class="text-[10px] font-extrabold uppercase tracking-wider text-slate-700">2. Anexar Arquivo (Arraste e Solte ou Escolha do Dispositivo) *</span>
                         <div class="flex items-center gap-1.5">
-                            <button type="button" id="btnModoSp" onclick="setModoAnexoDoc('sharepoint')" class="pill active">Link SharePoint</button>
-                            <button type="button" id="btnModoFoto" onclick="setModoAnexoDoc('foto_campo')" class="pill">Foto Direta (Câmera / Tablet)</button>
+                            <button type="button" id="btnModoDireto" onclick="setModoAnexoDoc('arquivo_direto')" class="pill active">📎 Arrastar / Escolher Arquivo</button>
+                            <button type="button" id="btnModoSp" onclick="setModoAnexoDoc('sharepoint')" class="pill">🔗 Link SharePoint (Opcional)</button>
                         </div>
                     </div>
 
-                    <div id="boxAnexoSharePoint" class="space-y-2.5">
+                    <div id="boxAnexoDireto" class="space-y-3">
+                        <div id="ndDropZone"
+                            ondragenter="onNdDragOver(event)"
+                            ondragover="onNdDragOver(event)"
+                            ondragleave="onNdDragLeave(event)"
+                            ondrop="onNdDrop(event)"
+                            class="dropzone-docs rounded-2xl p-5 text-center space-y-2.5 cursor-pointer"
+                            onclick="onNdDropZoneClick(event)">
+                            <div class="w-11 h-11 mx-auto rounded-2xl bg-indigo-100 text-indigo-700 flex items-center justify-center shadow-sm">
+                                <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12"/></svg>
+                            </div>
+                            <div>
+                                <div class="text-sm font-extrabold text-slate-900">Arraste seu arquivo aqui (PDF, Foto, Planilha, Word)</div>
+                                <p class="text-[11px] font-semibold text-slate-500 mt-0.5">Sem precisar copiar links! Até <strong>7 MB</strong> direto no sistema (ou sem limite com pasta OneDrive vinculada).</p>
+                            </div>
+                            <div class="flex flex-wrap items-center justify-center gap-2 pt-1">
+                                <label class="btn-pill-dark text-xs py-2 px-4 cursor-pointer">
+                                    <span>📄 Selecionar Arquivo do PC / Celular</span>
+                                    <input type="file" id="ndArquivoFile" accept=".pdf,image/*,.doc,.docx,.xls,.xlsx,.ppt,.pptx,.txt,.csv,.dwg,.dxf" onchange="onArquivoDiretoSelecionado(event)" class="hidden">
+                                </label>
+                                <label class="btn-touch bg-emerald-600 hover:bg-emerald-700 text-white text-xs py-2 px-4 cursor-pointer">
+                                    <span>📷 Tirar Foto / Câmera</span>
+                                    <input type="file" id="ndFotoFile" accept="image/*" capture="environment" onchange="onFotoCampoSelecionada(event)" class="hidden">
+                                </label>
+                            </div>
+                            <div id="ndOneDriveMiniStatus" class="text-[10px] font-bold text-slate-500 pt-1">
+                                Salvamento direto no aplicativo ativo — funciona para qualquer usuário no campo.
+                            </div>
+                        </div>
+
+                        <!-- Preview de Documento PDF / Planilha / Word -->
+                        <div id="ndArquivoInfoBox" hidden class="hidden p-3.5 rounded-2xl bg-white border border-indigo-200 flex flex-wrap items-center justify-between gap-3 shadow-sm">
+                            <div class="flex items-center gap-3 min-w-0">
+                                <span id="ndArquivoExtBadge" class="px-2.5 py-2 rounded-xl bg-indigo-600 text-white font-mono font-extrabold text-xs shrink-0">PDF</span>
+                                <div class="min-w-0">
+                                    <div id="ndArquivoNomeLbl" class="text-xs font-extrabold text-slate-900 truncate">arquivo.pdf</div>
+                                    <div id="ndArquivoMetaLbl" class="text-[10px] font-bold text-emerald-700">Pronto para enviar</div>
+                                </div>
+                            </div>
+                            <div class="flex items-center gap-1.5 shrink-0">
+                                <button type="button" onclick="visualizarAnexoDraft()" class="px-3 py-1.5 rounded-xl bg-indigo-50 hover:bg-indigo-100 text-indigo-700 text-[11px] font-extrabold">👁️ Visualizar</button>
+                                <button type="button" onclick="limparAnexoDiretoDoc()" class="px-2.5 py-1.5 rounded-xl bg-slate-100 hover:bg-rose-100 text-slate-700 hover:text-rose-700 text-[11px] font-extrabold">Remover ✕</button>
+                            </div>
+                        </div>
+
+                        <!-- Preview de Foto -->
+                        <div id="ndFotoPreviewBox" hidden class="hidden p-3 rounded-2xl bg-white border border-emerald-200 flex flex-wrap items-center justify-between gap-3 shadow-sm">
+                            <div class="flex items-center gap-3">
+                                <img id="ndFotoPreviewImg" src="" alt="Preview" class="h-24 w-auto rounded-xl border border-slate-300 object-cover shadow-sm">
+                                <div>
+                                    <div class="text-xs font-extrabold text-slate-900">Foto anexada</div>
+                                    <div id="ndFotoStatus" class="text-[11px] font-bold text-emerald-700">Foto otimizada pronta para envio.</div>
+                                </div>
+                            </div>
+                            <button type="button" onclick="limparFotoCampoDoc()" class="px-3 py-1.5 rounded-xl bg-slate-100 hover:bg-rose-100 text-slate-700 hover:text-rose-700 text-[11px] font-extrabold">Remover Foto ✕</button>
+                        </div>
+                    </div>
+
+                    <div id="boxAnexoSharePoint" hidden class="hidden space-y-2.5">
+                        <div class="p-3 rounded-xl bg-sky-50 border border-sky-200 text-[11px] font-semibold text-sky-900">
+                            Use esta aba apenas se o arquivo for muito pesado (&gt; 7 MB) e você preferir colar o link diretamente do SharePoint.
+                        </div>
                         <div>
-                            <label class="block text-[10px] font-extrabold uppercase text-slate-500 mb-1">URL do Arquivo ou Pasta no SharePoint *</label>
+                            <label class="block text-[10px] font-extrabold uppercase text-slate-500 mb-1">URL do Arquivo ou Pasta no SharePoint</label>
                             <input type="url" id="ndArquivoUrl" oninput="onSharePointUrlInput(this.value)" class="input-clean py-2 text-xs font-mono" placeholder="https://ceperaind.sharepoint.com/sites/PCMCEPERA-LevantamentoManutenoPreventiva/...">
                         </div>
                         <div>
-                            <label class="block text-[10px] font-extrabold uppercase text-slate-500 mb-1">Código/Link Embed p/ Pré-Visualizar na Tela (Opcional — SharePoint &gt; Compartilhar &gt; Incorporar)</label>
-                            <input type="text" id="ndArquivoEmbedUrl" oninput="normalizarEmbedInput(this)" class="input-clean py-2 text-xs font-mono" placeholder="Cole a URL embed ou a tag &lt;iframe src=&quot;...&quot;&gt; que o sistema extrai sozinho">
+                            <label class="block text-[10px] font-extrabold uppercase text-slate-500 mb-1">Código/Link Embed p/ Pré-Visualizar na Tela (Opcional)</label>
+                            <input type="text" id="ndArquivoEmbedUrl" oninput="normalizarEmbedInput(this)" class="input-clean py-2 text-xs font-mono" placeholder="Cole a URL embed ou a tag &lt;iframe src=&quot;...&quot;&gt;">
                         </div>
                     </div>
 
-                    <div id="boxAnexoFoto" hidden class="hidden space-y-2.5">
-                        <div class="flex flex-wrap items-center gap-3">
-                            <label class="btn-touch bg-emerald-600 hover:bg-emerald-700 text-white text-xs py-2 px-4 cursor-pointer">
-                                <span>Tirar Foto / Escolher Imagem</span>
-                                <input type="file" id="ndFotoFile" accept="image/*" capture="environment" onchange="onFotoCampoSelecionada(event)" class="hidden">
-                            </label>
-                            <span id="ndFotoStatus" class="text-[11px] font-bold text-slate-500">Nenhuma foto selecionada (otimização automática p/ Cosmo/Firestore).</span>
+                    <!-- Guia Opcional Recolhido para Padrão SharePoint -->
+                    <details class="p-2.5 rounded-xl bg-white/80 border border-slate-200 text-[11px]">
+                        <summary class="cursor-pointer font-extrabold text-sky-800 select-none flex flex-wrap items-center justify-between gap-2">
+                            <span>📂 Organização automática SharePoint (Pasta &amp; Nome padrão gerado)</span>
+                            <span class="text-[10px] font-mono text-slate-500" id="ndSpNomeResumoBadge">Ver detalhes</span>
+                        </summary>
+                        <div class="pt-2.5 space-y-2">
+                            <div class="grid grid-cols-1 gap-1 text-[11px] font-mono bg-slate-50 p-2.5 rounded-xl border border-slate-200">
+                                <div class="truncate text-slate-600"><strong class="text-slate-800">Pasta:</strong> <span id="ndSpPastaPath">SISTEMA/...</span></div>
+                                <div class="truncate text-indigo-700"><strong class="text-slate-800">Arquivo:</strong> <span id="ndSpNomeArquivo">DOC-...</span></div>
+                            </div>
+                            <div class="flex flex-wrap items-center gap-1.5">
+                                <button type="button" onclick="copiarTextoSimples(document.getElementById('ndSpNomeArquivo').innerText, 'Nome padrão do arquivo copiado!')" class="px-2.5 py-1 rounded-lg bg-slate-100 hover:bg-slate-200 text-[10px] font-extrabold text-slate-700">Copiar Nome</button>
+                                <button type="button" onclick="abrirPastaDestinoModalSharePoint()" class="px-2.5 py-1 rounded-lg bg-sky-600 hover:bg-sky-700 text-white text-[10px] font-extrabold">Abrir Pasta SharePoint ↗</button>
+                                <button type="button" id="btnNdConectarOneDrive" onclick="conectarPastaOneDriveLocal()" class="px-2.5 py-1 rounded-lg bg-emerald-50 hover:bg-emerald-100 border border-emerald-200 text-emerald-800 text-[10px] font-extrabold">📁 Vincular Pasta OneDrive</button>
+                            </div>
                         </div>
-                        <div id="ndFotoPreviewBox" hidden class="hidden relative inline-block">
-                            <img id="ndFotoPreviewImg" src="" alt="Preview" class="h-36 w-auto rounded-2xl border border-slate-300 object-cover shadow-sm">
-                            <button type="button" onclick="limparFotoCampoDoc()" class="absolute -top-2 -right-2 w-6 h-6 rounded-full bg-slate-900 text-white text-xs font-bold">✕</button>
-                        </div>
-                    </div>
+                    </details>
                 </div>
 
-                <!-- Passo 4: Busca, Parâmetros Técnicos, Revisão e Validade -->
+                <!-- Passo 3: Busca, Parâmetros Técnicos, Revisão e Validade -->
                 <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
                     <div>
-                        <label class="block text-[10px] font-extrabold uppercase text-slate-500 mb-1">Tags / Palavras-chave para Busca *</label>
-                        <input type="text" id="ndTags" required class="input-clean py-2 text-xs font-bold" placeholder="Ex: SEW, redutor, inversor CFW11, óleo VG 220, retentor">
+                        <label class="block text-[10px] font-extrabold uppercase text-slate-500 mb-1">Tags / Palavras-chave para Busca (Opcional)</label>
+                        <input type="text" id="ndTags" class="input-clean py-2 text-xs font-bold" placeholder="Ex: SEW, redutor, inversor CFW11, óleo VG 220 (auto-sugerido se vazio)">
                     </div>
                     <div class="grid grid-cols-2 gap-2">
                         <div>
@@ -713,7 +836,7 @@
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
         import { getAuth, signInAnonymously } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
-        import { initializeFirestore, collection, addDoc, setDoc, onSnapshot, doc, updateDoc, deleteDoc } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
+        import { initializeFirestore, collection, addDoc, setDoc, onSnapshot, doc, updateDoc, deleteDoc, getDocs, query, where } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
 
         const memoryStorage = {};
         const safeStorage = {
@@ -741,6 +864,7 @@
 
         const refDocsAtivos = collection(db, "docs_ativos");
         const refDocsRevisoes = collection(db, "docs_revisoes");
+        const refDocsArquivosPartes = collection(db, "docs_arquivos_partes");
         const refLinhas = collection(db, "ob_linhas");
         const refFunc = collection(db, "ir_funcionarios");
         const refSpConfig = doc(db, "config", "docs_sharepoint");
@@ -751,6 +875,7 @@
             biblioteca: "Documentos Compartilhados",
             pastaRaiz: "SISTEMA",
             viewId: "da8a2e7e-0d98-46b8-b619-61b655535ada",
+            webhookUploadUrl: "",
             urlPastaRaiz: "https://ceperaind.sharepoint.com/sites/PCMCEPERA-LevantamentoManutenoPreventiva/Documentos%20Compartilhados/Forms/AllItems.aspx?id=%2Fsites%2FPCMCEPERA%2DLevantamentoManutenoPreventiva%2FDocumentos%20Compartilhados%2FSISTEMA&viewid=da8a2e7e%2D0d98%2D46b8%2Db619%2D61b655535ada"
         };
 
@@ -781,12 +906,18 @@
             }
         };
 
+        const MAX_DB_UPLOAD_BYTES = 7 * 1024 * 1024;
+        const CHUNK_B64_CHARS = 420000;
+
         let usuarioLogado = null;
         let currentView = 'biblioteca';
         let revTabFiltro = 'validades';
         let categoriaFiltro = '';
-        let modoAnexoAtual = 'sharepoint';
+        let modoAnexoAtual = 'arquivo_direto';
         let fotoCampoB64Draft = '';
+        let arquivoDiretoDraft = null;
+        let pastaOneDriveHandle = null;
+        const blobUrlCache = new Map();
         let sharepointCfg = { ...DEFAULT_SHAREPOINT_CFG };
 
         let rawLinhasDocs = [];
@@ -1011,12 +1142,29 @@
         };
 
         window.copiarTextoSimples = async (txt, msgOk = 'Copiado!') => {
+            let copiou = false;
             try {
                 if (navigator.clipboard && navigator.clipboard.writeText) {
                     await navigator.clipboard.writeText(String(txt || ''));
+                    copiou = true;
                 }
+            } catch (_) {}
+            if (!copiou) {
+                try {
+                    const ta = document.createElement('textarea');
+                    ta.value = String(txt || '');
+                    ta.style.position = 'fixed';
+                    ta.style.opacity = '0';
+                    document.body.appendChild(ta);
+                    ta.select();
+                    document.execCommand('copy');
+                    ta.remove();
+                    copiou = true;
+                } catch (_) {}
+            }
+            if (copiou) {
                 showToast(msgOk, 'success');
-            } catch (_) {
+            } else {
                 showToast(String(txt || ''), 'info');
             }
         };
@@ -1373,13 +1521,14 @@
                         <div class="flex flex-wrap items-center gap-1">
                             ${tagsHtml}
                             ${valBadge}
+                            ${d.arquivoNome && !d.arquivoUrl ? `<span class="px-2 py-0.5 rounded-md bg-indigo-50 text-indigo-700 border border-indigo-200 text-[10px] font-extrabold">📎 ${escapeHtml(d.arquivoNome.split('.').pop()?.toUpperCase() || 'DOC')} • ${formatarTamanhoBytes(d.arquivoTamanhoBytes)}</span>` : ''}
                             ${d.temRevisaoPendente ? '<span class="px-2 py-0.5 rounded-full text-[9px] font-extrabold bg-amber-100 text-amber-800 border border-amber-200">Nova Rev. em aprovação</span>' : ''}
                         </div>
                     </div>
 
                     <div class="pt-3 border-t border-slate-100 flex flex-wrap items-center gap-2">
-                        ${d.arquivoUrl ? `<a href="${escapeHtml(d.arquivoUrl)}" target="_blank" rel="noopener" class="btn-pill-dark flex-1 text-[11px] py-2 px-3">Abrir Arquivo ↗</a>` : ''}
-                        <button type="button" onclick="abrirDetalheDoc('${d.id}')" class="btn-touch ${d.arquivoUrl ? 'bg-slate-100 hover:bg-slate-200 text-slate-800' : 'btn-pill-dark flex-1'} text-[11px] py-2 px-3">Detalhes &amp; Revisões</button>
+                        ${d.arquivoId ? `<button type="button" onclick="abrirArquivoDoc('${d.id}')" class="btn-pill-dark flex-1 text-[11px] py-2 px-3">👁️ Abrir Arquivo</button>` : (d.arquivoUrl ? `<a href="${escapeHtml(d.arquivoUrl)}" target="_blank" rel="noopener" class="btn-pill-dark flex-1 text-[11px] py-2 px-3">Abrir Arquivo ↗</a>` : '')}
+                        <button type="button" onclick="abrirDetalheDoc('${d.id}')" class="btn-touch ${(d.arquivoId || d.arquivoUrl) ? 'bg-slate-100 hover:bg-slate-200 text-slate-800' : 'btn-pill-dark flex-1'} text-[11px] py-2 px-3">Detalhes &amp; Revisões</button>
                     </div>
                 </article>`;
             }).join('');
@@ -1406,7 +1555,7 @@
                     const master = docsAtivos.find(d => d.id === rev.docMasterId) || {};
                     const pathTxt = [rev.area, rev.maquina, rev.equipamento, rev.conjunto, rev.subconjunto].filter(Boolean).map(escapeHtml).join(' › ');
                     const chkAtivo = Boolean(rev.area && rev.maquina && rev.equipamento);
-                    const chkArq = Boolean(rev.arquivoUrl || rev.fotoThumbB64);
+                    const chkArq = Boolean(rev.arquivoId || rev.arquivoUrl || rev.fotoThumbB64);
                     const chkTags = Boolean(Array.isArray(rev.tags) && rev.tags.length > 0);
                     const selfNote = normKey(rev.enviadoPor) === normKey(usuarioLogado?.nome)
                         ? '<span class="px-2 py-0.5 rounded-full text-[9px] font-extrabold bg-slate-100 text-slate-600">Enviado por você</span>'
@@ -1446,6 +1595,7 @@
                                     <span class="px-2 py-0.5 rounded-md ${chkTags ? 'bg-emerald-100 text-emerald-800' : 'bg-amber-100 text-amber-800'}">${chkTags ? '✓' : '!'} Tags de Busca</span>
                                 </div>
                                 ${rev.fotoThumbB64 ? `<img src="${rev.fotoThumbB64}" onclick="abrirZoomFotoSrc('${rev.fotoThumbB64}', '${escapeHtml(rev.titulo)}')" class="h-24 rounded-xl border border-slate-300 cursor-zoom-in object-cover">` : ''}
+                                ${rev.arquivoId ? `<div class="flex flex-wrap items-center gap-2 pt-1"><button type="button" onclick="abrirArquivoDoc('${rev.docMasterId}', '${rev.id}')" class="px-3 py-1.5 rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white font-extrabold text-[11px]">👁️ Visualizar Arquivo Anexado (${escapeHtml(rev.arquivoNome || 'PDF')})</button><button type="button" onclick="baixarArquivoDoc('${rev.docMasterId}', '${rev.id}')" class="px-2.5 py-1.5 rounded-xl bg-white border border-slate-200 text-slate-700 font-extrabold text-[11px]">⬇ Baixar</button></div>` : ''}
                                 ${rev.arquivoUrl ? `<a href="${escapeHtml(rev.arquivoUrl)}" target="_blank" rel="noopener" class="inline-flex items-center gap-1 font-extrabold text-sky-700 underline">Conferir arquivo no SharePoint ↗</a>` : ''}
                             </div>
                         </div>
@@ -1488,8 +1638,8 @@
             if (!rev.area || !rev.maquina || !rev.equipamento) {
                 return showToast('Validação reprovada: documento sem vínculo completo na árvore de ativos.', 'error');
             }
-            if (!rev.arquivoUrl && !rev.fotoThumbB64) {
-                return showToast('Validação reprovada: anexe link do SharePoint ou foto antes de aprovar.', 'error');
+            if (!rev.arquivoId && !rev.arquivoUrl && !rev.fotoThumbB64) {
+                return showToast('Validação reprovada: anexe um arquivo, foto ou link do SharePoint antes de aprovar.', 'error');
             }
 
             const agora = new Date().toISOString();
@@ -1538,7 +1688,12 @@
                     resumoTecnico: rev.resumoTecnico || '',
                     validadeEm: rev.validadeEm || '',
                     periodicidadeRevalidacaoMeses: Number(rev.periodicidadeRevalidacaoMeses || 0),
-                    arquivoProvider: rev.arquivoProvider || 'sharepoint',
+                    arquivoProvider: rev.arquivoProvider || (rev.arquivoId ? 'banco_interno' : 'sharepoint'),
+                    arquivoId: rev.arquivoId || '',
+                    arquivoNome: rev.arquivoNome || '',
+                    arquivoMime: rev.arquivoMime || '',
+                    arquivoTamanhoBytes: Number(rev.arquivoTamanhoBytes || 0),
+                    arquivoPartes: Number(rev.arquivoPartes || 0),
                     arquivoUrl: rev.arquivoUrl || '',
                     arquivoEmbedUrl: rev.arquivoEmbedUrl || '',
                     fotoThumbB64: rev.fotoThumbB64 || '',
@@ -1569,7 +1724,7 @@
             if (!isPerfilAprovadorDocs(usuarioLogado)) return;
             const rev = docsRevisoes.find(r => r.id === revId);
             if (!rev) return;
-            const motivo = prompt(`Informe o motivo da reprovação para "${rev.codigoDoc} ${rev.revisaoLabel}":`, 'Link inválido / faltam informações técnicas ou tags');
+            const motivo = prompt(`Informe o motivo da reprovação para "${rev.codigoDoc} ${rev.revisaoLabel}":`, 'Arquivo ilegível / faltam informações técnicas ou tags');
             if (!motivo || !motivo.trim()) return;
 
             const master = docsAtivos.find(d => d.id === rev.docMasterId);
@@ -1703,8 +1858,11 @@
         function renderSharePointView() {
             const inpUrl = document.getElementById('spCfgUrlRaiz');
             if (inpUrl) inpUrl.value = sharepointCfg.urlPastaRaiz || DEFAULT_SHAREPOINT_CFG.urlPastaRaiz;
+            const inpWh = document.getElementById('spCfgWebhookUrl');
+            if (inpWh) inpWh.value = sharepointCfg.webhookUploadUrl || '';
             const linkEl = document.getElementById('linkSharepointRaiz');
             if (linkEl) linkEl.href = sharepointCfg.urlPastaRaiz || DEFAULT_SHAREPOINT_CFG.urlPastaRaiz;
+            atualizarBadgesOneDriveUI();
 
             const box = document.getElementById('sharepointArvorePreview');
             if (!box) return;
@@ -1738,8 +1896,9 @@
 
         window.salvarConfigSharePoint = async () => {
             const url = (document.getElementById('spCfgUrlRaiz')?.value || '').trim();
+            const webhookUploadUrl = (document.getElementById('spCfgWebhookUrl')?.value || '').trim();
             if (!url) return showToast('Informe a URL da pasta SISTEMA no SharePoint.', 'error');
-            const parsed = { ...sharepointCfg, urlPastaRaiz: url };
+            const parsed = { ...sharepointCfg, urlPastaRaiz: url, webhookUploadUrl };
             try {
                 const u = new URL(url);
                 parsed.tenantUrl = `${u.protocol}//${u.host}`;
@@ -1768,6 +1927,85 @@
             if (typeof window.open === 'function') window.open(url, '_blank', 'noopener');
         };
 
+        function gerarScriptConsoleSharePoint() {
+            const pastasBrutas = getListaPastasSharePointEsperadas();
+            const raiz = sharepointCfg.pastaRaiz || 'SISTEMA';
+            const libName = sharepointCfg.biblioteca || 'Documentos Compartilhados';
+            const siteRel = (sharepointCfg.sitePath || '/sites/PCMCEPERA-LevantamentoManutenoPreventiva').replace(/\/$/, '');
+
+            const setPastas = new Set();
+            setPastas.add(raiz);
+            pastasBrutas.forEach(p => {
+                const parts = p.split('/');
+                let cur = '';
+                parts.forEach(part => {
+                    cur = cur ? `${cur}/${part}` : part;
+                    setPastas.add(cur);
+                });
+            });
+            const ordenadas = [...setPastas].sort((a, b) => a.split('/').length - b.split('/').length || a.localeCompare(b));
+            const serverRelPaths = ordenadas.map(p => `${siteRel}/${libName}/${p}`);
+
+            return `// =========================================================================\n` +
+                   `// SCRIPT PCM CEPÊRA: CRIAÇÃO AUTOMÁTICA DE PASTAS NO SHAREPOINT ONLINE\n` +
+                   `// Execute no Console (F12) na aba aberta do SharePoint ceperaind.sharepoint.com\n` +
+                   `// =========================================================================\n` +
+                   `(async function criarEstruturaSharePointCepera() {\n` +
+                   `    console.clear();\n` +
+                   `    console.log('%c[PCM Cepêra] Iniciando criação direta de ${serverRelPaths.length} pastas no SharePoint...', 'color: #0284c7; font-weight: bold; font-size: 13px;');\n` +
+                   `    const siteUrl = (typeof _spPageContextInfo !== 'undefined' && _spPageContextInfo.webAbsoluteUrl) ? _spPageContextInfo.webAbsoluteUrl : (window.location.origin + '${siteRel}');\n` +
+                   `    let digest = (typeof _spPageContextInfo !== 'undefined' && _spPageContextInfo.formDigestValue) || document.querySelector('#__REQUESTDIGEST')?.value;\n` +
+                   `    async function renovarDigest() {\n` +
+                   `        try {\n` +
+                   `            const r = await fetch(siteUrl + '/_api/contextinfo', { method: 'POST', headers: { 'Accept': 'application/json;odata=verbose' } });\n` +
+                   `            const j = await r.json();\n` +
+                   `            digest = j?.d?.GetContextWebInformation?.FormDigestValue || digest;\n` +
+                   `        } catch (_) {}\n` +
+                   `    }\n` +
+                   `    if (!digest) await renovarDigest();\n` +
+                   `    const pastas = ${JSON.stringify(serverRelPaths, null, 4)};\n` +
+                   `    let criadas = 0, existiam = 0, erros = 0;\n` +
+                   `    for (let i = 0; i < pastas.length; i++) {\n` +
+                   `        const pastaRel = pastas[i];\n` +
+                   `        const nome = pastaRel.split('/').pop();\n` +
+                   `        if (i > 0 && i % 30 === 0) await renovarDigest();\n` +
+                   `        try {\n` +
+                   `            const resp = await fetch(siteUrl + '/_api/web/folders', {\n` +
+                   `                method: 'POST',\n` +
+                   `                headers: {\n` +
+                   `                    'Accept': 'application/json;odata=verbose',\n` +
+                   `                    'Content-Type': 'application/json;odata=verbose',\n` +
+                   `                    'X-RequestDigest': digest\n` +
+                   `                },\n` +
+                   `                body: JSON.stringify({ '__metadata': { 'type': 'SP.Folder' }, 'ServerRelativeUrl': pastaRel })\n` +
+                   `            });\n` +
+                   `            if (resp.ok || resp.status === 201) {\n` +
+                   `                criadas++;\n` +
+                   `                console.log(\`%c[\${i+1}/\${pastas.length}] Criada: \${nome}\`, 'color: #16a34a;', pastaRel);\n` +
+                   `            } else if (resp.status === 409 || resp.status === 400 || resp.status === 500) {\n` +
+                   `                existiam++;\n` +
+                   `                console.log(\`[\${i+1}/\${pastas.length}] Já existe: \${nome}\`);\n` +
+                   `            } else {\n` +
+                   `                erros++;\n` +
+                   `                console.warn(\`[\${i+1}/\${pastas.length}] Aviso (\${resp.status}): \${nome}\`, pastaRel);\n` +
+                   `            }\n` +
+                   `        } catch (e) {\n` +
+                   `            erros++;\n` +
+                   `            console.error(\`[\${i+1}/\${pastas.length}] Erro ao criar \${pastaRel}:\`, e);\n` +
+                   `        }\n` +
+                   `    }\n` +
+                   `    console.log('%c========================================================', 'color: #0284c7; font-weight: bold;');\n` +
+                   `    console.log(\`%c[PCM Cepêra] Concluído! \${criadas} pastas criadas, \${existiam} já existiam, \${erros} avisos.\`, 'color: #16a34a; font-weight: bold; font-size: 14px;');\n` +
+                   `    alert(\`PCM Cepêra: Estrutura de pastas SISTEMA criada no SharePoint!\\nNovas: \${criadas} | Já existiam: \${existiam}\\nA página do SharePoint será recarregada.\`);\n` +
+                   `    window.location.reload();\n` +
+                   `})();`;
+        }
+
+        window.copiarScriptConsoleSharePoint = () => {
+            const code = gerarScriptConsoleSharePoint();
+            copiarTextoSimples(code, 'Script de Console copiado! Agora abra o SharePoint, aperte F12, cole no Console e dê Enter.');
+        };
+
         window.baixarScriptPastasSharePoint = (tipo = 'bat') => {
             const pastas = getListaPastasSharePointEsperadas();
             const raiz = sharepointCfg.pastaRaiz || 'SISTEMA';
@@ -1794,6 +2032,9 @@
                 psLines.push(`}`);
                 psLines.push(`Write-Host "Estrutura completa criada dentro de ${raiz}!" -ForegroundColor Green`);
                 conteudo = psLines.join('\r\n');
+            } else if (tipo === 'js') {
+                nomeArq = 'criar_estrutura_SISTEMA_sharepoint_console.js';
+                conteudo = gerarScriptConsoleSharePoint();
             } else {
                 nomeArq = 'criar_estrutura_SISTEMA.bat';
                 const winLines = [
@@ -1903,6 +2144,326 @@
             atualizarPreviewNomenclaturaDoc();
         };
 
+        function formatarTamanhoBytes(bytes) {
+            const n = Number(bytes || 0);
+            if (!n || n <= 0) return '0 KB';
+            if (n < 1024) return `${n} B`;
+            if (n < 1024 * 1024) return `${Math.max(1, Math.round(n / 1024))} KB`;
+            return `${(n / (1024 * 1024)).toFixed(2).replace('.', ',')} MB`;
+        }
+
+        function inferMimeByFileName(name) {
+            const ext = String(name || '').split('.').pop()?.toLowerCase() || '';
+            if (ext === 'pdf') return 'application/pdf';
+            if (ext === 'jpg' || ext === 'jpeg') return 'image/jpeg';
+            if (ext === 'png') return 'image/png';
+            if (ext === 'webp') return 'image/webp';
+            if (ext === 'xlsx') return 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet';
+            if (ext === 'xls') return 'application/vnd.ms-excel';
+            if (ext === 'docx') return 'application/vnd.openxmlformats-officedocument.wordprocessingml.document';
+            if (ext === 'doc') return 'application/msword';
+            if (ext === 'csv') return 'text/csv';
+            if (ext === 'txt') return 'text/plain';
+            return 'application/octet-stream';
+        }
+
+        function isImagemPorTipoOuExt(file) {
+            const t = String(file?.type || '').toLowerCase();
+            if (t.startsWith('image/')) return true;
+            return /\.(jpg|jpeg|png|gif|webp|bmp|heic)$/i.test(String(file?.name || ''));
+        }
+
+        // ================= INTEGRAÇÃO PASTA ONEDRIVE LOCAL (DESKTOP SEM LINKS) =================
+        function abrirIdbOneDrive() {
+            return new Promise((resolve, reject) => {
+                if (typeof indexedDB === 'undefined') return reject(new Error('no_idb'));
+                const req = indexedDB.open('cepera_docs_onedrive_fs', 1);
+                req.onupgradeneeded = () => {
+                    try { req.result.createObjectStore('handles'); } catch (_) {}
+                };
+                req.onsuccess = () => resolve(req.result);
+                req.onerror = () => reject(req.error || new Error('idb_err'));
+            });
+        }
+
+        async function salvarHandleOneDriveIdb(handle) {
+            try {
+                const dbIdb = await abrirIdbOneDrive();
+                const tx = dbIdb.transaction('handles', 'readwrite');
+                tx.objectStore('handles').put(handle, 'sp_root');
+            } catch (_) {}
+        }
+
+        async function carregarHandleOneDriveIdb() {
+            try {
+                const dbIdb = await abrirIdbOneDrive();
+                return await new Promise((resolve) => {
+                    const tx = dbIdb.transaction('handles', 'readonly');
+                    const req = tx.objectStore('handles').get('sp_root');
+                    req.onsuccess = () => resolve(req.result || null);
+                    req.onerror = () => resolve(null);
+                });
+            } catch (_) { return null; }
+        }
+
+        async function removerHandleOneDriveIdb() {
+            try {
+                const dbIdb = await abrirIdbOneDrive();
+                const tx = dbIdb.transaction('handles', 'readwrite');
+                tx.objectStore('handles').delete('sp_root');
+            } catch (_) {}
+        }
+
+        function atualizarBadgesOneDriveUI() {
+            const conectado = Boolean(pastaOneDriveHandle);
+            const nomePasta = pastaOneDriveHandle?.name || '';
+            const badge = document.getElementById('spOneDriveStatusBadge');
+            if (badge) {
+                badge.innerText = conectado
+                    ? `✓ Pasta OneDrive vinculada: ${nomePasta}`
+                    : (sharepointCfg.webhookUploadUrl ? '✓ Upload Nuvem Power Automate ativo' : 'Pasta OneDrive: Não vinculada neste navegador');
+                badge.className = (conectado || sharepointCfg.webhookUploadUrl)
+                    ? 'px-3 py-1 rounded-full text-[11px] font-extrabold bg-emerald-600 text-white border border-emerald-700'
+                    : 'px-3 py-1 rounded-full text-[11px] font-extrabold bg-white border border-slate-200 text-slate-600';
+            }
+            const btnDesc = document.getElementById('btnDesconectarOneDrive');
+            if (btnDesc) { btnDesc.hidden = !conectado; btnDesc.classList.toggle('hidden', !conectado); }
+            const mini = document.getElementById('ndOneDriveMiniStatus');
+            if (mini) {
+                mini.innerHTML = conectado
+                    ? `<span class="text-emerald-700">✓ Espelhamento automático ativo para pasta OneDrive "<strong>${escapeHtml(nomePasta)}</strong>" (qualquer tamanho suportado).</span>`
+                    : (sharepointCfg.webhookUploadUrl
+                        ? '<span class="text-emerald-700">✓ Envio direto na nuvem SharePoint configurado via Power Automate.</span>'
+                        : 'Salvamento direto no aplicativo ativo (até <strong>7 MB</strong>) — zero links necessários.');
+            }
+            const btnNd = document.getElementById('btnNdConectarOneDrive');
+            if (btnNd) btnNd.innerText = conectado ? `✓ OneDrive: ${nomePasta}` : '📁 Vincular Pasta OneDrive';
+        }
+
+        window.conectarPastaOneDriveLocal = async () => {
+            if (typeof window.showDirectoryPicker !== 'function') {
+                return showToast('Seu navegador/celular não suporta vínculo de pasta local. Sem problema: arraste o arquivo normalmente até 7 MB!', 'info');
+            }
+            try {
+                const dirHandle = await window.showDirectoryPicker({ mode: 'readwrite' });
+                pastaOneDriveHandle = dirHandle;
+                await salvarHandleOneDriveIdb(dirHandle);
+                atualizarBadgesOneDriveUI();
+                showToast(`Pasta OneDrive "${dirHandle.name}" conectada! Arquivos arrastados serão gravados direto nela.`, 'success');
+            } catch (err) {
+                if (err?.name !== 'AbortError') showToast('Não foi possível acessar a pasta selecionada.', 'error');
+            }
+        };
+
+        window.desconectarPastaOneDriveLocal = async () => {
+            pastaOneDriveHandle = null;
+            await removerHandleOneDriveIdb();
+            atualizarBadgesOneDriveUI();
+            showToast('Vínculo local com OneDrive removido neste navegador.');
+        };
+
+        async function salvarArquivoEmPastaOneDriveLocal(pastaRel, nomeArquivo, base64Body, fileObj) {
+            if (!pastaOneDriveHandle) return { ok: false };
+            try {
+                if (typeof pastaOneDriveHandle.queryPermission === 'function') {
+                    let perm = await pastaOneDriveHandle.queryPermission({ mode: 'readwrite' });
+                    if (perm === 'prompt') perm = await pastaOneDriveHandle.requestPermission({ mode: 'readwrite' });
+                    if (perm !== 'granted') return { ok: false };
+                }
+
+                const raiz = sharepointCfg.pastaRaiz || 'SISTEMA';
+                let relSegs = String(pastaRel || '').split('/').filter(Boolean);
+                let temCategoriasNaRaiz = false;
+                try {
+                    await pastaOneDriveHandle.getDirectoryHandle('01_MANUAIS', { create: false });
+                    temCategoriasNaRaiz = true;
+                } catch (_) {}
+
+                const nomeRaizLocal = String(pastaOneDriveHandle.name || '').toUpperCase();
+                let caminhoDentroLib = relSegs.join('/');
+                if ((nomeRaizLocal === raiz.toUpperCase() || temCategoriasNaRaiz) && relSegs[0] === raiz) {
+                    relSegs = relSegs.slice(1);
+                    if (temCategoriasNaRaiz && nomeRaizLocal !== raiz.toUpperCase()) {
+                        caminhoDentroLib = relSegs.join('/');
+                    }
+                }
+
+                let dirAtual = pastaOneDriveHandle;
+                for (const seg of relSegs) {
+                    dirAtual = await dirAtual.getDirectoryHandle(seg, { create: true });
+                }
+                const fHandle = await dirAtual.getFileHandle(nomeArquivo, { create: true });
+                const writable = await fHandle.createWritable();
+                if (fileObj) {
+                    await writable.write(fileObj);
+                } else {
+                    const bytes = base64ToUint8Array(base64Body);
+                    await writable.write(bytes);
+                }
+                await writable.close();
+
+                const site = String(sharepointCfg.sitePath || DEFAULT_SHAREPOINT_CFG.sitePath).replace(/\/+$/, '');
+                const lib = String(sharepointCfg.biblioteca || 'Documentos Compartilhados').replace(/^\/+|\/+$/g, '');
+                const tenant = String(sharepointCfg.tenantUrl || DEFAULT_SHAREPOINT_CFG.tenantUrl).replace(/\/+$/, '');
+                const spFileUrl = `${tenant}${site}/${encodeURIComponent(lib).replace(/%20/g, '%20')}/${caminhoDentroLib.split('/').map(encodeURIComponent).join('/')}/${encodeURIComponent(nomeArquivo)}`;
+                return { ok: true, sharepointUrl: spFileUrl };
+            } catch (err) {
+                console.warn('Falha ao gravar no OneDrive local:', err);
+                return { ok: false };
+            }
+        }
+
+        async function enviarArquivoViaWebhookSharePoint(payload) {
+            const hook = (sharepointCfg.webhookUploadUrl || '').trim();
+            if (!hook) return null;
+            try {
+                const resp = await fetch(hook, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(payload)
+                });
+                if (!resp.ok) return null;
+                const json = await resp.json().catch(() => ({}));
+                if (json?.arquivoUrl || json?.url || json?.sharepointUrl) {
+                    return {
+                        arquivoUrl: json.arquivoUrl || json.url || json.sharepointUrl,
+                        arquivoEmbedUrl: json.embedUrl || json.arquivoEmbedUrl || ''
+                    };
+                }
+                return null;
+            } catch (_) {
+                return null;
+            }
+        }
+
+        // ================= CONVERSÃO BASE64 / UPLOAD EM PARTES / VISUALIZAÇÃO =================
+        function extrairBase64Puro(dataUrl) {
+            const s = String(dataUrl || '');
+            const idx = s.indexOf('base64,');
+            return idx >= 0 ? s.slice(idx + 7) : s;
+        }
+
+        function base64ToUint8Array(b64) {
+            const bin = atob(b64);
+            const arr = new Uint8Array(bin.length);
+            for (let i = 0; i < bin.length; i++) arr[i] = bin.charCodeAt(i);
+            return arr;
+        }
+
+        async function gravarArquivoPartesFirestore(arquivoId, masterId, revNum, draft) {
+            const rawB64 = draft.base64Body || extrairBase64Puro(draft.dataUrl);
+            const totalParts = Math.max(1, Math.ceil(rawB64.length / CHUNK_B64_CHARS));
+            const agora = new Date().toISOString();
+            for (let i = 0; i < totalParts; i++) {
+                const slice = rawB64.slice(i * CHUNK_B64_CHARS, (i + 1) * CHUNK_B64_CHARS);
+                await addDoc(refDocsArquivosPartes, {
+                    arquivoId,
+                    docMasterId: masterId,
+                    revNum,
+                    partIndex: i,
+                    totalParts,
+                    fileName: draft.fileName,
+                    mimeType: draft.mimeType || inferMimeByFileName(draft.fileName),
+                    sizeBytes: Number(draft.sizeBytes || 0),
+                    chunkB64: slice,
+                    criadoEm: agora
+                });
+            }
+            return {
+                arquivoId,
+                arquivoNome: draft.fileName,
+                arquivoMime: draft.mimeType || inferMimeByFileName(draft.fileName),
+                arquivoTamanhoBytes: Number(draft.sizeBytes || 0),
+                arquivoPartes: totalParts
+            };
+        }
+
+        async function carregarArquivoBlobPorId(arquivoId, mimeType = '', fileName = 'documento') {
+            if (!arquivoId) return null;
+            if (blobUrlCache.has(arquivoId)) return blobUrlCache.get(arquivoId);
+
+            const q = query(refDocsArquivosPartes, where('arquivoId', '==', arquivoId));
+            const snap = await getDocs(q);
+            const partes = snap.docs
+                .map(d => d.data())
+                .sort((a, b) => Number(a.partIndex || 0) - Number(b.partIndex || 0));
+            if (!partes.length) return null;
+
+            const finalMime = mimeType || partes[0].mimeType || inferMimeByFileName(fileName || partes[0].fileName);
+            const finalName = fileName || partes[0].fileName || 'documento';
+            const b64Joined = partes.map(p => p.chunkB64 || '').join('');
+            const bytes = base64ToUint8Array(b64Joined);
+            const blob = new Blob([bytes], { type: finalMime });
+            const blobUrl = URL.createObjectURL(blob);
+            const rec = { blobUrl, mimeType: finalMime, fileName: finalName, sizeBytes: bytes.length };
+            blobUrlCache.set(arquivoId, rec);
+            return rec;
+        }
+
+        function dispararDownloadBlob(url, fileName) {
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = fileName || 'documento';
+            document.body.appendChild(a);
+            a.click();
+            a.remove();
+        }
+
+        window.abrirArquivoDoc = async (masterId, revId = '') => {
+            const rev = revId ? docsRevisoes.find(r => r.id === revId) : null;
+            const d = rev || docsAtivos.find(x => x.id === masterId);
+            if (!d || !podeVerDocumento(d)) return;
+
+            if (d.arquivoId) {
+                try {
+                    showToast('Carregando arquivo...', 'info');
+                    const rec = await carregarArquivoBlobPorId(d.arquivoId, d.arquivoMime, d.arquivoNome);
+                    if (!rec) return showToast('Partes do arquivo não encontradas no banco.', 'error');
+                    if (rec.mimeType.startsWith('image/')) {
+                        abrirZoomFotoSrc(rec.blobUrl, `${d.codigo || d.codigoDoc} — ${d.titulo}`);
+                    } else if (rec.mimeType.includes('pdf') || rec.mimeType.startsWith('text/')) {
+                        const win = typeof window.open === 'function' ? window.open(rec.blobUrl, '_blank', 'noopener') : null;
+                        if (!win) dispararDownloadBlob(rec.blobUrl, rec.fileName);
+                    } else {
+                        dispararDownloadBlob(rec.blobUrl, rec.fileName);
+                        showToast(`Download de "${rec.fileName}" iniciado!`, 'success');
+                    }
+                } catch (err) {
+                    console.error(err);
+                    showToast('Erro ao abrir arquivo.', 'error');
+                }
+                return;
+            }
+            if (d.arquivoUrl) {
+                if (typeof window.open === 'function') window.open(d.arquivoUrl, '_blank', 'noopener');
+                return;
+            }
+            if (d.fotoThumbB64) {
+                abrirZoomFotoSrc(d.fotoThumbB64, `${d.codigo || d.codigoDoc} — ${d.titulo}`);
+            }
+        };
+
+        window.baixarArquivoDoc = async (masterId, revId = '') => {
+            const rev = revId ? docsRevisoes.find(r => r.id === revId) : null;
+            const d = rev || docsAtivos.find(x => x.id === masterId);
+            if (!d || !podeVerDocumento(d)) return;
+            if (d.arquivoId) {
+                try {
+                    const rec = await carregarArquivoBlobPorId(d.arquivoId, d.arquivoMime, d.arquivoNome);
+                    if (rec) {
+                        dispararDownloadBlob(rec.blobUrl, rec.fileName);
+                        showToast(`Download de "${rec.fileName}" iniciado!`, 'success');
+                    }
+                } catch (_) {
+                    showToast('Erro ao baixar arquivo.', 'error');
+                }
+            } else if (d.fotoThumbB64) {
+                dispararDownloadBlob(d.fotoThumbB64, `${d.codigo || 'foto'}.jpg`);
+            } else if (d.arquivoUrl && typeof window.open === 'function') {
+                window.open(d.arquivoUrl, '_blank', 'noopener');
+            }
+        };
+
         window.atualizarPreviewNomenclaturaDoc = () => {
             const categoria = document.getElementById('ndCategoria')?.value || 'manuais';
             const area = document.getElementById('ndArea')?.value || '';
@@ -1915,14 +2476,18 @@
             const titulo = document.getElementById('ndTitulo')?.value || 'Documento';
 
             const pasta = montarPastaSharePointRelativa({ categoria, area, maquina, equipamento });
-            const ext = modoAnexoAtual === 'foto_campo' ? 'jpg' : 'pdf';
-            const arq = montarNomePadraoArquivoSp(codigo, revLabel, titulo, ext);
+            const origExt = arquivoDiretoDraft?.fileName?.includes('.')
+                ? arquivoDiretoDraft.fileName.split('.').pop().toLowerCase().replace(/[^a-z0-9]/g, '')
+                : ((modoAnexoAtual === 'foto_campo' || (fotoCampoB64Draft && !arquivoDiretoDraft)) ? 'jpg' : 'pdf');
+            const arq = montarNomePadraoArquivoSp(codigo, revLabel, titulo, origExt || 'pdf');
 
             const pEl = document.getElementById('ndSpPastaPath');
             const aEl = document.getElementById('ndSpNomeArquivo');
+            const bEl = document.getElementById('ndSpNomeResumoBadge');
             const prevEl = document.getElementById('docFormAtivoPreview');
             if (pEl) pEl.innerText = pasta;
             if (aEl) aEl.innerText = arq;
+            if (bEl) bEl.innerText = arq;
             if (prevEl) prevEl.innerText = [area, maquina, equipamento, conjunto, subconjunto].filter(Boolean).join(' › ');
         };
 
@@ -1933,13 +2498,17 @@
         };
 
         window.setModoAnexoDoc = (modo) => {
-            modoAnexoAtual = modo === 'foto_campo' ? 'foto_campo' : 'sharepoint';
+            if (modo === 'sharepoint') modoAnexoAtual = 'sharepoint';
+            else if (modo === 'foto_campo') modoAnexoAtual = 'foto_campo';
+            else modoAnexoAtual = 'arquivo_direto';
+
+            document.getElementById('btnModoDireto')?.classList.toggle('active', modoAnexoAtual !== 'sharepoint');
             document.getElementById('btnModoSp')?.classList.toggle('active', modoAnexoAtual === 'sharepoint');
-            document.getElementById('btnModoFoto')?.classList.toggle('active', modoAnexoAtual === 'foto_campo');
+            const bDir = document.getElementById('boxAnexoDireto');
             const bSp = document.getElementById('boxAnexoSharePoint');
-            const bFt = document.getElementById('boxAnexoFoto');
+            if (bDir) { bDir.hidden = modoAnexoAtual === 'sharepoint'; bDir.classList.toggle('hidden', modoAnexoAtual === 'sharepoint'); }
             if (bSp) { bSp.hidden = modoAnexoAtual !== 'sharepoint'; bSp.classList.toggle('hidden', modoAnexoAtual !== 'sharepoint'); }
-            if (bFt) { bFt.hidden = modoAnexoAtual !== 'foto_campo'; bFt.classList.toggle('hidden', modoAnexoAtual !== 'foto_campo'); }
+            atualizarBadgesOneDriveUI();
             atualizarPreviewNomenclaturaDoc();
         };
 
@@ -1962,30 +2531,153 @@
             if (m && m[1]) inp.value = m[1];
         };
 
-        window.onFotoCampoSelecionada = (ev) => {
+        // ================= DRAG & DROP / SELEÇÃO DE QUALQUER ARQUIVO =================
+        window.onNdDropZoneClick = (ev) => {
+            if (ev?.target?.closest && (ev.target.closest('label') || ev.target.closest('button'))) return;
+            document.getElementById('ndArquivoFile')?.click();
+        };
+
+        window.onNdDragOver = (ev) => {
+            if (ev?.preventDefault) ev.preventDefault();
+            if (ev?.stopPropagation) ev.stopPropagation();
+            document.getElementById('ndDropZone')?.classList.add('drag-over');
+        };
+
+        window.onNdDragLeave = (ev) => {
+            if (ev?.preventDefault) ev.preventDefault();
+            document.getElementById('ndDropZone')?.classList.remove('drag-over');
+        };
+
+        window.onNdDrop = (ev) => {
+            if (ev?.preventDefault) ev.preventDefault();
+            if (ev?.stopPropagation) ev.stopPropagation();
+            document.getElementById('ndDropZone')?.classList.remove('drag-over');
+            const file = ev?.dataTransfer?.files?.[0];
+            if (file) processarArquivoSelecionadoDoc(file);
+        };
+
+        window.onArquivoDiretoSelecionado = (ev) => {
             const file = ev?.target?.files?.[0];
+            if (file) processarArquivoSelecionadoDoc(file);
+        };
+
+        function autoPreencherTituloSeVazio(fileName) {
+            const titInp = document.getElementById('ndTitulo');
+            if (titInp && !titInp.value.trim() && fileName) {
+                const limpo = String(fileName).replace(/\.[^.]+$/, '').replace(/[_-]+/g, ' ').replace(/\s+/g, ' ').trim();
+                titInp.value = limpo;
+                atualizarPreviewNomenclaturaDoc();
+            }
+        }
+
+        function processarArquivoSelecionadoDoc(file) {
             if (!file) return;
+            autoPreencherTituloSeVazio(file.name);
+
+            if (isImagemPorTipoOuExt(file)) {
+                comprimirImagemCampo(file, 'arquivo_direto');
+                return;
+            }
+
+            const podeSemLimite = Boolean(pastaOneDriveHandle || sharepointCfg.webhookUploadUrl);
+            const sizeBytes = Number(file.size || 0);
+            if (sizeBytes > MAX_DB_UPLOAD_BYTES && !podeSemLimite) {
+                showToast(`Este arquivo tem ${formatarTamanhoBytes(sizeBytes)} (limite sem OneDrive conectado é 7 MB). Vincule sua pasta OneDrive ou use a aba Link SharePoint.`, 'error');
+                return;
+            }
+
+            const reader = new FileReader();
+            reader.onload = (e) => {
+                const dataUrl = String(e?.target?.result || '');
+                const base64Body = extrairBase64Puro(dataUrl);
+                const mimeType = file.type || inferMimeByFileName(file.name);
+                arquivoDiretoDraft = {
+                    fileName: file.name || 'documento.pdf',
+                    mimeType,
+                    sizeBytes: sizeBytes || Math.round(base64Body.length * 0.75),
+                    dataUrl,
+                    base64Body,
+                    fileObj: file
+                };
+                modoAnexoAtual = 'arquivo_direto';
+                exibirPreviewArquivoDraft();
+                atualizarPreviewNomenclaturaDoc();
+            };
+            reader.readAsDataURL(file);
+        }
+
+        function exibirPreviewArquivoDraft() {
+            const box = document.getElementById('ndArquivoInfoBox');
+            if (!box || !arquivoDiretoDraft) return;
+            const ext = (arquivoDiretoDraft.fileName.split('.').pop() || 'DOC').toUpperCase().slice(0, 5);
+            const extEl = document.getElementById('ndArquivoExtBadge');
+            const nmEl = document.getElementById('ndArquivoNomeLbl');
+            const mtEl = document.getElementById('ndArquivoMetaLbl');
+            if (extEl) extEl.innerText = ext;
+            if (nmEl) nmEl.innerText = arquivoDiretoDraft.fileName;
+            if (mtEl) {
+                const destinoTxt = pastaOneDriveHandle
+                    ? 'Será salvo no sistema + pasta OneDrive conectada'
+                    : (sharepointCfg.webhookUploadUrl ? 'Será enviado automático ao SharePoint' : 'Será salvo direto no banco do sistema');
+                mtEl.innerText = `${formatarTamanhoBytes(arquivoDiretoDraft.sizeBytes)} • ${destinoTxt}`;
+            }
+            box.hidden = false;
+            box.classList.remove('hidden');
+        }
+
+        window.visualizarAnexoDraft = () => {
+            if (!arquivoDiretoDraft?.dataUrl) return;
+            try {
+                const bytes = base64ToUint8Array(arquivoDiretoDraft.base64Body || extrairBase64Puro(arquivoDiretoDraft.dataUrl));
+                const blob = new Blob([bytes], { type: arquivoDiretoDraft.mimeType || 'application/pdf' });
+                const url = URL.createObjectURL(blob);
+                const win = typeof window.open === 'function' ? window.open(url, '_blank', 'noopener') : null;
+                if (!win) dispararDownloadBlob(url, arquivoDiretoDraft.fileName);
+            } catch (_) {
+                showToast('Arquivo pronto para envio.', 'info');
+            }
+        };
+
+        window.limparAnexoDiretoDoc = () => {
+            arquivoDiretoDraft = null;
+            const inp = document.getElementById('ndArquivoFile');
+            if (inp) inp.value = '';
+            const box = document.getElementById('ndArquivoInfoBox');
+            if (box) { box.hidden = true; box.classList.add('hidden'); }
+            atualizarPreviewNomenclaturaDoc();
+        };
+
+        function comprimirImagemCampo(file, modo = 'foto_campo') {
+            autoPreencherTituloSeVazio(file.name);
             const reader = new FileReader();
             reader.onload = (e) => {
                 const img = new Image();
                 img.onload = () => {
                     const cvs = document.createElement('canvas');
                     let w = img.width, h = img.height;
-                    const MAX = 1024;
+                    const MAX = 1280;
                     if (w > h && w > MAX) { h = Math.round(h * MAX / w); w = MAX; }
                     else if (h >= w && h > MAX) { w = Math.round(w * MAX / h); h = MAX; }
                     cvs.width = w; cvs.height = h;
                     const ctx = cvs.getContext('2d');
                     ctx.drawImage(img, 0, 0, w, h);
-                    fotoCampoB64Draft = cvs.toDataURL('image/jpeg', 0.72);
+                    fotoCampoB64Draft = cvs.toDataURL('image/jpeg', 0.74);
+                    if (modo === 'foto_campo') modoAnexoAtual = 'foto_campo';
                     document.getElementById('ndFotoPreviewImg').src = fotoCampoB64Draft;
                     const box = document.getElementById('ndFotoPreviewBox');
                     if (box) { box.hidden = false; box.classList.remove('hidden'); }
-                    document.getElementById('ndFotoStatus').innerText = `✓ Foto otimizada (${Math.round(fotoCampoB64Draft.length / 1024)} KB) pronta para aprovação`;
+                    document.getElementById('ndFotoStatus').innerText = `✓ Foto otimizada (${Math.round(fotoCampoB64Draft.length / 1024)} KB) pronta para envio`;
+                    atualizarPreviewNomenclaturaDoc();
                 };
                 img.src = e.target.result;
             };
             reader.readAsDataURL(file);
+        }
+
+        window.onFotoCampoSelecionada = (ev) => {
+            const file = ev?.target?.files?.[0];
+            if (!file) return;
+            comprimirImagemCampo(file, 'foto_campo');
         };
 
         window.limparFotoCampoDoc = () => {
@@ -2010,8 +2702,13 @@
         window.abrirModalNovoDocumento = (tipo = 'doc', prefill = {}) => {
             const form = document.getElementById('formNovoDoc');
             if (form) form.reset();
+            ['ndTitulo', 'ndArquivoUrl', 'ndArquivoEmbedUrl', 'ndTags', 'ndValidadeEm', 'ndResumoTecnico'].forEach(fid => {
+                const el = document.getElementById(fid);
+                if (el) el.value = '';
+            });
             fotoCampoB64Draft = '';
             limparFotoCampoDoc();
+            limparAnexoDiretoDoc();
             document.getElementById('docFormModo').value = 'novo';
             document.getElementById('docMasterEditId').value = '';
             document.getElementById('ndRevisaoLabel').value = 'REV 00';
@@ -2041,7 +2738,7 @@
                 subconjunto: prefill.subconjunto || ''
             };
             popularNdSelects(prefAtivo);
-            setModoAnexoDoc((!isPerfilAprovadorDocs(usuarioLogado) || document.getElementById('ndCategoria').value === 'fotos') ? 'foto_campo' : 'sharepoint');
+            setModoAnexoDoc('arquivo_direto');
             abrirModal('modalNovoDoc');
         };
 
@@ -2051,6 +2748,7 @@
             fecharModal('modalDetalheDoc');
             const form = document.getElementById('formNovoDoc');
             if (form) form.reset();
+            limparAnexoDiretoDoc();
             fotoCampoB64Draft = d.fotoThumbB64 || '';
             if (fotoCampoB64Draft) {
                 document.getElementById('ndFotoPreviewImg').src = fotoCampoB64Draft;
@@ -2090,7 +2788,7 @@
                 area: d.area, maquina: d.maquina, equipamento: d.equipamento,
                 conjunto: d.conjunto || '', subconjunto: d.subconjunto || ''
             });
-            setModoAnexoDoc(d.arquivoProvider === 'foto_campo' && !d.arquivoUrl ? 'foto_campo' : 'sharepoint');
+            setModoAnexoDoc(d.arquivoUrl && !d.arquivoId ? 'sharepoint' : 'arquivo_direto');
             abrirModal('modalNovoDoc');
             setTimeout(() => document.getElementById('ndMotivoAlteracao')?.focus(), 80);
         };
@@ -2111,10 +2809,13 @@
             const titulo = document.getElementById('ndTitulo').value.trim();
             const revLabel = document.getElementById('ndRevisaoLabel').value.trim() || 'REV 00';
             const revNum = parseInt(revLabel.replace(/\D/g, ''), 10) || 0;
-            const arquivoUrl = document.getElementById('ndArquivoUrl').value.trim();
-            const arquivoEmbedUrl = document.getElementById('ndArquivoEmbedUrl').value.trim();
+            let arquivoUrl = document.getElementById('ndArquivoUrl').value.trim();
+            let arquivoEmbedUrl = document.getElementById('ndArquivoEmbedUrl').value.trim();
             const tagsRaw = document.getElementById('ndTags').value;
-            const tags = [...new Set(tagsRaw.split(/[,;]+/).map(t => t.trim()).filter(Boolean))];
+            let tags = [...new Set(tagsRaw.split(/[,;]+/).map(t => t.trim()).filter(Boolean))];
+            if (!tags.length) {
+                tags = [...new Set([equipamento, subtipo, disciplina].filter(Boolean))];
+            }
             const validadeEm = document.getElementById('ndValidadeEm').value || '';
             const periodicidadeRevalidacaoMeses = parseInt(document.getElementById('ndRevalidacaoMeses').value || '0', 10) || 0;
             const resumoTecnico = document.getElementById('ndResumoTecnico').value.trim();
@@ -2123,8 +2824,8 @@
             if (!area || !maquina || !equipamento || !codigo || !titulo) {
                 return showToast('Preencha Setor, Linha, Equipamento, Código e Título.', 'error');
             }
-            if (!arquivoUrl && !fotoCampoB64Draft) {
-                return showToast('Informe o Link do SharePoint ou anexe uma foto antes de enviar.', 'error');
+            if (!arquivoDiretoDraft && !arquivoUrl && !fotoCampoB64Draft) {
+                return showToast('Arraste um arquivo, tire uma foto ou informe um link antes de enviar.', 'error');
             }
 
             if (modo === 'novo' && docsAtivos.some(d => normKey(d.codigo) === normKey(codigo))) {
@@ -2144,16 +2845,45 @@
 
             const catMeta = CATEGORIAS_DOCS[categoria] || CATEGORIAS_DOCS.manuais;
             const pastaSug = montarPastaSharePointRelativa({ categoria, area, maquina, equipamento });
-            const nomeSug = montarNomePadraoArquivoSp(codigo, revLabel, titulo, modoAnexoAtual === 'foto_campo' && !arquivoUrl ? 'jpg' : 'pdf');
+            const fileExt = arquivoDiretoDraft?.fileName?.includes('.')
+                ? arquivoDiretoDraft.fileName.split('.').pop().toLowerCase().replace(/[^a-z0-9]/g, '')
+                : ((fotoCampoB64Draft && !arquivoUrl) ? 'jpg' : 'pdf');
+            const nomeSug = montarNomePadraoArquivoSp(codigo, revLabel, titulo, fileExt || 'pdf');
             const agora = new Date().toISOString();
             const autor = usuarioLogado?.nome || usuarioLogado?.user || 'Usuário';
             const autorRole = usuarioLogado?.role || 'Técnico';
             const origemEnvio = isPerfilAprovadorDocs(usuarioLogado) ? 'gestao' : 'campo_sugestao';
 
             const btn = document.getElementById('btnSalvarSubmissaoDoc');
-            if (btn) { btn.disabled = true; btn.innerText = 'Enviando p/ Aprovação...'; }
+            if (btn) { btn.disabled = true; btn.innerText = 'Salvando Arquivo e Enviando...'; }
 
             try {
+                // 1. Espelha na pasta OneDrive / Power Automate se conectado (zero trabalho pro usuário!)
+                let spMirrorUrl = '';
+                if (!arquivoUrl && (arquivoDiretoDraft || fotoCampoB64Draft)) {
+                    const b64ToSync = arquivoDiretoDraft?.base64Body || extrairBase64Puro(fotoCampoB64Draft);
+                    const fileObjToSync = arquivoDiretoDraft?.fileObj || null;
+                    if (pastaOneDriveHandle) {
+                        const resOd = await salvarArquivoEmPastaOneDriveLocal(pastaSug, nomeSug, b64ToSync, fileObjToSync);
+                        if (resOd?.ok && resOd.sharepointUrl) spMirrorUrl = resOd.sharepointUrl;
+                    } else if (sharepointCfg.webhookUploadUrl) {
+                        const resWh = await enviarArquivoViaWebhookSharePoint({
+                            pastaRelativa: pastaSug,
+                            nomeArquivo: nomeSug,
+                            mimeType: arquivoDiretoDraft?.mimeType || 'image/jpeg',
+                            tamanhoBytes: arquivoDiretoDraft?.sizeBytes || 0,
+                            conteudoBase64: b64ToSync,
+                            codigo,
+                            revisao: revLabel
+                        });
+                        if (resWh?.arquivoUrl) {
+                            spMirrorUrl = resWh.arquivoUrl;
+                            if (resWh.arquivoEmbedUrl && !arquivoEmbedUrl) arquivoEmbedUrl = resWh.arquivoEmbedUrl;
+                        }
+                    }
+                    if (spMirrorUrl) arquivoUrl = spMirrorUrl;
+                }
+
                 let targetMasterId = masterId;
                 const specs = {
                     ativoNodeId,
@@ -2162,6 +2892,29 @@
                     fabricante: matchNode?.fabricante || '',
                     modelo: matchNode?.modelo || ''
                 };
+
+                // Meta do arquivo direto (partes no Firestore caso <= 7MB)
+                let arquivoMeta = {
+                    arquivoId: '',
+                    arquivoNome: arquivoDiretoDraft?.fileName || '',
+                    arquivoMime: arquivoDiretoDraft?.mimeType || '',
+                    arquivoTamanhoBytes: Number(arquivoDiretoDraft?.sizeBytes || 0),
+                    arquivoPartes: 0
+                };
+
+                let provider = 'sharepoint';
+                if (arquivoDiretoDraft) {
+                    if (Number(arquivoDiretoDraft.sizeBytes || 0) <= MAX_DB_UPLOAD_BYTES) {
+                        provider = arquivoUrl ? 'hibrido' : 'banco_interno';
+                    } else if (arquivoUrl) {
+                        provider = 'sharepoint';
+                    } else {
+                        if (btn) { btn.disabled = false; btn.innerText = 'Enviar para Aprovação'; }
+                        return showToast('Arquivo maior que 7 MB requer pasta OneDrive conectada ou Link SharePoint.', 'error');
+                    }
+                } else if (fotoCampoB64Draft && !arquivoUrl) {
+                    provider = 'foto_campo';
+                }
 
                 if (modo === 'novo') {
                     const masterPayload = {
@@ -2188,7 +2941,8 @@
                         temRevisaoPendente: true,
                         validadeEm,
                         periodicidadeRevalidacaoMeses,
-                        arquivoProvider: (fotoCampoB64Draft && !arquivoUrl) ? 'foto_campo' : 'sharepoint',
+                        arquivoProvider: provider,
+                        ...arquivoMeta,
                         arquivoUrl,
                         arquivoEmbedUrl,
                         fotoThumbB64: fotoCampoB64Draft || '',
@@ -2208,6 +2962,11 @@
                         atualizadoPor: autor,
                         atualizadoEm: agora
                     });
+                }
+
+                if (arquivoDiretoDraft && Number(arquivoDiretoDraft.sizeBytes || 0) <= MAX_DB_UPLOAD_BYTES) {
+                    const arqId = `arq_${Date.now()}_${Math.random().toString(36).slice(2, 7)}`;
+                    arquivoMeta = await gravarArquivoPartesFirestore(arqId, targetMasterId, revNum, arquivoDiretoDraft);
                 }
 
                 await addDoc(refDocsRevisoes, {
@@ -2233,7 +2992,8 @@
                     revisaoLabel: revLabel,
                     status: 'pendente_aprovacao',
                     motivoAlteracao,
-                    arquivoProvider: (fotoCampoB64Draft && !arquivoUrl) ? 'foto_campo' : 'sharepoint',
+                    arquivoProvider: provider,
+                    ...arquivoMeta,
                     arquivoUrl,
                     arquivoEmbedUrl,
                     fotoThumbB64: fotoCampoB64Draft || '',
@@ -2248,13 +3008,13 @@
                 fecharModal('modalNovoDoc');
                 showToast(
                     modo === 'novo'
-                        ? `"${codigo} (${revLabel})" enviado para Aprovação! Após aprovado ficará visível na Biblioteca.`
-                        : `Nova revisão "${revLabel}" de "${codigo}" enviada para Aprovação (versão anterior segue vigente).`,
+                        ? `"${codigo} (${revLabel})" enviado para Aprovação!${spMirrorUrl ? ' (Espelhado no OneDrive/SharePoint)' : ''}`
+                        : `Nova revisão "${revLabel}" de "${codigo}" enviada para Aprovação.`,
                     'success'
                 );
             } catch (err) {
                 console.error(err);
-                showToast('Erro ao gravar submissão no Firestore.', 'error');
+                showToast('Erro ao gravar arquivo/submissão no banco de dados.', 'error');
             } finally {
                 if (btn) { btn.disabled = false; btn.innerText = 'Enviar para Aprovação'; }
             }
@@ -2297,6 +3057,22 @@
                    </div>`
                 : '';
 
+            const arquivoDiretoSlotHtml = d.arquivoId
+                ? `<div id="detDocPreviewDiretoBox" class="rounded-2xl border border-indigo-200 bg-indigo-50/40 p-3.5 space-y-2.5">
+                        <div class="flex flex-wrap items-center justify-between gap-2">
+                            <div class="min-w-0">
+                                <div class="text-[10px] font-extrabold uppercase text-indigo-800">Arquivo Anexado no Sistema</div>
+                                <div class="text-xs font-extrabold text-slate-900 truncate">${escapeHtml(d.arquivoNome || 'Documento')} <span class="text-slate-500 font-semibold">(${formatarTamanhoBytes(d.arquivoTamanhoBytes)})</span></div>
+                            </div>
+                            <div class="flex items-center gap-1.5 shrink-0">
+                                <button type="button" onclick="abrirArquivoDoc('${d.id}')" class="px-3 py-1.5 rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white font-extrabold text-[11px]">Abrir em Tela Cheia ↗</button>
+                                <button type="button" onclick="baixarArquivoDoc('${d.id}')" class="px-3 py-1.5 rounded-xl bg-white hover:bg-slate-100 border border-indigo-200 text-indigo-800 font-extrabold text-[11px]">⬇ Baixar</button>
+                            </div>
+                        </div>
+                        <div id="detDocPreviewDiretoViewer" class="text-[11px] font-bold text-slate-500">Carregando pré-visualização...</div>
+                   </div>`
+                : '';
+
             document.getElementById('detDocBody').innerHTML = `
                 <div class="grid grid-cols-1 sm:grid-cols-3 gap-3">
                     <div class="p-3 rounded-2xl bg-slate-50 border border-slate-200">
@@ -2315,15 +3091,16 @@
 
                 ${d.resumoTecnico ? `<div class="p-3.5 rounded-2xl bg-indigo-50/70 border border-indigo-200 font-semibold text-indigo-950"><span class="text-[10px] font-extrabold uppercase text-indigo-700 block mb-0.5">Parâmetros &amp; Resumo Técnico</span>${escapeHtml(d.resumoTecnico)}</div>` : ''}
                 ${d.fotoThumbB64 ? `<div><img src="${d.fotoThumbB64}" onclick="abrirZoomFotoDoc('${d.id}')" class="max-h-72 rounded-2xl border border-slate-200 object-contain cursor-zoom-in mx-auto"></div>` : ''}
+                ${arquivoDiretoSlotHtml}
                 ${embedHtml}
 
                 <div class="p-3.5 rounded-2xl bg-sky-50/70 border border-sky-200 flex flex-wrap items-center justify-between gap-2">
                     <div class="min-w-0">
-                        <div class="text-[10px] font-extrabold uppercase text-sky-800">Padrão SharePoint</div>
+                        <div class="text-[10px] font-extrabold uppercase text-sky-800">Pasta / Padrão SharePoint</div>
                         <div class="text-[11px] font-mono text-slate-700 truncate">${escapeHtml(d.sharepointPastaSugerida || sharepointCfg.pastaRaiz)}/${escapeHtml(d.sharepointNomeSugerido || '')}</div>
                     </div>
                     <div class="flex flex-wrap items-center gap-1.5">
-                        ${d.arquivoUrl ? `<a href="${escapeHtml(d.arquivoUrl)}" target="_blank" rel="noopener" class="px-3 py-1.5 rounded-xl bg-sky-600 hover:bg-sky-700 text-white font-extrabold text-[11px]">Abrir Arquivo no SharePoint ↗</a>` : ''}
+                        ${d.arquivoUrl ? `<a href="${escapeHtml(d.arquivoUrl)}" target="_blank" rel="noopener" class="px-3 py-1.5 rounded-xl bg-sky-600 hover:bg-sky-700 text-white font-extrabold text-[11px]">Abrir no SharePoint ↗</a>` : ''}
                         <a href="${escapeHtml(spFolderUrl)}" target="_blank" rel="noopener" class="px-3 py-1.5 rounded-xl bg-white hover:bg-sky-50 border border-sky-200 text-sky-800 font-extrabold text-[11px]">Abrir Pasta ↗</a>
                     </div>
                 </div>
@@ -2342,7 +3119,10 @@
                                     <div class="text-[11px] font-semibold text-slate-700">${escapeHtml(r.motivoAlteracao || '-')}</div>
                                     ${r.analisadoPor ? `<div class="text-[10px] text-slate-500">Análise: ${escapeHtml(r.analisadoPor)} (${formatDataBR(r.analisadoEm)})${r.motivoReprovacao ? ' • Motivo: ' + escapeHtml(r.motivoReprovacao) : ''}</div>` : ''}
                                 </div>
-                                ${r.arquivoUrl ? `<a href="${escapeHtml(r.arquivoUrl)}" target="_blank" rel="noopener" class="px-2.5 py-1 rounded-lg bg-slate-100 hover:bg-slate-200 text-slate-700 font-extrabold text-[10px] shrink-0">Arquivo ↗</a>` : ''}
+                                <div class="flex items-center gap-1.5 shrink-0">
+                                    ${r.arquivoId ? `<button type="button" onclick="abrirArquivoDoc('${d.id}', '${r.id}')" class="px-2.5 py-1 rounded-lg bg-indigo-50 hover:bg-indigo-100 text-indigo-700 font-extrabold text-[10px]">Visualizar</button>` : ''}
+                                    ${r.arquivoUrl ? `<a href="${escapeHtml(r.arquivoUrl)}" target="_blank" rel="noopener" class="px-2.5 py-1 rounded-lg bg-slate-100 hover:bg-slate-200 text-slate-700 font-extrabold text-[10px]">SharePoint ↗</a>` : ''}
+                                </div>
                             </div>`).join('')}
                     </div>
                 </div>`;
@@ -2354,6 +3134,21 @@
                 <button type="button" onclick="fecharModal('modalDetalheDoc')" class="btn-touch bg-white border border-slate-200 text-slate-700 text-xs">Fechar</button>`;
 
             abrirModal('modalDetalheDoc');
+
+            if (d.arquivoId) {
+                carregarArquivoBlobPorId(d.arquivoId, d.arquivoMime, d.arquivoNome).then((rec) => {
+                    const viewer = document.getElementById('detDocPreviewDiretoViewer');
+                    if (!viewer) return;
+                    if (!rec) { viewer.innerText = 'Arquivo não encontrado no banco.'; return; }
+                    if (rec.mimeType.includes('pdf')) {
+                        viewer.innerHTML = `<iframe src="${rec.blobUrl}" class="w-full h-[420px] rounded-xl border border-slate-200 bg-white" title="${escapeHtml(rec.fileName)}"></iframe>`;
+                    } else if (rec.mimeType.startsWith('image/')) {
+                        viewer.innerHTML = `<img src="${rec.blobUrl}" onclick="abrirZoomFotoSrc('${rec.blobUrl}', '${escapeHtml(d.titulo)}')" class="max-h-80 mx-auto rounded-xl border border-slate-200 cursor-zoom-in">`;
+                    } else {
+                        viewer.innerHTML = `<div class="p-3 rounded-xl bg-white border border-slate-200 text-slate-600 font-semibold">Prévia na tela disponível para PDF e imagens. Clique em <strong>⬇ Baixar</strong> acima para abrir o arquivo (${escapeHtml(rec.fileName)}).</div>`;
+                    }
+                }).catch(() => {});
+            }
         };
 
         // ================= HANDOFF INTEGRADO DE OUTROS MÓDULOS =================
@@ -2426,6 +3221,13 @@
             usuarioLogado = lerSessaoCentral();
             carregarPreferenciasUsuario(usuarioLogado);
 
+            carregarHandleOneDriveIdb().then(h => {
+                if (h) {
+                    pastaOneDriveHandle = h;
+                    atualizarBadgesOneDriveUI();
+                }
+            }).catch(() => {});
+
             try {
                 await Promise.race([
                     signInAnonymously(auth),
@@ -2463,6 +3265,7 @@
 
             onSnapshot(refSpConfig, (snapDoc) => {
                 if (snapDoc.exists()) sharepointCfg = { ...DEFAULT_SHAREPOINT_CFG, ...(snapDoc.data() || {}) };
+                atualizarBadgesOneDriveUI();
                 if (currentView === 'sharepoint') renderSharePointView();
             }, () => {});
 
