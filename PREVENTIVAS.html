@@ -989,6 +989,24 @@
                         <textarea id="plObservacoes" rows="3" class="input-clean py-2 text-xs font-semibold" placeholder="Recomendações de segurança, pontos de lubrificação, torques..."></textarea>
                     </div>
                 </div>
+
+                <!-- Bloco 6: Biblioteca Técnica do Equipamento (SharePoint / GED) -->
+                <div class="p-3.5 rounded-2xl bg-indigo-50/60 border border-indigo-200 space-y-2.5">
+                    <div class="flex flex-wrap items-center justify-between gap-2">
+                        <div>
+                            <div class="text-[11px] font-extrabold text-indigo-900 uppercase">Biblioteca Técnica do Equipamento (Vincular Docs)</div>
+                            <p class="text-[10px] text-indigo-700 font-semibold">Somente documentos <span class="font-extrabold">VIGENTES</span> e aprovados (manuais, lubrificação, desenhos, fotos). Sempre abre na última revisão aprovada.</p>
+                        </div>
+                        <button type="button" onclick="abrirBibliotecaDocsFromEditor()" class="px-3 py-1.5 rounded-xl bg-white border border-indigo-200 hover:bg-indigo-100 text-[11px] font-extrabold text-indigo-700">
+                            <i class="fa-solid fa-folder-open mr-1"></i>Abrir Biblioteca ↗
+                        </button>
+                    </div>
+                    <div class="flex flex-wrap items-center gap-2">
+                        <input type="text" id="plDocsBuscaInput" oninput="onPlDocsBuscaInput(this.value)" placeholder="Buscar por código (DOC-...), título, tag ou categoria..." class="input-clean py-1.5 text-xs flex-1 min-w-[200px]">
+                        <span id="plDocsVinculadosCount" class="px-2.5 py-1 rounded-xl bg-white border border-indigo-200 text-[10px] font-extrabold text-indigo-700">0 vinculado(s)</span>
+                    </div>
+                    <div id="plDocsBibliotecaBox" class="max-h-44 overflow-y-auto space-y-1.5 pr-1"></div>
+                </div>
             </form>
             <div class="px-6 py-4 border-t border-slate-100 bg-slate-50 flex items-center justify-end gap-2 shrink-0">
                 <button type="button" onclick="fecharModal('modalEditorPlano')" class="btn-touch bg-white border border-slate-200 text-slate-700 text-xs">Cancelar</button>
@@ -1253,6 +1271,7 @@
                 <input type="hidden" id="execOrdemId" value="">
                 <div id="execMetaStrip" class="grid grid-cols-2 sm:grid-cols-4 gap-2.5"></div>
                 <div id="execAnexoRefBox" hidden class="hidden p-3.5 rounded-2xl bg-sky-50/70 border border-sky-200 flex items-center justify-between gap-3"></div>
+                <div id="execDocsBibliotecaBox" hidden class="hidden p-3.5 rounded-2xl bg-indigo-50/70 border border-indigo-200 space-y-2.5"></div>
 
                 <!-- Barra de Progresso do Checklist -->
                 <div class="space-y-1.5">
@@ -1524,6 +1543,7 @@
         const colEquipes = collection(db, "ag_equipes");
         const colSetores = collection(db, "ag_setores");
         const colAnomalias = collection(db, "ir_anomalias");
+        const colDocsAtivos = collection(db, "docs_ativos");
 
         const PERIODICIDADES = {
             'Diária': { dias: 1, meses: 0, semanas: 0.14 },
@@ -1591,6 +1611,9 @@
         let execChecklistDraft = [];
         let execFotosDraft = [];
         let execAnexoRefAtual = null;
+        let docsAtivosList = [];
+        let planoDocsVinculadosDraft = [];
+        let planoDocsBuscaDraft = '';
         let pendingDeleteFn = null;
         const charts = { aderencia: null, crit: null, reprog: null, backlog: null };
 
@@ -1611,6 +1634,192 @@
         function isPerfilGestao(role) {
             const r = normKey(role);
             return r === 'admin' || r === 'gerente' || r.startsWith('supervisor');
+        }
+
+        const DOCS_CAT_LABELS_PREV = {
+            manuais: 'Manual',
+            lubrificacao: 'Lubrificação',
+            desenhos: 'Desenho Técnico',
+            orcamentos: 'Orçamento (Gestão)',
+            fotos: 'Foto Ref.',
+            qualidade: 'Qualidade & Seg.'
+        };
+
+        function podeVerDocPrev(d) {
+            if (!d) return false;
+            if (d.categoria === 'orcamentos' || d.sigilo === 'gestao') {
+                return Boolean(isGestao || isPerfilGestao(usuarioLogado?.role));
+            }
+            return true;
+        }
+
+        function getDocsVigentesParaAtivoPrev(setor, maq, eq, conj = '', sub = '') {
+            const s = normKey(setor);
+            const m = normKey(maq);
+            const e = normKey(eq);
+            const c = normKey(conj);
+            const sc = normKey(sub);
+            return docsAtivosList
+                .filter(d => {
+                    if (d.status !== 'vigente' || !podeVerDocPrev(d)) return false;
+                    const da = normKey(d.area);
+                    const dm = normKey(d.maquina);
+                    const de = normKey(d.equipamento);
+                    const dc = normKey(d.conjunto);
+                    const dsc = normKey(d.subconjunto);
+                    if (s && da && da !== s) return false;
+                    if (m && dm && dm !== m) return false;
+                    if (e && de && de !== e) return false;
+                    if (c && dc && dc !== c) return false;
+                    if (sc && dsc && dsc !== sc) return false;
+                    if (!s && !m && !e) return true;
+                    return Boolean((!s || da === s) && (!m || dm === m) && (!e || !de || de === e));
+                })
+                .sort((a, b) => {
+                    const score = (x) => (normKey(x.subconjunto) && normKey(x.subconjunto) === sc ? 4 : 0) + (normKey(x.conjunto) && normKey(x.conjunto) === c ? 2 : 0) + (normKey(x.equipamento) && normKey(x.equipamento) === e ? 1 : 0);
+                    return (score(b) - score(a)) || String(a.codigo || '').localeCompare(String(b.codigo || ''));
+                });
+        }
+
+        function resolverDocsPlanoOrdemPrev(plano, ordem) {
+            const rawLinks = Array.isArray(plano?.documentosVinculados) && plano.documentosVinculados.length
+                ? plano.documentosVinculados
+                : (Array.isArray(ordem?.documentosVinculados) ? ordem.documentosVinculados : []);
+            const vinculados = [];
+            const seenIds = new Set();
+            rawLinks.forEach(lnk => {
+                const docId = typeof lnk === 'string' ? lnk : lnk?.docId;
+                const docCod = typeof lnk === 'object' ? lnk?.codigo : '';
+                const found = docsAtivosList.find(x => (docId && x.id === docId) || (docCod && x.codigo === docCod));
+                if (found) {
+                    if (found.status !== 'vigente' || !podeVerDocPrev(found)) return;
+                    if (!seenIds.has(found.id)) {
+                        seenIds.add(found.id);
+                        vinculados.push(found);
+                    }
+                } else if (typeof lnk === 'object' && lnk?.titulo) {
+                    if ((lnk.categoria === 'orcamentos') && !(isGestao || isPerfilGestao(usuarioLogado?.role))) return;
+                    vinculados.push({
+                        id: docId || docCod || lnk.titulo,
+                        codigo: lnk.codigo || 'DOC',
+                        titulo: lnk.titulo,
+                        categoria: lnk.categoria || 'manuais',
+                        revisaoVigenteLabel: 'Vigente',
+                        arquivoUrl: '',
+                        _snapshotOnly: true
+                    });
+                }
+            });
+            const src = plano || ordem || {};
+            const relacionados = getDocsVigentesParaAtivoPrev(src.setor, src.maquina, src.equipamento, src.conjunto, src.subconjunto)
+                .filter(d => !seenIds.has(d.id));
+            return { vinculados, relacionados };
+        }
+
+        window.abrirBibliotecaDocsPrev = (setor = '', maq = '', eq = '', conj = '', sub = '', categoria = '') => {
+            const handoff = {
+                targetApp: 'docs_ativos',
+                action: 'filtrar_ativo',
+                ativo: { area: setor, maquina: maq, equipamento: eq, conjunto: conj, subconjunto: sub },
+                categoria: categoria || ''
+            };
+            try { localStorage.setItem('cepera_agendamento_handoff', JSON.stringify(handoff)); } catch (e) {}
+            if (window.parent && window.parent !== window) {
+                window.parent.postMessage({ type: 'CEPERA_NAVEGAR_APP', appId: 'docs_ativos', forceReload: true, handoff }, '*');
+                return;
+            }
+            const qs = new URLSearchParams();
+            if (setor) qs.set('area', setor);
+            if (maq) qs.set('maquina', maq);
+            if (eq) qs.set('equipamento', eq);
+            if (conj) qs.set('conjunto', conj);
+            window.location.href = `DOCS-ATIVOS.html${qs.toString() ? '?' + qs.toString() : ''}`;
+        };
+
+        window.abrirBibliotecaDocsFromEditor = () => {
+            abrirBibliotecaDocsPrev(
+                document.getElementById('plAtivoSetor')?.value || '',
+                document.getElementById('plAtivoMaquina')?.value || '',
+                document.getElementById('plAtivoEquipamento')?.value || '',
+                document.getElementById('plAtivoConjunto')?.value || '',
+                document.getElementById('plAtivoSubconjunto')?.value || ''
+            );
+        };
+
+        window.abrirZoomDocFotoPrev = (docId) => {
+            const d = docsAtivosList.find(x => x.id === docId);
+            if (d?.fotoThumbB64) abrirZoomFoto(d.fotoThumbB64, `${d.codigo || 'Foto'} • ${d.titulo || ''}`);
+        };
+
+        window.onPlDocsBuscaInput = (val) => {
+            planoDocsBuscaDraft = String(val || '');
+            renderPlanoDocsPicker();
+        };
+
+        window.toggleDocVinculadoPlano = (docId) => {
+            const idx = planoDocsVinculadosDraft.findIndex(x => (typeof x === 'string' ? x : x.docId) === docId);
+            if (idx >= 0) {
+                planoDocsVinculadosDraft.splice(idx, 1);
+            } else {
+                const d = docsAtivosList.find(x => x.id === docId);
+                if (!d) return;
+                planoDocsVinculadosDraft.push({ docId: d.id, codigo: d.codigo || '', titulo: d.titulo || '', categoria: d.categoria || 'manuais' });
+            }
+            renderPlanoDocsPicker();
+        };
+
+        function renderPlanoDocsPicker() {
+            const box = document.getElementById('plDocsBibliotecaBox');
+            const badge = document.getElementById('plDocsVinculadosCount');
+            if (!box || !badge) return;
+            const s = document.getElementById('plAtivoSetor')?.value || '';
+            const m = document.getElementById('plAtivoMaquina')?.value || '';
+            const e = document.getElementById('plAtivoEquipamento')?.value || '';
+            const c = document.getElementById('plAtivoConjunto')?.value || '';
+            const sc = document.getElementById('plAtivoSubconjunto')?.value || '';
+            const linkedIds = new Set(planoDocsVinculadosDraft.map(x => typeof x === 'string' ? x : x.docId));
+            badge.innerText = `${linkedIds.size} vinculado(s)`;
+
+            const ativoDocs = getDocsVigentesParaAtivoPrev(s, m, e, c, sc);
+            const mapById = new Map();
+            ativoDocs.forEach(d => mapById.set(d.id, d));
+            docsAtivosList.forEach(d => {
+                if (linkedIds.has(d.id) && d.status === 'vigente' && podeVerDocPrev(d) && !mapById.has(d.id)) {
+                    mapById.set(d.id, d);
+                }
+            });
+            const q = normKey(planoDocsBuscaDraft);
+            let list = Array.from(mapById.values());
+            if (q) {
+                list = docsAtivosList
+                    .filter(d => d.status === 'vigente' && podeVerDocPrev(d) && normKey([d.codigo, d.titulo, d.categoria, d.area, d.maquina, d.equipamento, d.conjunto, ...(d.tags || [])].join(' ')).includes(q));
+            }
+            if (!list.length) {
+                box.innerHTML = `<div class="p-3 rounded-xl bg-white/80 border border-dashed border-indigo-200 text-[11px] font-semibold text-slate-500 text-center">${q ? 'Nenhum documento vigente encontrado para essa busca.' : 'Nenhum documento vigente cadastrado para este ativo ainda. Use "Abrir Biblioteca ↗" para consultar outros ou cadastrar.'}</div>`;
+                return;
+            }
+            box.innerHTML = list.map(d => {
+                const checked = linkedIds.has(d.id);
+                const catLbl = DOCS_CAT_LABELS_PREV[d.categoria] || d.categoria || 'Doc';
+                const pathTxt = [d.maquina, d.equipamento, d.conjunto].filter(Boolean).join(' › ');
+                return `
+                    <label class="flex items-center justify-between gap-2.5 p-2 rounded-xl border cursor-pointer transition-colors ${checked ? 'bg-indigo-100/80 border-indigo-400' : 'bg-white border-slate-200 hover:border-indigo-300'}">
+                        <div class="flex items-center gap-2.5 min-w-0 flex-1">
+                            <input type="checkbox" ${checked ? 'checked' : ''} onchange="toggleDocVinculadoPlano('${d.id}')" class="accent-indigo-600 shrink-0">
+                            ${d.fotoThumbB64 ? `<img src="${d.fotoThumbB64}" onclick="event.preventDefault();abrirZoomDocFotoPrev('${d.id}')" class="w-9 h-9 rounded-lg object-cover border border-slate-200 shrink-0">` : ''}
+                            <div class="min-w-0">
+                                <div class="flex flex-wrap items-center gap-1.5">
+                                    <span class="text-[10px] font-extrabold text-indigo-700">${escapeHtml(d.codigo || 'DOC')}</span>
+                                    <span class="px-1.5 py-0.5 rounded bg-slate-100 text-slate-600 text-[9px] font-extrabold">${escapeHtml(d.revisaoVigenteLabel || 'REV 00')}</span>
+                                    <span class="px-1.5 py-0.5 rounded bg-indigo-50 text-indigo-700 text-[9px] font-extrabold uppercase">${escapeHtml(catLbl)}</span>
+                                </div>
+                                <div class="text-xs font-bold text-slate-800 truncate">${escapeHtml(d.titulo)}</div>
+                                ${pathTxt ? `<div class="text-[10px] text-slate-400 truncate">${escapeHtml(pathTxt)}</div>` : ''}
+                            </div>
+                        </div>
+                        ${d.arquivoUrl ? `<a href="${escapeHtml(d.arquivoUrl)}" target="_blank" rel="noopener noreferrer" onclick="event.stopPropagation()" class="px-2 py-1 rounded-lg bg-slate-100 hover:bg-indigo-200 text-[10px] font-extrabold text-slate-700 shrink-0">SharePoint ↗</a>` : ''}
+                    </label>`;
+            }).join('');
         }
 
         function pickField(raw, candidatos) {
@@ -3501,6 +3710,7 @@
                 if (autoFillCampos && infoLinha.classe) {
                     document.getElementById('plCriticidade').value = sugerirPrioridadeDeClasse(infoLinha.classe);
                 }
+                if (typeof renderPlanoDocsPicker === 'function') renderPlanoDocsPicker();
                 return null;
             }
             const classeLinhaTxt = infoLinha.classe ? ` • Linha: Classe ${infoLinha.classe}` : '';
@@ -3514,6 +3724,7 @@
                     document.getElementById('plTitulo').value = `Preventiva ${match.periodicidade_preventiva || ''} — ${match.equipamento}${match.subconjunto ? ' (' + match.subconjunto + ')' : ''}`.trim();
                 }
             }
+            if (typeof renderPlanoDocsPicker === 'function') renderPlanoDocsPicker();
             return match;
         }
 
@@ -3588,9 +3799,14 @@
 
             planoChecklistDraft = Array.isArray(plano?.checklist) ? plano.checklist.map(x => ({ ...x })) : [];
             planoAnexoDraft = plano?.anexoReferencia ? { ...plano.anexoReferencia } : null;
+            planoDocsVinculadosDraft = Array.isArray(plano?.documentosVinculados) ? plano.documentosVinculados.map(x => typeof x === 'string' ? { docId: x } : { ...x }) : [];
+            planoDocsBuscaDraft = '';
+            const buscaDocsEl = document.getElementById('plDocsBuscaInput');
+            if (buscaDocsEl) buscaDocsEl.value = '';
             document.getElementById('planoAnexoInput').value = '';
             renderPlanoChecklistDraft();
             renderPlanoAnexoPreview();
+            renderPlanoDocsPicker();
             abrirModal('modalEditorPlano');
         };
 
@@ -3733,6 +3949,9 @@
                 observacoes: document.getElementById('plObservacoes').value.trim(),
                 checklist: checklistLimpo,
                 anexoReferencia: planoAnexoDraft || null,
+                documentosVinculados: planoDocsVinculadosDraft.map(x => typeof x === 'string'
+                    ? { docId: x, codigo: '', titulo: '', categoria: '' }
+                    : { docId: x.docId || '', codigo: x.codigo || '', titulo: x.titulo || '', categoria: x.categoria || '' }).filter(x => x.docId || x.codigo),
                 atualizadoPor: usuarioLogado?.nome || 'PCM',
                 atualizadoEm: new Date().toISOString()
             };
@@ -4413,6 +4632,53 @@
                 refBox.hidden = true; refBox.classList.add('hidden'); refBox.innerHTML = '';
             }
 
+            const docsBox = document.getElementById('execDocsBibliotecaBox');
+            if (docsBox) {
+                const { vinculados, relacionados } = resolverDocsPlanoOrdemPrev(plano, o);
+                const totalDocs = vinculados.length + relacionados.length;
+                const renderDocRowExec = (d, isLinked) => {
+                    const catLbl = DOCS_CAT_LABELS_PREV[d.categoria] || d.categoria || 'Doc';
+                    return `
+                        <div class="flex items-center justify-between gap-2.5 p-2 rounded-xl bg-white border ${isLinked ? 'border-indigo-300' : 'border-slate-200'}">
+                            <div class="flex items-center gap-2.5 min-w-0">
+                                ${d.fotoThumbB64 ? `<img src="${d.fotoThumbB64}" onclick="abrirZoomDocFotoPrev('${d.id}')" class="w-10 h-10 rounded-lg object-cover border border-slate-200 cursor-pointer shrink-0">` : `<div class="w-9 h-9 rounded-lg bg-indigo-50 text-indigo-700 flex items-center justify-center shrink-0"><i class="fa-solid fa-file-lines"></i></div>`}
+                                <div class="min-w-0">
+                                    <div class="flex flex-wrap items-center gap-1">
+                                        <span class="text-[10px] font-extrabold text-indigo-700">${escapeHtml(d.codigo || 'DOC')}</span>
+                                        <span class="px-1.5 py-0.5 rounded bg-slate-100 text-slate-700 text-[9px] font-extrabold">${escapeHtml(d.revisaoVigenteLabel || 'REV 00')}</span>
+                                        <span class="px-1.5 py-0.5 rounded bg-indigo-50 text-indigo-700 text-[9px] font-extrabold uppercase">${escapeHtml(catLbl)}</span>
+                                        ${isLinked ? `<span class="px-1.5 py-0.5 rounded bg-emerald-50 text-emerald-700 text-[9px] font-extrabold">Vinculado</span>` : ''}
+                                    </div>
+                                    <div class="text-xs font-bold text-slate-800 truncate">${escapeHtml(d.titulo || '')}</div>
+                                </div>
+                            </div>
+                            <div class="flex items-center gap-1.5 shrink-0">
+                                ${d.fotoThumbB64 ? `<button type="button" onclick="abrirZoomDocFotoPrev('${d.id}')" class="px-2.5 py-1 rounded-lg bg-sky-50 hover:bg-sky-100 text-sky-700 text-[10px] font-extrabold">Ver Foto</button>` : ''}
+                                ${d.arquivoUrl ? `<a href="${escapeHtml(d.arquivoUrl)}" target="_blank" rel="noopener noreferrer" class="px-2.5 py-1 rounded-lg bg-indigo-600 hover:bg-indigo-700 text-white text-[10px] font-extrabold">Abrir Doc ↗</a>` : ''}
+                            </div>
+                        </div>`;
+                };
+                const openLibBtn = `<button type="button" onclick="abrirBibliotecaDocsPrev('${escapeHtml(o.setor || '')}','${escapeHtml(o.maquina || '')}','${escapeHtml(o.equipamento || '')}','${escapeHtml(o.conjunto || '')}','${escapeHtml(o.subconjunto || '')}')" class="px-2.5 py-1 rounded-lg bg-white border border-indigo-200 hover:bg-indigo-100 text-[10px] font-extrabold text-indigo-700 shrink-0"><i class="fa-solid fa-folder-open mr-1"></i>Biblioteca ↗</button>`;
+                docsBox.hidden = false; docsBox.classList.remove('hidden');
+                if (!totalDocs) {
+                    docsBox.innerHTML = `<div class="flex flex-wrap items-center justify-between gap-2"><span class="text-[11px] font-bold text-indigo-900"><i class="fa-solid fa-book-open mr-1.5 text-indigo-600"></i>Biblioteca Técnica do Ativo: nenhum doc vigente vinculado</span>${openLibBtn}</div>`;
+                } else {
+                    const vincHtml = vinculados.map(d => renderDocRowExec(d, true)).join('');
+                    const relHtml = relacionados.length ? `
+                        <details ${vinculados.length ? '' : 'open'} class="pt-1">
+                            <summary class="cursor-pointer text-[11px] font-extrabold text-indigo-800 select-none">Outros documentos vigentes deste ativo (${relacionados.length})</summary>
+                            <div class="space-y-1.5 mt-1.5">${relacionados.map(d => renderDocRowExec(d, false)).join('')}</div>
+                        </details>` : '';
+                    docsBox.innerHTML = `
+                        <div class="flex flex-wrap items-center justify-between gap-2">
+                            <div class="text-[11px] font-extrabold text-indigo-900 uppercase"><i class="fa-solid fa-book-open mr-1.5 text-indigo-600"></i>Docs Técnicos & Referências Vigentes (${totalDocs})</div>
+                            ${openLibBtn}
+                        </div>
+                        ${vincHtml ? `<div class="space-y-1.5">${vincHtml}</div>` : ''}
+                        ${relHtml}`;
+                }
+            }
+
             // Carregar checklist da ordem (ou herdar do plano se ordem veio da Agenda PCM)
             if (Array.isArray(o.checklistExec) && o.checklistExec.length) {
                 execChecklistDraft = o.checklistExec.map(x => ({ ...x }));
@@ -4743,6 +5009,25 @@
                     ${o.reprogramacoes.map(r => `<div>• ${formatDateBR(r.de)} → ${formatDateBR(r.para)} (${escapeHtml(r.motivo)})${r.obs ? ': ' + escapeHtml(r.obs) : ''}</div>`).join('')}
                 </div>` : '';
 
+            const planoDocsA4 = o.planoId ? getPlanosPreventiva().find(p => p.id === o.planoId) : null;
+            const resDocsA4 = resolverDocsPlanoOrdemPrev(planoDocsA4, o);
+            const docsListA4 = [...resDocsA4.vinculados, ...resDocsA4.relacionados];
+            const docsHtmlA4 = docsListA4.length ? `
+                <div style="margin-top:14px;page-break-inside:avoid">
+                    <h3 style="font-size:12px;text-transform:uppercase;border-bottom:1px solid #cbd5e1;padding-bottom:4px;margin-bottom:6px">Biblioteca Técnica & Documentos Vigentes (${docsListA4.length})</h3>
+                    <table>
+                        <thead><tr><th style="width:110px">Código</th><th style="width:70px;text-align:center">Revisão</th><th style="width:110px">Categoria</th><th>Título / Local SharePoint</th></tr></thead>
+                        <tbody>${docsListA4.map(d => `
+                            <tr>
+                                <td style="font-weight:700">${escapeHtml(d.codigo || 'DOC')}</td>
+                                <td style="text-align:center;font-weight:700">${escapeHtml(d.revisaoVigenteLabel || 'REV 00')}</td>
+                                <td>${escapeHtml(DOCS_CAT_LABELS_PREV[d.categoria] || d.categoria || 'Doc')}</td>
+                                <td><strong>${escapeHtml(d.titulo || '')}</strong>${d.sharepointPastaSugerida ? `<br><small style="color:#475569">SharePoint: ${escapeHtml(d.sharepointPastaSugerida)}</small>` : ''}</td>
+                            </tr>`).join('')}
+                        </tbody>
+                    </table>
+                </div>` : '';
+
             const stLabel = STATUS_META[getStatusEfetivo(o, getHojeStr())]?.label || o.status;
             const wi = getIsoWeekInfo(o.data);
             const datasOrd = getDatasOrdem(o);
@@ -4796,6 +5081,7 @@
                     <div style="margin-top:4px;white-space:pre-wrap">${escapeHtml(obsFinal || 'Sem observações adicionais registradas.')}</div>
                 </div>
                 ${reprogHtml}
+                ${docsHtmlA4}
                 ${fotosHtml}
                 <div class="sigs">
                     <div class="sig-line">${escapeHtml(o.executadoPor || o.responsavel || 'Técnico Executante')}<br><span style="font-weight:400;color:#64748b">Executante da Manutenção</span></div>
@@ -5016,6 +5302,10 @@
             onSnapshot(colResp, snap => { listaResp = snap.docs.map(d => ({ id: d.id, ...d.data() })); });
             onSnapshot(colEquipes, snap => { listaEquipes = snap.docs.map(d => ({ id: d.id, ...d.data() })); popularSelectsGlobais(); });
             onSnapshot(colSetores, snap => { listaSetores = snap.docs.map(d => ({ id: d.id, ...d.data() })); popularSelectsGlobais(); });
+            onSnapshot(colDocsAtivos, snap => {
+                docsAtivosList = snap.docs.map(d => ({ id: d.id, ...d.data() }));
+                if (typeof renderPlanoDocsPicker === 'function') renderPlanoDocsPicker();
+            });
         }
 
         if (document.readyState === 'loading') {
