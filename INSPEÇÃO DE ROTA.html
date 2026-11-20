@@ -2488,6 +2488,7 @@
                             subconjunto: subConj ? subSubc : '',
                             tag: pickField(sub, ['tag', 'TAG', 'codigo_ativo']) || pickField(raw, ['tag', 'TAG', 'codigo_ativo']),
                             criticidade: pickField(sub, ['criticidade', 'Criticidade']) || pickField(raw, ['criticidade', 'Criticidade']),
+                            criticidade_linha: pickField(sub, ['criticidade_linha', 'classe_linha', 'linha_criticidade']) || pickField(raw, ['criticidade_linha', 'classe_linha', 'linha_criticidade']),
                             periodicidade_preventiva: pickField(sub, ['periodicidade_preventiva', 'periodicidade']) || pickField(raw, ['periodicidade_preventiva', 'periodicidade']),
                             disciplina: pickField(sub, ['disciplina', 'Disciplina']) || pickField(raw, ['disciplina', 'Disciplina']),
                             status_ativo: pickField(sub, ['status_ativo', 'status']) || pickField(raw, ['status_ativo', 'status']),
@@ -2509,6 +2510,7 @@
                             subconjunto: '',
                             tag: pickField(raw, ['tag', 'TAG', 'codigo_ativo']),
                             criticidade: pickField(raw, ['criticidade', 'Criticidade']),
+                            criticidade_linha: pickField(raw, ['criticidade_linha', 'classe_linha', 'linha_criticidade']),
                             periodicidade_preventiva: pickField(raw, ['periodicidade_preventiva', 'periodicidade']),
                             disciplina: pickField(raw, ['disciplina', 'Disciplina']),
                             status_ativo: pickField(raw, ['status_ativo', 'status']),
@@ -2530,6 +2532,7 @@
             const subconjunto = conjRaw ? subconjRaw : '';
             const tag = pickField(raw, ['tag', 'TAG', 'codigo_ativo']);
             const criticidade = pickField(raw, ['criticidade', 'Criticidade']);
+            const criticidade_linha = pickField(raw, ['criticidade_linha', 'classe_linha', 'linha_criticidade']);
             const periodicidade_preventiva = pickField(raw, ['periodicidade_preventiva', 'periodicidade']);
             const disciplina = pickField(raw, ['disciplina', 'Disciplina']);
             const status_ativo = pickField(raw, ['status_ativo', 'status']);
@@ -2546,6 +2549,7 @@
                 subconjunto,
                 tag,
                 criticidade,
+                criticidade_linha,
                 periodicidade_preventiva,
                 disciplina,
                 status_ativo,
@@ -4051,11 +4055,22 @@
                 const chaveMaqAtual = `${node.area || ''}|||${node.maquina || ''}`;
                 if (exibirDivisoriaMaquina && chaveMaqAtual !== chaveMaquinaAnterior) {
                     chaveMaquinaAnterior = chaveMaqAtual;
-                    const qtdMaq = itens.filter(i => i.area === node.area && i.maquina === node.maquina).length;
+                    const maqNodesDiv = itens.filter(i => i.area === node.area && i.maquina === node.maquina);
+                    const qtdMaq = maqNodesDiv.length;
+                    const rankL = { A: 3, B: 2, C: 1 };
+                    let expL = '', impL = '';
+                    maqNodesDiv.forEach(mIt => {
+                        const cl = String(mIt.criticidade_linha || '').trim().toUpperCase().replace(/^CLASSE\s*/i, '').charAt(0);
+                        if ((rankL[cl] || 0) > (rankL[expL] || 0)) expL = cl;
+                        const ca = String(mIt.criticidade || '').trim().toUpperCase().replace(/^CLASSE\s*/i, '').charAt(0);
+                        if ((rankL[ca] || 0) > (rankL[impL] || 0)) impL = ca;
+                    });
+                    const lCls = expL || impL;
+                    const lBadge = lCls ? `<span class="ml-1.5 px-2 py-0.5 rounded-full text-[9px] font-extrabold border ${lCls === 'A' ? 'bg-rose-100 text-rose-800 border-rose-300' : (lCls === 'B' ? 'bg-amber-100 text-amber-800 border-amber-300' : 'bg-emerald-100 text-emerald-800 border-emerald-300')}" title="${expL ? 'Criticidade da Linha definida na Árvore' : 'Inferida pelos equipamentos'}">Linha ${lCls}${expL ? '' : ' (auto)'}</span>` : '';
                     tbody += `
                     <tr class="bg-slate-100 border-y-2 border-slate-300">
                         <td colspan="53" class="!text-left py-2 px-3.5 font-extrabold text-[11px] uppercase tracking-wider text-slate-800 sticky left-0 bg-slate-200/95 z-10">
-                            <span class="inline-flex items-center gap-1.5"><svg class="w-3.5 h-3.5 text-slate-600 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4"/></svg>${escapeHtml(node.area)} › <span class="text-sky-700">${escapeHtml(node.maquina)}</span> <span class="text-slate-500 font-bold">(${qtdMaq} conj.)</span></span>
+                            <span class="inline-flex items-center gap-1.5"><svg class="w-3.5 h-3.5 text-slate-600 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4"/></svg>${escapeHtml(node.area)} › <span class="text-sky-700">${escapeHtml(node.maquina)}</span> <span class="text-slate-500 font-bold">(${qtdMaq} conj.)</span>${lBadge}</span>
                         </td>
                     </tr>`;
                 }

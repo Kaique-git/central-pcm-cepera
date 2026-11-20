@@ -1831,6 +1831,14 @@
                 const multiBadge = diasOrd.length > 1
                     ? `<span class="st-badge bg-indigo-50 text-indigo-800 border-indigo-200">Dia ${idxDia >= 0 ? idxDia + 1 : 1}/${diasOrd.length} (${escapeHtml(formatPeriodoLancamentoBR(l))}) • Checklist único</span>`
                     : '';
+                const rawPrio = String(l.prioridade || l.criticidade || '').trim().toUpperCase();
+                let critBadge = '';
+                if (rawPrio.startsWith('P1') || rawPrio === 'P1') critBadge = `<span class="st-badge bg-rose-100 text-rose-800 border-rose-200">P1 — Crítica</span>`;
+                else if (rawPrio.startsWith('P2') || rawPrio === 'P2') critBadge = `<span class="st-badge bg-orange-100 text-orange-800 border-orange-200">P2 — Alta</span>`;
+                else if (rawPrio.startsWith('P3') || rawPrio === 'P3') critBadge = `<span class="st-badge bg-sky-100 text-sky-800 border-sky-200">P3 — Média</span>`;
+                else if (rawPrio.startsWith('P4') || rawPrio === 'P4') critBadge = `<span class="st-badge bg-emerald-100 text-emerald-800 border-emerald-200">P4 — Baixa</span>`;
+                else if (rawPrio === 'A' || rawPrio === 'B' || rawPrio === 'C') critBadge = `<span class="st-badge ${rawPrio === 'A' ? 'bg-rose-100 text-rose-800 border-rose-200' : (rawPrio === 'B' ? 'bg-amber-100 text-amber-800 border-amber-200' : 'bg-emerald-100 text-emerald-800 border-emerald-200')}">Classe ${rawPrio}</span>`;
+                const linBadge = l.criticidadeLinha ? `<span class="st-badge bg-slate-100 text-slate-700 border-slate-300">Linha ${escapeHtml(String(l.criticidadeLinha))}</span>` : '';
                 let statusOptions = "";
                 Object.keys(STATUSES).forEach(stKey => {
                     statusOptions += `<option value="${stKey}" ${stKey === (l.status || 'pendente') ? 'selected' : ''}>${STATUSES[stKey].nome}</option>`;
@@ -1843,6 +1851,7 @@
                             <span class="font-extrabold text-xs text-slate-900">${escapeHtml(l.hora || '--:--')}</span>
                             ${semBadge}
                             <span class="st-badge" style="border-color:${t.cor};color:${t.cor}">${t.nome}</span>
+                            ${critBadge}${linBadge}
                             <select class="st-badge st-select ${s.badge}" onchange="mudarStatus('${escapeHtml(l.id)}', this.value)">${statusOptions}</select>
                             ${l.recadoOrigemId ? `<span class="st-badge bg-amber-50 text-amber-800 border-amber-200">Planejado via Mural</span>` : ''}
                             ${l.origem === 'modulo_preventivas' ? `<span class="st-badge bg-sky-50 text-sky-800 border-sky-200">Preventiva Integrada${l.planoCodigo ? ' • ' + escapeHtml(l.planoCodigo) : ''}</span>` : ''}
@@ -1918,6 +1927,7 @@
                 if (btn) { btn.disabled = false; btn.innerText = "Salvar Lançamento"; }
                 return showToast("Selecione uma data programada válida.", "error");
             }
+
             diaAberto = dataSelecionada;
             const recadoOrigemId = (document.getElementById('fRecadoOrigemId')?.value || '').trim();
             const ativoJsonRaw = (document.getElementById('fAtivoContextoJson')?.value || '').trim();
@@ -1948,7 +1958,17 @@
                 if (ativoCtx.conjunto) baseData.conjunto = ativoCtx.conjunto;
                 if (ativoCtx.subconjunto) baseData.subconjunto = ativoCtx.subconjunto;
                 if (ativoCtx.tag) baseData.tag = ativoCtx.tag;
-                if (ativoCtx.criticidade) baseData.criticidade = ativoCtx.criticidade;
+                if (ativoCtx.criticidade) {
+                    const clsAtivo = String(ativoCtx.criticidade).trim().toUpperCase();
+                    if (baseData.tipo === 'preventiva') {
+                        const mapPrio = { A: 'P1', B: 'P3', C: 'P4' };
+                        baseData.prioridade = mapPrio[clsAtivo] || clsAtivo;
+                        baseData.criticidade = mapPrio[clsAtivo] || clsAtivo;
+                    } else {
+                        baseData.criticidade = clsAtivo;
+                    }
+                }
+                if (ativoCtx.criticidade_linha) baseData.criticidadeLinha = ativoCtx.criticidade_linha;
                 if (ativoCtx.docId || ativoCtx.nodeId) baseData.ativoId = ativoCtx.docId || ativoCtx.nodeId;
             }
 
@@ -2730,7 +2750,8 @@
                 const detalhes = [
                     pathLbl ? `Ativo: ${pathLbl}` : '',
                     a.tag ? `TAG: ${a.tag}` : '',
-                    a.criticidade ? `Criticidade: Classe ${a.criticidade}` : '',
+                    a.criticidade ? `Criticidade do Ativo: Classe ${a.criticidade}` : '',
+                    a.criticidade_linha ? `Criticidade da Linha: Classe ${a.criticidade_linha}` : '',
                     a.periodicidade ? `Periodicidade padrão: ${a.periodicidade}` : ''
                 ].filter(Boolean);
                 fDesc.value = detalhes.join(' • ');

@@ -91,6 +91,10 @@
         .crit-B { background: #fef3c7; color: #b45309; border: 1px solid #fcd34d; }
         .crit-C { background: #d1fae5; color: #047857; border: 1px solid #6ee7b7; }
         .crit-none { background: #f1f5f9; color: #64748b; border: 1px solid #cbd5e1; }
+        .prio-P1 { background: #ffe4e6; color: #be123c; border: 1px solid #fda4af; }
+        .prio-P2 { background: #ffedd5; color: #c2410c; border: 1px solid #fdba74; }
+        .prio-P3 { background: #fef3c7; color: #b45309; border: 1px solid #fcd34d; }
+        .prio-P4 { background: #d1fae5; color: #047857; border: 1px solid #6ee7b7; }
 
         .st-pendente { background: #e0f2fe; color: #0369a1; border: 1px solid #bae6fd; }
         .st-andamento { background: #fef3c7; color: #b45309; border: 1px solid #fde68a; }
@@ -356,10 +360,11 @@
                                 <option value="">Todos os Setores</option>
                             </select>
                             <select id="cockpitFiltroCrit" onchange="renderCockpit()" class="input-clean py-2 text-xs font-bold w-auto">
-                                <option value="">Criticidade (Todas)</option>
-                                <option value="A">Classe A — Crítico</option>
-                                <option value="B">Classe B — Importante</option>
-                                <option value="C">Classe C — Não Crítico</option>
+                                <option value="">Prioridade (Todas)</option>
+                                <option value="P1">P1 — Crítica</option>
+                                <option value="P2">P2 — Alta</option>
+                                <option value="P3">P3 — Média</option>
+                                <option value="P4">P4 — Baixa</option>
                             </select>
                         </div>
                         <div class="flex flex-wrap items-center gap-2">
@@ -440,10 +445,11 @@
                                 <option value="">Todos Setores</option>
                             </select>
                             <select id="calFiltroCrit" onchange="renderCalendario()" class="input-clean py-1.5 text-xs font-bold w-auto">
-                                <option value="">Todas Criticidades</option>
-                                <option value="A">Classe A</option>
-                                <option value="B">Classe B</option>
-                                <option value="C">Classe C</option>
+                                <option value="">Todas Prioridades</option>
+                                <option value="P1">P1 — Crítica</option>
+                                <option value="P2">P2 — Alta</option>
+                                <option value="P3">P3 — Média</option>
+                                <option value="P4">P4 — Baixa</option>
                             </select>
                             <select id="calFiltroStatus" onchange="renderCalendario()" class="input-clean py-1.5 text-xs font-bold w-auto">
                                 <option value="">Todos Status</option>
@@ -534,10 +540,17 @@
                             <div class="flex flex-wrap items-center gap-2 pt-1 border-t border-slate-200/70">
                                 <input type="text" id="sem52Busca" oninput="renderCalendario52Semanas()" placeholder="Buscar código, plano, TAG, responsável..." class="input-clean py-1.5 text-xs font-bold flex-1 min-w-[200px]">
                                 <select id="sem52FiltroCrit" onchange="renderCalendario52Semanas()" class="input-clean py-1.5 text-xs font-bold w-auto">
-                                    <option value="">Criticidade (Todas)</option>
-                                    <option value="A">Classe A</option>
-                                    <option value="B">Classe B</option>
-                                    <option value="C">Classe C</option>
+                                    <option value="">Prioridade (Todas)</option>
+                                    <option value="P1">P1 — Crítica</option>
+                                    <option value="P2">P2 — Alta</option>
+                                    <option value="P3">P3 — Média</option>
+                                    <option value="P4">P4 — Baixa</option>
+                                </select>
+                                <select id="sem52FiltroLinhaCrit" onchange="renderCalendario52Semanas()" class="input-clean py-1.5 text-xs font-bold w-auto" title="Filtrar pela Criticidade da Linha (Árvore de Ativos)">
+                                    <option value="">Linha (Todas)</option>
+                                    <option value="A">Linha Classe A</option>
+                                    <option value="B">Linha Classe B</option>
+                                    <option value="C">Linha Classe C</option>
                                 </select>
                                 <select id="sem52FiltroDisc" onchange="renderCalendario52Semanas()" class="input-clean py-1.5 text-xs font-bold w-auto">
                                     <option value="">Disciplina (Todas)</option>
@@ -627,10 +640,11 @@
                                 <option value="flutuante">Data Flutuante</option>
                             </select>
                             <select id="planosFiltroCrit" onchange="renderPlanos()" class="input-clean py-1.5 text-xs font-bold">
-                                <option value="">Criticidade (Todas)</option>
-                                <option value="A">Classe A</option>
-                                <option value="B">Classe B</option>
-                                <option value="C">Classe C</option>
+                                <option value="">Prioridade (Todas)</option>
+                                <option value="P1">P1 — Crítica</option>
+                                <option value="P2">P2 — Alta</option>
+                                <option value="P3">P3 — Média</option>
+                                <option value="P4">P4 — Baixa</option>
                             </select>
                         </div>
                     </div>
@@ -655,10 +669,11 @@
                                     <option value="">Setores (Todos)</option>
                                 </select>
                                 <select id="ordensFiltroCrit" onchange="renderOrdens()" class="input-clean py-2 text-xs font-bold w-auto">
-                                    <option value="">Criticidade</option>
-                                    <option value="A">Classe A</option>
-                                    <option value="B">Classe B</option>
-                                    <option value="C">Classe C</option>
+                                    <option value="">Prioridade</option>
+                                    <option value="P1">P1 — Crítica</option>
+                                    <option value="P2">P2 — Alta</option>
+                                    <option value="P3">P3 — Média</option>
+                                    <option value="P4">P4 — Baixa</option>
                                 </select>
                                 <select id="ordensFiltroEquipe" onchange="renderOrdens()" class="input-clean py-2 text-xs font-bold w-auto">
                                     <option value="">Disciplina / Equipe</option>
@@ -728,8 +743,8 @@
                         </div>
                         <div class="glass-card p-5 rounded-3xl space-y-3">
                             <div>
-                                <span class="text-[10px] font-extrabold uppercase tracking-widest text-rose-600">Risco Operacional</span>
-                                <h3 class="text-sm font-extrabold text-slate-900">Cumprimento por Criticidade (A / B / C)</h3>
+                                <span class="text-[10px] font-extrabold uppercase tracking-widest text-rose-600">Prioridade dos Planos</span>
+                                <h3 class="text-sm font-extrabold text-slate-900">Cumprimento por Prioridade (P1 a P4)</h3>
                             </div>
                             <div class="h-64"><canvas id="chartCritCumprimento"></canvas></div>
                         </div>
@@ -896,11 +911,12 @@
                         </select>
                     </div>
                     <div>
-                        <label class="block text-[10px] font-extrabold uppercase text-slate-500 mb-1">Criticidade *</label>
+                        <label class="block text-[10px] font-extrabold uppercase text-slate-500 mb-1">Prioridade do Plano *</label>
                         <select id="plCriticidade" required class="input-clean py-2 text-xs font-extrabold">
-                            <option value="A">Classe A — Crítico</option>
-                            <option value="B" selected>Classe B — Importante</option>
-                            <option value="C">Classe C — Não Crítico</option>
+                            <option value="P1">P1 — Crítica</option>
+                            <option value="P2">P2 — Alta</option>
+                            <option value="P3" selected>P3 — Média</option>
+                            <option value="P4">P4 — Baixa</option>
                         </select>
                     </div>
                     <div>
@@ -1524,6 +1540,12 @@
             B: { label: 'Classe B', desc: 'Importante', cls: 'crit-B' },
             C: { label: 'Classe C', desc: 'Não Crítico', cls: 'crit-C' }
         };
+        const PRIORIDADES_PLANO = {
+            P1: { label: 'P1', desc: 'Crítica', full: 'P1 — Crítica', cls: 'prio-P1', order: 1, cor: '#e11d48' },
+            P2: { label: 'P2', desc: 'Alta', full: 'P2 — Alta', cls: 'prio-P2', order: 2, cor: '#f97316' },
+            P3: { label: 'P3', desc: 'Média', full: 'P3 — Média', cls: 'prio-P3', order: 3, cor: '#0284c7' },
+            P4: { label: 'P4', desc: 'Baixa', full: 'P4 — Baixa', cls: 'prio-P4', order: 4, cor: '#10b981' }
+        };
         const STATUS_META = {
             atrasada: { label: 'Atrasada', cls: 'st-atrasada', cor: '#e11d48' },
             pendente: { label: 'Programada', cls: 'st-pendente', cor: '#0284c7' },
@@ -1540,7 +1562,7 @@
             semanas52: { title: 'Calendário de 52 Semanas (ISO-8601)', sub: 'Seleção de dias dentro da semana com mesmo checklist • Linkado à Agenda PCM' },
             planos: { title: 'Planos & Checklists Preventivos', sub: 'Importe do Excel com Ctrl+C / Ctrl+V e atualize tudo dentro do app' },
             ordens: { title: 'Execução, Ordens & Reprogramações', sub: 'Histórico completo, exportação CSV e relatórios A4' },
-            indicadores: { title: 'Indicadores de Preventiva (KPIs)', sub: 'Aderência vs Meta 90%, Classe A, Backlog, H/H e Cobertura de Ativos' },
+            indicadores: { title: 'Indicadores de Preventiva (KPIs)', sub: 'Aderência vs Meta 90%, Prioridade P1 (Crítica), Backlog, H/H e Cobertura de Ativos' },
             tecnico: { title: 'Minhas Preventivas (Campo)', sub: 'Checklist interativo, fotos de evidência e relatório A4' }
         };
 
@@ -1613,12 +1635,67 @@
             return '';
         }
 
+        function normalizarPrioridadePlano(val) {
+            const up = String(val || '').trim().toUpperCase();
+            if (!up) return '';
+            if (/^P?1(\b|\s|-|—)/.test(up) || up === 'P1' || up === '1' || up === 'CRITICA' || up === 'CRÍTICA' || up === 'CRITICO' || up === 'CRÍTICO' || up === 'A' || up.startsWith('CLASSE A')) return 'P1';
+            if (/^P?2(\b|\s|-|—)/.test(up) || up === 'P2' || up === '2' || up === 'ALTA') return 'P2';
+            if (/^P?3(\b|\s|-|—)/.test(up) || up === 'P3' || up === '3' || up === 'MEDIA' || up === 'MÉDIA' || up === 'IMPORTANTE' || up === 'B' || up.startsWith('CLASSE B')) return 'P3';
+            if (/^P?4(\b|\s|-|—)/.test(up) || up === 'P4' || up === '4' || up === 'BAIXA' || up.includes('NAO CRIT') || up.includes('NÃO CRIT') || up === 'C' || up.startsWith('CLASSE C')) return 'P4';
+            return '';
+        }
+
+        function sugerirPrioridadeDeClasse(classeAsset) {
+            const c = normalizarCriticidade(classeAsset);
+            if (c === 'A') return 'P1';
+            if (c === 'B') return 'P3';
+            if (c === 'C') return 'P4';
+            return 'P3';
+        }
+
+        function getPrioridadePlanoDoc(doc, fallback = '') {
+            if (!doc || typeof doc !== 'object') return fallback ? (normalizarPrioridadePlano(fallback) || fallback) : '';
+            const raw = doc.prioridade || doc.prioridadePlano || doc.criticidade || '';
+            const p = normalizarPrioridadePlano(raw);
+            return p || (fallback ? (normalizarPrioridadePlano(fallback) || fallback) : '');
+        }
+
+        function getPrioridadeMeta(prio) {
+            const p = normalizarPrioridadePlano(prio);
+            return PRIORIDADES_PLANO[p] || { label: p || 'S/P', desc: 'Não definida', full: 'Sem Prioridade', cls: 'crit-none', order: 9, cor: '#94a3b8' };
+        }
+
+        function getClasseLinhaAtivo(setor, maquina) {
+            const s = String(setor || '').trim();
+            const m = String(maquina || '').trim();
+            if (!m) return { classe: '', explicita: false };
+            const rank = { A: 3, B: 2, C: 1, '': 0 };
+            const nodes = assetNodes.filter(n => (!s || n.area === s) && n.maquina === m);
+            let bestExp = '';
+            let bestImp = '';
+            nodes.forEach(n => {
+                if (rank[n.criticidade_linha || ''] > rank[bestExp]) bestExp = n.criticidade_linha;
+                if (rank[n.criticidade || ''] > rank[bestImp]) bestImp = n.criticidade;
+            });
+            if (bestExp) return { classe: bestExp, explicita: true };
+            return { classe: bestImp, explicita: false };
+        }
+
+        function renderBadgeLinhaCrit(setor, maquina, compact = true) {
+            const info = getClasseLinhaAtivo(setor, maquina);
+            if (!info.classe) return '';
+            const cls = CRITICIDADES[info.classe]?.cls || 'crit-none';
+            const title = `Criticidade da Linha (${info.explicita ? 'definida na Árvore de Ativos' : 'inferida pelos ativos'}): Classe ${info.classe}`;
+            return `<span class="badge-pill ${cls}" title="${escapeHtml(title)}">${compact ? `Linha ${info.classe}` : `Linha Classe ${info.classe}`}</span>`;
+        }
+
         function expandirDocParaNodes(docId, raw) {
             const area = pickField(raw, ['setor', 'area', 'área']) || 'Sem Setor';
             const maquina = pickField(raw, ['maquina', 'máquina', 'linha']) || 'Linha Geral';
             const equipamento = pickField(raw, ['equipamento']) || 'Equipamento';
             const tag = pickField(raw, ['tag', 'codigo', 'patrimonio']);
             const criticidade = normalizarCriticidade(pickField(raw, ['criticidade', 'tipo_criticidade']));
+            const criticidade_linha = normalizarCriticidade(pickField(raw, ['criticidade_linha', 'classe_linha', 'linha_criticidade']));
             const periodicidade_preventiva = pickField(raw, ['periodicidade_preventiva', 'periodicidade']);
             const disciplina = pickField(raw, ['disciplina']) || 'Mecânica';
             const status_ativo = pickField(raw, ['status_ativo']) || 'Ativo';
@@ -1632,7 +1709,7 @@
                     const sub = isObj ? pickField(cItem, ['subconjunto']) : '';
                     return {
                         nodeId: `${docId}__leg_${idx}`, docId, area, maquina, equipamento,
-                        conjunto: cj || 'Conjunto Geral', subconjunto: sub, tag, criticidade,
+                        conjunto: cj || 'Conjunto Geral', subconjunto: sub, tag, criticidade, criticidade_linha,
                         periodicidade_preventiva, disciplina, status_ativo
                     };
                 });
@@ -1640,7 +1717,7 @@
             return [{
                 nodeId: docId, docId, area, maquina, equipamento,
                 conjunto: conjuntoFlat || 'Conjunto Geral', subconjunto: subconjuntoFlat,
-                tag, criticidade, periodicidade_preventiva, disciplina, status_ativo
+                tag, criticidade, criticidade_linha, periodicidade_preventiva, disciplina, status_ativo
             }];
         }
 
@@ -2107,7 +2184,7 @@
         };
 
         window.limparFiltrosSem52 = () => {
-            ['sem52Busca', 'sem52FiltroSetor', 'sem52FiltroMaquina', 'sem52FiltroEquipamento', 'sem52FiltroConjunto', 'sem52FiltroCrit', 'sem52FiltroDisc', 'sem52FiltroPer', 'sem52FiltroAgenda'].forEach(id => {
+            ['sem52Busca', 'sem52FiltroSetor', 'sem52FiltroMaquina', 'sem52FiltroEquipamento', 'sem52FiltroConjunto', 'sem52FiltroCrit', 'sem52FiltroLinhaCrit', 'sem52FiltroDisc', 'sem52FiltroPer', 'sem52FiltroAgenda'].forEach(id => {
                 const el = document.getElementById(id);
                 if (el) el.value = '';
             });
@@ -2276,7 +2353,6 @@
                 if (n.status_ativo === 'Desativado' || n.status_ativo === 'Descartado') return false;
                 if (!PERIODICIDADES[n.periodicidade_preventiva]) return false;
                 if (filtroSetor && n.area !== filtroSetor) return false;
-                if (filtroCrit && n.criticidade !== filtroCrit) return false;
                 return true;
             });
             return ativosComPrev.filter(n => {
@@ -2287,8 +2363,12 @@
                 return !temOrdem;
             }).map(n => {
                 const plano = planos.find(p => p.ativoId === n.nodeId || (normKey(p.setor) === normKey(n.area) && normKey(p.equipamento) === normKey(n.equipamento)));
-                return { ...n, planoVinculadoId: plano?.id || '' };
-            }).sort((a, b) => (a.criticidade || 'Z').localeCompare(b.criticidade || 'Z'));
+                const infoLinha = getClasseLinhaAtivo(n.area, n.maquina);
+                const prioSug = sugerirPrioridadeDeClasse(n.criticidade || infoLinha.classe);
+                const prioEfetiva = plano ? getPrioridadePlanoDoc(plano, prioSug) : prioSug;
+                return { ...n, planoVinculadoId: plano?.id || '', prioEfetiva, classeLinha: infoLinha.classe };
+            }).filter(n => !filtroCrit || n.prioEfetiva === filtroCrit)
+              .sort((a, b) => getPrioridadeMeta(a.prioEfetiva).order - getPrioridadeMeta(b.prioEfetiva).order);
         }
 
         window.renderCockpit = () => {
@@ -2298,14 +2378,14 @@
 
             const ordensBase = getOrdensPreventiva().filter(o => {
                 if (fSetor && (o.setor || '') !== fSetor) return false;
-                if (fCrit && (o.criticidade || '') !== fCrit) return false;
+                if (fCrit && getPrioridadePlanoDoc(o) !== fCrit) return false;
                 return true;
             });
 
             const atrasadasEHoje = ordensBase.filter(o => {
                 const st = getStatusEfetivo(o, hojeStr);
                 return st === 'atrasada' || ((st === 'pendente' || st === 'andamento') && ordemCaiNoDia(o, hojeStr));
-            }).sort((a, b) => (a.data || '').localeCompare(b.data || '') || (a.criticidade || 'Z').localeCompare(b.criticidade || 'Z'));
+            }).sort((a, b) => (a.data || '').localeCompare(b.data || '') || (getPrioridadeMeta(getPrioridadePlanoDoc(a)).order - getPrioridadeMeta(getPrioridadePlanoDoc(b)).order));
 
             const noPeriodo = ordensBase.filter(o => ordemCaiNoPeriodo(o, ini, fim) && o.status !== 'cancelado')
                 .sort((a, b) => (a.data || '').localeCompare(b.data || '') || (a.hora || '').localeCompare(b.hora || ''));
@@ -2341,7 +2421,8 @@
             boxAtras.innerHTML = atrasadasEHoje.length ? atrasadasEHoje.map(o => {
                 const st = getStatusEfetivo(o, hojeStr);
                 const dias = diffDays(hojeStr, getDataFinalOrdem(o));
-                const critCls = CRITICIDADES[o.criticidade]?.cls || 'crit-none';
+                const prio = getPrioridadePlanoDoc(o);
+                const prioMeta = getPrioridadeMeta(prio);
                 const isoInfo = getIsoWeekInfo(o.data);
                 return `
                     <div class="p-3.5 rounded-2xl border ${st === 'atrasada' ? 'bg-rose-50/70 border-rose-200' : 'bg-sky-50/70 border-sky-200'} flex flex-col sm:flex-row sm:items-center justify-between gap-2.5">
@@ -2349,7 +2430,8 @@
                             <div class="flex flex-wrap items-center gap-1.5">
                                 <span class="px-2 py-0.5 rounded-full text-[10px] font-extrabold ${st === 'atrasada' ? 'st-atrasada' : 'st-pendente'}">${st === 'atrasada' ? `Atrasada há ${dias}d` : 'Em Execução / Hoje'}</span>
                                 <span class="px-1.5 py-0.5 rounded-md bg-slate-900 text-white text-[10px] font-extrabold">S${isoInfo.week}</span>
-                                ${o.criticidade ? `<span class="px-2 py-0.5 rounded-full text-[10px] font-extrabold ${critCls}">Classe ${escapeHtml(o.criticidade)}</span>` : ''}
+                                ${prio ? `<span class="px-2 py-0.5 rounded-full text-[10px] font-extrabold ${prioMeta.cls}" title="${escapeHtml(prioMeta.full)}">${escapeHtml(prioMeta.full)}</span>` : ''}
+                                ${renderBadgeLinhaCrit(o.setor, o.maquina)}
                                 ${o.paradaNecessaria === 'sim' ? `<span class="px-2 py-0.5 rounded-full text-[10px] font-extrabold bg-amber-100 text-amber-800 border border-amber-200">Parada</span>` : ''}
                                 <span class="text-[11px] font-extrabold text-slate-600">${formatPeriodoDatasOrdemBR(o)} ${escapeHtml(o.hora || '')}</span>
                             </div>
@@ -2367,7 +2449,8 @@
             boxPer.innerHTML = noPeriodo.length ? noPeriodo.map(o => {
                 const st = getStatusEfetivo(o, hojeStr);
                 const stMeta = STATUS_META[st] || STATUS_META.pendente;
-                const critCls = CRITICIDADES[o.criticidade]?.cls || 'crit-none';
+                const prio = getPrioridadePlanoDoc(o);
+                const prioMeta = getPrioridadeMeta(prio);
                 const isoInfo = getIsoWeekInfo(o.data);
                 return `
                     <div class="p-3 rounded-2xl border border-slate-200 bg-white flex flex-col sm:flex-row sm:items-center justify-between gap-2">
@@ -2376,7 +2459,8 @@
                                 <span class="px-1.5 py-0.5 rounded-md bg-slate-100 text-slate-800 text-[10px] font-extrabold">S${isoInfo.week}</span>
                                 <span class="text-xs font-extrabold text-sky-700">${formatPeriodoDatasOrdemBR(o)}</span>
                                 <span class="px-2 py-0.5 rounded-full text-[10px] font-extrabold ${stMeta.cls}">${stMeta.label}</span>
-                                ${o.criticidade ? `<span class="px-1.5 py-0.5 rounded-full text-[10px] font-extrabold ${critCls}">${escapeHtml(o.criticidade)}</span>` : ''}
+                                ${prio ? `<span class="px-1.5 py-0.5 rounded-full text-[10px] font-extrabold ${prioMeta.cls}" title="${escapeHtml(prioMeta.full)}">${escapeHtml(prioMeta.label)}</span>` : ''}
+                                ${renderBadgeLinhaCrit(o.setor, o.maquina)}
                                 <span class="text-[10px] font-bold text-slate-400">${escapeHtml(o.equipe || '')} • ${formatDuracaoHH(o.duracaoEstimadaMin || 60)}</span>
                             </div>
                             <div class="text-xs font-extrabold text-slate-900 truncate">${escapeHtml(o.titulo || 'Preventiva')}</div>
@@ -2415,11 +2499,14 @@
             const boxSem = document.getElementById('cockpitListaSemAgenda');
             boxSem.innerHTML = semAgenda.length ? semAgenda.slice(0, 30).map(n => {
                 const critCls = CRITICIDADES[n.criticidade]?.cls || 'crit-none';
+                const prioMeta = getPrioridadeMeta(n.prioEfetiva);
                 return `
                     <div class="p-2.5 rounded-2xl bg-amber-50/60 border border-amber-200 flex items-center justify-between gap-2">
                         <div class="min-w-0">
-                            <div class="flex items-center gap-1.5">
-                                ${n.criticidade ? `<span class="px-1.5 py-0.5 rounded-full text-[9px] font-extrabold ${critCls}">${n.criticidade}</span>` : ''}
+                            <div class="flex flex-wrap items-center gap-1.5">
+                                <span class="px-1.5 py-0.5 rounded-full text-[9px] font-extrabold ${prioMeta.cls}" title="Prioridade sugerida/plano: ${escapeHtml(prioMeta.full)}">${escapeHtml(prioMeta.label)}</span>
+                                ${n.criticidade ? `<span class="px-1.5 py-0.5 rounded-full text-[9px] font-extrabold ${critCls}">Ativo ${n.criticidade}</span>` : ''}
+                                ${renderBadgeLinhaCrit(n.area, n.maquina)}
                                 <span class="text-[10px] font-extrabold text-amber-800">${escapeHtml(n.periodicidade_preventiva)}</span>
                                 ${n.tag ? `<span class="text-[10px] font-mono text-slate-500">${escapeHtml(n.tag)}</span>` : ''}
                             </div>
@@ -2479,11 +2566,14 @@
             const rows = periodo.map(o => {
                 const st = STATUS_META[getStatusEfetivo(o, hojeStr)]?.label || o.status;
                 const isoInfo = getIsoWeekInfo(o.data);
-                return `<tr><td><strong>S${isoInfo.week}</strong> • ${formatPeriodoDatasOrdemBR(o)} ${escapeHtml(o.hora || '')}</td><td><strong>${escapeHtml(o.titulo)}</strong><br><small>${escapeHtml(o.planoCodigo || '')}</small></td><td>${escapeHtml([o.setor, o.maquina, o.equipamento, o.subconjunto].filter(Boolean).join(' › '))}</td><td>${escapeHtml(o.criticidade || '-')}</td><td>${escapeHtml(o.responsavel || o.equipe || '-')}</td><td>${o.paradaNecessaria === 'sim' ? 'SIM' : 'NÃO'}</td><td>${escapeHtml(st)}</td></tr>`;
+                const prio = getPrioridadePlanoDoc(o);
+                const prioTxt = prio ? getPrioridadeMeta(prio).full : '-';
+                const lInfo = getClasseLinhaAtivo(o.setor, o.maquina);
+                return `<tr><td><strong>S${isoInfo.week}</strong> • ${formatPeriodoDatasOrdemBR(o)} ${escapeHtml(o.hora || '')}</td><td><strong>${escapeHtml(o.titulo)}</strong><br><small>${escapeHtml(o.planoCodigo || '')}</small></td><td>${escapeHtml([o.setor, o.maquina, o.equipamento, o.subconjunto].filter(Boolean).join(' › '))}</td><td>${escapeHtml(prioTxt)}${lInfo.classe ? `<br><small>Linha ${lInfo.classe}</small>` : ''}</td><td>${escapeHtml(o.responsavel || o.equipe || '-')}</td><td>${o.paradaNecessaria === 'sim' ? 'SIM' : 'NÃO'}</td><td>${escapeHtml(st)}</td></tr>`;
             }).join('');
             const w = window.open('', '_blank');
             if (!w) { showToast('Permita pop-ups para imprimir o resumo A4.', 'error'); return; }
-            w.document.write(`<!DOCTYPE html><html lang="pt-BR"><head><meta charset="UTF-8"><title>Resumo Preventivas — ${escapeHtml(label)}</title><style>body{font-family:Arial,sans-serif;color:#0f172a;margin:20px;font-size:11px}header{display:flex;justify-content:space-between;align-items:center;border-bottom:2px solid #0f172a;padding-bottom:10px;margin-bottom:14px}img{height:38px}table{width:100%;border-collapse:collapse}th,td{border:1px solid #cbd5e1;padding:6px;text-align:left}th{background:#f1f5f9;font-size:10px;text-transform:uppercase}</style></head><body><header><div style="display:flex;align-items:center;gap:12px"><img src="CEPERA_LOGO.png" alt="Cepêra"><div><h2 style="margin:0">Resumo de Manutenção Preventiva Programada</h2><div>Período: <strong>${escapeHtml(label)}</strong>${fSetor ? ` • Setor: <strong>${escapeHtml(fSetor)}</strong>` : ''}</div></div></div><div>Emitido em ${formatDateBR(hojeStr)}<br>Total: <strong>${periodo.length}</strong> ordens</div></header><table><thead><tr><th>Semana / Datas</th><th>Preventiva / Plano</th><th>Ativo</th><th>Crit.</th><th>Responsável</th><th>Parada</th><th>Status</th></tr></thead><tbody>${rows || '<tr><td colspan="7" style="text-align:center;padding:16px">Nenhuma preventiva no período.</td></tr>'}</tbody></table><script>window.onload=()=>window.print();<\/script></body></html>`);
+            w.document.write(`<!DOCTYPE html><html lang="pt-BR"><head><meta charset="UTF-8"><title>Resumo Preventivas — ${escapeHtml(label)}</title><style>body{font-family:Arial,sans-serif;color:#0f172a;margin:20px;font-size:11px}header{display:flex;justify-content:space-between;align-items:center;border-bottom:2px solid #0f172a;padding-bottom:10px;margin-bottom:14px}img{height:38px}table{width:100%;border-collapse:collapse}th,td{border:1px solid #cbd5e1;padding:6px;text-align:left}th{background:#f1f5f9;font-size:10px;text-transform:uppercase}</style></head><body><header><div style="display:flex;align-items:center;gap:12px"><img src="CEPERA_LOGO.png" alt="Cepêra"><div><h2 style="margin:0">Resumo de Manutenção Preventiva Programada</h2><div>Período: <strong>${escapeHtml(label)}</strong>${fSetor ? ` • Setor: <strong>${escapeHtml(fSetor)}</strong>` : ''}</div></div></div><div>Emitido em ${formatDateBR(hojeStr)}<br>Total: <strong>${periodo.length}</strong> ordens</div></header><table><thead><tr><th>Semana / Datas</th><th>Preventiva / Plano</th><th>Ativo</th><th>Prior. / Linha</th><th>Responsável</th><th>Parada</th><th>Status</th></tr></thead><tbody>${rows || '<tr><td colspan="7" style="text-align:center;padding:16px">Nenhuma preventiva no período.</td></tr>'}</tbody></table><script>window.onload=()=>window.print();<\/script></body></html>`);
             w.document.close();
         };
 
@@ -2509,7 +2599,7 @@
 
             const prevs = getOrdensPreventiva().filter(o => {
                 if (fSetor && o.setor !== fSetor) return false;
-                if (fCrit && o.criticidade !== fCrit) return false;
+                if (fCrit && getPrioridadePlanoDoc(o) !== fCrit) return false;
                 if (fStatus && getStatusEfetivo(o, hojeStr) !== fStatus) return false;
                 return true;
             });
@@ -2541,7 +2631,9 @@
                     const bg = st === 'atrasada' ? 'bg-rose-100 text-rose-800 border-rose-200' : st === 'concluido' ? 'bg-emerald-100 text-emerald-800 border-emerald-200 done' : st === 'andamento' ? 'bg-amber-100 text-amber-900 border-amber-200' : 'bg-sky-100 text-sky-900 border-sky-200';
                     const dot = STATUS_META[st]?.cor || '#0284c7';
                     const tagDia = it._totalDias > 1 ? `[D${it._diaIdx}/${it._totalDias}] ` : '';
-                    return `<div class="cal-chip ${bg}" title="${escapeHtml(it.titulo)}${it._totalDias > 1 ? ` • Dia ${it._diaIdx} de ${it._totalDias} (mesmo checklist)` : ''}"><span class="w-1.5 h-1.5 rounded-full shrink-0" style="background:${dot}"></span><span class="truncate">${it.criticidade === 'A' ? '[A] ' : ''}${tagDia}${escapeHtml(it.equipamento || it.titulo)}</span></div>`;
+                    const prio = getPrioridadePlanoDoc(it);
+                    const prioTag = (prio === 'P1' || prio === 'P2') ? `[${prio}] ` : '';
+                    return `<div class="cal-chip ${bg}" title="${escapeHtml(it.titulo)}${prio ? ` (${getPrioridadeMeta(prio).full})` : ''}${it._totalDias > 1 ? ` • Dia ${it._diaIdx} de ${it._totalDias} (mesmo checklist)` : ''}"><span class="w-1.5 h-1.5 rounded-full shrink-0" style="background:${dot}"></span><span class="truncate">${prioTag}${tagDia}${escapeHtml(it.equipamento || it.titulo)}</span></div>`;
                 }).join('');
                 const extra = items.length > 4 ? `<div class="text-[10px] font-extrabold text-sky-700 pl-1">+${items.length - 4} mais</div>` : '';
                 html += `
@@ -2573,7 +2665,8 @@
             prevs.forEach(o => {
                 const st = getStatusEfetivo(o, hojeStr);
                 const stMeta = STATUS_META[st] || STATUS_META.pendente;
-                const critCls = CRITICIDADES[o.criticidade]?.cls || 'crit-none';
+                const prio = getPrioridadePlanoDoc(o);
+                const prioMeta = getPrioridadeMeta(prio);
                 const diasOrd = getDatasOrdem(o);
                 const diaIdx = diasOrd.indexOf(iso) + 1;
                 cards.push(`
@@ -2582,7 +2675,8 @@
                             <div class="flex flex-wrap items-center gap-1.5">
                                 <span class="px-2 py-0.5 rounded-full text-[10px] font-extrabold ${stMeta.cls}">${stMeta.label}</span>
                                 ${diasOrd.length > 1 ? `<span class="px-2 py-0.5 rounded-full text-[10px] font-extrabold bg-indigo-100 text-indigo-800">Dia ${diaIdx}/${diasOrd.length} (Checklist Único: ${formatDiasOrdemCompacto(diasOrd)})</span>` : ''}
-                                ${o.criticidade ? `<span class="px-2 py-0.5 rounded-full text-[10px] font-extrabold ${critCls}">Classe ${escapeHtml(o.criticidade)}</span>` : ''}
+                                ${prio ? `<span class="px-2 py-0.5 rounded-full text-[10px] font-extrabold ${prioMeta.cls}">${escapeHtml(prioMeta.full)}</span>` : ''}
+                                ${renderBadgeLinhaCrit(o.setor, o.maquina)}
                                 ${o.paradaNecessaria === 'sim' ? `<span class="px-2 py-0.5 rounded-full text-[10px] font-extrabold bg-amber-100 text-amber-800">Exige Parada</span>` : ''}
                                 <span class="text-[11px] font-bold text-slate-500">${escapeHtml(o.hora || '08:00')} • ${formatDuracaoHH(o.duracaoEstimadaMin || 60)}</span>
                             </div>
@@ -2684,6 +2778,7 @@
             const fEquip = document.getElementById('sem52FiltroEquipamento')?.value || '';
             const fConj = document.getElementById('sem52FiltroConjunto')?.value || '';
             const fCrit = document.getElementById('sem52FiltroCrit')?.value || '';
+            const fLinhaCrit = document.getElementById('sem52FiltroLinhaCrit')?.value || '';
             const fDisc = document.getElementById('sem52FiltroDisc')?.value || '';
             const fPer = document.getElementById('sem52FiltroPer')?.value || '';
             const fAgenda = document.getElementById('sem52FiltroAgenda')?.value || '';
@@ -2701,11 +2796,15 @@
 
             const baseRows = [];
             planosTodos.forEach(p => {
+                const prio = getPrioridadePlanoDoc(p);
+                const linhaInfo = getClasseLinhaAtivo(p.setor, p.maquina);
+                const critLinha = linhaInfo.classe || normalizarCriticidade(p.criticidadeLinha);
                 if (fSetor && (p.setor || '') !== fSetor) return;
                 if (fMaq && (p.maquina || '') !== fMaq) return;
                 if (fEquip && (p.equipamento || '') !== fEquip) return;
                 if (fConj && !correspondeFiltroConjunto(p, fConj)) return;
-                if (fCrit && (p.criticidade || '') !== fCrit) return;
+                if (fCrit && prio !== fCrit) return;
+                if (fLinhaCrit && critLinha !== fLinhaCrit) return;
                 if (fDisc && normKey(p.disciplina) !== normKey(fDisc)) return;
                 if (fPer && (p.periodicidade || '') !== fPer) return;
                 if (busca) {
@@ -2719,7 +2818,9 @@
                     codigo: p.codigo || 'PM',
                     titulo: p.titulo || 'Preventiva',
                     subtitulo: [p.setor, p.maquina, p.equipamento, getConjuntoLabelItem(p)].filter(Boolean).join(' › '),
-                    criticidade: p.criticidade || '',
+                    criticidade: prio,
+                    criticidadeLinha: critLinha,
+                    criticidadeLinhaExp: linhaInfo.explicita,
                     disciplina: p.disciplina || 'Mecânica',
                     periodicidade: p.periodicidade || 'Mensal',
                     modo: p.modoAgendamento || 'fixo'
@@ -2733,11 +2834,15 @@
                 if (matchId) return;
                 const datasAno = getDatasOrdem(o).filter(d => getIsoWeekInfo(d).isoYear === ano);
                 if (!datasAno.length) return;
+                const prio = getPrioridadePlanoDoc(o);
+                const linhaInfo = getClasseLinhaAtivo(o.setor, o.maquina);
+                const critLinha = linhaInfo.classe || normalizarCriticidade(o.criticidadeLinha);
                 if (fSetor && (o.setor || '') !== fSetor) return;
                 if (fMaq && (o.maquina || '') !== fMaq) return;
                 if (fEquip && (o.equipamento || '') !== fEquip) return;
                 if (fConj && !correspondeFiltroConjunto(o, fConj)) return;
-                if (fCrit && (o.criticidade || '') !== fCrit) return;
+                if (fCrit && prio !== fCrit) return;
+                if (fLinhaCrit && critLinha !== fLinhaCrit) return;
                 if (fDisc && normKey(o.equipe) !== normKey(fDisc)) return;
                 if (fPer && (o.periodicidade || '') !== fPer) return;
                 if (busca) {
@@ -2753,7 +2858,9 @@
                         codigo: 'AGENDA',
                         titulo: o.titulo || 'Preventiva Avulsa (Agenda PCM)',
                         subtitulo: [o.setor, o.maquina, o.equipamento, o.responsavel].filter(Boolean).join(' › ') || 'Lançada na Agenda PCM',
-                        criticidade: o.criticidade || '',
+                        criticidade: prio,
+                        criticidadeLinha: critLinha,
+                        criticidadeLinhaExp: linhaInfo.explicita,
                         disciplina: o.equipe || 'Geral',
                         periodicidade: o.periodicidade || 'Avulsa',
                         modo: 'agenda'
@@ -2784,7 +2891,7 @@
                 return true;
             });
 
-            const temFiltroAtivo = Boolean(busca || fSetor || fMaq || fEquip || fConj || fCrit || fDisc || fPer || fAgenda);
+            const temFiltroAtivo = Boolean(busca || fSetor || fMaq || fEquip || fConj || fCrit || fLinhaCrit || fDisc || fPer || fAgenda);
             const cntBadge = document.getElementById('sem52ContagemFiltro');
             if (cntBadge) {
                 cntBadge.innerText = temFiltroAtivo ? `Exibindo ${rows.length} de ${totalGeral} linha(s)` : `${rows.length} linha(s)`;
@@ -2870,13 +2977,15 @@
                 tbody = `<tr><td colspan="${totalWeeks + 1}" class="p-10 text-center space-y-2"><div class="text-xs font-bold text-slate-400">${temFiltroAtivo ? 'Nenhum plano de preventiva encontrado com os filtros aplicados.' : 'Nenhum plano de preventiva cadastrado ainda. Crie um plano em "Planos & Checklists".'}</div>${temFiltroAtivo ? '<button type="button" onclick="limparFiltrosSem52()" class="px-3 py-1.5 rounded-xl bg-sky-600 text-white text-xs font-extrabold">Limpar Filtros</button>' : ''}</td></tr>`;
             } else {
                 rows.forEach(r => {
-                    const critCls = CRITICIDADES[r.criticidade]?.cls || 'crit-none';
+                    const prioMeta = getPrioridadeMeta(r.criticidade);
+                    const critLinhaCls = CRITICIDADES[r.criticidadeLinha]?.cls || 'crit-none';
                     const headRow = `
                         <td class="matrix-sticky-col p-2.5 text-left align-top">
                             <div class="flex items-center justify-between gap-1 mb-0.5">
                                 <span class="font-mono text-[10px] font-extrabold ${r.isPlano ? 'text-sky-700 bg-sky-50 border-sky-200' : 'text-indigo-700 bg-indigo-50 border-indigo-200'} px-1.5 py-0.5 rounded border">${escapeHtml(r.codigo)}</span>
                                 <div class="flex items-center gap-1 shrink-0">
-                                    ${r.criticidade ? `<span class="px-1.5 py-0.5 rounded-full text-[9px] font-extrabold ${critCls}">${r.criticidade}</span>` : ''}
+                                    ${r.criticidade ? `<span class="px-1.5 py-0.5 rounded-full text-[9px] font-extrabold ${prioMeta.cls}" title="Prioridade do Plano: ${escapeHtml(prioMeta.full)}">${escapeHtml(prioMeta.label)}</span>` : ''}
+                                    ${r.criticidadeLinha ? `<span class="px-1.5 py-0.5 rounded-full text-[9px] font-extrabold ${critLinhaCls}" title="Criticidade da Linha (${r.criticidadeLinhaExp ? 'definida na Árvore' : 'inferida'})">L-${r.criticidadeLinha}</span>` : ''}
                                     <span class="px-1.5 py-0.5 rounded bg-slate-100 text-slate-600 text-[9px] font-bold">${escapeHtml(r.periodicidade)}</span>
                                 </div>
                             </div>
@@ -2993,7 +3102,10 @@
             const p = getPlanosPreventiva().find(x => x.id === pId);
             const resumoEl = document.getElementById('sem52ModalAtivoResumo');
             if (p) {
-                if (resumoEl) resumoEl.innerHTML = `<strong>${escapeHtml([p.setor, p.maquina, p.equipamento, p.subconjunto].filter(Boolean).join(' › '))}</strong><br>Criticidade <strong>${escapeHtml(p.criticidade || '-')}</strong> • Periodicidade: <strong>${escapeHtml(p.periodicidade || 'Mensal')}</strong> • Checklist único com <strong>${(p.checklist || []).length}</strong> item(ns).`;
+                const prio = getPrioridadePlanoDoc(p);
+                const prioTxt = prio ? getPrioridadeMeta(prio).full : 'Sem Prioridade';
+                const lInfo = getClasseLinhaAtivo(p.setor, p.maquina);
+                if (resumoEl) resumoEl.innerHTML = `<strong>${escapeHtml([p.setor, p.maquina, p.equipamento, p.subconjunto].filter(Boolean).join(' › '))}</strong><br>Prioridade: <strong>${escapeHtml(prioTxt)}</strong>${lInfo.classe ? ` • Linha: <strong>Classe ${lInfo.classe}</strong>` : ''} • Periodicidade: <strong>${escapeHtml(p.periodicidade || 'Mensal')}</strong> • Checklist único com <strong>${(p.checklist || []).length}</strong> item(ns).`;
                 if (!manterCampos) {
                     const eqSel = document.getElementById('sem52Equipe');
                     if (eqSel) eqSel.value = p.disciplina || 'Mecânica';
@@ -3137,7 +3249,9 @@
                         planoId: p.id,
                         planoCodigo: p.codigo || '',
                         planoRevisao: p.revisao || 'Rev. 01',
-                        criticidade: p.criticidade || 'B',
+                        prioridade: getPrioridadePlanoDoc(p, 'P3'),
+                        criticidade: getPrioridadePlanoDoc(p, 'P3'),
+                        criticidadeLinha: getClasseLinhaAtivo(p.setor, p.maquina).classe || normalizarCriticidade(p.criticidadeLinha),
                         periodicidade: p.periodicidade || 'Mensal',
                         modoAgendamento: p.modoAgendamento || 'fixo',
                         paradaNecessaria,
@@ -3188,7 +3302,8 @@
                 box.innerHTML = ordensSem.map(o => {
                     const st = getStatusEfetivo(o, hojeStr);
                     const stMeta = STATUS_META[st] || STATUS_META.pendente;
-                    const critCls = CRITICIDADES[o.criticidade]?.cls || 'crit-none';
+                    const prio = getPrioridadePlanoDoc(o);
+                    const prioMeta = getPrioridadeMeta(prio);
                     const diasW = getDatasOrdem(o).filter(d => datesWeek.some(dw => dw.iso === d));
                     return `
                         <div class="p-3.5 rounded-2xl border border-slate-200 bg-white flex flex-col sm:flex-row sm:items-center justify-between gap-2.5">
@@ -3196,7 +3311,8 @@
                                 <div class="flex flex-wrap items-center gap-1.5">
                                     <span class="px-2 py-0.5 rounded-full text-[10px] font-extrabold ${stMeta.cls}">${stMeta.label}</span>
                                     <span class="px-2 py-0.5 rounded-lg bg-indigo-50 text-indigo-800 border border-indigo-200 text-[10px] font-extrabold">${escapeHtml(formatDiasOrdemCompacto(diasW))} (${getDatasOrdem(o).length}d)</span>
-                                    ${o.criticidade ? `<span class="px-1.5 py-0.5 rounded-full text-[10px] font-extrabold ${critCls}">Classe ${o.criticidade}</span>` : ''}
+                                    ${prio ? `<span class="px-1.5 py-0.5 rounded-full text-[10px] font-extrabold ${prioMeta.cls}">${escapeHtml(prioMeta.full)}</span>` : ''}
+                                    ${renderBadgeLinhaCrit(o.setor, o.maquina)}
                                     <span class="text-[10px] font-mono text-slate-400">${escapeHtml(o.planoCodigo || 'Agenda')}</span>
                                 </div>
                                 <div class="text-xs font-extrabold text-slate-900 truncate">${escapeHtml(o.titulo)}</div>
@@ -3227,6 +3343,7 @@
             const fEquip = document.getElementById('sem52FiltroEquipamento')?.value || '';
             const fConj = document.getElementById('sem52FiltroConjunto')?.value || '';
             const fCrit = document.getElementById('sem52FiltroCrit')?.value || '';
+            const fLinhaCrit = document.getElementById('sem52FiltroLinhaCrit')?.value || '';
             const fDisc = document.getElementById('sem52FiltroDisc')?.value || '';
             const fPer = document.getElementById('sem52FiltroPer')?.value || '';
 
@@ -3234,11 +3351,14 @@
                 .filter(o => {
                     if (o.status === 'cancelado') return false;
                     if (!getDatasOrdem(o).some(d => getIsoWeekInfo(d).isoYear === ano)) return false;
+                    const prio = getPrioridadePlanoDoc(o);
+                    const lCrit = getClasseLinhaAtivo(o.setor, o.maquina).classe || normalizarCriticidade(o.criticidadeLinha);
                     if (fSetor && (o.setor || '') !== fSetor) return false;
                     if (fMaq && (o.maquina || '') !== fMaq) return false;
                     if (fEquip && (o.equipamento || '') !== fEquip) return false;
                     if (fConj && !correspondeFiltroConjunto(o, fConj)) return false;
-                    if (fCrit && (o.criticidade || '') !== fCrit) return false;
+                    if (fCrit && prio !== fCrit) return false;
+                    if (fLinhaCrit && lCrit !== fLinhaCrit) return false;
                     if (fDisc && normKey(o.equipe) !== normKey(fDisc)) return false;
                     if (fPer && (o.periodicidade || '') !== fPer) return false;
                     if (busca) {
@@ -3251,10 +3371,13 @@
                 .map(o => {
                     const wi = getIsoWeekInfo(o.data);
                     const st = STATUS_META[getStatusEfetivo(o, hojeStr)]?.label || o.status;
-                    return `<tr><td style="text-align:center;font-weight:800">S${wi.week}</td><td>${formatPeriodoDatasOrdemBR(o)}</td><td><strong>${escapeHtml(o.titulo)}</strong></td><td>${escapeHtml([o.setor, o.maquina, o.equipamento, getConjuntoLabelItem(o)].filter(Boolean).join(' › '))}</td><td>${escapeHtml(o.responsavel || o.equipe || '-')}</td><td>${escapeHtml(st)}</td></tr>`;
+                    const prio = getPrioridadePlanoDoc(o);
+                    const prioTxt = prio ? getPrioridadeMeta(prio).label : '-';
+                    const lCrit = getClasseLinhaAtivo(o.setor, o.maquina).classe || '';
+                    return `<tr><td style="text-align:center;font-weight:800">S${wi.week}</td><td>${formatPeriodoDatasOrdemBR(o)}</td><td><strong>${escapeHtml(o.titulo)}</strong><br><small>${escapeHtml(prioTxt)}${lCrit ? ` • Linha ${lCrit}` : ''}</small></td><td>${escapeHtml([o.setor, o.maquina, o.equipamento, getConjuntoLabelItem(o)].filter(Boolean).join(' › '))}</td><td>${escapeHtml(o.responsavel || o.equipe || '-')}</td><td>${escapeHtml(st)}</td></tr>`;
                 }).join('');
 
-            const filtroResumo = [fSetor, fMaq, fEquip, fConj, fCrit ? `Classe ${fCrit}` : '', fDisc, fPer].filter(Boolean).join(' • ');
+            const filtroResumo = [fSetor, fMaq, fEquip, fConj, fCrit ? getPrioridadeMeta(fCrit).full : '', fLinhaCrit ? `Linha Classe ${fLinhaCrit}` : '', fDisc, fPer].filter(Boolean).join(' • ');
             const w = window.open('', '_blank');
             if (!w) { showToast('Permita pop-ups para imprimir o cronograma 52 semanas.', 'error'); return; }
             w.document.write(`<!DOCTYPE html><html lang="pt-BR"><head><meta charset="UTF-8"><title>Cronograma Anual 52 Semanas — ${ano}</title><style>body{font-family:Arial,sans-serif;color:#0f172a;margin:18px;font-size:11px}header{display:flex;justify-content:space-between;align-items:center;border-bottom:2px solid #0284c7;padding-bottom:8px;margin-bottom:12px}table{width:100%;border-collapse:collapse}th,td{border:1px solid #cbd5e1;padding:6px;text-align:left}th{background:#f1f5f9;font-size:10px;text-transform:uppercase}</style></head><body><header><div style="display:flex;align-items:center;gap:12px"><img src="CEPERA_LOGO.png" style="height:36px"><div><h2 style="margin:0">Cronograma Anual de Preventivas — ${ano} (${totalWeeks} Semanas ISO)</h2><div>${filtroResumo ? `Filtro: <strong>${escapeHtml(filtroResumo)}</strong>` : 'Sincronizado com Agenda PCM Cepêra'}</div></div></div><div>Emitido em ${formatDateBR(hojeStr)}</div></header><table><thead><tr><th style="width:55px;text-align:center">Sem.</th><th>Dias Programados</th><th>Plano / Preventiva</th><th>Ativo</th><th>Equipe / Resp.</th><th>Status</th></tr></thead><tbody>${rowsHtml || '<tr><td colspan="6" style="text-align:center">Sem programações no ano para o filtro selecionado.</td></tr>'}</tbody></table><script>window.onload=()=>window.print();<\/script></body></html>`);
@@ -3284,7 +3407,7 @@
                 if (fPer && (p.periodicidade || '') !== fPer) return false;
                 if (fDisc && normKey(p.disciplina) !== normKey(fDisc)) return false;
                 if (fModo && (p.modoAgendamento || 'fixo') !== fModo) return false;
-                if (fCrit && (p.criticidade || '') !== fCrit) return false;
+                if (fCrit && getPrioridadePlanoDoc(p) !== fCrit) return false;
                 if (busca) {
                     const hay = normKey([p.codigo, p.titulo, p.setor, p.maquina, p.equipamento, p.conjunto, p.subconjunto, p.tag, p.disciplina].join(' '));
                     if (!hay.includes(busca)) return false;
@@ -3308,7 +3431,8 @@
             }
 
             grid.innerHTML = list.map(p => {
-                const critCls = CRITICIDADES[p.criticidade]?.cls || 'crit-none';
+                const prio = getPrioridadePlanoDoc(p);
+                const prioMeta = getPrioridadeMeta(prio);
                 const modo = p.modoAgendamento === 'flutuante' ? { lbl: 'Data Flutuante', cls: 'bg-violet-100 text-violet-800 border-violet-200' } : { lbl: 'Cronograma Fixo', cls: 'bg-sky-100 text-sky-800 border-sky-200' };
                 const itens = Array.isArray(p.checklist) ? p.checklist.length : 0;
                 const prox = ordens.filter(o => o.planoId === p.id && o.status !== 'concluido' && o.status !== 'cancelado' && o.data >= hoje).sort((a, b) => a.data.localeCompare(b.data))[0];
@@ -3317,9 +3441,10 @@
                         <div class="space-y-2.5">
                             <div class="flex flex-wrap items-center justify-between gap-1.5">
                                 <span class="font-mono text-[11px] font-extrabold text-sky-700 bg-sky-50 px-2.5 py-0.5 rounded-lg border border-sky-200">${escapeHtml(p.codigo || 'PM')} • ${escapeHtml(p.revisao || 'Rev.01')}</span>
-                                <div class="flex items-center gap-1">
+                                <div class="flex flex-wrap items-center gap-1">
                                     <span class="px-2 py-0.5 rounded-full text-[10px] font-extrabold border ${modo.cls}">${modo.lbl}</span>
-                                    ${p.criticidade ? `<span class="px-2 py-0.5 rounded-full text-[10px] font-extrabold ${critCls}">${p.criticidade}</span>` : ''}
+                                    ${prio ? `<span class="px-2 py-0.5 rounded-full text-[10px] font-extrabold ${prioMeta.cls}" title="Prioridade do Plano">${escapeHtml(prioMeta.full)}</span>` : ''}
+                                    ${renderBadgeLinhaCrit(p.setor, p.maquina)}
                                 </div>
                             </div>
                             <div>
@@ -3363,18 +3488,26 @@
             const e = document.getElementById('plAtivoEquipamento').value;
             const c = document.getElementById('plAtivoConjunto').value;
             const sub = document.getElementById('plAtivoSubconjunto').value;
+            const infoLinha = getClasseLinhaAtivo(s, m);
             const match = assetNodes.find(n =>
                 n.area === s && n.maquina === m && n.equipamento === e &&
                 (!c || n.conjunto === c) && (!sub || n.subconjunto === sub)
             );
             const badge = document.getElementById('plAtivoInfoBadge');
             if (!match) {
-                badge.innerText = 'Ativo selecionado manualmente';
+                badge.innerText = infoLinha.classe
+                    ? `Ativo selecionado manualmente • Linha: Classe ${infoLinha.classe}`
+                    : 'Ativo selecionado manualmente';
+                if (autoFillCampos && infoLinha.classe) {
+                    document.getElementById('plCriticidade').value = sugerirPrioridadeDeClasse(infoLinha.classe);
+                }
                 return null;
             }
-            badge.innerText = `TAG: ${match.tag || '—'} • Crit: ${match.criticidade || '—'} • Per: ${match.periodicidade_preventiva || '—'}`;
+            const classeLinhaTxt = infoLinha.classe ? ` • Linha: Classe ${infoLinha.classe}` : '';
+            badge.innerText = `TAG: ${match.tag || '—'} • Ativo: ${match.criticidade ? 'Classe ' + match.criticidade : '—'}${classeLinhaTxt} • Per: ${match.periodicidade_preventiva || '—'}`;
             if (autoFillCampos) {
-                if (match.criticidade) document.getElementById('plCriticidade').value = match.criticidade;
+                const classeRef = match.criticidade || infoLinha.classe;
+                if (classeRef) document.getElementById('plCriticidade').value = sugerirPrioridadeDeClasse(classeRef);
                 if (PERIODICIDADES[match.periodicidade_preventiva]) document.getElementById('plPeriodicidade').value = match.periodicidade_preventiva;
                 if (match.disciplina) document.getElementById('plDisciplina').value = match.disciplina;
                 if (!document.getElementById('plTitulo').value) {
@@ -3442,7 +3575,10 @@
             document.getElementById('plTitulo').value = plano?.titulo || (ativoPre ? `Preventiva ${ativoPre.periodicidade_preventiva || ''} — ${ativoPre.equipamento}${alvoPlanoNom ? ' (' + alvoPlanoNom + ')' : ''}`.trim() : '');
             document.getElementById('plModoAgendamento').value = plano?.modoAgendamento || 'fixo';
             document.getElementById('plPeriodicidade').value = plano?.periodicidade || (PERIODICIDADES[ativoPre?.periodicidade_preventiva] ? ativoPre.periodicidade_preventiva : 'Mensal');
-            document.getElementById('plCriticidade').value = plano?.criticidade || ativoPre?.criticidade || 'B';
+            const prioInit = plano
+                ? getPrioridadePlanoDoc(plano, 'P3')
+                : sugerirPrioridadeDeClasse(ativoPre?.criticidade || getClasseLinhaAtivo(ativoPre?.area || '', ativoPre?.maquina || '').classe);
+            document.getElementById('plCriticidade').value = prioInit || 'P3';
             document.getElementById('plDisciplina').value = plano?.disciplina || ativoPre?.disciplina || 'Mecânica';
             document.getElementById('plDuracaoMin').value = plano?.duracaoEstimadaMin || 60;
             document.getElementById('plParadaNecessaria').value = plano?.paradaNecessaria || 'sim';
@@ -3568,6 +3704,10 @@
                 return;
             }
             const matchAtivo = atualizarInfoAtivoSelecionado(false);
+            const setorPl = document.getElementById('plAtivoSetor').value;
+            const maquinaPl = document.getElementById('plAtivoMaquina').value;
+            const prioPlano = normalizarPrioridadePlano(document.getElementById('plCriticidade').value) || 'P3';
+            const critLinhaPl = getClasseLinhaAtivo(setorPl, maquinaPl).classe || normalizarCriticidade(matchAtivo?.criticidade_linha);
             const payload = {
                 kind: 'plano_preventiva',
                 codigo: document.getElementById('plCodigo').value.trim(),
@@ -3575,14 +3715,16 @@
                 titulo: document.getElementById('plTitulo').value.trim(),
                 ativoId: matchAtivo?.nodeId || '',
                 tag: matchAtivo?.tag || '',
-                setor: document.getElementById('plAtivoSetor').value,
-                maquina: document.getElementById('plAtivoMaquina').value,
+                setor: setorPl,
+                maquina: maquinaPl,
                 equipamento: document.getElementById('plAtivoEquipamento').value,
                 conjunto: document.getElementById('plAtivoConjunto').value,
                 subconjunto: document.getElementById('plAtivoSubconjunto').value,
                 modoAgendamento: document.getElementById('plModoAgendamento').value,
                 periodicidade: document.getElementById('plPeriodicidade').value,
-                criticidade: document.getElementById('plCriticidade').value,
+                prioridade: prioPlano,
+                criticidade: prioPlano,
+                criticidadeLinha: critLinhaPl,
                 disciplina: document.getElementById('plDisciplina').value,
                 duracaoEstimadaMin: Math.max(5, Number(document.getElementById('plDuracaoMin').value) || 60),
                 paradaNecessaria: document.getElementById('plParadaNecessaria').value,
@@ -3678,7 +3820,10 @@
             if (!p) { resumo.classList.add('hidden'); return; }
             resumo.classList.remove('hidden');
             const modoLbl = p.modoAgendamento === 'flutuante' ? 'Data Flutuante (próxima gerada após conclusão)' : 'Cronograma Fixo (pode gerar lote anual)';
-            resumo.innerHTML = `<strong>${escapeHtml([p.setor, p.maquina, p.equipamento, p.subconjunto].filter(Boolean).join(' › '))}</strong><br>Modo do Plano: <strong>${modoLbl}</strong> • Criticidade <strong>${escapeHtml(p.criticidade || '-')}</strong> • Checklist com <strong>${(p.checklist || []).length}</strong> item(ns).`;
+            const prio = getPrioridadePlanoDoc(p);
+            const prioTxt = prio ? getPrioridadeMeta(prio).full : 'Sem Prioridade';
+            const lInfo = getClasseLinhaAtivo(p.setor, p.maquina);
+            resumo.innerHTML = `<strong>${escapeHtml([p.setor, p.maquina, p.equipamento, p.subconjunto].filter(Boolean).join(' › '))}</strong><br>Modo do Plano: <strong>${modoLbl}</strong> • Prioridade: <strong>${escapeHtml(prioTxt)}</strong>${lInfo.classe ? ` • Linha: <strong>Classe ${lInfo.classe}</strong>` : ''} • Checklist com <strong>${(p.checklist || []).length}</strong> item(ns).`;
             document.getElementById('progEquipe').value = p.disciplina || 'Mecânica';
             document.getElementById('progParada').value = p.paradaNecessaria || 'sim';
             document.getElementById('progModoGeracao').value = p.modoAgendamento === 'fixo' ? 'lote' : 'unica';
@@ -3765,7 +3910,9 @@
                         planoId: p.id,
                         planoCodigo: p.codigo || '',
                         planoRevisao: p.revisao || 'Rev. 01',
-                        criticidade: p.criticidade || 'B',
+                        prioridade: getPrioridadePlanoDoc(p, 'P3'),
+                        criticidade: getPrioridadePlanoDoc(p, 'P3'),
+                        criticidadeLinha: getClasseLinhaAtivo(p.setor, p.maquina).classe || normalizarCriticidade(p.criticidadeLinha),
                         periodicidade: p.periodicidade || 'Mensal',
                         modoAgendamento: p.modoAgendamento || 'fixo',
                         paradaNecessaria,
@@ -3807,7 +3954,7 @@
                 const st = getStatusEfetivo(o, hojeStr);
                 if (fStatus && st !== fStatus) return false;
                 if (fSetor && (o.setor || '') !== fSetor) return false;
-                if (fCrit && (o.criticidade || '') !== fCrit) return false;
+                if (fCrit && getPrioridadePlanoDoc(o) !== fCrit) return false;
                 if (fEq && (o.equipe || '') !== fEq) return false;
                 if (dIni && getDataFinalOrdem(o) < dIni) return false;
                 if (dFim && o.data > dFim) return false;
@@ -3842,7 +3989,8 @@
             tbody.innerHTML = list.map(o => {
                 const st = getStatusEfetivo(o, hojeStr);
                 const stMeta = STATUS_META[st] || STATUS_META.pendente;
-                const critCls = CRITICIDADES[o.criticidade]?.cls || 'crit-none';
+                const prio = getPrioridadePlanoDoc(o);
+                const prioMeta = getPrioridadeMeta(prio);
                 const chk = Array.isArray(o.checklistExec) ? o.checklistExec : [];
                 const doneChk = chk.filter(x => x.status).length;
                 const fotosQtd = Array.isArray(o.fotos) ? o.fotos.length : 0;
@@ -3867,7 +4015,10 @@
                             <div class="text-[10px] text-slate-500">${escapeHtml([o.maquina, o.conjunto, o.subconjunto].filter(Boolean).join(' › '))}</div>
                         </td>
                         <td class="py-3 px-3 text-center">
-                            <span class="px-2 py-0.5 rounded-full text-[10px] font-extrabold ${critCls}">${escapeHtml(o.criticidade || '—')}</span>
+                            <div class="flex flex-col items-center gap-1">
+                                <span class="px-2 py-0.5 rounded-full text-[10px] font-extrabold ${prioMeta.cls}" title="${escapeHtml(prioMeta.full)}">${escapeHtml(prio ? prioMeta.label : '—')}</span>
+                                ${renderBadgeLinhaCrit(o.setor, o.maquina)}
+                            </div>
                         </td>
                         <td class="py-3 px-3">
                             <div class="font-bold text-slate-800">${escapeHtml(o.responsavel || 'Não atribuído')}</div>
@@ -3895,16 +4046,20 @@
             const list = getOrdensFiltradas();
             if (!list.length) { showToast('Nenhuma ordem para exportar.', 'error'); return; }
             const hojeStr = getHojeStr();
-            const headers = ['Semana', 'Data', 'Hora', 'Plano', 'Titulo', 'Setor', 'Maquina', 'Equipamento', 'Subconjunto', 'Criticidade', 'Periodicidade', 'Modo', 'Equipe', 'Responsavel', 'Status', 'HH_Estimado_Min', 'HH_Real_Min', 'Fotos', 'Reprogramacoes'];
+            const headers = ['Semana', 'Data', 'Hora', 'Plano', 'Titulo', 'Setor', 'Maquina', 'Equipamento', 'Subconjunto', 'Prioridade', 'Criticidade_Linha', 'Periodicidade', 'Modo', 'Equipe', 'Responsavel', 'Status', 'HH_Estimado_Min', 'HH_Real_Min', 'Fotos', 'Reprogramacoes'];
             const esc = v => `"${String(v ?? '').replace(/"/g, '""')}"`;
-            const rows = list.map(o => [
-                `S${getIsoWeekInfo(o.data).week}`, formatPeriodoDatasOrdemBR(o), o.hora || '', o.planoCodigo || '', o.titulo || '',
-                o.setor || '', o.maquina || '', o.equipamento || '', o.subconjunto || '',
-                o.criticidade || '', o.periodicidade || '', o.modoAgendamento || 'fixo',
-                o.equipe || '', o.responsavel || '', STATUS_META[getStatusEfetivo(o, hojeStr)]?.label || o.status,
-                o.duracaoEstimadaMin || 0, o.duracaoRealMin || 0,
-                (o.fotos || []).length, (o.reprogramacoes || []).length
-            ].map(esc).join(';'));
+            const rows = list.map(o => {
+                const prio = getPrioridadePlanoDoc(o);
+                const lCrit = getClasseLinhaAtivo(o.setor, o.maquina).classe || o.criticidadeLinha || '';
+                return [
+                    `S${getIsoWeekInfo(o.data).week}`, formatPeriodoDatasOrdemBR(o), o.hora || '', o.planoCodigo || '', o.titulo || '',
+                    o.setor || '', o.maquina || '', o.equipamento || '', o.subconjunto || '',
+                    prio ? getPrioridadeMeta(prio).full : '', lCrit ? `Classe ${lCrit}` : '', o.periodicidade || '', o.modoAgendamento || 'fixo',
+                    o.equipe || '', o.responsavel || '', STATUS_META[getStatusEfetivo(o, hojeStr)]?.label || o.status,
+                    o.duracaoEstimadaMin || 0, o.duracaoRealMin || 0,
+                    (o.fotos || []).length, (o.reprogramacoes || []).length
+                ].map(esc).join(';');
+            });
             const csv = '\uFEFF' + [headers.join(';'), ...rows].join('\n');
             const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
             const url = URL.createObjectURL(blob);
@@ -4004,9 +4159,9 @@
             const concluidasAteHoje = vencidasAteHoje.filter(o => o.status === 'concluido');
             const aderencia = vencidasAteHoje.length ? Math.round((concluidasAteHoje.length / vencidasAteHoje.length) * 100) : 100;
 
-            const classeA = vencidasAteHoje.filter(o => o.criticidade === 'A');
-            const classeAConc = classeA.filter(o => o.status === 'concluido').length;
-            const pctClasseA = classeA.length ? Math.round((classeAConc / classeA.length) * 100) : 100;
+            const prioP1 = vencidasAteHoje.filter(o => getPrioridadePlanoDoc(o) === 'P1');
+            const prioP1Conc = prioP1.filter(o => o.status === 'concluido').length;
+            const pctP1 = prioP1.length ? Math.round((prioP1Conc / prioP1.length) * 100) : 100;
 
             const backlogOrdens = ordens.filter(o => getStatusEfetivo(o, hojeStr) === 'atrasada');
             const backlogMin = backlogOrdens.reduce((a, o) => a + (Number(o.duracaoEstimadaMin) || 60), 0);
@@ -4022,7 +4177,7 @@
 
             document.getElementById('kpiIndicadoresGrid').innerHTML = [
                 { k: 'Aderência Preventiva', v: `${aderencia}%`, sub: `${concluidasAteHoje.length}/${vencidasAteHoje.length} (Meta 90%)`, vc: aderencia >= 90 ? 'text-emerald-600' : 'text-amber-600' },
-                { k: 'Cumprimento Classe A', v: `${pctClasseA}%`, sub: `${classeAConc}/${classeA.length} ativos críticos`, vc: pctClasseA >= 95 ? 'text-emerald-600' : 'text-rose-600' },
+                { k: 'Cumprimento P1 (Crítica)', v: `${pctP1}%`, sub: `${prioP1Conc}/${prioP1.length} planos P1`, vc: pctP1 >= 95 ? 'text-emerald-600' : 'text-rose-600' },
                 { k: 'Backlog Preventivo', v: `${backlogOrdens.length}`, sub: `${formatDuracaoHH(backlogMin)} atrasado(s)`, vc: backlogOrdens.length > 0 ? 'text-rose-600' : 'text-emerald-600' },
                 { k: 'H/H Plan. vs Real', v: formatDuracaoHH(hhRealMin), sub: `Planejado: ${formatDuracaoHH(hhPlanMin)}`, vc: 'text-indigo-700' },
                 { k: 'Cobertura da Árvore', v: `${coberturaPct}%`, sub: `${ativosCobertos.length}/${ativosElegiveis.length} ativos c/ plano`, vc: 'text-sky-700' }
@@ -4060,15 +4215,15 @@
                     options: { responsive: true, maintainAspectRatio: false, scales: { y: { beginAtZero: true }, y1: { position: 'right', min: 0, max: 100, grid: { drawOnChartArea: false } } } }
                 });
 
-                // Chart 2: Cumprimento por Criticidade
-                const critKeys = ['A', 'B', 'C'];
-                const critConc = critKeys.map(k => ordens.filter(o => o.criticidade === k && o.status === 'concluido').length);
-                const critPend = critKeys.map(k => ordens.filter(o => o.criticidade === k && o.status !== 'concluido').length);
+                // Chart 2: Cumprimento por Prioridade (P1 a P4)
+                const prioKeys = ['P1', 'P2', 'P3', 'P4'];
+                const critConc = prioKeys.map(k => ordens.filter(o => getPrioridadePlanoDoc(o) === k && o.status === 'concluido').length);
+                const critPend = prioKeys.map(k => ordens.filter(o => getPrioridadePlanoDoc(o) === k && o.status !== 'concluido').length);
                 destroyChart('crit');
                 charts.crit = new Chart(document.getElementById('chartCritCumprimento'), {
                     type: 'bar',
                     data: {
-                        labels: ['Classe A (Crítico)', 'Classe B (Importante)', 'Classe C (Não Crítico)'],
+                        labels: ['P1 — Crítica', 'P2 — Alta', 'P3 — Média', 'P4 — Baixa'],
                         datasets: [
                             { label: 'Concluídas', data: critConc, backgroundColor: '#10b981', borderRadius: 6 },
                             { label: 'Abertas / Atrasadas', data: critPend, backgroundColor: '#f43f5e', borderRadius: 6 }
@@ -4176,7 +4331,8 @@
             box.innerHTML = list.map(o => {
                 const st = getStatusEfetivo(o, hojeStr);
                 const stMeta = STATUS_META[st] || STATUS_META.pendente;
-                const critCls = CRITICIDADES[o.criticidade]?.cls || 'crit-none';
+                const prio = getPrioridadePlanoDoc(o);
+                const prioMeta = getPrioridadeMeta(prio);
                 const chk = Array.isArray(o.checklistExec) ? o.checklistExec : [];
                 const done = chk.filter(x => x.status).length;
                 const pct = chk.length ? Math.round((done / chk.length) * 100) : 0;
@@ -4189,7 +4345,8 @@
                             <div class="flex flex-wrap items-center justify-between gap-2">
                                 <div class="flex flex-wrap items-center gap-1.5">
                                     <span class="px-2.5 py-0.5 rounded-full text-[10px] font-extrabold ${stMeta.cls}">${stMeta.label}</span>
-                                    ${o.criticidade ? `<span class="px-2 py-0.5 rounded-full text-[10px] font-extrabold ${critCls}">Classe ${o.criticidade}</span>` : ''}
+                                    ${prio ? `<span class="px-2 py-0.5 rounded-full text-[10px] font-extrabold ${prioMeta.cls}">${escapeHtml(prioMeta.full)}</span>` : ''}
+                                    ${renderBadgeLinhaCrit(o.setor, o.maquina)}
                                     ${o.paradaNecessaria === 'sim' ? `<span class="px-2 py-0.5 rounded-full text-[10px] font-extrabold bg-amber-100 text-amber-800">Máq. Parada</span>` : ''}
                                 </div>
                                 <span class="text-xs font-extrabold text-slate-700"><span class="px-1.5 py-0.5 rounded bg-slate-900 text-white text-[9px] mr-1">S${isoInfo.week}</span>${formatPeriodoDatasOrdemBR(o)}${datasOrd.length > 1 ? ` (${formatDiasOrdemCompacto(datasOrd)})` : ''} ${escapeHtml(o.hora || '')}</span>
@@ -4225,7 +4382,8 @@
             const plano = o.planoId ? getPlanosPreventiva().find(p => p.id === o.planoId) : null;
             const st = getStatusEfetivo(o, getHojeStr());
             const stMeta = STATUS_META[st] || STATUS_META.pendente;
-            const critCls = CRITICIDADES[o.criticidade]?.cls || 'crit-none';
+            const prio = getPrioridadePlanoDoc(o);
+            const prioMeta = getPrioridadeMeta(prio);
             const isoInfo = getIsoWeekInfo(o.data);
             const datasOrd = getDatasOrdem(o);
 
@@ -4233,7 +4391,8 @@
             document.getElementById('execHeaderBadge').innerHTML = `
                 <span class="px-2.5 py-0.5 rounded-full text-[10px] font-extrabold ${stMeta.cls}">${stMeta.label}</span>
                 ${o.planoCodigo ? `<span class="px-2 py-0.5 rounded-full text-[10px] font-mono font-extrabold bg-slate-100 text-slate-700">${escapeHtml(o.planoCodigo)}</span>` : ''}
-                ${o.criticidade ? `<span class="px-2 py-0.5 rounded-full text-[10px] font-extrabold ${critCls}">Classe ${o.criticidade}</span>` : ''}
+                ${prio ? `<span class="px-2 py-0.5 rounded-full text-[10px] font-extrabold ${prioMeta.cls}">${escapeHtml(prioMeta.full)}</span>` : ''}
+                ${renderBadgeLinhaCrit(o.setor, o.maquina)}
                 <span class="px-2 py-0.5 rounded-full text-[10px] font-extrabold bg-sky-50 text-sky-800">${o.modoAgendamento === 'flutuante' ? 'Flutuante' : 'Fixo'}</span>`;
             document.getElementById('execTitulo').innerText = o.titulo || 'Preventiva';
             document.getElementById('execAtivoCaminho').innerText = [o.setor, o.maquina, o.equipamento, o.conjunto, o.subconjunto, o.tag ? `TAG ${o.tag}` : ''].filter(Boolean).join(' › ') || 'Atividade da Agenda PCM';
@@ -4513,7 +4672,9 @@
                     planoId: o.planoId || '',
                     planoCodigo: o.planoCodigo || '',
                     planoRevisao: plano?.revisao || o.planoRevisao || 'Rev. 01',
-                    criticidade: o.criticidade || 'B',
+                    prioridade: getPrioridadePlanoDoc(o, plano ? getPrioridadePlanoDoc(plano, 'P3') : 'P3'),
+                    criticidade: getPrioridadePlanoDoc(o, plano ? getPrioridadePlanoDoc(plano, 'P3') : 'P3'),
+                    criticidadeLinha: getClasseLinhaAtivo(o.setor, o.maquina).classe || normalizarCriticidade(o.criticidadeLinha),
                     periodicidade: o.periodicidade || 'Mensal',
                     modoAgendamento: 'flutuante',
                     paradaNecessaria: o.paradaNecessaria || 'sim',
@@ -4585,6 +4746,9 @@
             const stLabel = STATUS_META[getStatusEfetivo(o, getHojeStr())]?.label || o.status;
             const wi = getIsoWeekInfo(o.data);
             const datasOrd = getDatasOrdem(o);
+            const prioA4 = getPrioridadePlanoDoc(o);
+            const prioA4Txt = prioA4 ? getPrioridadeMeta(prioA4).full : '—';
+            const linhaA4Crit = getClasseLinhaAtivo(o.setor, o.maquina).classe || o.criticidadeLinha || '';
             const w = window.open('', '_blank');
             if (!w) { showToast('Permita pop-ups para gerar o Relatório A4.', 'error'); return; }
             w.document.write(`<!DOCTYPE html><html lang="pt-BR"><head><meta charset="UTF-8"><title>Relatório Preventiva — ${escapeHtml(o.planoCodigo || o.titulo)}</title><style>
@@ -4617,7 +4781,7 @@
                 </div>
                 <div class="grid">
                     <div class="box" style="grid-column:span 2"><div class="lbl">Ativo (Árvore Gestão de Ativos)</div><div class="val">${escapeHtml([o.setor, o.maquina, o.equipamento, o.conjunto, o.subconjunto].filter(Boolean).join(' › ') || '—')}</div></div>
-                    <div class="box"><div class="lbl">TAG / Criticidade</div><div class="val">${escapeHtml(o.tag || '—')} • Classe ${escapeHtml(o.criticidade || '—')}</div></div>
+                    <div class="box"><div class="lbl">TAG / Prioridade / Linha</div><div class="val">${escapeHtml(o.tag || '—')} • ${escapeHtml(prioA4Txt)}${linhaA4Crit ? ` • Linha ${escapeHtml(linhaA4Crit)}` : ''}</div></div>
                     <div class="box"><div class="lbl">Periodicidade / Modo</div><div class="val">${escapeHtml(o.periodicidade || '—')} (${o.modoAgendamento === 'flutuante' ? 'Flutuante' : 'Fixo'})</div></div>
                     <div class="box"><div class="lbl">Data Programada</div><div class="val">S${wi.week} • ${formatPeriodoDatasOrdemBR(o)}${datasOrd.length > 1 ? ` (${formatDiasOrdemCompacto(datasOrd)})` : ''} ${escapeHtml(o.hora || '')}</div></div>
                     <div class="box"><div class="lbl">Conclusão Real</div><div class="val">${o.dataConclusao ? formatDateBR(o.dataConclusao) : 'Em aberto'}</div></div>
@@ -4769,6 +4933,7 @@
                 conjunto: a.conjunto || '',
                 subconjunto: a.subconjunto || '',
                 criticidade: a.criticidade || '',
+                criticidade_linha: a.criticidade_linha || '',
                 periodicidade_preventiva: a.periodicidade || a.periodicidade_preventiva || '',
                 disciplina: a.disciplina || 'Mecânica',
                 tag: a.tag || ''
