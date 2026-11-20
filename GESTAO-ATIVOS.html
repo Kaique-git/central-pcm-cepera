@@ -1148,7 +1148,7 @@
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
         import { getAuth, signInAnonymously } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
-        import { initializeFirestore, collection, addDoc, setDoc, onSnapshot, doc, deleteDoc, updateDoc } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
+        import { initializeFirestore, collection, addDoc, setDoc, onSnapshot, doc, deleteDoc, updateDoc, getDocs, query, where } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
 
         // ================= STORAGE & CONFIG =================
         const memStore = {};
@@ -1181,6 +1181,8 @@
         const refObsPecas = collection(db, "ob_equipamentos");
         const refDocsAtivos = collection(db, "docs_ativos");
         const refDocsRevisoes = collection(db, "docs_revisoes");
+        const refDocsArquivosPartes = collection(db, "docs_arquivos_partes");
+        const blobCacheDocsGa = new Map();
 
         // ================= DOMÍNIO DE ENGENHARIA =================
         const PERIODICIDADES = {
@@ -1345,6 +1347,44 @@
                 subconjunto: lvl === 'leaf' ? (refNode.subconjunto || '') : ''
             };
             abrirBibliotecaDocsGa(action, ativo);
+        };
+
+        window.abrirDocBibliotecaGa = async (docId) => {
+            const d = listaDocsAtivos.find(x => x.id === docId);
+            if (!d || !podeVerDocGa(d)) return;
+            if (d.arquivoId) {
+                try {
+                    if (blobCacheDocsGa.has(d.arquivoId)) {
+                        const c = blobCacheDocsGa.get(d.arquivoId);
+                        const w = (c.mimeType.includes('pdf') || c.mimeType.startsWith('image/') || c.mimeType.startsWith('text/')) && typeof window.open === 'function' ? window.open(c.blobUrl, '_blank', 'noopener') : null;
+                        if (!w) { const a = document.createElement('a'); a.href = c.blobUrl; a.download = c.fileName; document.body.appendChild(a); a.click(); a.remove(); }
+                        return;
+                    }
+                    const snap = await getDocs(query(refDocsArquivosPartes, where('arquivoId', '==', d.arquivoId)));
+                    const partes = snap.docs.map(x => x.data()).sort((a, b) => Number(a.partIndex || 0) - Number(b.partIndex || 0));
+                    if (!partes.length) return showToast('Arquivo não encontrado.', 'error');
+                    const b64 = partes.map(p => p.chunkB64 || '').join('');
+                    const bin = atob(b64);
+                    const arr = new Uint8Array(bin.length);
+                    for (let i = 0; i < bin.length; i++) arr[i] = bin.charCodeAt(i);
+                    const mimeType = d.arquivoMime || partes[0].mimeType || 'application/pdf';
+                    const fileName = d.arquivoNome || partes[0].fileName || 'documento.pdf';
+                    const blob = new Blob([arr], { type: mimeType });
+                    const blobUrl = URL.createObjectURL(blob);
+                    blobCacheDocsGa.set(d.arquivoId, { blobUrl, mimeType, fileName });
+                    if (mimeType.includes('pdf') || mimeType.startsWith('image/') || mimeType.startsWith('text/')) {
+                        const w = typeof window.open === 'function' ? window.open(blobUrl, '_blank', 'noopener') : null;
+                        if (!w) { const a = document.createElement('a'); a.href = blobUrl; a.download = fileName; document.body.appendChild(a); a.click(); a.remove(); }
+                    } else {
+                        const a = document.createElement('a'); a.href = blobUrl; a.download = fileName; document.body.appendChild(a); a.click(); a.remove();
+                    }
+                } catch (_) {
+                    showToast('Erro ao abrir documento.', 'error');
+                }
+                return;
+            }
+            if (d.arquivoUrl && typeof window.open === 'function') window.open(d.arquivoUrl, '_blank', 'noopener');
+            else abrirBibliotecaDocsGa('abrir_doc', {}, '', d.id);
         };
 
         function normKey(str) {
@@ -3165,7 +3205,7 @@
                                 </div>
                             </div>
                             <div class="flex items-center gap-1.5 shrink-0">
-                                ${docItem.arquivoUrl ? `<a href="${escapeHtml(docItem.arquivoUrl)}" target="_blank" rel="noopener noreferrer" class="px-2.5 py-1 rounded-lg bg-indigo-600 hover:bg-indigo-700 text-white text-[10px] font-extrabold">SharePoint ↗</a>` : ''}
+                                ${docItem.arquivoId ? `<button type="button" onclick="abrirDocBibliotecaGa('${escapeHtml(docItem.id)}')" class="px-2.5 py-1 rounded-lg bg-indigo-600 hover:bg-indigo-700 text-white text-[10px] font-extrabold">Abrir ↗</button>` : (docItem.arquivoUrl ? `<a href="${escapeHtml(docItem.arquivoUrl)}" target="_blank" rel="noopener noreferrer" class="px-2.5 py-1 rounded-lg bg-indigo-600 hover:bg-indigo-700 text-white text-[10px] font-extrabold">SharePoint ↗</a>` : '')}
                                 <button type="button" onclick="abrirBibliotecaDocsGa('abrir_doc', {}, '', '${escapeHtml(docItem.id)}')" class="px-2.5 py-1 rounded-lg bg-slate-100 hover:bg-slate-200 text-slate-700 text-[10px] font-extrabold">Revisões</button>
                             </div>
                         </div>`;

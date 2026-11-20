@@ -1899,7 +1899,7 @@
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
         import { getAuth, signInAnonymously } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
-        import { initializeFirestore, collection, addDoc, setDoc, onSnapshot, doc, updateDoc, deleteDoc } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
+        import { initializeFirestore, collection, addDoc, setDoc, onSnapshot, doc, updateDoc, deleteDoc, getDocs, query, where } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
 
         // ================= ARMAZENAMENTO SEGURO (IMUNE A SANDBOX DO GOOGLE SITES) =================
         const memStore = {};
@@ -1937,6 +1937,8 @@
         const refAnomalias = collection(db, "ir_anomalias");
         const refChecklists = collection(db, "ir_checklists");
         const refDocsAtivos = collection(db, "docs_ativos");
+        const refDocsArquivosPartes = collection(db, "docs_arquivos_partes");
+        const blobCacheDocsInsp = new Map();
         const refMasterCfg = doc(db, "pcm_config", "admin_master");
 
         const DEFAULT_ADMIN = { id: 'default_admin', nome: 'Administrador PCM', user: 'admin', pass: 'admin', role: 'Admin' };
@@ -3542,6 +3544,47 @@
             }
         };
 
+        window.abrirDocBibliotecaInsp = async (docId) => {
+            const d = listaDocsAtivos.find(x => x.id === docId);
+            if (!d || !podeVerDocInsp(d)) return;
+            if (d.arquivoId) {
+                try {
+                    if (blobCacheDocsInsp.has(d.arquivoId)) {
+                        const c = blobCacheDocsInsp.get(d.arquivoId);
+                        if (c.mimeType.startsWith('image/') && typeof abrirZoomFoto === 'function') return abrirZoomFoto(c.blobUrl);
+                        const w = typeof window.open === 'function' ? window.open(c.blobUrl, '_blank', 'noopener') : null;
+                        if (!w) { const a = document.createElement('a'); a.href = c.blobUrl; a.download = c.fileName; document.body.appendChild(a); a.click(); a.remove(); }
+                        return;
+                    }
+                    const snap = await getDocs(query(refDocsArquivosPartes, where('arquivoId', '==', d.arquivoId)));
+                    const partes = snap.docs.map(x => x.data()).sort((a, b) => Number(a.partIndex || 0) - Number(b.partIndex || 0));
+                    if (!partes.length) return showToast('Arquivo não encontrado.', 'error');
+                    const b64 = partes.map(p => p.chunkB64 || '').join('');
+                    const bin = atob(b64);
+                    const arr = new Uint8Array(bin.length);
+                    for (let i = 0; i < bin.length; i++) arr[i] = bin.charCodeAt(i);
+                    const mimeType = d.arquivoMime || partes[0].mimeType || 'application/pdf';
+                    const fileName = d.arquivoNome || partes[0].fileName || 'documento.pdf';
+                    const blob = new Blob([arr], { type: mimeType });
+                    const blobUrl = URL.createObjectURL(blob);
+                    blobCacheDocsInsp.set(d.arquivoId, { blobUrl, mimeType, fileName });
+                    if (mimeType.startsWith('image/') && typeof abrirZoomFoto === 'function') {
+                        abrirZoomFoto(blobUrl);
+                    } else if (mimeType.includes('pdf') || mimeType.startsWith('text/')) {
+                        const w = typeof window.open === 'function' ? window.open(blobUrl, '_blank', 'noopener') : null;
+                        if (!w) { const a = document.createElement('a'); a.href = blobUrl; a.download = fileName; document.body.appendChild(a); a.click(); a.remove(); }
+                    } else {
+                        const a = document.createElement('a'); a.href = blobUrl; a.download = fileName; document.body.appendChild(a); a.click(); a.remove();
+                    }
+                } catch (_) {
+                    showToast('Erro ao abrir documento anexado.', 'error');
+                }
+                return;
+            }
+            if (d.arquivoUrl && typeof window.open === 'function') window.open(d.arquivoUrl, '_blank', 'noopener');
+            else if (d.fotoThumbB64) abrirZoomFotoDocInsp(d.id);
+        };
+
         window.onCfgDocsBuscaInsp = (val) => {
             editorDocsBusca = String(val || '');
             renderEditorDocsPickerInsp();
@@ -3590,7 +3633,7 @@
                                 <div class="text-xs font-bold text-slate-800 truncate">${escapeHtml(d.titulo || '')}</div>
                             </div>
                         </div>
-                        ${d.arquivoUrl ? `<a href="${escapeHtml(d.arquivoUrl)}" target="_blank" rel="noopener noreferrer" onclick="event.stopPropagation()" class="px-2 py-1 rounded-lg bg-slate-100 hover:bg-indigo-200 text-[10px] font-extrabold text-slate-700 shrink-0">SharePoint ↗</a>` : ''}
+                        ${d.arquivoId ? `<button type="button" onclick="event.preventDefault();event.stopPropagation();abrirDocBibliotecaInsp('${d.id}')" class="px-2 py-1 rounded-lg bg-slate-100 hover:bg-indigo-200 text-[10px] font-extrabold text-slate-700 shrink-0">Abrir ↗</button>` : (d.arquivoUrl ? `<a href="${escapeHtml(d.arquivoUrl)}" target="_blank" rel="noopener noreferrer" onclick="event.stopPropagation()" class="px-2 py-1 rounded-lg bg-slate-100 hover:bg-indigo-200 text-[10px] font-extrabold text-slate-700 shrink-0">SharePoint ↗</a>` : '')}
                     </label>`;
             }).join('');
         }
@@ -6677,8 +6720,11 @@
                                         <button type="button" onclick="abrirBibliotecaPorAgendaInsp('${escapeHtml(i.id)}')" class="text-[10px] font-extrabold text-indigo-700 hover:underline shrink-0">Biblioteca ↗</button>
                                     </div>
                                     ${topDocs.length ? `<div class="flex flex-wrap gap-1.5">${topDocs.map(d => {
-                                        if (d.fotoThumbB64) {
+                                        if (d.fotoThumbB64 && !d.arquivoId) {
                                             return `<button type="button" onclick="abrirZoomFotoDocInsp('${d.id}')" class="inline-flex items-center gap-1 px-2 py-0.5 rounded-lg bg-white border border-indigo-200 hover:bg-indigo-100 text-[10px] font-extrabold text-slate-700">📷 ${escapeHtml(d.codigo || 'Foto')}</button>`;
+                                        }
+                                        if (d.arquivoId) {
+                                            return `<button type="button" onclick="abrirDocBibliotecaInsp('${d.id}')" class="inline-flex items-center gap-1 px-2 py-0.5 rounded-lg bg-white border border-indigo-200 hover:bg-indigo-100 text-[10px] font-extrabold text-indigo-800">📄 ${escapeHtml(d.codigo || 'Doc')} ↗</button>`;
                                         }
                                         return d.arquivoUrl
                                             ? `<a href="${escapeHtml(d.arquivoUrl)}" target="_blank" rel="noopener noreferrer" class="inline-flex items-center gap-1 px-2 py-0.5 rounded-lg bg-white border border-indigo-200 hover:bg-indigo-100 text-[10px] font-extrabold text-indigo-800">📄 ${escapeHtml(d.codigo || 'Doc')} ↗</a>`
@@ -6817,7 +6863,7 @@
                                     </div>
                                     <div class="flex items-center gap-1 shrink-0">
                                         ${d.fotoThumbB64 ? `<button type="button" onclick="abrirZoomFotoDocInsp('${d.id}')" class="px-2 py-1 rounded-lg bg-sky-50 hover:bg-sky-100 text-sky-700 text-[10px] font-extrabold">Foto</button>` : ''}
-                                        ${d.arquivoUrl ? `<a href="${escapeHtml(d.arquivoUrl)}" target="_blank" rel="noopener noreferrer" class="px-2 py-1 rounded-lg bg-indigo-600 hover:bg-indigo-700 text-white text-[10px] font-extrabold">Abrir ↗</a>` : ''}
+                                        ${d.arquivoId ? `<button type="button" onclick="abrirDocBibliotecaInsp('${d.id}')" class="px-2 py-1 rounded-lg bg-indigo-600 hover:bg-indigo-700 text-white text-[10px] font-extrabold">Abrir ↗</button>` : (d.arquivoUrl ? `<a href="${escapeHtml(d.arquivoUrl)}" target="_blank" rel="noopener noreferrer" class="px-2 py-1 rounded-lg bg-indigo-600 hover:bg-indigo-700 text-white text-[10px] font-extrabold">Abrir ↗</a>` : '')}
                                     </div>
                                 </div>`;
                             }).join('')}
