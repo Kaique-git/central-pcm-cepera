@@ -850,13 +850,23 @@
                     </div>
                 </div>
 
-                <label class="flex items-start gap-3 p-3.5 rounded-2xl bg-sky-50/70 border border-sky-200 cursor-pointer">
-                    <input type="checkbox" id="nInspecaoAtiva" checked class="w-4 h-4 mt-0.5 accent-emerald-600 rounded shrink-0">
-                    <div class="text-xs">
-                        <div class="font-extrabold text-slate-900">Ativo para Inspeção de Rota (Calendário 52 Semanas)</div>
-                        <p class="text-[11px] text-slate-600 font-medium mt-0.5">Se desmarcado (Não Ativo), este item aparece mapeado nos Planos Cirúrgicos e Preventivas, porém fica oculto do agendamento semanal de Inspeção de Rota.</p>
-                    </div>
-                </label>
+                <div class="p-3.5 rounded-2xl bg-sky-50/70 border border-sky-200 space-y-2.5 text-xs">
+                    <div class="text-[10px] font-extrabold uppercase tracking-wider text-sky-800">Escopo na Inspeção de Rota (Calendário 52 Semanas & Minhas Inspeções)</div>
+                    <label class="flex items-start gap-2.5 cursor-pointer">
+                        <input type="checkbox" id="nInspecaoConjAtiva" checked class="w-4 h-4 mt-0.5 accent-indigo-600 rounded shrink-0">
+                        <div>
+                            <div class="font-extrabold text-slate-900">Ativar Inspeção do Conjunto Inteiro (Recomendado)</div>
+                            <p class="text-[11px] text-slate-600 font-medium mt-0.5">O Conjunto inteiro aparece nas rotas 52 Semanas e em Minhas Inspeções englobando todos os subconjuntos acima, sem precisar ativar cada subconjunto.</p>
+                        </div>
+                    </label>
+                    <label class="flex items-start gap-2.5 cursor-pointer pt-2 border-t border-sky-200/70">
+                        <input type="checkbox" id="nInspecaoAtiva" class="w-4 h-4 mt-0.5 accent-emerald-600 rounded shrink-0">
+                        <div>
+                            <div class="font-bold text-slate-800">Ativar também Inspeção individual por Subconjunto (granular / filtrado)</div>
+                            <p class="text-[11px] text-slate-500 font-medium mt-0.5">Marque apenas se quiser uma rota específica e separada para cada subconjunto individualmente.</p>
+                        </div>
+                    </label>
+                </div>
 
                 <div class="flex justify-end gap-2 pt-2 border-t border-slate-100">
                     <button type="button" onclick="fecharModal('modalNovoAtivo')" class="btn-touch bg-slate-100 text-slate-700 text-xs">Cancelar</button>
@@ -1318,6 +1328,9 @@
                     const inspItem = isObj
                         ? (cItem.inspecao_ativa !== undefined ? (cItem.inspecao_ativa !== false && cItem.inspecao_ativa !== 'false') : inspecao_ativa_doc)
                         : (!inatList.includes(idx) && inspecao_ativa_doc);
+                    const inspConjItem = (typeof getConjuntoInteiroAtivoRaw === 'function')
+                        ? getConjuntoInteiroAtivoRaw(raw, cjNome)
+                        : (raw.inspecao_conjunto_ativa === true || raw.inspecao_conjunto_ativa === 'true');
                     return {
                         nodeId: `${docId}__leg_${idx}`,
                         docId,
@@ -1341,6 +1354,7 @@
                         ano_fabricacao,
                         status_ativo,
                         inspecao_ativa: inspItem,
+                        inspecao_conjunto_ativa: inspConjItem,
                         padrinho_mec,
                         padrinho_ele,
                         observacoes_tecnicas,
@@ -1350,6 +1364,10 @@
                 });
             }
 
+            const conjNomeFinal = conjuntoFlat || 'Conjunto Geral';
+            const inspConjFlat = (typeof getConjuntoInteiroAtivoRaw === 'function')
+                ? getConjuntoInteiroAtivoRaw(raw, conjNomeFinal)
+                : (raw.inspecao_conjunto_ativa === true || raw.inspecao_conjunto_ativa === 'true');
             return [{
                 nodeId: docId,
                 docId,
@@ -1357,7 +1375,7 @@
                 area,
                 maquina,
                 equipamento,
-                conjunto: conjuntoFlat || 'Conjunto Geral',
+                conjunto: conjNomeFinal,
                 subconjunto: subconjuntoFlat,
                 tag,
                 criticidade,
@@ -1372,6 +1390,7 @@
                 ano_fabricacao,
                 status_ativo,
                 inspecao_ativa: inspecao_ativa_doc,
+                inspecao_conjunto_ativa: inspConjFlat,
                 padrinho_mec,
                 padrinho_ele,
                 observacoes_tecnicas,
@@ -1505,6 +1524,271 @@
                 showToast('Erro ao salvar criticidade da Linha no Firestore.', 'error');
             }
         };
+
+        // ================= INSPEÇÃO DE ROTA: CONJUNTO INTEIRO VS SUBCONJUNTO =================
+        function hash32FNV1aAtivos(str, seed = 2166136261) {
+            let h = seed >>> 0;
+            const s = String(str || '');
+            for (let i = 0; i < s.length; i++) {
+                h ^= s.charCodeAt(i);
+                h = Math.imul(h, 16777619) >>> 0;
+            }
+            return h.toString(36);
+        }
+
+        function normConjMapKeyAtivos(conj) {
+            return normKey(conj).replace(/[.$[\]/~*]/g, '_');
+        }
+
+        function makeConjuntoNodeIdAtivos(area, maquina, equipamento, conjunto) {
+            const base = [normKey(area), normKey(maquina), normKey(equipamento), normKey(conjunto)].join('||');
+            const h1 = hash32FNV1aAtivos(base, 2166136261);
+            const h2 = hash32FNV1aAtivos(base.split('').reverse().join(''), 374761393);
+            return `CONJ__${h1}_${h2}`;
+        }
+
+        function getConjuntoInteiroAtivoRaw(raw, conjuntoNome) {
+            if (!raw || typeof raw !== 'object') return false;
+            if (Array.isArray(raw.conjuntos) && raw.conjuntos.length > 0) {
+                const map = raw.conjuntos_insp_inteiros_map;
+                const k = normConjMapKeyAtivos(conjuntoNome);
+                if (map && typeof map === 'object' && k && map[k] !== undefined) {
+                    return map[k] === true || map[k] === 'true';
+                }
+                const normC = normKey(conjuntoNome);
+                const found = raw.conjuntos.find(c => normKey(typeof c === 'string' ? c : (c?.nome || c?.conjunto || '')) === normC);
+                if (found && typeof found === 'object' && found.inspecao_conjunto_ativa !== undefined) {
+                    return found.inspecao_conjunto_ativa === true || found.inspecao_conjunto_ativa === 'true';
+                }
+            }
+            if (raw.inspecao_conjunto_ativa !== undefined) {
+                return raw.inspecao_conjunto_ativa === true || raw.inspecao_conjunto_ativa === 'true';
+            }
+            return false;
+        }
+
+        function getStatusInspecaoGrupoConjunto(leafs, area = '', maquina = '', equipamento = '', conjunto = '') {
+            const lista = Array.isArray(leafs) ? leafs : [];
+            const rep = lista[0] || {};
+            const a = area || rep.area || '';
+            const m = maquina || rep.maquina || '';
+            const eq = equipamento || rep.equipamento || '';
+            const cj = conjunto || rep.conjunto || '';
+            const docMap = new Map(rawLinhasDocs.map(d => [d.id, d.data || {}]));
+            const subsComNome = lista.filter(n => Boolean((n.subconjunto || '').trim()));
+            const temSemSub = lista.some(n => !(n.subconjunto || '').trim());
+            const hasSubconjuntos = subsComNome.length > 0 && !temSemSub;
+
+            let conjInteiroAtivo = false;
+            if (hasSubconjuntos) {
+                conjInteiroAtivo = lista.some(n => {
+                    if (n.inspecao_conjunto_ativa === true) return true;
+                    const raw = docMap.get(n.docId);
+                    return raw ? getConjuntoInteiroAtivoRaw(raw, cj) : false;
+                });
+            } else {
+                conjInteiroAtivo = lista.some(n => n.inspecao_ativa !== false);
+            }
+
+            const subsAtivos = lista.filter(n => Boolean((n.subconjunto || '').trim()) && n.inspecao_ativa !== false);
+            return {
+                conjGroupId: makeConjuntoNodeIdAtivos(a, m, eq, cj),
+                hasSubconjuntos,
+                conjInteiroAtivo,
+                subsTotal: subsComNome.length,
+                subsAtivosCount: subsAtivos.length,
+                algumaRotaAtiva: conjInteiroAtivo || subsAtivos.length > 0 || (!hasSubconjuntos && lista.some(n => n.inspecao_ativa !== false))
+            };
+        }
+
+        window.toggleInspecaoConjuntoInteiro = async (area, maquina, equipamento, conjunto, ativar, ocultarSubs = false) => {
+            const aN = normKey(area), mN = normKey(maquina), eN = normKey(equipamento), cN = normKey(conjunto);
+            const leafs = assetNodes.filter(n =>
+                normKey(n.area) === aN &&
+                normKey(n.maquina) === mN &&
+                normKey(n.equipamento) === eN &&
+                normKey(n.conjunto) === cN
+            );
+            if (!leafs.length) {
+                return showToast('Nenhum registro encontrado para este Conjunto.', 'error');
+            }
+
+            const status = getStatusInspecaoGrupoConjunto(leafs, area, maquina, equipamento, conjunto);
+            const docIds = [...new Set(leafs.map(n => n.docId).filter(Boolean))];
+            const docMap = new Map(rawLinhasDocs.map(d => [d.id, d.data || {}]));
+            const agora = new Date().toISOString();
+            const usuarioNome = usuarioLogado?.nome || usuarioLogado?.user || 'Gestor';
+            const conjMapKey = normConjMapKeyAtivos(conjunto);
+
+            try {
+                for (const dId of docIds) {
+                    const raw = docMap.get(dId) || {};
+                    const upd = {
+                        atualizado_por: usuarioNome,
+                        atualizado_em: agora
+                    };
+                    if (Array.isArray(raw.conjuntos) && raw.conjuntos.length > 0) {
+                        const prevMap = (raw.conjuntos_insp_inteiros_map && typeof raw.conjuntos_insp_inteiros_map === 'object')
+                            ? { ...raw.conjuntos_insp_inteiros_map }
+                            : {};
+                        prevMap[conjMapKey] = Boolean(ativar);
+                        upd.conjuntos_insp_inteiros_map = prevMap;
+                        if (ocultarSubs || !status.hasSubconjuntos) {
+                            upd.conjuntos = raw.conjuntos.map(c => {
+                                if (!c || typeof c !== 'object') return c;
+                                if (normKey(c.nome || c.conjunto) !== cN) return c;
+                                const clone = { ...c, inspecao_conjunto_ativa: Boolean(ativar) };
+                                if (ocultarSubs) clone.inspecao_ativa = false;
+                                else if (!status.hasSubconjuntos) clone.inspecao_ativa = Boolean(ativar);
+                                return clone;
+                            });
+                        }
+                    } else {
+                        upd.inspecao_conjunto_ativa = Boolean(ativar);
+                        if (ocultarSubs && (raw.subconjunto || '').trim()) {
+                            upd.inspecao_ativa = false;
+                        } else if (!status.hasSubconjuntos) {
+                            upd.inspecao_ativa = Boolean(ativar);
+                        }
+                    }
+                    await updateDoc(doc(db, 'ob_linhas', dId), upd);
+                }
+
+                showToast(ativar
+                    ? (ocultarSubs
+                        ? `Inspeção do Conjunto Inteiro "${conjunto}" ativada (subconjuntos individuais ocultados)!`
+                        : `Inspeção do Conjunto Inteiro "${conjunto}" ATIVADA nas rotas 52S e Minhas Inspeções!`)
+                    : `Inspeção do Conjunto Inteiro "${conjunto}" ocultada.`, 'success');
+            } catch (err) {
+                console.error(err);
+                showToast('Erro ao atualizar inspeção do Conjunto no Firestore.', 'error');
+            }
+        };
+
+        window.toggleInspecaoSubconjuntoAtivo = async (nodeId, ativar) => {
+            const node = assetNodes.find(n => n.nodeId === nodeId);
+            if (!node || !node.docId) return;
+            const raw = (rawLinhasDocs.find(d => d.id === node.docId) || {}).data || {};
+            const agora = new Date().toISOString();
+            const usuarioNome = usuarioLogado?.nome || usuarioLogado?.user || 'Gestor';
+
+            try {
+                if (node.isLegacyArray && Array.isArray(raw.conjuntos)) {
+                    const conjuntosClean = [...raw.conjuntos];
+                    const novosFlat = {
+                        setor: node.area,
+                        area: node.area,
+                        maquina: node.maquina,
+                        equipamento: node.equipamento,
+                        conjunto: node.conjunto,
+                        subconjunto: node.subconjunto,
+                        inspecao_ativa: Boolean(ativar),
+                        inspecao_conjunto_ativa: Boolean(node.inspecao_conjunto_ativa),
+                        status_ativo: node.status_ativo || 'Ativo',
+                        atualizado_por: usuarioNome,
+                        atualizado_em: agora
+                    };
+                    if (typeof node.legacyIndex === 'number' && conjuntosClean[node.legacyIndex] && typeof conjuntosClean[node.legacyIndex] === 'object') {
+                        conjuntosClean[node.legacyIndex] = { ...conjuntosClean[node.legacyIndex], inspecao_ativa: Boolean(ativar) };
+                        await updateDoc(doc(db, 'ob_linhas', node.docId), { conjuntos: conjuntosClean, atualizado_por: usuarioNome, atualizado_em: agora });
+                    } else {
+                        await addDoc(refLinhas, { ...novosFlat, timestamp: Date.now() });
+                    }
+                } else {
+                    await updateDoc(doc(db, 'ob_linhas', node.docId), {
+                        inspecao_ativa: Boolean(ativar),
+                        atualizado_por: usuarioNome,
+                        atualizado_em: agora
+                    });
+                }
+                showToast(ativar
+                    ? `Inspeção filtrada do subconjunto "${node.subconjunto || node.conjunto}" ativada!`
+                    : `Subconjunto "${node.subconjunto || node.conjunto}" ocultado da inspeção.`, 'success');
+            } catch (err) {
+                console.error(err);
+                showToast('Erro ao atualizar subconjunto no Firestore.', 'error');
+            }
+        };
+
+        window.abrirPlanoInspecaoConjuntoDireto = (area, maquina, equipamento, conjunto, escopo = 'conjunto', nodeId = '') => {
+            const leafs = assetNodes.filter(n =>
+                normKey(n.area) === normKey(area) &&
+                normKey(n.maquina) === normKey(maquina) &&
+                normKey(n.equipamento) === normKey(equipamento) &&
+                normKey(n.conjunto) === normKey(conjunto)
+            );
+            const rep = (nodeId && leafs.find(n => n.nodeId === nodeId)) || leafs[0] || {};
+            const st = getStatusInspecaoGrupoConjunto(leafs, area, maquina, equipamento, conjunto);
+            pendingAgendarCtx = {
+                area: area || rep.area || '',
+                maquina: maquina || rep.maquina || '',
+                equipamento: equipamento || rep.equipamento || '',
+                conjunto: conjunto || rep.conjunto || '',
+                subconjunto: escopo === 'conjunto' ? '' : (rep.subconjunto || ''),
+                escopo,
+                conjuntoGroupId: st.conjGroupId,
+                nodeId: escopo === 'conjunto' ? st.conjGroupId : (rep.nodeId || ''),
+                docId: rep.docId || '',
+                inspecao_ativa: st.algumaRotaAtiva,
+                inspecao_conjunto_ativa: st.conjInteiroAtivo
+            };
+            executarHandoffAgendamento('inspecao_rota', 'inspecao_plano');
+        };
+
+        function renderPainelInspecaoConjunto(area, maquina, equipamento, conjunto, leafs) {
+            const st = getStatusInspecaoGrupoConjunto(leafs, area, maquina, equipamento, conjunto);
+            const aJ = JSON.stringify(area).replace(/"/g, '&quot;');
+            const mJ = JSON.stringify(maquina).replace(/"/g, '&quot;');
+            const eJ = JSON.stringify(equipamento).replace(/"/g, '&quot;');
+            const cJ = JSON.stringify(conjunto).replace(/"/g, '&quot;');
+            const subs = (leafs || []).filter(n => Boolean((n.subconjunto || '').trim()));
+
+            return `
+            <div class="p-4 rounded-2xl border ${st.conjInteiroAtivo ? 'border-indigo-200 bg-indigo-50/50' : 'border-slate-200 bg-slate-50/70'} space-y-3">
+                <div class="flex flex-wrap items-start justify-between gap-2.5">
+                    <div class="space-y-0.5">
+                        <div class="flex flex-wrap items-center gap-1.5">
+                            <span class="text-[10px] font-extrabold uppercase tracking-wider text-indigo-700">Inspeção de Rota (52 Semanas &amp; Minhas Inspeções)</span>
+                            ${st.conjInteiroAtivo
+                                ? '<span class="px-2 py-0.5 rounded-full text-[10px] font-extrabold bg-emerald-100 text-emerald-800 border border-emerald-200">Conjunto Inteiro Ativo</span>'
+                                : '<span class="px-2 py-0.5 rounded-full text-[10px] font-bold bg-slate-200 text-slate-600">Conjunto Inteiro Oculto</span>'}
+                        </div>
+                        <p class="text-[11px] text-slate-600 font-medium">
+                            Ative a inspeção para o <strong>Conjunto inteiro (${escapeHtml(conjunto)})</strong> sem precisar ativar cada subconjunto — e ative subconjuntos individuais abaixo somente quando quiser uma inspeção mais filtrada.
+                        </p>
+                    </div>
+                    <div class="flex flex-wrap items-center gap-1.5 shrink-0">
+                        <button type="button" onclick="toggleInspecaoConjuntoInteiro(${aJ}, ${mJ}, ${eJ}, ${cJ}, ${!st.conjInteiroAtivo}, false)" class="px-3 py-1.5 rounded-xl text-[11px] font-extrabold transition-colors ${st.conjInteiroAtivo ? 'bg-slate-200 hover:bg-slate-300 text-slate-800' : 'bg-indigo-600 hover:bg-indigo-700 text-white shadow-sm'}">
+                            ${st.conjInteiroAtivo ? 'Ocultar Conjunto Inteiro' : 'Ativar Conjunto Inteiro'}
+                        </button>
+                        ${st.hasSubconjuntos && (!st.conjInteiroAtivo || st.subsAtivosCount > 0) ? `
+                        <button type="button" onclick="toggleInspecaoConjuntoInteiro(${aJ}, ${mJ}, ${eJ}, ${cJ}, true, true)" class="px-3 py-1.5 rounded-xl text-[11px] font-extrabold bg-emerald-600 hover:bg-emerald-700 text-white shadow-sm">
+                            Ativar Só Conjunto Inteiro (Ocultar Subs)
+                        </button>` : ''}
+                        <button type="button" onclick="abrirPlanoInspecaoConjuntoDireto(${aJ}, ${mJ}, ${eJ}, ${cJ}, 'conjunto')" class="px-3 py-1.5 rounded-xl text-[11px] font-extrabold bg-white hover:bg-indigo-50 text-indigo-700 border border-indigo-200">
+                            Plano Cirúrgico do Conjunto →
+                        </button>
+                    </div>
+                </div>
+                ${st.hasSubconjuntos ? `
+                <div class="pt-2 border-t border-slate-200/80 space-y-1.5">
+                    <div class="flex items-center justify-between text-[10px] font-extrabold uppercase text-slate-500">
+                        <span>Inspeção Filtrada por Subconjunto (${st.subsAtivosCount}/${st.subsTotal} ativo(s))</span>
+                        <span>Opcional / Granular</span>
+                    </div>
+                    <div class="flex flex-wrap gap-1.5">
+                        ${subs.map(s => {
+                            const sAtivo = s.inspecao_ativa !== false;
+                            return `<button type="button" onclick="toggleInspecaoSubconjuntoAtivo('${escapeHtml(s.nodeId)}', ${!sAtivo})" title="Clique para ${sAtivo ? 'ocultar' : 'ativar'} inspeção filtrada somente deste subconjunto" class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-xl text-[11px] font-bold border transition-colors ${sAtivo ? 'bg-amber-50 border-amber-300 text-amber-900 hover:bg-amber-100' : 'bg-white border-slate-200 text-slate-500 hover:border-slate-300'}">
+                                <span class="w-2 h-2 rounded-full ${sAtivo ? 'bg-amber-500' : 'bg-slate-300'}"></span>
+                                <span>${escapeHtml(s.subconjunto)}</span>
+                                <span class="text-[9px] font-extrabold uppercase ${sAtivo ? 'text-amber-700' : 'text-slate-400'}">${sAtivo ? 'Ativo' : 'Oculto'}</span>
+                            </button>`;
+                        }).join('')}
+                    </div>
+                </div>` : ''}
+            </div>`;
+        }
 
         function renderBadgeCrit(crit, size = 'sm') {
             const padCls = size === 'xs' ? 'px-1.5 py-0.5 text-[9px]' : 'px-2 py-0.5 text-[10px]';
@@ -2048,6 +2332,12 @@
                                         const kC = `C|${area}|${maq}|${eq}|${cj}`;
                                         const openC = autoExpand || expandedKeys.has(kC);
                                         const critC = maiorCriticidade(leafs);
+                                        const stInspConj = getStatusInspecaoGrupoConjunto(leafs, area, maq, eq, cj);
+                                        const inspBadgeConj = stInspConj.conjInteiroAtivo
+                                            ? `<span title="Inspeção do Conjunto Inteiro ativa" class="text-[9px] font-extrabold px-1.5 py-0.5 rounded-full bg-indigo-50 text-indigo-700 border border-indigo-200">Conj.Ativo</span>`
+                                            : (stInspConj.subsAtivosCount > 0
+                                                ? `<span title="${stInspConj.subsAtivosCount} subconjunto(s) com inspeção filtrada ativa" class="text-[9px] font-extrabold px-1.5 py-0.5 rounded-full bg-amber-50 text-amber-800 border border-amber-200">${stInspConj.subsAtivosCount} Sub</span>`
+                                                : `<span title="Oculto das rotas de inspeção 52 Semanas" class="text-[9px] font-bold px-1.5 py-0.5 rounded-full bg-slate-100 text-slate-400 border border-slate-200">Oculto</span>`);
 
                                         html += `<div>
                                             <div class="tree-row ${isSelected('conjunto', area, maq, eq, cj) ? 'selected' : ''}" onclick="selecionarAlvo('conjunto', ${JSON.stringify(area).replace(/"/g, '&quot;')}, ${JSON.stringify(maq).replace(/"/g, '&quot;')}, ${JSON.stringify(eq).replace(/"/g, '&quot;')}, ${JSON.stringify(cj).replace(/"/g, '&quot;')})">
@@ -2057,6 +2347,7 @@
                                                     <span class="text-[11px] font-bold text-slate-700 truncate">${escapeHtml(cj)}</span>
                                                 </div>
                                                 <div class="flex items-center gap-1 shrink-0">
+                                                    ${inspBadgeConj}
                                                     ${critC ? renderBadgeCrit(critC, 'xs') : ''}
                                                     <span class="text-[10px] font-bold text-slate-400">${leafs.length}</span>
                                                     <button type="button" title="Agendar programada para este conjunto" aria-label="Agendar programada para ${escapeHtml(cj)}" onclick="event.stopPropagation(); abrirModalAgendarConjunto(${JSON.stringify(area).replace(/"/g, '&quot;')}, ${JSON.stringify(maq).replace(/"/g, '&quot;')}, ${JSON.stringify(eq).replace(/"/g, '&quot;')}, ${JSON.stringify(cj).replace(/"/g, '&quot;')})" class="w-5 h-5 rounded-md bg-slate-100 hover:bg-emerald-100 text-slate-500 hover:text-emerald-700 flex items-center justify-center transition-colors"><svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/></svg></button>
@@ -2142,7 +2433,10 @@
                 normKey(n.conjunto) === cjN
             );
             const rep = (nodeId && leafs.find(n => n.nodeId === nodeId)) || leafs[0] || {};
-            const inspAtiva = leafs.length ? leafs.some(n => n.inspecao_ativa !== false) : true;
+            const statusInspGrupo = getStatusInspecaoGrupoConjunto(leafs, area || rep.area || '', maquina || rep.maquina || '', equipamento || rep.equipamento || '', conjunto || rep.conjunto || '');
+            const inspAtiva = nodeId
+                ? (rep.inspecao_ativa !== false || statusInspGrupo.conjInteiroAtivo)
+                : statusInspGrupo.algumaRotaAtiva;
 
             pendingAgendarCtx = {
                 area: area || rep.area || '',
@@ -2150,6 +2444,8 @@
                 equipamento: equipamento || rep.equipamento || '',
                 conjunto: conjunto || rep.conjunto || '',
                 subconjunto: nodeId ? (rep.subconjunto || '') : '',
+                escopo: nodeId ? ((rep.subconjunto || '').trim() ? 'subconjunto' : 'conjunto') : (statusInspGrupo.conjInteiroAtivo || !statusInspGrupo.hasSubconjuntos ? 'conjunto' : 'subconjunto'),
+                conjuntoGroupId: statusInspGrupo.conjGroupId,
                 tag: rep.tag || '',
                 criticidade: maiorCriticidade(leafs) || rep.criticidade || '',
                 criticidade_linha: getInfoCriticidadeLinha(area || rep.area || '', maquina || rep.maquina || '').classe || '',
@@ -2157,9 +2453,10 @@
                 disciplina: rep.disciplina || 'Mecânica',
                 padrinho_mec: rep.padrinho_mec || '',
                 padrinho_ele: rep.padrinho_ele || '',
-                nodeId: rep.nodeId || '',
+                nodeId: nodeId ? (rep.nodeId || '') : (statusInspGrupo.conjInteiroAtivo ? statusInspGrupo.conjGroupId : (rep.nodeId || '')),
                 docId: rep.docId || '',
-                inspecao_ativa: inspAtiva
+                inspecao_ativa: inspAtiva,
+                inspecao_conjunto_ativa: statusInspGrupo.conjInteiroAtivo
             };
 
             const titEl = document.getElementById('agConjuntoTitulo');
@@ -2374,6 +2671,12 @@
             const lista = Array.isArray(nodes) ? nodes : [];
             const docIds = new Set(lista.map(n => n.docId).filter(Boolean));
             const nodeIds = new Set(lista.map(n => n.nodeId).filter(Boolean));
+            lista.forEach(n => {
+                if (n && n.area && n.maquina && n.equipamento && n.conjunto) {
+                    const cgId = makeConjuntoNodeIdAtivos(n.area, n.maquina, n.equipamento, n.conjunto);
+                    nodeIds.add(cgId);
+                }
+            });
             const eqKeys = new Set(lista.map(n => `${normKey(n.maquina)}|${normKey(n.equipamento)}`));
             const equipSet = new Set(lista.map(n => normKey(n.equipamento)).filter(Boolean));
             const areaSet = new Set(lista.map(n => normKey(n.area)).filter(Boolean));
@@ -2944,9 +3247,9 @@
                                 </select>
                             </div>
                             <div>
-                                <label class="block text-[10px] font-extrabold uppercase text-sky-700 mb-1">Inspeção de Rota (52s)</label>
+                                <label class="block text-[10px] font-extrabold uppercase text-sky-700 mb-1">${node.subconjunto ? 'Inspeção deste Subconjunto (52s)' : 'Inspeção do Conjunto (52s)'}</label>
                                 <select id="edInspecaoAtiva" class="input-clean py-2 text-xs font-extrabold border-sky-200 bg-sky-50/50">
-                                    <option value="true" ${node.inspecao_ativa !== false ? 'selected' : ''}>Ativo na Inspeção (52 Semanas)</option>
+                                    <option value="true" ${node.inspecao_ativa !== false ? 'selected' : ''}>${node.subconjunto ? 'Ativo na Inspeção (Subconjunto filtrado)' : 'Ativo na Inspeção (52 Semanas)'}</option>
                                     <option value="false" ${node.inspecao_ativa === false ? 'selected' : ''}>Não Ativo (Ocultar das Inspeções)</option>
                                 </select>
                             </div>
@@ -3064,6 +3367,10 @@
                 </div>` : '';
             }
 
+            const inspConjBlock = selectedTarget.level === 'conjunto'
+                ? renderPainelInspecaoConjunto(selectedTarget.area, selectedTarget.maquina, selectedTarget.equipamento, selectedTarget.conjunto, branchNodes)
+                : '';
+
             panel.innerHTML = `
             <div class="space-y-5">
                 <div class="flex flex-wrap items-start justify-between gap-3 border-b border-slate-100 pb-4">
@@ -3086,6 +3393,7 @@
                     </div>
                 </div>
 
+                ${inspConjBlock}
                 ${criticidadeLinhaBlock}
 
                 <div class="grid grid-cols-2 sm:grid-cols-5 gap-3">
@@ -3178,6 +3486,23 @@
             if (prefill.conjunto) document.getElementById('nConjunto').value = prefill.conjunto;
             document.getElementById('nCriticidade').value = 'B';
             document.getElementById('nPeriodicidade').value = 'Mensal';
+            const elConjChk = document.getElementById('nInspecaoConjAtiva');
+            const elSubChk = document.getElementById('nInspecaoAtiva');
+            if (elConjChk) {
+                if (prefill.area && prefill.maquina && prefill.equipamento && prefill.conjunto) {
+                    const irm = assetNodes.filter(n =>
+                        normKey(n.area) === normKey(prefill.area) &&
+                        normKey(n.maquina) === normKey(prefill.maquina) &&
+                        normKey(n.equipamento) === normKey(prefill.equipamento) &&
+                        normKey(n.conjunto) === normKey(prefill.conjunto)
+                    );
+                    const stG = getStatusInspecaoGrupoConjunto(irm, prefill.area, prefill.maquina, prefill.equipamento, prefill.conjunto);
+                    elConjChk.checked = irm.length ? stG.conjInteiroAtivo : true;
+                } else {
+                    elConjChk.checked = true;
+                }
+            }
+            if (elSubChk) elSubChk.checked = false;
             abrirModal('modalNovoAtivo');
             setTimeout(() => {
                 if (!prefill.area) document.getElementById('nArea')?.focus();
@@ -3204,7 +3529,8 @@
             const criticidade = document.getElementById('nCriticidade').value;
             const periodicidade = document.getElementById('nPeriodicidade').value;
             const disciplina = document.getElementById('nDisciplina').value;
-            const inspecao_ativa = document.getElementById('nInspecaoAtiva') ? Boolean(document.getElementById('nInspecaoAtiva').checked) : true;
+            const inspecao_conjunto_ativa = document.getElementById('nInspecaoConjAtiva') ? Boolean(document.getElementById('nInspecaoConjAtiva').checked) : true;
+            const inspecao_ativa = document.getElementById('nInspecaoAtiva') ? Boolean(document.getElementById('nInspecaoAtiva').checked) : false;
             const tagBase = document.getElementById('nTag').value.trim();
             const fabricante = document.getElementById('nFabricante').value.trim();
             const modelo = document.getElementById('nModelo').value.trim();
@@ -3233,6 +3559,7 @@
                         periodicidade_semanas: PERIODICIDADES[periodicidade]?.semanas ?? 0,
                         disciplina,
                         inspecao_ativa,
+                        inspecao_conjunto_ativa,
                         fabricante,
                         modelo,
                         serie,
@@ -3319,6 +3646,7 @@
                 ano_fabricacao,
                 status_ativo,
                 inspecao_ativa,
+                inspecao_conjunto_ativa: Boolean(node.inspecao_conjunto_ativa),
                 padrinho_mec,
                 padrinho_ele,
                 observacoes_tecnicas,
@@ -3378,6 +3706,8 @@
                     numeroSerie: '',
                     ano_fabricacao: node.ano_fabricacao,
                     status_ativo: node.status_ativo,
+                    inspecao_ativa: node.inspecao_ativa !== false,
+                    inspecao_conjunto_ativa: Boolean(node.inspecao_conjunto_ativa),
                     padrinho_mec: node.padrinho_mec,
                     padrinho_ele: node.padrinho_ele,
                     observacoes_tecnicas: node.observacoes_tecnicas,
@@ -3487,6 +3817,8 @@
                         numeroSerie: '',
                         ano_fabricacao: n.ano_fabricacao,
                         status_ativo: 'Ativo',
+                        inspecao_ativa: n.inspecao_ativa !== false,
+                        inspecao_conjunto_ativa: Boolean(n.inspecao_conjunto_ativa),
                         padrinho_mec: n.padrinho_mec,
                         padrinho_ele: n.padrinho_ele,
                         observacoes_tecnicas: n.observacoes_tecnicas,
@@ -4069,6 +4401,13 @@
                     valid.add(d.id);
                 }
             });
+            if (typeof makeConjuntoNodeIdAtivos === 'function') {
+                assetNodes.forEach(n => {
+                    if (n && n.area && n.maquina && n.equipamento && n.conjunto) {
+                        valid.add(makeConjuntoNodeIdAtivos(n.area, n.maquina, n.equipamento, n.conjunto));
+                    }
+                });
+            }
             return valid;
         }
 
