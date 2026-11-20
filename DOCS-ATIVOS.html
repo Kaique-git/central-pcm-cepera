@@ -432,11 +432,17 @@
                                 </p>
                             </div>
                             <div class="flex flex-wrap items-center gap-2">
-                                <button type="button" onclick="baixarScriptPastasSharePoint('bat')" class="btn-pill-dark text-xs py-2 px-4">
-                                    <span>↓ Baixar Gerador Pastas OneDrive (.bat)</span>
+                                <button type="button" onclick="copiarScriptConsoleSharePoint()" class="btn-touch bg-emerald-600 hover:bg-emerald-700 text-white text-xs py-2 px-3.5 shadow-sm font-extrabold flex items-center gap-1.5" title="Copia o script para rodar no Console F12 do SharePoint sem precisar de OneDrive">
+                                    <span>⚡ Copiar Script Console Web (Sem OneDrive)</span>
                                 </button>
-                                <button type="button" onclick="baixarScriptPastasSharePoint('ps1')" class="btn-touch bg-slate-100 hover:bg-slate-200 text-slate-800 border border-slate-200 text-xs py-2 px-3">
+                                <button type="button" onclick="baixarScriptPastasSharePoint('bat')" class="btn-pill-dark text-xs py-2 px-3" title="Baixa script .bat para rodar dentro da pasta sincronizada">
+                                    <span>↓ Gerador (.bat)</span>
+                                </button>
+                                <button type="button" onclick="baixarScriptPastasSharePoint('ps1')" class="btn-touch bg-slate-100 hover:bg-slate-200 text-slate-800 border border-slate-200 text-xs py-2 px-3" title="Script PowerShell PnP">
                                     <span>↓ Script PnP (.ps1)</span>
+                                </button>
+                                <button type="button" onclick="baixarScriptPastasSharePoint('js')" class="btn-touch bg-slate-100 hover:bg-slate-200 text-slate-800 border border-slate-200 text-xs py-2 px-2.5" title="Baixar script JavaScript para Console">
+                                    <span>↓ .js</span>
                                 </button>
                                 <button type="button" onclick="abrirPastaSharePointAtual()" class="btn-touch bg-sky-600 hover:bg-sky-700 text-white text-xs py-2 px-3.5">
                                     <span>Abrir Pasta SISTEMA ↗</span>
@@ -444,11 +450,46 @@
                             </div>
                         </div>
 
+                        <!-- Card de Solução de Erro de Sincronização do OneDrive -->
+                        <div class="p-4 rounded-2xl bg-amber-50 border border-amber-200 space-y-2.5 text-xs text-amber-950">
+                            <div class="flex items-center gap-2 font-extrabold text-amber-950">
+                                <span class="text-base">⚠️</span>
+                                <span>Apareceu o erro "Você já está sincronizando um atalho para uma pasta desta biblioteca compartilhada"?</span>
+                            </div>
+                            <p class="text-slate-700 font-medium">
+                                Isso acontece porque o OneDrive proíbe usar <strong>"Sincronizar"</strong> se você já tiver usado a função <strong>"Adicionar atalho ao OneDrive"</strong> nessa mesma biblioteca. Você tem <strong>duas formas simples</strong> de resolver:
+                            </p>
+                            <div class="grid grid-cols-1 md:grid-cols-2 gap-3 pt-1">
+                                <div class="p-3 rounded-xl bg-white/90 border border-emerald-200 space-y-1.5 shadow-sm">
+                                    <div class="font-extrabold text-emerald-800 flex items-center gap-1">
+                                        <span>⚡ Opção 1 (Recomendada • 100% Nuvem • Sem OneDrive):</span>
+                                    </div>
+                                    <p class="text-[11px] text-slate-600 leading-relaxed font-medium">
+                                        1. Clique no botão verde <strong>"⚡ Copiar Script Console Web"</strong> acima.<br>
+                                        2. Na aba aberta do SharePoint, aperte <code>F12</code> no teclado (ou clique com botão direito &gt; <em>Inspecionar</em>).<br>
+                                        3. Vá na aba <strong>Console</strong>, aperte <code>Ctrl + V</code> e dê <code>Enter</code>.<br>
+                                        Todas as pastas de Linhas e Equipamentos serão criadas na nuvem em segundos!
+                                    </p>
+                                </div>
+                                <div class="p-3 rounded-xl bg-white/90 border border-amber-200 space-y-1.5 shadow-sm">
+                                    <div class="font-extrabold text-amber-900 flex items-center gap-1">
+                                        <span>🔄 Opção 2 (Destravar o botão Sincronizar do OneDrive):</span>
+                                    </div>
+                                    <p class="text-[11px] text-slate-600 leading-relaxed font-medium">
+                                        1. Abra o seu <strong>OneDrive - Cepera</strong> no computador (Explorador de Arquivos).<br>
+                                        2. Procure a pasta que tem o ícone de <strong>correntinha azul</strong> (atalho da biblioteca PCM).<br>
+                                        3. Clique com o botão direito nela e escolha <strong>"Remover atalho"</strong> (isso <em>não</em> apaga nenhum arquivo do SharePoint).<br>
+                                        4. Volte à página do SharePoint e clique em <strong>Sincronizar</strong> novamente.
+                                    </p>
+                                </div>
+                            </div>
+                        </div>
+
                         <div class="p-4 rounded-2xl bg-sky-50/70 border border-sky-200 space-y-3 text-xs">
                             <div class="font-extrabold text-sky-900">Como criar todas as pastas em 30 segundos dentro do SharePoint da Cepêra:</div>
                             <ol class="list-decimal pl-5 space-y-1 text-slate-700 font-medium">
-                                <li>Abra a pasta <a id="linkSharepointRaiz" href="#" target="_blank" rel="noopener" class="font-extrabold text-sky-700 underline">SISTEMA no SharePoint</a> e clique no botão <strong>Sincronizar</strong> (OneDrive do Windows) — ou peça à TI via PowerShell PnP.</li>
-                                <li>Baixe o arquivo <strong><code>criar_estrutura_SISTEMA.bat</code></strong> acima, coloque dentro da pasta sincronizada <code>SISTEMA</code> e dê dois cliques: todas as pastas abaixo (por Categoria, Setor, Linha e Equipamento) serão criadas e sincronizadas na nuvem automaticamente.</li>
+                                <li><strong>Via Web Console (Sem OneDrive):</strong> Copie o script no botão verde acima, abra o Console (F12) no SharePoint e cole.</li>
+                                <li><strong>Via OneDrive:</strong> Abra a pasta <a id="linkSharepointRaiz" href="#" target="_blank" rel="noopener" class="font-extrabold text-sky-700 underline">SISTEMA no SharePoint</a>, clique em <strong>Sincronizar</strong> (após remover eventuais atalhos em conflito), baixe o <code>criar_estrutura_SISTEMA.bat</code>, cole dentro de <code>SISTEMA</code> e dê dois cliques.</li>
                                 <li>Restrinja as permissões da subpasta <code>04_ORCAMENTOS_SIGILOSOS</code> no SharePoint apenas para o grupo de Gestão/Supervisão.</li>
                             </ol>
                             <div class="grid grid-cols-1 md:grid-cols-2 gap-3 pt-2 border-t border-sky-200/80">
@@ -1011,12 +1052,29 @@
         };
 
         window.copiarTextoSimples = async (txt, msgOk = 'Copiado!') => {
+            let copiou = false;
             try {
                 if (navigator.clipboard && navigator.clipboard.writeText) {
                     await navigator.clipboard.writeText(String(txt || ''));
+                    copiou = true;
                 }
+            } catch (_) {}
+            if (!copiou) {
+                try {
+                    const ta = document.createElement('textarea');
+                    ta.value = String(txt || '');
+                    ta.style.position = 'fixed';
+                    ta.style.opacity = '0';
+                    document.body.appendChild(ta);
+                    ta.select();
+                    document.execCommand('copy');
+                    ta.remove();
+                    copiou = true;
+                } catch (_) {}
+            }
+            if (copiou) {
                 showToast(msgOk, 'success');
-            } catch (_) {
+            } else {
                 showToast(String(txt || ''), 'info');
             }
         };
@@ -1768,6 +1826,85 @@
             if (typeof window.open === 'function') window.open(url, '_blank', 'noopener');
         };
 
+        function gerarScriptConsoleSharePoint() {
+            const pastasBrutas = getListaPastasSharePointEsperadas();
+            const raiz = sharepointCfg.pastaRaiz || 'SISTEMA';
+            const libName = sharepointCfg.biblioteca || 'Documentos Compartilhados';
+            const siteRel = (sharepointCfg.sitePath || '/sites/PCMCEPERA-LevantamentoManutenoPreventiva').replace(/\/$/, '');
+
+            const setPastas = new Set();
+            setPastas.add(raiz);
+            pastasBrutas.forEach(p => {
+                const parts = p.split('/');
+                let cur = '';
+                parts.forEach(part => {
+                    cur = cur ? `${cur}/${part}` : part;
+                    setPastas.add(cur);
+                });
+            });
+            const ordenadas = [...setPastas].sort((a, b) => a.split('/').length - b.split('/').length || a.localeCompare(b));
+            const serverRelPaths = ordenadas.map(p => `${siteRel}/${libName}/${p}`);
+
+            return `// =========================================================================\n` +
+                   `// SCRIPT PCM CEPÊRA: CRIAÇÃO AUTOMÁTICA DE PASTAS NO SHAREPOINT ONLINE\n` +
+                   `// Execute no Console (F12) na aba aberta do SharePoint ceperaind.sharepoint.com\n` +
+                   `// =========================================================================\n` +
+                   `(async function criarEstruturaSharePointCepera() {\n` +
+                   `    console.clear();\n` +
+                   `    console.log('%c[PCM Cepêra] Iniciando criação direta de ${serverRelPaths.length} pastas no SharePoint...', 'color: #0284c7; font-weight: bold; font-size: 13px;');\n` +
+                   `    const siteUrl = (typeof _spPageContextInfo !== 'undefined' && _spPageContextInfo.webAbsoluteUrl) ? _spPageContextInfo.webAbsoluteUrl : (window.location.origin + '${siteRel}');\n` +
+                   `    let digest = (typeof _spPageContextInfo !== 'undefined' && _spPageContextInfo.formDigestValue) || document.querySelector('#__REQUESTDIGEST')?.value;\n` +
+                   `    async function renovarDigest() {\n` +
+                   `        try {\n` +
+                   `            const r = await fetch(siteUrl + '/_api/contextinfo', { method: 'POST', headers: { 'Accept': 'application/json;odata=verbose' } });\n` +
+                   `            const j = await r.json();\n` +
+                   `            digest = j?.d?.GetContextWebInformation?.FormDigestValue || digest;\n` +
+                   `        } catch (_) {}\n` +
+                   `    }\n` +
+                   `    if (!digest) await renovarDigest();\n` +
+                   `    const pastas = ${JSON.stringify(serverRelPaths, null, 4)};\n` +
+                   `    let criadas = 0, existiam = 0, erros = 0;\n` +
+                   `    for (let i = 0; i < pastas.length; i++) {\n` +
+                   `        const pastaRel = pastas[i];\n` +
+                   `        const nome = pastaRel.split('/').pop();\n` +
+                   `        if (i > 0 && i % 30 === 0) await renovarDigest();\n` +
+                   `        try {\n` +
+                   `            const resp = await fetch(siteUrl + '/_api/web/folders', {\n` +
+                   `                method: 'POST',\n` +
+                   `                headers: {\n` +
+                   `                    'Accept': 'application/json;odata=verbose',\n` +
+                   `                    'Content-Type': 'application/json;odata=verbose',\n` +
+                   `                    'X-RequestDigest': digest\n` +
+                   `                },\n` +
+                   `                body: JSON.stringify({ '__metadata': { 'type': 'SP.Folder' }, 'ServerRelativeUrl': pastaRel })\n` +
+                   `            });\n` +
+                   `            if (resp.ok || resp.status === 201) {\n` +
+                   `                criadas++;\n` +
+                   `                console.log(\`%c[\${i+1}/\${pastas.length}] Criada: \${nome}\`, 'color: #16a34a;', pastaRel);\n` +
+                   `            } else if (resp.status === 409 || resp.status === 400 || resp.status === 500) {\n` +
+                   `                existiam++;\n` +
+                   `                console.log(\`[\${i+1}/\${pastas.length}] Já existe: \${nome}\`);\n` +
+                   `            } else {\n` +
+                   `                erros++;\n` +
+                   `                console.warn(\`[\${i+1}/\${pastas.length}] Aviso (\${resp.status}): \${nome}\`, pastaRel);\n` +
+                   `            }\n` +
+                   `        } catch (e) {\n` +
+                   `            erros++;\n` +
+                   `            console.error(\`[\${i+1}/\${pastas.length}] Erro ao criar \${pastaRel}:\`, e);\n` +
+                   `        }\n` +
+                   `    }\n` +
+                   `    console.log('%c========================================================', 'color: #0284c7; font-weight: bold;');\n` +
+                   `    console.log(\`%c[PCM Cepêra] Concluído! \${criadas} pastas criadas, \${existiam} já existiam, \${erros} avisos.\`, 'color: #16a34a; font-weight: bold; font-size: 14px;');\n` +
+                   `    alert(\`PCM Cepêra: Estrutura de pastas SISTEMA criada no SharePoint!\\nNovas: \${criadas} | Já existiam: \${existiam}\\nA página do SharePoint será recarregada.\`);\n` +
+                   `    window.location.reload();\n` +
+                   `})();`;
+        }
+
+        window.copiarScriptConsoleSharePoint = () => {
+            const code = gerarScriptConsoleSharePoint();
+            copiarTextoSimples(code, 'Script de Console copiado! Agora abra o SharePoint, aperte F12, cole no Console e dê Enter.');
+        };
+
         window.baixarScriptPastasSharePoint = (tipo = 'bat') => {
             const pastas = getListaPastasSharePointEsperadas();
             const raiz = sharepointCfg.pastaRaiz || 'SISTEMA';
@@ -1794,6 +1931,9 @@
                 psLines.push(`}`);
                 psLines.push(`Write-Host "Estrutura completa criada dentro de ${raiz}!" -ForegroundColor Green`);
                 conteudo = psLines.join('\r\n');
+            } else if (tipo === 'js') {
+                nomeArq = 'criar_estrutura_SISTEMA_sharepoint_console.js';
+                conteudo = gerarScriptConsoleSharePoint();
             } else {
                 nomeArq = 'criar_estrutura_SISTEMA.bat';
                 const winLines = [
