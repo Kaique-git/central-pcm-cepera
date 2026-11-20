@@ -44,24 +44,24 @@
 
         .glass-card-hover:hover {
             transform: translateY(-2px);
-            box-shadow: 0 14px 28px -10px rgba(15, 23, 42, 0.1);
+            box-shadow: 0 12px 24px -10px rgba(15, 23, 42, 0.09);
             border-color: #cbd5e1;
         }
 
         .input-clean {
-            padding: 0.75rem 0.95rem;
-            font-size: 0.9rem;
+            padding: 0.65rem 0.9rem;
+            font-size: 0.875rem;
             border-radius: 0.85rem;
             border: 1px solid #cbd5e1;
             background: #ffffff;
-            transition: border-color 0.15s;
+            transition: border-color 0.15s ease, box-shadow 0.15s ease;
             width: 100%;
             color: #0f172a;
         }
         .input-clean:focus {
             outline: none;
             border-color: var(--accent);
-            box-shadow: 0 0 0 3px rgba(2, 132, 199, 0.12);
+            box-shadow: 0 0 0 3px rgba(2, 132, 199, 0.14);
         }
 
         .btn-pill-dark {
@@ -69,26 +69,26 @@
             color: #ffffff;
             font-weight: 700;
             border-radius: 9999px;
-            padding: 0.7rem 1.35rem;
+            padding: 0.65rem 1.3rem;
             display: inline-flex;
             align-items: center;
             justify-content: center;
-            gap: 0.5rem;
+            gap: 0.45rem;
             transition: opacity 0.15s ease, transform 0.15s ease;
             cursor: pointer;
-            box-shadow: 0 6px 16px -4px rgba(15, 23, 42, 0.25);
+            box-shadow: 0 6px 14px -4px rgba(15, 23, 42, 0.22);
         }
         .btn-pill-dark:hover { opacity: 0.92; transform: translateY(-1px); }
         .btn-pill-dark:active { transform: scale(0.98); }
 
         .btn-touch {
-            padding: 0.7rem 1.15rem;
+            padding: 0.6rem 1.05rem;
             font-weight: 700;
             border-radius: 0.85rem;
             display: inline-flex;
             align-items: center;
             justify-content: center;
-            gap: 0.45rem;
+            gap: 0.4rem;
             transition: all 0.15s ease;
             cursor: pointer;
         }
@@ -436,9 +436,9 @@
         <!-- BARRA SUPERIOR COMPACTA DA CENTRAL -->
         <div id="workspaceTopBar" class="h-12 bg-slate-900 text-white px-3 sm:px-5 flex items-center justify-between gap-2 border-b border-slate-800 shrink-0">
             <div class="flex items-center gap-2 min-w-0">
-                <button type="button" onclick="fecharAppWorkspace()" class="px-3 py-1.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-white font-extrabold text-xs flex items-center gap-1.5 border border-slate-700 transition-colors shrink-0">
-                    <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M10 19l-7-7m0 0l7-7m-7 7h18"/></svg>
-                    <span>Central PCM</span>
+                <button type="button" onclick="fecharAppWorkspace()" title="Voltar ao Portal PCM" class="px-3 py-1 rounded-xl bg-slate-800 hover:bg-slate-700 text-white font-extrabold text-xs flex items-center gap-1.5 border border-slate-700 transition-colors shrink-0">
+                    <img src="CEPERA_LOGO.png" alt="Cepêra" class="h-4 w-auto object-contain rounded bg-white px-0.5">
+                    <span>Portal</span>
                 </button>
                 <div class="h-4 w-px bg-slate-700 mx-1 hidden sm:block"></div>
                 <!-- PÍLULAS DE ALTERNÂNCIA RÁPIDA ENTRE APPS LIBERADOS -->
@@ -1577,7 +1577,7 @@
                     }))
                 ];
                 kpiRow.innerHTML = cardsKpi.map(k => `
-                    <div class="glass-card p-3.5 rounded-2xl">
+                    <div class="glass-card p-3.5 rounded-3xl">
                         <div class="text-[10px] font-extrabold uppercase text-slate-400 truncate">${escapeHtml(k.label)}</div>
                         <div class="text-base font-extrabold ${k.cor} mt-0.5">${escapeHtml(k.val)}</div>
                     </div>

@@ -50,7 +50,7 @@
         }
 
         .glass-rail {
-            background: #f8fafc;
+            background: rgba(255, 255, 255, 0.9);
             border-right: 1px solid #e2e8f0;
         }
 
@@ -61,10 +61,12 @@
             align-items: center;
             justify-content: center;
             gap: 0.25rem;
-            padding: 0.65rem 0.25rem;
-            border-radius: 0.95rem;
+            padding: 0.65rem 0.35rem;
+            border-radius: 1rem;
             font-size: 10px;
             font-weight: 800;
+            text-align: center;
+            line-height: 1.15;
             color: #64748b;
             background: #ffffff;
             border: 1px solid #e2e8f0;
@@ -72,7 +74,7 @@
             cursor: pointer;
             position: relative;
         }
-        .rail-btn:hover { color: #0f172a; border-color: #cbd5e1; background: #f1f5f9; }
+        .rail-btn:hover { color: #0f172a; border-color: #cbd5e1; background: #f8fafc; }
         .rail-btn.active {
             background: var(--accent);
             color: #ffffff;
@@ -81,7 +83,7 @@
         }
 
         .mob-tab {
-            padding: 0.45rem 0.95rem;
+            padding: 0.48rem 0.95rem;
             border-radius: 9999px;
             font-size: 0.75rem;
             font-weight: 800;
@@ -92,34 +94,36 @@
             cursor: pointer;
             transition: all 0.15s ease;
         }
+        .mob-tab:hover { border-color: #cbd5e1; color: #0f172a; }
         .mob-tab.active {
             background: var(--accent);
             color: #ffffff;
             border-color: var(--accent);
+            box-shadow: 0 4px 10px -2px rgba(2, 132, 199, 0.25);
         }
 
         .input-clean {
-            padding: 0.65rem 0.85rem;
-            font-size: 0.85rem;
-            border-radius: 0.8rem;
+            padding: 0.65rem 0.9rem;
+            font-size: 0.875rem;
+            border-radius: 0.85rem;
             border: 1px solid #cbd5e1;
             background: #ffffff;
-            transition: border-color 0.15s, box-shadow 0.15s;
+            transition: border-color 0.15s ease, box-shadow 0.15s ease;
             width: 100%;
             color: #0f172a;
         }
         .input-clean:focus {
             outline: none;
             border-color: var(--accent);
-            box-shadow: 0 0 0 3px rgba(2, 132, 199, 0.12);
+            box-shadow: 0 0 0 3px rgba(2, 132, 199, 0.14);
         }
 
         .btn-pill-dark {
             background: var(--accent);
             color: #ffffff;
-            font-weight: 800;
+            font-weight: 700;
             border-radius: 9999px;
-            padding: 0.65rem 1.25rem;
+            padding: 0.65rem 1.3rem;
             display: inline-flex;
             align-items: center;
             justify-content: center;
@@ -132,8 +136,8 @@
         .btn-pill-dark:active { transform: scale(0.98); }
 
         .btn-touch {
-            padding: 0.6rem 1rem;
-            font-weight: 800;
+            padding: 0.6rem 1.05rem;
+            font-weight: 700;
             border-radius: 0.85rem;
             display: inline-flex;
             align-items: center;
@@ -148,13 +152,13 @@
             display: inline-flex;
             align-items: center;
             gap: 0.35rem;
-            padding: 0.4rem 0.85rem;
+            padding: 0.42rem 0.9rem;
             border-radius: 9999px;
             border: 1px solid #e2e8f0;
             background: #ffffff;
             color: #64748b;
             cursor: pointer;
-            font-size: 0.72rem;
+            font-size: 0.75rem;
             font-weight: 800;
             white-space: nowrap;
             transition: all 0.15s ease;
@@ -301,7 +305,7 @@
                 A <strong>Central de Gestão de Ativos</strong> é exclusiva para perfis de <strong>Administrador PCM</strong> e <strong>Gerente</strong> por governar a árvore mestra de toda a planta.
             </p>
             <button type="button" onclick="voltarParaCentralPCM()" class="btn-pill-dark text-xs w-full py-3">
-                <span>Voltar à Central PCM</span>
+                <span>Voltar ao Portal PCM</span>
             </button>
         </div>
     </div>
@@ -313,7 +317,10 @@
             <!-- BARRA LATERAL DESKTOP -->
             <aside aria-label="Menu principal" class="hidden md:flex flex-col items-center justify-between py-5 px-2.5 glass-rail shrink-0 w-24">
                 <div class="flex flex-col items-center gap-3 w-full">
-                    <img src="CEPERA_LOGO.png" alt="Cepêra" class="w-16 h-11 object-contain rounded-xl shadow-sm bg-white p-1 border border-slate-200">
+                    <button type="button" onclick="voltarParaCentralPCM()" title="Voltar ao Portal PCM" class="w-full p-2 rounded-2xl bg-white border border-slate-200 hover:border-sky-400 hover:bg-slate-50 transition-colors flex flex-col items-center gap-1 shadow-sm">
+                        <img src="CEPERA_LOGO.png" alt="Cepêra" class="h-8 w-auto object-contain">
+                        <span class="text-[9px] font-extrabold text-sky-700 uppercase tracking-wider">Portal</span>
+                    </button>
                     <span class="px-2 py-0.5 rounded-full bg-slate-900 text-white text-[8px] font-extrabold uppercase tracking-wider">Admin</span>
                     <div class="h-px w-10 bg-slate-200/80"></div>
                     <nav id="desktopRailNav" class="flex flex-col items-center gap-2 w-full">
@@ -355,13 +362,12 @@
             <!-- ÁREA DE CONTEÚDO -->
             <div class="flex-1 flex flex-col min-w-0">
                 <!-- HEADER SUPERIOR -->
-                <header class="px-4 sm:px-7 py-3.5 flex flex-wrap items-center justify-between gap-3 border-b border-slate-200/80 bg-white/60 shrink-0">
+                <header class="px-5 sm:px-7 py-3.5 flex flex-wrap items-center justify-between gap-3 border-b border-slate-200/80 bg-white/60 shrink-0">
                     <div class="flex items-center gap-3 min-w-0">
-                        <button type="button" onclick="voltarParaCentralPCM()" title="Voltar à Central de Aplicativos PCM" class="px-3 py-1.5 rounded-full bg-slate-900 hover:bg-slate-800 text-white text-xs font-extrabold flex items-center gap-1.5 shadow-sm shrink-0">
-                            <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M10 19l-7-7m0 0l7-7m-7 7h18"/></svg>
-                            <span>Central</span>
+                        <button type="button" onclick="voltarParaCentralPCM()" title="Voltar ao Portal PCM" class="md:hidden px-2.5 py-1 rounded-2xl bg-white hover:bg-slate-50 border border-slate-200 hover:border-sky-400 text-sky-700 font-extrabold flex items-center gap-1.5 shadow-sm transition-colors shrink-0">
+                            <img src="CEPERA_LOGO.png" alt="Cepêra" class="h-6 w-auto object-contain">
+                            <span class="text-[10px] font-extrabold uppercase tracking-wider">Portal</span>
                         </button>
-                        <img src="CEPERA_LOGO.png" alt="Cepêra" class="md:hidden h-8 w-auto object-contain rounded-lg shadow-sm bg-white px-1.5 py-0.5 border border-slate-200">
                         <div class="flex items-center gap-2 text-xs font-bold text-slate-500 truncate">
                             <span id="statusDot" class="w-2 h-2 rounded-full bg-amber-500 animate-pulse shrink-0"></span>
                             <span id="statusText">Conectando...</span>
@@ -5555,22 +5561,22 @@
             box.innerHTML = `
                 <!-- FILTRO RÁPIDO + KPIs -->
                 <div class="grid grid-cols-2 lg:grid-cols-4 gap-3">
-                    <div class="glass-card p-4 rounded-2xl border-l-4 ${orfaosAtivos.length ? 'border-l-amber-500' : 'border-l-emerald-500'}">
+                    <div class="glass-card p-4 rounded-3xl border-l-4 ${orfaosAtivos.length ? 'border-l-amber-500' : 'border-l-emerald-500'}">
                         <div class="text-[10px] font-extrabold uppercase text-slate-400">Histórico / Planos Órfãos</div>
                         <div class="text-2xl font-extrabold ${orfaosAtivos.length ? 'text-amber-600' : 'text-emerald-600'} mt-0.5">${orfaosAtivos.length}</div>
                         <div class="text-[11px] font-semibold text-slate-500">${orfaosAtivos.reduce((a, g) => a + g.totalRegistros, 0)} registro(s) preservado(s)</div>
                     </div>
-                    <div class="glass-card p-4 rounded-2xl border-l-4 ${legados.length ? 'border-l-amber-500' : 'border-l-emerald-500'}">
+                    <div class="glass-card p-4 rounded-3xl border-l-4 ${legados.length ? 'border-l-amber-500' : 'border-l-emerald-500'}">
                         <div class="text-[10px] font-extrabold uppercase text-slate-400">Legados em Array</div>
                         <div class="text-2xl font-extrabold ${legados.length ? 'text-amber-600' : 'text-emerald-600'} mt-0.5">${legados.length}</div>
                         <div class="text-[11px] font-semibold text-slate-500">Migráveis em cascata</div>
                     </div>
-                    <div class="glass-card p-4 rounded-2xl border-l-4 ${(duplicados.length + grafias.length) ? 'border-l-indigo-500' : 'border-l-emerald-500'}">
+                    <div class="glass-card p-4 rounded-3xl border-l-4 ${(duplicados.length + grafias.length) ? 'border-l-indigo-500' : 'border-l-emerald-500'}">
                         <div class="text-[10px] font-extrabold uppercase text-slate-400">Duplicidades &amp; Grafia</div>
                         <div class="text-2xl font-extrabold ${(duplicados.length + grafias.length) ? 'text-indigo-600' : 'text-emerald-600'} mt-0.5">${duplicados.length + grafias.length}</div>
                         <div class="text-[11px] font-semibold text-slate-500">${duplicados.length} dup. • ${grafias.length} grafia(s)</div>
                     </div>
-                    <div class="glass-card p-4 rounded-2xl border-l-4 ${incompletos.length ? 'border-l-rose-500' : 'border-l-emerald-500'}">
+                    <div class="glass-card p-4 rounded-3xl border-l-4 ${incompletos.length ? 'border-l-rose-500' : 'border-l-emerald-500'}">
                         <div class="text-[10px] font-extrabold uppercase text-slate-400">Pendências Engenharia</div>
                         <div class="text-2xl font-extrabold ${incompletos.length ? 'text-rose-600' : 'text-emerald-600'} mt-0.5">${incompletos.length}</div>
                         <div class="text-[11px] font-semibold text-slate-500">Subconj. / Crit. / Per.</div>

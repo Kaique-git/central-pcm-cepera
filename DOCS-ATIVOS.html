@@ -11,7 +11,7 @@
         [hidden] { display: none !important; }
         :root {
             --primary: #0f172a;
-            --accent: #4f46e5;
+            --accent: #0284c7;
             --cepera: #dc2626;
         }
 
@@ -48,7 +48,7 @@
         }
 
         .glass-rail {
-            background: #f8fafc;
+            background: rgba(255, 255, 255, 0.9);
             border-right: 1px solid #e2e8f0;
         }
 
@@ -59,10 +59,12 @@
             align-items: center;
             justify-content: center;
             gap: 0.25rem;
-            padding: 0.65rem 0.25rem;
-            border-radius: 0.95rem;
+            padding: 0.65rem 0.35rem;
+            border-radius: 1rem;
             font-size: 10px;
             font-weight: 800;
+            text-align: center;
+            line-height: 1.15;
             color: #64748b;
             background: #ffffff;
             border: 1px solid #e2e8f0;
@@ -70,16 +72,16 @@
             cursor: pointer;
             position: relative;
         }
-        .rail-btn:hover { color: #0f172a; border-color: #cbd5e1; background: #f1f5f9; }
+        .rail-btn:hover { color: #0f172a; border-color: #cbd5e1; background: #f8fafc; }
         .rail-btn.active {
             background: var(--accent);
             color: #ffffff;
             border-color: var(--accent);
-            box-shadow: 0 6px 14px -4px rgba(79, 70, 229, 0.35);
+            box-shadow: 0 6px 14px -4px rgba(2, 132, 199, 0.35);
         }
 
         .mob-tab {
-            padding: 0.45rem 0.95rem;
+            padding: 0.48rem 0.95rem;
             border-radius: 9999px;
             font-size: 0.75rem;
             font-weight: 800;
@@ -90,26 +92,28 @@
             cursor: pointer;
             transition: all 0.15s ease;
         }
+        .mob-tab:hover { border-color: #cbd5e1; color: #0f172a; }
         .mob-tab.active {
             background: var(--accent);
             color: #ffffff;
             border-color: var(--accent);
+            box-shadow: 0 4px 10px -2px rgba(2, 132, 199, 0.25);
         }
 
         .input-clean {
-            padding: 0.65rem 0.85rem;
-            font-size: 0.85rem;
+            padding: 0.65rem 0.9rem;
+            font-size: 0.875rem;
             border-radius: 0.85rem;
             border: 1px solid #cbd5e1;
             background: #ffffff;
-            transition: border-color 0.15s;
+            transition: border-color 0.15s ease, box-shadow 0.15s ease;
             width: 100%;
             color: #0f172a;
         }
         .input-clean:focus {
             outline: none;
             border-color: var(--accent);
-            box-shadow: 0 0 0 3px rgba(79, 70, 229, 0.14);
+            box-shadow: 0 0 0 3px rgba(2, 132, 199, 0.14);
         }
 
         .btn-pill-dark {
@@ -117,14 +121,14 @@
             color: #ffffff;
             font-weight: 700;
             border-radius: 9999px;
-            padding: 0.65rem 1.25rem;
+            padding: 0.65rem 1.3rem;
             display: inline-flex;
             align-items: center;
             justify-content: center;
             gap: 0.45rem;
             transition: opacity 0.15s ease, transform 0.15s ease;
             cursor: pointer;
-            box-shadow: 0 6px 14px -4px rgba(15, 23, 42, 0.25);
+            box-shadow: 0 6px 14px -4px rgba(15, 23, 42, 0.22);
         }
         .btn-pill-dark:hover { opacity: 0.92; transform: translateY(-1px); }
         .btn-pill-dark:active { transform: scale(0.98); }
@@ -143,13 +147,16 @@
         .btn-touch:active { transform: scale(0.98); }
 
         .pill {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.35rem;
             padding: 0.42rem 0.9rem;
             border-radius: 9999px;
             border: 1px solid #e2e8f0;
             background: #ffffff;
             color: #64748b;
             cursor: pointer;
-            font-size: 0.72rem;
+            font-size: 0.75rem;
             font-weight: 800;
             white-space: nowrap;
             transition: all 0.15s ease;
@@ -159,7 +166,7 @@
             background: var(--accent);
             color: #ffffff;
             border-color: var(--accent);
-            box-shadow: 0 4px 10px -2px rgba(79, 70, 229, 0.25);
+            box-shadow: 0 4px 10px -2px rgba(2, 132, 199, 0.25);
         }
 
         .cat-manuais { background: #e0f2fe; color: #0369a1; border: 1px solid #bae6fd; }
@@ -176,13 +183,13 @@
 
         .dropzone-docs {
             border: 2px dashed #94a3b8;
-            background: linear-gradient(135deg, #f8fafc 0%, #eef2ff 100%);
+            background: linear-gradient(135deg, #f8fafc 0%, #f0f9ff 100%);
             transition: all 0.16s ease;
         }
         .dropzone-docs:hover,
         .dropzone-docs.drag-over {
             border-color: var(--accent);
-            background: #e0e7ff;
+            background: #e0f2fe;
             transform: scale(1.005);
         }
         body.theme-dark .dropzone-docs {
@@ -190,8 +197,8 @@
             border-color: #475569 !important;
         }
         body.theme-dark .dropzone-docs.drag-over {
-            background: #1e1b4b !important;
-            border-color: #818cf8 !important;
+            background: #0c4a6e !important;
+            border-color: #38bdf8 !important;
         }
 
         *:focus-visible { outline: 3px solid var(--accent) !important; outline-offset: 2px; }
@@ -217,21 +224,27 @@
         body.theme-dark .text-slate-500,
         body.theme-dark .text-slate-400 { color: #94a3b8 !important; }
         body.theme-dark .bg-white,
+        body.theme-dark .bg-white\/60,
         body.theme-dark .bg-slate-50,
         body.theme-dark .bg-slate-100 { background-color: #0f172a !important; border-color: #334155 !important; color: #f1f5f9 !important; }
+        body.theme-dark .border-slate-200, body.theme-dark .border-slate-200\/80, body.theme-dark .border-slate-100 { border-color: #334155 !important; }
         body.theme-dark .input-clean { background: #0f172a !important; border-color: #475569 !important; color: #ffffff !important; }
-        body.theme-dark .rail-btn { background: #0f172a !important; border-color: #334155 !important; color: #cbd5e1 !important; }
-        body.theme-dark .rail-btn.active { background: var(--accent) !important; color: #ffffff !important; }
+        body.theme-dark .rail-btn,
+        body.theme-dark .mob-tab,
         body.theme-dark .pill { background: #0f172a !important; border-color: #334155 !important; color: #cbd5e1 !important; }
-        body.theme-dark .pill.active { background: var(--accent) !important; color: #ffffff !important; }
+        body.theme-dark .rail-btn.active,
+        body.theme-dark .mob-tab.active,
+        body.theme-dark .pill.active { background: var(--accent) !important; color: #ffffff !important; border-color: var(--accent) !important; }
         body.high-contrast { background: #ffffff !important; color: #000000 !important; }
         body.high-contrast .frosted-shell,
-        body.high-contrast .glass-card { background: #ffffff !important; border: 2px solid #000000 !important; box-shadow: none !important; backdrop-filter: none !important; }
-        body.tablet-mode * { transition: none !important; animation: none !important; }
-        body.tablet-mode .btn-touch, body.tablet-mode .btn-pill-dark { min-height: 44px; }
+        body.high-contrast .glass-card,
+        body.high-contrast .glass-rail { background: #ffffff !important; border: 2px solid #000000 !important; box-shadow: none !important; backdrop-filter: none !important; }
+        body.high-contrast .input-clean { border: 2px solid #000000 !important; color: #000000 !important; }
+        body.tablet-mode *, body.tablet-mode *::before, body.tablet-mode *::after { transition: none !important; animation: none !important; }
+        body.tablet-mode .btn-touch, body.tablet-mode .btn-pill-dark, body.tablet-mode .input-clean, body.tablet-mode .mob-tab { min-height: 46px !important; font-size: 0.92rem !important; }
     </style>
 </head>
-<body class="antialiased selection:bg-indigo-100 selection:text-indigo-900">
+<body class="antialiased selection:bg-sky-100 selection:text-sky-900">
     <div id="toastStack" class="fixed bottom-4 right-4 z-[95] flex flex-col gap-2 max-w-sm"></div>
 
     <!-- TELA ACESSO BLOQUEADO / SESSÃO -->
@@ -245,64 +258,68 @@
             <p id="accessDeniedMsg" class="text-xs font-medium text-slate-600 leading-relaxed">
                 Faça login na Central de Sistemas PCM Cepêra para consultar manuais, desenhos, cartas de lubrificação e fotos dos ativos.
             </p>
-            <button type="button" onclick="voltarParaCentralPCM()" class="btn-pill-dark w-full text-xs">Voltar para Login da Central PCM</button>
+            <button type="button" onclick="voltarParaCentralPCM()" class="btn-pill-dark w-full text-xs">Voltar para Login do Portal PCM</button>
         </div>
     </div>
 
     <!-- APP PRINCIPAL -->
-    <div id="mainApp" hidden class="hidden min-h-screen flex flex-col lg:flex-row">
-        <!-- RAIL LATERAL DESKTOP -->
-        <aside class="glass-rail hidden lg:flex flex-col w-24 shrink-0 p-3 justify-between sticky top-0 h-screen z-30">
-            <div class="space-y-4">
-                <button type="button" onclick="voltarParaCentralPCM()" title="Voltar ao Portal PCM" class="w-full p-2 rounded-2xl bg-white border border-slate-200 hover:border-indigo-400 transition-colors flex flex-col items-center gap-1">
-                    <img src="CEPERA_LOGO.png" alt="Cepêra" class="h-8 w-auto object-contain">
-                    <span class="text-[9px] font-extrabold text-slate-500 uppercase">Portal</span>
-                </button>
+    <div id="mainApp" hidden class="hidden min-h-screen w-full p-2 sm:p-4 md:p-5 flex flex-col">
+        <div class="frosted-shell rounded-[26px] flex-1 flex flex-col md:flex-row overflow-hidden min-h-[calc(100vh-2.5rem)]">
+            <!-- RAIL LATERAL DESKTOP -->
+            <aside aria-label="Menu principal" class="hidden md:flex flex-col items-center justify-between py-5 px-2.5 glass-rail shrink-0 w-24">
+                <div class="flex flex-col items-center gap-3 w-full">
+                    <button type="button" onclick="voltarParaCentralPCM()" title="Voltar ao Portal PCM" class="w-full p-2 rounded-2xl bg-white border border-slate-200 hover:border-sky-400 hover:bg-slate-50 transition-colors flex flex-col items-center gap-1 shadow-sm">
+                        <img src="CEPERA_LOGO.png" alt="Cepêra" class="h-8 w-auto object-contain">
+                        <span class="text-[9px] font-extrabold text-sky-700 uppercase tracking-wider">Portal</span>
+                    </button>
+                    <div class="h-px w-10 bg-slate-200/80 my-0.5"></div>
 
-                <nav class="space-y-2" aria-label="Menu Biblioteca de Documentos">
-                    <button type="button" id="rail-biblioteca" onclick="switchView('biblioteca')" class="rail-btn active">
-                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253"/></svg>
-                        <span>Biblioteca</span>
-                    </button>
-                    <button type="button" id="rail-aprovacoes" onclick="switchView('aprovacoes')" hidden class="rail-btn hidden">
-                        <span id="badgeRailAprov" hidden class="hidden absolute -top-1 -right-1 px-1.5 py-0.5 rounded-full text-[9px] font-extrabold bg-rose-600 text-white shadow">0</span>
-                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
-                        <span>Aprovações</span>
-                    </button>
-                    <button type="button" id="rail-revisoes" onclick="switchView('revisoes')" class="rail-btn">
-                        <span id="badgeRailValidade" hidden class="hidden absolute -top-1 -right-1 px-1.5 py-0.5 rounded-full text-[9px] font-extrabold bg-amber-500 text-white shadow">0</span>
-                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
-                        <span>Revisões</span>
-                    </button>
-                    <button type="button" id="rail-sharepoint" onclick="switchView('sharepoint')" hidden class="rail-btn hidden">
-                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 7v10a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2h-6l-2-2H5a2 2 0 00-2 2z"/></svg>
-                        <span>SharePoint</span>
-                    </button>
-                </nav>
-            </div>
+                    <nav class="space-y-2 w-full" aria-label="Menu Biblioteca de Documentos">
+                        <button type="button" id="rail-biblioteca" onclick="switchView('biblioteca')" class="rail-btn active">
+                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253"/></svg>
+                            <span>Biblioteca</span>
+                        </button>
+                        <button type="button" id="rail-aprovacoes" onclick="switchView('aprovacoes')" hidden class="rail-btn hidden">
+                            <span id="badgeRailAprov" hidden class="hidden absolute -top-1 -right-1 px-1.5 py-0.5 rounded-full text-[9px] font-extrabold bg-rose-600 text-white shadow">0</span>
+                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+                            <span>Aprovações</span>
+                        </button>
+                        <button type="button" id="rail-revisoes" onclick="switchView('revisoes')" class="rail-btn">
+                            <span id="badgeRailValidade" hidden class="hidden absolute -top-1 -right-1 px-1.5 py-0.5 rounded-full text-[9px] font-extrabold bg-amber-500 text-white shadow">0</span>
+                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+                            <span>Revisões</span>
+                        </button>
+                        <button type="button" id="rail-sharepoint" onclick="switchView('sharepoint')" hidden class="rail-btn hidden">
+                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 7v10a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2h-6l-2-2H5a2 2 0 00-2 2z"/></svg>
+                            <span>SharePoint</span>
+                        </button>
+                    </nav>
+                </div>
 
-            <div class="space-y-2">
-                <button type="button" onclick="abrirEspacoUsuario()" title="Preferências (Alt + U)" class="rail-btn">
-                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"/><circle cx="12" cy="12" r="3" stroke-width="2"/></svg>
-                    <span>Visual</span>
-                </button>
-                <button type="button" onclick="fazerLogout()" title="Sair da Sessão" class="rail-btn text-rose-600">
-                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"/></svg>
-                    <span>Sair</span>
-                </button>
-            </div>
-        </aside>
+                <div class="flex flex-col items-center gap-2 w-full">
+                    <button type="button" onclick="abrirEspacoUsuario()" title="Espaço do Usuário (Alt + U)" class="rail-btn">
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"/><circle cx="12" cy="12" r="3" stroke-width="2"/></svg>
+                        <span>Espaço</span>
+                    </button>
+                    <button type="button" onclick="fazerLogout()" title="Sair da Sessão" class="rail-btn hover:!bg-rose-50 hover:!text-rose-600 hover:!border-rose-200">
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"/></svg>
+                        <span>Sair</span>
+                    </button>
+                </div>
+            </aside>
 
-        <!-- CONTEÚDO PRINCIPAL -->
-        <div class="flex-1 min-w-0 flex flex-col">
-            <!-- HEADER -->
-            <header class="frosted-shell border-x-0 border-t-0 sticky top-0 z-20 px-4 sm:px-6 py-3">
-                <div class="max-w-7xl mx-auto flex flex-wrap items-center justify-between gap-3">
+            <!-- CONTEÚDO PRINCIPAL -->
+            <div class="flex-1 min-w-0 flex flex-col">
+                <!-- HEADER -->
+                <header class="px-5 sm:px-7 py-3.5 flex flex-wrap items-center justify-between gap-3 border-b border-slate-200/80 bg-white/60 shrink-0">
                     <div class="flex items-center gap-3 min-w-0">
-                        <button type="button" onclick="voltarParaCentralPCM()" class="lg:hidden p-2 rounded-xl bg-white border border-slate-200 text-slate-700 font-extrabold text-xs">← Portal</button>
+                        <button type="button" onclick="voltarParaCentralPCM()" title="Voltar ao Portal PCM" class="md:hidden px-2.5 py-1 rounded-2xl bg-white hover:bg-slate-50 border border-slate-200 hover:border-sky-400 text-sky-700 font-extrabold flex items-center gap-1.5 shadow-sm transition-colors shrink-0">
+                            <img src="CEPERA_LOGO.png" alt="Cepêra" class="h-6 w-auto object-contain">
+                            <span class="text-[10px] font-extrabold uppercase tracking-wider">Portal</span>
+                        </button>
                         <div class="min-w-0">
                             <div class="flex flex-wrap items-center gap-2">
-                                <span class="text-[10px] font-extrabold uppercase tracking-widest text-indigo-700">GED PCM Cepêra • SharePoint + ob_linhas</span>
+                                <span class="text-[10px] font-extrabold uppercase tracking-widest text-sky-600">GED PCM Cepêra • SharePoint + ob_linhas</span>
                                 <span id="syncPill" class="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-[10px] font-extrabold bg-slate-100 text-slate-600">
                                     <span id="statusDot" class="w-2 h-2 rounded-full bg-amber-400"></span>
                                     <span id="statusText">Conectando...</span>
@@ -313,10 +330,14 @@
                     </div>
 
                     <div class="flex flex-wrap items-center gap-2">
-                        <div id="userChip" class="hidden sm:flex items-center gap-2 px-3 py-1.5 rounded-full bg-slate-100 border border-slate-200 text-[11px] font-extrabold text-slate-700">
-                            <span class="w-2 h-2 rounded-full bg-indigo-500"></span>
+                        <div id="userChip" class="hidden sm:flex items-center gap-2 px-3 py-1.5 rounded-full bg-white border border-slate-200 text-[11px] font-extrabold text-slate-700 shadow-sm">
+                            <span class="w-2 h-2 rounded-full bg-sky-500"></span>
                             <span id="userChipLabel">Usuário</span>
                         </div>
+                        <span id="masterDocsChip" hidden title="Modo Admin Master ativo: edição e exclusão direta de documentos liberadas" class="hidden items-center gap-1.5 px-3 py-1.5 rounded-full bg-rose-50 border border-rose-200 text-[11px] font-extrabold text-rose-700">
+                            <span class="w-2 h-2 rounded-full bg-rose-500"></span>
+                            <span>MASTER</span>
+                        </span>
                         <button type="button" onclick="abrirModalNovoDocumento('doc')" id="btnNovoDocHeader" class="btn-pill-dark text-xs py-2 px-4">
                             <span>+ Novo Documento / Foto</span>
                         </button>
@@ -324,25 +345,24 @@
                             <span>SharePoint ↗</span>
                         </button>
                     </div>
-                </div>
+                </header>
 
                 <!-- NAVEGAÇÃO MOBILE -->
-                <div class="lg:hidden flex items-center gap-1.5 overflow-x-auto pt-2.5 pb-0.5">
+                <div id="mobileTabNav" class="md:hidden flex items-center gap-2 overflow-x-auto px-4 py-2.5 bg-white/60 border-b border-slate-200/80 shrink-0">
                     <button type="button" id="mob-biblioteca" onclick="switchView('biblioteca')" class="mob-tab active">Biblioteca</button>
                     <button type="button" id="mob-aprovacoes" onclick="switchView('aprovacoes')" hidden class="mob-tab hidden">Aprovações <span id="badgeMobAprov" class="ml-1 px-1.5 py-0.2 rounded-full bg-rose-600 text-white text-[10px]">0</span></button>
                     <button type="button" id="mob-revisoes" onclick="switchView('revisoes')" class="mob-tab">Revisões &amp; Validades</button>
                     <button type="button" id="mob-sharepoint" onclick="switchView('sharepoint')" hidden class="mob-tab hidden">SharePoint</button>
                 </div>
-            </header>
 
-            <main class="flex-1 p-4 sm:p-6 max-w-7xl w-full mx-auto space-y-6">
-                <!-- ================= VIEW 1: BIBLIOTECA TÉCNICA ================= -->
-                <section id="viewBiblioteca" class="space-y-5">
-                    <!-- Barra de Busca Dinâmica (Spotlight Industrial) + KPIs Rápidos -->
-                    <div class="glass-card rounded-3xl p-4 sm:p-5 space-y-4">
-                        <div class="flex flex-col md:flex-row md:items-center gap-3">
-                            <div class="relative flex-1">
-                                <svg class="w-5 h-5 text-indigo-500 absolute left-3.5 top-1/2 -translate-y-1/2 pointer-events-none" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/></svg>
+                <main class="flex-1 overflow-y-auto p-4 sm:p-7 space-y-6">
+                    <!-- ================= VIEW 1: BIBLIOTECA TÉCNICA ================= -->
+                    <section id="viewBiblioteca" class="space-y-5 max-w-7xl mx-auto">
+                        <!-- Barra de Busca Dinâmica (Spotlight Industrial) + KPIs Rápidos -->
+                        <div class="glass-card rounded-3xl p-4 sm:p-5 space-y-4">
+                            <div class="flex flex-col md:flex-row md:items-center gap-3">
+                                <div class="relative flex-1">
+                                    <svg class="w-5 h-5 text-sky-600 absolute left-3.5 top-1/2 -translate-y-1/2 pointer-events-none" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/></svg>
                                 <input type="text" id="docSearchInput" oninput="onFiltroBibliotecaChange()" class="input-clean pl-11 pr-24 py-3 text-sm font-bold" placeholder="Busca rápida: código DOC-, título, inversor CFW11, rolamento, lubrificante, TAG, linha ou máquina...">
                                 <button type="button" onclick="limparFiltrosBiblioteca()" class="absolute right-2.5 top-1/2 -translate-y-1/2 px-2.5 py-1 rounded-lg bg-slate-100 hover:bg-slate-200 text-[11px] font-extrabold text-slate-600">Limpar</button>
                             </div>
@@ -554,6 +574,7 @@
                     </div>
                 </section>
             </main>
+        </div>
         </div>
     </div>
 
@@ -788,7 +809,7 @@
             </form>
 
             <div class="px-6 py-4 border-t border-slate-100 bg-slate-50 flex flex-wrap items-center justify-between gap-2">
-                <span class="text-[11px] font-bold text-slate-500">Será enviado para validação e aprovação de Gestão/Supervisão.</span>
+                <span id="modalDocFooterNota" class="text-[11px] font-bold text-slate-500">Será enviado para validação e aprovação de Gestão/Supervisão.</span>
                 <div class="flex items-center gap-2">
                     <button type="button" onclick="fecharModal('modalNovoDoc')" class="btn-touch bg-white border border-slate-200 text-slate-700 text-xs">Cancelar</button>
                     <button type="submit" form="formNovoDoc" id="btnSalvarSubmissaoDoc" class="btn-pill-dark text-xs px-6">Enviar para Aprovação</button>
@@ -920,6 +941,10 @@
         const refLinhas = collection(db, "ob_linhas");
         const refFunc = collection(db, "ir_funcionarios");
         const refSpConfig = doc(db, "config", "docs_sharepoint");
+        // Admin Master (mesma convenção da Central PCM / Inspeção de Rota: pcm_config/admin_master + sessão cepera_admin_master_auth)
+        const refMasterCfgDocs = doc(db, "pcm_config", "admin_master");
+        const DEFAULT_MASTER_HASH_DOCS = "7c2cce436d043699877f19ad8a6aef78dc5b1f167d97fbfa5d316885c2150a59";
+        let customMasterHashDocs = null;
 
         const DEFAULT_SHAREPOINT_CFG = {
             tenantUrl: "https://ceperaind.sharepoint.com",
@@ -1042,6 +1067,7 @@ match /config/{document=**} {
         let modoAnexoAtual = 'arquivo_direto';
         let fotoCampoB64Draft = '';
         let arquivoDiretoDraft = null;
+        let masterEditManterArquivo = null;
         let pastaOneDriveHandle = null;
         const blobUrlCache = new Map();
         let sharepointCfg = { ...DEFAULT_SHAREPOINT_CFG };
@@ -1054,7 +1080,7 @@ match /config/{document=**} {
         let handoffDocsConsumido = false;
         let handoffDocsLinhasOk = false;
         let handoffDocsLoaded = false;
-        let userPrefs = { tema: 'padrao', accent: '#4f46e5', tabletMode: false, fontLevel: 0 };
+        let userPrefs = { tema: 'padrao', accent: '#0284c7', tabletMode: false, fontLevel: 0 };
 
         function escapeHtml(val) {
             return String(val ?? '')
@@ -1106,6 +1132,16 @@ match /config/{document=**} {
         function isPerfilAprovadorDocs(user) {
             return Boolean(user && isPerfilGestaoDocs(user.role));
         }
+
+        function getActiveMasterHashDocs() {
+            return customMasterHashDocs || DEFAULT_MASTER_HASH_DOCS;
+        }
+
+        // Funções Master (edição direta / exclusão direta): somente Admin/Gerente com sessão Admin Master ativa
+        window.isMasterDocsAtivo = (user = usuarioLogado) => {
+            if (!user || !isPerfilAdmin(user.role)) return false;
+            return safeSessionGet('cepera_admin_master_auth') === getActiveMasterHashDocs();
+        };
 
         function podeVerDocumento(docObj, user = usuarioLogado) {
             if (!docObj) return false;
@@ -1302,7 +1338,7 @@ match /config/{document=**} {
             if (userPrefs.tema === 'dark') document.body.classList.add('theme-dark');
             if (userPrefs.tema === 'contraste') document.body.classList.add('high-contrast');
             if (userPrefs.tabletMode) document.body.classList.add('tablet-mode');
-            document.documentElement.style.setProperty('--accent', userPrefs.accent || '#4f46e5');
+            document.documentElement.style.setProperty('--accent', userPrefs.accent || '#0284c7');
             const bTab = document.getElementById('btnToggleTabletMode');
             if (bTab) {
                 bTab.innerText = userPrefs.tabletMode ? 'ATIVADO' : 'DESATIVADO';
@@ -1377,6 +1413,13 @@ match /config/{document=**} {
             });
             const uLbl = document.getElementById('userChipLabel');
             if (uLbl && usuarioLogado) uLbl.innerText = `${usuarioLogado.nome || usuarioLogado.user} (${usuarioLogado.role})`;
+            const chipMaster = document.getElementById('masterDocsChip');
+            if (chipMaster) {
+                const mOn = isMasterDocsAtivo();
+                chipMaster.hidden = !mOn;
+                chipMaster.classList.toggle('hidden', !mOn);
+                chipMaster.classList.toggle('inline-flex', mOn);
+            }
             const btnNew = document.getElementById('btnNovoDocHeader');
             if (btnNew) {
                 btnNew.innerText = aprovador ? '+ Novo Documento / Foto' : '+ Enviar Foto / Sugestão';
@@ -1575,19 +1618,19 @@ match /config/{document=**} {
             const kpis = document.getElementById('docKpisStrip');
             if (kpis) {
                 kpis.innerHTML = `
-                    <div class="glass-card p-3.5 rounded-2xl">
+                    <div class="glass-card p-4 rounded-3xl">
                         <div class="text-[10px] font-extrabold uppercase text-slate-400">Docs Vigentes</div>
-                        <div class="text-2xl font-extrabold text-indigo-700">${vigentesTotais.length}</div>
+                        <div class="text-2xl font-extrabold text-sky-700">${vigentesTotais.length}</div>
                     </div>
-                    <div class="glass-card p-3.5 rounded-2xl">
+                    <div class="glass-card p-4 rounded-3xl">
                         <div class="text-[10px] font-extrabold uppercase text-slate-400">Equipamentos Documentados</div>
                         <div class="text-2xl font-extrabold text-slate-900">${equipCobertos}</div>
                     </div>
-                    <div class="glass-card p-3.5 rounded-2xl">
+                    <div class="glass-card p-4 rounded-3xl">
                         <div class="text-[10px] font-extrabold uppercase text-slate-400">Fila de Aprovação</div>
                         <div class="text-2xl font-extrabold ${pendentesCount ? 'text-amber-600' : 'text-emerald-600'}">${pendentesCount}</div>
                     </div>
-                    <div class="glass-card p-3.5 rounded-2xl">
+                    <div class="glass-card p-4 rounded-3xl">
                         <div class="text-[10px] font-extrabold uppercase text-slate-400">Validades (Venc./30d)</div>
                         <div class="text-2xl font-extrabold ${vencAlertas ? 'text-rose-600' : 'text-emerald-600'}">${vencAlertas}</div>
                     </div>`;
@@ -1606,6 +1649,7 @@ match /config/{document=**} {
                 return;
             }
 
+            const masterOnCards = isMasterDocsAtivo();
             grid.innerHTML = filtrados.map(d => {
                 const cat = CATEGORIAS_DOCS[d.categoria] || CATEGORIAS_DOCS.manuais;
                 const valSt = getStatusValidade(d.validadeEm);
@@ -1657,6 +1701,10 @@ match /config/{document=**} {
                     <div class="pt-3 border-t border-slate-100 flex flex-wrap items-center gap-2">
                         ${d.arquivoId ? `<button type="button" onclick="abrirArquivoDoc('${d.id}')" class="btn-pill-dark flex-1 text-[11px] py-2 px-3">👁️ Abrir Arquivo</button>` : (d.arquivoUrl ? `<a href="${escapeHtml(d.arquivoUrl)}" target="_blank" rel="noopener" class="btn-pill-dark flex-1 text-[11px] py-2 px-3">Abrir Arquivo ↗</a>` : '')}
                         <button type="button" onclick="abrirDetalheDoc('${d.id}')" class="btn-touch ${(d.arquivoId || d.arquivoUrl) ? 'bg-slate-100 hover:bg-slate-200 text-slate-800' : 'btn-pill-dark flex-1'} text-[11px] py-2 px-3">Detalhes &amp; Revisões</button>
+                        ${masterOnCards ? `<div class="w-full flex items-center gap-1.5">
+                            <button type="button" onclick="abrirModalEdicaoMaster('${d.id}')" title="Edição direta (Admin Master) — grava sem fila de aprovação" class="flex-1 px-2.5 py-1.5 rounded-xl bg-amber-50 hover:bg-amber-100 border border-amber-200 text-amber-800 font-extrabold text-[11px]">✏️ Editar (Master)</button>
+                            <button type="button" onclick="excluirDocumentoMaster('${d.id}')" title="Exclusão direta (Admin Master) — remove documento, revisões e arquivos" class="px-2.5 py-1.5 rounded-xl bg-rose-50 hover:bg-rose-100 border border-rose-200 text-rose-700 font-extrabold text-[11px]">🗑️ Excluir</button>
+                        </div>` : ''}
                     </div>
                 </article>`;
             }).join('');
@@ -1729,6 +1777,7 @@ match /config/{document=**} {
                         </div>
 
                         <div class="flex flex-wrap items-center justify-end gap-2 pt-2 border-t border-slate-100">
+                            ${isMasterDocsAtivo() ? `<button type="button" onclick="excluirRevisaoMaster('${rev.id}')" title="Exclusão direta (Admin Master)" class="btn-touch bg-white hover:bg-rose-50 text-rose-700 border border-rose-200 text-xs py-2 px-4">🗑️ Excluir (Master)</button>` : ''}
                             <button type="button" onclick="reprovarRevisaoDoc('${rev.id}')" class="btn-touch bg-rose-50 hover:bg-rose-100 text-rose-700 border border-rose-200 text-xs py-2 px-4">✕ Reprovar com Motivo</button>
                             <button type="button" onclick="aprovarRevisaoDoc('${rev.id}')" class="btn-touch bg-emerald-600 hover:bg-emerald-700 text-white text-xs py-2 px-5 shadow-sm">✓ Aprovar e Publicar Vigente</button>
                         </div>
@@ -2937,11 +2986,29 @@ match /config/{document=**} {
                     base64Body,
                     fileObj: file
                 };
+                masterEditManterArquivo = null;
                 modoAnexoAtual = 'arquivo_direto';
                 exibirPreviewArquivoDraft();
                 atualizarPreviewNomenclaturaDoc();
             };
             reader.readAsDataURL(file);
+        }
+
+        function exibirPreviewArquivoExistenteMaster(meta) {
+            const box = document.getElementById('ndArquivoInfoBox');
+            if (!box || !meta?.arquivoId) return;
+            const nome = meta.arquivoNome || 'Documento salvo no sistema';
+            const ext = (nome.split('.').pop() || 'DOC').toUpperCase().slice(0, 5);
+            const extEl = document.getElementById('ndArquivoExtBadge');
+            const nmEl = document.getElementById('ndArquivoNomeLbl');
+            const mtEl = document.getElementById('ndArquivoMetaLbl');
+            if (extEl) extEl.innerText = ext;
+            if (nmEl) nmEl.innerText = nome;
+            if (mtEl) {
+                mtEl.innerText = `${formatarTamanhoBytes(meta.arquivoTamanhoBytes)} • Arquivo atual no sistema (arraste outro se quiser substituir)`;
+            }
+            box.hidden = false;
+            box.classList.remove('hidden');
         }
 
         function exibirPreviewArquivoDraft() {
@@ -2964,7 +3031,13 @@ match /config/{document=**} {
         }
 
         window.visualizarAnexoDraft = () => {
-            if (!arquivoDiretoDraft?.dataUrl) return;
+            if (!arquivoDiretoDraft?.dataUrl) {
+                const editId = document.getElementById('docMasterEditId')?.value;
+                if (masterEditManterArquivo?.arquivoId && editId) {
+                    return abrirArquivoDoc(editId);
+                }
+                return;
+            }
             try {
                 const bytes = base64ToUint8Array(arquivoDiretoDraft.base64Body || extrairBase64Puro(arquivoDiretoDraft.dataUrl));
                 const blob = new Blob([bytes], { type: arquivoDiretoDraft.mimeType || 'application/pdf' });
@@ -2978,6 +3051,7 @@ match /config/{document=**} {
 
         window.limparAnexoDiretoDoc = () => {
             arquivoDiretoDraft = null;
+            masterEditManterArquivo = null;
             const inp = document.getElementById('ndArquivoFile');
             if (inp) inp.value = '';
             const box = document.getElementById('ndArquivoInfoBox');
@@ -3037,10 +3111,47 @@ match /config/{document=**} {
             if (inp) inp.value = iso;
         };
 
+        function atualizarRotulosModoModalDoc(modo) {
+            const kicker = document.getElementById('modalDocKicker');
+            const nota = document.getElementById('modalDocFooterNota');
+            const btn = document.getElementById('btnSalvarSubmissaoDoc');
+            if (modo === 'master_edit') {
+                if (kicker) kicker.innerText = 'Admin Master • Edição Direta (Sem Fila de Aprovação)';
+                if (nota) nota.innerText = 'Modo Admin Master: alterações gravadas diretamente no documento.';
+                if (btn) btn.innerText = '💾 Salvar Edição Direta (Master)';
+            } else {
+                if (kicker) kicker.innerText = 'Qualidade de Dados • Entra na Fila de Aprovação';
+                if (nota) nota.innerText = 'Será enviado para validação e aprovação de Gestão/Supervisão.';
+                if (btn) btn.innerText = 'Enviar para Aprovação';
+            }
+        }
+
+        async function removerPartesArquivoSeOrfao(arquivoIds = [], excluirRevIds = new Set(), excluirMasterIds = new Set()) {
+            const candidatos = [...new Set((arquivoIds || []).filter(Boolean))];
+            for (const arqId of candidatos) {
+                const emUsoPorOutroMaster = docsAtivos.some(d => !excluirMasterIds.has(d.id) && d.arquivoId === arqId);
+                const emUsoPorOutraRev = docsRevisoes.some(r => !excluirRevIds.has(r.id) && r.arquivoId === arqId);
+                if (emUsoPorOutroMaster || emUsoPorOutraRev) continue;
+                try {
+                    const snap = await getDocs(query(refDocsArquivosPartes, where('arquivoId', '==', arqId)));
+                    for (const p of snap.docs) {
+                        await deleteDoc(doc(db, 'docs_arquivos_partes', p.id));
+                    }
+                    const cached = blobUrlCache.get(arqId);
+                    if (cached?.blobUrl && typeof URL?.revokeObjectURL === 'function') {
+                        try { URL.revokeObjectURL(cached.blobUrl); } catch (_) {}
+                    }
+                    blobUrlCache.delete(arqId);
+                } catch (err) {
+                    console.warn('Aviso ao limpar partes do arquivo:', arqId, err);
+                }
+            }
+        }
+
         window.abrirModalNovoDocumento = (tipo = 'doc', prefill = {}) => {
             const form = document.getElementById('formNovoDoc');
             if (form) form.reset();
-            ['ndTitulo', 'ndArquivoUrl', 'ndArquivoEmbedUrl', 'ndTags', 'ndValidadeEm', 'ndResumoTecnico'].forEach(fid => {
+            ['ndTitulo', 'ndArquivoUrl', 'ndArquivoEmbedUrl', 'ndTags', 'ndValidadeEm', 'ndResumoTecnico', 'ndAtivoSpecs'].forEach(fid => {
                 const el = document.getElementById(fid);
                 if (el) el.value = '';
             });
@@ -3055,6 +3166,7 @@ match /config/{document=**} {
             document.getElementById('modalDocTituloModal').innerText = isPerfilAprovadorDocs(usuarioLogado)
                 ? 'Inserir Novo Documento na Biblioteca (Vai p/ Aprovação)'
                 : 'Enviar Foto / Sugestão de Documento (Vai p/ Aprovação)';
+            atualizarRotulosModoModalDoc('novo');
 
             popularCategoriasSelectModal();
             if (prefill.categoria && CATEGORIAS_DOCS[prefill.categoria]) {
@@ -3105,6 +3217,7 @@ match /config/{document=**} {
             document.getElementById('docFormModo').value = 'revisao';
             document.getElementById('docMasterEditId').value = d.id;
             document.getElementById('modalDocTituloModal').innerText = `Nova Revisão — ${d.codigo} (${nextLbl})`;
+            atualizarRotulosModoModalDoc('revisao');
             popularCategoriasSelectModal();
             document.getElementById('ndCategoria').value = d.categoria;
             onNdCategoriaChange();
@@ -3131,10 +3244,240 @@ match /config/{document=**} {
             setTimeout(() => document.getElementById('ndMotivoAlteracao')?.focus(), 80);
         };
 
+        window.abrirModalEdicaoMaster = (masterId) => {
+            if (!isMasterDocsAtivo()) {
+                return showToast('Acesso restrito: apenas Admin Master pode editar documentos diretamente.', 'error');
+            }
+            const d = docsAtivos.find(x => x.id === masterId);
+            if (!d) return showToast('Documento não encontrado.', 'error');
+            fecharModal('modalDetalheDoc');
+
+            const form = document.getElementById('formNovoDoc');
+            if (form) form.reset();
+            limparAnexoDiretoDoc();
+
+            fotoCampoB64Draft = d.fotoThumbB64 || '';
+            if (fotoCampoB64Draft) {
+                document.getElementById('ndFotoPreviewImg').src = fotoCampoB64Draft;
+                const b = document.getElementById('ndFotoPreviewBox');
+                if (b) { b.hidden = false; b.classList.remove('hidden'); }
+                document.getElementById('ndFotoStatus').innerText = '✓ Foto atual do documento (será mantida salvo se remover)';
+            } else {
+                limparFotoCampoDoc();
+            }
+
+            if (d.arquivoId) {
+                masterEditManterArquivo = {
+                    arquivoId: d.arquivoId,
+                    arquivoNome: d.arquivoNome || 'Documento salvo',
+                    arquivoMime: d.arquivoMime || '',
+                    arquivoTamanhoBytes: Number(d.arquivoTamanhoBytes || 0),
+                    arquivoPartes: Number(d.arquivoPartes || 0)
+                };
+                exibirPreviewArquivoExistenteMaster(masterEditManterArquivo);
+            }
+
+            document.getElementById('docFormModo').value = 'master_edit';
+            document.getElementById('docMasterEditId').value = d.id;
+            document.getElementById('modalDocTituloModal').innerText = `Editar Documento (Master) — ${d.codigo}`;
+            atualizarRotulosModoModalDoc('master_edit');
+
+            popularCategoriasSelectModal();
+            if (CATEGORIAS_DOCS[d.categoria]) {
+                document.getElementById('ndCategoria').value = d.categoria;
+                onNdCategoriaChange();
+            }
+            if (d.subtipo) document.getElementById('ndSubtipo').value = d.subtipo;
+            document.getElementById('ndDisciplina').value = d.disciplina || 'Mecânica';
+            document.getElementById('ndCodigo').value = d.codigo || '';
+            document.getElementById('ndCodigo').readOnly = false;
+            document.getElementById('ndTitulo').value = d.titulo || '';
+            document.getElementById('ndRevisaoLabel').value = d.revisaoVigenteLabel || 'REV 00';
+            document.getElementById('ndTags').value = (Array.isArray(d.tags) ? d.tags : []).join(', ');
+            document.getElementById('ndValidadeEm').value = d.validadeEm || '';
+            document.getElementById('ndRevalidacaoMeses').value = String(d.periodicidadeRevalidacaoMeses || 0);
+            document.getElementById('ndResumoTecnico').value = d.resumoTecnico || '';
+            document.getElementById('ndArquivoUrl').value = d.arquivoUrl || '';
+            document.getElementById('ndArquivoEmbedUrl').value = d.arquivoEmbedUrl || '';
+            document.getElementById('ndAtivoSpecs').value = [d.tagAtivo, d.fabricante, d.modelo].filter(Boolean).join(' • ');
+            document.getElementById('ndMotivoAlteracao').value = 'Edição direta (Admin Master)';
+
+            popularNdSelects({
+                area: d.area, maquina: d.maquina, equipamento: d.equipamento,
+                conjunto: d.conjunto || '', subconjunto: d.subconjunto || ''
+            });
+            setModoAnexoDoc(d.arquivoUrl && !d.arquivoId ? 'sharepoint' : 'arquivo_direto');
+            atualizarPreviewNomenclaturaDoc();
+            abrirModal('modalNovoDoc');
+        };
+
+        window.excluirDocumentoMaster = async (masterId) => {
+            if (!isMasterDocsAtivo()) {
+                return showToast('Acesso restrito: apenas Admin Master pode excluir documentos diretamente.', 'error');
+            }
+            const d = docsAtivos.find(x => x.id === masterId);
+            const revsMem = docsRevisoes.filter(r => r.docMasterId === masterId);
+            let revsDb = [];
+            try {
+                const snapRevs = await getDocs(query(refDocsRevisoes, where('docMasterId', '==', masterId)));
+                revsDb = snapRevs.docs.map(docItem => ({ id: docItem.id, ...(docItem.data ? docItem.data() : {}) }));
+            } catch (_) {}
+
+            const revMap = new Map();
+            for (const r of [...revsMem, ...revsDb]) revMap.set(r.id, r);
+            const revIds = new Set(revMap.keys());
+
+            const labelDoc = d ? `${d.codigo || masterId} — ${d.titulo || ''}` : masterId;
+            if (!confirm(`[Admin Master] Excluir permanentemente o documento "${labelDoc}" (${revIds.size} revisão(ões) e arquivos anexados)?`)) {
+                return;
+            }
+
+            try {
+                const arquivoIds = [];
+                if (d?.arquivoId) arquivoIds.push(d.arquivoId);
+                for (const r of revMap.values()) {
+                    if (r?.arquivoId) arquivoIds.push(r.arquivoId);
+                }
+
+                for (const rId of revIds) {
+                    await deleteDoc(doc(db, 'docs_revisoes', rId));
+                }
+                await deleteDoc(doc(db, 'docs_ativos', masterId));
+                await removerPartesArquivoSeOrfao(arquivoIds, revIds, new Set([masterId]));
+
+                fecharModal('modalDetalheDoc');
+                showToast(`Documento "${d?.codigo || masterId}" excluído diretamente (Admin Master).`, 'success');
+            } catch (err) {
+                console.error('Falha em excluirDocumentoMaster:', err);
+                const info = formatarErroFirestoreDocs(err);
+                if (info.tipo === 'regras_firestore') abrirModalAlertaRegrasFirestore(info);
+                else showToast(info.resumo, 'error');
+            }
+        };
+
+        window.excluirRevisaoMaster = async (revId) => {
+            if (!isMasterDocsAtivo()) {
+                return showToast('Acesso restrito: apenas Admin Master pode excluir revisões diretamente.', 'error');
+            }
+            const rev = docsRevisoes.find(r => r.id === revId);
+            if (!rev) return showToast('Revisão não encontrada.', 'error');
+
+            const restantes = docsRevisoes
+                .filter(r => r.docMasterId === rev.docMasterId && r.id !== rev.id)
+                .sort((a, b) => Number(b.revisaoNum || 0) - Number(a.revisaoNum || 0));
+
+            if (restantes.length === 0 && rev.docMasterId) {
+                return window.excluirDocumentoMaster(rev.docMasterId);
+            }
+
+            if (!confirm(`[Admin Master] Excluir permanentemente a revisão "${rev.revisaoLabel}" de "${rev.codigoDoc || rev.docMasterId}"?`)) {
+                return;
+            }
+
+            try {
+                const agora = new Date().toISOString();
+                const autor = usuarioLogado?.nome || usuarioLogado?.user || 'Admin Master PCM';
+                const master = docsAtivos.find(d => d.id === rev.docMasterId);
+
+                await deleteDoc(doc(db, 'docs_revisoes', rev.id));
+
+                if (master) {
+                    const outrasPend = restantes.some(x => x.status === 'pendente_aprovacao');
+                    if (master.revisaoVigenteId === rev.id) {
+                        const fallbackVig = restantes.find(x => x.status === 'vigente' || x.status === 'obsoleta');
+                        if (fallbackVig) {
+                            if (fallbackVig.status !== 'vigente') {
+                                await updateDoc(doc(db, 'docs_revisoes', fallbackVig.id), sanitizarPayloadFirestore({
+                                    status: 'vigente',
+                                    atualizadoEm: agora
+                                }));
+                            }
+                            const masterReset = {
+                                titulo: fallbackVig.titulo,
+                                categoria: fallbackVig.categoria,
+                                subtipo: fallbackVig.subtipo,
+                                sigilo: (CATEGORIAS_DOCS[fallbackVig.categoria] || CATEGORIAS_DOCS.manuais).sigilo,
+                                disciplina: fallbackVig.disciplina || master.disciplina || 'Mecânica',
+                                area: fallbackVig.area,
+                                maquina: fallbackVig.maquina,
+                                equipamento: fallbackVig.equipamento,
+                                conjunto: fallbackVig.conjunto || '',
+                                subconjunto: fallbackVig.subconjunto || '',
+                                tags: Array.isArray(fallbackVig.tags) ? fallbackVig.tags : [],
+                                resumoTecnico: fallbackVig.resumoTecnico || '',
+                                validadeEm: fallbackVig.validadeEm || '',
+                                periodicidadeRevalidacaoMeses: Number(fallbackVig.periodicidadeRevalidacaoMeses || 0),
+                                arquivoProvider: fallbackVig.arquivoProvider || (fallbackVig.arquivoId ? 'banco_interno' : 'sharepoint'),
+                                arquivoId: fallbackVig.arquivoId || '',
+                                arquivoNome: fallbackVig.arquivoNome || '',
+                                arquivoMime: fallbackVig.arquivoMime || '',
+                                arquivoTamanhoBytes: Number(fallbackVig.arquivoTamanhoBytes || 0),
+                                arquivoPartes: Number(fallbackVig.arquivoPartes || 0),
+                                arquivoUrl: fallbackVig.arquivoUrl || '',
+                                arquivoEmbedUrl: fallbackVig.arquivoEmbedUrl || '',
+                                fotoThumbB64: fallbackVig.fotoThumbB64 || '',
+                                sharepointPastaSugerida: fallbackVig.sharepointPastaSugerida || '',
+                                sharepointNomeSugerido: fallbackVig.sharepointNomeSugerido || '',
+                                status: 'vigente',
+                                revisaoVigenteNum: fallbackVig.revisaoNum,
+                                revisaoVigenteLabel: fallbackVig.revisaoLabel,
+                                revisaoVigenteId: fallbackVig.id,
+                                temRevisaoPendente: outrasPend,
+                                atualizadoPor: autor,
+                                atualizadoEm: agora
+                            };
+                            masterReset.searchText = construirSearchText({ ...master, ...masterReset });
+                            await updateDoc(doc(db, 'docs_ativos', master.id), sanitizarPayloadFirestore(masterReset));
+                        } else {
+                            await updateDoc(doc(db, 'docs_ativos', master.id), sanitizarPayloadFirestore({
+                                status: outrasPend ? 'pendente_aprovacao' : 'reprovado',
+                                revisaoVigenteNum: null,
+                                revisaoVigenteLabel: outrasPend ? `Pendente (${restantes[0]?.revisaoLabel || 'REV'})` : 'Sem revisão vigente',
+                                revisaoVigenteId: '',
+                                temRevisaoPendente: outrasPend,
+                                arquivoId: '',
+                                arquivoNome: '',
+                                arquivoMime: '',
+                                arquivoTamanhoBytes: 0,
+                                arquivoPartes: 0,
+                                atualizadoPor: autor,
+                                atualizadoEm: agora
+                            }));
+                        }
+                    } else {
+                        await updateDoc(doc(db, 'docs_ativos', master.id), sanitizarPayloadFirestore({
+                            temRevisaoPendente: outrasPend,
+                            atualizadoPor: autor,
+                            atualizadoEm: agora
+                        }));
+                    }
+                }
+
+                if (rev.arquivoId) {
+                    await removerPartesArquivoSeOrfao([rev.arquivoId], new Set([rev.id]), new Set());
+                }
+
+                showToast(`Revisão "${rev.revisaoLabel}" excluída diretamente (Admin Master).`, 'success');
+                const detModal = document.getElementById('modalDetalheDoc');
+                if (detModal && !detModal.hidden && master) {
+                    abrirDetalheDoc(master.id);
+                }
+            } catch (err) {
+                console.error('Falha em excluirRevisaoMaster:', err);
+                const info = formatarErroFirestoreDocs(err);
+                if (info.tipo === 'regras_firestore') abrirModalAlertaRegrasFirestore(info);
+                else showToast(info.resumo, 'error');
+            }
+        };
+
         window.salvarSubmissaoDocumento = async (e) => {
             e.preventDefault();
             const modo = document.getElementById('docFormModo').value;
             const masterId = document.getElementById('docMasterEditId').value;
+            if (modo === 'master_edit' && !isMasterDocsAtivo()) {
+                return showToast('Acesso restrito: apenas Admin Master pode editar documentos diretamente.', 'error');
+            }
+
             const area = document.getElementById('ndArea').value.trim();
             const maquina = document.getElementById('ndMaquina').value.trim();
             const equipamento = document.getElementById('ndEquipamento').value.trim();
@@ -3162,12 +3505,21 @@ match /config/{document=**} {
             if (!area || !maquina || !equipamento || !codigo || !titulo) {
                 return showToast('Preencha Setor, Linha, Equipamento, Código e Título.', 'error');
             }
-            if (!arquivoDiretoDraft && !arquivoUrl && !fotoCampoB64Draft) {
+            const temAnexoMantido = (modo === 'master_edit' && Boolean(masterEditManterArquivo?.arquivoId));
+            if (!arquivoDiretoDraft && !temAnexoMantido && !arquivoUrl && !fotoCampoB64Draft) {
                 return showToast('Arraste um arquivo, tire uma foto ou informe um link antes de enviar.', 'error');
             }
 
             if (modo === 'novo' && docsAtivos.some(d => normKey(d.codigo) === normKey(codigo))) {
                 return showToast(`O código "${codigo}" já existe. Use "Nova Revisão" nele ou ajuste a numeração.`, 'error');
+            }
+            if (modo === 'master_edit' && docsAtivos.some(d => d.id !== masterId && normKey(d.codigo) === normKey(codigo))) {
+                return showToast(`O código "${codigo}" já pertence a outro documento.`, 'error');
+            }
+
+            const existingMaster = (modo === 'master_edit') ? docsAtivos.find(d => d.id === masterId) : null;
+            if (modo === 'master_edit' && !existingMaster) {
+                return showToast('Documento não encontrado para edição Master.', 'error');
             }
 
             const matchNode = assetNodes.find(n =>
@@ -3183,8 +3535,9 @@ match /config/{document=**} {
 
             const catMeta = CATEGORIAS_DOCS[categoria] || CATEGORIAS_DOCS.manuais;
             const pastaSug = montarPastaSharePointRelativa({ categoria, area, maquina, equipamento });
-            const fileExt = arquivoDiretoDraft?.fileName?.includes('.')
-                ? arquivoDiretoDraft.fileName.split('.').pop().toLowerCase().replace(/[^a-z0-9]/g, '')
+            const refArqNome = arquivoDiretoDraft?.fileName || (temAnexoMantido ? masterEditManterArquivo.arquivoNome : '');
+            const fileExt = refArqNome?.includes('.')
+                ? refArqNome.split('.').pop().toLowerCase().replace(/[^a-z0-9]/g, '')
                 : ((fotoCampoB64Draft && !arquivoUrl) ? 'jpg' : 'pdf');
             const nomeSug = montarNomePadraoArquivoSp(codigo, revLabel, titulo, fileExt || 'pdf');
             const agora = new Date().toISOString();
@@ -3193,7 +3546,10 @@ match /config/{document=**} {
             const origemEnvio = isPerfilAprovadorDocs(usuarioLogado) ? 'gestao' : 'campo_sugestao';
 
             const btn = document.getElementById('btnSalvarSubmissaoDoc');
-            if (btn) { btn.disabled = true; btn.innerText = 'Salvando Arquivo e Enviando...'; }
+            if (btn) {
+                btn.disabled = true;
+                btn.innerText = modo === 'master_edit' ? 'Salvando Edição Master...' : 'Salvando Arquivo e Enviando...';
+            }
 
             try {
                 // 1. Espelha na pasta OneDrive / Power Automate se conectado (zero trabalho pro usuário!)
@@ -3227,11 +3583,11 @@ match /config/{document=**} {
                 if (modo === 'novo') targetMasterId = masterDocRef.id;
 
                 const specs = {
-                    ativoNodeId,
-                    ativoDocId: matchNode?.docId || '',
-                    tagAtivo: matchNode?.tag || '',
-                    fabricante: matchNode?.fabricante || '',
-                    modelo: matchNode?.modelo || ''
+                    ativoNodeId: ativoNodeId || existingMaster?.ativoNodeId || '',
+                    ativoDocId: matchNode?.docId || existingMaster?.ativoDocId || '',
+                    tagAtivo: matchNode?.tag || existingMaster?.tagAtivo || '',
+                    fabricante: matchNode?.fabricante || existingMaster?.fabricante || '',
+                    modelo: matchNode?.modelo || existingMaster?.modelo || ''
                 };
 
                 let arqId = '';
@@ -3251,16 +3607,108 @@ match /config/{document=**} {
                     } else if (arquivoUrl) {
                         provider = 'sharepoint';
                     } else {
-                        if (btn) { btn.disabled = false; btn.innerText = 'Enviar para Aprovação'; }
+                        if (btn) {
+                            btn.disabled = false;
+                            btn.innerText = modo === 'master_edit' ? '💾 Salvar Edição Direta (Master)' : 'Enviar para Aprovação';
+                        }
                         return showToast('Arquivo maior que 7 MB requer pasta OneDrive conectada ou Link SharePoint.', 'error');
                     }
+                } else if (temAnexoMantido) {
+                    arquivoMeta = { ...masterEditManterArquivo };
+                    provider = arquivoUrl ? 'hibrido' : 'banco_interno';
                 } else if (fotoCampoB64Draft && !arquivoUrl) {
                     provider = 'foto_campo';
                 }
 
-                // 2. Se houver anexo direto <= 7MB, grava as partes antes no Firestore
+                // 2. Se houver novo anexo direto <= 7MB, grava as partes antes no Firestore
                 if (arqId && arquivoDiretoDraft) {
                     arquivoMeta = await gravarArquivoPartesFirestore(arqId, targetMasterId, revNum, arquivoDiretoDraft);
+                }
+
+                if (modo === 'master_edit' && existingMaster) {
+                    const oldArquivoId = existingMaster.arquivoId || '';
+                    const masterPatch = {
+                        codigo,
+                        titulo,
+                        categoria,
+                        subtipo,
+                        sigilo: catMeta.sigilo,
+                        disciplina,
+                        escopoNivel: subconjunto ? 'subconjunto' : (conjunto ? 'conjunto' : 'equipamento'),
+                        ...specs,
+                        area,
+                        maquina,
+                        equipamento,
+                        conjunto,
+                        subconjunto,
+                        tags,
+                        resumoTecnico,
+                        validadeEm,
+                        periodicidadeRevalidacaoMeses,
+                        arquivoProvider: provider,
+                        ...arquivoMeta,
+                        arquivoUrl,
+                        arquivoEmbedUrl,
+                        fotoThumbB64: fotoCampoB64Draft || '',
+                        sharepointPastaSugerida: pastaSug,
+                        sharepointNomeSugerido: nomeSug,
+                        editadoMasterPor: autor,
+                        editadoMasterEm: agora,
+                        atualizadoPor: autor,
+                        atualizadoEm: agora
+                    };
+                    masterPatch.searchText = construirSearchText({ ...existingMaster, ...masterPatch });
+                    await updateDoc(doc(db, 'docs_ativos', existingMaster.id), sanitizarPayloadFirestore(masterPatch));
+
+                    const revsDoDoc = docsRevisoes.filter(r => r.docMasterId === existingMaster.id);
+                    const alvoRev = revsDoDoc.find(r => r.id === existingMaster.revisaoVigenteId)
+                        || revsDoDoc.sort((a, b) => Number(b.revisaoNum || 0) - Number(a.revisaoNum || 0))[0];
+
+                    if (alvoRev) {
+                        await updateDoc(doc(db, 'docs_revisoes', alvoRev.id), sanitizarPayloadFirestore({
+                            codigoDoc: codigo,
+                            titulo,
+                            categoria,
+                            subtipo,
+                            sigilo: catMeta.sigilo,
+                            disciplina,
+                            ...specs,
+                            area,
+                            maquina,
+                            equipamento,
+                            conjunto,
+                            subconjunto,
+                            tags,
+                            resumoTecnico,
+                            validadeEm,
+                            periodicidadeRevalidacaoMeses,
+                            motivoAlteracao,
+                            arquivoProvider: provider,
+                            ...arquivoMeta,
+                            arquivoUrl,
+                            arquivoEmbedUrl,
+                            fotoThumbB64: fotoCampoB64Draft || '',
+                            sharepointPastaSugerida: pastaSug,
+                            sharepointNomeSugerido: nomeSug,
+                            editadoMasterPor: autor,
+                            editadoMasterEm: agora
+                        }));
+                    }
+
+                    if (normKey(existingMaster.codigo) !== normKey(codigo)) {
+                        for (const r of revsDoDoc) {
+                            if (alvoRev && r.id === alvoRev.id) continue;
+                            await updateDoc(doc(db, 'docs_revisoes', r.id), sanitizarPayloadFirestore({ codigoDoc: codigo }));
+                        }
+                    }
+
+                    if (oldArquivoId && oldArquivoId !== arquivoMeta.arquivoId) {
+                        await removerPartesArquivoSeOrfao([oldArquivoId]);
+                    }
+
+                    fecharModal('modalNovoDoc');
+                    showToast(`Documento "${codigo}" atualizado diretamente (Admin Master)!`, 'success');
+                    return;
                 }
 
                 if (modo === 'novo') {
@@ -3363,7 +3811,10 @@ match /config/{document=**} {
                     showToast(info.resumo, 'error');
                 }
             } finally {
-                if (btn) { btn.disabled = false; btn.innerText = 'Enviar para Aprovação'; }
+                if (btn) {
+                    btn.disabled = false;
+                    btn.innerText = modo === 'master_edit' ? '💾 Salvar Edição Direta (Master)' : 'Enviar para Aprovação';
+                }
             }
         };
 
@@ -3421,6 +3872,7 @@ match /config/{document=**} {
                 : '';
 
             const ehAprovadorSp = isPerfilAprovadorDocs(usuarioLogado);
+            const masterOnDet = isMasterDocsAtivo();
             const nomePadraoSp = d.sharepointNomeSugerido || `${d.codigo || 'DOC'}.pdf`;
             const pastaPadraoSp = d.sharepointPastaSugerida || sharepointCfg.pastaRaiz || 'SISTEMA';
             const spBoxHtml = d.arquivoUrl
@@ -3495,6 +3947,7 @@ match /config/{document=**} {
                                 <div class="flex items-center gap-1.5 shrink-0">
                                     ${r.arquivoId ? `<button type="button" onclick="abrirArquivoDoc('${d.id}', '${r.id}')" class="px-2.5 py-1 rounded-lg bg-indigo-50 hover:bg-indigo-100 text-indigo-700 font-extrabold text-[10px]">Visualizar</button>` : ''}
                                     ${r.arquivoUrl ? `<a href="${escapeHtml(r.arquivoUrl)}" target="_blank" rel="noopener" class="px-2.5 py-1 rounded-lg bg-slate-100 hover:bg-slate-200 text-slate-700 font-extrabold text-[10px]">SharePoint ↗</a>` : ''}
+                                    ${masterOnDet ? `<button type="button" onclick="excluirRevisaoMaster('${r.id}')" title="Excluir esta revisão (Admin Master)" class="px-2.5 py-1 rounded-lg bg-rose-50 hover:bg-rose-100 border border-rose-200 text-rose-700 font-extrabold text-[10px]">🗑️ Excluir Rev.</button>` : ''}
                                 </div>
                             </div>`).join('')}
                     </div>
@@ -3503,6 +3956,8 @@ match /config/{document=**} {
             document.getElementById('detDocFooter').innerHTML = `
                 <div class="flex flex-wrap items-center gap-2">
                     <button type="button" onclick="abrirModalNovaRevisao('${d.id}')" class="btn-pill-dark text-xs py-2 px-4">+ Submeter Nova Revisão</button>
+                    ${masterOnDet ? `<button type="button" onclick="abrirModalEdicaoMaster('${d.id}')" title="Edição direta sem fila de aprovação (Admin Master)" class="btn-touch bg-amber-50 hover:bg-amber-100 border border-amber-200 text-amber-800 text-xs py-2 px-4">✏️ Editar (Master)</button>
+                    <button type="button" onclick="excluirDocumentoMaster('${d.id}')" title="Exclui documento, todas as revisões e arquivos anexados (Admin Master)" class="btn-touch bg-rose-50 hover:bg-rose-100 border border-rose-200 text-rose-700 text-xs py-2 px-4">🗑️ Excluir Documento (Master)</button>` : ''}
                 </div>
                 <button type="button" onclick="fecharModal('modalDetalheDoc')" class="btn-touch bg-white border border-slate-200 text-slate-700 text-xs">Fechar</button>`;
 
@@ -3641,6 +4096,14 @@ match /config/{document=**} {
                 atualizarBadgesOneDriveUI();
                 if (currentView === 'sharepoint') renderSharePointView();
             }, () => {});
+
+            try {
+                onSnapshot(refMasterCfgDocs, (snapDoc) => {
+                    const data = snapDoc && snapDoc.exists() ? snapDoc.data() : null;
+                    customMasterHashDocs = (data && data.pass_hash) ? String(data.pass_hash) : null;
+                    if (usuarioLogado) { aplicarPerfilInterface(); renderCurrentView(); }
+                }, () => {});
+            } catch (_) {}
 
             onSnapshot(refLinhas, (snap) => {
                 rawLinhasDocs = snap.docs.map(d => ({ id: d.id, ...d.data() }));
