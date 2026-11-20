@@ -478,12 +478,21 @@
                         <div class="grid grid-cols-1 xl:grid-cols-12 gap-5 items-start">
                             <!-- COLUNA ESQUERDA: ÁRVORE EXPANSÍVEL -->
                             <div class="xl:col-span-5 glass-card rounded-3xl p-4 sm:p-5 flex flex-col max-h-[75vh]">
-                                <div class="flex items-center justify-between pb-3 mb-3 border-b border-slate-100">
-                                    <div>
-                                        <h2 class="text-xs font-extrabold uppercase tracking-wider text-slate-700">Estrutura Hierárquica</h2>
-                                        <p id="treeFilterSummary" class="text-[11px] text-slate-400 font-semibold">Clique em qualquer nível para inspecionar ou editar</p>
+                                <div class="pb-3 mb-3 border-b border-slate-100 space-y-2">
+                                    <div class="flex items-center justify-between gap-2">
+                                        <div>
+                                            <h2 class="text-xs font-extrabold uppercase tracking-wider text-slate-700">Estrutura Hierárquica</h2>
+                                            <p id="treeFilterSummary" class="text-[11px] text-slate-400 font-semibold">Clique em qualquer nível para inspecionar ou editar</p>
+                                        </div>
+                                        <button type="button" onclick="abrirModalNovoAtivo()" class="px-2.5 py-1 rounded-xl bg-sky-50 hover:bg-sky-100 text-sky-700 border border-sky-200 text-[11px] font-extrabold">+ Setor / Ativo</button>
                                     </div>
-                                    <button type="button" onclick="abrirModalNovoAtivo()" class="px-2.5 py-1 rounded-xl bg-sky-50 hover:bg-sky-100 text-sky-700 border border-sky-200 text-[11px] font-extrabold">+ Setor / Ativo</button>
+                                    <div class="flex flex-wrap items-center gap-1.5" id="treeLinhasQuickBar">
+                                        <button type="button" onclick="setFiltroLinhaRapido('')" id="btnLinhaCrit_ALL" class="px-2 py-1 rounded-lg text-[10px] font-extrabold bg-slate-900 text-white transition-colors">Todas Linhas</button>
+                                        <button type="button" onclick="setFiltroLinhaRapido('A')" id="btnLinhaCrit_A" class="px-2 py-1 rounded-lg text-[10px] font-extrabold bg-rose-50 hover:bg-rose-100 text-rose-700 border border-rose-200 transition-colors">Só Linha A</button>
+                                        <button type="button" onclick="setFiltroLinhaRapido('AB')" id="btnLinhaCrit_AB" class="px-2 py-1 rounded-lg text-[10px] font-extrabold bg-amber-50 hover:bg-amber-100 text-amber-800 border border-amber-200 transition-colors">Linhas A+B</button>
+                                        <button type="button" onclick="setFiltroLinhaRapido('UNDEF')" id="btnLinhaCrit_UNDEF" class="px-2 py-1 rounded-lg text-[10px] font-extrabold bg-slate-100 hover:bg-slate-200 text-slate-600 border border-slate-200 transition-colors">Sem Linha A/B/C</button>
+                                        <button type="button" onclick="toggleOrdenarLinhasCrit()" id="btnOrdenarLinhasCrit" title="Ordenar Linhas por criticidade (A → B → C)" class="ml-auto px-2 py-1 rounded-lg text-[10px] font-extrabold bg-indigo-600 text-white border border-indigo-700 transition-colors">Ordem: A→B→C ✓</button>
+                                    </div>
                                 </div>
                                 <div id="treeContainer" class="flex-1 overflow-y-auto space-y-1 pr-1"></div>
                             </div>
@@ -537,6 +546,18 @@
                             </div>
                         </div>
 
+                        <!-- CRITICIDADE DAS LINHAS (CLASSE A / B / C) -->
+                        <div class="glass-card p-5 sm:p-6 rounded-3xl space-y-4">
+                            <div class="flex flex-wrap items-center justify-between gap-2">
+                                <div>
+                                    <h3 class="text-sm font-extrabold text-slate-900">Criticidade das Linhas Produtivas (Classe A / B / C)</h3>
+                                    <p class="text-[11px] text-slate-500">Aponte e acompanhe as linhas mais críticas da planta — ordene ou clique para abrir direto na Árvore</p>
+                                </div>
+                                <div id="dashLinhasCritBadges" class="flex flex-wrap items-center gap-1.5"></div>
+                            </div>
+                            <div id="dashLinhasCritList" class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-2.5 max-h-80 overflow-y-auto pr-1"></div>
+                        </div>
+
                         <!-- RESUMO POR SETOR / ÁREA -->
                         <div class="glass-card p-5 sm:p-6 rounded-3xl space-y-4">
                             <div class="flex items-center justify-between">
@@ -550,11 +571,11 @@
                                     <thead>
                                         <tr class="bg-slate-50 border-b border-slate-200 text-[10px] font-extrabold uppercase text-slate-500">
                                             <th class="py-3 px-4">Setor / Área</th>
-                                            <th class="py-3 px-3 text-center">Linhas</th>
+                                            <th class="py-3 px-3 text-center">Linhas (Cls A)</th>
                                             <th class="py-3 px-3 text-center">Equipamentos</th>
                                             <th class="py-3 px-3 text-center">Conjuntos</th>
                                             <th class="py-3 px-3 text-center">Subconjuntos</th>
-                                            <th class="py-3 px-3 text-center">Classe A</th>
+                                            <th class="py-3 px-3 text-center">Ativos Cls. A</th>
                                             <th class="py-3 px-3 text-center">Completude</th>
                                             <th class="py-3 px-4 text-right">Ação</th>
                                         </tr>
@@ -1275,6 +1296,7 @@
             const ano_fabricacao = pickField(raw, ['ano_fabricacao', 'ano']);
             const tag = pickField(raw, ['tag', 'codigo', 'patrimonio']);
             const criticidade = normalizarCriticidade(pickField(raw, ['criticidade', 'tipo_criticidade']));
+            const criticidade_linha = normalizarCriticidade(pickField(raw, ['criticidade_linha', 'classe_linha', 'linha_criticidade']));
             const periodicidade_preventiva = pickField(raw, ['periodicidade_preventiva', 'periodicidade']);
             const disciplina = pickField(raw, ['disciplina']) || 'Mecânica';
             const status_ativo = STATUS_ATIVOS[raw.status_ativo] ? raw.status_ativo : 'Ativo';
@@ -1308,6 +1330,7 @@
                         subconjunto: subNome,
                         tag,
                         criticidade,
+                        criticidade_linha,
                         criticidade_criterios: raw.criticidade_criterios || null,
                         periodicidade_preventiva,
                         periodicidade_semanas: (PERIODICIDADES[periodicidade_preventiva]?.semanas ?? raw.periodicidade_semanas ?? 0),
@@ -1338,6 +1361,7 @@
                 subconjunto: subconjuntoFlat,
                 tag,
                 criticidade,
+                criticidade_linha,
                 criticidade_criterios: raw.criticidade_criterios || null,
                 periodicidade_preventiva,
                 periodicidade_semanas: (PERIODICIDADES[periodicidade_preventiva]?.semanas ?? raw.periodicidade_semanas ?? 0),
@@ -1389,6 +1413,98 @@
             });
             return best;
         }
+
+        function getInfoCriticidadeLinha(area, maquina, nodesOverride = null) {
+            const nodes = (nodesOverride || assetNodes).filter(n => (!area || n.area === area) && n.maquina === maquina);
+            let bestExp = '';
+            let pesoExp = 0;
+            let bestImp = '';
+            let pesoImp = 0;
+            nodes.forEach(n => {
+                const pl = CRITICIDADES[n.criticidade_linha]?.peso || 0;
+                if (pl > pesoExp) { pesoExp = pl; bestExp = n.criticidade_linha; }
+                const pa = CRITICIDADES[n.criticidade]?.peso || 0;
+                if (pa > pesoImp) { pesoImp = pa; bestImp = n.criticidade; }
+            });
+            return {
+                classe: bestExp || bestImp || '',
+                explicita: Boolean(bestExp),
+                explicitaClasse: bestExp,
+                inferidaClasse: bestImp,
+                semDefinicao: !bestExp,
+                peso: CRITICIDADES[bestExp || bestImp]?.peso || 0,
+                qtdNodes: nodes.length
+            };
+        }
+
+        function renderBadgeCritLinha(infoOrClasse, size = 'sm') {
+            const info = (infoOrClasse && typeof infoOrClasse === 'object')
+                ? infoOrClasse
+                : { classe: String(infoOrClasse || ''), explicita: true };
+            const padCls = size === 'xs' ? 'px-1.5 py-0.5 text-[9px]' : 'px-2 py-0.5 text-[10px]';
+            const cls = info.classe;
+            if (!cls || !CRITICIDADES[cls]) {
+                return `<span class="rounded-full font-bold ${padCls} bg-slate-100 text-slate-500 border border-slate-200" title="Criticidade desta Linha ainda não apontada">Linha s/ def.</span>`;
+            }
+            const suf = info.explicita ? '' : ' (auto)';
+            const ttl = info.explicita
+                ? `Criticidade apontada da Linha: ${CRITICIDADES[cls].label} — ${CRITICIDADES[cls].desc}`
+                : `Classe ${cls} inferida pelos equipamentos (clique para apontar explicitamente na Linha)`;
+            return `<span class="rounded-full font-extrabold uppercase ${padCls} ${CRITICIDADES[cls].badge} ${info.explicita ? 'ring-1 ring-inset ring-black/10' : 'opacity-80 border-dashed'}" title="${escapeHtml(ttl)}">Linha ${cls}${suf}</span>`;
+        }
+
+        function getCatalogoLinhasCrit(nodesOverride = null) {
+            const list = nodesOverride || assetNodes;
+            const map = new Map();
+            list.forEach(n => {
+                const key = `${n.area}|||${n.maquina}`;
+                if (!map.has(key)) map.set(key, []);
+                map.get(key).push(n);
+            });
+            const res = [];
+            map.forEach((nodes, key) => {
+                const [area, maquina] = key.split('|||');
+                const info = getInfoCriticidadeLinha(area, maquina, nodes);
+                const eqs = new Set(nodes.map(x => x.equipamento)).size;
+                res.push({ area, maquina, ...info, equipamentosCount: eqs, subconjuntosCount: nodes.length });
+            });
+            return res.sort((a, b) => (b.peso - a.peso) || a.area.localeCompare(b.area, 'pt-BR') || a.maquina.localeCompare(b.maquina, 'pt-BR'));
+        }
+
+        window.definirCriticidadeLinha = async (area, maquina, novaClasse = '', aplicarAosAtivosVazios = false) => {
+            const cls = novaClasse ? normalizarCriticidade(novaClasse) : '';
+            const matching = assetNodes.filter(n => n.area === area && n.maquina === maquina);
+            if (!matching.length) {
+                showToast('Nenhum registro encontrado para esta Linha.', 'error');
+                return;
+            }
+            const docIds = [...new Set(matching.map(n => n.docId).filter(Boolean))];
+            const docMap = new Map(rawLinhasDocs.map(d => [d.id, d.data || {}]));
+            const agora = new Date().toISOString();
+            const usuarioNome = usuarioLogado?.nome || usuarioLogado?.user || 'Gestor';
+            let okCount = 0;
+            try {
+                for (const dId of docIds) {
+                    const raw = docMap.get(dId) || {};
+                    const upd = {
+                        criticidade_linha: cls,
+                        atualizado_por: usuarioNome,
+                        atualizado_em: agora
+                    };
+                    if (cls && aplicarAosAtivosVazios && !normalizarCriticidade(raw.criticidade)) {
+                        upd.criticidade = cls;
+                    }
+                    await updateDoc(doc(db, 'ob_linhas', dId), upd);
+                    okCount++;
+                }
+                showToast(cls
+                    ? `Linha "${maquina}" apontada como Classe ${cls} (${CRITICIDADES[cls]?.desc || ''}) em ${okCount} registro(s)!`
+                    : `Marcação explícita da Linha "${maquina}" removida (${okCount} registro(s)).`, 'success');
+            } catch (err) {
+                console.error(err);
+                showToast('Erro ao salvar criticidade da Linha no Firestore.', 'error');
+            }
+        };
 
         function renderBadgeCrit(crit, size = 'sm') {
             const padCls = size === 'xs' ? 'px-1.5 py-0.5 text-[9px]' : 'px-2 py-0.5 text-[10px]';
@@ -1668,12 +1784,55 @@
         }
 
         // ================= FILTRO & RENDERIZAÇÃO DA ÁRVORE =================
+        let filtroLinhaModo = '';
+        let ordenarLinhasPorCriticidade = true;
+
+        function atualizarUiControlesLinhaArvore() {
+            const mapa = {
+                '': ['btnLinhaCrit_ALL', 'bg-slate-900 text-white', 'bg-slate-100 hover:bg-slate-200 text-slate-600 border border-slate-200'],
+                'A': ['btnLinhaCrit_A', 'bg-rose-600 text-white border border-rose-700', 'bg-rose-50 hover:bg-rose-100 text-rose-700 border border-rose-200'],
+                'AB': ['btnLinhaCrit_AB', 'bg-amber-600 text-white border border-amber-700', 'bg-amber-50 hover:bg-amber-100 text-amber-800 border border-amber-200'],
+                'UNDEF': ['btnLinhaCrit_UNDEF', 'bg-slate-700 text-white border border-slate-800', 'bg-slate-100 hover:bg-slate-200 text-slate-600 border border-slate-200']
+            };
+            Object.entries(mapa).forEach(([k, [id, clsOn, clsOff]]) => {
+                const el = document.getElementById(id);
+                if (!el) return;
+                el.className = `px-2 py-1 rounded-lg text-[10px] font-extrabold transition-colors ${filtroLinhaModo === k ? clsOn : clsOff}`;
+            });
+            const btnOrd = document.getElementById('btnOrdenarLinhasCrit');
+            if (btnOrd) {
+                btnOrd.innerText = ordenarLinhasPorCriticidade ? 'Ordem: A→B→C ✓' : 'Ordem: A–Z';
+                btnOrd.className = ordenarLinhasPorCriticidade
+                    ? 'ml-auto px-2 py-1 rounded-lg text-[10px] font-extrabold bg-indigo-600 text-white border border-indigo-700 transition-colors'
+                    : 'ml-auto px-2 py-1 rounded-lg text-[10px] font-extrabold bg-slate-100 text-slate-600 border border-slate-200 transition-colors';
+            }
+        }
+
+        window.setFiltroLinhaRapido = (modo = '') => {
+            filtroLinhaModo = (filtroLinhaModo === modo && modo !== '') ? '' : modo;
+            atualizarUiControlesLinhaArvore();
+            onTreeFilterChange();
+        };
+
+        window.toggleOrdenarLinhasCrit = () => {
+            ordenarLinhasPorCriticidade = !ordenarLinhasPorCriticidade;
+            atualizarUiControlesLinhaArvore();
+            renderTree(false);
+        };
+
         function getNodesFiltradosArvore() {
             const q = normKey(document.getElementById('treeSearchInput')?.value || '');
             const crit = document.getElementById('treeFilterCrit')?.value || '';
             const per = document.getElementById('treeFilterPer')?.value || '';
             const disc = document.getElementById('treeFilterDisc')?.value || '';
             const st = document.getElementById('treeFilterStatus')?.value || '';
+
+            const lineInfoCache = new Map();
+            const getLineInfo = (area, maq) => {
+                const k = `${area}|||${maq}`;
+                if (!lineInfoCache.has(k)) lineInfoCache.set(k, getInfoCriticidadeLinha(area, maq));
+                return lineInfoCache.get(k);
+            };
 
             return assetNodes.filter(n => {
                 if (crit === 'NONE' && n.criticidade) return false;
@@ -1682,6 +1841,12 @@
                 if (per && per !== 'NONE' && n.periodicidade_preventiva !== per) return false;
                 if (disc && n.disciplina !== disc) return false;
                 if (st && n.status_ativo !== st) return false;
+                if (filtroLinhaModo) {
+                    const lInfo = getLineInfo(n.area, n.maquina);
+                    if (filtroLinhaModo === 'A' && lInfo.classe !== 'A') return false;
+                    if (filtroLinhaModo === 'AB' && lInfo.classe !== 'A' && lInfo.classe !== 'B') return false;
+                    if (filtroLinhaModo === 'UNDEF' && lInfo.explicita) return false;
+                }
                 if (q) {
                     const hay = normKey(`${n.area} ${n.maquina} ${n.equipamento} ${n.conjunto} ${n.subconjunto} ${n.tag} ${n.fabricante} ${n.modelo} ${n.serie} ${n.padrinho_mec} ${n.padrinho_ele}`);
                     if (!hay.includes(q)) return false;
@@ -1696,7 +1861,8 @@
                 document.getElementById('treeFilterCrit')?.value ||
                 document.getElementById('treeFilterPer')?.value ||
                 document.getElementById('treeFilterDisc')?.value ||
-                document.getElementById('treeFilterStatus')?.value
+                document.getElementById('treeFilterStatus')?.value ||
+                filtroLinhaModo
             );
             renderTree(hasFilter);
         };
@@ -1706,6 +1872,8 @@
                 const el = document.getElementById(id);
                 if (el) el.value = '';
             });
+            filtroLinhaModo = '';
+            atualizarUiControlesLinhaArvore();
             renderTree(false);
         };
 
@@ -1800,6 +1968,16 @@
                 const openA = autoExpand || expandedKeys.has(kA);
                 const areaNodes = filtrados.filter(n => n.area === area);
                 const critA = maiorCriticidade(areaNodes);
+                let areaLinhasA = 0;
+                const linhasEntries = [...mMap.entries()].map(([maq, eMap]) => {
+                    const maqNodes = areaNodes.filter(n => n.maquina === maq);
+                    const linhaInfo = getInfoCriticidadeLinha(area, maq, assetNodes);
+                    if (linhaInfo.classe === 'A') areaLinhasA++;
+                    return { maq, eMap, maqNodes, linhaInfo };
+                });
+                if (ordenarLinhasPorCriticidade) {
+                    linhasEntries.sort((a, b) => (b.linhaInfo.peso - a.linhaInfo.peso) || a.maq.localeCompare(b.maq, 'pt-BR'));
+                }
 
                 html += `<div>
                     <div class="tree-row ${isSelected('area', area) ? 'selected' : ''}" onclick="selecionarAlvo('area', ${JSON.stringify(area).replace(/"/g, '&quot;')})">
@@ -1809,7 +1987,7 @@
                             <span class="text-xs font-extrabold text-slate-900 truncate">${escapeHtml(area)}</span>
                         </div>
                         <div class="flex items-center gap-1 shrink-0">
-                            ${critA ? renderBadgeCrit(critA, 'xs') : ''}
+                            ${areaLinhasA ? `<span class="px-1.5 py-0.5 rounded-full text-[9px] font-extrabold bg-rose-600 text-white" title="${areaLinhasA} linha(s) Classe A neste setor">${areaLinhasA} Linha A</span>` : (critA ? renderBadgeCrit(critA, 'xs') : '')}
                             <span class="text-[10px] font-bold text-slate-400">${mMap.size}L</span>
                             <button type="button" title="Adicionar Máquina/Linha neste Setor" onclick="event.stopPropagation(); abrirModalNovoAtivo({ area: ${JSON.stringify(area).replace(/"/g, '&quot;')} })" class="w-5 h-5 rounded-md bg-slate-100 hover:bg-sky-100 text-slate-600 hover:text-sky-700 font-extrabold text-xs flex items-center justify-center">+</button>
                         </div>
@@ -1817,21 +1995,25 @@
 
                 if (openA) {
                     html += `<div class="tree-children">`;
-                    mMap.forEach((eMap, maq) => {
+                    linhasEntries.forEach(({ maq, eMap, maqNodes, linhaInfo }) => {
                         const kM = `M|${area}|${maq}`;
                         const openM = autoExpand || expandedKeys.has(kM);
-                        const maqNodes = areaNodes.filter(n => n.maquina === maq);
-                        const critM = maiorCriticidade(maqNodes);
+                        const linhaHighlightCls = linhaInfo.classe === 'A'
+                            ? 'border-l-4 border-l-rose-500 bg-rose-50/45 hover:bg-rose-50/80'
+                            : (linhaInfo.classe === 'B'
+                                ? 'border-l-4 border-l-amber-500 bg-amber-50/35 hover:bg-amber-50/70'
+                                : (linhaInfo.classe === 'C' ? 'border-l-4 border-l-emerald-500 bg-emerald-50/25' : ''));
+                        const iconCorCls = linhaInfo.classe === 'A' ? 'text-rose-600' : (linhaInfo.classe === 'B' ? 'text-amber-600' : (linhaInfo.classe === 'C' ? 'text-emerald-600' : 'text-indigo-600'));
 
                         html += `<div>
-                            <div class="tree-row ${isSelected('maquina', area, maq) ? 'selected' : ''}" onclick="selecionarAlvo('maquina', ${JSON.stringify(area).replace(/"/g, '&quot;')}, ${JSON.stringify(maq).replace(/"/g, '&quot;')})">
+                            <div class="tree-row ${linhaHighlightCls} ${isSelected('maquina', area, maq) ? 'selected' : ''}" onclick="selecionarAlvo('maquina', ${JSON.stringify(area).replace(/"/g, '&quot;')}, ${JSON.stringify(maq).replace(/"/g, '&quot;')})">
                                 <div class="flex items-center gap-1.5 min-w-0">
                                     <span class="tree-chevron ${openM ? 'open' : ''}" onclick="event.stopPropagation(); toggleBranch(${JSON.stringify(kM).replace(/"/g, '&quot;')})">${CHEVRON_SVG}</span>
-                                    <svg class="w-3.5 h-3.5 text-indigo-600 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"/></svg>
+                                    <svg class="w-3.5 h-3.5 ${iconCorCls} shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"/></svg>
                                     <span class="text-xs font-bold text-slate-800 truncate">${escapeHtml(maq)}</span>
                                 </div>
                                 <div class="flex items-center gap-1 shrink-0">
-                                    ${critM ? renderBadgeCrit(critM, 'xs') : ''}
+                                    ${renderBadgeCritLinha(linhaInfo, 'xs')}
                                     <span class="text-[10px] font-bold text-slate-400">${eMap.size}E</span>
                                     <button type="button" title="Adicionar Equipamento nesta Linha" onclick="event.stopPropagation(); abrirModalNovoAtivo({ area: ${JSON.stringify(area).replace(/"/g, '&quot;')}, maquina: ${JSON.stringify(maq).replace(/"/g, '&quot;')} })" class="w-5 h-5 rounded-md bg-slate-100 hover:bg-sky-100 text-slate-600 hover:text-sky-700 font-extrabold text-xs flex items-center justify-center">+</button>
                                 </div>
@@ -1970,6 +2152,7 @@
                 subconjunto: nodeId ? (rep.subconjunto || '') : '',
                 tag: rep.tag || '',
                 criticidade: maiorCriticidade(leafs) || rep.criticidade || '',
+                criticidade_linha: getInfoCriticidadeLinha(area || rep.area || '', maquina || rep.maquina || '').classe || '',
                 periodicidade: rep.periodicidade_preventiva || '',
                 disciplina: rep.disciplina || 'Mecânica',
                 padrinho_mec: rep.padrinho_mec || '',
@@ -1986,9 +2169,11 @@
             if (metaEl) {
                 const pathTxt = [pendingAgendarCtx.area, pendingAgendarCtx.maquina, pendingAgendarCtx.equipamento, pendingAgendarCtx.conjunto, pendingAgendarCtx.subconjunto]
                     .filter(Boolean).map(escapeHtml).join(' › ');
+                const lInfoAg = getInfoCriticidadeLinha(pendingAgendarCtx.area, pendingAgendarCtx.maquina);
                 metaEl.innerHTML = `
                     <div class="text-[11px] font-bold text-slate-500">${pathTxt}</div>
                     <div class="flex flex-wrap items-center gap-1.5 pt-1">
+                        ${lInfoAg.classe ? renderBadgeCritLinha(lInfoAg, 'xs') : ''}
                         ${pendingAgendarCtx.criticidade ? renderBadgeCrit(pendingAgendarCtx.criticidade, 'xs') : ''}
                         ${pendingAgendarCtx.periodicidade ? `<span class="px-2 py-0.5 rounded-full text-[10px] font-extrabold bg-sky-50 text-sky-700 border border-sky-200">${escapeHtml(pendingAgendarCtx.periodicidade)}</span>` : ''}
                         <span class="px-2 py-0.5 rounded-full text-[10px] font-bold bg-slate-100 text-slate-700">${escapeHtml(pendingAgendarCtx.disciplina)}</span>
@@ -2076,14 +2261,25 @@
             const planosEl = document.getElementById('agModalPlanosLista');
             if (planosEl) {
                 if (planosMatch.length) {
-                    planosEl.innerHTML = planosMatch.slice(0, 4).map(p => `
+                    const fmtPrio = (rawP) => {
+                        const u = String(rawP || '').trim().toUpperCase();
+                        if (u === 'P1' || u === 'A') return 'P1';
+                        if (u === 'P2') return 'P2';
+                        if (u === 'P3' || u === 'B') return 'P3';
+                        if (u === 'P4' || u === 'C') return 'P4';
+                        return u;
+                    };
+                    planosEl.innerHTML = planosMatch.slice(0, 4).map(p => {
+                        const pr = fmtPrio(p.prioridade || p.criticidade);
+                        return `
                         <div class="p-2.5 rounded-xl bg-white border border-slate-200 flex items-center justify-between gap-2">
                             <div class="min-w-0">
                                 <div class="text-[11px] font-extrabold text-slate-900 truncate">${escapeHtml(p.codigo ? p.codigo + ' — ' : '')}${escapeHtml(p.titulo || 'Plano Preventivo')}</div>
-                                <div class="text-[10px] font-semibold text-slate-500">${escapeHtml(p.periodicidade || 'Mensal')} • ${Array.isArray(p.checklist) ? p.checklist.length : 0} item(ns) no checklist</div>
+                                <div class="text-[10px] font-semibold text-slate-500">${pr ? `<span class="font-extrabold text-slate-700">${escapeHtml(pr)}</span> • ` : ''}${escapeHtml(p.periodicidade || 'Mensal')} • ${Array.isArray(p.checklist) ? p.checklist.length : 0} item(ns) no checklist</div>
                             </div>
                             <button type="button" onclick="executarHandoffAgendamento('preventivas', 'preventiva_programar', '${escapeHtml(p.id)}')" class="px-3 py-1.5 rounded-xl bg-sky-600 hover:bg-sky-700 text-white text-[11px] font-extrabold shrink-0">Programar →</button>
-                        </div>`).join('') + (planosMatch.length > 4 ? `<div class="text-[10px] font-bold text-slate-400">+${planosMatch.length - 4} plano(s) no módulo Preventivas</div>` : '');
+                        </div>`;
+                    }).join('') + (planosMatch.length > 4 ? `<div class="text-[10px] font-bold text-slate-400">+${planosMatch.length - 4} plano(s) no módulo Preventivas</div>` : '');
                 } else {
                     planosEl.innerHTML = `<div class="p-2.5 rounded-xl bg-white/80 border border-dashed border-slate-300 text-[11px] font-semibold text-slate-500">Nenhum plano preventivo vinculado ainda a este conjunto. Crie um agora ou filtre o Calendário 52 Semanas abaixo.</div>`;
                 }
@@ -2360,14 +2556,24 @@
             let bodyHtml = '';
 
             if (active360Tab === 'programados') {
+                const normPrio360 = (rawP) => {
+                    const u = String(rawP || '').trim().toUpperCase();
+                    if (u.startsWith('P1') || u === 'A') return 'P1';
+                    if (u.startsWith('P2')) return 'P2';
+                    if (u.startsWith('P3') || u === 'B') return 'P3';
+                    if (u.startsWith('P4') || u === 'C') return 'P4';
+                    return u;
+                };
                 const cardsProg = [];
                 d.programacoesAbertas.forEach(o => {
                     const isPrev = o.origem === 'modulo_preventivas' || o.tipo === 'preventiva';
+                    const prCode = isPrev ? normPrio360(o.prioridade || o.criticidade) : '';
                     cardsProg.push(`
                     <div class="p-3 rounded-xl bg-white border border-slate-200 flex flex-wrap items-start justify-between gap-2">
                         <div class="min-w-0 flex-1 space-y-0.5">
                             <div class="flex flex-wrap items-center gap-1.5">
                                 <span class="px-2 py-0.5 rounded-full text-[9px] font-extrabold ${isPrev ? 'bg-sky-100 text-sky-800' : 'bg-emerald-100 text-emerald-800'}">${escapeHtml(isPrev ? 'Preventiva' : String(o.tipo || 'Agenda').toUpperCase())}</span>
+                                ${prCode ? `<span class="px-2 py-0.5 rounded-full text-[9px] font-extrabold bg-slate-900 text-white">${escapeHtml(prCode)}</span>` : ''}
                                 ${o.semana ? `<span class="px-2 py-0.5 rounded-full text-[9px] font-extrabold bg-slate-100 text-slate-700">S${escapeHtml(String(o.semana))}</span>` : ''}
                                 <span class="text-[10px] font-bold text-slate-500">${escapeHtml(formatDataBr360(o.data))}${o.hora ? ' às ' + escapeHtml(o.hora) : ''}</span>
                             </div>
@@ -2395,10 +2601,13 @@
                 const plansBadgeHtml = d.planosPreventiva.length ? `
                     <div class="pt-2 space-y-1.5">
                         <div class="text-[10px] font-extrabold uppercase text-sky-700">Planos Preventivos Vinculados (${d.planosPreventiva.length}):</div>
-                        ${d.planosPreventiva.map(p => `<div class="px-3 py-2 rounded-xl bg-sky-50/70 border border-sky-200 text-[11px] font-bold text-sky-950 flex flex-wrap items-center justify-between gap-2">
-                            <span>${escapeHtml(p.codigo ? p.codigo + ' — ' : '')}${escapeHtml(p.titulo || 'Plano')} (${escapeHtml(p.periodicidade || 'Mensal')})</span>
+                        ${d.planosPreventiva.map(p => {
+                            const pPr = normPrio360(p.prioridade || p.criticidade);
+                            return `<div class="px-3 py-2 rounded-xl bg-sky-50/70 border border-sky-200 text-[11px] font-bold text-sky-950 flex flex-wrap items-center justify-between gap-2">
+                            <span>${pPr ? `<span class="px-1.5 py-0.5 rounded bg-slate-900 text-white text-[9px] font-extrabold mr-1">${escapeHtml(pPr)}</span>` : ''}${escapeHtml(p.codigo ? p.codigo + ' — ' : '')}${escapeHtml(p.titulo || 'Plano')} (${escapeHtml(p.periodicidade || 'Mensal')})</span>
                             <span class="text-[10px] text-sky-700">${Array.isArray(p.checklist) ? p.checklist.length : 0} itens no checklist</span>
-                        </div>`).join('')}
+                        </div>`;
+                        }).join('')}
                     </div>` : '';
 
                 bodyHtml = cardsProg.length
@@ -2792,25 +3001,92 @@
 
             const podeClonar = selectedTarget.level === 'maquina' || selectedTarget.level === 'equipamento';
             const podeAgendarConj = selectedTarget.level === 'conjunto';
+            const areaJson = JSON.stringify(selectedTarget.area || '').replace(/"/g, '&quot;');
+            const maqJson = JSON.stringify(selectedTarget.maquina || '').replace(/"/g, '&quot;');
+
+            let criticidadeLinhaBlock = '';
+            if (selectedTarget.level === 'maquina') {
+                const lInfo = getInfoCriticidadeLinha(selectedTarget.area, selectedTarget.maquina, branchNodes);
+                const btnLin = (cls, titulo, corCls) => {
+                    const ativo = lInfo.explicitaClasse === cls;
+                    return `<button type="button" onclick="definirCriticidadeLinha(${areaJson}, ${maqJson}, '${cls}', false)" class="px-3 py-2 rounded-xl text-xs font-extrabold border transition-all ${ativo ? `${corCls} ring-2 ring-offset-1 ring-slate-900 shadow-sm` : 'bg-white hover:bg-slate-50 text-slate-700 border-slate-200'}">${titulo}${ativo ? ' ✓' : ''}</button>`;
+                };
+                criticidadeLinhaBlock = `
+                <div class="p-4 rounded-2xl border ${lInfo.classe === 'A' ? 'bg-rose-50/60 border-rose-200' : (lInfo.classe === 'B' ? 'bg-amber-50/50 border-amber-200' : (lInfo.classe === 'C' ? 'bg-emerald-50/50 border-emerald-200' : 'bg-slate-50 border-slate-200'))} space-y-2.5">
+                    <div class="flex flex-wrap items-center justify-between gap-2">
+                        <div>
+                            <div class="text-[10px] font-extrabold uppercase tracking-wider text-slate-600">Criticidade desta Linha na Árvore (Classe A / B / C)</div>
+                            <div class="text-xs font-bold text-slate-700 mt-0.5">${lInfo.explicita
+                                ? `Apontada explicitamente como <strong>Classe ${lInfo.explicitaClasse} — ${escapeHtml(CRITICIDADES[lInfo.explicitaClasse]?.desc || '')}</strong>`
+                                : (lInfo.inferidaClasse
+                                    ? `Sem marcação na Linha ainda (inferida como Classe ${lInfo.inferidaClasse} pelos equipamentos)`
+                                    : 'Sem classificação definida para esta Linha')
+                            }</div>
+                        </div>
+                        ${renderBadgeCritLinha(lInfo)}
+                    </div>
+                    <div class="flex flex-wrap items-center gap-1.5">
+                        ${btnLin('A', 'Classe A — Crítica', 'crit-A')}
+                        ${btnLin('B', 'Classe B — Importante', 'crit-B')}
+                        ${btnLin('C', 'Classe C — Não Crítica', 'crit-C')}
+                        ${lInfo.explicita ? `<button type="button" onclick="definirCriticidadeLinha(${areaJson}, ${maqJson}, '', false)" class="px-2.5 py-2 rounded-xl text-[11px] font-bold text-slate-500 hover:bg-white border border-transparent hover:border-slate-200">Limpar</button>` : ''}
+                        ${(lInfo.explicita && semCrit > 0) ? `<button type="button" onclick="definirCriticidadeLinha(${areaJson}, ${maqJson}, '${lInfo.explicitaClasse}', true)" class="ml-auto px-2.5 py-2 rounded-xl text-[11px] font-extrabold bg-slate-900 text-white hover:bg-slate-800">Preencher ${semCrit} ativo(s) sem ABC c/ Classe ${lInfo.explicitaClasse}</button>` : ''}
+                    </div>
+                </div>`;
+            } else if (selectedTarget.level === 'area') {
+                const linhasSetor = getCatalogoLinhasCrit(branchNodes);
+                criticidadeLinhaBlock = linhasSetor.length ? `
+                <div class="p-4 rounded-2xl bg-slate-50 border border-slate-200 space-y-2.5">
+                    <div class="flex flex-wrap items-center justify-between gap-2">
+                        <div>
+                            <div class="text-[10px] font-extrabold uppercase tracking-wider text-slate-600">Apontar Criticidade das Linhas neste Setor (A / B / C)</div>
+                            <div class="text-[11px] text-slate-500 font-semibold">Defina rapidamente quais linhas de produção são Classe A, B ou C nesta área.</div>
+                        </div>
+                        <span class="text-[10px] font-extrabold px-2 py-0.5 rounded-full bg-white border border-slate-200 text-slate-600">${linhasSetor.length} linha(s)</span>
+                    </div>
+                    <div class="max-h-56 overflow-y-auto divide-y divide-slate-200/70 rounded-xl border border-slate-200 bg-white">
+                        ${linhasSetor.map(ln => {
+                            const lnMaqJs = JSON.stringify(ln.maquina).replace(/"/g, '&quot;');
+                            const pillBtn = (c, clsOn) => `<button type="button" onclick="definirCriticidadeLinha(${areaJson}, ${lnMaqJs}, '${c}', false)" class="w-7 h-7 rounded-lg text-[11px] font-extrabold border transition-colors ${ln.explicitaClasse === c ? `${clsOn} ring-1 ring-slate-900` : 'bg-slate-50 hover:bg-slate-100 text-slate-600 border-slate-200'}" title="Apontar ${escapeHtml(ln.maquina)} como Classe ${c}">${c}</button>`;
+                            return `<div class="px-3 py-2 flex flex-wrap items-center justify-between gap-2">
+                                <button type="button" onclick="selecionarAlvo('maquina', ${areaJson}, ${lnMaqJs})" class="text-left min-w-0 flex-1 hover:text-sky-700">
+                                    <div class="text-xs font-extrabold text-slate-900 truncate">${escapeHtml(ln.maquina)}</div>
+                                    <div class="text-[10px] text-slate-500 font-semibold">${ln.equipamentosCount} equip. • ${ln.subconjuntosCount} subconj. ${ln.explicita ? `• Linha ${ln.explicitaClasse}` : (ln.inferidaClasse ? `• Auto: ${ln.inferidaClasse}` : '• Sem definição')}</div>
+                                </button>
+                                <div class="flex items-center gap-1 shrink-0">
+                                    ${pillBtn('A', 'crit-A')}
+                                    ${pillBtn('B', 'crit-B')}
+                                    ${pillBtn('C', 'crit-C')}
+                                </div>
+                            </div>`;
+                        }).join('')}
+                    </div>
+                </div>` : '';
+            }
 
             panel.innerHTML = `
             <div class="space-y-5">
                 <div class="flex flex-wrap items-start justify-between gap-3 border-b border-slate-100 pb-4">
                     <div>
                         <span class="text-[10px] font-extrabold uppercase tracking-widest text-sky-600">${lvlLabels[selectedTarget.level]}</span>
-                        <h2 class="text-xl sm:text-2xl font-extrabold text-slate-900 mt-0.5">${escapeHtml(currentName)}</h2>
+                        <div class="flex flex-wrap items-center gap-2 mt-0.5">
+                            <h2 class="text-xl sm:text-2xl font-extrabold text-slate-900">${escapeHtml(currentName)}</h2>
+                            ${selectedTarget.maquina ? renderBadgeCritLinha(getInfoCriticidadeLinha(selectedTarget.area, selectedTarget.maquina, branchNodes)) : ''}
+                        </div>
                         <p class="text-xs text-slate-500 font-semibold mt-0.5">
                             ${[selectedTarget.area, selectedTarget.maquina, selectedTarget.equipamento, selectedTarget.conjunto].filter(Boolean).map(escapeHtml).join(' › ')}
                         </p>
                     </div>
                     <div class="flex flex-wrap items-center gap-1.5">
-                        ${podeAgendarConj ? `<button type="button" onclick="abrirModalAgendarConjunto(${JSON.stringify(selectedTarget.area || '').replace(/"/g, '&quot;')}, ${JSON.stringify(selectedTarget.maquina || '').replace(/"/g, '&quot;')}, ${JSON.stringify(selectedTarget.equipamento || '').replace(/"/g, '&quot;')}, ${JSON.stringify(selectedTarget.conjunto || '').replace(/"/g, '&quot;')})" class="btn-touch bg-emerald-50 hover:bg-emerald-100 text-emerald-800 border border-emerald-200 text-[11px] py-2 px-3 inline-flex items-center gap-1.5"><svg class="w-3.5 h-3.5 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/></svg><span>Agendar Programada</span></button>` : ''}
+                        ${podeAgendarConj ? `<button type="button" onclick="abrirModalAgendarConjunto(${areaJson}, ${maqJson}, ${JSON.stringify(selectedTarget.equipamento || '').replace(/"/g, '&quot;')}, ${JSON.stringify(selectedTarget.conjunto || '').replace(/"/g, '&quot;')})" class="btn-touch bg-emerald-50 hover:bg-emerald-100 text-emerald-800 border border-emerald-200 text-[11px] py-2 px-3 inline-flex items-center gap-1.5"><svg class="w-3.5 h-3.5 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/></svg><span>Agendar Programada</span></button>` : ''}
                         <button type="button" onclick='abrirModalNovoAtivo(${JSON.stringify(prefill).replace(/'/g, "&#39;")})' class="btn-pill-dark text-[11px] py-2 px-3.5">+ Adicionar Filho</button>
                         <button type="button" onclick="abrirModalRenomearGalho()" class="btn-touch bg-amber-50 hover:bg-amber-100 text-amber-800 border border-amber-200 text-[11px] py-2 px-3">Renomear Galho</button>
                         ${podeClonar ? `<button type="button" onclick="abrirModalClonarGalho()" class="btn-touch bg-indigo-50 hover:bg-indigo-100 text-indigo-700 border border-indigo-200 text-[11px] py-2 px-3">Clonar Estrutura</button>` : ''}
-                        <button type="button" onclick="imprimirDossieAtivoA4('${selectedTarget.level}', ${JSON.stringify(selectedTarget.area || '').replace(/"/g, '&quot;')}, ${JSON.stringify(selectedTarget.maquina || '').replace(/"/g, '&quot;')}, ${JSON.stringify(selectedTarget.equipamento || '').replace(/"/g, '&quot;')})" class="btn-touch bg-slate-900 hover:bg-slate-800 text-white text-[11px] py-2 px-3">Dossiê A4</button>
+                        <button type="button" onclick="imprimirDossieAtivoA4('${selectedTarget.level}', ${areaJson}, ${maqJson}, ${JSON.stringify(selectedTarget.equipamento || '').replace(/"/g, '&quot;')})" class="btn-touch bg-slate-900 hover:bg-slate-800 text-white text-[11px] py-2 px-3">Dossiê A4</button>
                     </div>
                 </div>
+
+                ${criticidadeLinhaBlock}
 
                 <div class="grid grid-cols-2 sm:grid-cols-5 gap-3">
                     <div class="p-3.5 rounded-2xl bg-slate-50 border border-slate-200">
@@ -2938,6 +3214,7 @@
 
             if (btn) { btn.disabled = true; btn.innerText = 'Salvando...'; }
             try {
+                const critLinhaAtual = getInfoCriticidadeLinha(area, maquina).explicitaClasse || '';
                 let ultimoId = '';
                 for (let i = 0; i < listaSubs.length; i++) {
                     const sub = listaSubs[i];
@@ -2951,6 +3228,7 @@
                         subconjunto: sub,
                         tag: tagItem,
                         criticidade,
+                        criticidade_linha: critLinhaAtual,
                         periodicidade_preventiva: periodicidade,
                         periodicidade_semanas: PERIODICIDADES[periodicidade]?.semanas ?? 0,
                         disciplina,
@@ -3017,6 +3295,9 @@
                 critCriterios = { seguranca: seg, parada: par, custo: cus, redundancia: red, score: seg + par + cus + red };
             }
 
+            const critLinhaPreservada = (area === node.area && maquina === node.maquina ? node.criticidade_linha : '')
+                || getInfoCriticidadeLinha(area, maquina).explicitaClasse
+                || '';
             const payload = {
                 setor: area,
                 area,
@@ -3026,6 +3307,7 @@
                 subconjunto,
                 tag,
                 criticidade,
+                criticidade_linha: critLinhaPreservada,
                 criticidade_criterios: critCriterios,
                 periodicidade_preventiva: periodicidade,
                 periodicidade_semanas: PERIODICIDADES[periodicidade]?.semanas ?? 0,
@@ -3086,6 +3368,7 @@
                     subconjunto: novoNome,
                     tag: node.tag ? `${node.tag}-CP` : '',
                     criticidade: node.criticidade,
+                    criticidade_linha: node.criticidade_linha || getInfoCriticidadeLinha(node.area, node.maquina).explicitaClasse || '',
                     periodicidade_preventiva: node.periodicidade_preventiva,
                     periodicidade_semanas: node.periodicidade_semanas,
                     disciplina: node.disciplina,
@@ -3178,6 +3461,9 @@
 
             const autor = (usuarioLogado && (usuarioLogado.nome || usuarioLogado.user)) || 'Admin';
             const agora = new Date().toISOString();
+            const critLinhaDest = (destArea === pendingCloneCtx.area && destMaq === pendingCloneCtx.maquina)
+                ? (getInfoCriticidadeLinha(pendingCloneCtx.area, pendingCloneCtx.maquina).explicitaClasse || '')
+                : (getInfoCriticidadeLinha(destArea, destMaq).explicitaClasse || '');
             try {
                 for (const n of pendingCloneCtx.nodes) {
                     const novoEq = pendingCloneCtx.level === 'equipamento' ? destEq : n.equipamento;
@@ -3190,6 +3476,7 @@
                         subconjunto: n.subconjunto,
                         tag: '',
                         criticidade: n.criticidade,
+                        criticidade_linha: critLinhaDest || (destArea === pendingCloneCtx.area && destMaq === pendingCloneCtx.maquina ? (n.criticidade_linha || '') : ''),
                         criticidade_criterios: n.criticidade_criterios || null,
                         periodicidade_preventiva: n.periodicidade_preventiva,
                         periodicidade_semanas: n.periodicidade_semanas,
@@ -3284,6 +3571,12 @@
             renderTree(true);
         };
 
+        window.abrirLinhaNaArvore = (area, maq) => {
+            limparFiltrosArvore();
+            switchView('arvore');
+            selecionarAlvo('maquina', area, maq);
+        };
+
         function renderDashboard() {
             const setores = new Set(assetNodes.map(n => n.area));
             const maquinas = new Set(assetNodes.map(n => `${n.area}|${n.maquina}`));
@@ -3376,6 +3669,45 @@
                 });
             }
 
+            // Criticidade das Linhas Produtivas
+            const catalogoLinhas = getCatalogoLinhasCrit();
+            const lBadgesEl = document.getElementById('dashLinhasCritBadges');
+            if (lBadgesEl) {
+                const lA = catalogoLinhas.filter(l => l.classe === 'A').length;
+                const lB = catalogoLinhas.filter(l => l.classe === 'B').length;
+                const lC = catalogoLinhas.filter(l => l.classe === 'C').length;
+                const lSemExp = catalogoLinhas.filter(l => l.semDefinicao).length;
+                lBadgesEl.innerHTML = `
+                    <span class="px-2.5 py-1 rounded-full text-[10px] font-extrabold crit-A">${lA} Classe A</span>
+                    <span class="px-2.5 py-1 rounded-full text-[10px] font-extrabold crit-B">${lB} Classe B</span>
+                    <span class="px-2.5 py-1 rounded-full text-[10px] font-extrabold crit-C">${lC} Classe C</span>
+                    <span class="px-2.5 py-1 rounded-full text-[10px] font-extrabold bg-slate-100 text-slate-600 border border-slate-200">${lSemExp} p/ apontar</span>`;
+            }
+            const lListEl = document.getElementById('dashLinhasCritList');
+            if (lListEl) {
+                lListEl.innerHTML = catalogoLinhas.length ? catalogoLinhas.map(ln => {
+                    const aJs = JSON.stringify(ln.area).replace(/"/g, '&quot;');
+                    const mJs = JSON.stringify(ln.maquina).replace(/"/g, '&quot;');
+                    const cardCls = ln.classe === 'A' ? 'border-l-4 border-l-rose-500 bg-rose-50/40 border-rose-200' : (ln.classe === 'B' ? 'border-l-4 border-l-amber-500 bg-amber-50/35 border-amber-200' : (ln.classe === 'C' ? 'border-l-4 border-l-emerald-500 bg-emerald-50/25 border-emerald-200' : 'bg-slate-50 border-slate-200'));
+                    const qBtn = (c, clsOn) => `<button type="button" onclick="event.stopPropagation(); definirCriticidadeLinha(${aJs}, ${mJs}, '${c}', false)" class="w-6 h-6 rounded-md text-[10px] font-extrabold border transition-colors ${ln.explicitaClasse === c ? `${clsOn} ring-1 ring-slate-900` : 'bg-white hover:bg-slate-100 text-slate-600 border-slate-200'}" title="Apontar ${escapeHtml(ln.maquina)} como Linha Classe ${c}">${c}</button>`;
+                    return `<div onclick="abrirLinhaNaArvore(${aJs}, ${mJs})" class="p-3 rounded-2xl border ${cardCls} hover:shadow-sm cursor-pointer flex items-center justify-between gap-2 transition-all">
+                        <div class="min-w-0">
+                            <div class="text-[10px] font-extrabold uppercase text-slate-400 truncate">${escapeHtml(ln.area)}</div>
+                            <div class="text-xs font-extrabold text-slate-900 truncate">${escapeHtml(ln.maquina)}</div>
+                            <div class="flex flex-wrap items-center gap-1 mt-1">
+                                ${renderBadgeCritLinha(ln, 'xs')}
+                                <span class="text-[10px] font-semibold text-slate-500">${ln.equipamentosCount}E • ${ln.subconjuntosCount}S</span>
+                            </div>
+                        </div>
+                        <div class="flex items-center gap-1 shrink-0">
+                            ${qBtn('A', 'crit-A')}
+                            ${qBtn('B', 'crit-B')}
+                            ${qBtn('C', 'crit-C')}
+                        </div>
+                    </div>`;
+                }).join('') : `<div class="col-span-full py-6 text-center text-xs font-bold text-slate-400">Nenhuma linha produtiva cadastrada ainda.</div>`;
+            }
+
             // Tabela por Setor
             const tbody = document.getElementById('dashSetoresTbody');
             const areasArr = [...setores].sort((a, b) => a.localeCompare(b));
@@ -3385,14 +3717,16 @@
             }
             tbody.innerHTML = areasArr.map(area => {
                 const sub = assetNodes.filter(n => n.area === area);
-                const lins = new Set(sub.map(n => n.maquina)).size;
+                const linsSet = new Set(sub.map(n => n.maquina));
+                const lins = linsSet.size;
+                const linsA = [...linsSet].filter(m => getInfoCriticidadeLinha(area, m, sub).classe === 'A').length;
                 const eqs = new Set(sub.map(n => `${n.maquina}|${n.equipamento}`)).size;
                 const conjs = new Set(sub.map(n => `${n.maquina}|${n.equipamento}|${n.conjunto}`)).size;
                 const qA = sub.filter(n => n.criticidade === 'A').length;
                 const comp = sub.length ? Math.round(sub.reduce((acc, n) => acc + calcularCompletudeNode(n), 0) / sub.length) : 0;
                 return `<tr class="hover:bg-slate-50/80 transition-colors">
                     <td class="py-3 px-4 font-extrabold text-slate-900">${escapeHtml(area)}</td>
-                    <td class="py-3 px-3 text-center font-bold">${lins}</td>
+                    <td class="py-3 px-3 text-center font-bold">${lins}${linsA ? ` <span class="ml-1 px-1.5 py-0.5 rounded-full text-[9px] font-extrabold crit-A" title="${linsA} linha(s) Classe A">${linsA} A</span>` : ''}</td>
                     <td class="py-3 px-3 text-center font-bold">${eqs}</td>
                     <td class="py-3 px-3 text-center font-bold">${conjs}</td>
                     <td class="py-3 px-3 text-center font-extrabold text-slate-900">${sub.length}</td>
