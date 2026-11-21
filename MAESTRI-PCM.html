@@ -308,7 +308,7 @@
                         <div class="min-w-0">
                             <div class="flex items-center gap-1.5">
                                 <span class="text-[10px] font-extrabold uppercase tracking-widest text-sky-700">PCM Cepêra</span>
-                                <span class="px-1.5 py-0.5 rounded bg-slate-900 text-white font-mono text-[9px] font-extrabold">v41 • 9 NÓS</span>
+                                <span class="px-1.5 py-0.5 rounded bg-slate-900 text-white font-mono text-[9px] font-extrabold">v42 • PROTEÇÃO NÓ 5</span>
                             </div>
                             <h1 class="text-sm font-extrabold text-slate-900 truncate">Maestri 2.0 • IA & AQF</h1>
                         </div>
@@ -498,13 +498,32 @@
                                 </button>
 
                                 <button type="button" onclick="reanimarRedeNeuralLive()" class="inline-flex items-center gap-1.5 px-4 py-2 rounded-xl bg-sky-500 hover:bg-sky-400 text-slate-950 text-xs font-extrabold shadow-lg shadow-sky-500/25 transition-all">
-                                    <svg class="w-3.5 h-3.5" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM9.555 7.168A1 1 0 008 8v4a1 1 0 001.555.832l3-2a1 1 0 000-1.664l-3-2z" clip-rule="evenodd"/></svg>
-                                    <span>Executar Fluxo ao Vivo</span>
-                                </button>
+                                     <svg class="w-3.5 h-3.5" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM9.555 7.168A1 1 0 008 8v4a1 1 0 001.555.832l3-2a1 1 0 000-1.664l-3-2z" clip-rule="evenodd"/></svg>
+                                     <span>Reproduzir Fluxo ao Vivo</span>
+                                 </button>
 
-                                <button type="button" onclick="reexecutarNosPosConferencia()" style="background:rgba(79,70,229,0.9);color:#ffffff;" class="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-xl hover:bg-indigo-400 text-xs font-extrabold transition-colors">
+                                 <button type="button" onclick="reexecutarNosPosConferencia()" style="background:rgba(79,70,229,0.9);color:#ffffff;" class="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-xl hover:bg-indigo-400 text-xs font-extrabold transition-colors">
+                                     <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"/></svg>
+                                     <span>Reprocessar Nós 6→9</span>
+                                 </button>
+                            </div>
+                        </div>
+
+                        <!-- AVISO DE BASE JÁ AUDITADA & PROTEGIDA CONTRA REEXECUÇÃO -->
+                        <div id="neuralLoteAuditadoBanner" hidden class="hidden relative z-10 rounded-2xl border border-emerald-500/40 bg-emerald-950/35 px-4 py-3 flex flex-col lg:flex-row lg:items-center justify-between gap-3">
+                            <div class="flex items-center gap-3 min-w-0">
+                                <span class="w-9 h-9 rounded-xl bg-emerald-500/20 border border-emerald-400/50 text-emerald-300 flex items-center justify-center shrink-0">
+                                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"/></svg>
+                                </span>
+                                <div class="min-w-0">
+                                    <div id="bannerLoteAuditadoTitle" class="text-xs font-extrabold text-emerald-300">Base Já Auditada &amp; Protegida</div>
+                                    <div id="bannerLoteAuditadoTxt" class="text-[11px] font-semibold text-slate-300 truncate">Dados já processados anteriormente com revisões do Nó 5 preservadas.</div>
+                                </div>
+                            </div>
+                            <div class="flex flex-wrap items-center gap-2 shrink-0">
+                                <button type="button" onclick="reavaliarBaseAtualComNovasRegras()" style="background:#f59e0b;color:#0f172a;" class="inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-xl text-[11px] font-extrabold transition-colors">
                                     <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"/></svg>
-                                    <span>Reprocessar Nós 6→9</span>
+                                    <span>Reavaliar Pendentes (N6 → N2)</span>
                                 </button>
                             </div>
                         </div>
@@ -1333,6 +1352,40 @@
         </div>
     </div>
 
+    <!-- ==================== MODAL: BASE JÁ AUDITADA (PROTEÇÃO CONTRA REAUDITORIA) ==================== -->
+    <div id="modalBaseJaAuditada" role="dialog" aria-modal="true" hidden class="hidden fixed inset-0 bg-slate-900/65 backdrop-blur-sm z-[74] flex items-end sm:items-center justify-center p-0 sm:p-4">
+        <div class="bg-white w-full sm:max-w-lg sm:rounded-3xl rounded-t-3xl p-6 shadow-2xl border border-slate-200 space-y-4">
+            <div class="flex items-center justify-between border-b border-slate-100 pb-3">
+                <div class="flex items-center gap-2.5">
+                    <span class="w-9 h-9 rounded-2xl bg-emerald-100 text-emerald-700 flex items-center justify-center shrink-0">
+                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"/></svg>
+                    </span>
+                    <div>
+                        <span class="text-[10px] font-extrabold uppercase tracking-widest text-emerald-700">Proteção Contra Reauditoria Duplicada</span>
+                        <h2 class="text-base sm:text-lg font-extrabold text-slate-900">Estes dados já foram auditados</h2>
+                    </div>
+                </div>
+                <button type="button" onclick="fecharModal('modalBaseJaAuditada')" aria-label="Fechar" class="w-8 h-8 rounded-full bg-slate-100 text-slate-600 flex items-center justify-center"><svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg></button>
+            </div>
+            <div id="modalJaAuditadaInfo" class="p-3.5 rounded-2xl bg-slate-50 border border-slate-200 text-xs text-slate-700 space-y-1.5 leading-relaxed"></div>
+            <p class="text-xs text-slate-600 leading-relaxed">Para evitar que as ordens revisadas voltem para a Mesa do Conferente (Nó 5) com a mesma classificação antiga, a rede neural não reaudita a mesma base automaticamente. Escolha o que deseja fazer:</p>
+            <div class="space-y-2 pt-1">
+                <button type="button" onclick="fecharModal('modalBaseJaAuditada')" class="btn-touch bg-slate-900 hover:bg-slate-800 text-white w-full py-2.5 text-xs justify-center">
+                    <span>Manter Auditoria Atual (Não Reexecutar)</span>
+                </button>
+                <button type="button" onclick="fecharModal('modalBaseJaAuditada'); reanimarRedeNeuralLive();" class="btn-touch bg-sky-50 hover:bg-sky-100 text-sky-900 border border-sky-200 w-full py-2.5 text-xs justify-center">
+                    <span>Apenas Rever Animação Visual (Sem Mudar Nós)</span>
+                </button>
+                <button type="button" onclick="confirmarReavaliacaoBasePeloModal()" class="btn-touch bg-amber-100 hover:bg-amber-200 text-amber-950 border border-amber-300 w-full py-2.5 text-xs justify-center">
+                    <span>Reavaliar Pendentes c/ Regras do Bibliotecário (Preserva Nó 5)</span>
+                </button>
+            </div>
+            <div class="pt-2 border-t border-slate-100 flex justify-end">
+                <button type="button" onclick="zerarRevisoesEReauditarBase()" class="text-[11px] font-bold text-rose-600 hover:text-rose-800 underline">Zerar revisões deste lote e começar do zero</button>
+            </div>
+        </div>
+    </div>
+
     <!-- ==================== MODAL CONFIRMAÇÃO EXCLUSÃO ==================== -->
     <div id="deleteOverlay" role="dialog" aria-modal="true" hidden class="hidden fixed inset-0 bg-slate-900/60 z-[75] flex items-center justify-center p-4">
         <div class="bg-white w-full max-w-sm rounded-3xl p-6 shadow-2xl border border-slate-200 space-y-4">
@@ -1483,11 +1536,15 @@
         let estudosAqf = [];
         let propostasPlanejador = [];
         let historicoRodadas = [{ ...BASELINE_SET_OUT_2026 }];
+        let lotesAuditadosMap = {};
+        let revisoesPorOm = {};
+        let lotePendenteConfirmacao = null;
         let rodadaVigenteInfo = {
             periodo: "Nov/2026",
             status: "aguardando_upload",
             arquivoNome: "",
-            tipo: "VIGENTE"
+            tipo: "VIGENTE",
+            hashLote: ""
         };
         let neuralRitmoModo = "passo_a_passo"; // "passo_a_passo" | "rapido"
         let neuralAnimacaoModo = "cinematica"; // "cinematica" | "instantanea" (retrocompatibilidade testes)
@@ -2457,18 +2514,186 @@
             };
         }
 
+        function calcularAssinaturaDataset(lista = []) {
+            const normItens = (Array.isArray(lista) ? lista : [])
+                .map(x => `${String(x.om || "").trim()}|${normKey(x.problema)}|${normKey(x.servico)}|${Number(x.tempo_min || 0)}`)
+                .sort()
+                .join("||");
+            return sha256Fallback(`${lista.length}::${normItens}`).slice(0, 24);
+        }
+
+        function aplicarRevisoesSalvasNaAuditoria(lista = []) {
+            return (Array.isArray(lista) ? lista : []).map(item => {
+                const o = { ...item };
+                const rev = revisoesPorOm[String(o.om)];
+                if (rev) {
+                    o.categoria = rev.categoria || o.categoria;
+                    o.b = rev.b ?? (o.categoria === "QUEBRA" ? (o.b || 2) : null);
+                    o.c = rev.c ?? (o.categoria === "QUEBRA" ? (o.c || 2) : null);
+                    o.severidade = rev.severidade || o.severidade;
+                    o.regra_severidade = rev.regra_severidade || o.regra_severidade || "";
+                    o.justificativa = rev.justificativa || o.justificativa;
+                    o.origem = "SUPERVISOR";
+                    o.fila = "AUTOMATICO";
+                    o.confianca = 5;
+                }
+                return o;
+            });
+        }
+
+        function atualizarBannerLoteAuditado() {
+            const banner = document.getElementById("neuralLoteAuditadoBanner");
+            const titleEl = document.getElementById("bannerLoteAuditadoTitle");
+            const txtEl = document.getElementById("bannerLoteAuditadoTxt");
+            const hash = rodadaVigenteInfo.hashLote;
+            const reg = hash ? lotesAuditadosMap[hash] : null;
+            if (!banner) return;
+
+            if (!omsAuditadas.length || !reg) {
+                banner.hidden = true;
+                banner.classList.add("hidden");
+                return;
+            }
+            banner.hidden = false;
+            banner.classList.remove("hidden");
+            const revCnt = omsAuditadas.filter(o => o.origem === "SUPERVISOR" || revisoesPorOm[String(o.om)]).length;
+            const pendentesNo5 = omsAuditadas.filter(o => o.fila === "CONFERIR" || o.fila === "REVISAO").length;
+            const dt = reg.ultima_reavaliacao || reg.auditado_em || rodadaVigenteInfo.auditadoEm;
+            const horaFmt = dt ? new Date(dt).toLocaleString("pt-BR", { day: "2-digit", month: "2-digit", hour: "2-digit", minute: "2-digit" }) : "agora";
+
+            if (titleEl) {
+                titleEl.innerText = rodadaVigenteInfo.status === "reavaliado"
+                    ? "Base Reavaliada (Regras N6 → N2 aplicadas • Revisões do Nó 5 preservadas)"
+                    : "Base Já Auditada & Protegida";
+            }
+            if (txtEl) {
+                txtEl.innerText = `${reg.arquivoNome || rodadaVigenteInfo.periodo} • ${omsAuditadas.length} OMs • Registrada em ${horaFmt} • ${revCnt} revisão(ões) salva(s) no Nó 5 • ${pendentesNo5} pendente(s)`;
+            }
+        }
+
+        function abrirModalLoteJaAuditado(info = {}) {
+            const modalInfo = document.getElementById("modalJaAuditadaInfo");
+            if (modalInfo) {
+                const dt = info.auditado_em ? new Date(info.auditado_em).toLocaleString("pt-BR") : "anteriormente";
+                const revCnt = Number(info.revCnt || 0);
+                modalInfo.innerHTML = `
+                    <div><strong>Arquivo / Base:</strong> ${escapeHtml(info.nomeArquivo || "Planilha ERP")} (${escapeHtml(info.periodo || rodadaVigenteInfo.periodo)})</div>
+                    <div><strong>Volume:</strong> ${info.total || omsAuditadas.length} OMs já auditadas em ${escapeHtml(dt)}</div>
+                    <div class="text-emerald-800 font-bold"><strong>Proteção Nó 5:</strong> ${revCnt} validação(ões)/correção(ões) do supervisor estão salvas e NÃO serão perdidas nem jogadas de volta para conferência.</div>`;
+            }
+            abrirModal("modalBaseJaAuditada");
+        }
+
+        async function restaurarOuAlertarLoteJaAuditado(cfg = {}) {
+            const reg = lotesAuditadosMap[cfg.hash] || null;
+            const jaEstavaAtiva = Boolean(omsAuditadas.length && rodadaVigenteInfo.hashLote === cfg.hash);
+
+            lotePendenteConfirmacao = {
+                brutas: cfg.brutas || omsBrutasCarregadas,
+                nomeArquivo: cfg.nomeArquivo || reg?.arquivoNome || rodadaVigenteInfo.arquivoNome || "Planilha ERP",
+                periodo: cfg.periodo || reg?.periodo || rodadaVigenteInfo.periodo,
+                hash: cfg.hash,
+                tipo: cfg.tipo || reg?.tipo || "VIGENTE",
+                isSimulado: Boolean(cfg.isSimulado),
+                usarBenchmarkSetOut: Boolean(cfg.usarBenchmarkSetOut)
+            };
+
+            if (!jaEstavaAtiva && reg && Array.isArray(reg.auditadas) && reg.auditadas.length) {
+                omsBrutasCarregadas = (cfg.brutas || omsBrutasCarregadas).map(x => ({ ...x }));
+                omsAuditadas = aplicarRevisoesSalvasNaAuditoria(reg.auditadas);
+                if (reg.custo) custoRodada = { ...custoRodada, ...reg.custo };
+                rodadaVigenteInfo = {
+                    periodo: cfg.periodo || reg.periodo,
+                    status: "ja_auditado",
+                    arquivoNome: cfg.nomeArquivo || reg.arquivoNome,
+                    tipo: cfg.tipo || reg.tipo || "VIGENTE",
+                    hashLote: cfg.hash,
+                    auditadoEm: reg.auditado_em || new Date().toISOString()
+                };
+                const inpP = document.getElementById("inputPeriodoRodada");
+                if (inpP && rodadaVigenteInfo.periodo) inpP.value = rodadaVigenteInfo.periodo;
+                recalcularNosPosAuditoria();
+                salvarEstadoPersistidoMaestri();
+                renderCurrentView();
+                aplicarEstadoFinalRedeNeural({ total: omsAuditadas.length, fastCnt: custoRodada.oms_fast_path_r0, loteCnt: custoRodada.oms_ia_lote, chamadas: custoRodada.chamadas_ia, forcarSyncStream: true });
+            }
+
+            atualizarBannerLoteAuditado();
+            const revCnt = omsAuditadas.filter(o => o.origem === "SUPERVISOR" || revisoesPorOm[String(o.om)]).length;
+
+            if (!cfg.silenciosoSeJaAuditado) {
+                abrirModalLoteJaAuditado({
+                    nomeArquivo: lotePendenteConfirmacao.nomeArquivo,
+                    periodo: lotePendenteConfirmacao.periodo,
+                    total: omsAuditadas.length,
+                    auditado_em: reg?.ultima_reavaliacao || reg?.auditado_em || rodadaVigenteInfo.auditadoEm,
+                    revCnt
+                });
+                showToast("Estes dados já foram auditados! Revisões do Nó 5 mantidas intactas.", "info");
+            } else {
+                showToast(`Auditoria anterior restaurada (${omsAuditadas.length} OMs • ${revCnt} revisão(ões) preservada(s)).`, "info");
+            }
+
+            return { reexecucaoBloqueada: true, hash: cfg.hash, total: omsAuditadas.length, jaAuditada: true };
+        }
+
+        window.reavaliarBaseAtualComNovasRegras = async () => {
+            fecharModal("modalBaseJaAuditada");
+            if (lotePendenteConfirmacao && Array.isArray(lotePendenteConfirmacao.brutas) && lotePendenteConfirmacao.brutas.length) {
+                omsBrutasCarregadas = lotePendenteConfirmacao.brutas.map(x => ({ ...x }));
+                rodadaVigenteInfo = {
+                    ...rodadaVigenteInfo,
+                    periodo: lotePendenteConfirmacao.periodo || rodadaVigenteInfo.periodo,
+                    arquivoNome: lotePendenteConfirmacao.nomeArquivo || rodadaVigenteInfo.arquivoNome,
+                    tipo: lotePendenteConfirmacao.tipo || rodadaVigenteInfo.tipo || "VIGENTE",
+                    hashLote: lotePendenteConfirmacao.hash || rodadaVigenteInfo.hashLote
+                };
+            }
+            const usarBench = Boolean(lotePendenteConfirmacao?.usarBenchmarkSetOut);
+            lotePendenteConfirmacao = null;
+            if (!omsBrutasCarregadas.length) {
+                showToast("Nenhuma base carregada para reavaliar.", "error");
+                return;
+            }
+            return await executarPipelineCompletoUI({ animar: true, forcarReavaliacao: true, usarBenchmarkSetOut: usarBench });
+        };
+
+        window.confirmarReavaliacaoBasePeloModal = async () => {
+            return await window.reavaliarBaseAtualComNovasRegras();
+        };
+
+        window.zerarRevisoesEReauditarBase = async () => {
+            fecharModal("modalBaseJaAuditada");
+            const idsAtual = new Set(omsBrutasCarregadas.map(x => String(x.om)));
+            idsAtual.forEach(id => { delete revisoesPorOm[id]; });
+            if (rodadaVigenteInfo.hashLote) delete lotesAuditadosMap[rodadaVigenteInfo.hashLote];
+            lotePendenteConfirmacao = null;
+            return await executarPipelineCompletoUI({ animar: true, forcarReavaliacao: true, ignorarRevisoesHumanas: true });
+        };
+
         function salvarEstadoPersistidoMaestri() {
             try {
                 if (rodadaVigenteInfo.tipo !== "INSPECAO_HISTORICA" && omsBrutasCarregadas.length > 0) {
                     safeStorage.set("cepera_maestri_rodada_vigente", JSON.stringify({
                         info: rodadaVigenteInfo,
                         brutas: omsBrutasCarregadas.slice(0, 2500),
+                        auditadas: omsAuditadas.slice(0, 2500),
                         custo: custoRodada
                     }));
                 } else if (omsBrutasCarregadas.length === 0) {
                     safeStorage.remove("cepera_maestri_rodada_vigente");
                 }
                 safeStorage.set("cepera_maestri_historico_rodadas", JSON.stringify(historicoRodadas));
+                safeStorage.set("cepera_maestri_om_revisoes", JSON.stringify(revisoesPorOm));
+                safeStorage.set("cepera_maestri_biblioteca", JSON.stringify(bibliotecaCorrecoes.slice(0, 400)));
+
+                // Mantém últimos 5 lotes auditados com snapshot compacto para evitar reauditoria acidental
+                const keys = Object.keys(lotesAuditadosMap);
+                if (keys.length > 5) {
+                    const ordenadas = keys.sort((a, b) => String(lotesAuditadosMap[b]?.auditado_em || "").localeCompare(String(lotesAuditadosMap[a]?.auditado_em || "")));
+                    ordenadas.slice(5).forEach(k => delete lotesAuditadosMap[k]);
+                }
+                safeStorage.set("cepera_maestri_lotes_auditados", JSON.stringify(lotesAuditadosMap));
             } catch (_) {}
         }
 
@@ -2499,6 +2724,30 @@
 
         function restaurarEstadoPersistidoMaestri() {
             try {
+                const rawRev = safeStorage.get("cepera_maestri_om_revisoes");
+                if (rawRev) {
+                    const parsedRev = JSON.parse(rawRev);
+                    if (parsedRev && typeof parsedRev === "object") revisoesPorOm = parsedRev;
+                }
+            } catch (_) {}
+
+            try {
+                const rawBib = safeStorage.get("cepera_maestri_biblioteca");
+                if (rawBib) {
+                    const arrBib = JSON.parse(rawBib);
+                    if (Array.isArray(arrBib) && arrBib.length) bibliotecaCorrecoes = arrBib;
+                }
+            } catch (_) {}
+
+            try {
+                const rawLotes = safeStorage.get("cepera_maestri_lotes_auditados");
+                if (rawLotes) {
+                    const parsedLotes = JSON.parse(rawLotes);
+                    if (parsedLotes && typeof parsedLotes === "object") lotesAuditadosMap = parsedLotes;
+                }
+            } catch (_) {}
+
+            try {
                 const rawHist = safeStorage.get("cepera_maestri_historico_rodadas");
                 if (rawHist) {
                     const arr = JSON.parse(rawHist);
@@ -2515,7 +2764,11 @@
                     const parsed = JSON.parse(rawVig);
                     if (parsed && Array.isArray(parsed.brutas) && parsed.brutas.length) {
                         rodadaVigenteInfo = { ...rodadaVigenteInfo, ...(parsed.info || {}) };
+                        if (!rodadaVigenteInfo.hashLote) rodadaVigenteInfo.hashLote = calcularAssinaturaDataset(parsed.brutas);
                         omsBrutasCarregadas = parsed.brutas;
+                        if (Array.isArray(parsed.auditadas) && parsed.auditadas.length) {
+                            omsAuditadas = aplicarRevisoesSalvasNaAuditoria(parsed.auditadas);
+                        }
                         if (parsed.custo) custoRodada = { ...custoRodada, ...parsed.custo };
                         const inpP = document.getElementById("inputPeriodoRodada");
                         if (inpP && rodadaVigenteInfo.periodo) inpP.value = rodadaVigenteInfo.periodo;
@@ -2563,7 +2816,8 @@
                 periodo: getPeriodoAtualPadrao(),
                 status: "aguardando_upload",
                 arquivoNome: "",
-                tipo: "VIGENTE"
+                tipo: "VIGENTE",
+                hashLote: ""
             };
             custoRodada = { oms_total: 0, oms_fast_path_r0: 0, oms_ia_lote: 0, chamadas_ia: 0, lote_size: Number(safeStorage.get("cepera_maestri_lote_size") || 20), custo_brl: 0, custo_sem_otimizacao_brl: 0, economia_brl: 0, economia_pct: 0 };
             recalcularNosPosAuditoria();
@@ -2583,6 +2837,7 @@
             neuralOrdensLive = [];
             renderCurrentView();
             resetarVisualRedeNeuralAguardando();
+            atualizarBannerLoteAuditado();
         };
 
         window.limparRodadaVigente = () => {
@@ -2591,37 +2846,67 @@
             showToast("Painel zerado e pronto para processar o novo lote mensal do ERP!", "info");
         };
 
-        window.simularLoteNovembroTeste = async () => {
+        window.simularLoteNovembroTeste = async (opts = {}) => {
             if (!bibliotecaCorrecoes.length) {
                 bibliotecaCorrecoes = SEED_BIBLIOTECA_INICIAL.map(x => ({ ...x }));
             }
-            omsBrutasCarregadas = gerarOmsSimuladasNovembro();
+            const simOms = gerarOmsSimuladasNovembro();
+            const hashSim = calcularAssinaturaDataset(simOms);
+            if (!opts.forcarReavaliacao && ((omsAuditadas.length && rodadaVigenteInfo.hashLote === hashSim) || lotesAuditadosMap[hashSim])) {
+                return await restaurarOuAlertarLoteJaAuditado({
+                    brutas: simOms,
+                    nomeArquivo: "Lote_Simulado_Novembro_2026.csv",
+                    periodo: "Nov/2026",
+                    hash: hashSim,
+                    tipo: "VIGENTE",
+                    isSimulado: true,
+                    silenciosoSeJaAuditado: Boolean(opts.silenciosoSeJaAuditado)
+                });
+            }
+            omsBrutasCarregadas = simOms;
             rodadaVigenteInfo = {
                 periodo: "Nov/2026",
                 status: "ativo",
                 arquivoNome: "Lote_Simulado_Novembro_2026.csv",
-                tipo: "VIGENTE"
+                tipo: "VIGENTE",
+                hashLote: ""
             };
             const inpP = document.getElementById("inputPeriodoRodada");
             if (inpP) inpP.value = "Nov/2026";
-            await executarPipelineCompletoUI({ animar: true, isSimulado: true });
+            return await executarPipelineCompletoUI({ animar: true, isSimulado: true, forcarReavaliacao: Boolean(opts.forcarReavaliacao) });
         };
 
-        window.inspecionarHistoricoSetOut = async () => {
+        window.inspecionarHistoricoSetOut = async (opts = {}) => {
             if (!bibliotecaCorrecoes.length) {
                 bibliotecaCorrecoes = SEED_BIBLIOTECA_INICIAL.map(x => ({ ...x }));
             }
-            omsBrutasCarregadas = SEED_OMS_REAIS_REPRESENTATIVAS.map(x => ({ ...x }));
+            const setOms = SEED_OMS_REAIS_REPRESENTATIVAS.map(x => ({ ...x }));
+            const hashSet = calcularAssinaturaDataset(setOms);
+            const trocaDeContexto = rodadaVigenteInfo.hashLote !== hashSet;
+            if (!opts.forcarReavaliacao && ((omsAuditadas.length && rodadaVigenteInfo.hashLote === hashSet) || lotesAuditadosMap[hashSet])) {
+                return await restaurarOuAlertarLoteJaAuditado({
+                    brutas: setOms,
+                    nomeArquivo: "dados_brutos_para_ia.csv (Set/Out)",
+                    periodo: "Set/Out 2026 (Amostra Treino)",
+                    hash: hashSet,
+                    tipo: "INSPECAO_HISTORICA",
+                    usarBenchmarkSetOut: true,
+                    silenciosoSeJaAuditado: opts.silenciosoSeJaAuditado !== undefined ? Boolean(opts.silenciosoSeJaAuditado) : trocaDeContexto
+                });
+            }
+            omsBrutasCarregadas = setOms;
             rodadaVigenteInfo = {
                 periodo: "Set/Out 2026 (Amostra Treino)",
                 status: "historico_inspecao",
                 arquivoNome: "dados_brutos_para_ia.csv (Set/Out)",
-                tipo: "INSPECAO_HISTORICA"
+                tipo: "INSPECAO_HISTORICA",
+                hashLote: ""
             };
             const inpP = document.getElementById("inputPeriodoRodada");
             if (inpP) inpP.value = "Set/Out 2026";
-            await executarPipelineCompletoUI({ animar: true, usarBenchmarkSetOut: true });
+            const r = await executarPipelineCompletoUI({ animar: true, usarBenchmarkSetOut: true, forcarReavaliacao: Boolean(opts.forcarReavaliacao) });
             showToast("Base de Treinamento Set/Out (1.234 OMs) aberta para inspeção!", "info");
+            return r;
         };
 
         // Mantém alias retrocompatível
@@ -2673,24 +2958,65 @@ OMs:\n${JSON.stringify(listaPrompt)}`;
         window.executarPipelineCompletoUI = async (opts = {}) => {
             if (!omsBrutasCarregadas.length) {
                 showToast("Nenhuma planilha carregada! Selecione seu CSV/XLSX de Novembro ou clique em 'Simular Lote Teste'.", "info");
-                adicionarLogNeural("[MAESTRO] Aguardando estímulo: arraste o CSV/XLSX do ERP ou clique em Simular Lote Teste.");
-                return;
+                registrarInteracaoNeural({
+                    origem: "MAESTRO", destino: "N1", status: "pronto",
+                    titulo: "Aguardando estímulo de entrada",
+                    retorno: "Arraste a planilha ERP ou clique em Simular Lote Teste para iniciar."
+                });
+                return { reexecucaoBloqueada: true, motivo: "SEM_DADOS" };
             }
+
+            const hashAtual = calcularAssinaturaDataset(omsBrutasCarregadas);
+            const emModoReavaliacao = Boolean(opts.forcarReavaliacao);
+            const regExistente = lotesAuditadosMap[hashAtual];
+            const jaAtivaMesmaBase = Boolean(omsAuditadas.length && rodadaVigenteInfo.hashLote === hashAtual);
+
+            if (!emModoReavaliacao && (jaAtivaMesmaBase || regExistente)) {
+                return await restaurarOuAlertarLoteJaAuditado({
+                    brutas: omsBrutasCarregadas,
+                    nomeArquivo: rodadaVigenteInfo.arquivoNome || regExistente?.arquivoNome || "Lote ERP",
+                    periodo: rodadaVigenteInfo.periodo || regExistente?.periodo || getPeriodoAtualPadrao(),
+                    hash: hashAtual,
+                    tipo: rodadaVigenteInfo.tipo || regExistente?.tipo || "VIGENTE",
+                    isSimulado: Boolean(opts.isSimulado),
+                    usarBenchmarkSetOut: Boolean(opts.usarBenchmarkSetOut),
+                    silenciosoSeJaAuditado: Boolean(opts.silenciosoSeJaAuditado)
+                });
+            }
+
             const cfg = carregarCofreIaLocal();
             const cacheDedup = new Map();
             let fastCnt = 0;
             let loteCnt = 0;
+            let preservadasSupCnt = 0;
             const pendentesIa = [];
 
             const preliminares = omsBrutasCarregadas.map(om => {
+                const revSalva = !opts.ignorarRevisoesHumanas ? revisoesPorOm[String(om.om)] : null;
+                if (revSalva) {
+                    preservadasSupCnt++;
+                    fastCnt++;
+                    return {
+                        om,
+                        dec: {
+                            categoria: revSalva.categoria,
+                            b: revSalva.b || null,
+                            c: revSalva.c || null,
+                            confianca: 5,
+                            origem: "SUPERVISOR",
+                            justificativa: revSalva.justificativa || "Decisão confirmada pelo supervisor no Nó 5 (preservada)."
+                        },
+                        revSalva
+                    };
+                }
                 const dec = classificarOmNoMotorMaestri(om, cacheDedup);
-                if (["FAST_PATH_R0", "BIBLIOTECA_MEMORIA", "DEDUP_RODADA", "BLOQUEIO_APONTAMENTO", "PRE_AUDITADA"].includes(dec.origem)) {
+                if (["FAST_PATH_R0", "BIBLIOTECA_MEMORIA", "DEDUP_RODADA", "BLOQUEIO_APONTAMENTO", "PRE_AUDITADA", "SUPERVISOR"].includes(dec.origem)) {
                     fastCnt++;
                 } else {
                     loteCnt++;
                     pendentesIa.push(om);
                 }
-                return { om, dec };
+                return { om, dec, revSalva: null };
             });
 
             // Chamada real em lotes de 20 OMs se chave Gemini estiver configurada no Cofre Master e modo !== deterministico
@@ -2710,7 +3036,20 @@ OMs:\n${JSON.stringify(listaPrompt)}`;
                 }
             }
 
-            omsAuditadas = preliminares.map(({ om, dec }) => {
+            omsAuditadas = preliminares.map(({ om, dec, revSalva }) => {
+                if (revSalva) {
+                    const baseItem = construirItemAuditadoCompleto(om, dec);
+                    return {
+                        ...baseItem,
+                        b: revSalva.b || baseItem.b || null,
+                        c: revSalva.c || baseItem.c || null,
+                        severidade: revSalva.severidade || baseItem.severidade,
+                        regra_severidade: revSalva.regra_severidade || baseItem.regra_severidade || "",
+                        origem: "SUPERVISOR",
+                        fila: "AUTOMATICO",
+                        confianca: 5
+                    };
+                }
                 const overrideIa = iaMap.get(String(om.om));
                 const finalDec = overrideIa && CATEGORIAS_OFICIAIS.includes(String(overrideIa.categoria).toUpperCase())
                     ? {
@@ -2758,6 +3097,13 @@ OMs:\n${JSON.stringify(listaPrompt)}`;
                 };
             }
 
+            rodadaVigenteInfo = {
+                ...rodadaVigenteInfo,
+                hashLote: hashAtual,
+                status: emModoReavaliacao ? "reavaliado" : "auditado",
+                auditadoEm: new Date().toISOString()
+            };
+
             recalcularNosPosAuditoria();
             if (rodadaVigenteInfo.tipo !== "INSPECAO_HISTORICA" && !opts.naoArquivarAuto) {
                 const periodoSnap = (document.getElementById("inputPeriodoRodada")?.value || rodadaVigenteInfo.periodo || getPeriodoAtualPadrao()).trim();
@@ -2770,16 +3116,35 @@ OMs:\n${JSON.stringify(listaPrompt)}`;
                     ];
                 }
             }
+
+            lotesAuditadosMap[hashAtual] = {
+                hash: hashAtual,
+                arquivoNome: rodadaVigenteInfo.arquivoNome || rodadaVigenteInfo.periodo,
+                periodo: rodadaVigenteInfo.periodo,
+                tipo: rodadaVigenteInfo.tipo,
+                total_oms: omsAuditadas.length,
+                revisadas_qtd: preservadasSupCnt,
+                auditado_em: regExistente?.auditado_em || rodadaVigenteInfo.auditadoEm,
+                ultima_reavaliacao: emModoReavaliacao ? new Date().toISOString() : null,
+                custo: { ...custoRodada },
+                auditadas: omsAuditadas.slice(0, 2500)
+            };
+
             salvarEstadoPersistidoMaestri();
             renderCurrentView();
+            atualizarBannerLoteAuditado();
 
             if (opts.animar !== false && neuralAnimacaoModo !== "instantanea" && typeof window.setTimeout === "function") {
-                executarAnimacaoRedeNeural({ total: omsAuditadas.length, fastCnt, loteCnt, chamadas: custoRodada.chamadas_ia });
+                executarAnimacaoRedeNeural({ total: omsAuditadas.length, fastCnt, loteCnt, chamadas: custoRodada.chamadas_ia, isReavaliacao: emModoReavaliacao, preservadasSupCnt });
             } else {
-                aplicarEstadoFinalRedeNeural({ total: omsAuditadas.length, fastCnt, loteCnt, chamadas: custoRodada.chamadas_ia, forcarSyncStream: true });
+                aplicarEstadoFinalRedeNeural({ total: omsAuditadas.length, fastCnt, loteCnt, chamadas: custoRodada.chamadas_ia, forcarSyncStream: true, isReavaliacao: emModoReavaliacao, preservadasSupCnt });
             }
 
-            showToast(`Rede Neural Maestri concluída (${omsAuditadas.length} OMs de ${rodadaVigenteInfo.periodo} • Custo R$ ${custoRodada.custo_brl.toFixed(2)})!`, "success");
+            const verb = emModoReavaliacao
+                ? `Reavaliação concluída (${omsAuditadas.length} OMs • ${preservadasSupCnt} revisões do Nó 5 preservadas)`
+                : `Rede Neural Maestri concluída (${omsAuditadas.length} OMs de ${rodadaVigenteInfo.periodo} • Custo R$ ${custoRodada.custo_brl.toFixed(2)})`;
+            showToast(`${verb}!`, "success");
+            return { reexecucaoBloqueada: false, hash: hashAtual, total: omsAuditadas.length, reavaliacao: emModoReavaliacao, preservadasSupCnt };
         };
 
         window.reexecutarNosPosConferencia = () => {
@@ -3333,18 +3698,29 @@ OMs:\n${JSON.stringify(listaPrompt)}`;
             const pend = omsAuditadas.filter(o => o.fila === "CONFERIR" || o.fila === "REVISAO").length;
             const ativas = bibliotecaCorrecoes.filter(b => b.status !== "REVERTIDO").length;
 
+            const ehReav = Boolean(stats.isReavaliacao || rodadaVigenteInfo.status === "reavaliado");
+            const revPresCnt = omsAuditadas.filter(o => o.origem === "SUPERVISOR" || revisoesPorOm[String(o.om)]).length;
+
             atualizarBotoesControleRitmoUI();
             const hub = document.getElementById("neuralMaestroHub");
             if (hub) hub.classList.remove("is-delegating");
             const badge = document.getElementById("neuralStatusBadge");
             if (badge) {
-                badge.innerText = `Rede Sincronizada (${tot} OMs • ${rodadaVigenteInfo.periodo})`;
-                badge.className = "px-2.5 py-0.5 rounded-full bg-emerald-500/20 text-emerald-300 border border-emerald-400/50 text-[10px] font-extrabold";
+                badge.innerText = ehReav
+                    ? `Reavaliada N6→N2 (${tot} OMs • ${revPresCnt} Nó 5 preservadas)`
+                    : `Rede Sincronizada (${tot} OMs • ${rodadaVigenteInfo.periodo})`;
+                badge.className = ehReav
+                    ? "px-2.5 py-0.5 rounded-full bg-amber-500/20 text-amber-200 border border-amber-400/50 text-[10px] font-extrabold"
+                    : "px-2.5 py-0.5 rounded-full bg-emerald-500/20 text-emerald-300 border border-emerald-400/50 text-[10px] font-extrabold";
             }
             const ph = document.getElementById("maestroPhasePill");
-            if (ph) ph.innerText = "CONCLUÍDO";
+            if (ph) ph.innerText = ehReav ? "REAVALIADO" : "CONCLUÍDO";
             const msg = document.getElementById("maestroDelegacaoMsg");
-            if (msg) msg.innerText = `Ciclo ${rodadaVigenteInfo.periodo} concluído: ${fast}/${tot} OMs (${pctF}%) decididas a R$ 0 + ${estudosAqf.length} Estudo(s) AQF gerados.`;
+            if (msg) {
+                msg.innerText = ehReav
+                    ? `Reavaliação ${rodadaVigenteInfo.periodo}: ${ativas} regras N6 aplicadas e ${revPresCnt} validação(ões) do Nó 5 preservadas!`
+                    : `Ciclo ${rodadaVigenteInfo.periodo} concluído: ${fast}/${tot} OMs (${pctF}%) decididas a R$ 0 + ${estudosAqf.length} Estudo(s) AQF gerados.`;
+            }
             const thr = document.getElementById("maestroThroughputTxt");
             if (thr) thr.innerText = `${tot} OMs OK`;
             const cu = document.getElementById("maestroCustoLiveTxt");
@@ -3370,11 +3746,23 @@ OMs:\n${JSON.stringify(listaPrompt)}`;
             if (stats.forcarSyncStream || !neuralOrdensLive.length || neuralInteracoesLive.length <= 1) {
                 neuralOrdensLive = omsAuditadas.slice().reverse();
                 neuralInteracoesLive = gerarResumoHandshakesFinais(tot, fast, lote, pctF, ativas);
+                if (ehReav) {
+                    neuralInteracoesLive.unshift({
+                        id: `reav-${Date.now()}`,
+                        hora: agoraHMS(),
+                        origem: "MAESTRO",
+                        destino: "N2/N6",
+                        status: "r0",
+                        titulo: `Reavaliação concluída com ${ativas} regras do Bibliotecário (Nó 6 → Nó 2)`,
+                        retorno: `${revPresCnt} OM(s) já revisadas no Nó 5 permaneceram protegidas como AUTOMATICO`
+                    });
+                }
             }
 
             atualizarBarraResumoLive(tot, tot, omsAuditadas, `${tot} OMs • Economia -${custoRodada.economia_pct}%`);
             renderInteracoesAoVivo();
             renderStreamOrdensAoVivo();
+            atualizarBannerLoteAuditado();
 
             const doneEdges = new Set(DEFINICAO_SINAPSES.map(e => e.id));
             renderNeuralSvgTopology(new Set(["s_n2_n4", "s_n6_n2", "s_n8_n9"]), doneEdges);
@@ -3746,7 +4134,7 @@ OMs:\n${JSON.stringify(listaPrompt)}`;
             });
         }
 
-        window.carregarDadosPlanilhaBrutaOuAuditada = async (rows, nomeArquivo = "") => {
+        window.carregarDadosPlanilhaBrutaOuAuditada = async (rows, nomeArquivo = "", opts = {}) => {
             if (!Array.isArray(rows) || !rows.length) {
                 showToast("Nenhum registro válido encontrado no arquivo.", "error");
                 return;
@@ -3806,14 +4194,29 @@ OMs:\n${JSON.stringify(listaPrompt)}`;
             const periodoDetectado = detectarPeriodoDoLote(novasBrutas, nomeArquivo);
             const inpP = document.getElementById("inputPeriodoRodada");
             if (inpP) inpP.value = periodoDetectado;
+            const hashNovo = calcularAssinaturaDataset(novasBrutas);
+
+            const jaAud = Boolean((omsAuditadas.length && rodadaVigenteInfo.hashLote === hashNovo) || lotesAuditadosMap[hashNovo]);
+            if (jaAud && !opts?.forcarReavaliacao) {
+                return await restaurarOuAlertarLoteJaAuditado({
+                    brutas: novasBrutas,
+                    nomeArquivo: nomeArquivo || "Planilha_ERP",
+                    periodo: periodoDetectado,
+                    hash: hashNovo,
+                    tipo: "VIGENTE",
+                    silenciosoSeJaAuditado: Boolean(opts?.silenciosoSeJaAuditado)
+                });
+            }
+
             rodadaVigenteInfo = {
                 periodo: periodoDetectado,
                 status: "ativo",
                 arquivoNome: nomeArquivo || "Planilha_ERP",
-                tipo: "VIGENTE"
+                tipo: "VIGENTE",
+                hashLote: ""
             };
             omsBrutasCarregadas = novasBrutas;
-            await executarPipelineCompletoUI({ animar: true });
+            return await executarPipelineCompletoUI({ animar: true, ...(opts || {}) });
         };
 
         async function processarArquivoFileObjErp(file) {
@@ -4119,9 +4522,10 @@ OMs:\n${JSON.stringify(listaPrompt)}`;
             }).join("");
 
             if (!neuralAnimandoAgora) {
-                if (tot) aplicarEstadoFinalRedeNeural({ total: tot, fastCnt, loteCnt: custoRodada.oms_ia_lote, chamadas: custoRodada.chamadas_ia });
+                if (tot) aplicarEstadoFinalRedeNeural({ total: tot, fastCnt, loteCnt: custoRodada.oms_ia_lote, chamadas: custoRodada.chamadas_ia, forcarSyncStream: true });
                 else resetarVisualRedeNeuralAguardando();
             }
+            atualizarBannerLoteAuditado();
 
             renderComparativoHistorico();
 
@@ -4332,6 +4736,29 @@ OMs:\n${JSON.stringify(listaPrompt)}`;
                 </div>`).join("");
         };
 
+        function registrarRevisaoSupervisorOm(o, justOverride = "") {
+            if (!o) return;
+            const prev = revisoesPorOm[o.om] || {};
+            revisoesPorOm[o.om] = {
+                om: o.om,
+                categoria: o.categoria,
+                b: o.b || null,
+                c: o.c || null,
+                severidade: o.severidade || "NA",
+                regra_severidade: o.regra_severidade || "",
+                justificativa: justOverride || o.justificativa || prev.justificativa || "Validado pelo supervisor no Nó 5.",
+                origem: "SUPERVISOR",
+                fila: "AUTOMATICO",
+                confianca: 5,
+                supervisor: usuarioLogado?.nome || "Supervisor PCM",
+                revisado_em: new Date().toISOString()
+            };
+            if (rodadaVigenteInfo.hashLote && lotesAuditadosMap[rodadaVigenteInfo.hashLote]) {
+                lotesAuditadosMap[rodadaVigenteInfo.hashLote].auditadas = omsAuditadas.slice(0, 2500);
+                lotesAuditadosMap[rodadaVigenteInfo.hashLote].revisadas_qtd = omsAuditadas.filter(x => x.origem === "SUPERVISOR").length;
+            }
+        }
+
         window.confirmarOmSupervisorDireto = (omId) => {
             const o = omsAuditadas.find(x => x.om === String(omId));
             if (!o) return;
@@ -4342,8 +4769,11 @@ OMs:\n${JSON.stringify(listaPrompt)}`;
             o.fila = "AUTOMATICO";
             o.confianca = 5;
             o.origem = "SUPERVISOR";
+            registrarRevisaoSupervisorOm(o, o.justificativa);
             recalcularNosPosAuditoria();
+            salvarEstadoPersistidoMaestri();
             renderCurrentView();
+            atualizarBannerLoteAuditado();
             showToast(`OM #${o.om} confirmada como ${o.categoria}!`, "success");
         };
 
@@ -4354,10 +4784,17 @@ OMs:\n${JSON.stringify(listaPrompt)}`;
                 showToast("Nenhuma OM da fila CONFERIR para confirmar em lote.", "error");
                 return;
             }
-            alvos.forEach(o => { o.fila = "AUTOMATICO"; o.confianca = 5; o.origem = "SUPERVISOR"; });
+            alvos.forEach(o => {
+                o.fila = "AUTOMATICO";
+                o.confianca = 5;
+                o.origem = "SUPERVISOR";
+                registrarRevisaoSupervisorOm(o, o.justificativa);
+            });
             recalcularNosPosAuditoria();
+            salvarEstadoPersistidoMaestri();
             renderCurrentView();
-            showToast(`${alvos.length} OM(s) confirmadas em lote!`, "success");
+            atualizarBannerLoteAuditado();
+            showToast(`${alvos.length} OM(s) confirmadas em lote e protegidas contra reexecução!`, "success");
         };
 
         window.abrirModalCorrigirOm = (omId) => {
@@ -4412,7 +4849,10 @@ OMs:\n${JSON.stringify(listaPrompt)}`;
                 o.b = null;
                 o.c = null;
                 o.severidade = "NA";
+                o.regra_severidade = "";
             }
+
+            registrarRevisaoSupervisorOm(o, o.justificativa);
 
             const regBib = {
                 om: o.om,
@@ -4438,8 +4878,10 @@ OMs:\n${JSON.stringify(listaPrompt)}`;
 
             fecharModal("modalCorrigirOmSupervisor");
             recalcularNosPosAuditoria();
+            salvarEstadoPersistidoMaestri();
             renderCurrentView();
-            showToast(`OM #${o.om} corrigida para ${novaCat} e regra aprendida pelo Bibliotecário (Nó 6)!`, "success");
+            atualizarBannerLoteAuditado();
+            showToast(`OM #${o.om} corrigida para ${novaCat} e aprendida pelo Bibliotecário (Nó 6)!`, "success");
         };
 
         // VIEW 4: NÓ 6 — BIBLIOTECÁRIO & DETECTOR DE DIVERGÊNCIA
@@ -4977,8 +5419,13 @@ OMs:\n${JSON.stringify(listaPrompt)}`;
                 bibliotecaCorrecoes = SEED_BIBLIOTECA_INICIAL.map(x => ({ ...x }));
             }
             const tinhaVigenteSalva = restaurarEstadoPersistidoMaestri();
-            if (tinhaVigenteSalva && omsBrutasCarregadas.length) {
-                await executarPipelineCompletoUI({ animar: false, naoArquivarAuto: false });
+            if (tinhaVigenteSalva && omsAuditadas.length) {
+                recalcularNosPosAuditoria();
+                renderCurrentView();
+                aplicarEstadoFinalRedeNeural({ total: omsAuditadas.length, fastCnt: custoRodada.oms_fast_path_r0, loteCnt: custoRodada.oms_ia_lote, chamadas: custoRodada.chamadas_ia, forcarSyncStream: true });
+                atualizarBannerLoteAuditado();
+            } else if (tinhaVigenteSalva && omsBrutasCarregadas.length) {
+                await executarPipelineCompletoUI({ animar: false, naoArquivarAuto: false, silenciosoSeJaAuditado: true });
             } else {
                 prepararModoAguardandoNovembro();
             }
