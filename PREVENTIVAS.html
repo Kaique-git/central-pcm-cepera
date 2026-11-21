@@ -279,6 +279,11 @@
                         <svg class="w-4 h-4 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 3.055A9.001 9.001 0 1020.945 13H11V3.055z"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20.488 9H15V3.512A9.025 9.025 0 0120.488 9z"/></svg>
                         <span>Indicadores (KPIs)</span>
                     </button>
+                    <button type="button" id="nav-master-prev" onclick="switchView('master-prev')" hidden class="nav-item hidden !text-rose-700 hover:!bg-rose-50">
+                        <svg class="w-4 h-4 shrink-0 text-rose-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"/></svg>
+                        <span class="flex-1">Admin Master</span>
+                        <span class="px-1.5 py-0.5 rounded-full text-[9px] font-extrabold bg-rose-600 text-white">ON</span>
+                    </button>
                 </div>
 
                 <!-- NAVEGAÇÃO CAMPO / TÉCNICO -->
@@ -336,7 +341,11 @@
                         <p id="headerSubtitle" class="text-[11px] text-slate-500 font-semibold truncate">Sincronizado em tempo real com a Agenda PCM e Gestão de Ativos</p>
                     </div>
                 </div>
-                <div id="headerActionsGestao" class="flex items-center gap-2 shrink-0">
+                <div id="headerActionsGestao" class="flex flex-wrap items-center gap-2 shrink-0">
+                    <button type="button" id="btnMasterPrev" onclick="abrirModalAdminMasterPrev()" title="Acesso Admin Master (Edição direta, reabertura e exclusão em lote)" class="hidden px-3 py-2 rounded-full bg-white hover:bg-slate-50 border border-slate-200 text-xs font-extrabold text-slate-700 items-center gap-1.5 shadow-sm transition-colors">
+                        <svg class="w-3.5 h-3.5 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"/></svg>
+                        <span id="lblBtnMasterPrev">Master</span>
+                    </button>
                     <button type="button" onclick="abrirModalProgramarPreventiva()" class="btn-touch bg-slate-100 hover:bg-slate-200 text-slate-800 border border-slate-200 text-xs py-2 px-3.5">
                         <svg class="w-4 h-4 text-sky-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/></svg>
                         <span class="hidden sm:inline">Programar no Calendário</span>
@@ -820,6 +829,70 @@
                     <div id="tecnicoListaCards" class="grid grid-cols-1 lg:grid-cols-2 gap-4"></div>
                 </section>
 
+                <!-- ==================== VIEW 8: ADMIN MASTER (GESTÃO DIRETA & EXCLUSÃO EM LOTE) ==================== -->
+                <section id="view-master-prev" hidden class="hidden space-y-5">
+                    <div class="glass-card p-5 sm:p-6 rounded-3xl border-2 border-rose-200 bg-gradient-to-r from-rose-50/80 via-white to-amber-50/60 flex flex-col lg:flex-row lg:items-center justify-between gap-4">
+                        <div class="space-y-1">
+                            <div class="flex flex-wrap items-center gap-2">
+                                <span class="px-2.5 py-0.5 rounded-full text-[10px] font-extrabold uppercase tracking-widest bg-rose-600 text-white">Privilégio Admin Master</span>
+                                <span class="text-[10px] font-extrabold uppercase tracking-wider text-rose-700">ag_manutencao • Sincronizado com Agenda PCM</span>
+                            </div>
+                            <h2 class="text-lg font-extrabold text-slate-900">Central Admin Master de Preventivas</h2>
+                            <p class="text-xs font-semibold text-slate-600">Edite qualquer ordem diretamente (inclusive concluídas), reabra checklists, limpe pendentes de um plano ou exclua ordens e planos em lote.</p>
+                        </div>
+                        <div class="flex flex-wrap items-center gap-2 shrink-0">
+                            <button type="button" onclick="abrirModalAdminMasterPrev()" class="btn-touch bg-white hover:bg-slate-50 border border-slate-200 text-slate-800 py-2 px-4 text-xs">
+                                Configurar / Senha Master
+                            </button>
+                            <button type="button" onclick="travarAdminMasterPrev()" class="btn-touch bg-slate-900 hover:bg-slate-800 text-white py-2 px-4 text-xs">
+                                Sair do Modo Master
+                            </button>
+                        </div>
+                    </div>
+
+                    <div class="glass-card p-5 rounded-3xl space-y-4">
+                        <div class="flex flex-col xl:flex-row xl:items-center justify-between gap-3">
+                            <div class="flex flex-wrap items-center gap-1.5 bg-slate-100 p-1 rounded-full w-fit">
+                                <button type="button" id="btnMasterPrevTabOrdens" onclick="setMasterPrevTab('ordens')" class="px-4 py-1.5 rounded-full text-xs font-extrabold bg-slate-900 text-white">
+                                    Ordens Preventivas (<span id="masterPrevCntOrdens">0</span>)
+                                </button>
+                                <button type="button" id="btnMasterPrevTabPlanos" onclick="setMasterPrevTab('planos')" class="px-4 py-1.5 rounded-full text-xs font-extrabold text-slate-600">
+                                    Planos Preventivos (<span id="masterPrevCntPlanos">0</span>)
+                                </button>
+                            </div>
+                            <div class="flex flex-wrap items-center gap-2">
+                                <input type="text" id="masterPrevBusca" oninput="renderMasterPrevView()" class="input-clean py-2 text-xs font-bold w-full sm:w-64" placeholder="Buscar por código, título, ativo, semana S10...">
+                                <select id="masterPrevFiltroStatus" onchange="renderMasterPrevView()" class="input-clean py-2 text-xs font-bold w-auto">
+                                    <option value="">Status: Todos</option>
+                                    <option value="pendente">Programadas</option>
+                                    <option value="atrasada">Atrasadas</option>
+                                    <option value="andamento">Em Andamento</option>
+                                    <option value="concluido">Concluídas</option>
+                                    <option value="cancelado">Canceladas</option>
+                                </select>
+                                <button type="button" onclick="selecionarTodosVisiveisMasterPrev()" class="px-3 py-2 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-700 text-[11px] font-extrabold">Selecionar Visíveis</button>
+                                <button type="button" onclick="limparSelecaoMasterPrev()" class="px-3 py-2 rounded-xl bg-white hover:bg-slate-50 border border-slate-200 text-slate-600 text-[11px] font-extrabold">Limpar</button>
+                            </div>
+                        </div>
+
+                        <div id="masterPrevBatchBar" hidden class="hidden p-3.5 rounded-2xl bg-rose-50 border border-rose-200 flex flex-wrap items-center justify-between gap-3 text-xs">
+                            <div class="flex flex-wrap items-center gap-3">
+                                <span class="font-extrabold text-rose-900"><span id="masterPrevSelCount">0</span> item(ns) selecionado(s)</span>
+                                <label id="masterPrevCascataPlanosWrap" hidden class="hidden inline-flex items-center gap-1.5 text-[11px] font-bold text-rose-800 cursor-pointer">
+                                    <input type="checkbox" id="masterPrevExcluirOrdensCascata" class="w-4 h-4 accent-rose-600">
+                                    <span>Excluir também as ordens pendentes vinculadas a estes planos</span>
+                                </label>
+                            </div>
+                            <div class="flex flex-wrap items-center gap-2">
+                                <button type="button" id="btnMasterPrevReabrirLote" onclick="reabrirLoteMasterPrev()" class="hidden px-3.5 py-2 rounded-xl bg-amber-500 hover:bg-amber-600 text-white font-extrabold text-xs">🔓 Reabrir Selecionadas</button>
+                                <button type="button" id="btnMasterPrevExcluirLote" onclick="excluirLoteMasterPrev()" class="px-4 py-2 rounded-xl bg-rose-600 hover:bg-rose-700 text-white font-extrabold text-xs shadow-sm">🗑️ Excluir Selecionados</button>
+                            </div>
+                        </div>
+
+                        <div id="masterPrevLista" class="space-y-2.5 max-h-[62vh] overflow-y-auto pr-1"></div>
+                    </div>
+                </section>
+
             </main>
         </div>
 
@@ -848,6 +921,10 @@
             <button type="button" id="mtab-tecnico" onclick="switchView('tecnico')" class="mobile-tab">
                 <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0"/><circle cx="12" cy="12" r="3" stroke-width="2"/></svg>
                 <span>Campo</span>
+            </button>
+            <button type="button" id="mtab-master-prev" onclick="switchView('master-prev')" hidden class="mobile-tab hidden !text-rose-700">
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"/></svg>
+                <span>Master</span>
             </button>
         </nav>
         </div>
@@ -1062,7 +1139,7 @@
                     </div>
                     <div>
                         <label class="block text-[10px] font-extrabold uppercase text-slate-500 mb-1">Data Inicial *</label>
-                        <input type="date" id="progDataInicio" required onchange="atualizarPreviewCronograma()" class="input-clean py-2 text-xs font-extrabold">
+                        <input type="date" id="progDataInicio" required onchange="onProgDataInicioChange()" class="input-clean py-2 text-xs font-extrabold">
                     </div>
                     <div>
                         <label class="block text-[10px] font-extrabold uppercase text-sky-700 mb-1">Duração (Mesmo Checklist)</label>
@@ -1098,6 +1175,23 @@
                 </div>
 
                 <div id="progPreviewDatas" class="p-3 rounded-2xl bg-slate-50 border border-slate-200 text-[11px] font-semibold text-slate-600"></div>
+
+                <!-- Prévia Interativa das Próximas Preventivas conforme Periodicidade do Plano -->
+                <div id="progProximasBox" hidden class="hidden p-4 rounded-2xl bg-emerald-50/75 border border-emerald-200 space-y-3">
+                    <div class="flex flex-wrap items-center justify-between gap-2">
+                        <div>
+                            <span class="text-[10px] font-extrabold uppercase tracking-wider text-emerald-800">↻ Próximas Preventivas Previstas (<span id="progProxPeriodicidadeLbl">Semestral</span>)</span>
+                            <p class="text-[11px] font-semibold text-emerald-900/80">Marque as próximas datas previstas pela periodicidade para já deixá-las agendadas no cronograma sem risco de esquecer.</p>
+                        </div>
+                        <div class="flex flex-wrap items-center gap-1.5">
+                            <button type="button" onclick="selecionarProximaUnicaProg()" class="px-2.5 py-1 rounded-lg bg-emerald-600 hover:bg-emerald-700 text-white text-[10px] font-extrabold">✓ Selecionar 1ª Próxima</button>
+                            <button type="button" onclick="selecionarTodasPreviasProg(true)" class="px-2.5 py-1 rounded-lg bg-white hover:bg-emerald-100 border border-emerald-300 text-emerald-800 text-[10px] font-extrabold">Todas</button>
+                            <button type="button" onclick="adicionarMaisPreviaProg()" class="px-2.5 py-1 rounded-lg bg-white hover:bg-emerald-100 border border-emerald-300 text-emerald-800 text-[10px] font-extrabold">+ Mais 1</button>
+                            <button type="button" onclick="selecionarTodasPreviasProg(false)" class="px-2.5 py-1 rounded-lg bg-white hover:bg-slate-100 border border-slate-200 text-slate-600 text-[10px] font-extrabold">Limpar</button>
+                        </div>
+                    </div>
+                    <div id="progProximasLista" class="space-y-1.5"></div>
+                </div>
 
                 <div class="grid grid-cols-1 sm:grid-cols-3 gap-3">
                     <div>
@@ -1188,6 +1282,32 @@
                     <div id="sem52ModalDiasResumo" class="text-[11px] font-extrabold text-sky-800 bg-white border border-sky-200 px-3 py-2 rounded-xl"></div>
                 </div>
 
+                <!-- Prévia Automática das Próximas Preventivas pela Periodicidade (Novo Agendamento) -->
+                <div id="sem52ProximasBox" hidden class="hidden p-4 rounded-2xl bg-emerald-50/75 border border-emerald-200 space-y-3">
+                    <div class="flex flex-wrap items-center justify-between gap-2">
+                        <div>
+                            <span class="text-[10px] font-extrabold uppercase tracking-wider text-emerald-800">↻ Próximas Preventivas Previstas (<span id="sem52ProxPeriodicidadeLbl">Semestral</span>)</span>
+                            <p class="text-[11px] font-semibold text-emerald-900/80">Selecione abaixo a(s) próxima(s) data(s) prevista(s) pelo ciclo do plano para já garantir o cronograma completo.</p>
+                        </div>
+                        <div class="flex flex-wrap items-center gap-1.5">
+                            <button type="button" onclick="selecionarProximaUnicaSem52()" class="px-2.5 py-1 rounded-lg bg-emerald-600 hover:bg-emerald-700 text-white text-[10px] font-extrabold">✓ Selecionar 1ª Próxima</button>
+                            <button type="button" onclick="selecionarTodasPreviasSem52(true)" class="px-2.5 py-1 rounded-lg bg-white hover:bg-emerald-100 border border-emerald-300 text-emerald-800 text-[10px] font-extrabold">Todas</button>
+                            <button type="button" onclick="adicionarMaisPreviaSem52()" class="px-2.5 py-1 rounded-lg bg-white hover:bg-emerald-100 border border-emerald-300 text-emerald-800 text-[10px] font-extrabold">+ Mais 1</button>
+                            <button type="button" onclick="selecionarTodasPreviasSem52(false)" class="px-2.5 py-1 rounded-lg bg-white hover:bg-slate-100 border border-slate-200 text-slate-600 text-[10px] font-extrabold">Limpar</button>
+                        </div>
+                    </div>
+                    <div id="sem52ProximasLista" class="space-y-1.5"></div>
+                </div>
+
+                <!-- Atalho Rápido de Próxima Prevista ao Editar Ordem Existente -->
+                <div id="sem52AgendarProximaExistBox" hidden class="hidden p-3.5 rounded-2xl bg-emerald-50/80 border border-emerald-200 flex flex-wrap items-center justify-between gap-2">
+                    <div class="min-w-0">
+                        <div class="text-[10px] font-extrabold uppercase tracking-wider text-emerald-800">↻ Próxima Preventiva Prevista pelo Plano</div>
+                        <div id="sem52AgendarProximaExistTxt" class="text-[11px] font-bold text-emerald-950">—</div>
+                    </div>
+                    <button type="button" id="btnSem52AgendarProximaExist" onclick="agendarProximaDaOrdemExistenteSem52()" class="px-3.5 py-1.5 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white text-[11px] font-extrabold shrink-0">+ Agendar Próxima</button>
+                </div>
+
                 <div class="grid grid-cols-1 sm:grid-cols-3 gap-3">
                     <div>
                         <label class="block text-[10px] font-extrabold uppercase text-slate-500 mb-1">Horário Início</label>
@@ -1226,6 +1346,7 @@
             <div class="px-6 py-4 border-t border-slate-100 bg-slate-50 flex flex-wrap items-center justify-between gap-2">
                 <div class="flex flex-wrap items-center gap-2">
                     <button type="button" id="btnSem52AbrirExec" onclick="executarOrdemModalSem52()" class="hidden btn-touch bg-sky-50 hover:bg-sky-100 text-sky-700 border border-sky-200 text-xs">Abrir Checklist</button>
+                    <button type="button" id="btnSem52MasterEdit" onclick="editarMasterOrdemModalSem52()" class="hidden btn-touch bg-amber-50 hover:bg-amber-100 text-amber-800 border border-amber-300 text-xs">✏️ Edição Master</button>
                     <button type="button" id="btnSem52Excluir" onclick="excluirOrdemModalSem52()" class="hidden btn-touch bg-rose-50 hover:bg-rose-100 text-rose-700 border border-rose-200 text-xs">Excluir Ordem</button>
                 </div>
                 <div class="flex items-center gap-2 ml-auto">
@@ -1354,9 +1475,17 @@
             </div>
 
             <div class="px-5 sm:px-6 py-4 border-t border-slate-100 bg-slate-50 flex flex-wrap items-center justify-between gap-2 shrink-0">
-                <button type="button" onclick="imprimirRelatorioPreventivaA4Atual()" class="btn-touch bg-white hover:bg-slate-100 text-slate-800 border border-slate-300 text-xs py-2 px-3.5">
-                    Imprimir Relatório A4
-                </button>
+                <div class="flex flex-wrap items-center gap-2">
+                    <button type="button" onclick="imprimirRelatorioPreventivaA4Atual()" class="btn-touch bg-white hover:bg-slate-100 text-slate-800 border border-slate-300 text-xs py-2 px-3.5">
+                        Imprimir Relatório A4
+                    </button>
+                    <button type="button" id="btnExecMasterEdit" onclick="editarMasterOrdemAtualExec()" hidden class="hidden btn-touch bg-amber-50 hover:bg-amber-100 text-amber-800 border border-amber-300 text-xs py-2 px-3">
+                        ✏️ Edição Master
+                    </button>
+                    <button type="button" id="btnExecMasterReabrir" onclick="reabrirOrdemAtualExecMaster()" hidden class="hidden btn-touch bg-rose-50 hover:bg-rose-100 text-rose-700 border border-rose-200 text-xs py-2 px-3">
+                        🔓 Reabrir (Master)
+                    </button>
+                </div>
                 <div class="flex flex-wrap items-center gap-2">
                     <button type="button" id="btnSalvarProgressoExec" onclick="salvarExecucaoPreventiva(false)" class="btn-touch bg-amber-100 hover:bg-amber-200 text-amber-900 border border-amber-300 text-xs py-2 px-4">
                         Salvar Progresso
@@ -1516,6 +1645,183 @@
         </div>
     </div>
 
+    <!-- ==================== MODAL ADMIN MASTER (SENHA OCULTA) ==================== -->
+    <div id="modalAdminMasterPrev" role="dialog" aria-modal="true" hidden class="hidden fixed inset-0 bg-slate-900/65 backdrop-blur-sm z-[75] flex items-end sm:items-center justify-center p-0 sm:p-4">
+        <div class="bg-white w-full sm:max-w-md sm:rounded-3xl rounded-t-3xl p-6 shadow-2xl border border-slate-200 space-y-4">
+            <div class="flex items-center justify-between border-b border-slate-100 pb-3">
+                <div>
+                    <div class="flex items-center gap-2 mb-1">
+                        <span class="text-[10px] font-extrabold uppercase tracking-widest text-rose-600">Privilégio Restrito</span>
+                        <span id="masterPrevModalBadge" class="text-[10px] font-extrabold uppercase px-2 py-0.5 rounded-full bg-slate-100 text-slate-600">Bloqueado</span>
+                    </div>
+                    <h2 class="text-lg font-extrabold text-slate-900">Acesso Admin Master</h2>
+                </div>
+                <button type="button" onclick="fecharModal('modalAdminMasterPrev')" class="w-8 h-8 rounded-full bg-slate-100 text-slate-600 font-bold">✕</button>
+            </div>
+
+            <form id="masterPrevUnlockBox" onsubmit="desbloquearAdminMasterPrev(event)" class="space-y-4">
+                <p class="text-xs text-slate-600 leading-relaxed">
+                    Digite a <strong>senha oculta Admin Master</strong> (a mesma do Portal PCM) para habilitar edição direta de ordens concluídas, reabertura, limpeza de pendentes e exclusão definitiva em lote.
+                </p>
+                <div>
+                    <label for="masterPrevPassInput" class="block text-[11px] font-extrabold uppercase text-slate-500 mb-1">Senha Oculta Master *</label>
+                    <input type="password" id="masterPrevPassInput" required autocomplete="off" class="input-clean py-2.5 text-sm font-mono" placeholder="••••••••••••">
+                </div>
+                <div class="flex gap-2 pt-2 border-t border-slate-100">
+                    <button type="button" onclick="fecharModal('modalAdminMasterPrev')" class="btn-touch bg-slate-100 text-slate-700 flex-1 text-xs">Cancelar</button>
+                    <button type="submit" class="btn-touch bg-rose-600 hover:bg-rose-700 text-white flex-1 text-xs shadow-md">Desbloquear Master</button>
+                </div>
+            </form>
+
+            <div id="masterPrevActiveBox" hidden class="hidden space-y-4">
+                <div class="p-3.5 rounded-2xl bg-rose-50 border border-rose-200 text-xs text-rose-900 space-y-1">
+                    <div class="font-extrabold">✓ Admin Master Desbloqueado nesta Sessão</div>
+                    <div class="text-[11px] text-rose-800">Funções diretas de edição, reabertura e exclusão em lote estão habilitadas em todo o módulo de Preventivas.</div>
+                </div>
+                <div class="p-3.5 rounded-2xl bg-slate-50 border border-slate-200 space-y-2.5">
+                    <div class="text-[11px] font-extrabold uppercase text-slate-600">Alterar Senha Oculta Master (Todo o Portal)</div>
+                    <input type="password" id="masterPrevNewPass1" autocomplete="new-password" class="input-clean py-2 text-xs font-mono" placeholder="Nova senha oculta (mín. 6 caracteres)">
+                    <input type="password" id="masterPrevNewPass2" autocomplete="new-password" class="input-clean py-2 text-xs font-mono" placeholder="Confirmar nova senha oculta">
+                    <button type="button" onclick="salvarNovaSenhaMasterPrev()" class="btn-touch bg-slate-900 hover:bg-slate-800 text-white w-full py-2 text-xs">Atualizar Senha Oculta</button>
+                </div>
+                <div class="flex gap-2 pt-2 border-t border-slate-100">
+                    <button type="button" onclick="fecharModal('modalAdminMasterPrev'); switchView('master-prev');" class="btn-touch bg-rose-600 hover:bg-rose-700 text-white flex-1 text-xs">Abrir Painel Master</button>
+                    <button type="button" onclick="travarAdminMasterPrev()" class="btn-touch bg-slate-100 hover:bg-slate-200 text-slate-800 flex-1 text-xs">Bloquear / Sair</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- ==================== MODAL EDIÇÃO DIRETA MASTER DE ORDEM PREVENTIVA ==================== -->
+    <div id="modalEdicaoMasterOrdem" role="dialog" aria-modal="true" hidden class="hidden fixed inset-0 bg-slate-900/65 backdrop-blur-sm z-[76] flex items-end sm:items-center justify-center p-0 sm:p-4">
+        <div class="bg-white w-full max-w-2xl rounded-t-3xl sm:rounded-3xl shadow-2xl border border-rose-200 max-h-[94vh] flex flex-col overflow-hidden">
+            <div class="px-6 py-4 border-b border-rose-100 bg-rose-50/60 flex items-center justify-between gap-3">
+                <div class="min-w-0">
+                    <span class="text-[10px] font-extrabold uppercase tracking-widest text-rose-700">Privilégio Admin Master • Edição Direta (ag_manutencao)</span>
+                    <h2 id="masterEditOrdModalTitle" class="text-base sm:text-lg font-extrabold text-slate-900 truncate">Editar Ordem Preventiva (Master)</h2>
+                </div>
+                <button type="button" onclick="fecharModal('modalEdicaoMasterOrdem')" class="w-8 h-8 rounded-full bg-white border border-rose-200 text-slate-600 font-bold shrink-0">✕</button>
+            </div>
+            <form id="formEdicaoMasterOrdem" onsubmit="salvarEdicaoMasterOrdem(event)" class="flex-1 overflow-y-auto p-5 sm:p-6 space-y-4 text-xs">
+                <input type="hidden" id="mOrdId" value="">
+                <div id="mOrdAtivoResumo" class="p-3 rounded-2xl bg-slate-50 border border-slate-200 text-[11px] font-bold text-slate-700"></div>
+
+                <div class="grid grid-cols-1 sm:grid-cols-3 gap-3">
+                    <div class="sm:col-span-2">
+                        <label class="block text-[10px] font-extrabold uppercase text-slate-500 mb-1">Título da Ordem *</label>
+                        <input type="text" id="mOrdTitulo" required class="input-clean py-2 text-xs font-extrabold">
+                    </div>
+                    <div>
+                        <label class="block text-[10px] font-extrabold uppercase text-rose-700 mb-1">Status Direto *</label>
+                        <select id="mOrdStatus" class="input-clean py-2 text-xs font-extrabold border-rose-200 bg-rose-50/40">
+                            <option value="pendente">Programada (Pendente)</option>
+                            <option value="andamento">Em Andamento</option>
+                            <option value="concluido">Concluída</option>
+                            <option value="cancelado">Cancelada</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div class="grid grid-cols-1 sm:grid-cols-4 gap-3">
+                    <div>
+                        <label class="block text-[10px] font-extrabold uppercase text-slate-500 mb-1">Data Início *</label>
+                        <input type="date" id="mOrdData" required class="input-clean py-2 text-xs font-extrabold">
+                    </div>
+                    <div>
+                        <label class="block text-[10px] font-extrabold uppercase text-slate-500 mb-1">Duração (Dias)</label>
+                        <select id="mOrdDuracaoDias" class="input-clean py-2 text-xs font-bold">
+                            <option value="1">1 dia</option>
+                            <option value="2">2 dias</option>
+                            <option value="3">3 dias</option>
+                            <option value="4">4 dias</option>
+                            <option value="5">5 dias</option>
+                            <option value="6">6 dias</option>
+                            <option value="7">7 dias</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label class="block text-[10px] font-extrabold uppercase text-slate-500 mb-1">Horário</label>
+                        <input type="time" id="mOrdHora" value="08:00" class="input-clean py-2 text-xs font-bold">
+                    </div>
+                    <div>
+                        <label class="block text-[10px] font-extrabold uppercase text-slate-500 mb-1">Data Conclusão</label>
+                        <input type="date" id="mOrdDataConclusao" class="input-clean py-2 text-xs font-bold">
+                    </div>
+                </div>
+
+                <div class="grid grid-cols-1 sm:grid-cols-3 gap-3">
+                    <div>
+                        <label class="block text-[10px] font-extrabold uppercase text-slate-500 mb-1">Equipe / Disciplina</label>
+                        <select id="mOrdEquipe" class="input-clean py-2 text-xs font-bold"></select>
+                    </div>
+                    <div>
+                        <label class="block text-[10px] font-extrabold uppercase text-slate-500 mb-1">Responsável</label>
+                        <input type="text" id="mOrdResponsavel" class="input-clean py-2 text-xs font-bold" placeholder="Nome do técnico">
+                    </div>
+                    <div>
+                        <label class="block text-[10px] font-extrabold uppercase text-slate-500 mb-1">Executado Por</label>
+                        <input type="text" id="mOrdExecutadoPor" class="input-clean py-2 text-xs font-bold" placeholder="Se concluída">
+                    </div>
+                </div>
+
+                <div class="grid grid-cols-2 sm:grid-cols-4 gap-3">
+                    <div>
+                        <label class="block text-[10px] font-extrabold uppercase text-slate-500 mb-1">Prioridade</label>
+                        <select id="mOrdPrioridade" class="input-clean py-2 text-xs font-extrabold">
+                            <option value="P1">P1 — Crítica</option>
+                            <option value="P2">P2 — Alta</option>
+                            <option value="P3">P3 — Média</option>
+                            <option value="P4">P4 — Baixa</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label class="block text-[10px] font-extrabold uppercase text-slate-500 mb-1">Periodicidade</label>
+                        <select id="mOrdPeriodicidade" class="input-clean py-2 text-xs font-bold">
+                            <option value="Diária">Diária</option>
+                            <option value="Semanal">Semanal</option>
+                            <option value="Quinzenal">Quinzenal</option>
+                            <option value="Mensal">Mensal</option>
+                            <option value="Bimestral">Bimestral</option>
+                            <option value="Trimestral">Trimestral</option>
+                            <option value="Semestral">Semestral</option>
+                            <option value="Anual">Anual</option>
+                            <option value="Avulsa">Avulsa</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label class="block text-[10px] font-extrabold uppercase text-slate-500 mb-1">HH Estimado (min)</label>
+                        <input type="number" id="mOrdDurEst" min="5" step="5" class="input-clean py-2 text-xs font-bold">
+                    </div>
+                    <div>
+                        <label class="block text-[10px] font-extrabold uppercase text-slate-500 mb-1">HH Real (min)</label>
+                        <input type="number" id="mOrdDurReal" min="0" step="5" class="input-clean py-2 text-xs font-bold">
+                    </div>
+                </div>
+
+                <div>
+                    <label class="block text-[10px] font-extrabold uppercase text-slate-500 mb-1">Descrição / Observação da Ordem</label>
+                    <textarea id="mOrdDescricao" rows="2" class="input-clean py-2 text-xs font-semibold"></textarea>
+                </div>
+                <div>
+                    <label class="block text-[10px] font-extrabold uppercase text-slate-500 mb-1">Parecer Técnico / Observação de Execução</label>
+                    <textarea id="mOrdObsExecucao" rows="2" class="input-clean py-2 text-xs font-semibold"></textarea>
+                </div>
+
+                <label class="flex items-center gap-2 p-3 rounded-2xl bg-amber-50 border border-amber-200 text-amber-900 font-bold text-[11px] cursor-pointer">
+                    <input type="checkbox" id="mOrdLimparReprog" class="w-4 h-4 accent-amber-600">
+                    <span>Limpar histórico de reprogramações desta ordem (zera o contador de adiamentos)</span>
+                </label>
+            </form>
+            <div class="px-6 py-4 border-t border-slate-100 bg-slate-50 flex flex-wrap items-center justify-between gap-2">
+                <button type="button" onclick="excluirOrdemDoModalMaster()" class="btn-touch bg-rose-50 hover:bg-rose-100 text-rose-700 border border-rose-200 text-xs">🗑️ Excluir Ordem</button>
+                <div class="flex items-center gap-2 ml-auto">
+                    <button type="button" onclick="fecharModal('modalEdicaoMasterOrdem')" class="btn-touch bg-white border border-slate-200 text-slate-700 text-xs">Cancelar</button>
+                    <button type="submit" form="formEdicaoMasterOrdem" id="btnSalvarEdicaoMasterOrdem" class="btn-touch bg-rose-600 hover:bg-rose-700 text-white text-xs px-5 shadow-md">💾 Salvar Edição Master</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
     <!-- ==================== MODAL CONFIRMAÇÃO DE EXCLUSÃO ==================== -->
     <div id="deleteOverlay" role="dialog" aria-modal="true" hidden class="hidden fixed inset-0 bg-slate-900/60 z-[75] flex items-center justify-center p-4">
         <div class="bg-white w-full max-w-sm rounded-3xl p-6 shadow-2xl border border-slate-200 space-y-4">
@@ -1533,14 +1839,18 @@
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
         import { getAuth, signInAnonymously } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
-        import { initializeFirestore, collection, addDoc, onSnapshot, doc, updateDoc, deleteDoc, getDocs, query, where } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
+        import { initializeFirestore, collection, addDoc, setDoc, onSnapshot, doc, updateDoc, deleteDoc, getDocs, query, where } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
 
         const memStore = {};
+        const memSession = {};
         const safeStorage = {
             get(k) { try { return window.localStorage.getItem(k); } catch (_) { return memStore[k] || null; } },
             set(k, v) { memStore[k] = v; try { window.localStorage.setItem(k, v); } catch (_) {} },
             remove(k) { delete memStore[k]; try { window.localStorage.removeItem(k); } catch (_) {} }
         };
+        function safeSessionGet(k) { try { return window.sessionStorage.getItem(k); } catch (_) { return memSession[k] || null; } }
+        function safeSessionSet(k, v) { memSession[k] = String(v); try { window.sessionStorage.setItem(k, String(v)); } catch (_) {} }
+        function safeSessionRemove(k) { delete memSession[k]; try { window.sessionStorage.removeItem(k); } catch (_) {} }
 
         const firebaseConfig = {
             apiKey: "AIzaSyAGbFTTCgbqe9XFKFSb6ltB5lYj5O6QipE",
@@ -1565,6 +1875,9 @@
         const colAnomalias = collection(db, "ir_anomalias");
         const colDocsAtivos = collection(db, "docs_ativos");
         const colDocsArquivosPartes = collection(db, "docs_arquivos_partes");
+        const refMasterCfgPrev = doc(db, "pcm_config", "admin_master");
+        const DEFAULT_MASTER_HASH_PREV = "7c2cce436d043699877f19ad8a6aef78dc5b1f167d97fbfa5d316885c2150a59";
+        let customMasterHashPrev = null;
         const blobCacheDocsPrev = new Map();
 
         const PERIODICIDADES = {
@@ -1605,7 +1918,8 @@
             planos: { title: 'Planos & Checklists Preventivos', sub: 'Importe do Excel com Ctrl+C / Ctrl+V e atualize tudo dentro do app' },
             ordens: { title: 'Execução, Ordens & Reprogramações', sub: 'Histórico completo, exportação CSV e relatórios A4' },
             indicadores: { title: 'Indicadores de Preventiva (KPIs)', sub: 'Aderência vs Meta 90%, Prioridade P1 (Crítica), Backlog, H/H e Cobertura de Ativos' },
-            tecnico: { title: 'Minhas Preventivas (Campo)', sub: 'Checklist interativo, fotos de evidência e relatório A4' }
+            tecnico: { title: 'Minhas Preventivas (Campo)', sub: 'Checklist interativo, fotos de evidência e relatório A4' },
+            'master-prev': { title: 'Central Admin Master — Preventivas', sub: 'Edição direta, reabertura de concluídas, limpeza de planos e exclusão em lote' }
         };
 
         // ================= ESTADO GLOBAL =================
@@ -1626,6 +1940,12 @@
         let diaCalAberto = null;
         let sem52Ano = hojeInit.getFullYear();
         let sem52DiasSelecionados = new Set();
+        let sem52PreviasDraft = [];
+        let sem52ProxExistenteAlvo = null;
+        let progPreviasDraft = [];
+        let progLoteDesmarcadas = new Set();
+        let masterPrevTab = 'ordens';
+        let masterPrevSelecionados = new Set();
         let resumoSem52Atual = { ano: sem52Ano, semana: 1 };
 
         let planoChecklistDraft = [];
@@ -1657,6 +1977,223 @@
             const r = normKey(role);
             return r === 'admin' || r === 'gerente' || r.startsWith('supervisor') || r.includes('gestor');
         }
+
+        function isPerfilAdminPrev(role) {
+            const r = normKey(role);
+            return r === 'admin' || r === 'gerente';
+        }
+
+        function sha256FallbackPrev(texto) {
+            const rightRotate = (v, amt) => (v >>> amt) | (v << (32 - amt));
+            const maxWord = Math.pow(2, 32);
+            let result = '';
+            const words = [];
+            const rawStr = String(texto || '');
+            let bytes;
+            if (typeof TextEncoder !== 'undefined') {
+                bytes = new TextEncoder().encode(rawStr);
+            } else {
+                const utf8 = unescape(encodeURIComponent(rawStr));
+                bytes = Array.from({ length: utf8.length }, (_, idx) => utf8.charCodeAt(idx));
+            }
+            const bitLen = bytes.length * 8;
+            const hash = [];
+            const k = [];
+            let primeCounter = 0;
+            const isPrime = (n) => { for (let f = 2; f * f <= n; f++) if (n % f === 0) return false; return true; };
+            for (let candidate = 2; primeCounter < 64; candidate++) {
+                if (isPrime(candidate)) {
+                    if (primeCounter < 8) hash[primeCounter] = ((Math.pow(candidate, 0.5) * maxWord) | 0);
+                    k[primeCounter++] = ((Math.pow(candidate, 1 / 3) * maxWord) | 0);
+                }
+            }
+            const padded = Array.from(bytes);
+            padded.push(0x80);
+            while ((padded.length % 64) !== 56) padded.push(0);
+            const hi = Math.floor(bitLen / maxWord);
+            const lo = bitLen >>> 0;
+            padded.push((hi >>> 24) & 0xff, (hi >>> 16) & 0xff, (hi >>> 8) & 0xff, hi & 0xff);
+            padded.push((lo >>> 24) & 0xff, (lo >>> 16) & 0xff, (lo >>> 8) & 0xff, lo & 0xff);
+            for (let i = 0; i < padded.length; i += 4) {
+                words.push((padded[i] << 24) | (padded[i + 1] << 16) | (padded[i + 2] << 8) | padded[i + 3]);
+            }
+            for (let j = 0; j < words.length; j += 16) {
+                const w = words.slice(j, j + 16);
+                const old = hash.slice(0);
+                for (let i = 0; i < 64; i++) {
+                    if (i >= 16) {
+                        const s0 = rightRotate(w[i - 15], 7) ^ rightRotate(w[i - 15], 18) ^ (w[i - 15] >>> 3);
+                        const s1 = rightRotate(w[i - 2], 17) ^ rightRotate(w[i - 2], 19) ^ (w[i - 2] >>> 10);
+                        w[i] = (w[i - 16] + s0 + w[i - 7] + s1) | 0;
+                    }
+                    const a = hash[0], b = hash[1], c = hash[2], d = hash[3], e = hash[4], f = hash[5], g = hash[6], h = hash[7];
+                    const S1 = rightRotate(e, 6) ^ rightRotate(e, 11) ^ rightRotate(e, 25);
+                    const ch = (e & f) ^ ((~e) & g);
+                    const t1 = (h + S1 + ch + k[i] + w[i]) | 0;
+                    const S0 = rightRotate(a, 2) ^ rightRotate(a, 13) ^ rightRotate(a, 22);
+                    const maj = (a & b) ^ (a & c) ^ (b & c);
+                    const t2 = (S0 + maj) | 0;
+                    hash.unshift((t1 + t2) | 0);
+                    hash.pop();
+                    hash[4] = (hash[4] + t1) | 0;
+                }
+                for (let i = 0; i < 8; i++) hash[i] = (hash[i] + old[i]) | 0;
+            }
+            for (let i = 0; i < 8; i++) result += (hash[i] >>> 0).toString(16).padStart(8, '0');
+            return result;
+        }
+
+        async function sha256HexPrev(texto) {
+            const raw = String(texto || '');
+            if (typeof window !== 'undefined' && window.crypto && window.crypto.subtle && typeof TextEncoder !== 'undefined') {
+                try {
+                    const buf = await window.crypto.subtle.digest('SHA-256', new TextEncoder().encode(raw));
+                    return Array.from(new Uint8Array(buf)).map(b => b.toString(16).padStart(2, '0')).join('');
+                } catch (_) {}
+            }
+            return sha256FallbackPrev(raw);
+        }
+
+        function getActiveMasterHashPrev() {
+            return customMasterHashPrev || DEFAULT_MASTER_HASH_PREV;
+        }
+
+        async function verifyAdminMasterPassPrev(pass) {
+            if (!pass) return false;
+            const h = await sha256HexPrev(pass);
+            return h === getActiveMasterHashPrev();
+        }
+
+        window.isAdminMasterAtivo = (user = usuarioLogado) => {
+            return Boolean(user && isPerfilAdminPrev(user.role) && safeSessionGet('cepera_admin_master_auth') === getActiveMasterHashPrev());
+        };
+
+        function setAdminMasterSessaoPrev(ativo) {
+            if (ativo) safeSessionSet('cepera_admin_master_auth', getActiveMasterHashPrev());
+            else safeSessionRemove('cepera_admin_master_auth');
+            atualizarBadgeMasterPrev();
+        }
+
+        function atualizarBadgeMasterPrev() {
+            const btn = document.getElementById('btnMasterPrev');
+            const lbl = document.getElementById('lblBtnMasterPrev');
+            const isAdm = Boolean(usuarioLogado && isPerfilAdminPrev(usuarioLogado.role));
+            const ativo = isAdminMasterAtivo();
+
+            if (btn) {
+                if (!isAdm) {
+                    btn.hidden = true;
+                    btn.classList.add('hidden');
+                    btn.classList.remove('inline-flex');
+                } else {
+                    btn.hidden = false;
+                    btn.classList.remove('hidden');
+                    btn.classList.add('inline-flex');
+                    if (ativo) {
+                        btn.className = 'inline-flex px-3 py-2 rounded-full bg-rose-600 hover:bg-rose-700 border border-rose-700 text-xs font-extrabold text-white items-center gap-1.5 shadow-sm transition-colors';
+                        if (lbl) lbl.innerText = 'Master Ativo';
+                    } else {
+                        btn.className = 'inline-flex px-3 py-2 rounded-full bg-white hover:bg-slate-50 border border-slate-200 text-xs font-extrabold text-slate-700 items-center gap-1.5 shadow-sm transition-colors';
+                        if (lbl) lbl.innerText = 'Master';
+                    }
+                }
+            }
+
+            const navM = document.getElementById('nav-master-prev');
+            const mobM = document.getElementById('mtab-master-prev');
+            if (navM) { navM.hidden = !ativo; navM.classList.toggle('hidden', !ativo); }
+            if (mobM) { mobM.hidden = !ativo; mobM.classList.toggle('hidden', !ativo); }
+
+            if (!ativo && currentView === 'master-prev') {
+                switchView(isGestao ? 'cockpit' : 'tecnico');
+            }
+        }
+
+        function renderModalAdminMasterPrev() {
+            const ativo = isAdminMasterAtivo();
+            const badge = document.getElementById('masterPrevModalBadge');
+            const unlockBox = document.getElementById('masterPrevUnlockBox');
+            const activeBox = document.getElementById('masterPrevActiveBox');
+            if (badge) {
+                badge.innerText = ativo ? 'Desbloqueado' : 'Bloqueado';
+                badge.className = ativo
+                    ? 'text-[10px] font-extrabold uppercase px-2 py-0.5 rounded-full bg-rose-600 text-white'
+                    : 'text-[10px] font-extrabold uppercase px-2 py-0.5 rounded-full bg-slate-100 text-slate-600';
+            }
+            if (unlockBox) { unlockBox.hidden = ativo; unlockBox.classList.toggle('hidden', ativo); }
+            if (activeBox) { activeBox.hidden = !ativo; activeBox.classList.toggle('hidden', !ativo); }
+        }
+
+        window.abrirModalAdminMasterPrev = () => {
+            if (!usuarioLogado || !isPerfilAdminPrev(usuarioLogado.role)) {
+                showToast('Recurso exclusivo para administradores.', 'error');
+                return;
+            }
+            const inp = document.getElementById('masterPrevPassInput');
+            if (inp) inp.value = '';
+            renderModalAdminMasterPrev();
+            abrirModal('modalAdminMasterPrev');
+            setTimeout(() => document.getElementById('masterPrevPassInput')?.focus(), 80);
+        };
+
+        window.desbloquearAdminMasterPrev = async (e) => {
+            e.preventDefault();
+            if (!usuarioLogado || !isPerfilAdminPrev(usuarioLogado.role)) {
+                showToast('Recurso exclusivo para administradores.', 'error');
+                return;
+            }
+            const pass = document.getElementById('masterPrevPassInput')?.value || '';
+            const ok = await verifyAdminMasterPassPrev(pass);
+            if (!ok) {
+                showToast('Senha oculta do Admin Master incorreta.', 'error');
+                return;
+            }
+            setAdminMasterSessaoPrev(true);
+            renderModalAdminMasterPrev();
+            renderCurrentView();
+            showToast('Modo Admin Master desbloqueado em Preventivas!', 'success');
+        };
+
+        window.travarAdminMasterPrev = () => {
+            setAdminMasterSessaoPrev(false);
+            masterPrevSelecionados.clear();
+            renderModalAdminMasterPrev();
+            fecharModal('modalAdminMasterPrev');
+            renderCurrentView();
+            showToast('Modo Admin Master bloqueado.');
+        };
+
+        window.salvarNovaSenhaMasterPrev = async () => {
+            if (!isAdminMasterAtivo()) {
+                showToast('Desbloqueie o modo Admin Master primeiro.', 'error');
+                return;
+            }
+            const s1 = document.getElementById('masterPrevNewPass1')?.value || '';
+            const s2 = document.getElementById('masterPrevNewPass2')?.value || '';
+            if (s1.length < 6) {
+                showToast('A nova senha oculta deve ter pelo menos 6 caracteres.', 'error');
+                return;
+            }
+            if (s1 !== s2) {
+                showToast('As senhas digitadas não conferem.', 'error');
+                return;
+            }
+            try {
+                const novoHash = await sha256HexPrev(s1);
+                await setDoc(refMasterCfgPrev, {
+                    pass_hash: novoHash,
+                    updated_by: usuarioLogado?.nome || 'Admin Master',
+                    updated_at: Date.now()
+                });
+                customMasterHashPrev = novoHash;
+                safeSessionSet('cepera_admin_master_auth', novoHash);
+                document.getElementById('masterPrevNewPass1').value = '';
+                document.getElementById('masterPrevNewPass2').value = '';
+                showToast('Senha oculta Admin Master atualizada em todo o Portal PCM!', 'success');
+            } catch (_) {
+                showToast('Erro ao atualizar senha oculta no Firestore.', 'error');
+            }
+        };
 
         const DOCS_CAT_LABELS_PREV = {
             manuais: 'Manual',
@@ -2183,6 +2720,64 @@
             return datas;
         }
 
+        function getQtdPreviasDefaultPorPeriodicidade(periodicidade) {
+            if (periodicidade === 'Anual') return 2;
+            if (periodicidade === 'Semestral') return 2;
+            if (periodicidade === 'Trimestral') return 3;
+            if (periodicidade === 'Bimestral') return 5;
+            if (periodicidade === 'Mensal') return 3;
+            return 3;
+        }
+
+        function planoJaTemOrdemNaSemanaIso(planoId, anoIso, weekIso) {
+            if (!planoId) return false;
+            return getOrdensPreventiva().some(o => {
+                if (o.status === 'cancelado' || o.planoId !== planoId) return false;
+                return getDatasOrdem(o).some(d => {
+                    const wi = getIsoWeekInfo(d);
+                    return wi.isoYear === Number(anoIso) && wi.week === Number(weekIso);
+                });
+            });
+        }
+
+        function expandirDatasSpanPrev(dataIniIso, offsets = [0]) {
+            if (!dataIniIso) return [];
+            const offs = Array.isArray(offsets) && offsets.length ? offsets : [0];
+            return [...new Set(offs.map(off => somarDiasIso(dataIniIso, Number(off) || 0)).filter(Boolean))].sort();
+        }
+
+        function construirPreviasProximas(datasBaseSorted, periodicidade, planoId = '', qtd = null, diaSemanaPref = '', manterEstadoAnterior = null) {
+            const baseList = Array.isArray(datasBaseSorted) ? datasBaseSorted.filter(Boolean).sort() : [];
+            if (!baseList.length || !PERIODICIDADES[periodicidade]) return [];
+            const baseIni = baseList[0];
+            const offsets = baseList.map(d => Math.max(0, diffDays(d, baseIni)));
+            const totalItens = Math.max(1, Math.min(24, Number(qtd || getQtdPreviasDefaultPorPeriodicidade(periodicidade))));
+            const out = [];
+            let cur = baseIni;
+            for (let i = 0; i < totalItens; i++) {
+                const prox = calcularProximaData(cur, periodicidade, diaSemanaPref);
+                if (!prox || prox <= cur) break;
+                const prevAnt = Array.isArray(manterEstadoAnterior) ? manterEstadoAnterior[i] : null;
+                const dataEscolhida = (prevAnt && prevAnt.editada && prevAnt.data) ? prevAnt.data : prox;
+                const datasSpan = expandirDatasSpanPrev(dataEscolhida, offsets);
+                const wi = getIsoWeekInfo(datasSpan[0]);
+                out.push({
+                    indice: i + 1,
+                    data: datasSpan[0],
+                    dataSugerida: prox,
+                    datas: datasSpan,
+                    offsets,
+                    semana: wi.week,
+                    ano: wi.isoYear,
+                    selecionada: prevAnt ? Boolean(prevAnt.selecionada) : false,
+                    editada: prevAnt ? Boolean(prevAnt.editada) : false,
+                    conflitoSemana: planoJaTemOrdemNaSemanaIso(planoId, wi.isoYear, wi.week)
+                });
+                cur = prox;
+            }
+            return out;
+        }
+
         function parseExcelChecklistText(rawText) {
             const lines = String(rawText || '').replace(/\r\n/g, '\n').replace(/\r/g, '\n').split('\n');
             const items = [];
@@ -2305,6 +2900,7 @@
         window.fazerLogout = () => {
             safeStorage.remove('cepera_central_session');
             safeStorage.remove('cepera_ir_user');
+            safeSessionRemove('cepera_admin_master_auth');
             if (window.parent && window.parent !== window) {
                 window.parent.postMessage({ type: 'CEPERA_LOGOUT_CENTRAL' }, '*');
             } else {
@@ -2347,8 +2943,12 @@
         // ================= NAVEGAÇÃO & SELECTS GLOBAIS =================
         window.switchView = (view) => {
             if (!isGestao && view !== 'tecnico') view = 'tecnico';
+            if (view === 'master-prev' && !isAdminMasterAtivo()) {
+                showToast('Desbloqueie o modo Admin Master para abrir o painel Master.', 'error');
+                view = isGestao ? 'cockpit' : 'tecnico';
+            }
             currentView = view;
-            ['cockpit', 'calendario', 'semanas52', 'planos', 'ordens', 'indicadores', 'tecnico'].forEach(v => {
+            ['cockpit', 'calendario', 'semanas52', 'planos', 'ordens', 'indicadores', 'tecnico', 'master-prev'].forEach(v => {
                 const sec = document.getElementById(`view-${v}`);
                 const nav = document.getElementById(`nav-${v}`);
                 const mtab = document.getElementById(`mtab-${v}`);
@@ -2578,6 +3178,7 @@
 
         function renderCurrentView() {
             atualizarBadgesNav();
+            atualizarBadgeMasterPrev();
             if (currentView === 'cockpit') renderCockpit();
             else if (currentView === 'calendario') renderCalendario();
             else if (currentView === 'semanas52') renderCalendario52Semanas();
@@ -2585,6 +3186,7 @@
             else if (currentView === 'ordens') renderOrdens();
             else if (currentView === 'indicadores') renderIndicadores();
             else if (currentView === 'tecnico') renderTecnico();
+            else if (currentView === 'master-prev') renderMasterPrevView();
         }
 
         // ================= VIEW 1: COCKPIT ALERTAS & RESUMO =================
@@ -2980,6 +3582,7 @@
                             ${st === 'concluido' ? `<button type="button" onclick="imprimirRelatorioPreventivaA4('${o.id}')" class="px-3 py-1.5 rounded-xl bg-emerald-50 text-emerald-800 border border-emerald-200 text-[11px] font-extrabold">Relatório A4</button>` : ''}
                             ${isGestao ? `<button type="button" onclick="fecharModal('modalDiaCal'); abrirModalSemana52('${escapeHtml(o.planoId || '')}', ${isoW.week}, '${o.id}', ${isoW.isoYear})" class="px-3 py-1.5 rounded-xl bg-indigo-50 text-indigo-800 border border-indigo-200 text-[11px] font-extrabold">Dias na S${isoW.week}</button>` : ''}
                             ${isGestao ? `<button type="button" onclick="fecharModal('modalDiaCal'); abrirModalReprogramar('${o.id}')" class="px-3 py-1.5 rounded-xl bg-amber-50 text-amber-800 border border-amber-200 text-[11px] font-extrabold">Reprogramar</button>` : ''}
+                            ${isAdminMasterAtivo() ? `<button type="button" onclick="fecharModal('modalDiaCal'); abrirModalEdicaoMasterOrdem('${o.id}')" class="px-3 py-1.5 rounded-xl bg-rose-600 hover:bg-rose-700 text-white text-[11px] font-extrabold">✏️ Master</button>` : ''}
                             ${isGestao ? `<button type="button" onclick="excluirOrdemPreventiva('${o.id}')" class="px-3 py-1.5 rounded-xl bg-rose-50 text-rose-700 border border-rose-200 text-[11px] font-extrabold ml-auto">Excluir</button>` : ''}
                         </div>
                     </div>`);
@@ -3322,7 +3925,7 @@
             tbl.innerHTML = `<thead>${thead}</thead><tbody>${tbody}</tbody>`;
         };
 
-        window.abrirModalSemana52 = (planoId = '', weekNum = 1, ordemId = '', anoPre = null) => {
+        window.abrirModalSemana52 = (planoId = '', weekNum = 1, ordemId = '', anoPre = null, datasPreIso = null) => {
             if (!isGestao) { showToast('Apenas perfis de Gestão podem programar na matriz de 52 semanas.', 'error'); return; }
             const planos = getPlanosPreventiva().sort((a, b) => (a.codigo || '').localeCompare(b.codigo || ''));
             const ordemExist = ordemId ? getOrdensPreventiva().find(x => x.id === ordemId) : null;
@@ -3358,6 +3961,10 @@
             const resps = getResponsaveisUnicos();
             document.getElementById('sem52Resp').innerHTML = `<option value="">A definir / Equipe</option>` + resps.map(r => `<option value="${escapeHtml(r)}">${escapeHtml(r)}</option>`).join('');
 
+            sem52PreviasDraft = [];
+            sem52ProxExistenteAlvo = null;
+
+            const btnMasterEd = document.getElementById('btnSem52MasterEdit');
             if (ordemExist) {
                 const weekIsoSet = new Set(datesWeek.map(d => d.iso));
                 const existentesNaSem = getDatasOrdem(ordemExist).filter(d => weekIsoSet.has(d));
@@ -3370,21 +3977,182 @@
                 document.getElementById('sem52Desc').value = ordemExist.descricao || '';
                 document.getElementById('btnSem52AbrirExec').classList.remove('hidden');
                 document.getElementById('btnSem52Excluir').classList.remove('hidden');
+                if (btnMasterEd) btnMasterEd.classList.toggle('hidden', !isAdminMasterAtivo());
                 document.getElementById('btnSalvarSemana52').innerText = 'Salvar Alterações da Semana';
             } else {
-                sem52DiasSelecionados = new Set([datesWeek[0].iso]);
+                const weekIsoSet = new Set(datesWeek.map(d => d.iso));
+                const preValid = Array.isArray(datasPreIso) ? datasPreIso.filter(d => weekIsoSet.has(d)) : [];
+                sem52DiasSelecionados = new Set(preValid.length ? preValid : [datesWeek[0].iso]);
                 document.getElementById('sem52Hora').value = '08:00';
                 document.getElementById('sem52TituloOverride').value = '';
                 document.getElementById('sem52Desc').value = '';
                 document.getElementById('btnSem52AbrirExec').classList.add('hidden');
                 document.getElementById('btnSem52Excluir').classList.add('hidden');
+                if (btnMasterEd) btnMasterEd.classList.add('hidden');
                 document.getElementById('btnSalvarSemana52').innerText = `Agendar na S${w}`;
-                onSem52PlanoChange();
             }
 
             onSem52PlanoChange(Boolean(ordemExist));
             renderSem52DiasPicker();
             abrirModal('modalSemana52Prev');
+        };
+
+        function atualizarTextoBotaoSalvarSem52() {
+            const btn = document.getElementById('btnSalvarSemana52');
+            if (!btn) return;
+            const editId = document.getElementById('sem52EditOrdemId')?.value.trim();
+            if (editId) {
+                btn.innerText = 'Salvar Alterações da Semana';
+                return;
+            }
+            const w = Number(document.getElementById('sem52CellSemana')?.value || 1);
+            const extras = sem52PreviasDraft.filter(x => x.selecionada).length;
+            btn.innerText = extras > 0
+                ? `Agendar S${w} + ${extras} próxima(s) (${extras + 1} total)`
+                : `Agendar na S${w}`;
+        }
+
+        function atualizarPreviasSem52(preservarEstado = false, qtdOverride = null) {
+            const box = document.getElementById('sem52ProximasBox');
+            const listEl = document.getElementById('sem52ProximasLista');
+            const existBox = document.getElementById('sem52AgendarProximaExistBox');
+            const existTxt = document.getElementById('sem52AgendarProximaExistTxt');
+            const editId = document.getElementById('sem52EditOrdemId')?.value.trim();
+            const pId = document.getElementById('sem52ModalPlanoId')?.value || '';
+            const p = getPlanosPreventiva().find(x => x.id === pId);
+            const datasSel = [...sem52DiasSelecionados].sort();
+
+            if (editId) {
+                if (box) { box.hidden = true; box.classList.add('hidden'); }
+                sem52PreviasDraft = [];
+                const ordExist = getOrdensPreventiva().find(x => x.id === editId);
+                const per = p?.periodicidade || ordExist?.periodicidade || '';
+                if (existBox && ordExist && p && PERIODICIDADES[per] && datasSel.length) {
+                    const proxIso = calcularProximaData(datasSel[0], per);
+                    if (proxIso) {
+                        const offsets = datasSel.map(d => Math.max(0, diffDays(d, datasSel[0])));
+                        const proxSpan = expandirDatasSpanPrev(proxIso, offsets);
+                        const wi = getIsoWeekInfo(proxSpan[0]);
+                        const jaExiste = planoJaTemOrdemNaSemanaIso(p.id, wi.isoYear, wi.week);
+                        sem52ProxExistenteAlvo = { planoId: p.id, ano: wi.isoYear, semana: wi.week, datas: proxSpan };
+                        existBox.hidden = false;
+                        existBox.classList.remove('hidden');
+                        if (existTxt) {
+                            existTxt.innerHTML = `Periodicidade <strong>${escapeHtml(per)}</strong> → Próxima prevista: <strong>S${wi.week}/${wi.isoYear} • ${formatPeriodoDatasOrdemBR({ datas: proxSpan })}</strong>${jaExiste ? ' <span class="ml-1 px-1.5 py-0.5 rounded bg-amber-100 text-amber-800 text-[10px]">Já existe agenda nesta semana</span>' : ''}`;
+                        }
+                    } else {
+                        existBox.hidden = true; existBox.classList.add('hidden');
+                    }
+                } else if (existBox) {
+                    existBox.hidden = true; existBox.classList.add('hidden');
+                }
+                atualizarTextoBotaoSalvarSem52();
+                return;
+            }
+
+            if (existBox) { existBox.hidden = true; existBox.classList.add('hidden'); }
+            const per = p?.periodicidade || '';
+            if (!p || !PERIODICIDADES[per] || !datasSel.length) {
+                sem52PreviasDraft = [];
+                if (box) { box.hidden = true; box.classList.add('hidden'); }
+                atualizarTextoBotaoSalvarSem52();
+                return;
+            }
+
+            const qtd = qtdOverride || (preservarEstado && sem52PreviasDraft.length ? sem52PreviasDraft.length : getQtdPreviasDefaultPorPeriodicidade(per));
+            sem52PreviasDraft = construirPreviasProximas(datasSel, per, p.id, qtd, '', preservarEstado ? sem52PreviasDraft : null);
+
+            const perLbl = document.getElementById('sem52ProxPeriodicidadeLbl');
+            if (perLbl) perLbl.innerText = per;
+            if (box) { box.hidden = false; box.classList.remove('hidden'); }
+
+            if (listEl) {
+                listEl.innerHTML = sem52PreviasDraft.map((item, idx) => {
+                    const durTxt = item.datas.length > 1 ? ` • ${item.datas.length}d (${formatDateBR(item.datas[0]).slice(0, 5)}–${formatDateBR(item.datas[item.datas.length - 1]).slice(0, 5)})` : '';
+                    return `
+                        <div class="flex flex-wrap items-center justify-between gap-2 p-2.5 rounded-xl border ${item.selecionada ? 'bg-white border-emerald-400 shadow-sm' : 'bg-white/75 border-emerald-200/80'}">
+                            <label class="flex items-center gap-2.5 min-w-0 cursor-pointer">
+                                <input type="checkbox" ${item.selecionada ? 'checked' : ''} onchange="togglePreviaSem52(${idx}, this.checked)" class="w-4 h-4 accent-emerald-600 shrink-0">
+                                <div class="min-w-0">
+                                    <div class="flex flex-wrap items-center gap-1.5">
+                                        <span class="px-1.5 py-0.5 rounded bg-slate-900 text-white font-mono text-[10px] font-extrabold">S${item.semana}/${item.ano}</span>
+                                        <span class="text-[11px] font-extrabold text-slate-800">${item.indice}ª próxima (${escapeHtml(per)})</span>
+                                        ${durTxt ? `<span class="text-[10px] font-bold text-sky-700">${durTxt}</span>` : ''}
+                                        ${item.conflitoSemana ? `<span class="px-1.5 py-0.5 rounded-full bg-amber-100 text-amber-800 border border-amber-200 text-[9px] font-extrabold">Já agendada na S${item.semana}</span>` : ''}
+                                    </div>
+                                </div>
+                            </label>
+                            <div class="flex items-center gap-1.5 shrink-0">
+                                <input type="date" value="${item.data}" onchange="alterarDataPreviaSem52(${idx}, this.value)" aria-label="Data da ${item.indice}ª próxima preventiva" class="input-clean py-1 px-2 text-[11px] font-mono font-extrabold w-auto">
+                            </div>
+                        </div>`;
+                }).join('');
+            }
+            atualizarTextoBotaoSalvarSem52();
+        }
+
+        window.togglePreviaSem52 = (idx, checked) => {
+            if (!sem52PreviasDraft[idx]) return;
+            sem52PreviasDraft[idx].selecionada = Boolean(checked);
+            atualizarPreviasSem52(true);
+        };
+
+        window.alterarDataPreviaSem52 = (idx, novaData) => {
+            if (!sem52PreviasDraft[idx] || !novaData) return;
+            const item = sem52PreviasDraft[idx];
+            const span = expandirDatasSpanPrev(novaData, item.offsets);
+            const wi = getIsoWeekInfo(span[0]);
+            const pId = document.getElementById('sem52ModalPlanoId')?.value || '';
+            item.data = span[0];
+            item.datas = span;
+            item.semana = wi.week;
+            item.ano = wi.isoYear;
+            item.editada = true;
+            item.selecionada = true;
+            item.conflitoSemana = planoJaTemOrdemNaSemanaIso(pId, wi.isoYear, wi.week);
+            atualizarPreviasSem52(true);
+        };
+
+        window.selecionarProximaUnicaSem52 = () => {
+            if (!sem52PreviasDraft.length) return;
+            sem52PreviasDraft.forEach((it, idx) => { it.selecionada = idx === 0; });
+            atualizarPreviasSem52(true);
+        };
+
+        window.selecionarTodasPreviasSem52 = (marcar) => {
+            sem52PreviasDraft.forEach(it => { it.selecionada = Boolean(marcar); });
+            atualizarPreviasSem52(true);
+        };
+
+        window.adicionarMaisPreviaSem52 = () => {
+            const novaQtd = Math.min(24, (sem52PreviasDraft.length || 0) + 1);
+            atualizarPreviasSem52(true, novaQtd);
+        };
+
+        window.agendarProximaDaOrdemExistenteSem52 = () => {
+            if (!sem52ProxExistenteAlvo) return;
+            const alvo = { ...sem52ProxExistenteAlvo };
+            fecharModal('modalSemana52Prev');
+            sem52Ano = alvo.ano;
+            const anoSel = document.getElementById('sem52AnoSelect');
+            if (anoSel) {
+                if (!Array.from(anoSel.options || []).some(o => Number(o.value) === alvo.ano)) {
+                    const opt = document.createElement('option');
+                    opt.value = String(alvo.ano);
+                    opt.text = String(alvo.ano);
+                    anoSel.appendChild(opt);
+                }
+                anoSel.value = String(alvo.ano);
+            }
+            abrirModalSemana52(alvo.planoId, alvo.semana, '', alvo.ano, alvo.datas);
+            showToast(`Pré-preenchida a próxima preventiva prevista na S${alvo.semana}/${alvo.ano}. Confirme os dias e salve!`, 'success');
+        };
+
+        window.editarMasterOrdemModalSem52 = () => {
+            const id = document.getElementById('sem52EditOrdemId')?.value;
+            if (!id) return;
+            fecharModal('modalSemana52Prev');
+            abrirModalEdicaoMasterOrdem(id);
         };
 
         window.onSem52PlanoChange = (manterCampos = false) => {
@@ -3405,6 +4173,7 @@
             } else if (resumoEl) {
                 resumoEl.innerText = 'Preventiva avulsa vinculada à Agenda PCM.';
             }
+            atualizarPreviasSem52(false);
         };
 
         function renderSem52DiasPicker() {
@@ -3436,6 +4205,7 @@
                 resEl.className = 'text-[11px] font-extrabold text-sky-800 bg-white border border-sky-200 px-3 py-2 rounded-xl';
                 resEl.innerText = `${selecionadas.length} dia(s) selecionado(s): ${selecionadas.map(d => `${d.label} (${d.br})`).join(', ')} — Compartilham o mesmo checklist único.`;
             }
+            atualizarPreviasSem52(true);
         }
 
         window.toggleDiaSemana52 = (iso) => {
@@ -3512,53 +4282,70 @@
                 } else {
                     const p = getPlanosPreventiva().find(x => x.id === document.getElementById('sem52ModalPlanoId').value);
                     if (!p) { showToast('Selecione um plano válido.', 'error'); return; }
-                    const checklistExec = (p.checklist || []).map(it => ({
-                        id: it.id, tarefa: it.tarefa, criterio: it.criterio || '', peca: it.peca || '', critico: Boolean(it.critico), status: '', obs: ''
-                    }));
                     const titulo = tituloOverride || `${p.codigo ? p.codigo + ' — ' : ''}${p.titulo}`;
-                    await addDoc(colManutencao, {
-                        kind: 'agendamento',
-                        origem: 'modulo_preventivas',
-                        tipo: 'preventiva',
-                        status: 'pendente',
-                        data: datas[0],
-                        dataFim: datas[datas.length - 1],
-                        datas,
-                        semana: weekNum,
-                        ano,
-                        dataOriginal: datas[0],
-                        hora,
-                        titulo,
-                        setor: p.setor || '',
-                        maquina: p.maquina || '',
-                        equipamento: p.equipamento || '',
-                        conjunto: p.conjunto || '',
-                        subconjunto: p.subconjunto || '',
-                        tag: p.tag || '',
-                        ativoId: p.ativoId || '',
-                        planoId: p.id,
-                        planoCodigo: p.codigo || '',
-                        planoRevisao: p.revisao || 'Rev. 01',
-                        prioridade: getPrioridadePlanoDoc(p, 'P3'),
-                        criticidade: getPrioridadePlanoDoc(p, 'P3'),
-                        criticidadeLinha: getClasseLinhaAtivo(p.setor, p.maquina).classe || normalizarCriticidade(p.criticidadeLinha),
-                        periodicidade: p.periodicidade || 'Mensal',
-                        modoAgendamento: p.modoAgendamento || 'fixo',
-                        paradaNecessaria,
-                        duracaoEstimadaMin: Number(p.duracaoEstimadaMin) || 60,
-                        duracaoRealMin: 0,
-                        epis: p.epis || '',
-                        pecas: p.pecas || '',
-                        equipe,
-                        responsavel,
-                        descricao: descExtra || `[Plano ${p.codigo || ''}] ${[p.maquina, p.equipamento, p.subconjunto].filter(Boolean).join(' › ')}`,
-                        checklistExec,
-                        fotos: [],
-                        reprogramacoes: [],
-                        criadoPor: usuarioLogado?.nome || 'PCM',
-                        criadoEm: new Date().toISOString()
-                    });
-                    showToast(`Preventiva agendada na S${weekNum} (${formatDiasOrdemCompacto(datas)}) e sincronizada na Agenda PCM!`, 'success');
+                    const extrasSel = sem52PreviasDraft.filter(x => x.selecionada && x.datas?.length);
+                    const serieId = extrasSel.length ? `ser_${Date.now()}_${Math.random().toString(36).slice(2, 6)}` : '';
+                    const lotes = [
+                        { datas, semana: weekNum, ano, recorrente: false },
+                        ...extrasSel.map(ex => ({ datas: ex.datas, semana: ex.semana, ano: ex.ano, recorrente: true }))
+                    ];
+
+                    for (const lote of lotes) {
+                        const checklistExec = (p.checklist || []).map(it => ({
+                            id: it.id, tarefa: it.tarefa, criterio: it.criterio || '', peca: it.peca || '', critico: Boolean(it.critico), status: '', obs: ''
+                        }));
+                        await addDoc(colManutencao, {
+                            kind: 'agendamento',
+                            origem: 'modulo_preventivas',
+                            tipo: 'preventiva',
+                            status: 'pendente',
+                            data: lote.datas[0],
+                            dataFim: lote.datas[lote.datas.length - 1],
+                            datas: lote.datas,
+                            semana: lote.semana,
+                            ano: lote.ano,
+                            dataOriginal: lote.datas[0],
+                            hora,
+                            titulo,
+                            setor: p.setor || '',
+                            maquina: p.maquina || '',
+                            equipamento: p.equipamento || '',
+                            conjunto: p.conjunto || '',
+                            subconjunto: p.subconjunto || '',
+                            tag: p.tag || '',
+                            ativoId: p.ativoId || '',
+                            planoId: p.id,
+                            planoCodigo: p.codigo || '',
+                            planoRevisao: p.revisao || 'Rev. 01',
+                            prioridade: getPrioridadePlanoDoc(p, 'P3'),
+                            criticidade: getPrioridadePlanoDoc(p, 'P3'),
+                            criticidadeLinha: getClasseLinhaAtivo(p.setor, p.maquina).classe || normalizarCriticidade(p.criticidadeLinha),
+                            periodicidade: p.periodicidade || 'Mensal',
+                            modoAgendamento: p.modoAgendamento || 'fixo',
+                            paradaNecessaria,
+                            duracaoEstimadaMin: Number(p.duracaoEstimadaMin) || 60,
+                            duracaoRealMin: 0,
+                            epis: p.epis || '',
+                            pecas: p.pecas || '',
+                            equipe,
+                            responsavel,
+                            descricao: descExtra || `[Plano ${p.codigo || ''}] ${[p.maquina, p.equipamento, p.subconjunto].filter(Boolean).join(' › ')}`,
+                            checklistExec,
+                            fotos: [],
+                            reprogramacoes: [],
+                            geradaPorRecorrencia: lote.recorrente,
+                            serieRecorrenciaId: serieId,
+                            criadoPor: usuarioLogado?.nome || 'PCM',
+                            criadoEm: new Date().toISOString()
+                        });
+                    }
+                    const semsTxt = lotes.map(l => `S${l.semana}/${l.ano}`).join(', ');
+                    showToast(
+                        lotes.length > 1
+                            ? `${lotes.length} preventivas agendadas (${semsTxt}) seguindo a periodicidade ${p.periodicidade || ''} e sincronizadas na Agenda PCM!`
+                            : `Preventiva agendada na S${weekNum} (${formatDiasOrdemCompacto(datas)}) e sincronizada na Agenda PCM!`,
+                        'success'
+                    );
                 }
                 fecharModal('modalSemana52Prev');
             } catch (err) {
@@ -3720,12 +4507,14 @@
                 return;
             }
 
+            const masterAtivo = isAdminMasterAtivo();
             grid.innerHTML = list.map(p => {
                 const prio = getPrioridadePlanoDoc(p);
                 const prioMeta = getPrioridadeMeta(prio);
                 const modo = p.modoAgendamento === 'flutuante' ? { lbl: 'Data Flutuante', cls: 'bg-violet-100 text-violet-800 border-violet-200' } : { lbl: 'Cronograma Fixo', cls: 'bg-sky-100 text-sky-800 border-sky-200' };
                 const itens = Array.isArray(p.checklist) ? p.checklist.length : 0;
-                const prox = ordens.filter(o => o.planoId === p.id && o.status !== 'concluido' && o.status !== 'cancelado' && o.data >= hoje).sort((a, b) => a.data.localeCompare(b.data))[0];
+                const ordsPlanoPend = ordens.filter(o => o.planoId === p.id && o.status !== 'concluido' && o.status !== 'cancelado');
+                const prox = ordsPlanoPend.filter(o => o.data >= hoje).sort((a, b) => a.data.localeCompare(b.data))[0];
                 return `
                     <div class="glass-card glass-card-hover p-5 rounded-3xl flex flex-col justify-between gap-3.5">
                         <div class="space-y-2.5">
@@ -3757,6 +4546,10 @@
                             <button type="button" onclick="abrirModalEditorPlano('${p.id}')" class="py-2 px-3 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-800 text-[11px] font-extrabold">Editar</button>
                             <button type="button" onclick="duplicarPlano('${p.id}')" class="py-2 px-2.5 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-700 text-[11px] font-extrabold" title="Duplicar plano">Clonar</button>
                             <button type="button" onclick="excluirPlano('${p.id}')" class="py-2 px-2.5 rounded-xl bg-rose-50 hover:bg-rose-100 text-rose-700 text-[11px] font-extrabold">✕</button>
+                            ${masterAtivo ? `<div class="w-full flex items-center gap-1.5 pt-1">
+                                <button type="button" onclick="excluirOrdensFuturasPlanoMaster('${p.id}')" title="Admin Master: limpar todas as ordens pendentes/atrasadas vinculadas a este plano" class="flex-1 py-1.5 px-2.5 rounded-xl bg-amber-50 hover:bg-amber-100 border border-amber-200 text-amber-800 text-[10px] font-extrabold">🧹 Limpar Pendentes (${ordsPlanoPend.length})</button>
+                                <button type="button" onclick="excluirPlanoMasterComPendentes('${p.id}')" title="Admin Master: excluir plano e todas as ordens pendentes vinculadas" class="py-1.5 px-2.5 rounded-xl bg-rose-600 hover:bg-rose-700 text-white text-[10px] font-extrabold">🗑️ Master</button>
+                            </div>` : ''}
                         </div>
                     </div>`;
             }).join('');
@@ -4103,13 +4896,15 @@
 
             const hoje = dataPre || getHojeStr();
             document.getElementById('progDataInicio').value = hoje;
-            document.getElementById('progDataFim').value = `${new Date().getFullYear()}-12-31`;
+            document.getElementById('progDataFim').value = `${(parseIsoDate(hoje) || new Date()).getFullYear()}-12-31`;
             document.getElementById('progDiaSemanaPref').value = '';
             const selDur = document.getElementById('progDuracaoDias');
             if (selDur) selDur.value = '1';
             document.getElementById('progHora').value = '08:00';
             document.getElementById('progTituloOverride').value = '';
             document.getElementById('progDescricao').value = '';
+            progPreviasDraft = [];
+            progLoteDesmarcadas.clear();
             onProgPlanoChange();
             abrirModal('modalProgramarPreventiva');
         };
@@ -4123,10 +4918,22 @@
             const prio = getPrioridadePlanoDoc(p);
             const prioTxt = prio ? getPrioridadeMeta(prio).full : 'Sem Prioridade';
             const lInfo = getClasseLinhaAtivo(p.setor, p.maquina);
-            resumo.innerHTML = `<strong>${escapeHtml([p.setor, p.maquina, p.equipamento, p.subconjunto].filter(Boolean).join(' › '))}</strong><br>Modo do Plano: <strong>${modoLbl}</strong> • Prioridade: <strong>${escapeHtml(prioTxt)}</strong>${lInfo.classe ? ` • Linha: <strong>Classe ${lInfo.classe}</strong>` : ''} • Checklist com <strong>${(p.checklist || []).length}</strong> item(ns).`;
+            resumo.innerHTML = `<strong>${escapeHtml([p.setor, p.maquina, p.equipamento, p.subconjunto].filter(Boolean).join(' › '))}</strong><br>Modo do Plano: <strong>${modoLbl}</strong> • Periodicidade: <strong>${escapeHtml(p.periodicidade || 'Mensal')}</strong> • Prioridade: <strong>${escapeHtml(prioTxt)}</strong>${lInfo.classe ? ` • Linha: <strong>Classe ${lInfo.classe}</strong>` : ''} • Checklist com <strong>${(p.checklist || []).length}</strong> item(ns).`;
             document.getElementById('progEquipe').value = p.disciplina || 'Mecânica';
             document.getElementById('progParada').value = p.paradaNecessaria || 'sim';
             document.getElementById('progModoGeracao').value = p.modoAgendamento === 'fixo' ? 'lote' : 'unica';
+
+            // Garante horizonte mínimo de pelo menos +1 ciclo completo (ex.: Semestral em agosto ou Anual)
+            const dIni = document.getElementById('progDataInicio').value;
+            const per = p.periodicidade || 'Mensal';
+            if (dIni && PERIODICIDADES[per]) {
+                const baseYearEnd = `${(parseIsoDate(dIni) || new Date()).getFullYear()}-12-31`;
+                const proxCiclo = calcularProximaData(dIni, per);
+                const fimIdeal = (proxCiclo && proxCiclo > baseYearEnd) ? proxCiclo : baseYearEnd;
+                document.getElementById('progDataFim').value = fimIdeal;
+            }
+            progPreviasDraft = [];
+            progLoteDesmarcadas.clear();
             onProgModoChange();
         };
 
@@ -4135,10 +4942,111 @@
             const box = document.getElementById('progLoteBox');
             box.hidden = modo !== 'lote';
             box.classList.toggle('hidden', modo !== 'lote');
-            atualizarPreviewCronograma();
+            atualizarPreviewCronograma(false);
         };
 
-        window.atualizarPreviewCronograma = () => {
+        window.onProgDataInicioChange = () => {
+            const p = getPlanosPreventiva().find(x => x.id === document.getElementById('progPlanoId')?.value);
+            const dIni = document.getElementById('progDataInicio')?.value || '';
+            const dFimEl = document.getElementById('progDataFim');
+            const per = p?.periodicidade || '';
+            if (dIni && dFimEl && PERIODICIDADES[per]) {
+                const proxCiclo = calcularProximaData(dIni, per);
+                if (proxCiclo && (!dFimEl.value || dFimEl.value < proxCiclo)) {
+                    dFimEl.value = proxCiclo;
+                }
+            }
+            progPreviasDraft = [];
+            progLoteDesmarcadas.clear();
+            atualizarPreviewCronograma(false);
+        };
+
+        function atualizarPreviasProgUnica(p, dIni, durDias, preservarEstado = false, qtdOverride = null) {
+            const proxBox = document.getElementById('progProximasBox');
+            const proxList = document.getElementById('progProximasLista');
+            const per = p?.periodicidade || '';
+            if (!p || !dIni || !PERIODICIDADES[per]) {
+                progPreviasDraft = [];
+                if (proxBox) { proxBox.hidden = true; proxBox.classList.add('hidden'); }
+                return;
+            }
+            const baseSpan = [];
+            for (let k = 0; k < durDias; k++) baseSpan.push(somarDiasIso(dIni, k));
+            const qtd = qtdOverride || (preservarEstado && progPreviasDraft.length ? progPreviasDraft.length : getQtdPreviasDefaultPorPeriodicidade(per));
+            progPreviasDraft = construirPreviasProximas(baseSpan, per, p.id, qtd, '', preservarEstado ? progPreviasDraft : null);
+
+            const perLbl = document.getElementById('progProxPeriodicidadeLbl');
+            if (perLbl) perLbl.innerText = per;
+            if (proxBox) { proxBox.hidden = false; proxBox.classList.remove('hidden'); }
+            if (proxList) {
+                proxList.innerHTML = progPreviasDraft.map((item, idx) => {
+                    const durTxt = item.datas.length > 1 ? ` • ${item.datas.length}d (${formatDateBR(item.datas[0]).slice(0, 5)}–${formatDateBR(item.datas[item.datas.length - 1]).slice(0, 5)})` : '';
+                    return `
+                        <div class="flex flex-wrap items-center justify-between gap-2 p-2.5 rounded-xl border ${item.selecionada ? 'bg-white border-emerald-400 shadow-sm' : 'bg-white/75 border-emerald-200/80'}">
+                            <label class="flex items-center gap-2.5 min-w-0 cursor-pointer">
+                                <input type="checkbox" ${item.selecionada ? 'checked' : ''} onchange="togglePreviaProg(${idx}, this.checked)" class="w-4 h-4 accent-emerald-600 shrink-0">
+                                <div class="min-w-0 flex flex-wrap items-center gap-1.5">
+                                    <span class="px-1.5 py-0.5 rounded bg-slate-900 text-white font-mono text-[10px] font-extrabold">S${item.semana}/${item.ano}</span>
+                                    <span class="text-[11px] font-extrabold text-slate-800">${item.indice}ª próxima (${escapeHtml(per)})</span>
+                                    ${durTxt ? `<span class="text-[10px] font-bold text-sky-700">${durTxt}</span>` : ''}
+                                    ${item.conflitoSemana ? `<span class="px-1.5 py-0.5 rounded-full bg-amber-100 text-amber-800 border border-amber-200 text-[9px] font-extrabold">Já agendada na S${item.semana}</span>` : ''}
+                                </div>
+                            </label>
+                            <input type="date" value="${item.data}" onchange="alterarDataPreviaProg(${idx}, this.value)" aria-label="Data da ${item.indice}ª próxima preventiva" class="input-clean py-1 px-2 text-[11px] font-mono font-extrabold w-auto">
+                        </div>`;
+                }).join('');
+            }
+        }
+
+        window.togglePreviaProg = (idx, checked) => {
+            if (!progPreviasDraft[idx]) return;
+            progPreviasDraft[idx].selecionada = Boolean(checked);
+            atualizarPreviewCronograma(true);
+        };
+
+        window.alterarDataPreviaProg = (idx, novaData) => {
+            if (!progPreviasDraft[idx] || !novaData) return;
+            const item = progPreviasDraft[idx];
+            const span = expandirDatasSpanPrev(novaData, item.offsets);
+            const wi = getIsoWeekInfo(span[0]);
+            const pId = document.getElementById('progPlanoId')?.value || '';
+            item.data = span[0];
+            item.datas = span;
+            item.semana = wi.week;
+            item.ano = wi.isoYear;
+            item.editada = true;
+            item.selecionada = true;
+            item.conflitoSemana = planoJaTemOrdemNaSemanaIso(pId, wi.isoYear, wi.week);
+            atualizarPreviewCronograma(true);
+        };
+
+        window.selecionarProximaUnicaProg = () => {
+            if (!progPreviasDraft.length) return;
+            progPreviasDraft.forEach((it, idx) => { it.selecionada = idx === 0; });
+            atualizarPreviewCronograma(true);
+        };
+
+        window.selecionarTodasPreviasProg = (marcar) => {
+            progPreviasDraft.forEach(it => { it.selecionada = Boolean(marcar); });
+            atualizarPreviewCronograma(true);
+        };
+
+        window.adicionarMaisPreviaProg = () => {
+            const p = getPlanosPreventiva().find(x => x.id === document.getElementById('progPlanoId')?.value);
+            const dIni = document.getElementById('progDataInicio')?.value;
+            const durDias = Math.max(1, Math.min(7, Number(document.getElementById('progDuracaoDias')?.value || 1)));
+            const novaQtd = Math.min(24, (progPreviasDraft.length || 0) + 1);
+            atualizarPreviasProgUnica(p, dIni, durDias, true, novaQtd);
+            atualizarPreviewCronograma(true);
+        };
+
+        window.toggleDataLoteProg = (dtIso) => {
+            if (progLoteDesmarcadas.has(dtIso)) progLoteDesmarcadas.delete(dtIso);
+            else progLoteDesmarcadas.add(dtIso);
+            atualizarPreviewCronograma(true);
+        };
+
+        window.atualizarPreviewCronograma = (preservarEstado = false) => {
             const p = getPlanosPreventiva().find(x => x.id === document.getElementById('progPlanoId').value);
             const modo = document.getElementById('progModoGeracao').value;
             const dIni = document.getElementById('progDataInicio').value;
@@ -4146,14 +5054,40 @@
             const dow = document.getElementById('progDiaSemanaPref').value;
             const durDias = Math.max(1, Math.min(7, Number(document.getElementById('progDuracaoDias')?.value || 1)));
             const box = document.getElementById('progPreviewDatas');
-            if (!p || !dIni) { box.innerText = 'Selecione o plano e a data inicial.'; return; }
-            const datas = modo === 'lote' ? gerarDatasCronograma(dIni, dFim, p.periodicidade || 'Mensal', dow) : [dIni];
-            if (!datas.length) { box.innerText = 'Verifique se a data final é maior ou igual à data inicial.'; return; }
-            box.innerHTML = `<div class="font-extrabold text-slate-800 mb-1">Serão criadas ${datas.length} ordem(ns) na Agenda PCM (ag_manutencao)${durDias > 1 ? ` • ${durDias} dias/ordem com checklist único` : ''}:</div><div class="flex flex-wrap gap-1">${datas.slice(0, 18).map(d => {
+            const proxBox = document.getElementById('progProximasBox');
+            if (!p || !dIni) {
+                box.innerText = 'Selecione o plano e a data inicial.';
+                if (proxBox) { proxBox.hidden = true; proxBox.classList.add('hidden'); }
+                return;
+            }
+
+            if (modo === 'unica') {
+                atualizarPreviasProgUnica(p, dIni, durDias, preservarEstado);
+                const extras = progPreviasDraft.filter(x => x.selecionada).map(x => x.data);
+                const datasTotal = [dIni, ...extras];
+                box.innerHTML = `<div class="font-extrabold text-slate-800 mb-1">Serão criadas ${datasTotal.length} ordem(ns) na Agenda PCM (ag_manutencao)${durDias > 1 ? ` • ${durDias} dias/ordem com checklist único` : ''}:</div><div class="flex flex-wrap gap-1">${datasTotal.slice(0, 18).map((d, i) => {
+                    const wi = getIsoWeekInfo(d);
+                    const fimSpan = durDias > 1 ? somarDiasIso(d, durDias - 1) : d;
+                    return `<span class="px-2 py-0.5 rounded-lg ${i === 0 ? 'bg-sky-50 border-sky-300 text-sky-900' : 'bg-emerald-50 border-emerald-300 text-emerald-900'} border font-mono text-[10px] font-bold">S${wi.week}/${wi.isoYear} • ${durDias > 1 ? `${formatDateBR(d).slice(0, 5)}–${formatDateBR(fimSpan).slice(0, 5)}` : formatDateBR(d)}</span>`;
+                }).join('')}${datasTotal.length > 18 ? `<span class="text-[10px] font-bold text-slate-500">+${datasTotal.length - 18} datas</span>` : ''}</div>`;
+                const btn = document.getElementById('btnSalvarProgramacao');
+                if (btn) btn.innerText = datasTotal.length > 1 ? `Confirmar (${datasTotal.length} preventivas)` : 'Confirmar Programação';
+                return;
+            }
+
+            if (proxBox) { proxBox.hidden = true; proxBox.classList.add('hidden'); }
+            const datasBrutas = gerarDatasCronograma(dIni, dFim, p.periodicidade || 'Mensal', dow);
+            if (!datasBrutas.length) { box.innerText = 'Verifique se a data final é maior ou igual à data inicial.'; return; }
+            const datasAtivas = datasBrutas.filter(d => !progLoteDesmarcadas.has(d));
+            box.innerHTML = `<div class="font-extrabold text-slate-800 mb-1">Serão criadas ${datasAtivas.length} de ${datasBrutas.length} ordem(ns) na Agenda PCM (clique para marcar/desmarcar)${durDias > 1 ? ` • ${durDias} dias/ordem com checklist único` : ''}:</div><div class="flex flex-wrap gap-1.5">${datasBrutas.slice(0, 24).map(d => {
                 const wi = getIsoWeekInfo(d);
                 const fimSpan = durDias > 1 ? somarDiasIso(d, durDias - 1) : d;
-                return `<span class="px-2 py-0.5 rounded-lg bg-white border border-slate-200 font-mono text-[10px] font-bold">S${wi.week} • ${durDias > 1 ? `${formatDateBR(d).slice(0, 5)}–${formatDateBR(fimSpan).slice(0, 5)}` : formatDateBR(d)}</span>`;
-            }).join('')}${datas.length > 18 ? `<span class="text-[10px] font-bold text-slate-500">+${datas.length - 18} datas</span>` : ''}</div>`;
+                const marcada = !progLoteDesmarcadas.has(d);
+                const conflito = planoJaTemOrdemNaSemanaIso(p.id, wi.isoYear, wi.week);
+                return `<button type="button" onclick="toggleDataLoteProg('${d}')" class="px-2 py-1 rounded-lg border font-mono text-[10px] font-bold transition-colors ${marcada ? (conflito ? 'bg-amber-50 border-amber-300 text-amber-900' : 'bg-white border-sky-300 text-slate-800') : 'bg-slate-100 border-slate-200 text-slate-400 line-through'}">${marcada ? '✓ ' : ''}S${wi.week}/${wi.isoYear} • ${durDias > 1 ? `${formatDateBR(d).slice(0, 5)}–${formatDateBR(fimSpan).slice(0, 5)}` : formatDateBR(d)}${conflito ? ' ⚠' : ''}</button>`;
+            }).join('')}${datasBrutas.length > 24 ? `<span class="text-[10px] font-bold text-slate-500">+${datasBrutas.length - 24} datas</span>` : ''}</div>`;
+            const btn = document.getElementById('btnSalvarProgramacao');
+            if (btn) btn.innerText = `Confirmar Programação (${datasAtivas.length})`;
         };
 
         window.salvarProgramacaoPreventiva = async (e) => {
@@ -4165,8 +5099,10 @@
             const dFim = document.getElementById('progDataFim').value;
             const dow = document.getElementById('progDiaSemanaPref').value;
             const durDias = Math.max(1, Math.min(7, Number(document.getElementById('progDuracaoDias')?.value || 1)));
-            const datas = modo === 'lote' ? gerarDatasCronograma(dIni, dFim, p.periodicidade || 'Mensal', dow) : [dIni];
-            if (!datas.length) { showToast('Nenhuma data válida para programar.', 'error'); return; }
+            const datas = modo === 'lote'
+                ? gerarDatasCronograma(dIni, dFim, p.periodicidade || 'Mensal', dow).filter(d => !progLoteDesmarcadas.has(d))
+                : [dIni, ...progPreviasDraft.filter(x => x.selecionada && x.data).map(x => x.data)];
+            if (!datas.length) { showToast('Nenhuma data válida selecionada para programar.', 'error'); return; }
 
             const btn = document.getElementById('btnSalvarProgramacao');
             btn.disabled = true; btn.innerText = `Agendando (${datas.length})...`;
@@ -4177,8 +5113,10 @@
                 const responsavel = document.getElementById('progResponsavel').value || '';
                 const paradaNecessaria = document.getElementById('progParada').value || 'sim';
                 const descExtra = document.getElementById('progDescricao').value.trim();
+                const serieId = datas.length > 1 ? `ser_${Date.now()}_${Math.random().toString(36).slice(2, 6)}` : '';
 
-                for (const dt of datas) {
+                for (let idxDt = 0; idxDt < datas.length; idxDt++) {
+                    const dt = datas[idxDt];
                     const checklistExec = (p.checklist || []).map(it => ({
                         id: it.id, tarefa: it.tarefa, criterio: it.criterio || '', peca: it.peca || '', critico: Boolean(it.critico), status: '', obs: ''
                     }));
@@ -4226,6 +5164,8 @@
                         checklistExec,
                         fotos: [],
                         reprogramacoes: [],
+                        geradaPorRecorrencia: idxDt > 0,
+                        serieRecorrenciaId: serieId,
                         criadoPor: usuarioLogado?.nome || 'PCM',
                         criadoEm: new Date().toISOString()
                     });
@@ -4286,6 +5226,7 @@
                 tbody.innerHTML = `<tr><td colspan="8" class="py-10 text-center text-slate-400 font-bold">Nenhuma ordem preventiva encontrada com os filtros aplicados.</td></tr>`;
                 return;
             }
+            const masterAtivo = isAdminMasterAtivo();
             tbody.innerHTML = list.map(o => {
                 const st = getStatusEfetivo(o, hojeStr);
                 const stMeta = STATUS_META[st] || STATUS_META.pendente;
@@ -4336,6 +5277,8 @@
                             <button type="button" onclick="abrirModalSemana52('${escapeHtml(o.planoId || '')}', ${isoInfo.week}, '${o.id}', ${isoInfo.isoYear})" class="px-2 py-1 rounded-lg bg-indigo-50 hover:bg-indigo-100 text-indigo-700 border border-indigo-200 text-[11px] font-extrabold" title="Ajustar dias na S${isoInfo.week}">S${isoInfo.week}</button>
                             <button type="button" onclick="imprimirRelatorioPreventivaA4('${o.id}')" class="px-2 py-1 rounded-lg bg-emerald-50 hover:bg-emerald-100 text-emerald-800 border border-emerald-200 text-[11px] font-extrabold" title="Relatório A4">A4</button>
                             <button type="button" onclick="abrirModalReprogramar('${o.id}')" class="px-2 py-1 rounded-lg bg-amber-50 hover:bg-amber-100 text-amber-800 border border-amber-200 text-[11px] font-extrabold" title="Reprogramar">↻</button>
+                            ${masterAtivo ? `<button type="button" onclick="abrirModalEdicaoMasterOrdem('${o.id}')" class="px-2 py-1 rounded-lg bg-rose-600 hover:bg-rose-700 text-white text-[11px] font-extrabold" title="Edição Direta Admin Master">✏️ Master</button>` : ''}
+                            ${masterAtivo && (o.status === 'concluido' || o.status === 'cancelado') ? `<button type="button" onclick="reabrirOrdemMaster('${o.id}')" class="px-2 py-1 rounded-lg bg-amber-500 hover:bg-amber-600 text-white text-[11px] font-extrabold" title="Reabrir Ordem (Admin Master)">🔓</button>` : ''}
                             <button type="button" onclick="excluirOrdemPreventiva('${o.id}')" class="px-2 py-1 rounded-lg bg-rose-50 hover:bg-rose-100 text-rose-700 border border-rose-200 text-[11px] font-extrabold" title="Excluir">✕</button>
                         </td>
                     </tr>`;
@@ -4773,9 +5716,30 @@
             document.getElementById('execDuracaoRealMin').value = o.duracaoRealMin || o.duracaoEstimadaMin || 60;
             document.getElementById('execObsFinal').value = o.obsExecucao || '';
             document.getElementById('execFotosInput').value = '';
+
+            const masterAtivo = isAdminMasterAtivo();
+            const btnMEdit = document.getElementById('btnExecMasterEdit');
+            const btnMReabrir = document.getElementById('btnExecMasterReabrir');
+            if (btnMEdit) { btnMEdit.hidden = !masterAtivo; btnMEdit.classList.toggle('hidden', !masterAtivo); }
+            const podeReabrir = masterAtivo && (o.status === 'concluido' || o.status === 'cancelado');
+            if (btnMReabrir) { btnMReabrir.hidden = !podeReabrir; btnMReabrir.classList.toggle('hidden', !podeReabrir); }
+
             renderExecChecklist();
             renderExecFotos();
             abrirModal('modalExecutarPreventiva');
+        };
+
+        window.editarMasterOrdemAtualExec = () => {
+            const id = document.getElementById('execOrdemId')?.value;
+            if (!id) return;
+            fecharModal('modalExecutarPreventiva');
+            abrirModalEdicaoMasterOrdem(id);
+        };
+
+        window.reabrirOrdemAtualExecMaster = async () => {
+            const id = document.getElementById('execOrdemId')?.value;
+            if (!id) return;
+            await reabrirOrdemMaster(id, true);
         };
 
         window.setItemExecStatus = (idx, status) => {
@@ -5173,10 +6137,457 @@
             w.document.close();
         };
 
+        // ================= VIEW 8: ADMIN MASTER (GESTÃO DIRETA & EXCLUSÃO EM LOTE) =================
+        function exigirAdminMasterPrev() {
+            if (!isAdminMasterAtivo()) {
+                showToast('Acesso restrito: desbloqueie o modo Admin Master primeiro.', 'error');
+                return false;
+            }
+            return true;
+        }
+
+        window.setMasterPrevTab = (tab) => {
+            masterPrevTab = tab === 'planos' ? 'planos' : 'ordens';
+            masterPrevSelecionados.clear();
+            const bOrd = document.getElementById('btnMasterPrevTabOrdens');
+            const bPl = document.getElementById('btnMasterPrevTabPlanos');
+            if (bOrd) bOrd.className = `px-4 py-1.5 rounded-full text-xs font-extrabold ${masterPrevTab === 'ordens' ? 'bg-slate-900 text-white' : 'text-slate-600'}`;
+            if (bPl) bPl.className = `px-4 py-1.5 rounded-full text-xs font-extrabold ${masterPrevTab === 'planos' ? 'bg-slate-900 text-white' : 'text-slate-600'}`;
+            renderMasterPrevView();
+        };
+
+        function getItensVisiveisMasterPrev() {
+            const busca = normKey(document.getElementById('masterPrevBusca')?.value || '');
+            const fStatus = document.getElementById('masterPrevFiltroStatus')?.value || '';
+            const hojeStr = getHojeStr();
+
+            if (masterPrevTab === 'planos') {
+                return getPlanosPreventiva().filter(p => {
+                    if (!busca) return true;
+                    const hay = normKey([p.codigo, p.titulo, p.setor, p.maquina, p.equipamento, p.conjunto, p.subconjunto, p.periodicidade, p.disciplina].join(' '));
+                    return hay.includes(busca);
+                }).sort((a, b) => (a.codigo || '').localeCompare(b.codigo || '') || (a.titulo || '').localeCompare(b.titulo || ''));
+            }
+
+            return getOrdensPreventiva().filter(o => {
+                const stEf = getStatusEfetivo(o, hojeStr);
+                if (fStatus && o.status !== fStatus && stEf !== fStatus) return false;
+                if (busca) {
+                    const wi = getIsoWeekInfo(o.data);
+                    const hay = normKey([
+                        `s${wi.week}`, `s${wi.week}/${wi.isoYear}`,
+                        o.titulo, o.planoCodigo, o.setor, o.maquina, o.equipamento,
+                        o.conjunto, o.subconjunto, o.tag, o.responsavel, o.executadoPor,
+                        o.equipe, o.periodicidade, o.status, stEf
+                    ].join(' '));
+                    if (!hay.includes(busca)) return false;
+                }
+                return true;
+            }).sort((a, b) => (b.data || '').localeCompare(a.data || ''));
+        }
+
+        function atualizarBarraLoteMasterPrev() {
+            const bar = document.getElementById('masterPrevBatchBar');
+            const cnt = document.getElementById('masterPrevSelCount');
+            const cascWrap = document.getElementById('masterPrevCascataPlanosWrap');
+            const btnReab = document.getElementById('btnMasterPrevReabrirLote');
+            const n = masterPrevSelecionados.size;
+
+            if (cnt) cnt.innerText = String(n);
+            if (bar) { bar.hidden = n === 0; bar.classList.toggle('hidden', n === 0); }
+            if (cascWrap) {
+                const showCasc = masterPrevTab === 'planos';
+                cascWrap.hidden = !showCasc;
+                cascWrap.classList.toggle('hidden', !showCasc);
+            }
+            if (btnReab) btnReab.classList.toggle('hidden', masterPrevTab !== 'ordens');
+        }
+
+        window.renderMasterPrevView = () => {
+            if (!isAdminMasterAtivo()) return;
+            const todasOrdens = getOrdensPreventiva();
+            const todosPlanos = getPlanosPreventiva();
+            const cOrd = document.getElementById('masterPrevCntOrdens');
+            const cPl = document.getElementById('masterPrevCntPlanos');
+            if (cOrd) cOrd.innerText = String(todasOrdens.length);
+            if (cPl) cPl.innerText = String(todosPlanos.length);
+
+            const fStEl = document.getElementById('masterPrevFiltroStatus');
+            if (fStEl) fStEl.classList.toggle('hidden', masterPrevTab !== 'ordens');
+
+            const validIds = new Set((masterPrevTab === 'planos' ? todosPlanos : todasOrdens).map(x => x.id));
+            [...masterPrevSelecionados].forEach(id => { if (!validIds.has(id)) masterPrevSelecionados.delete(id); });
+
+            const itens = getItensVisiveisMasterPrev();
+            const lista = document.getElementById('masterPrevLista');
+            const hojeStr = getHojeStr();
+
+            if (!lista) return;
+            if (!itens.length) {
+                lista.innerHTML = `<div class="py-10 text-center text-xs font-bold text-slate-400">Nenhum registro encontrado nesta aba com os filtros atuais.</div>`;
+                atualizarBarraLoteMasterPrev();
+                return;
+            }
+
+            if (masterPrevTab === 'planos') {
+                lista.innerHTML = itens.map(p => {
+                    const checked = masterPrevSelecionados.has(p.id);
+                    const ordsPl = todasOrdens.filter(o => o.planoId === p.id);
+                    const pendCnt = ordsPl.filter(o => o.status !== 'concluido' && o.status !== 'cancelado').length;
+                    const prio = getPrioridadePlanoDoc(p);
+                    const prioMeta = getPrioridadeMeta(prio);
+                    return `
+                        <div class="p-3.5 rounded-2xl border ${checked ? 'border-rose-400 bg-rose-50/40' : 'border-slate-200 bg-white'} flex flex-col lg:flex-row lg:items-center justify-between gap-3">
+                            <label class="flex items-start gap-3 min-w-0 cursor-pointer flex-1">
+                                <input type="checkbox" ${checked ? 'checked' : ''} onchange="toggleSelMasterPrev('${p.id}', this.checked)" class="w-4 h-4 mt-1 accent-rose-600 shrink-0">
+                                <div class="min-w-0 space-y-1">
+                                    <div class="flex flex-wrap items-center gap-1.5">
+                                        <span class="font-mono text-[10px] font-extrabold px-2 py-0.5 rounded-lg bg-sky-50 text-sky-800 border border-sky-200">${escapeHtml(p.codigo || 'PM')} • ${escapeHtml(p.revisao || 'Rev.01')}</span>
+                                        <span class="px-2 py-0.5 rounded-full text-[10px] font-extrabold bg-slate-100 text-slate-700">${escapeHtml(p.periodicidade || 'Mensal')}</span>
+                                        ${prio ? `<span class="px-2 py-0.5 rounded-full text-[10px] font-extrabold ${prioMeta.cls}">${escapeHtml(prioMeta.label)}</span>` : ''}
+                                        <span class="px-2 py-0.5 rounded-full text-[10px] font-extrabold ${pendCnt > 0 ? 'bg-amber-100 text-amber-800' : 'bg-slate-100 text-slate-500'}">${pendCnt} pendente(s) / ${ordsPl.length} ordem(ns)</span>
+                                    </div>
+                                    <div class="text-xs font-extrabold text-slate-900 truncate">${escapeHtml(p.titulo)}</div>
+                                    <div class="text-[11px] font-semibold text-slate-500 truncate">${escapeHtml([p.setor, p.maquina, p.equipamento, p.conjunto, p.subconjunto].filter(Boolean).join(' › ') || '—')}</div>
+                                </div>
+                            </label>
+                            <div class="flex flex-wrap items-center gap-1.5 shrink-0">
+                                <button type="button" onclick="abrirModalEditorPlano('${p.id}')" class="px-3 py-1.5 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-800 text-[11px] font-extrabold">✏️ Editar Plano</button>
+                                <button type="button" onclick="excluirOrdensFuturasPlanoMaster('${p.id}')" class="px-3 py-1.5 rounded-xl bg-amber-50 hover:bg-amber-100 border border-amber-200 text-amber-800 text-[11px] font-extrabold">🧹 Limpar Pend. (${pendCnt})</button>
+                                <button type="button" onclick="excluirPlanoMasterComPendentes('${p.id}')" class="px-3 py-1.5 rounded-xl bg-rose-600 hover:bg-rose-700 text-white text-[11px] font-extrabold">🗑️ Excluir Plano</button>
+                            </div>
+                        </div>`;
+                }).join('');
+            } else {
+                lista.innerHTML = itens.map(o => {
+                    const checked = masterPrevSelecionados.has(o.id);
+                    const st = getStatusEfetivo(o, hojeStr);
+                    const stMeta = STATUS_META[st] || STATUS_META.pendente;
+                    const wi = getIsoWeekInfo(o.data);
+                    const reprogs = Array.isArray(o.reprogramacoes) ? o.reprogramacoes.length : 0;
+                    const prio = getPrioridadePlanoDoc(o);
+                    const prioMeta = getPrioridadeMeta(prio);
+                    const podeReabrir = o.status === 'concluido' || o.status === 'cancelado';
+                    return `
+                        <div class="p-3.5 rounded-2xl border ${checked ? 'border-rose-400 bg-rose-50/40' : 'border-slate-200 bg-white'} flex flex-col lg:flex-row lg:items-center justify-between gap-3">
+                            <label class="flex items-start gap-3 min-w-0 cursor-pointer flex-1">
+                                <input type="checkbox" ${checked ? 'checked' : ''} onchange="toggleSelMasterPrev('${o.id}', this.checked)" class="w-4 h-4 mt-1 accent-rose-600 shrink-0">
+                                <div class="min-w-0 space-y-1">
+                                    <div class="flex flex-wrap items-center gap-1.5">
+                                        <span class="px-2 py-0.5 rounded-full text-[10px] font-extrabold ${stMeta.cls}">${stMeta.label}</span>
+                                        <span class="px-1.5 py-0.5 rounded bg-slate-900 text-white font-mono text-[10px] font-extrabold">S${wi.week}/${wi.isoYear}</span>
+                                        <span class="text-[11px] font-extrabold text-slate-800">${formatPeriodoDatasOrdemBR(o)}</span>
+                                        ${prio ? `<span class="px-2 py-0.5 rounded-full text-[10px] font-extrabold ${prioMeta.cls}">${escapeHtml(prioMeta.label)}</span>` : ''}
+                                        ${reprogs ? `<span class="px-1.5 py-0.5 rounded-full bg-amber-100 text-amber-800 text-[9px] font-extrabold">↻ ${reprogs}x</span>` : ''}
+                                    </div>
+                                    <div class="text-xs font-extrabold text-slate-900 truncate">${escapeHtml(o.titulo)}</div>
+                                    <div class="text-[11px] font-semibold text-slate-500 truncate">${escapeHtml([o.setor, o.maquina, o.equipamento, o.conjunto, o.subconjunto].filter(Boolean).join(' › ') || '—')} • ${escapeHtml(o.equipe || '—')} • Resp: ${escapeHtml(o.responsavel || 'Não definido')}</div>
+                                </div>
+                            </label>
+                            <div class="flex flex-wrap items-center gap-1.5 shrink-0">
+                                <button type="button" onclick="abrirModalEdicaoMasterOrdem('${o.id}')" class="px-3 py-1.5 rounded-xl bg-rose-600 hover:bg-rose-700 text-white text-[11px] font-extrabold">✏️ Editar Master</button>
+                                ${podeReabrir
+                                    ? `<button type="button" onclick="reabrirOrdemMaster('${o.id}')" class="px-3 py-1.5 rounded-xl bg-amber-500 hover:bg-amber-600 text-white text-[11px] font-extrabold">🔓 Reabrir</button>`
+                                    : `<button type="button" onclick="concluirOrdemDiretoMaster('${o.id}')" class="px-3 py-1.5 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white text-[11px] font-extrabold">✓ Concluir</button>`
+                                }
+                                <button type="button" onclick="excluirOrdemPreventiva('${o.id}')" class="px-2.5 py-1.5 rounded-xl bg-rose-50 hover:bg-rose-100 text-rose-700 border border-rose-200 text-[11px] font-extrabold" title="Excluir ordem">🗑️</button>
+                            </div>
+                        </div>`;
+                }).join('');
+            }
+            atualizarBarraLoteMasterPrev();
+        };
+
+        window.toggleSelMasterPrev = (id, checked) => {
+            if (!id) return;
+            if (checked) masterPrevSelecionados.add(id);
+            else masterPrevSelecionados.delete(id);
+            renderMasterPrevView();
+        };
+
+        window.selecionarTodosVisiveisMasterPrev = () => {
+            if (!exigirAdminMasterPrev()) return;
+            getItensVisiveisMasterPrev().forEach(it => masterPrevSelecionados.add(it.id));
+            renderMasterPrevView();
+        };
+
+        window.limparSelecaoMasterPrev = () => {
+            masterPrevSelecionados.clear();
+            renderMasterPrevView();
+        };
+
+        window.reabrirOrdemMaster = async (ordemId, fecharExec = false) => {
+            if (!exigirAdminMasterPrev()) return;
+            const o = getOrdensPreventiva().find(x => x.id === ordemId);
+            if (!o) { showToast('Ordem preventiva não encontrada.', 'error'); return; }
+            try {
+                const agoraIso = new Date().toISOString();
+                await updateDoc(doc(db, 'ag_manutencao', ordemId), {
+                    status: 'pendente',
+                    dataConclusao: '',
+                    executadoEm: '',
+                    reabertoMasterPor: usuarioLogado?.nome || 'Admin Master',
+                    reabertoMasterEm: agoraIso,
+                    atualizadoEm: agoraIso
+                });
+                if (fecharExec) fecharModal('modalExecutarPreventiva');
+                showToast(`Ordem "${o.titulo}" reaberta diretamente (Admin Master)!`, 'success');
+            } catch (_) {
+                showToast('Erro ao reabrir ordem no Firestore.', 'error');
+            }
+        };
+
+        window.concluirOrdemDiretoMaster = async (ordemId) => {
+            if (!exigirAdminMasterPrev()) return;
+            const o = getOrdensPreventiva().find(x => x.id === ordemId);
+            if (!o) { showToast('Ordem preventiva não encontrada.', 'error'); return; }
+            try {
+                const agoraIso = new Date().toISOString();
+                const hojeStr = getHojeStr();
+                await updateDoc(doc(db, 'ag_manutencao', ordemId), {
+                    status: 'concluido',
+                    dataConclusao: o.dataConclusao || hojeStr,
+                    executadoPor: o.executadoPor || o.responsavel || usuarioLogado?.nome || 'Admin Master',
+                    executadoEm: o.executadoEm || agoraIso,
+                    editadoMasterPor: usuarioLogado?.nome || 'Admin Master',
+                    editadoMasterEm: agoraIso,
+                    atualizadoEm: agoraIso
+                });
+                showToast(`Ordem "${o.titulo}" concluída diretamente (Admin Master)!`, 'success');
+            } catch (_) {
+                showToast('Erro ao concluir ordem no Firestore.', 'error');
+            }
+        };
+
+        window.reabrirLoteMasterPrev = async () => {
+            if (!exigirAdminMasterPrev()) return;
+            if (masterPrevTab !== 'ordens') return;
+            const ids = [...masterPrevSelecionados];
+            if (!ids.length) return;
+            const agoraIso = new Date().toISOString();
+            try {
+                for (const id of ids) {
+                    await updateDoc(doc(db, 'ag_manutencao', id), {
+                        status: 'pendente',
+                        dataConclusao: '',
+                        executadoEm: '',
+                        reabertoMasterPor: usuarioLogado?.nome || 'Admin Master',
+                        reabertoMasterEm: agoraIso,
+                        atualizadoEm: agoraIso
+                    });
+                }
+                masterPrevSelecionados.clear();
+                renderMasterPrevView();
+                showToast(`${ids.length} ordem(ns) reaberta(s) em lote (Admin Master)!`, 'success');
+            } catch (_) {
+                showToast('Erro ao reabrir ordens em lote.', 'error');
+            }
+        };
+
+        window.excluirLoteMasterPrev = () => {
+            if (!exigirAdminMasterPrev()) return;
+            const ids = [...masterPrevSelecionados];
+            if (!ids.length) return;
+
+            if (masterPrevTab === 'planos') {
+                const cascata = Boolean(document.getElementById('masterPrevExcluirOrdensCascata')?.checked);
+                const pendVinc = cascata
+                    ? getOrdensPreventiva().filter(o => ids.includes(o.planoId) && o.status !== 'concluido' && o.status !== 'cancelado')
+                    : [];
+                const msg = cascata
+                    ? `Excluir definitivamente ${ids.length} plano(s) selecionado(s) E ${pendVinc.length} ordem(ns) pendente(s) vinculada(s)? (Ordens concluídas permanecem no histórico)`
+                    : `Excluir definitivamente ${ids.length} plano(s) selecionado(s)? (As ordens já agendadas não serão apagadas)`;
+                pedirConfirmacaoExclusao('Exclusão Master em Lote (Planos)', msg, async () => {
+                    for (const pid of ids) {
+                        await deleteDoc(doc(db, 'ag_manutencao', pid));
+                    }
+                    for (const ord of pendVinc) {
+                        await deleteDoc(doc(db, 'ag_manutencao', ord.id));
+                    }
+                    masterPrevSelecionados.clear();
+                    showToast(`${ids.length} plano(s)${pendVinc.length ? ` e ${pendVinc.length} ordem(ns) pendente(s)` : ''} excluído(s) (Admin Master)!`, 'success');
+                });
+                return;
+            }
+
+            pedirConfirmacaoExclusao(
+                'Exclusão Master em Lote (Ordens)',
+                `Excluir definitivamente ${ids.length} ordem(ns) preventiva(s) selecionada(s) do banco e da Agenda PCM?`,
+                async () => {
+                    for (const id of ids) {
+                        await deleteDoc(doc(db, 'ag_manutencao', id));
+                    }
+                    masterPrevSelecionados.clear();
+                    showToast(`${ids.length} ordem(ns) preventiva(s) excluída(s) em lote (Admin Master)!`, 'success');
+                }
+            );
+        };
+
+        window.excluirOrdensFuturasPlanoMaster = (planoId) => {
+            if (!exigirAdminMasterPrev()) return;
+            const p = getPlanosPreventiva().find(x => x.id === planoId);
+            const pendentes = getOrdensPreventiva().filter(o => o.planoId === planoId && o.status !== 'concluido' && o.status !== 'cancelado');
+            if (!pendentes.length) {
+                showToast(`O plano "${p?.codigo || p?.titulo || planoId}" não possui ordens pendentes para limpar.`, 'info');
+                return;
+            }
+            pedirConfirmacaoExclusao(
+                'Limpar Ordens Pendentes (Admin Master)',
+                `Remover todas as ${pendentes.length} ordem(ns) pendente(s)/atrasada(s) do plano "${p?.codigo || ''} ${p?.titulo || ''}"? Ordens concluídas são preservadas.`,
+                async () => {
+                    for (const ord of pendentes) {
+                        await deleteDoc(doc(db, 'ag_manutencao', ord.id));
+                    }
+                    showToast(`${pendentes.length} ordem(ns) pendente(s) do plano removida(s) (Admin Master)!`, 'success');
+                }
+            );
+        };
+
+        window.excluirPlanoMasterComPendentes = (planoId) => {
+            if (!exigirAdminMasterPrev()) return;
+            const p = getPlanosPreventiva().find(x => x.id === planoId);
+            if (!p) return;
+            const pendentes = getOrdensPreventiva().filter(o => o.planoId === planoId && o.status !== 'concluido' && o.status !== 'cancelado');
+            pedirConfirmacaoExclusao(
+                'Excluir Plano + Pendentes (Admin Master)',
+                `Excluir definitivamente o plano "${p.codigo || ''} — ${p.titulo}" e todas as ${pendentes.length} ordem(ns) pendente(s) vinculada(s)? (Ordens concluídas continuam no histórico)`,
+                async () => {
+                    await deleteDoc(doc(db, 'ag_manutencao', planoId));
+                    for (const ord of pendentes) {
+                        await deleteDoc(doc(db, 'ag_manutencao', ord.id));
+                    }
+                    masterPrevSelecionados.delete(planoId);
+                    showToast(`Plano excluído${pendentes.length ? ` junto com ${pendentes.length} ordem(ns) pendente(s)` : ''} (Admin Master)!`, 'success');
+                }
+            );
+        };
+
+        window.abrirModalEdicaoMasterOrdem = (ordemId) => {
+            if (!exigirAdminMasterPrev()) return;
+            const o = getOrdensPreventiva().find(x => x.id === ordemId);
+            if (!o) { showToast('Ordem preventiva não encontrada.', 'error'); return; }
+
+            const eqs = getEquipesUnicas();
+            if (o.equipe && !eqs.includes(o.equipe)) eqs.unshift(o.equipe);
+            const selEq = document.getElementById('mOrdEquipe');
+            if (selEq) selEq.innerHTML = eqs.map(e => `<option value="${escapeHtml(e)}">${escapeHtml(e)}</option>`).join('');
+
+            const datasOrd = getDatasOrdem(o);
+            const durDias = Math.max(1, Math.min(7, datasOrd.length || 1));
+            const wi = getIsoWeekInfo(o.data);
+            const reprogs = Array.isArray(o.reprogramacoes) ? o.reprogramacoes.length : 0;
+
+            document.getElementById('mOrdId').value = o.id;
+            document.getElementById('masterEditOrdModalTitle').innerText = `Editar Ordem Master — S${wi.week}/${wi.isoYear}`;
+            document.getElementById('mOrdAtivoResumo').innerHTML = `<strong>${escapeHtml([o.setor, o.maquina, o.equipamento, o.conjunto, o.subconjunto].filter(Boolean).join(' › ') || 'Atividade Agenda PCM')}</strong><br>Plano: <strong>${escapeHtml(o.planoCodigo || 'Avulsa')}</strong> • ID: <span class="font-mono">${escapeHtml(o.id)}</span>${reprogs ? ` • Reprogramações registradas: <strong>${reprogs}</strong>` : ''}`;
+            document.getElementById('mOrdTitulo').value = o.titulo || '';
+            document.getElementById('mOrdStatus').value = ['pendente', 'andamento', 'concluido', 'cancelado'].includes(o.status) ? o.status : 'pendente';
+            document.getElementById('mOrdData').value = o.data || getHojeStr();
+            document.getElementById('mOrdDuracaoDias').value = String(durDias);
+            document.getElementById('mOrdHora').value = o.hora || '08:00';
+            document.getElementById('mOrdDataConclusao').value = o.dataConclusao || '';
+            if (selEq) selEq.value = o.equipe || eqs[0] || 'Mecânica';
+            document.getElementById('mOrdResponsavel').value = o.responsavel || '';
+            document.getElementById('mOrdExecutadoPor').value = o.executadoPor || '';
+            document.getElementById('mOrdPrioridade').value = getPrioridadePlanoDoc(o, 'P3') || 'P3';
+            const selPer = document.getElementById('mOrdPeriodicidade');
+            if (selPer) selPer.value = (o.periodicidade && PERIODICIDADES[o.periodicidade]) ? o.periodicidade : 'Avulsa';
+            document.getElementById('mOrdDurEst').value = Number(o.duracaoEstimadaMin) || 60;
+            document.getElementById('mOrdDurReal').value = Number(o.duracaoRealMin) || 0;
+            document.getElementById('mOrdDescricao').value = o.descricao || '';
+            document.getElementById('mOrdObsExecucao').value = o.obsExecucao || '';
+            const chkLimpar = document.getElementById('mOrdLimparReprog');
+            if (chkLimpar) chkLimpar.checked = false;
+
+            abrirModal('modalEdicaoMasterOrdem');
+        };
+
+        window.salvarEdicaoMasterOrdem = async (e) => {
+            e.preventDefault();
+            if (!exigirAdminMasterPrev()) return;
+            const id = document.getElementById('mOrdId').value.trim();
+            const o = getOrdensPreventiva().find(x => x.id === id);
+            if (!o) { showToast('Ordem não encontrada.', 'error'); return; }
+
+            const titulo = document.getElementById('mOrdTitulo').value.trim();
+            const status = document.getElementById('mOrdStatus').value || 'pendente';
+            const dataIni = document.getElementById('mOrdData').value;
+            if (!titulo || !dataIni) { showToast('Informe título e data inicial.', 'error'); return; }
+
+            const durDias = Math.max(1, Math.min(7, Number(document.getElementById('mOrdDuracaoDias').value || 1)));
+            const datasSorted = [];
+            for (let k = 0; k < durDias; k++) datasSorted.push(somarDiasIso(dataIni, k));
+            const wi = getIsoWeekInfo(datasSorted[0]);
+
+            const prio = normalizarPrioridadePlano(document.getElementById('mOrdPrioridade').value) || 'P3';
+            const agoraIso = new Date().toISOString();
+            const dataConcInput = document.getElementById('mOrdDataConclusao').value;
+            const execPorInput = document.getElementById('mOrdExecutadoPor').value.trim();
+
+            const payload = {
+                titulo,
+                status,
+                data: datasSorted[0],
+                dataFim: datasSorted[datasSorted.length - 1],
+                datas: datasSorted,
+                semana: wi.week,
+                ano: wi.isoYear,
+                hora: document.getElementById('mOrdHora').value || '08:00',
+                equipe: document.getElementById('mOrdEquipe').value || o.equipe || 'Mecânica',
+                responsavel: document.getElementById('mOrdResponsavel').value.trim(),
+                executadoPor: execPorInput,
+                prioridade: prio,
+                criticidade: prio,
+                periodicidade: document.getElementById('mOrdPeriodicidade').value || o.periodicidade || 'Avulsa',
+                duracaoEstimadaMin: Math.max(5, Number(document.getElementById('mOrdDurEst').value) || 60),
+                duracaoRealMin: Math.max(0, Number(document.getElementById('mOrdDurReal').value) || 0),
+                descricao: document.getElementById('mOrdDescricao').value.trim(),
+                obsExecucao: document.getElementById('mOrdObsExecucao').value.trim(),
+                editadoMasterPor: usuarioLogado?.nome || 'Admin Master',
+                editadoMasterEm: agoraIso,
+                atualizadoEm: agoraIso
+            };
+
+            if (status === 'concluido') {
+                payload.dataConclusao = dataConcInput || o.dataConclusao || getHojeStr();
+                payload.executadoPor = execPorInput || o.responsavel || usuarioLogado?.nome || 'Admin Master';
+                payload.executadoEm = o.executadoEm || agoraIso;
+            } else if (status === 'pendente' || status === 'andamento') {
+                payload.dataConclusao = '';
+                payload.executadoEm = '';
+            } else if (dataConcInput) {
+                payload.dataConclusao = dataConcInput;
+            }
+
+            if (document.getElementById('mOrdLimparReprog')?.checked) {
+                payload.reprogramacoes = [];
+            }
+
+            const btn = document.getElementById('btnSalvarEdicaoMasterOrdem');
+            if (btn) { btn.disabled = true; btn.innerText = 'Salvando...'; }
+            try {
+                await updateDoc(doc(db, 'ag_manutencao', id), payload);
+                fecharModal('modalEdicaoMasterOrdem');
+                showToast(`Ordem "${titulo}" atualizada diretamente (Admin Master • S${wi.week}/${wi.isoYear})!`, 'success');
+            } catch (_) {
+                showToast('Erro ao salvar edição Master da ordem.', 'error');
+            } finally {
+                if (btn) { btn.disabled = false; btn.innerText = '💾 Salvar Edição Master'; }
+            }
+        };
+
+        window.excluirOrdemDoModalMaster = () => {
+            if (!exigirAdminMasterPrev()) return;
+            const id = document.getElementById('mOrdId')?.value.trim();
+            if (!id) return;
+            fecharModal('modalEdicaoMasterOrdem');
+            excluirOrdemPreventiva(id);
+        };
+
         // ================= ATALHOS DE TECLADO =================
         document.addEventListener('keydown', (e) => {
             if (e.key === 'Escape') {
-                ['modalZoomFoto', 'deleteOverlay', 'modalProxFlutuante', 'modalReprogramar', 'modalExecutarPreventiva', 'modalDiaCal', 'modalSemana52Prev', 'modalResumoSemana52', 'modalProgramarPreventiva', 'modalEditorPlano', 'modalEspacoUsuario', 'modalAtalhos'].forEach(fecharModal);
+                ['modalZoomFoto', 'deleteOverlay', 'modalEdicaoMasterOrdem', 'modalAdminMasterPrev', 'modalProxFlutuante', 'modalReprogramar', 'modalExecutarPreventiva', 'modalDiaCal', 'modalSemana52Prev', 'modalResumoSemana52', 'modalProgramarPreventiva', 'modalEditorPlano', 'modalEspacoUsuario', 'modalAtalhos'].forEach(fecharModal);
                 return;
             }
             if (e.ctrlKey && e.key === '?') { e.preventDefault(); abrirModalAtalhos(); return; }
@@ -5184,6 +6595,7 @@
             if (e.altKey && e.key.toLowerCase() === 't') { e.preventDefault(); toggleTabletMode(); return; }
             if (e.altKey && isGestao) {
                 const map = { '1': 'cockpit', '2': 'calendario', '3': 'semanas52', '4': 'planos', '5': 'ordens', '6': 'indicadores', '7': 'tecnico' };
+                if (isAdminMasterAtivo()) map['8'] = 'master-prev';
                 if (map[e.key]) { e.preventDefault(); switchView(map[e.key]); }
             }
         });
@@ -5199,6 +6611,9 @@
             } catch (_) {}
             const legacyUser = safeStorage.get('cepera_ir_user');
             if (legacyUser) return { nome: legacyUser, user: legacyUser, role: 'Admin' };
+            if (safeSessionGet('cepera_admin_master_auth') === getActiveMasterHashPrev()) {
+                return { id: 'admin_master', nome: 'Admin Master PCM', user: 'master', role: 'Admin', isMaster: true };
+            }
             return null;
         }
 
@@ -5227,6 +6642,7 @@
                 if (el) el.classList.toggle('hidden', !isGestao);
             });
 
+            atualizarBadgeMasterPrev();
             switchView(isGestao ? 'cockpit' : 'tecnico');
         }
 
@@ -5334,7 +6750,35 @@
 
         async function iniciarAplicacao() {
             carregarPreferenciasVisuais();
-            usuarioLogado = lerSessaoCentral();
+            let sessao = lerSessaoCentral();
+            let authAnonFeito = false;
+            const tokenMaster = safeSessionGet('cepera_admin_master_auth');
+            if (!sessao && tokenMaster) {
+                try {
+                    await Promise.race([
+                        signInAnonymously(auth),
+                        new Promise(resolve => setTimeout(resolve, 2000))
+                    ]);
+                    authAnonFeito = true;
+                } catch (_) {}
+                await new Promise(resolve => {
+                    let done = false;
+                    const finish = () => { if (!done) { done = true; resolve(); } };
+                    const timer = setTimeout(finish, 2000);
+                    try {
+                        let unsub = null;
+                        unsub = onSnapshot(refMasterCfgPrev, snapDoc => {
+                            const data = (snapDoc && typeof snapDoc.exists === 'function' && snapDoc.exists()) ? snapDoc.data() : null;
+                            customMasterHashPrev = (data && data.pass_hash) ? String(data.pass_hash) : null;
+                            clearTimeout(timer);
+                            try { if (typeof unsub === 'function') unsub(); } catch (_) {}
+                            finish();
+                        }, () => { clearTimeout(timer); finish(); });
+                    } catch (_) { clearTimeout(timer); finish(); }
+                });
+                sessao = lerSessaoCentral();
+            }
+            usuarioLogado = sessao;
             if (!usuarioLogado) {
                 const den = document.getElementById('accessDeniedScreen');
                 den.hidden = false; den.classList.remove('hidden');
@@ -5344,11 +6788,24 @@
             main.hidden = false; main.classList.remove('hidden');
             aplicarPerfilNaInterface();
 
+            if (!authAnonFeito) {
+                try {
+                    await Promise.race([
+                        signInAnonymously(auth),
+                        new Promise(resolve => setTimeout(resolve, 2000))
+                    ]);
+                } catch (_) {}
+            }
+
             try {
-                await Promise.race([
-                    signInAnonymously(auth),
-                    new Promise(resolve => setTimeout(resolve, 2000))
-                ]);
+                onSnapshot(refMasterCfgPrev, snapDoc => {
+                    const data = (snapDoc && typeof snapDoc.exists === 'function' && snapDoc.exists()) ? snapDoc.data() : null;
+                    customMasterHashPrev = (data && data.pass_hash) ? String(data.pass_hash) : null;
+                    if (usuarioLogado) {
+                        atualizarBadgeMasterPrev();
+                        renderCurrentView();
+                    }
+                }, () => {});
             } catch (_) {}
 
             onSnapshot(colManutencao, snap => {
@@ -5371,7 +6828,7 @@
 
             onSnapshot(colFunc, snap => {
                 listaFunc = snap.docs.map(d => ({ id: d.id, ...d.data() }));
-                if (usuarioLogado?.user) {
+                if (usuarioLogado?.user && !usuarioLogado?.isMaster) {
                     const match = listaFunc.find(f => normKey(f.user) === normKey(usuarioLogado.user));
                     if (match && match.role && match.role !== usuarioLogado.role) {
                         usuarioLogado = { ...usuarioLogado, id: match.id, nome: match.nome || usuarioLogado.nome, role: match.role };
