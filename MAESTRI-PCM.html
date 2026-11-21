@@ -20,6 +20,10 @@
             --font-scale: 1;
         }
         * { box-sizing: border-box; }
+        html, body {
+            max-width: 100%;
+            overflow-x: hidden;
+        }
         body {
             font-family: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, sans-serif;
             background: radial-gradient(circle at top left, #e0f2fe 0%, #f4f7fb 42%, #eef2ff 100%);
@@ -28,6 +32,8 @@
             font-size: calc(14px * var(--font-scale));
             -webkit-font-smoothing: antialiased;
         }
+        img[src*="CEPERA_LOGO"] { max-width: 56px; max-height: 56px; width: auto; height: auto; }
+        [hidden] { display: none !important; }
         .font-mono { font-family: 'JetBrains Mono', monospace; }
         .frosted-shell {
             background: rgba(255, 255, 255, 0.88);
@@ -136,6 +142,131 @@
         body.tablet-mode .btn-touch, body.tablet-mode .btn-pill-dark, body.tablet-mode .input-clean { min-height: 44px; font-size: 13px; }
         body.font-sm { --font-scale: 0.92; }
         body.font-lg { --font-scale: 1.08; }
+
+        /* ==================== REDE NEURAL MAESTRO & PERCEPTRONS ==================== */
+        @keyframes flowSynapse {
+            to { stroke-dashoffset: -36; }
+        }
+        @keyframes maestroPulse {
+            0%, 100% { box-shadow: 0 0 0 0 rgba(56, 189, 248, 0.55), 0 0 28px rgba(14, 165, 233, 0.45); }
+            50% { box-shadow: 0 0 0 10px rgba(56, 189, 248, 0), 0 0 42px rgba(56, 189, 248, 0.85); }
+        }
+        @keyframes perceptronRingSpin {
+            from { transform: rotate(0deg); }
+            to { transform: rotate(360deg); }
+        }
+        @keyframes workerBlink {
+            0%, 100% { opacity: 0.45; transform: scale(0.95); }
+            50% { opacity: 1; transform: scale(1.06); }
+        }
+        .neural-stage {
+            position: relative;
+            background: radial-gradient(circle at 50% 0%, #0d2b45 0%, #07101f 52%, #030712 100%);
+            border: 1.5px solid rgba(56, 189, 248, 0.28);
+            box-shadow: 0 25px 60px -15px rgba(2, 132, 199, 0.35), inset 0 1px 0 rgba(255, 255, 255, 0.08);
+            color: #f8fafc;
+        }
+        .neural-grid-bg {
+            background-image: radial-gradient(rgba(148, 163, 184, 0.14) 1px, transparent 1px);
+            background-size: 22px 22px;
+        }
+        .maestro-hub {
+            position: relative;
+            border-radius: 1.5rem;
+            border: 1.5px solid rgba(56, 189, 248, 0.55);
+            background: linear-gradient(135deg, rgba(14, 116, 144, 0.36) 0%, rgba(15, 23, 42, 0.92) 55%, rgba(79, 70, 229, 0.35) 100%);
+            transition: all 0.25s ease;
+        }
+        .maestro-hub.is-delegating {
+            animation: maestroPulse 1.35s infinite ease-in-out;
+            border-color: #38bdf8;
+        }
+        .perceptron-node {
+            position: relative;
+            border-radius: 1.25rem;
+            border: 1.5px solid rgba(148, 163, 184, 0.24);
+            background: linear-gradient(180deg, rgba(15, 23, 42, 0.92) 0%, rgba(9, 14, 28, 0.96) 100%);
+            padding: 0.75rem 0.85rem;
+            transition: transform 0.22s ease, border-color 0.22s ease, box-shadow 0.22s ease;
+            cursor: pointer;
+            z-index: 2;
+        }
+        .perceptron-node:hover {
+            transform: translateY(-2px);
+            border-color: rgba(56, 189, 248, 0.65);
+        }
+        .perceptron-node.is-idle {
+            border-color: rgba(148, 163, 184, 0.22);
+            opacity: 0.86;
+        }
+        .perceptron-node.is-working {
+            border-color: #38bdf8;
+            box-shadow: 0 0 0 3px rgba(56, 189, 248, 0.28), 0 0 28px rgba(14, 165, 233, 0.65);
+            transform: scale(1.03);
+            opacity: 1;
+        }
+        .perceptron-node.is-done {
+            border-color: rgba(52, 211, 153, 0.72);
+            box-shadow: 0 0 18px rgba(16, 185, 129, 0.22);
+            opacity: 1;
+        }
+        .perceptron-node.is-waiting {
+            border-color: rgba(251, 191, 36, 0.78);
+            box-shadow: 0 0 18px rgba(245, 158, 11, 0.28);
+            opacity: 1;
+        }
+        .perceptron-core {
+            position: relative;
+            width: 34px;
+            height: 34px;
+            border-radius: 9999px;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            background: rgba(15, 23, 42, 0.9);
+            border: 2px solid rgba(56, 189, 248, 0.45);
+            flex-shrink: 0;
+        }
+        .perceptron-node.is-working .perceptron-core::after {
+            content: "";
+            position: absolute;
+            inset: -5px;
+            border-radius: 9999px;
+            border: 2px dashed #38bdf8;
+            animation: perceptronRingSpin 2.2s linear infinite;
+        }
+        .perceptron-node.is-done .perceptron-core {
+            border-color: #34d399;
+            background: rgba(16, 185, 129, 0.16);
+        }
+        .perceptron-node.is-waiting .perceptron-core {
+            border-color: #fbbf24;
+            background: rgba(245, 158, 11, 0.16);
+        }
+        .synapse-path {
+            fill: none;
+            stroke-linecap: round;
+            transition: stroke 0.25s ease, stroke-width 0.25s ease, opacity 0.25s ease;
+        }
+        .synapse-path.is-active {
+            stroke-dasharray: 10 8;
+            animation: flowSynapse 0.65s linear infinite;
+        }
+        .synapse-path.is-idle {
+            stroke-dasharray: 4 6;
+            opacity: 0.28;
+        }
+        .synapse-path.is-done {
+            opacity: 0.72;
+        }
+        .worker-chip-active {
+            animation: workerBlink 0.7s infinite ease-in-out;
+        }
+        .dropzone-active {
+            border-color: #0284c7 !important;
+            background: linear-gradient(135deg, #e0f2fe 0%, #eff6ff 100%) !important;
+            transform: scale(1.006);
+        }
     </style>
 </head>
 <body class="selection:bg-sky-600 selection:text-white">
@@ -259,53 +390,368 @@
                         <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"/></svg>
                         <span id="lblBtnMasterMaestri">Master</span>
                     </button>
-                    <button type="button" onclick="carregarRodadaReal1234Oms()" class="btn-touch bg-sky-50 hover:bg-sky-100 text-sky-800 border border-sky-200 text-xs py-2 px-3.5">
-                        ⚡ Carregar Rodada Real (1.234 OMs)
+                    <button type="button" id="btnHeaderUploadErp" onclick="document.getElementById('inputUploadPlanilhaErp').click()" class="btn-touch bg-sky-50 hover:bg-sky-100 text-sky-800 border border-sky-200 text-xs py-2 px-3.5">
+                        🔄 Processar Novas OMs do ERP
                     </button>
-                    <button type="button" onclick="executarPipelineCompletoUI()" class="btn-pill-dark text-xs py-2 px-4">
-                        ▶ Rodar 9 Nós Agora
+                    <button type="button" onclick="executarPipelineCompletoUI({ animar: true })" class="btn-pill-dark text-xs py-2 px-4">
+                        ▶ Rodar Rede Neural (9 Nós)
                     </button>
                 </div>
             </header>
 
             <main class="flex-1 p-4 sm:p-6 space-y-6 max-w-[1600px] w-full mx-auto">
-                <!-- ==================== VIEW 1: PIPELINE VISUAL DE 9 NÓS & UPLOAD ERP ==================== -->
+                <!-- ==================== VIEW 1: PIPELINE VISUAL DE REDE NEURAL (9 NÓS) & UPLOAD ERP ==================== -->
                 <section id="view-pipeline" class="space-y-5">
-                    <!-- KPI STRIP DE ECONOMIA E VELOCIDADE -->
+                    <!-- KPI STRIP DE ECONOMIA E RODADA VIGENTE -->
                     <div id="pipelineKpiGrid" class="grid grid-cols-2 lg:grid-cols-5 gap-3"></div>
 
-                    <!-- BLOCO DRAG & DROP DUPLO (ERP BRUTO OU RODADA AUDITADA / JSON) -->
-                    <div class="glass-card p-5 rounded-3xl border-2 border-dashed border-sky-300 bg-gradient-to-r from-sky-50/70 via-white to-indigo-50/50 flex flex-col lg:flex-row lg:items-center justify-between gap-4">
-                        <div class="space-y-1">
+                    <!-- BLOCO CENTRAL DE UPLOAD DO LOTE VIGENTE (NOVEMBRO+) -->
+                    <div id="erpDropZone"
+                        ondragover="onErpDragOver(event)"
+                        ondragleave="onErpDragLeave(event)"
+                        ondrop="onErpDrop(event)"
+                        class="glass-card p-5 rounded-3xl border-2 border-dashed border-sky-300 bg-gradient-to-r from-sky-50/80 via-white to-indigo-50/60 flex flex-col xl:flex-row xl:items-center justify-between gap-4 transition-all">
+                        <div class="space-y-1.5 flex-1">
                             <div class="flex flex-wrap items-center gap-2">
-                                <span class="px-2.5 py-0.5 rounded-full bg-sky-600 text-white text-[10px] font-extrabold uppercase tracking-wider">Entrada Dupla Inteligente</span>
-                                <span class="text-[11px] font-extrabold text-sky-900">Aceita Planilha Bruta do ERP (.csv / .xlsx) OU Rodada Auditada (OMs_Auditadas.csv / JSON)</span>
+                                <span id="badgeCicloVigente" class="px-2.5 py-0.5 rounded-full bg-sky-600 text-white text-[10px] font-extrabold uppercase tracking-wider">Lote Vigente • Novembro 2026</span>
+                                <span class="px-2.5 py-0.5 rounded-full bg-indigo-100 text-indigo-800 border border-indigo-200 text-[10px] font-extrabold">📚 Base de Treino Ativa: Set/Out (1.234 OMs)</span>
+                                <span id="rodadaVigenteStatusPill" class="px-2.5 py-0.5 rounded-full bg-amber-100 text-amber-800 border border-amber-200 text-[10px] font-extrabold">Aguardando planilha do ERP</span>
                             </div>
-                            <h3 class="text-sm sm:text-base font-extrabold text-slate-900">Arraste sua planilha do ERP ou pacote sincronizado do Python</h3>
-                            <p class="text-xs font-semibold text-slate-600">O Nó 1 detecta automaticamente se o arquivo é bruto (filtra concluídas e cruza com <code>ob_linhas</code>) ou se já está auditado (carrega a R$ 0,00 sem gastar tokens).</p>
+                            <h3 class="text-sm sm:text-base font-extrabold text-slate-900">Arraste a planilha do ERP de Novembro (.CSV / .XLSX) para acionar o Maestro &amp; Perceptrons</h3>
+                            <p class="text-xs font-semibold text-slate-600">O <strong>Nó 1</strong> identifica o mês automaticamente pelas datas, aplica a memória aprendida de <strong>Set/Out</strong> no <strong>Nó 2 (R$ 0,00)</strong> e compara se a planta <strong>Melhorou ou Piorou</strong>.</p>
                         </div>
                         <div class="flex flex-wrap items-center gap-2 shrink-0">
+                            <input type="text" id="inputPeriodoRodada" placeholder="Mês / Ciclo (ex: Nov/2026)" value="Nov/2026" class="input-clean py-2 text-xs font-extrabold w-40" title="Nome do ciclo/mês para comparação histórica">
                             <input type="file" id="inputUploadPlanilhaErp" accept=".csv,.xlsx,.json,.jsonl" onchange="processarArquivoUploadErp(event)" class="hidden">
-                            <button type="button" onclick="document.getElementById('inputUploadPlanilhaErp').click()" class="btn-pill-dark text-xs py-2.5 px-4">
-                                📂 Selecionar Planilha (.CSV / .XLSX / .JSON)
+                            <button type="button" onclick="document.getElementById('inputUploadPlanilhaErp').click()" class="btn-pill-dark text-xs py-2.5 px-4 shadow-sm">
+                                📂 Selecionar Planilha (.CSV / .XLSX)
                             </button>
-                            <button type="button" onclick="exportarPacoteSincronizacaoMaestri()" class="btn-touch bg-white hover:bg-slate-50 border border-slate-200 text-slate-700 text-xs py-2.5 px-3.5">
-                                ⬇ Exportar JSON / CSV
+                            <button type="button" onclick="simularLoteNovembroTeste()" class="btn-touch bg-sky-600 hover:bg-sky-700 text-white text-xs py-2.5 px-3.5" title="Testar a Rede Neural com um lote realista de Novembro para ver todos os nós e o comparador trabalhando">
+                                ⚡ Simular Lote Teste (Novembro)
+                            </button>
+                            <button type="button" onclick="inspecionarHistoricoSetOut()" class="btn-touch bg-white hover:bg-slate-50 border border-slate-200 text-slate-700 text-xs py-2.5 px-3" title="Abrir a amostra de treino de Set/Out (1.234 OMs) apenas para inspeção">
+                                📚 Inspecionar Treino Set/Out
+                            </button>
+                            <button type="button" onclick="limparRodadaVigente()" class="btn-touch bg-white hover:bg-rose-50 border border-slate-200 text-slate-600 hover:text-rose-700 text-xs py-2.5 px-3" title="Zerar lote atual para subir outro mês">
+                                🧹 Novo Mês
+                            </button>
+                            <button type="button" onclick="exportarPacoteSincronizacaoMaestri()" class="btn-touch bg-white hover:bg-slate-50 border border-slate-200 text-slate-700 text-xs py-2.5 px-3">
+                                ⬇ Exportar
                             </button>
                         </div>
                     </div>
 
-                    <!-- MAPA INTERATIVO DOS 9 NÓS -->
+                    <!-- ==================== PALCO GIGANTE: REDE NEURAL (MAESTRO + PERCEPTRONS TRABALHANDO) ==================== -->
+                    <div id="neuralPipelineStage" class="neural-stage rounded-3xl p-4 sm:p-6 space-y-4 overflow-hidden">
+                        <!-- BARRA SUPERIOR DA REDE NEURAL -->
+                        <div class="flex flex-wrap items-center justify-between gap-3 relative z-10">
+                            <div class="space-y-0.5">
+                                <div class="flex flex-wrap items-center gap-2">
+                                    <span class="px-2.5 py-0.5 rounded-full bg-sky-500/20 border border-sky-400/40 text-sky-300 text-[10px] font-extrabold uppercase tracking-widest">Rede Neural Industrial • 9 Perceptrons</span>
+                                    <span id="neuralStatusBadge" class="px-2.5 py-0.5 rounded-full bg-slate-800 text-slate-200 border border-slate-700 text-[10px] font-extrabold">● Aguardando Estímulo (ERP)</span>
+                                </div>
+                                <h3 class="text-base sm:text-xl font-extrabold text-white tracking-tight">Orquestração Neural em Tempo Real — Maestro Delegando Funções</h3>
+                            </div>
+                            <div class="flex flex-wrap items-center gap-2">
+                                <button type="button" id="btnToggleNeuralSpeed" onclick="alternarVelocidadeRedeNeural()" style="background:#1e293b;color:#e2e8f0;border:1px solid #475569;" class="px-3 py-1.5 rounded-xl bg-slate-800 hover:bg-slate-700 border border-slate-700 text-slate-200 text-xs font-extrabold transition-colors">
+                                    🎬 Animação: Cinemática
+                                </button>
+                                <button type="button" onclick="reanimarRedeNeuralLive()" class="px-3.5 py-1.5 rounded-xl bg-sky-500 hover:bg-sky-400 text-slate-950 text-xs font-extrabold shadow-lg shadow-sky-500/25 transition-all">
+                                    ▶ Reanimar Fluxo Neural
+                                </button>
+                                <button type="button" onclick="reexecutarNosPosConferencia()" class="px-3 py-1.5 rounded-xl bg-indigo-500/90 hover:bg-indigo-400 text-white text-xs font-extrabold transition-colors">
+                                    ↻ Reprocessar Nós 6→9 (R$ 0)
+                                </button>
+                            </div>
+                        </div>
+
+                        <!-- HUB CENTRAL DO MAESTRO + CANVAS DA REDE NEURAL -->
+                        <div id="neuralCanvasInner" class="neural-grid-bg relative rounded-2xl border border-slate-800/90 bg-slate-950/60 p-3 sm:p-5 space-y-5 overflow-hidden">
+                            <!-- SVG DE SINAPSES E PARTÍCULAS ANIMADAS -->
+                            <svg id="neuralSynapseSvg" viewBox="0 0 1200 540" preserveAspectRatio="none" class="hidden lg:block absolute inset-0 w-full h-full pointer-events-none" style="z-index:1;"></svg>
+
+                            <!-- CAMADA COORDENADORA: MAESTRO DELEGANDO -->
+                            <div class="relative z-10 flex justify-center">
+                                <div id="neuralMaestroHub" data-neural-id="maestro" class="maestro-hub max-w-2xl w-full px-5 py-3 flex flex-col sm:flex-row items-center justify-between gap-3">
+                                    <div class="flex items-center gap-3 min-w-0">
+                                        <div class="w-11 h-11 rounded-2xl bg-sky-500/20 border border-sky-400/60 flex items-center justify-center text-xl shrink-0">👑</div>
+                                        <div class="min-w-0">
+                                            <div class="flex items-center gap-2">
+                                                <span class="text-[10px] font-extrabold uppercase tracking-widest text-sky-300">Maestro • Núcleo Orquestrador</span>
+                                                <span id="maestroPhasePill" class="px-2 py-0.5 rounded bg-sky-500/25 text-sky-200 font-mono text-[9px] font-extrabold">PRONTO</span>
+                                            </div>
+                                            <div id="maestroDelegacaoMsg" class="text-xs sm:text-sm font-extrabold text-white truncate">Pronto para receber o CSV/XLSX de Novembro e distribuir carga entre os 9 perceptrons.</div>
+                                        </div>
+                                    </div>
+                                    <div class="flex items-center gap-3 shrink-0 font-mono text-[11px]">
+                                        <div class="text-right">
+                                            <div class="text-[9px] uppercase text-slate-400 font-bold">Taxa Sináptica</div>
+                                            <div id="maestroThroughputTxt" class="font-extrabold text-emerald-400">0 OMs/ciclo</div>
+                                        </div>
+                                        <div class="h-7 w-px bg-slate-700"></div>
+                                        <div class="text-right">
+                                            <div class="text-[9px] uppercase text-slate-400 font-bold">Custo Lote</div>
+                                            <div id="maestroCustoLiveTxt" class="font-extrabold text-sky-300">R$ 0,00</div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- 5 CAMADAS DE PERCEPTRONS EM REDE NEURAL (ESQUERDA → DIREITA) -->
+                            <div id="neuralLayersGrid" class="relative z-10 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-3.5 lg:gap-4 items-center">
+                                <!-- Camada 1: Entrada & Nó 1 -->
+                                <div class="space-y-3">
+                                    <div class="text-center text-[9px] font-extrabold uppercase tracking-widest text-slate-400">Camada 1 • Entrada</div>
+                                    <div id="pNode_input_erp" data-neural-id="input_erp" onclick="document.getElementById('inputUploadPlanilhaErp').click()" class="perceptron-node is-idle">
+                                        <div class="flex items-center gap-2.5">
+                                            <span class="perceptron-core text-base">📥</span>
+                                            <div class="min-w-0 flex-1">
+                                                <div class="text-[9px] font-mono font-bold text-sky-400">INPUT ERP</div>
+                                                <div class="text-xs font-extrabold text-white truncate">Planilha Vigente</div>
+                                                <div id="pStat_input_erp" class="text-[10px] font-semibold text-slate-400 truncate">CSV / XLSX / JSON</div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div id="pNode_no1" data-neural-id="no1" onclick="inspecionarNoNeural('no1')" class="perceptron-node is-idle">
+                                        <div class="flex items-center gap-2.5">
+                                            <span class="perceptron-core font-mono text-xs font-extrabold text-sky-300">N1</span>
+                                            <div class="min-w-0 flex-1">
+                                                <div class="flex items-center justify-between gap-1">
+                                                    <span class="text-[9px] font-mono font-bold text-sky-400">PERCEPTRON 1</span>
+                                                    <span id="pPct_no1" class="text-[9px] font-mono font-extrabold text-emerald-400">0%</span>
+                                                </div>
+                                                <div class="text-xs font-extrabold text-white truncate">Coletor &amp; Filtro</div>
+                                                <div id="pStat_no1" class="text-[10px] font-semibold text-slate-400 truncate">Filtra OMs + ob_linhas</div>
+                                            </div>
+                                        </div>
+                                        <div class="mt-2 h-1 rounded-full bg-slate-800 overflow-hidden"><div id="pBar_no1" class="h-full bg-sky-400 transition-all duration-300" style="width:0%"></div></div>
+                                    </div>
+                                    <div id="pNode_hist_base" data-neural-id="hist_base" onclick="inspecionarHistoricoSetOut()" class="perceptron-node is-done">
+                                        <div class="flex items-center gap-2.5">
+                                            <span class="perceptron-core text-sm">📚</span>
+                                            <div class="min-w-0 flex-1">
+                                                <div class="text-[9px] font-mono font-bold text-indigo-300">PESOS TREINO</div>
+                                                <div class="text-xs font-extrabold text-white truncate">Base Set/Out</div>
+                                                <div class="text-[10px] font-semibold text-emerald-300 truncate">1.234 OMs • Calibrado</div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <!-- Camada 2: Fast-Path R$ 0 + Nó 3 Multi-Lote -->
+                                <div class="space-y-4">
+                                    <div class="text-center text-[9px] font-extrabold uppercase tracking-widest text-slate-400">Camada 2 • Filtragem &amp; IA</div>
+                                    <div id="pNode_no2" data-neural-id="no2" onclick="inspecionarNoNeural('no2')" class="perceptron-node is-idle">
+                                        <div class="flex items-center gap-2.5">
+                                            <span class="perceptron-core font-mono text-xs font-extrabold text-emerald-300">N2</span>
+                                            <div class="min-w-0 flex-1">
+                                                <div class="flex items-center justify-between gap-1">
+                                                    <span class="text-[9px] font-mono font-bold text-emerald-400">VIA RÁPIDA R$ 0</span>
+                                                    <span id="pPct_no2" class="text-[9px] font-mono font-extrabold text-emerald-400">0%</span>
+                                                </div>
+                                                <div class="text-xs font-extrabold text-white truncate">Fast-Path + Memória</div>
+                                                <div id="pStat_no2" class="text-[10px] font-semibold text-slate-400 truncate">Custo zero (63%+ das OMs)</div>
+                                            </div>
+                                        </div>
+                                        <div class="mt-2 h-1 rounded-full bg-slate-800 overflow-hidden"><div id="pBar_no2" class="h-full bg-emerald-400 transition-all duration-300" style="width:0%"></div></div>
+                                    </div>
+
+                                    <div id="pNode_no3" data-neural-id="no3" onclick="inspecionarNoNeural('no3')" class="perceptron-node is-idle">
+                                        <div class="flex items-center gap-2.5">
+                                            <span class="perceptron-core font-mono text-xs font-extrabold text-indigo-300">N3</span>
+                                            <div class="min-w-0 flex-1">
+                                                <div class="flex items-center justify-between gap-1">
+                                                    <span class="text-[9px] font-mono font-bold text-indigo-300">AUDITOR LOTE 20</span>
+                                                    <span id="pPct_no3" class="text-[9px] font-mono font-extrabold text-sky-300">0%</span>
+                                                </div>
+                                                <div class="text-xs font-extrabold text-white truncate">Gemini Flash EN 13306</div>
+                                                <div id="pStat_no3" class="text-[10px] font-semibold text-slate-400 truncate">Sub-perceptrons paralelos</div>
+                                            </div>
+                                        </div>
+                                        <!-- Sub-perceptrons trabalhando em paralelo -->
+                                        <div id="no3WorkersRow" class="mt-2 grid grid-cols-3 gap-1 text-[9px] font-mono font-extrabold">
+                                            <span class="px-1.5 py-0.5 rounded bg-slate-900 border border-slate-700 text-center text-slate-400">W1: 20</span>
+                                            <span class="px-1.5 py-0.5 rounded bg-slate-900 border border-slate-700 text-center text-slate-400">W2: 20</span>
+                                            <span class="px-1.5 py-0.5 rounded bg-slate-900 border border-slate-700 text-center text-slate-400">W3: 20</span>
+                                        </div>
+                                        <div class="mt-2 h-1 rounded-full bg-slate-800 overflow-hidden"><div id="pBar_no3" class="h-full bg-indigo-400 transition-all duration-300" style="width:0%"></div></div>
+                                    </div>
+                                </div>
+
+                                <!-- Camada 3: Governança Humana & Aprendizado Contínuo -->
+                                <div class="space-y-3">
+                                    <div class="text-center text-[9px] font-extrabold uppercase tracking-widest text-slate-400">Camada 3 • Sinapse Humana</div>
+                                    <div id="pNode_no4" data-neural-id="no4" onclick="inspecionarNoNeural('no4')" class="perceptron-node is-idle">
+                                        <div class="flex items-center gap-2.5">
+                                            <span class="perceptron-core font-mono text-xs font-extrabold text-sky-300">N4</span>
+                                            <div class="min-w-0 flex-1">
+                                                <div class="flex items-center justify-between gap-1">
+                                                    <span class="text-[9px] font-mono font-bold text-sky-400">ROTEADOR</span>
+                                                    <span id="pPct_no4" class="text-[9px] font-mono font-extrabold text-emerald-400">0%</span>
+                                                </div>
+                                                <div class="text-xs font-extrabold text-white truncate">4 Equipes &amp; Qualidade</div>
+                                                <div id="pStat_no4" class="text-[10px] font-semibold text-slate-400 truncate">AUTO / CONFERIR / REVISÃO</div>
+                                            </div>
+                                        </div>
+                                        <div class="mt-2 h-1 rounded-full bg-slate-800 overflow-hidden"><div id="pBar_no4" class="h-full bg-sky-400 transition-all duration-300" style="width:0%"></div></div>
+                                    </div>
+
+                                    <div id="pNode_no5" data-neural-id="no5" onclick="switchView('conferente')" class="perceptron-node is-idle">
+                                        <div class="flex items-center gap-2.5">
+                                            <span class="perceptron-core font-mono text-xs font-extrabold text-amber-300">N5</span>
+                                            <div class="min-w-0 flex-1">
+                                                <div class="flex items-center justify-between gap-1">
+                                                    <span class="text-[9px] font-mono font-bold text-amber-300">SUPERVISOR</span>
+                                                    <span id="pPct_no5" class="text-[9px] font-mono font-extrabold text-amber-300">0%</span>
+                                                </div>
+                                                <div class="text-xs font-extrabold text-white truncate">Mesa Conferente 2-Toques</div>
+                                                <div id="pStat_no5" class="text-[10px] font-semibold text-slate-400 truncate">Valida ambíguas/graves</div>
+                                            </div>
+                                        </div>
+                                        <div class="mt-2 h-1 rounded-full bg-slate-800 overflow-hidden"><div id="pBar_no5" class="h-full bg-amber-400 transition-all duration-300" style="width:0%"></div></div>
+                                    </div>
+
+                                    <div id="pNode_no6" data-neural-id="no6" onclick="switchView('bibliotecario')" class="perceptron-node is-idle">
+                                        <div class="flex items-center gap-2.5">
+                                            <span class="perceptron-core font-mono text-xs font-extrabold text-violet-300">N6</span>
+                                            <div class="min-w-0 flex-1">
+                                                <div class="flex items-center justify-between gap-1">
+                                                    <span class="text-[9px] font-mono font-bold text-violet-300">RETROALIMENTAÇÃO</span>
+                                                    <span id="pPct_no6" class="text-[9px] font-mono font-extrabold text-violet-300">0%</span>
+                                                </div>
+                                                <div class="text-xs font-extrabold text-white truncate">Bibliotecário R$ 0</div>
+                                                <div id="pStat_no6" class="text-[10px] font-semibold text-slate-400 truncate">Realimenta N2 &amp; N3</div>
+                                            </div>
+                                        </div>
+                                        <div class="mt-2 h-1 rounded-full bg-slate-800 overflow-hidden"><div id="pBar_no6" class="h-full bg-violet-400 transition-all duration-300" style="width:0%"></div></div>
+                                    </div>
+                                </div>
+
+                                <!-- Camada 4: Engenharia de Confiabilidade & Caçador AQF -->
+                                <div class="space-y-4">
+                                    <div class="text-center text-[9px] font-extrabold uppercase tracking-widest text-slate-400">Camada 4 • Engenharia</div>
+                                    <div id="pNode_no7" data-neural-id="no7" onclick="switchView('confiabilidade')" class="perceptron-node is-idle">
+                                        <div class="flex items-center gap-2.5">
+                                            <span class="perceptron-core font-mono text-xs font-extrabold text-rose-300">N7</span>
+                                            <div class="min-w-0 flex-1">
+                                                <div class="flex items-center justify-between gap-1">
+                                                    <span class="text-[9px] font-mono font-bold text-rose-300">RADAR AQF</span>
+                                                    <span id="pPct_no7" class="text-[9px] font-mono font-extrabold text-rose-300">0%</span>
+                                                </div>
+                                                <div class="text-xs font-extrabold text-white truncate">Confiabilidade &amp; MTBF</div>
+                                                <div id="pStat_no7" class="text-[10px] font-semibold text-slate-400 truncate">Cruza Rota &amp; Obsolescência</div>
+                                            </div>
+                                        </div>
+                                        <div class="mt-2 h-1 rounded-full bg-slate-800 overflow-hidden"><div id="pBar_no7" class="h-full bg-rose-400 transition-all duration-300" style="width:0%"></div></div>
+                                    </div>
+
+                                    <div id="pNode_no8" data-neural-id="no8" onclick="switchView('cacador')" class="perceptron-node is-idle">
+                                        <div class="flex items-center gap-2.5">
+                                            <span class="perceptron-core font-mono text-xs font-extrabold text-sky-300">N8</span>
+                                            <div class="min-w-0 flex-1">
+                                                <div class="flex items-center justify-between gap-1">
+                                                    <span class="text-[9px] font-mono font-bold text-sky-300">CAUSA RAIZ</span>
+                                                    <span id="pPct_no8" class="text-[9px] font-mono font-extrabold text-sky-300">0%</span>
+                                                </div>
+                                                <div class="text-xs font-extrabold text-white truncate">Caçador AQF 2.0</div>
+                                                <div id="pStat_no8" class="text-[10px] font-semibold text-slate-400 truncate">Ishikawa 6M + DOCS-ATIVOS</div>
+                                            </div>
+                                        </div>
+                                        <div class="mt-2 h-1 rounded-full bg-slate-800 overflow-hidden"><div id="pBar_no8" class="h-full bg-sky-400 transition-all duration-300" style="width:0%"></div></div>
+                                    </div>
+                                </div>
+
+                                <!-- Camada 5: Output & Saída no Portal PCM -->
+                                <div class="space-y-3">
+                                    <div class="text-center text-[9px] font-extrabold uppercase tracking-widest text-slate-400">Camada 5 • Ação na Fábrica</div>
+                                    <div id="pNode_no9" data-neural-id="no9" onclick="switchView('cacador')" class="perceptron-node is-idle">
+                                        <div class="flex items-center gap-2.5">
+                                            <span class="perceptron-core font-mono text-xs font-extrabold text-emerald-300">N9</span>
+                                            <div class="min-w-0 flex-1">
+                                                <div class="flex items-center justify-between gap-1">
+                                                    <span class="text-[9px] font-mono font-bold text-emerald-300">OUTPUT PORTAL</span>
+                                                    <span id="pPct_no9" class="text-[9px] font-mono font-extrabold text-emerald-300">0%</span>
+                                                </div>
+                                                <div class="text-xs font-extrabold text-white truncate">Planejador 1-Clique</div>
+                                                <div id="pStat_no9" class="text-[10px] font-semibold text-slate-400 truncate">Preventiva 52S / Rota / Agenda</div>
+                                            </div>
+                                        </div>
+                                        <div class="mt-2 h-1 rounded-full bg-slate-800 overflow-hidden"><div id="pBar_no9" class="h-full bg-emerald-400 transition-all duration-300" style="width:0%"></div></div>
+                                    </div>
+                                    <div class="p-3 rounded-2xl border border-emerald-500/30 bg-emerald-950/35 text-[11px] space-y-1">
+                                        <div class="font-extrabold text-emerald-300">🚀 Entregas Automáticas</div>
+                                        <div class="text-slate-300 text-[10px] leading-snug">• Planos 52S (<code>PREVENTIVAS</code>)<br>• Pontos Cirúrgicos (<code>ROTA</code>)<br>• Ordens (<code>AGENDA-PCM</code>)</div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- TELEMETRIA AO VIVO DO MAESTRO (TERMINAL) -->
+                            <div class="relative z-10 rounded-2xl border border-slate-800 bg-slate-950/90 p-3 font-mono text-[11px] space-y-1">
+                                <div class="flex items-center justify-between text-[10px] text-slate-400 border-b border-slate-800 pb-1.5">
+                                    <span class="font-bold text-sky-400">▸ TELEMETRIA NEURAL AO VIVO (DESPACHO DO MAESTRO)</span>
+                                    <span id="neuralTelemetryElapsed">Ciclo pronto</span>
+                                </div>
+                                <div id="neuralTelemetryFeed" class="space-y-1 max-h-24 overflow-y-auto text-slate-300"></div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- ==================== PAINEL DE CONTROLE HISTÓRICO: MELHORAMOS OU PIORAMOS? ==================== -->
+                    <div id="comparativoHistoricoCard" class="glass-card p-5 rounded-3xl border border-indigo-200 space-y-4">
+                        <div class="flex flex-col lg:flex-row lg:items-center justify-between gap-3">
+                            <div>
+                                <div class="flex flex-wrap items-center gap-2">
+                                    <span class="px-2.5 py-0.5 rounded-full bg-indigo-600 text-white text-[10px] font-extrabold uppercase tracking-wider">Controle de Evolução PCM</span>
+                                    <span class="text-[11px] font-extrabold text-indigo-900">Comparativo Mês a Mês vs. Histórico de Treinamento</span>
+                                </div>
+                                <h3 class="text-base sm:text-lg font-extrabold text-slate-900 mt-1">Evolução da Planta: Melhoramos ou Pioramos?</h3>
+                            </div>
+                            <div class="flex flex-wrap items-center gap-2">
+                                <label for="compSelectBaseline" class="text-[11px] font-extrabold text-slate-600">Comparar Vigente contra:</label>
+                                <select id="compSelectBaseline" onchange="renderComparativoHistorico()" class="input-clean py-1.5 text-xs font-extrabold w-auto"></select>
+                                <button type="button" onclick="salvarRodadaAtualNoHistorico(true)" class="btn-touch bg-indigo-600 hover:bg-indigo-700 text-white text-xs py-2 px-3.5">
+                                    💾 Arquivar Ciclo no Histórico
+                                </button>
+                            </div>
+                        </div>
+
+                        <!-- DELTA CARDS -->
+                        <div id="comparativoDeltaGrid" class="grid grid-cols-2 md:grid-cols-4 xl:grid-cols-7 gap-2.5"></div>
+
+                        <!-- RECOMENDAÇÕES DO MAESTRO PARA O MOMENTO ATUAL -->
+                        <div id="comparativoRecomendacoesBox" class="p-4 rounded-2xl bg-slate-50 border border-slate-200 space-y-2"></div>
+
+                        <!-- LINHA DO TEMPO DOS CICLOS ARQUIVADOS -->
+                        <div class="overflow-x-auto">
+                            <table class="w-full text-left border-collapse text-xs">
+                                <thead>
+                                    <tr class="border-b border-slate-200 text-[10px] font-extrabold uppercase text-slate-500">
+                                        <th class="py-2 px-2">Período / Lote</th>
+                                        <th class="py-2 px-2 text-right">OMs</th>
+                                        <th class="py-2 px-2 text-right">Quebras</th>
+                                        <th class="py-2 px-2 text-right">Graves</th>
+                                        <th class="py-2 px-2 text-right">Ajuste</th>
+                                        <th class="py-2 px-2 text-right">Prog + Prev</th>
+                                        <th class="py-2 px-2 text-right">MTTR</th>
+                                        <th class="py-2 px-2 text-right">Fast-Path R$ 0</th>
+                                        <th class="py-2 px-2 text-right">Nota Apont.</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="comparativoHistoricoTable" class="divide-y divide-slate-100"></tbody>
+                            </table>
+                        </div>
+                    </div>
+
+                    <!-- CHECKPOINTS DETALHADOS DOS 9 NÓS -->
                     <div class="glass-card p-5 rounded-3xl space-y-4">
                         <div class="flex flex-wrap items-center justify-between gap-2">
                             <div>
-                                <span class="text-[10px] font-extrabold uppercase tracking-widest text-indigo-700">Arquitetura DAG • Checkpoints Independentes</span>
-                                <h3 class="text-base font-extrabold text-slate-900">Orquestrador de Agentes em 9 Nós</h3>
+                                <span class="text-[10px] font-extrabold uppercase tracking-widest text-indigo-700">Arquitetura DAG • Detalhes por Nó</span>
+                                <h3 class="text-base font-extrabold text-slate-900">Inspect Checkpoints — Detalhamento Técnico dos 9 Nós</h3>
                             </div>
                             <div class="flex flex-wrap items-center gap-2 text-[11px] font-extrabold">
                                 <span class="px-2.5 py-1 rounded-full bg-emerald-50 text-emerald-800 border border-emerald-200">● Nó Concluído</span>
                                 <span class="px-2.5 py-1 rounded-full bg-amber-50 text-amber-800 border border-amber-200">● Aguardando Supervisão</span>
-                                <button type="button" onclick="reexecutarNosPosConferencia()" class="px-3 py-1.5 rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white text-xs font-extrabold">↻ Reprocessar Nós 6→9 (R$ 0,00)</button>
                             </div>
                         </div>
                         <div id="pipelineNodesGrid" class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-3.5"></div>
@@ -315,15 +761,15 @@
                     <div class="grid grid-cols-1 lg:grid-cols-2 gap-4">
                         <div class="glass-card p-5 rounded-3xl space-y-3">
                             <div class="flex items-center justify-between">
-                                <h3 class="text-sm font-extrabold text-slate-900">Distribuição das 11 Categorias vs. Régua de Referência</h3>
+                                <h3 class="text-sm font-extrabold text-slate-900">Distribuição das 11 Categorias vs. Treino Set/Out</h3>
                                 <span class="text-[10px] font-extrabold text-slate-500">Calibração Equilíbrio Técnico</span>
                             </div>
                             <div id="pipelineTabelaDistribuicao" class="overflow-x-auto"></div>
                         </div>
                         <div class="glass-card p-5 rounded-3xl space-y-3">
                             <div class="flex items-center justify-between">
-                                <h3 class="text-sm font-extrabold text-slate-900">Escada de Severidade EN 13306 & Matriz B×C</h3>
-                                <span class="text-[10px] font-extrabold text-sky-700">Régua Oficial: 47,1% / 30,5% / 22,3%</span>
+                                <h3 class="text-sm font-extrabold text-slate-900">Escada de Severidade EN 13306 &amp; Matriz B×C</h3>
+                                <span class="text-[10px] font-extrabold text-sky-700">Régua Base Set/Out: 51,7% / 28,5% / 19,8%</span>
                             </div>
                             <div id="pipelineEscadaSeveridade" class="space-y-3"></div>
                         </div>
@@ -800,6 +1246,7 @@
         const colFunc = collection(db, "ir_funcionarios");
         const colMaestriCorr = collection(db, "maestri_correcoes");
         const colMaestriEstudos = collection(db, "maestri_estudos");
+        const colMaestriRodadas = collection(db, "maestri_rodadas");
         const refMasterCfg = doc(db, "pcm_config", "admin_master");
 
         const DEFAULT_MASTER_HASH = "7c2cce436d043699877f19ad8a6aef78dc5b1f167d97fbfa5d316885c2150a59";
@@ -812,12 +1259,41 @@
         ];
         const EQUIPES_OFICIAIS = ["MECANICA", "ELETRICA", "MONTAGEM", "PREDIAL"];
         const DIST_REFERENCIA = {
-            "AJUSTE": 64.4, "MANUTENCAO PROGRAMADA": 13.2, "QUEBRA": 11.3,
-            "SETUP PROGRAMADO": 4.9, "ACOMPANHAMENTO": 2.5, "FALHA OPERACIONAL": 1.8,
-            "PREDIAL": 1.1, "MELHORIAS": 0.7, "AJUSTE POS SETUP": 0.5,
-            "PREVENTIVA": 0.3, "INSPECAO DE ROTAS": 0.3
+            "AJUSTE": 60.7, "MANUTENCAO PROGRAMADA": 9.0, "QUEBRA": 13.9,
+            "SETUP PROGRAMADO": 2.4, "ACOMPANHAMENTO": 8.0, "FALHA OPERACIONAL": 1.7,
+            "PREDIAL": 1.3, "MELHORIAS": 0.7, "AJUSTE POS SETUP": 0.7,
+            "PREVENTIVA": 0.3, "INSPECAO DE ROTAS": 0.0
         };
-        const REGUA_OFICIAL = { LEVE: 47.1, MODERADA: 30.5, GRAVE: 22.3 };
+        const REGUA_OFICIAL = { LEVE: 51.7, MODERADA: 28.5, GRAVE: 19.8 };
+
+        // Histórico consolidado de Treinamento (Setembro/Outubro 2026 — 1.234 OMs reais concluídas do ERP)
+        const BASELINE_SET_OUT_2026 = {
+            id: "hist_set_out_2026",
+            periodo: "Set/Out 2026 (Treino • 1.234 OMs)",
+            curto: "Set/Out 2026",
+            tipo: "TREINO_BASE",
+            imutavel: true,
+            total_oms: 1234,
+            fast_path_r0: 780,
+            fast_path_pct: 63.2,
+            quebras_qtd: 172,
+            quebras_pct: 13.9,
+            graves_qtd: 34,
+            graves_pct_quebra: 19.8,
+            ajuste_qtd: 749,
+            ajuste_pct: 60.7,
+            prog_prev_qtd: 115,
+            prog_prev_pct: 9.3,
+            falha_op_qtd: 21,
+            falha_op_pct: 1.7,
+            mttr_min: 54.7,
+            qualidade_media: 74.8,
+            custo_brl: 1.48,
+            custo_sem_otimizacao_brl: 30.60,
+            top_ofensores: ["MULTIPET 1 - SOPRADORA 5000", "BOATOPACK 1 - ENVASADORA", "COZINHA 3"],
+            salvo_em: "2026-10-31T23:59:00"
+        };
+
         const PARADAS_BIB = new Set([
             "para", "com", "sem", "dos", "das", "que", "foi", "pela", "pelo",
             "esta", "estava", "apos", "sobre", "mais", "menos", "muito",
@@ -838,7 +1314,7 @@
         ];
 
         const VIEW_META = {
-            pipeline: { title: "Pipeline Visual de 9 Nós — Projeto Maestri 2.0", sub: "Coletor ERP › Fast-Path R$ 0 › Auditor Lote 20 › Roteador › Conferente › Bibliotecário › Confiabilidade › Caçador AQF › Planejador" },
+            pipeline: { title: "Rede Neural Maestri 2.0 — Vigente & Comparativo Histórico", sub: "Upload ERP de Novembro › Maestro Orquestrador › 9 Perceptrons em Ação › Evolução vs Treino Set/Out" },
             auditoria: { title: "Auditoria de OMs, Matriz B×C (EN 13306) & Qualidade de Apontamento", sub: "Inspeção completa das ordens classificadas, origem da decisão e score de preenchimento técnico por equipe" },
             conferente: { title: "Nó 5 — Mesa de Conferência Rápida dos Supervisores (2 Toques)", sub: "Valide ou corrija apenas os ~15%-20% de casos limítrofes/graves da sua equipe para ensinar o Bibliotecário" },
             bibliotecario: { title: "Nó 6 — Bibliotecário, Memória R$ 0,00 & Detector de Divergência", sub: "Curadoria de regras aprendidas (correcoes.jsonl) e arbitragem automática de critérios divergentes entre supervisores" },
@@ -867,16 +1343,27 @@
         let confiabilidadeData = {};
         let estudosAqf = [];
         let propostasPlanejador = [];
+        let historicoRodadas = [{ ...BASELINE_SET_OUT_2026 }];
+        let rodadaVigenteInfo = {
+            periodo: "Nov/2026",
+            status: "aguardando_upload",
+            arquivoNome: "",
+            tipo: "VIGENTE"
+        };
+        let neuralAnimacaoModo = "cinematica"; // "cinematica" | "instantanea"
+        let neuralAnimacaoTimer = null;
+        let neuralAnimandoAgora = false;
+        let neuralLogsLive = [];
         let custoRodada = {
-            oms_total: 1234,
-            oms_fast_path_r0: 780,
-            oms_ia_lote: 454,
-            chamadas_ia: 23,
+            oms_total: 0,
+            oms_fast_path_r0: 0,
+            oms_ia_lote: 0,
+            chamadas_ia: 0,
             lote_size: 20,
-            custo_brl: 1.48,
-            custo_sem_otimizacao_brl: 30.60,
-            economia_brl: 29.12,
-            economia_pct: 95.2
+            custo_brl: 0.0,
+            custo_sem_otimizacao_brl: 0.0,
+            economia_brl: 0.0,
+            economia_pct: 0
         };
         let masterSelecionadasOms = new Set();
 
@@ -1735,79 +2222,756 @@
             };
         }
 
-        window.carregarRodadaReal1234Oms = () => {
+        // ================= PERSISTÊNCIA, DETECÇÃO DE CICLO & COMPARATIVO HISTÓRICO =================
+        const NOMES_MESES_PT = ["Jan", "Fev", "Mar", "Abr", "Mai", "Jun", "Jul", "Ago", "Set", "Out", "Nov", "Dez"];
+
+        function getPeriodoAtualPadrao() {
+            const d = new Date();
+            return `${NOMES_MESES_PT[d.getMonth()]}/${d.getFullYear()}`;
+        }
+
+        function detectarPeriodoDoLote(oms, fallbackNomeArquivo = "") {
+            const contagemMes = {};
+            (oms || []).forEach(o => {
+                const raw = String(o.data || "").trim();
+                let ym = "";
+                const mIso = raw.match(/(20\d{2})[-/](\d{1,2})/);
+                const mBr = raw.match(/(\d{1,2})\/(\d{1,2})\/(20\d{2})/);
+                if (mIso) {
+                    ym = `${mIso[1]}-${String(Number(mIso[2])).padStart(2, "0")}`;
+                } else if (mBr) {
+                    ym = `${mBr[3]}-${String(Number(mBr[2])).padStart(2, "0")}`;
+                }
+                if (ym) contagemMes[ym] = (contagemMes[ym] || 0) + 1;
+            });
+            const ordenados = Object.entries(contagemMes).sort((a, b) => b[1] - a[1]);
+            if (ordenados.length) {
+                const [ano, mesStr] = ordenados[0][0].split("-");
+                const mesIdx = Math.max(0, Math.min(11, Number(mesStr) - 1));
+                if (ano === "2026" && (mesIdx === 8 || mesIdx === 9)) return "Set/Out 2026 (Histórico ERP)";
+                return `${NOMES_MESES_PT[mesIdx]}/${ano}`;
+            }
+            const inpVal = (document.getElementById("inputPeriodoRodada")?.value || "").trim();
+            if (inpVal) return inpVal;
+            if (fallbackNomeArquivo) return fallbackNomeArquivo.replace(/\.(csv|xlsx|json|jsonl)$/i, "").slice(0, 24);
+            return getPeriodoAtualPadrao();
+        }
+
+        function gerarResumoMetricasRodada(periodoLabel, omsList, tipo = "VIGENTE") {
+            const tot = omsList.length || 0;
+            const safeTot = tot || 1;
+            const fastCnt = omsList.filter(o => ["FAST_PATH_R0", "BIBLIOTECA_MEMORIA", "DEDUP_RODADA"].includes(o.origem)).length;
+            const quebras = omsList.filter(o => o.categoria === "QUEBRA");
+            const graves = quebras.filter(o => o.severidade === "GRAVE");
+            const ajustes = omsList.filter(o => o.categoria === "AJUSTE");
+            const progPrev = omsList.filter(o => o.categoria === "MANUTENCAO PROGRAMADA" || o.categoria === "PREVENTIVA" || o.categoria === "INSPECAO DE ROTAS");
+            const falhaOp = omsList.filter(o => o.categoria === "FALHA OPERACIONAL");
+            const mttrMin = quebras.length
+                ? Math.round((quebras.reduce((a, x) => a + Number(x.tempo_min || 0), 0) / quebras.length) * 10) / 10
+                : 0;
+            const qualMedia = tot
+                ? Math.round((omsList.reduce((a, x) => a + Number(x.qualidade_score || 60), 0) / tot) * 10) / 10
+                : 0;
+            const idSlug = `hist_${normKey(periodoLabel).replace(/\s+/g, "_").slice(0, 28) || "vigente"}`;
+
+            return {
+                id: idSlug,
+                periodo: periodoLabel,
+                curto: periodoLabel,
+                tipo,
+                imutavel: false,
+                total_oms: tot,
+                fast_path_r0: fastCnt,
+                fast_path_pct: tot ? Math.round((fastCnt / safeTot) * 1000) / 10 : 0,
+                quebras_qtd: quebras.length,
+                quebras_pct: tot ? Math.round((quebras.length / safeTot) * 1000) / 10 : 0,
+                graves_qtd: graves.length,
+                graves_pct_quebra: quebras.length ? Math.round((graves.length / quebras.length) * 1000) / 10 : 0,
+                ajuste_qtd: ajustes.length,
+                ajuste_pct: tot ? Math.round((ajustes.length / safeTot) * 1000) / 10 : 0,
+                prog_prev_qtd: progPrev.length,
+                prog_prev_pct: tot ? Math.round((progPrev.length / safeTot) * 1000) / 10 : 0,
+                falha_op_qtd: falhaOp.length,
+                falha_op_pct: tot ? Math.round((falhaOp.length / safeTot) * 1000) / 10 : 0,
+                mttr_min: mttrMin,
+                qualidade_media: qualMedia,
+                custo_brl: Number(custoRodada.custo_brl || 0),
+                custo_sem_otimizacao_brl: Number(custoRodada.custo_sem_otimizacao_brl || 0),
+                top_ofensores: (confiabilidadeData.top_ofensores || []).slice(0, 3).map(x => x.ativo),
+                salvo_em: new Date().toISOString()
+            };
+        }
+
+        function salvarEstadoPersistidoMaestri() {
+            try {
+                if (rodadaVigenteInfo.tipo !== "INSPECAO_HISTORICA" && omsBrutasCarregadas.length > 0) {
+                    safeStorage.set("cepera_maestri_rodada_vigente", JSON.stringify({
+                        info: rodadaVigenteInfo,
+                        brutas: omsBrutasCarregadas.slice(0, 2500),
+                        custo: custoRodada
+                    }));
+                } else if (omsBrutasCarregadas.length === 0) {
+                    safeStorage.remove("cepera_maestri_rodada_vigente");
+                }
+                safeStorage.set("cepera_maestri_historico_rodadas", JSON.stringify(historicoRodadas));
+            } catch (_) {}
+        }
+
+        window.salvarRodadaAtualNoHistorico = async (exibirToast = false) => {
+            if (!omsAuditadas.length) {
+                if (exibirToast) showToast("Suba ou simule uma planilha antes de arquivar no histórico.", "error");
+                return;
+            }
+            const periodoInp = (document.getElementById("inputPeriodoRodada")?.value || rodadaVigenteInfo.periodo || getPeriodoAtualPadrao()).trim();
+            rodadaVigenteInfo.periodo = periodoInp;
+            const snap = gerarResumoMetricasRodada(periodoInp, omsAuditadas, rodadaVigenteInfo.tipo || "VIGENTE");
+            if (snap.id === BASELINE_SET_OUT_2026.id) {
+                if (exibirToast) showToast("O lote de Set/Out já está salvo como Base de Treinamento.", "info");
+                return;
+            }
+            historicoRodadas = [
+                BASELINE_SET_OUT_2026,
+                ...historicoRodadas.filter(h => h.id !== BASELINE_SET_OUT_2026.id && h.id !== snap.id),
+                snap
+            ];
+            salvarEstadoPersistidoMaestri();
+            renderComparativoHistorico();
+            try {
+                await setDoc(doc(colMaestriRodadas, snap.id), snap);
+            } catch (_) {}
+            if (exibirToast) showToast(`Ciclo "${periodoInp}" arquivado para comparação mês a mês!`, "success");
+        };
+
+        function restaurarEstadoPersistidoMaestri() {
+            try {
+                const rawHist = safeStorage.get("cepera_maestri_historico_rodadas");
+                if (rawHist) {
+                    const arr = JSON.parse(rawHist);
+                    if (Array.isArray(arr) && arr.length) {
+                        const extras = arr.filter(h => h && h.id !== BASELINE_SET_OUT_2026.id);
+                        historicoRodadas = [{ ...BASELINE_SET_OUT_2026 }, ...extras];
+                    }
+                }
+            } catch (_) {}
+
+            try {
+                const rawVig = safeStorage.get("cepera_maestri_rodada_vigente");
+                if (rawVig) {
+                    const parsed = JSON.parse(rawVig);
+                    if (parsed && Array.isArray(parsed.brutas) && parsed.brutas.length) {
+                        rodadaVigenteInfo = { ...rodadaVigenteInfo, ...(parsed.info || {}) };
+                        omsBrutasCarregadas = parsed.brutas;
+                        if (parsed.custo) custoRodada = { ...custoRodada, ...parsed.custo };
+                        const inpP = document.getElementById("inputPeriodoRodada");
+                        if (inpP && rodadaVigenteInfo.periodo) inpP.value = rodadaVigenteInfo.periodo;
+                        return true;
+                    }
+                }
+            } catch (_) {}
+            return false;
+        }
+
+        function gerarOmsSimuladasNovembro() {
+            return [
+                { om: "33102", data: "2026-11-04 08:15", ativo: "BOATOPACK 1 - ENVASADORA", equipe: "MECANICA", tempo_min: 140, problema: "Mordente horizontal desalinhado rasgando sache", servico: "Substituída correia do servomotor dos mordentes e recalibrada temperatura de selagem." },
+                { om: "33108", data: "2026-11-05 14:20", ativo: "BOATOPACK 1 - ENVASADORA", equipe: "ELETRICA", tempo_min: 75, problema: "Servomotor travou em falha de encoder parando máquina", servico: "Trocado cabo encoder do servomotor principal e testado sincronismo." },
+                { om: "33114", data: "2026-11-06 09:40", ativo: "SERAC 2 - ENVASADORA SERAC", equipe: "MECANICA", tempo_min: 20, problema: "Bico 4 pingando no fechamento", servico: "Regulagem de curso e pressão pneumática sem parada de linha." },
+                { om: "33121", data: "2026-11-07 10:00", ativo: "MOINHO 01 - FRYMA KORUMA MK 320", equipe: "MONTAGEM", tempo_min: 85, problema: "Preventiva quinzenal de folga do conjunto Fryma", servico: "Executada inspeção preventiva do plano PM-FRY-02 com medição de folga e reaperto." },
+                { om: "33129", data: "2026-11-08 06:30", ativo: "COZINHA 3", equipe: "MECANICA", tempo_min: 50, problema: "Manutenção programada de parada de sábado no selo da bomba", servico: "Troca programada do selo mecânico e revisão de mancais na parada programada." },
+                { om: "33135", data: "2026-11-09 11:10", ativo: "MULTIPET 1 - SOPRADORA 5000", equipe: "MECANICA", tempo_min: 30, problema: "Inspeção de rota sensitiva na unidade hidráulica", servico: "Executada inspeção de rota semanal conforme checklist sem anomalias." },
+                { om: "33142", data: "2026-11-10 15:45", ativo: "ENVASADORA - SYSTEMPACK M400 1", equipe: "ELETRICA", tempo_min: 15, problema: "Datadora não imprime lote", servico: "Chave seletora estava em manual; colocado em automático e orientado o facilitador." },
+                { om: "33149", data: "2026-11-11 13:15", ativo: "SERAC 3 - POSICIONADOR POSIMEC", equipe: "MECANICA", tempo_min: 45, problema: "Setup de pote 350g para 700g", servico: "Realizado setup programado com troca de estrelas e guias de formato." },
+                { om: "33155", data: "2026-11-12 08:50", ativo: "CFT - LINHA", equipe: "MONTAGEM", tempo_min: 35, problema: "Válvula borboleta com retenção após retorno da linha", servico: "Ajuste após setup no atuador pneumático e teste de vedação." },
+                { om: "33163", data: "2026-11-13 17:10", ativo: "MULTIPET 2 - SOPRADORA 2/5", equipe: "ELETRICA", tempo_min: 12, problema: "Esteira parou por proteção térmica", servico: "Rearme do disjuntor motor no painel e verificação de corrente nominal." },
+                { om: "33170", data: "2026-11-14 09:05", ativo: "CALDEIRA & UTILIDADES", equipe: "PREDIAL", tempo_min: 55, problema: "Calha do corredor de envase entupida com vazamento", servico: "Desobstrução da calha pluvial e aplicação de manta asfáltica no telhado." },
+                { om: "33178", data: "2026-11-15 07:45", ativo: "BOATOPACK 2 - ENVASADORA", equipe: "MECANICA", tempo_min: 18, problema: "Desbobinador patinando filme", servico: "Limpeza dos roletes e ajuste de tensão do freio magnético." },
+                { om: "33185", data: "2026-11-16 12:30", ativo: "DENDE - TAMPADORA", equipe: "MECANICA", tempo_min: 40, problema: "Tampa enroscada no alimentador rotativo", servico: "Retirado objeto estranho e acompanhado fluxo por 20 minutos." },
+                { om: "33192", data: "2026-11-17 16:00", ativo: "DESENVASE - BOMBA", equipe: "ELETRICA", tempo_min: 22, problema: "Inversor desarmando por sobrecorrente", servico: "Verificada rampa de aceleração e resetado inversor sem troca de componente." },
+                { om: "33199", data: "2026-11-18 10:25", ativo: "SERAC 2 - ENVASADORA SERAC", equipe: "MECANICA", tempo_min: 65, problema: "Troca preventiva mensal do filtro regulador", servico: "Preventiva mensal conforme PM-SER-04 com troca do elemento filtrante e lubrificação." },
+                { om: "33204", data: "2026-11-19 08:10", ativo: "BOATOPACK 3 - ENVASADORA", equipe: "MECANICA", tempo_min: 25, problema: "Verificação de correia", servico: "" },
+                { om: "33211", data: "2026-11-19 14:40", ativo: "TANQUE PULMÃO MOSTARDA - COZ 3", equipe: "MONTAGEM", tempo_min: 95, problema: "Vazamento no estator da bomba positiva", servico: "Estator rompeu parando transferência; substituído estator e alinhado acoplamento." },
+                { om: "33218", data: "2026-11-20 09:20", ativo: "ENVASADORA - SYSTEMPACK M400 2", equipe: "MECANICA", tempo_min: 20, problema: "Acompanhamento de partida de lote especial", servico: "Acompanhamento técnico de partida após limpeza CIP sem intervenções." }
+            ];
+        }
+
+        window.prepararModoAguardandoNovembro = () => {
             if (!bibliotecaCorrecoes.length) {
                 bibliotecaCorrecoes = SEED_BIBLIOTECA_INICIAL.map(x => ({ ...x }));
             }
-            const cacheDedup = new Map();
-            omsBrutasCarregadas = SEED_OMS_REAIS_REPRESENTATIVAS.map(x => ({ ...x }));
-            omsAuditadas = omsBrutasCarregadas.map(om => {
-                const dec = classificarOmNoMotorMaestri(om, cacheDedup);
-                return construirItemAuditadoCompleto(om, dec);
-            });
-            custoRodada = {
-                oms_total: 1234,
-                oms_fast_path_r0: 780,
-                oms_ia_lote: 454,
-                chamadas_ia: 23,
-                lote_size: Number(safeStorage.get("cepera_maestri_lote_size") || 20),
-                custo_brl: 1.48,
-                custo_sem_otimizacao_brl: 30.60,
-                economia_brl: 29.12,
-                economia_pct: 95.2
+            omsBrutasCarregadas = [];
+            omsAuditadas = [];
+            qualidadeEquipes = {};
+            confiabilidadeData = { total_oms: 0, total_quebras: 0, categorias: {}, severidades: { LEVE: 0, MODERADA: 0, GRAVE: 0 }, matriz_bc: {}, top_ofensores: [] };
+            estudosAqf = [];
+            propostasPlanejador = [];
+            rodadaVigenteInfo = {
+                periodo: getPeriodoAtualPadrao(),
+                status: "aguardando_upload",
+                arquivoNome: "",
+                tipo: "VIGENTE"
             };
+            custoRodada = { oms_total: 0, oms_fast_path_r0: 0, oms_ia_lote: 0, chamadas_ia: 0, lote_size: Number(safeStorage.get("cepera_maestri_lote_size") || 20), custo_brl: 0, custo_sem_otimizacao_brl: 0, economia_brl: 0, economia_pct: 0 };
             recalcularNosPosAuditoria();
+            neuralLogsLive = [
+                `[SISTEMA] Base histórica Set/Out carregada (1.234 OMs • Memória ativa: ${bibliotecaCorrecoes.filter(b => b.status !== "REVERTIDO").length} regras R$ 0,00).`,
+                `[MAESTRO] Pronto para receber a planilha de ${rodadaVigenteInfo.periodo}. Arraste o arquivo ERP para iniciar a Rede Neural!`
+            ];
             renderCurrentView();
-            showToast("Rodada Real do ERP carregada (9 Nós ativos • Economia de 95,2% vs v40)!", "success");
+            resetarVisualRedeNeuralAguardando();
         };
 
-        window.executarPipelineCompletoUI = async () => {
+        window.limparRodadaVigente = () => {
+            safeStorage.remove("cepera_maestri_rodada_vigente");
+            prepararModoAguardandoNovembro();
+            showToast("Painel zerado e pronto para processar o novo lote mensal do ERP!", "info");
+        };
+
+        window.simularLoteNovembroTeste = async () => {
+            if (!bibliotecaCorrecoes.length) {
+                bibliotecaCorrecoes = SEED_BIBLIOTECA_INICIAL.map(x => ({ ...x }));
+            }
+            omsBrutasCarregadas = gerarOmsSimuladasNovembro();
+            rodadaVigenteInfo = {
+                periodo: "Nov/2026",
+                status: "ativo",
+                arquivoNome: "Lote_Simulado_Novembro_2026.csv",
+                tipo: "VIGENTE"
+            };
+            const inpP = document.getElementById("inputPeriodoRodada");
+            if (inpP) inpP.value = "Nov/2026";
+            await executarPipelineCompletoUI({ animar: true, isSimulado: true });
+        };
+
+        window.inspecionarHistoricoSetOut = async () => {
+            if (!bibliotecaCorrecoes.length) {
+                bibliotecaCorrecoes = SEED_BIBLIOTECA_INICIAL.map(x => ({ ...x }));
+            }
+            omsBrutasCarregadas = SEED_OMS_REAIS_REPRESENTATIVAS.map(x => ({ ...x }));
+            rodadaVigenteInfo = {
+                periodo: "Set/Out 2026 (Amostra Treino)",
+                status: "historico_inspecao",
+                arquivoNome: "dados_brutos_para_ia.csv (Set/Out)",
+                tipo: "INSPECAO_HISTORICA"
+            };
+            const inpP = document.getElementById("inputPeriodoRodada");
+            if (inpP) inpP.value = "Set/Out 2026";
+            await executarPipelineCompletoUI({ animar: true, usarBenchmarkSetOut: true });
+            showToast("Base de Treinamento Set/Out (1.234 OMs) aberta para inspeção!", "info");
+        };
+
+        // Mantém alias retrocompatível
+        window.carregarRodadaReal1234Oms = window.inspecionarHistoricoSetOut;
+
+        async function chamarGeminiLote20NoNavegador(loteOms, apiKey) {
+            if (typeof fetch !== "function" || !apiKey) return null;
+            const exemplosBib = bibliotecaCorrecoes
+                .filter(b => b.status !== "REVERTIDO" && b.categoria_supervisor)
+                .slice(0, 6)
+                .map(b => `- Prob: "${b.problema}" | Serv: "${b.servico}" => ${b.categoria_supervisor} (${b.sinal || "REGRA"})`)
+                .join("\n");
+
+            const listaPrompt = loteOms.map(o => ({
+                om: o.om,
+                ativo: o.ativo,
+                tempo_min: o.tempo_min,
+                problema: o.problema,
+                servico: o.servico
+            }));
+
+            const promptText = `Você é o Auditor IA PCM Cepêra (Norma EN 13306). Classifique EXATAMENTE cada OM na lista abaixo em uma das 11 categorias: ACOMPANHAMENTO, AJUSTE, AJUSTE POS SETUP, FALHA OPERACIONAL, INSPECAO DE ROTAS, MANUTENCAO PROGRAMADA, MELHORIAS, PREDIAL, PREVENTIVA, QUEBRA, SETUP PROGRAMADO.
+Para QUEBRA informe b (1..3) e c (1..3).
+Regras aprendidas do Bibliotecário da planta:\n${exemplosBib || "- Sem correções extras"}\n
+Responda SOMENTE um JSON Array no formato [{"om":"...","categoria":"...","b":null,"c":null,"confianca":4,"justificativa":"..."}].
+OMs:\n${JSON.stringify(listaPrompt)}`;
+
+            const resp = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${encodeURIComponent(apiKey)}`, {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({
+                    contents: [{ parts: [{ text: promptText }] }],
+                    generationConfig: { temperature: 0.1, responseMimeType: "application/json" }
+                })
+            });
+            if (!resp.ok) throw new Error(`HTTP ${resp.status}`);
+            const data = await resp.json();
+            const txt = data?.candidates?.[0]?.content?.parts?.[0]?.text || "[]";
+            const parsed = JSON.parse(txt.replace(/```json|```/g, "").trim());
+            const mapRes = new Map();
+            if (Array.isArray(parsed)) {
+                parsed.forEach(item => {
+                    if (item && item.om) mapRes.set(String(item.om), item);
+                });
+            }
+            return mapRes;
+        }
+
+        window.executarPipelineCompletoUI = async (opts = {}) => {
             if (!omsBrutasCarregadas.length) {
-                carregarRodadaReal1234Oms();
+                showToast("Nenhuma planilha carregada! Selecione seu CSV/XLSX de Novembro ou clique em 'Simular Lote Teste'.", "info");
+                adicionarLogNeural("[MAESTRO] Aguardando estímulo: arraste o CSV/XLSX do ERP ou clique em Simular Lote Teste.");
                 return;
             }
             const cfg = carregarCofreIaLocal();
             const cacheDedup = new Map();
             let fastCnt = 0;
             let loteCnt = 0;
+            const pendentesIa = [];
 
-            omsAuditadas = omsBrutasCarregadas.map(om => {
+            const preliminares = omsBrutasCarregadas.map(om => {
                 const dec = classificarOmNoMotorMaestri(om, cacheDedup);
-                if (["FAST_PATH_R0", "BIBLIOTECA_MEMORIA", "DEDUP_RODADA", "BLOQUEIO_APONTAMENTO"].includes(dec.origem)) fastCnt++;
-                else loteCnt++;
-                return construirItemAuditadoCompleto(om, dec);
+                if (["FAST_PATH_R0", "BIBLIOTECA_MEMORIA", "DEDUP_RODADA", "BLOQUEIO_APONTAMENTO", "PRE_AUDITADA"].includes(dec.origem)) {
+                    fastCnt++;
+                } else {
+                    loteCnt++;
+                    pendentesIa.push(om);
+                }
+                return { om, dec };
             });
 
-            const total = omsAuditadas.length;
-            const chamadas = cfg.modo === "deterministico" || !cfg.key ? 0 : Math.ceil(loteCnt / cfg.lote);
-            const custoV40 = Math.round(total * (30.60 / 1234) * 100) / 100;
-            const custoNovo = chamadas === 0 ? 0.0 : Math.round(chamadas * 0.064 * 100) / 100;
-            const econBrl = Math.max(0, Math.round((custoV40 - custoNovo) * 100) / 100);
-            const econPct = custoV40 > 0 ? Math.round((econBrl / custoV40) * 1000) / 10 : 100;
+            // Chamada real em lotes de 20 OMs se chave Gemini estiver configurada no Cofre Master e modo !== deterministico
+            const iaMap = new Map();
+            let chamadasReais = 0;
+            if (cfg.key && cfg.modo !== "deterministico" && pendentesIa.length > 0 && typeof fetch === "function" && !opts.usarBenchmarkSetOut) {
+                const loteSz = Math.max(5, Math.min(30, Number(cfg.lote || 20)));
+                for (let i = 0; i < pendentesIa.length; i += loteSz) {
+                    const chunk = pendentesIa.slice(i, i + loteSz);
+                    chamadasReais++;
+                    try {
+                        const resMap = await chamarGeminiLote20NoNavegador(chunk, cfg.key);
+                        if (resMap) resMap.forEach((val, k) => iaMap.set(k, val));
+                    } catch (_) {
+                        // Fallback silencioso para motor determinístico em caso de indisponibilidade/offline
+                    }
+                }
+            }
 
-            custoRodada = {
-                oms_total: total,
-                oms_fast_path_r0: fastCnt,
-                oms_ia_lote: loteCnt,
-                chamadas_ia: chamadas,
-                lote_size: cfg.lote,
-                custo_brl: custoNovo,
-                custo_sem_otimizacao_brl: custoV40,
-                economia_brl: econBrl,
-                economia_pct: econPct
-            };
+            omsAuditadas = preliminares.map(({ om, dec }) => {
+                const overrideIa = iaMap.get(String(om.om));
+                const finalDec = overrideIa && CATEGORIAS_OFICIAIS.includes(String(overrideIa.categoria).toUpperCase())
+                    ? {
+                        categoria: String(overrideIa.categoria).toUpperCase(),
+                        b: overrideIa.b ? Number(overrideIa.b) : dec.b,
+                        c: overrideIa.c ? Number(overrideIa.c) : dec.c,
+                        confianca: Number(overrideIa.confianca || 4),
+                        origem: "IA_LOTE20",
+                        justificativa: `[Gemini Flash Lote ${cfg.lote}] ${overrideIa.justificativa || dec.justificativa}`
+                    }
+                    : dec;
+                return construirItemAuditadoCompleto(om, finalDec);
+            });
+
+            if (opts.usarBenchmarkSetOut) {
+                custoRodada = {
+                    oms_total: 1234,
+                    oms_fast_path_r0: 780,
+                    oms_ia_lote: 454,
+                    chamadas_ia: 23,
+                    lote_size: cfg.lote,
+                    custo_brl: 1.48,
+                    custo_sem_otimizacao_brl: 30.60,
+                    economia_brl: 29.12,
+                    economia_pct: 95.2
+                };
+            } else {
+                const total = omsAuditadas.length;
+                const chamadas = cfg.modo === "deterministico" || !cfg.key ? 0 : (chamadasReais || Math.ceil(loteCnt / cfg.lote));
+                const custoV40 = Math.round(total * (30.60 / 1234) * 100) / 100;
+                const custoNovo = chamadas === 0 ? 0.0 : Math.round(chamadas * 0.064 * 100) / 100;
+                const econBrl = Math.max(0, Math.round((custoV40 - custoNovo) * 100) / 100);
+                const econPct = custoV40 > 0 ? Math.round((econBrl / custoV40) * 1000) / 10 : 100;
+
+                custoRodada = {
+                    oms_total: total,
+                    oms_fast_path_r0: fastCnt,
+                    oms_ia_lote: loteCnt,
+                    chamadas_ia: chamadas,
+                    lote_size: cfg.lote,
+                    custo_brl: custoNovo,
+                    custo_sem_otimizacao_brl: custoV40,
+                    economia_brl: econBrl,
+                    economia_pct: econPct
+                };
+            }
+
             recalcularNosPosAuditoria();
+            if (rodadaVigenteInfo.tipo !== "INSPECAO_HISTORICA" && !opts.naoArquivarAuto) {
+                const periodoSnap = (document.getElementById("inputPeriodoRodada")?.value || rodadaVigenteInfo.periodo || getPeriodoAtualPadrao()).trim();
+                const snap = gerarResumoMetricasRodada(periodoSnap, omsAuditadas, "VIGENTE");
+                if (snap.id !== BASELINE_SET_OUT_2026.id) {
+                    historicoRodadas = [
+                        BASELINE_SET_OUT_2026,
+                        ...historicoRodadas.filter(h => h.id !== BASELINE_SET_OUT_2026.id && h.id !== snap.id),
+                        snap
+                    ];
+                }
+            }
+            salvarEstadoPersistidoMaestri();
             renderCurrentView();
-            showToast(`Pipeline de 9 Nós concluído (${total} OMs • Custo R$ ${custoNovo.toFixed(2)} vs R$ ${custoV40.toFixed(2)})!`, "success");
+
+            if (opts.animar !== false && neuralAnimacaoModo === "cinematica" && typeof window.setTimeout === "function") {
+                executarAnimacaoRedeNeural({ total: omsAuditadas.length, fastCnt, loteCnt, chamadas: custoRodada.chamadas_ia });
+            } else {
+                aplicarEstadoFinalRedeNeural({ total: omsAuditadas.length, fastCnt, loteCnt, chamadas: custoRodada.chamadas_ia });
+            }
+
+            showToast(`Rede Neural Maestri concluída (${omsAuditadas.length} OMs de ${rodadaVigenteInfo.periodo} • Custo R$ ${custoRodada.custo_brl.toFixed(2)})!`, "success");
         };
 
         window.reexecutarNosPosConferencia = () => {
             recalcularNosPosAuditoria();
+            salvarEstadoPersistidoMaestri();
             renderCurrentView();
+            aplicarEstadoFinalRedeNeural({ total: omsAuditadas.length, fastCnt: custoRodada.oms_fast_path_r0, loteCnt: custoRodada.oms_ia_lote, chamadas: custoRodada.chamadas_ia });
             showToast("Nós 6, 7, 8 e 9 reprocessados a R$ 0,00 com as correções dos supervisores!", "success");
         };
 
-        // ================= UPLOAD DE PLANILHA ERP (.CSV / .JSON / .JSONL) =================
+        // ================= MOTOR VISUAL DA REDE NEURAL (MAESTRO + PERCEPTRONS + SVG SINAPSES) =================
+        function adicionarLogNeural(msg) {
+            const feedEl = document.getElementById("neuralTelemetryFeed");
+            const semHoraPrev = (neuralLogsLive[0] || "").replace(/^\[\d{2}:\d{2}:\d{2}\]\s*/, "");
+            if (semHoraPrev !== msg) {
+                const hh = new Date().toTimeString().slice(0, 8);
+                neuralLogsLive.unshift(`[${hh}] ${msg}`);
+                if (neuralLogsLive.length > 8) neuralLogsLive = neuralLogsLive.slice(0, 8);
+            }
+            if (feedEl) {
+                feedEl.innerHTML = neuralLogsLive.map((l, idx) =>
+                    `<div class="${idx === 0 ? "text-sky-300 font-bold" : "text-slate-400"} truncate">${escapeHtml(l)}</div>`
+                ).join("");
+            }
+        }
+
+        function setEstadoPerceptronUI(nodeId, estado, pct, textoStat) {
+            const el = document.getElementById(`pNode_${nodeId}`);
+            if (el) {
+                el.classList.remove("is-idle", "is-working", "is-done", "is-waiting");
+                el.classList.add(estado);
+            }
+            const pctEl = document.getElementById(`pPct_${nodeId}`);
+            if (pctEl && pct !== undefined) pctEl.innerText = `${pct}%`;
+            const barEl = document.getElementById(`pBar_${nodeId}`);
+            if (barEl && pct !== undefined && barEl.style) barEl.style.width = `${Math.max(0, Math.min(100, pct))}%`;
+            const stEl = document.getElementById(`pStat_${nodeId}`);
+            if (stEl && textoStat) stEl.innerText = textoStat;
+        }
+
+        const COORD_FALLBACK_NEURAL = {
+            maestro: { x: 600, y: 60 },
+            input_erp: { x: 115, y: 195 },
+            no1: { x: 115, y: 315 },
+            hist_base: { x: 115, y: 445 },
+            no2: { x: 355, y: 235 },
+            no3: { x: 355, y: 410 },
+            no4: { x: 600, y: 205 },
+            no5: { x: 600, y: 340 },
+            no6: { x: 600, y: 470 },
+            no7: { x: 855, y: 245 },
+            no8: { x: 855, y: 410 },
+            no9: { x: 1085, y: 295 }
+        };
+
+        const DEFINICAO_SINAPSES = [
+            { id: "s_in_n1", de: "input_erp", para: "no1", cor: "#38bdf8", label: "Planilha Bruta" },
+            { id: "s_hist_n2", de: "hist_base", para: "no2", cor: "#a78bfa", label: "Pesos Set/Out" },
+            { id: "s_n1_n2", de: "no1", para: "no2", cor: "#34d399", label: "Filtradas" },
+            { id: "s_n2_n4", de: "no2", para: "no4", cor: "#10b981", label: "Fast-Path R$ 0", curva: -36 },
+            { id: "s_n2_n3", de: "no2", para: "no3", cor: "#6366f1", label: "Ambíguas (Lote 20)" },
+            { id: "s_n3_n4", de: "no3", para: "no4", cor: "#38bdf8", label: "EN 13306 B×C" },
+            { id: "s_n4_n5", de: "no4", para: "no5", cor: "#fbbf24", label: "Fila Conferir" },
+            { id: "s_n5_n6", de: "no5", para: "no6", cor: "#c084fc", label: "Correções Sup." },
+            { id: "s_n6_n2", de: "no6", para: "no2", cor: "#a855f7", label: "Retroalimentação R$ 0", curva: 85 },
+            { id: "s_n4_n7", de: "no4", para: "no7", cor: "#f43f5e", label: "Base Confiável" },
+            { id: "s_n7_n8", de: "no7", para: "no8", cor: "#0ea5e9", label: "Top Ofensores" },
+            { id: "s_n8_n9", de: "no8", para: "no9", cor: "#34d399", label: "Ações 5W2H" },
+            { id: "s_m_n1", de: "maestro", para: "no1", cor: "#38bdf8", tracejado: true },
+            { id: "s_m_n2", de: "maestro", para: "no2", cor: "#34d399", tracejado: true },
+            { id: "s_m_n3", de: "maestro", para: "no3", cor: "#818cf8", tracejado: true },
+            { id: "s_m_n7", de: "maestro", para: "no7", cor: "#fb7185", tracejado: true },
+            { id: "s_m_n9", de: "maestro", para: "no9", cor: "#34d399", tracejado: true }
+        ];
+
+        function obterPontosSinapsesCanvas() {
+            const canvas = document.getElementById("neuralCanvasInner");
+            const svg = document.getElementById("neuralSynapseSvg");
+            if (canvas && svg && typeof canvas.getBoundingClientRect === "function") {
+                const cRect = canvas.getBoundingClientRect();
+                if (cRect.width > 100 && cRect.height > 100) {
+                    svg.setAttribute("viewBox", `0 0 ${Math.round(cRect.width)} ${Math.round(cRect.height)}`);
+                    const pts = {};
+                    Object.keys(COORD_FALLBACK_NEURAL).forEach(k => {
+                        const nodeEl = canvas.querySelector(`[data-neural-id="${k}"]`);
+                        if (nodeEl && typeof nodeEl.getBoundingClientRect === "function") {
+                            const r = nodeEl.getBoundingClientRect();
+                            if (r.width > 0) {
+                                pts[k] = {
+                                    x: Math.round((r.left - cRect.left) + r.width / 2),
+                                    y: Math.round((r.top - cRect.top) + r.height / 2)
+                                };
+                            }
+                        }
+                    });
+                    if (Object.keys(pts).length >= 6) return { ...COORD_FALLBACK_NEURAL, ...pts };
+                }
+            }
+            if (svg && typeof svg.setAttribute === "function") svg.setAttribute("viewBox", "0 0 1200 540");
+            return COORD_FALLBACK_NEURAL;
+        }
+
+        function renderNeuralSvgTopology(activeEdges = new Set(), doneEdges = new Set()) {
+            const svg = document.getElementById("neuralSynapseSvg");
+            if (!svg) return;
+            const pts = obterPontosSinapsesCanvas();
+            const svgPaths = DEFINICAO_SINAPSES.map(edge => {
+                const p1 = pts[edge.de];
+                const p2 = pts[edge.para];
+                if (!p1 || !p2) return "";
+                const dx = (p2.x - p1.x) * 0.48;
+                const dyCurva = edge.curva || 0;
+                const cx1 = p1.x + dx;
+                const cy1 = p1.y + dyCurva;
+                const cx2 = p2.x - dx;
+                const cy2 = p2.y + dyCurva;
+                const d = `M ${p1.x},${p1.y} C ${cx1},${cy1} ${cx2},${cy2} ${p2.x},${p2.y}`;
+                const isActive = activeEdges.has(edge.id);
+                const isDone = doneEdges.has(edge.id);
+                const cls = isActive ? "is-active" : (isDone ? "is-done" : "is-idle");
+                const width = isActive ? (edge.tracejado ? 2.5 : 3.6) : (edge.tracejado ? 1.3 : 2.2);
+                const opacityAttr = edge.tracejado && !isActive ? ' opacity="0.22"' : "";
+                const pathHtml = `<path id="syn_${edge.id}" d="${d}" stroke="${edge.cor}" stroke-width="${width}" class="synapse-path ${cls}"${opacityAttr}/>`;
+                if (!isActive || edge.tracejado) return pathHtml;
+                return `${pathHtml}<circle r="4.5" fill="${edge.cor}"><animateMotion dur="0.9s" repeatCount="indefinite" path="${d}"/></circle>`;
+            }).join("");
+            svg.innerHTML = svgPaths;
+        }
+
+        function resetarVisualRedeNeuralAguardando() {
+            if (neuralAnimacaoTimer) { try { clearTimeout(neuralAnimacaoTimer); } catch (_) {} neuralAnimacaoTimer = null; }
+            neuralAnimandoAgora = false;
+            const hub = document.getElementById("neuralMaestroHub");
+            if (hub) hub.classList.remove("is-delegating");
+            const badge = document.getElementById("neuralStatusBadge");
+            if (badge) {
+                badge.innerText = "● Aguardando Estímulo (ERP)";
+                badge.className = "px-2.5 py-0.5 rounded-full bg-slate-800 text-slate-200 border border-slate-700 text-[10px] font-extrabold";
+            }
+            const msg = document.getElementById("maestroDelegacaoMsg");
+            if (msg) msg.innerText = `Pronto para receber o CSV/XLSX de ${rodadaVigenteInfo.periodo} e delegar os 9 perceptrons.`;
+            const ph = document.getElementById("maestroPhasePill");
+            if (ph) ph.innerText = "PRONTO";
+            const thr = document.getElementById("maestroThroughputTxt");
+            if (thr) thr.innerText = "0 OMs/ciclo";
+            const cu = document.getElementById("maestroCustoLiveTxt");
+            if (cu) cu.innerText = "R$ 0,00";
+
+            ["input_erp", "no1", "no2", "no3", "no4", "no5", "no6", "no7", "no8", "no9"].forEach(id => {
+                setEstadoPerceptronUI(id, "is-idle", 0);
+            });
+            setEstadoPerceptronUI("hist_base", "is-done", 100);
+            const workers = document.getElementById("no3WorkersRow");
+            if (workers) {
+                workers.innerHTML = `<span class="px-1.5 py-0.5 rounded bg-slate-900 border border-slate-700 text-center text-slate-400">W1: Lote</span><span class="px-1.5 py-0.5 rounded bg-slate-900 border border-slate-700 text-center text-slate-400">W2: Lote</span><span class="px-1.5 py-0.5 rounded bg-slate-900 border border-slate-700 text-center text-slate-400">W3: Lote</span>`;
+            }
+            renderNeuralSvgTopology(new Set(), new Set(["s_hist_n2"]));
+            adicionarLogNeural(`[MAESTRO] Núcleo pronto. Treino Set/Out carregado; aguardando lote de ${rodadaVigenteInfo.periodo}.`);
+        }
+
+        function aplicarEstadoFinalRedeNeural(stats = {}) {
+            if (!omsAuditadas.length) { resetarVisualRedeNeuralAguardando(); return; }
+            const tot = stats.total || omsAuditadas.length;
+            const fast = stats.fastCnt !== undefined ? stats.fastCnt : omsAuditadas.filter(o => ["FAST_PATH_R0", "BIBLIOTECA_MEMORIA", "DEDUP_RODADA"].includes(o.origem)).length;
+            const pctF = tot ? Math.round((fast / tot) * 100) : 0;
+            const pend = omsAuditadas.filter(o => o.fila === "CONFERIR" || o.fila === "REVISAO").length;
+            const ativas = bibliotecaCorrecoes.filter(b => b.status !== "REVERTIDO").length;
+
+            const hub = document.getElementById("neuralMaestroHub");
+            if (hub) hub.classList.remove("is-delegating");
+            const badge = document.getElementById("neuralStatusBadge");
+            if (badge) {
+                badge.innerText = `✓ Rede Sincronizada (${tot} OMs • ${rodadaVigenteInfo.periodo})`;
+                badge.className = "px-2.5 py-0.5 rounded-full bg-emerald-500/20 text-emerald-300 border border-emerald-400/50 text-[10px] font-extrabold";
+            }
+            const ph = document.getElementById("maestroPhasePill");
+            if (ph) ph.innerText = "CONCLUÍDO";
+            const msg = document.getElementById("maestroDelegacaoMsg");
+            if (msg) msg.innerText = `Ciclo ${rodadaVigenteInfo.periodo} concluído: ${fast}/${tot} OMs (${pctF}%) decididas a R$ 0 + ${estudosAqf.length} Estudo(s) AQF gerados!`;
+            const thr = document.getElementById("maestroThroughputTxt");
+            if (thr) thr.innerText = `${tot} OMs OK`;
+            const cu = document.getElementById("maestroCustoLiveTxt");
+            if (cu) cu.innerText = `R$ ${custoRodada.custo_brl.toFixed(2)}`;
+
+            setEstadoPerceptronUI("input_erp", "is-done", 100, rodadaVigenteInfo.arquivoNome || `${tot} OMs carregadas`);
+            setEstadoPerceptronUI("hist_base", "is-done", 100, "1.234 OMs • Calibrado");
+            setEstadoPerceptronUI("no1", "is-done", 100, `${tot} OMs validadas`);
+            setEstadoPerceptronUI("no2", "is-done", 100, `${fast} OMs (${pctF}%) a R$ 0,00`);
+            setEstadoPerceptronUI("no3", "is-done", 100, `${custoRodada.oms_ia_lote || 0} casos • ${custoRodada.chamadas_ia} lote(s)`);
+            setEstadoPerceptronUI("no4", "is-done", 100, `4 equipes • Nota média ${gerarResumoMetricasRodada(rodadaVigenteInfo.periodo, omsAuditadas).qualidade_media}`);
+            setEstadoPerceptronUI("no5", pend > 0 ? "is-waiting" : "is-done", 100, pend > 0 ? `${pend} na fila do supervisor` : "Fila 100% validada");
+            setEstadoPerceptronUI("no6", "is-done", 100, `${ativas} regras vivas R$ 0`);
+            setEstadoPerceptronUI("no7", "is-done", 100, `${confiabilidadeData.total_quebras || 0} Quebras + MTBF/Rota`);
+            setEstadoPerceptronUI("no8", "is-done", 100, `${estudosAqf.length} Estudo(s) AQF ativos`);
+            setEstadoPerceptronUI("no9", "is-done", 100, `${propostasPlanejador.length} ações p/ 1-clique`);
+
+            const workers = document.getElementById("no3WorkersRow");
+            if (workers) {
+                workers.innerHTML = `<span class="px-1.5 py-0.5 rounded bg-emerald-950/70 border border-emerald-500/40 text-center text-emerald-300">W1: OK</span><span class="px-1.5 py-0.5 rounded bg-emerald-950/70 border border-emerald-500/40 text-center text-emerald-300">W2: OK</span><span class="px-1.5 py-0.5 rounded bg-emerald-950/70 border border-emerald-500/40 text-center text-emerald-300">W3: OK</span>`;
+            }
+
+            const doneEdges = new Set(DEFINICAO_SINAPSES.map(e => e.id));
+            renderNeuralSvgTopology(new Set(["s_n2_n4", "s_n6_n2", "s_n8_n9"]), doneEdges);
+            const elTime = document.getElementById("neuralTelemetryElapsed");
+            if (elTime) elTime.innerText = `${tot} OMs • Economia −${custoRodada.economia_pct}%`;
+        }
+
+        function executarAnimacaoRedeNeural(stats = {}) {
+            if (neuralAnimacaoTimer) { try { clearTimeout(neuralAnimacaoTimer); } catch (_) {} neuralAnimacaoTimer = null; }
+            const tot = stats.total || omsAuditadas.length || 20;
+            const fast = stats.fastCnt !== undefined ? stats.fastCnt : custoRodada.oms_fast_path_r0;
+            const lote = stats.loteCnt !== undefined ? stats.loteCnt : custoRodada.oms_ia_lote;
+            const chamadas = stats.chamadas !== undefined ? stats.chamadas : custoRodada.chamadas_ia;
+
+            neuralAnimandoAgora = true;
+            const hub = document.getElementById("neuralMaestroHub");
+            if (hub) hub.classList.add("is-delegating");
+            const badge = document.getElementById("neuralStatusBadge");
+            if (badge) {
+                badge.innerText = "⚡ PROCESSANDO REDE NEURAL AO VIVO";
+                badge.className = "px-2.5 py-0.5 rounded-full bg-sky-500/30 text-sky-200 border border-sky-400 text-[10px] font-extrabold";
+            }
+
+            ["no1", "no2", "no3", "no4", "no5", "no6", "no7", "no8", "no9"].forEach(id => setEstadoPerceptronUI(id, "is-idle", 0));
+
+            const etapas = [
+                {
+                    delay: 40,
+                    run: () => {
+                        document.getElementById("maestroPhasePill").innerText = "DESPACHO 1/5";
+                        document.getElementById("maestroDelegacaoMsg").innerText = `Recebidas ${tot} OMs de ${rodadaVigenteInfo.periodo}! Despachando Camada de Entrada & Filtro ob_linhas...`;
+                        document.getElementById("maestroThroughputTxt").innerText = `${tot} OMs in`;
+                        setEstadoPerceptronUI("input_erp", "is-done", 100, `${tot} OMs recebidas`);
+                        setEstadoPerceptronUI("no1", "is-working", 65, "Validando concluídas & ob_linhas...");
+                        renderNeuralSvgTopology(new Set(["s_in_n1", "s_m_n1"]), new Set());
+                        adicionarLogNeural(`👑 MAESTRO → PERCEPTRON N1: Ingestão de ${tot} OMs e cruzamento com árvore ob_linhas.`);
+                    }
+                },
+                {
+                    delay: 520,
+                    run: () => {
+                        document.getElementById("maestroPhasePill").innerText = "DESPACHO 2/5";
+                        document.getElementById("maestroDelegacaoMsg").innerText = `N1 concluído! Aplicando memória Set/Out no Fast-Path R$ 0,00 (${fast} OMs) e separando ${lote} casos ambíguos...`;
+                        setEstadoPerceptronUI("no1", "is-done", 100, `${tot} OMs higienizadas`);
+                        setEstadoPerceptronUI("no2", "is-working", 78, `Resolvendo ${fast} OMs sem API...`);
+                        renderNeuralSvgTopology(new Set(["s_n1_n2", "s_hist_n2", "s_m_n2"]), new Set(["s_in_n1"]));
+                        adicionarLogNeural(`⚡ N2 FAST-PATH R$ 0: Pesos de Set/Out + regras da planta interceptaram ${fast} OMs (custo R$ 0,00).`);
+                    }
+                },
+                {
+                    delay: 1050,
+                    run: () => {
+                        document.getElementById("maestroPhasePill").innerText = "PARALELO 3/5";
+                        document.getElementById("maestroDelegacaoMsg").innerText = `Via dupla ativa! Express R$ 0 → N4 | Neural Bridge → N3 disparando sub-perceptrons em paralelo (${chamadas} lote(s) de 20)...`;
+                        setEstadoPerceptronUI("no2", "is-done", 100, `${fast} OMs decididas a R$ 0`);
+                        setEstadoPerceptronUI("no3", "is-working", 72, `Processando ${lote} casos em paralelo...`);
+                        const workers = document.getElementById("no3WorkersRow");
+                        if (workers) {
+                            workers.innerHTML = `<span class="worker-chip-active px-1.5 py-0.5 rounded bg-sky-500/25 border border-sky-400 text-center text-sky-200">W1: 20</span><span class="worker-chip-active px-1.5 py-0.5 rounded bg-indigo-500/25 border border-indigo-400 text-center text-indigo-200">W2: 20</span><span class="worker-chip-active px-1.5 py-0.5 rounded bg-cyan-500/25 border border-cyan-400 text-center text-cyan-200">W3: 20</span>`;
+                        }
+                        renderNeuralSvgTopology(new Set(["s_n2_n4", "s_n2_n3", "s_m_n3"]), new Set(["s_in_n1", "s_n1_n2", "s_hist_n2"]));
+                        adicionarLogNeural(`🧠 N3 PERCEPTRONS PARALELOS: ${lote} OMs ambíguas auditadas via EN 13306 B×C (Lotes de 20).`);
+                    }
+                },
+                {
+                    delay: 1650,
+                    run: () => {
+                        document.getElementById("maestroPhasePill").innerText = "SINAPSE 4/5";
+                        document.getElementById("maestroDelegacaoMsg").innerText = `Roteando 4 equipes (N4), notificando Mesa Conferente (N5) e gravando retroalimentação no Bibliotecário (N6)...`;
+                        setEstadoPerceptronUI("no3", "is-done", 100, `${lote} OMs auditadas`);
+                        setEstadoPerceptronUI("no4", "is-done", 100, "AUTO / CONFERIR + Nota Equipe");
+                        setEstadoPerceptronUI("no5", "is-working", 85, "Separando fila das 4 equipes...");
+                        setEstadoPerceptronUI("no6", "is-working", 88, "Atualizando memória Set/Out → Nov...");
+                        renderNeuralSvgTopology(new Set(["s_n3_n4", "s_n4_n5", "s_n5_n6", "s_n6_n2", "s_n4_n7"]), new Set(["s_in_n1", "s_n1_n2", "s_n2_n4", "s_n2_n3"]));
+                        adicionarLogNeural(`📖 RETROALIMENTAÇÃO N6 → N2: Bibliotecário sincronizou regras para próximo ciclo a R$ 0.`);
+                    }
+                },
+                {
+                    delay: 2220,
+                    run: () => {
+                        document.getElementById("maestroPhasePill").innerText = "AQF 5/5";
+                        document.getElementById("maestroDelegacaoMsg").innerText = `Calculando MTBF/MTTR (N7), comparando evolução vs Set/Out, caçando causa raiz (N8) e gerando plano 1-clique (N9)!`;
+                        setEstadoPerceptronUI("no7", "is-working", 90, "Cruzando Rota & Obsolescência...");
+                        setEstadoPerceptronUI("no8", "is-working", 92, `Gerando ${estudosAqf.length} Estudo(s) AQF...`);
+                        setEstadoPerceptronUI("no9", "is-working", 95, "Preparando Preventivas 52S / Rotas...");
+                        renderNeuralSvgTopology(new Set(["s_n4_n7", "s_n7_n8", "s_n8_n9", "s_m_n7", "s_m_n9"]), new Set(["s_in_n1", "s_n1_n2", "s_n2_n4", "s_n2_n3", "s_n3_n4", "s_n6_n2"]));
+                        adicionarLogNeural(`🎯 N7→N8→N9: Confiabilidade cruzada com Inspeção de Rota e geradas ${propostasPlanejador.length} propostas 1-clique!`);
+                    }
+                },
+                {
+                    delay: 2800,
+                    run: () => {
+                        neuralAnimandoAgora = false;
+                        aplicarEstadoFinalRedeNeural(stats);
+                        adicionarLogNeural(`✅ MAESTRO: Ciclo ${rodadaVigenteInfo.periodo} 100% ativo! Veja abaixo se melhoramos ou pioramos vs Set/Out.`);
+                    }
+                }
+            ];
+
+            let stepIdx = 0;
+            const agendarProximo = () => {
+                if (stepIdx >= etapas.length) return;
+                const prevDelay = stepIdx === 0 ? 0 : etapas[stepIdx - 1].delay;
+                const waitMs = Math.max(20, etapas[stepIdx].delay - prevDelay);
+                neuralAnimacaoTimer = setTimeout(() => {
+                    etapas[stepIdx].run();
+                    stepIdx++;
+                    agendarProximo();
+                }, waitMs);
+            };
+            agendarProximo();
+        }
+
+        window.reanimarRedeNeuralLive = () => {
+            if (!omsAuditadas.length) {
+                simularLoteNovembroTeste();
+                return;
+            }
+            executarAnimacaoRedeNeural({ total: omsAuditadas.length, fastCnt: custoRodada.oms_fast_path_r0, loteCnt: custoRodada.oms_ia_lote, chamadas: custoRodada.chamadas_ia });
+        };
+
+        window.alternarVelocidadeRedeNeural = () => {
+            neuralAnimacaoModo = neuralAnimacaoModo === "cinematica" ? "instantanea" : "cinematica";
+            const btn = document.getElementById("btnToggleNeuralSpeed");
+            if (btn) btn.innerText = neuralAnimacaoModo === "cinematica" ? "🎬 Animação: Cinemática" : "⚡ Animação: Instantânea";
+            showToast(`Modo da Rede Neural ajustado para: ${neuralAnimacaoModo.toUpperCase()}.`, "info");
+        };
+
+        window.inspecionarNoNeural = (nodeId) => {
+            const mapViewByNo = { no1: "auditoria", no2: "auditoria", no3: "auditoria", no4: "auditoria", no5: "conferente", no6: "bibliotecario", no7: "confiabilidade", no8: "cacador", no9: "cacador" };
+            const target = mapViewByNo[nodeId] || "auditoria";
+            switchView(target);
+        };
+
+        if (typeof window !== "undefined" && typeof window.addEventListener === "function") {
+            window.addEventListener("resize", () => {
+                if (currentView === "pipeline") renderNeuralSvgTopology(new Set(["s_n2_n4", "s_n6_n2", "s_n8_n9"]), new Set(DEFINICAO_SINAPSES.map(e => e.id)));
+            });
+        }
+
+        // ================= UPLOAD DE PLANILHA ERP (.CSV / .XLSX / .JSON / .JSONL) + DRAG & DROP =================
+        window.onErpDragOver = (e) => {
+            e.preventDefault();
+            const dz = document.getElementById("erpDropZone");
+            if (dz) dz.classList.add("dropzone-active");
+        };
+        window.onErpDragLeave = () => {
+            const dz = document.getElementById("erpDropZone");
+            if (dz) dz.classList.remove("dropzone-active");
+        };
+        window.onErpDrop = (e) => {
+            e.preventDefault();
+            window.onErpDragLeave();
+            const file = e?.dataTransfer?.files?.[0];
+            if (file) processarArquivoFileObjErp(file);
+        };
+
         function parseCsvTexto(bruto) {
             const text = String(bruto || "").replace(/^\uFEFF/, "").replace(/\r\n/g, "\n").replace(/\r/g, "\n");
             const lines = text.split("\n").filter(l => l.trim().length > 0);
@@ -1843,6 +3007,7 @@
 
         function converterTempoMinutosUI(val) {
             if (val === null || val === undefined) return 0;
+            if (typeof val === "number" && val > 0 && val < 1) return Math.round(val * 24 * 60);
             const s = String(val).trim();
             if (!s) return 0;
             const m = s.match(/^(\d{1,3}):(\d{2})/);
@@ -1851,7 +3016,18 @@
             return isNaN(n) ? 0 : Math.round(n);
         }
 
-        window.carregarDadosPlanilhaBrutaOuAuditada = (rows) => {
+        async function carregarSheetJsSeNecessario() {
+            if (typeof window.XLSX !== "undefined") return window.XLSX;
+            return new Promise((resolve, reject) => {
+                const sc = document.createElement("script");
+                sc.src = "https://cdn.sheetjs.com/xlsx-0.20.3/package/dist/xlsx.full.min.js";
+                sc.onload = () => resolve(window.XLSX);
+                sc.onerror = () => reject(new Error("Falha ao carregar leitor .xlsx"));
+                document.head?.appendChild(sc) || document.body?.appendChild(sc);
+            });
+        }
+
+        window.carregarDadosPlanilhaBrutaOuAuditada = async (rows, nomeArquivo = "") => {
             if (!Array.isArray(rows) || !rows.length) {
                 showToast("Nenhum registro válido encontrado no arquivo.", "error");
                 return;
@@ -1903,29 +3079,57 @@
                 novasBrutas.push(item);
             });
 
+            if (!novasBrutas.length) {
+                showToast("Nenhuma OM concluída válida restou após o filtro do Nó 1.", "error");
+                return;
+            }
+
+            const periodoDetectado = detectarPeriodoDoLote(novasBrutas, nomeArquivo);
+            const inpP = document.getElementById("inputPeriodoRodada");
+            if (inpP) inpP.value = periodoDetectado;
+            rodadaVigenteInfo = {
+                periodo: periodoDetectado,
+                status: "ativo",
+                arquivoNome: nomeArquivo || "Planilha_ERP",
+                tipo: "VIGENTE"
+            };
             omsBrutasCarregadas = novasBrutas;
-            executarPipelineCompletoUI();
+            await executarPipelineCompletoUI({ animar: true });
         };
 
-        window.processarArquivoUploadErp = (event) => {
-            const file = event?.target?.files?.[0];
+        async function processarArquivoFileObjErp(file) {
             if (!file) return;
+            const lname = file.name.toLowerCase();
+            if (lname.endsWith(".xlsx") || lname.endsWith(".xls")) {
+                try {
+                    const XLSXLib = await carregarSheetJsSeNecessario();
+                    const buf = await file.arrayBuffer();
+                    const wb = XLSXLib.read(buf, { type: "array" });
+                    const firstSheet = wb.SheetNames[0];
+                    const rows = XLSXLib.utils.sheet_to_json(wb.Sheets[firstSheet], { defval: "" });
+                    await carregarDadosPlanilhaBrutaOuAuditada(rows, file.name);
+                } catch (_) {
+                    showToast("Não foi possível ler o .xlsx offline. Exporte em .CSV no ERP ou conecte à internet.", "error");
+                }
+                return;
+            }
+
             const reader = new FileReader();
-            reader.onload = (e) => {
+            reader.onload = async (e) => {
                 try {
                     const txt = String(e.target?.result || "");
-                    if (file.name.toLowerCase().endsWith(".json")) {
+                    if (lname.endsWith(".json")) {
                         const parsed = JSON.parse(txt);
                         if (Array.isArray(parsed.ordens)) {
-                            carregarDadosPlanilhaBrutaOuAuditada(parsed.ordens);
+                            await carregarDadosPlanilhaBrutaOuAuditada(parsed.ordens, file.name);
                             return;
                         }
                         if (Array.isArray(parsed)) {
-                            carregarDadosPlanilhaBrutaOuAuditada(parsed);
+                            await carregarDadosPlanilhaBrutaOuAuditada(parsed, file.name);
                             return;
                         }
                     }
-                    if (file.name.toLowerCase().endsWith(".jsonl")) {
+                    if (lname.endsWith(".jsonl")) {
                         const lines = txt.split(/\r?\n/).filter(Boolean).map(l => JSON.parse(l));
                         if (lines.length && lines[0].categoria_supervisor) {
                             bibliotecaCorrecoes = lines;
@@ -1934,17 +3138,24 @@
                             showToast(`${lines.length} regras carregadas no Bibliotecário (Nó 6)!`, "success");
                             return;
                         }
-                        carregarDadosPlanilhaBrutaOuAuditada(lines);
+                        await carregarDadosPlanilhaBrutaOuAuditada(lines, file.name);
                         return;
                     }
                     const rows = parseCsvTexto(txt);
-                    carregarDadosPlanilhaBrutaOuAuditada(rows);
+                    await carregarDadosPlanilhaBrutaOuAuditada(rows, file.name);
                 } catch (_) {
-                    showToast("Erro ao processar planilha. Verifique o formato (.CSV ou .JSON).", "error");
+                    showToast("Erro ao processar planilha. Verifique o formato (.CSV, .XLSX ou .JSON).", "error");
                 }
             };
             reader.readAsText(file, "UTF-8");
+        }
+
+        window.processarArquivoUploadErp = (event) => {
+            const file = event?.target?.files?.[0];
+            if (file) processarArquivoFileObjErp(file);
+            if (event?.target) event.target.value = "";
         };
+
         // ================= RENDERIZAÇÃO DAS 7 VIEWS =================
         function atualizarBadgesSidebarMaestri() {
             const pend = omsAuditadas.filter(o => o.fila === "CONFERIR" || o.fila === "REVISAO").length;
@@ -1963,7 +3174,11 @@
             if (bBib) bBib.innerText = String(ativasBib);
             if (bQb) bQb.innerText = String(quebrasCnt);
             if (bEst) bEst.innerText = String(estudosAqf.length);
-            if (hdrEc) hdrEc.innerText = `Economia −${custoRodada.economia_pct}% (R$ ${custoRodada.custo_brl.toFixed(2)} vs R$ ${custoRodada.custo_sem_otimizacao_brl.toFixed(2)})`;
+            if (hdrEc) {
+                hdrEc.innerText = omsAuditadas.length
+                    ? `${rodadaVigenteInfo.periodo} • Economia −${custoRodada.economia_pct}% (R$ ${custoRodada.custo_brl.toFixed(2)})`
+                    : `Treino Base Set/Out (1.234 OMs) • Pronto para ${rodadaVigenteInfo.periodo}`;
+            }
         }
 
         function renderCurrentView() {
@@ -1997,30 +3212,175 @@
             renderCurrentView();
         };
 
+        window.renderComparativoHistorico = () => {
+            const selBase = document.getElementById("compSelectBaseline");
+            if (selBase) {
+                const prev = selBase.value || BASELINE_SET_OUT_2026.id;
+                selBase.innerHTML = historicoRodadas
+                    .filter(h => h.id !== (omsAuditadas.length ? gerarResumoMetricasRodada(rodadaVigenteInfo.periodo, omsAuditadas).id : ""))
+                    .concat(historicoRodadas.some(h => h.id === BASELINE_SET_OUT_2026.id) ? [] : [BASELINE_SET_OUT_2026])
+                    .filter((h, idx, arr) => arr.findIndex(x => x.id === h.id) === idx)
+                    .map(h => `<option value="${escapeHtml(h.id)}">${escapeHtml(h.periodo)}</option>`)
+                    .join("");
+                if ([...selBase.options].some(o => o.value === prev)) selBase.value = prev;
+                else if (selBase.options.length) selBase.value = BASELINE_SET_OUT_2026.id;
+            }
+
+            const refId = selBase?.value || BASELINE_SET_OUT_2026.id;
+            const ref = historicoRodadas.find(h => h.id === refId) || BASELINE_SET_OUT_2026;
+            const atual = omsAuditadas.length
+                ? gerarResumoMetricasRodada(rodadaVigenteInfo.periodo, omsAuditadas, rodadaVigenteInfo.tipo)
+                : null;
+
+            const metricsConfig = [
+                { k: "Taxa de Quebras", key: "quebras_pct", unit: "%", menorMelhor: true },
+                { k: "Quebras GRAVES", key: "graves_pct_quebra", unit: "%", menorMelhor: true },
+                { k: "Ajustes (Apagar Fogo)", key: "ajuste_pct", unit: "%", menorMelhor: true },
+                { k: "Prog + Prev + Rota", key: "prog_prev_pct", unit: "%", menorMelhor: false },
+                { k: "MTTR Médio Quebra", key: "mttr_min", unit: " min", menorMelhor: true },
+                { k: "Fast-Path R$ 0", key: "fast_path_pct", unit: "%", menorMelhor: false },
+                { k: "Nota Apontamento", key: "qualidade_media", unit: "/100", menorMelhor: false }
+            ];
+
+            let melhorouCount = 0;
+            let piorouCount = 0;
+            const msgsRec = [];
+
+            document.getElementById("comparativoDeltaGrid").innerHTML = metricsConfig.map(m => {
+                const refVal = Number(ref[m.key] ?? 0);
+                if (!atual) {
+                    return `
+                        <div class="p-3 rounded-2xl bg-slate-50 border border-slate-200 space-y-1">
+                            <div class="text-[10px] font-extrabold uppercase text-slate-500">${m.k}</div>
+                            <div class="text-lg font-extrabold text-slate-400">— <span class="text-[10px]">vs ${refVal}${m.unit}</span></div>
+                            <div class="inline-block px-2 py-0.5 rounded-full bg-slate-200 text-slate-600 text-[10px] font-extrabold">Aguardando Lote</div>
+                        </div>`;
+                }
+                const curVal = Number(atual[m.key] ?? 0);
+                const diff = Math.round((curVal - refVal) * 10) / 10;
+                const estavel = Math.abs(diff) < 0.2;
+                const melhorou = !estavel && (m.menorMelhor ? diff < 0 : diff > 0);
+                if (melhorou) melhorouCount++;
+                else if (!estavel) piorouCount++;
+
+                const sinal = diff > 0 ? `+${diff}` : `${diff}`;
+                const badgeCls = estavel
+                    ? "bg-slate-100 text-slate-600"
+                    : (melhorou ? "bg-emerald-100 text-emerald-800" : "bg-rose-100 text-rose-800");
+                const badgeTxt = estavel
+                    ? `Estável (${sinal}${m.unit})`
+                    : (melhorou ? `✓ Melhorou (${sinal}${m.unit})` : `⚠ Piorou (${sinal}${m.unit})`);
+
+                if (!estavel && !melhorou && m.key === "quebras_pct") {
+                    msgsRec.push(`A taxa de quebras em <strong>${escapeHtml(atual.periodo)}</strong> subiu de ${refVal}% para ${curVal}%. Acione o <strong>Caçador AQF (Nó 8)</strong> nos top ofensores abaixo.`);
+                }
+                if (!estavel && !melhorou && m.key === "mttr_min") {
+                    msgsRec.push(`O MTTR subiu +${Math.abs(diff)} min vs ${escapeHtml(ref.curto || ref.periodo)}. Verifique falta de peças ou manuais em <strong>DOCS-ATIVOS</strong>.`);
+                }
+                if (!estavel && !melhorou && m.key === "qualidade_media") {
+                    msgsRec.push(`A qualidade de descrição dos mecânicos/eletricistas caiu (${curVal}/100 vs ${refVal}/100). Cobre detalhamento de componente trocado.`);
+                }
+
+                return `
+                    <div class="p-3 rounded-2xl bg-white border ${estavel ? "border-slate-200" : (melhorou ? "border-emerald-200 bg-emerald-50/30" : "border-rose-200 bg-rose-50/30")} space-y-1">
+                        <div class="text-[10px] font-extrabold uppercase text-slate-500">${m.k}</div>
+                        <div class="text-lg font-extrabold text-slate-900">${curVal}${m.unit}</div>
+                        <div class="text-[10px] font-semibold text-slate-500">Treino: ${refVal}${m.unit}</div>
+                        <span class="inline-block px-2 py-0.5 rounded-full text-[10px] font-extrabold ${badgeCls}">${badgeTxt}</span>
+                    </div>`;
+            }).join("");
+
+            const recBox = document.getElementById("comparativoRecomendacoesBox");
+            if (recBox) {
+                if (!atual) {
+                    recBox.innerHTML = `
+                        <div class="flex flex-wrap items-center justify-between gap-2">
+                            <div class="text-xs font-extrabold text-indigo-900">👑 Maestro • Proposta de Uso para Agora (${escapeHtml(rodadaVigenteInfo.periodo)})</div>
+                            <span class="px-2.5 py-0.5 rounded-full bg-indigo-100 text-indigo-800 text-[10px] font-extrabold">Memória Treinada em Set/Out Ativa</span>
+                        </div>
+                        <p class="text-xs font-semibold text-slate-600">Os dados de <strong>Set/Out (1.234 OMs • Quebras: 13,9% • MTTR: 54,7 min • Fast-Path R$ 0: 63,2%)</strong> já foram consolidados como linha de base. Assim que você arrastar o arquivo do ERP de Novembro, o sistema mostrará automaticamente onde melhoramos e quais máquinas exigem AQF e Preventiva imediata.</p>`;
+                } else {
+                    const top1 = (confiabilidadeData.top_ofensores || []).find(x => x.quebras > 0);
+                    if (top1) {
+                        msgsRec.unshift(`🎯 <strong>Prioridade Imediata (${escapeHtml(atual.periodo)}):</strong> O ativo <strong>${escapeHtml(top1.ativo)}</strong> lidera o Pareto atual (${top1.quebras} quebra(s), MTBF ${top1.mtbf_h}h). Use o <strong>Planejador 1-Clique</strong> no Nó 9 para agendar a preventiva/rota agora.`);
+                    }
+                    if (melhorouCount > piorouCount && !msgsRec.some(m => m.includes("melhorou"))) {
+                        msgsRec.push(`🚀 <strong>Saldo Positivo:</strong> ${melhorouCount} indicador(es) melhoraram em relação a <strong>${escapeHtml(ref.periodo)}</strong>!`);
+                    }
+                    recBox.innerHTML = `
+                        <div class="flex flex-wrap items-center justify-between gap-2">
+                            <div class="text-xs font-extrabold text-slate-900">👑 Veredicto do Maestro para ${escapeHtml(atual.periodo)} (${melhorouCount} Melhorias • ${piorouCount} Alertas)</div>
+                            <button type="button" onclick="switchView('cacador')" class="px-3 py-1 rounded-xl bg-sky-600 hover:bg-sky-700 text-white text-[11px] font-extrabold">🎯 Abrir Propostas do Caçador AQF →</button>
+                        </div>
+                        <ul class="text-xs font-semibold text-slate-700 space-y-1 list-disc pl-4">
+                            ${msgsRec.map(r => `<li>${r}</li>`).join("")}
+                        </ul>`;
+                }
+            }
+
+            // Tabela linha do tempo histórica
+            const linhasHist = [...historicoRodadas];
+            if (atual && !linhasHist.some(h => h.id === atual.id)) {
+                linhasHist.push(atual);
+            }
+            document.getElementById("comparativoHistoricoTable").innerHTML = linhasHist.map(h => {
+                const isBase = h.id === BASELINE_SET_OUT_2026.id;
+                const badge = isBase
+                    ? `<span class="px-2 py-0.5 rounded bg-indigo-100 text-indigo-800 text-[9px] font-extrabold ml-1">TREINO BASE</span>`
+                    : `<span class="px-2 py-0.5 rounded bg-emerald-100 text-emerald-800 text-[9px] font-extrabold ml-1">VIGENTE</span>`;
+                return `
+                    <tr class="hover:bg-slate-50/80 ${isBase ? "bg-indigo-50/25" : "font-semibold"}">
+                        <td class="py-2 px-2 font-extrabold text-slate-900">${escapeHtml(h.periodo)}${badge}</td>
+                        <td class="py-2 px-2 text-right font-mono">${h.total_oms}</td>
+                        <td class="py-2 px-2 text-right font-mono text-rose-700 font-bold">${h.quebras_pct}% (${h.quebras_qtd})</td>
+                        <td class="py-2 px-2 text-right font-mono">${h.graves_qtd} (${h.graves_pct_quebra}%)</td>
+                        <td class="py-2 px-2 text-right font-mono">${h.ajuste_pct}%</td>
+                        <td class="py-2 px-2 text-right font-mono text-sky-700 font-bold">${h.prog_prev_pct}%</td>
+                        <td class="py-2 px-2 text-right font-mono">${h.mttr_min} min</td>
+                        <td class="py-2 px-2 text-right font-mono text-emerald-700 font-bold">${h.fast_path_pct}%</td>
+                        <td class="py-2 px-2 text-right font-mono">${h.qualidade_media}/100</td>
+                    </tr>`;
+            }).join("");
+        };
+
         // VIEW 1: PIPELINE VISUAL DE 9 NÓS
         window.renderPipelineView = () => {
+            const tot = omsAuditadas.length;
             const fastCnt = omsAuditadas.filter(o => ["FAST_PATH_R0", "BIBLIOTECA_MEMORIA", "DEDUP_RODADA"].includes(o.origem)).length;
-            const pctFast = omsAuditadas.length ? Math.round((fastCnt / omsAuditadas.length) * 100) : 0;
+            const pctFast = tot ? Math.round((fastCnt / tot) * 100) : 0;
             const pendSup = omsAuditadas.filter(o => o.fila === "CONFERIR" || o.fila === "REVISAO").length;
 
+            const badgeCiclo = document.getElementById("badgeCicloVigente");
+            if (badgeCiclo) badgeCiclo.innerText = `Lote Vigente • ${rodadaVigenteInfo.periodo}`;
+            const statusPill = document.getElementById("rodadaVigenteStatusPill");
+            if (statusPill) {
+                if (!tot) {
+                    statusPill.innerText = "Aguardando planilha do ERP";
+                    statusPill.className = "px-2.5 py-0.5 rounded-full bg-amber-100 text-amber-800 border border-amber-200 text-[10px] font-extrabold";
+                } else {
+                    statusPill.innerText = `✓ ${tot} OMs Ativas (${rodadaVigenteInfo.arquivoNome || rodadaVigenteInfo.periodo})`;
+                    statusPill.className = "px-2.5 py-0.5 rounded-full bg-emerald-100 text-emerald-800 border border-emerald-200 text-[10px] font-extrabold";
+                }
+            }
+
             document.getElementById("pipelineKpiGrid").innerHTML = [
-                { k: "Custo da Rodada", v: `R$ ${custoRodada.custo_brl.toFixed(2)}`, sub: `Antes (v40): R$ ${custoRodada.custo_sem_otimizacao_brl.toFixed(2)} (−${custoRodada.economia_pct}%)`, vc: "text-emerald-600" },
-                { k: "Decididas a R$ 0 (Nó 2)", v: `${pctFast}%`, sub: `${fastCnt} de ${omsAuditadas.length} OMs no Fast-Path + Memória`, vc: "text-sky-700" },
-                { k: "Chamadas IA (Lote 20)", v: `${custoRodada.chamadas_ia}`, sub: `Antes: ~1.543 chamadas sequenciais`, vc: "text-indigo-700" },
-                { k: "Fila Supervisores (Nó 5)", v: `${pendSup}`, sub: `${omsAuditadas.length - pendSup} liberadas automaticamente`, vc: "text-amber-600" },
-                { k: "Estudos AQF & Ações", v: `${estudosAqf.length} / ${propostasPlanejador.length}`, sub: "Prontos para 1 clique no Portal", vc: "text-rose-600" }
+                { k: `Ciclo Atual (${rodadaVigenteInfo.periodo})`, v: tot ? `${tot} OMs` : "Aguardando CSV", sub: tot ? (rodadaVigenteInfo.arquivoNome || "Planilha ERP processada") : "Treino Base Set/Out (1.234 OMs) salvo", vc: tot ? "text-slate-900" : "text-sky-700" },
+                { k: "Custo do Lote", v: `R$ ${custoRodada.custo_brl.toFixed(2)}`, sub: tot ? `Sem otimização: R$ ${custoRodada.custo_sem_otimizacao_brl.toFixed(2)} (−${custoRodada.economia_pct}%)` : "Fast-Path + Lote 20 prontos", vc: "text-emerald-600" },
+                { k: "Decididas a R$ 0 (Nó 2)", v: `${pctFast}%`, sub: tot ? `${fastCnt} de ${tot} OMs sem API` : `${bibliotecaCorrecoes.filter(b => b.status !== "REVERTIDO").length} regras aprendidas prontas`, vc: "text-sky-700" },
+                { k: "Fila Supervisores (Nó 5)", v: `${pendSup}`, sub: tot ? `${tot - pendSup} liberadas automaticamente` : "0 pendências no momento", vc: "text-amber-600" },
+                { k: "Estudos AQF & Ações", v: `${estudosAqf.length} / ${propostasPlanejador.length}`, sub: "Propostas 1-clique p/ Preventivas/Rota", vc: "text-rose-600" }
             ].map(c => `
                 <div class="glass-card p-4 rounded-3xl">
                     <div class="text-[10px] font-extrabold uppercase tracking-wider text-slate-500">${c.k}</div>
-                    <div class="text-2xl font-extrabold mt-1 ${c.vc}">${c.v}</div>
-                    <div class="text-[11px] font-semibold text-slate-500 mt-0.5">${c.sub}</div>
+                    <div class="text-xl sm:text-2xl font-extrabold mt-1 ${c.vc} truncate">${c.v}</div>
+                    <div class="text-[11px] font-semibold text-slate-500 mt-0.5 truncate">${c.sub}</div>
                 </div>`).join("");
 
             const mapViewByNo = { no1: "auditoria", no2: "auditoria", no3: "auditoria", no4: "auditoria", no5: "conferente", no6: "bibliotecario", no7: "confiabilidade", no8: "cacador", no9: "cacador" };
             document.getElementById("pipelineNodesGrid").innerHTML = DEFINICAO_NOS.map(n => {
-                const st = estadoNos[n.id] || { ...n, status: "concluido", resumo: n.papel };
+                const st = estadoNos[n.id] || { ...n, status: tot ? "concluido" : "aguardando", resumo: n.papel };
                 const badgeCls = st.status === "aguardando" ? "bg-amber-100 text-amber-800 border-amber-300" : "bg-emerald-100 text-emerald-800 border-emerald-300";
-                const badgeTxt = st.status === "aguardando" ? "Aguardando Conferência" : "✓ Nó Concluído";
+                const badgeTxt = st.status === "aguardando" ? (tot ? "Aguardando Conferência" : "Pronto • Aguardando ERP") : "✓ Nó Concluído";
                 const targetV = mapViewByNo[n.id] || "auditoria";
                 return `
                     <div class="node-card status-${st.status} flex flex-col justify-between gap-2.5">
@@ -2033,29 +3393,36 @@
                             <p class="text-[11px] font-semibold text-slate-600 leading-snug">${escapeHtml(st.resumo)}</p>
                         </div>
                         <div class="pt-2 border-t border-slate-200/70 flex items-center justify-between text-[11px]">
-                            <span class="font-mono font-bold text-slate-400">Checkpoint OK</span>
+                            <span class="font-mono font-bold text-slate-400">Checkpoint ${tot ? "OK" : "Pronto"}</span>
                             <button type="button" onclick="switchView('${targetV}')" class="font-extrabold text-sky-700 hover:text-sky-900">Inspecionar Nó →</button>
                         </div>
                     </div>`;
             }).join("");
 
-            // Tabela distribuição
-            const tot = omsAuditadas.length || 1;
+            if (!neuralAnimandoAgora) {
+                if (tot) aplicarEstadoFinalRedeNeural({ total: tot, fastCnt, loteCnt: custoRodada.oms_ia_lote, chamadas: custoRodada.chamadas_ia });
+                else resetarVisualRedeNeuralAguardando();
+            }
+
+            renderComparativoHistorico();
+
+            // Tabela distribuição vs Treino Set/Out
+            const totDiv = tot || 1;
             const cats = confiabilidadeData.categorias || {};
             document.getElementById("pipelineTabelaDistribuicao").innerHTML = `
                 <table class="w-full text-left text-xs border-collapse">
                     <thead>
                         <tr class="border-b border-slate-200 text-[10px] font-extrabold uppercase text-slate-500">
                             <th class="py-2">Categoria Oficial</th>
-                            <th class="py-2 text-right">Qtd</th>
-                            <th class="py-2 text-right">% Rodada</th>
-                            <th class="py-2 text-right">% Gabarito</th>
+                            <th class="py-2 text-right">Qtd (${escapeHtml(rodadaVigenteInfo.periodo)})</th>
+                            <th class="py-2 text-right">% Atual</th>
+                            <th class="py-2 text-right">% Set/Out</th>
                         </tr>
                     </thead>
                     <tbody class="divide-y divide-slate-100">
                         ${CATEGORIAS_OFICIAIS.concat(["REVISAR_MANUAL"]).map(c => {
                             const q = cats[c] || 0;
-                            const pct = ((q / tot) * 100).toFixed(1);
+                            const pct = tot ? ((q / totDiv) * 100).toFixed(1) : "0.0";
                             const ref = DIST_REFERENCIA[c] !== undefined ? `${DIST_REFERENCIA[c].toFixed(1)}%` : "0.0%";
                             return `<tr>
                                 <td class="py-1.5 font-extrabold text-slate-800">${escapeHtml(c)}</td>
@@ -2072,14 +3439,14 @@
             const totQ = Math.max(1, (sevs.LEVE || 0) + (sevs.MODERADA || 0) + (sevs.GRAVE || 0));
             document.getElementById("pipelineEscadaSeveridade").innerHTML = ["LEVE", "MODERADA", "GRAVE"].map(nv => {
                 const q = sevs[nv] || 0;
-                const pct = Math.round((q / totQ) * 1000) / 10;
+                const pct = (sevs.LEVE || sevs.MODERADA || sevs.GRAVE) ? Math.round((q / totQ) * 1000) / 10 : 0;
                 const reg = REGUA_OFICIAL[nv];
                 const barCls = nv === "GRAVE" ? "bg-rose-600" : (nv === "MODERADA" ? "bg-amber-500" : "bg-emerald-500");
                 return `
                     <div class="p-3 rounded-2xl bg-slate-50 border border-slate-200 space-y-1.5">
                         <div class="flex items-center justify-between text-xs font-extrabold">
                             <span>QUEBRA ${nv} (${q} OMs)</span>
-                            <span>${pct}% <span class="text-slate-400 font-normal">(Régua: ${reg}%)</span></span>
+                            <span>${pct}% <span class="text-slate-400 font-normal">(Base Set/Out: ${reg}%)</span></span>
                         </div>
                         <div class="w-full h-2.5 rounded-full bg-slate-200 overflow-hidden">
                             <div class="h-full ${barCls}" style="width:${Math.min(100, pct)}%"></div>
@@ -2886,7 +4253,16 @@
             const main = document.getElementById("mainApp");
             main.hidden = false; main.classList.remove("hidden");
             aplicarPerfilNaInterface();
-            carregarRodadaReal1234Oms();
+
+            if (!bibliotecaCorrecoes.length) {
+                bibliotecaCorrecoes = SEED_BIBLIOTECA_INICIAL.map(x => ({ ...x }));
+            }
+            const tinhaVigenteSalva = restaurarEstadoPersistidoMaestri();
+            if (tinhaVigenteSalva && omsBrutasCarregadas.length) {
+                await executarPipelineCompletoUI({ animar: false, naoArquivarAuto: false });
+            } else {
+                prepararModoAguardandoNovembro();
+            }
 
             try {
                 await Promise.race([
@@ -2939,6 +4315,19 @@
                     renderCurrentView();
                 }
             }, () => {});
+
+            try {
+                onSnapshot(colMaestriRodadas, snap => {
+                    const remoteH = snap.docs.map(d => ({ id: d.id, ...d.data() })).filter(h => h && h.id !== BASELINE_SET_OUT_2026.id);
+                    if (remoteH.length) {
+                        const merged = new Map([[BASELINE_SET_OUT_2026.id, { ...BASELINE_SET_OUT_2026 }]]);
+                        historicoRodadas.forEach(h => { if (h && h.id) merged.set(h.id, h); });
+                        remoteH.forEach(h => { merged.set(h.id, h); });
+                        historicoRodadas = [...merged.values()];
+                        renderComparativoHistorico();
+                    }
+                }, () => {});
+            } catch (_) {}
         }
 
         if (document.readyState === "loading") {
