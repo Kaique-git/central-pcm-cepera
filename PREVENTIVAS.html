@@ -1655,7 +1655,7 @@
 
         function isPerfilGestao(role) {
             const r = normKey(role);
-            return r === 'admin' || r === 'gerente' || r.startsWith('supervisor');
+            return r === 'admin' || r === 'gerente' || r.startsWith('supervisor') || r.includes('gestor');
         }
 
         const DOCS_CAT_LABELS_PREV = {
@@ -1663,15 +1663,33 @@
             lubrificacao: 'Lubrificação',
             desenhos: 'Desenho Técnico',
             orcamentos: 'Orçamento (Gestão)',
+            administrativo: 'Administrativo (Gestão)',
             fotos: 'Foto Ref.',
             qualidade: 'Qualidade & Seg.'
         };
 
         function podeVerDocPrev(d) {
             if (!d) return false;
-            if (d.categoria === 'orcamentos' || d.sigilo === 'gestao') {
-                return Boolean(isGestao || isPerfilGestao(usuarioLogado?.role));
-            }
+            const ehOrc = d.categoria === 'orcamentos';
+            const ehAdm = d.categoria === 'administrativo';
+            const gestor = Boolean(isGestao || isPerfilGestao(usuarioLogado?.role));
+            if (ehOrc && !gestor) return false;
+
+            const modo = d.visibilidadeModo || ((ehOrc || ehAdm || d.sigilo === 'gestao') ? 'gestao' : 'todos');
+            if (!usuarioLogado) return modo === 'todos' && !ehOrc && d.sigilo !== 'gestao';
+            const uRole = normKey(usuarioLogado.role);
+            if (uRole === 'admin' || uRole === 'gerente') return true;
+            if (modo === 'gestao') return gestor;
+            if ((ehAdm || d.sigilo === 'gestao') && modo !== 'personalizado_ocultos' && modo !== 'personalizado_permitidos') return gestor;
+
+            const matchesUsr = (arr) => Array.isArray(arr) && arr.some(v => {
+                const nv = normKey(v);
+                return (usuarioLogado.user && nv === normKey(usuarioLogado.user)) || (usuarioLogado.id && String(v) === String(usuarioLogado.id));
+            });
+            const matchesEq = (arr) => Boolean(uRole) && Array.isArray(arr) && arr.some(v => normKey(v) === uRole);
+
+            if (matchesUsr(d.ocultoUsuarios) || matchesEq(d.ocultoEquipes)) return false;
+            if (modo === 'personalizado_permitidos') return matchesUsr(d.visivelUsuarios) || matchesEq(d.visivelEquipes);
             return true;
         }
 
@@ -1720,7 +1738,7 @@
                         vinculados.push(found);
                     }
                 } else if (typeof lnk === 'object' && lnk?.titulo) {
-                    if ((lnk.categoria === 'orcamentos') && !(isGestao || isPerfilGestao(usuarioLogado?.role))) return;
+                    if ((lnk.categoria === 'orcamentos' || lnk.categoria === 'administrativo' || lnk.sigilo === 'gestao') && !(isGestao || isPerfilGestao(usuarioLogado?.role))) return;
                     vinculados.push({
                         id: docId || docCod || lnk.titulo,
                         codigo: lnk.codigo || 'DOC',

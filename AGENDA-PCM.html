@@ -1274,14 +1274,31 @@
 
         function isPerfilGestaoDocsAg(role) {
             const r = normDocKeyAg(role);
-            return r === 'admin' || r === 'gerente' || r.startsWith('supervisor');
+            return r === 'admin' || r === 'gerente' || r.startsWith('supervisor') || r.includes('gestor');
         }
 
         function podeVerDocAg(d) {
             if (!d) return false;
-            if (d.categoria === 'orcamentos' || d.sigilo === 'gestao') {
-                return Boolean(usuarioLogado && isPerfilGestaoDocsAg(usuarioLogado.role));
-            }
+            const ehOrc = d.categoria === 'orcamentos';
+            const ehAdm = d.categoria === 'administrativo';
+            const gestor = Boolean(usuarioLogado && isPerfilGestaoDocsAg(usuarioLogado.role));
+            if (ehOrc && !gestor) return false;
+
+            const modo = d.visibilidadeModo || ((ehOrc || ehAdm || d.sigilo === 'gestao') ? 'gestao' : 'todos');
+            if (!usuarioLogado) return modo === 'todos' && !ehOrc && d.sigilo !== 'gestao';
+            const uRole = normDocKeyAg(usuarioLogado.role);
+            if (uRole === 'admin' || uRole === 'gerente') return true;
+            if (modo === 'gestao') return gestor;
+            if ((ehAdm || d.sigilo === 'gestao') && modo !== 'personalizado_ocultos' && modo !== 'personalizado_permitidos') return gestor;
+
+            const matchesUsr = (arr) => Array.isArray(arr) && arr.some(v => {
+                const nv = normDocKeyAg(v);
+                return (usuarioLogado.user && nv === normDocKeyAg(usuarioLogado.user)) || (usuarioLogado.id && String(v) === String(usuarioLogado.id));
+            });
+            const matchesEq = (arr) => Boolean(uRole) && Array.isArray(arr) && arr.some(v => normDocKeyAg(v) === uRole);
+
+            if (matchesUsr(d.ocultoUsuarios) || matchesEq(d.ocultoEquipes)) return false;
+            if (modo === 'personalizado_permitidos') return matchesUsr(d.visivelUsuarios) || matchesEq(d.visivelEquipes);
             return true;
         }
 
@@ -1290,6 +1307,7 @@
             lubrificacao: 'Lubrificação',
             desenhos: 'Desenho Técnico',
             orcamentos: 'Orçamento (Sigiloso)',
+            administrativo: 'Administrativo (Sigiloso)',
             fotos: 'Foto Ref.',
             qualidade: 'Qualidade & Seg.'
         };

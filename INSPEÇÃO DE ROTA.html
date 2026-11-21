@@ -3467,15 +3467,33 @@
             lubrificacao: 'Lubrificação',
             desenhos: 'Desenho Técnico',
             orcamentos: 'Orçamento (Gestão)',
+            administrativo: 'Administrativo (Gestão)',
             fotos: 'Foto Ref.',
             qualidade: 'Qualidade & Seg.'
         };
 
         function podeVerDocInsp(d) {
             if (!d) return false;
-            if (d.categoria === 'orcamentos' || d.sigilo === 'gestao') {
-                return Boolean(usuarioLogado && isPerfilGestor(usuarioLogado.role));
-            }
+            const ehOrc = d.categoria === 'orcamentos';
+            const ehAdm = d.categoria === 'administrativo';
+            const gestor = Boolean(usuarioLogado && isPerfilGestor(usuarioLogado.role));
+            if (ehOrc && !gestor) return false;
+
+            const modo = d.visibilidadeModo || ((ehOrc || ehAdm || d.sigilo === 'gestao') ? 'gestao' : 'todos');
+            if (!usuarioLogado) return modo === 'todos' && !ehOrc && d.sigilo !== 'gestao';
+            if (isPerfilAdmin(usuarioLogado.role)) return true;
+            if (modo === 'gestao') return gestor;
+            if ((ehAdm || d.sigilo === 'gestao') && modo !== 'personalizado_ocultos' && modo !== 'personalizado_permitidos') return gestor;
+
+            const uRole = normDocKeyInsp(usuarioLogado.role);
+            const matchesUsr = (arr) => Array.isArray(arr) && arr.some(v => {
+                const nv = normDocKeyInsp(v);
+                return (usuarioLogado.user && nv === normDocKeyInsp(usuarioLogado.user)) || (usuarioLogado.id && String(v) === String(usuarioLogado.id));
+            });
+            const matchesEq = (arr) => Boolean(uRole) && Array.isArray(arr) && arr.some(v => normDocKeyInsp(v) === uRole);
+
+            if (matchesUsr(d.ocultoUsuarios) || matchesEq(d.ocultoEquipes)) return false;
+            if (modo === 'personalizado_permitidos') return matchesUsr(d.visivelUsuarios) || matchesEq(d.visivelEquipes);
             return true;
         }
 
