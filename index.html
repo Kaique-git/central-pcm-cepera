@@ -731,6 +731,19 @@
                 description: 'Biblioteca controlada com Manuais, Lubrificação, Desenhos, Orçamentos (Gestão), Fotos e Qualidade vinculados à árvore de ativos, com SharePoint, revisões e aprovações.',
                 collections: ['docs_ativos', 'docs_revisoes', 'ob_linhas'],
                 defaultRoles: ['Admin', 'Gerente', 'Supervisor Mecânica', 'Supervisor Elétrica', 'Mecânica', 'Elétrica', 'Automação', 'Utilidades']
+            },
+            {
+                id: 'maestri_pcm',
+                shortTitle: 'Maestri IA',
+                title: 'Maestri 2.0 — IA Auditora & Confiabilidade AQF',
+                file: 'MAESTRI-PCM.html',
+                category: 'IA & Confiabilidade (9 Nós)',
+                badgeClass: 'bg-sky-100 text-sky-900 border-sky-200',
+                accentColor: '#0284c7',
+                iconHtml: '<svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"/></svg>',
+                description: 'Orquestrador em 9 Nós: Coletor ERP, Fast-Path R$ 0, Auditor IA em Lotes de 20 OMs (EN 13306 B×C), Mesa do Conferente por Equipe, Bibliotecário Contínuo, MTBF/MTTR, Caçador AQF 2.0 e Planejador 1-Clique.',
+                collections: ['maestri_correcoes', 'maestri_estudos', 'ag_manutencao', 'ir_checklists', 'ob_linhas', 'docs_ativos', 'ir_anomalias', 'ob_equipamentos'],
+                defaultRoles: ['Admin', 'Gerente', 'Supervisor Mecânica', 'Supervisor Elétrica']
             }
         ];
 
