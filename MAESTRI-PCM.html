@@ -159,6 +159,10 @@
             0%, 100% { opacity: 0.45; transform: scale(0.95); }
             50% { opacity: 1; transform: scale(1.06); }
         }
+        @keyframes slideFadeIn {
+            from { opacity: 0; transform: translateY(-6px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
         .neural-stage {
             position: relative;
             background: radial-gradient(circle at 50% 0%, #0d2b45 0%, #07101f 52%, #030712 100%);
@@ -168,14 +172,15 @@
         }
         .neural-grid-bg {
             background-image: radial-gradient(rgba(148, 163, 184, 0.14) 1px, transparent 1px);
-            background-size: 22px 22px;
+            background-size: 24px 24px;
         }
         .maestro-hub {
             position: relative;
             border-radius: 1.5rem;
             border: 1.5px solid rgba(56, 189, 248, 0.55);
-            background: linear-gradient(135deg, rgba(14, 116, 144, 0.36) 0%, rgba(15, 23, 42, 0.92) 55%, rgba(79, 70, 229, 0.35) 100%);
+            background: linear-gradient(135deg, rgba(14, 116, 144, 0.38) 0%, rgba(15, 23, 42, 0.94) 55%, rgba(79, 70, 229, 0.36) 100%);
             transition: all 0.25s ease;
+            cursor: pointer;
         }
         .maestro-hub.is-delegating {
             animation: maestroPulse 1.35s infinite ease-in-out;
@@ -183,25 +188,29 @@
         }
         .perceptron-node {
             position: relative;
-            border-radius: 1.25rem;
+            border-radius: 1.35rem;
             border: 1.5px solid rgba(148, 163, 184, 0.24);
-            background: linear-gradient(180deg, rgba(15, 23, 42, 0.92) 0%, rgba(9, 14, 28, 0.96) 100%);
-            padding: 0.75rem 0.85rem;
+            background: linear-gradient(180deg, rgba(15, 23, 42, 0.95) 0%, rgba(9, 14, 28, 0.98) 100%);
+            padding: 0.85rem 0.9rem;
             transition: transform 0.22s ease, border-color 0.22s ease, box-shadow 0.22s ease;
             cursor: pointer;
             z-index: 2;
         }
         .perceptron-node:hover {
             transform: translateY(-2px);
-            border-color: rgba(56, 189, 248, 0.65);
+            border-color: rgba(56, 189, 248, 0.72);
+        }
+        .perceptron-node.is-selected {
+            box-shadow: 0 0 0 3px rgba(56, 189, 248, 0.55), 0 0 32px rgba(56, 189, 248, 0.38) !important;
+            border-color: #38bdf8 !important;
         }
         .perceptron-node.is-idle {
             border-color: rgba(148, 163, 184, 0.22);
-            opacity: 0.86;
+            opacity: 0.88;
         }
         .perceptron-node.is-working {
             border-color: #38bdf8;
-            box-shadow: 0 0 0 3px rgba(56, 189, 248, 0.28), 0 0 28px rgba(14, 165, 233, 0.65);
+            box-shadow: 0 0 0 3px rgba(56, 189, 248, 0.32), 0 0 30px rgba(14, 165, 233, 0.68);
             transform: scale(1.03);
             opacity: 1;
         }
@@ -223,14 +232,14 @@
             display: inline-flex;
             align-items: center;
             justify-content: center;
-            background: rgba(15, 23, 42, 0.9);
-            border: 2px solid rgba(56, 189, 248, 0.45);
+            background: rgba(15, 23, 42, 0.92);
+            border: 2px solid rgba(56, 189, 248, 0.48);
             flex-shrink: 0;
         }
         .perceptron-node.is-working .perceptron-core::after {
             content: "";
             position: absolute;
-            inset: -5px;
+            inset: -6px;
             border-radius: 9999px;
             border: 2px dashed #38bdf8;
             animation: perceptronRingSpin 2.2s linear infinite;
@@ -254,14 +263,20 @@
         }
         .synapse-path.is-idle {
             stroke-dasharray: 4 6;
-            opacity: 0.28;
+            opacity: 0.34;
         }
         .synapse-path.is-done {
-            opacity: 0.72;
+            opacity: 0.78;
         }
         .worker-chip-active {
             animation: workerBlink 0.7s infinite ease-in-out;
         }
+        .neural-stream-card {
+            animation: slideFadeIn 0.22s ease-out;
+        }
+        .neural-scroll::-webkit-scrollbar { width: 6px; }
+        .neural-scroll::-webkit-scrollbar-track { background: rgba(15, 23, 42, 0.5); border-radius: 9999px; }
+        .neural-scroll::-webkit-scrollbar-thumb { background: rgba(56, 189, 248, 0.35); border-radius: 9999px; }
         .dropzone-active {
             border-color: #0284c7 !important;
             background: linear-gradient(135deg, #e0f2fe 0%, #eff6ff 100%) !important;
@@ -316,19 +331,22 @@
                             <div id="loggedUserName" class="font-extrabold text-slate-900 truncate">Gestor PCM</div>
                             <div id="loggedUserRole" class="text-[10px] font-bold text-slate-500">Admin</div>
                         </div>
-                        <button type="button" onclick="abrirEspacoUsuario()" class="px-2.5 py-1 rounded-xl bg-white hover:bg-slate-100 border border-slate-200 text-[10px] font-extrabold text-slate-700" title="Preferências Visuais (Alt+U)">⚙ Tema</button>
+                        <button type="button" onclick="abrirEspacoUsuario()" class="inline-flex items-center gap-1 px-2.5 py-1 rounded-xl bg-white hover:bg-slate-100 border border-slate-200 text-[10px] font-extrabold text-slate-700" title="Preferências Visuais (Alt+U)">
+                            <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/></svg>
+                            <span>Tema</span>
+                        </button>
                     </div>
                 </div>
 
                 <!-- NAVEGAÇÃO DOS NÓS -->
                 <nav class="hidden md:flex flex-col gap-1" aria-label="Navegação Maestri">
-                    <div class="px-2 pt-1 pb-0.5 text-[10px] font-extrabold uppercase tracking-wider text-slate-400">Pipeline & Auditoria (Nós 1–4)</div>
+                    <div class="px-2 pt-1 pb-0.5 text-[10px] font-extrabold uppercase tracking-wider text-slate-400">Pipeline &amp; Auditoria (Nós 1–4)</div>
                     <button type="button" id="nav-pipeline" onclick="switchView('pipeline')" class="nav-item active">
-                        <span>1. Pipeline Visual (9 Nós)</span>
+                        <span>1. Rede Neural (9 Nós)</span>
                         <span id="badgeNosConcluidos" class="px-2 py-0.5 rounded-full text-[10px] font-extrabold bg-emerald-500 text-white">9/9</span>
                     </button>
                     <button type="button" id="nav-auditoria" onclick="switchView('auditoria')" class="nav-item">
-                        <span>2. Auditoria OMs & Matriz B×C</span>
+                        <span>2. Auditoria OMs &amp; Matriz B×C</span>
                         <span id="badgeTotalOmsNav" class="px-2 py-0.5 rounded-full text-[10px] font-extrabold bg-slate-200 text-slate-800">0</span>
                     </button>
 
@@ -338,22 +356,25 @@
                         <span id="badgeConferirNav" class="px-2 py-0.5 rounded-full text-[10px] font-extrabold bg-amber-100 text-amber-800">0</span>
                     </button>
                     <button type="button" id="nav-bibliotecario" onclick="switchView('bibliotecario')" class="nav-item">
-                        <span>4. Bibliotecário & Memória R$ 0</span>
+                        <span>4. Bibliotecário &amp; Memória R$ 0</span>
                         <span id="badgeBiblioNav" class="px-2 py-0.5 rounded-full text-[10px] font-extrabold bg-indigo-100 text-indigo-800">0</span>
                     </button>
 
-                    <div class="px-2 pt-2.5 pb-0.5 text-[10px] font-extrabold uppercase tracking-wider text-slate-400">Engenharia & Ação (Nós 7–9)</div>
+                    <div class="px-2 pt-2.5 pb-0.5 text-[10px] font-extrabold uppercase tracking-wider text-slate-400">Engenharia &amp; Ação (Nós 7–9)</div>
                     <button type="button" id="nav-confiabilidade" onclick="switchView('confiabilidade')" class="nav-item">
-                        <span>5. Confiabilidade & Radares</span>
+                        <span>5. Confiabilidade &amp; Radares</span>
                         <span id="badgeQuebrasNav" class="px-2 py-0.5 rounded-full text-[10px] font-extrabold bg-rose-100 text-rose-800">0</span>
                     </button>
                     <button type="button" id="nav-cacador" onclick="switchView('cacador')" class="nav-item">
-                        <span>6. Caçador AQF & Planejador</span>
+                        <span>6. Caçador AQF &amp; Planejador</span>
                         <span id="badgeEstudosNav" class="px-2 py-0.5 rounded-full text-[10px] font-extrabold bg-sky-100 text-sky-800">0</span>
                     </button>
 
                     <button type="button" id="nav-master-maestri" onclick="switchView('master-maestri')" hidden class="nav-item hidden !text-rose-700 border border-rose-200 bg-rose-50/60 mt-2">
-                        <span>🔒 7. Admin Master & Cofre IA</span>
+                        <span class="inline-flex items-center gap-1.5">
+                            <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"/></svg>
+                            <span>7. Admin Master &amp; Cofre</span>
+                        </span>
                         <span class="px-1.5 py-0.5 rounded-full text-[9px] font-extrabold bg-rose-600 text-white">MASTER</span>
                     </button>
                 </nav>
@@ -374,10 +395,10 @@
             <header class="frosted-shell border-b border-slate-200/80 px-4 sm:px-6 py-3.5 sticky top-0 z-20 flex flex-wrap items-center justify-between gap-3">
                 <div class="min-w-0">
                     <div class="flex items-center gap-2">
-                        <span class="text-[10px] font-extrabold uppercase tracking-widest text-sky-700">Orquestrador de Agentes em Nós • EN 13306</span>
-                        <span id="hdrEconomiaBadge" class="px-2 py-0.5 rounded-full bg-emerald-100 text-emerald-800 border border-emerald-200 text-[10px] font-extrabold">Economia −94% vs v40</span>
+                        <span class="text-[10px] font-extrabold uppercase tracking-widest text-sky-700">Orquestrador Neural de Agentes • EN 13306</span>
+                        <span id="hdrEconomiaBadge" class="px-2 py-0.5 rounded-full bg-emerald-100 text-emerald-800 border border-emerald-200 text-[10px] font-extrabold">Treino Base Set/Out</span>
                     </div>
-                    <h2 id="headerTitle" class="text-base sm:text-lg font-extrabold text-slate-900 truncate">Pipeline Visual de 9 Nós — Projeto Maestri 2.0</h2>
+                    <h2 id="headerTitle" class="text-base sm:text-lg font-extrabold text-slate-900 truncate">Rede Neural Maestri 2.0 — Vigente &amp; Comparativo Histórico</h2>
                     <p id="headerSubtitle" class="text-xs font-semibold text-slate-500 truncate">Coletor ERP › Fast-Path R$ 0 › Auditor Lote 20 › Roteador › Conferente › Bibliotecário › Confiabilidade › Caçador AQF › Planejador</p>
                 </div>
 
@@ -391,17 +412,19 @@
                         <span id="lblBtnMasterMaestri">Master</span>
                     </button>
                     <button type="button" id="btnHeaderUploadErp" onclick="document.getElementById('inputUploadPlanilhaErp').click()" class="btn-touch bg-sky-50 hover:bg-sky-100 text-sky-800 border border-sky-200 text-xs py-2 px-3.5">
-                        🔄 Processar Novas OMs do ERP
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12"/></svg>
+                        <span>Processar Novas OMs do ERP</span>
                     </button>
                     <button type="button" onclick="executarPipelineCompletoUI({ animar: true })" class="btn-pill-dark text-xs py-2 px-4">
-                        ▶ Rodar Rede Neural (9 Nós)
+                        <svg class="w-3.5 h-3.5" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM9.555 7.168A1 1 0 008 8v4a1 1 0 001.555.832l3-2a1 1 0 000-1.664l-3-2z" clip-rule="evenodd"/></svg>
+                        <span>Executar Rede Neural (9 Nós)</span>
                     </button>
                 </div>
             </header>
 
-            <main class="flex-1 p-4 sm:p-6 space-y-6 max-w-[1600px] w-full mx-auto">
+            <main class="flex-1 p-4 sm:p-6 space-y-6 max-w-[1840px] w-full mx-auto">
                 <!-- ==================== VIEW 1: PIPELINE VISUAL DE REDE NEURAL (9 NÓS) & UPLOAD ERP ==================== -->
-                <section id="view-pipeline" class="space-y-5">
+                <section id="view-pipeline" class="space-y-6">
                     <!-- KPI STRIP DE ECONOMIA E RODADA VIGENTE -->
                     <div id="pipelineKpiGrid" class="grid grid-cols-2 lg:grid-cols-5 gap-3"></div>
 
@@ -413,8 +436,11 @@
                         class="glass-card p-5 rounded-3xl border-2 border-dashed border-sky-300 bg-gradient-to-r from-sky-50/80 via-white to-indigo-50/60 flex flex-col xl:flex-row xl:items-center justify-between gap-4 transition-all">
                         <div class="space-y-1.5 flex-1">
                             <div class="flex flex-wrap items-center gap-2">
-                                <span id="badgeCicloVigente" class="px-2.5 py-0.5 rounded-full bg-sky-600 text-white text-[10px] font-extrabold uppercase tracking-wider">Lote Vigente • Novembro 2026</span>
-                                <span class="px-2.5 py-0.5 rounded-full bg-indigo-100 text-indigo-800 border border-indigo-200 text-[10px] font-extrabold">📚 Base de Treino Ativa: Set/Out (1.234 OMs)</span>
+                                <span id="badgeCicloVigente" class="px-2.5 py-0.5 rounded-full bg-sky-600 text-white text-[10px] font-extrabold uppercase tracking-wider">Lote Vigente • Nov/2026</span>
+                                <span class="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full bg-indigo-100 text-indigo-800 border border-indigo-200 text-[10px] font-extrabold">
+                                    <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253"/></svg>
+                                    <span>Base de Treino Ativa: Set/Out (1.234 OMs)</span>
+                                </span>
                                 <span id="rodadaVigenteStatusPill" class="px-2.5 py-0.5 rounded-full bg-amber-100 text-amber-800 border border-amber-200 text-[10px] font-extrabold">Aguardando planilha do ERP</span>
                             </div>
                             <h3 class="text-sm sm:text-base font-extrabold text-slate-900">Arraste a planilha do ERP de Novembro (.CSV / .XLSX) para acionar o Maestro &amp; Perceptrons</h3>
@@ -424,71 +450,91 @@
                             <input type="text" id="inputPeriodoRodada" placeholder="Mês / Ciclo (ex: Nov/2026)" value="Nov/2026" class="input-clean py-2 text-xs font-extrabold w-40" title="Nome do ciclo/mês para comparação histórica">
                             <input type="file" id="inputUploadPlanilhaErp" accept=".csv,.xlsx,.json,.jsonl" onchange="processarArquivoUploadErp(event)" class="hidden">
                             <button type="button" onclick="document.getElementById('inputUploadPlanilhaErp').click()" class="btn-pill-dark text-xs py-2.5 px-4 shadow-sm">
-                                📂 Selecionar Planilha (.CSV / .XLSX)
+                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 7v10a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2h-6l-2-2H5a2 2 0 00-2 2z"/></svg>
+                                <span>Selecionar Planilha (.CSV / .XLSX)</span>
                             </button>
-                            <button type="button" onclick="simularLoteNovembroTeste()" class="btn-touch bg-sky-600 hover:bg-sky-700 text-white text-xs py-2.5 px-3.5" title="Testar a Rede Neural com um lote realista de Novembro para ver todos os nós e o comparador trabalhando">
-                                ⚡ Simular Lote Teste (Novembro)
+                            <button type="button" onclick="simularLoteNovembroTeste()" class="btn-touch bg-sky-600 hover:bg-sky-700 text-white text-xs py-2.5 px-3.5" title="Executar simulação realista de Novembro para ver todos os nós conversando ordem a ordem">
+                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"/></svg>
+                                <span>Simular Lote Teste (Novembro)</span>
                             </button>
                             <button type="button" onclick="inspecionarHistoricoSetOut()" class="btn-touch bg-white hover:bg-slate-50 border border-slate-200 text-slate-700 text-xs py-2.5 px-3" title="Abrir a amostra de treino de Set/Out (1.234 OMs) apenas para inspeção">
-                                📚 Inspecionar Treino Set/Out
+                                <svg class="w-4 h-4 text-indigo-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253"/></svg>
+                                <span>Inspecionar Treino Set/Out</span>
                             </button>
                             <button type="button" onclick="limparRodadaVigente()" class="btn-touch bg-white hover:bg-rose-50 border border-slate-200 text-slate-600 hover:text-rose-700 text-xs py-2.5 px-3" title="Zerar lote atual para subir outro mês">
-                                🧹 Novo Mês
+                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"/></svg>
+                                <span>Novo Mês</span>
                             </button>
                             <button type="button" onclick="exportarPacoteSincronizacaoMaestri()" class="btn-touch bg-white hover:bg-slate-50 border border-slate-200 text-slate-700 text-xs py-2.5 px-3">
-                                ⬇ Exportar
+                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"/></svg>
+                                <span>Exportar</span>
                             </button>
                         </div>
                     </div>
 
-                    <!-- ==================== PALCO GIGANTE: REDE NEURAL (MAESTRO + PERCEPTRONS TRABALHANDO) ==================== -->
-                    <div id="neuralPipelineStage" class="neural-stage rounded-3xl p-4 sm:p-6 space-y-4 overflow-hidden">
-                        <!-- BARRA SUPERIOR DA REDE NEURAL -->
-                        <div class="flex flex-wrap items-center justify-between gap-3 relative z-10">
-                            <div class="space-y-0.5">
+                    <!-- ==================== PALCO GIGANTE: REDE NEURAL (MAESTRO + PERCEPTRONS + CONVERSA AO VIVO + STREAM DE OMS) ==================== -->
+                    <div id="neuralPipelineStage" class="neural-stage rounded-3xl p-5 sm:p-7 space-y-6 overflow-hidden">
+                        <!-- BARRA SUPERIOR DE CONTROLE DO MOTOR NEURAL -->
+                        <div class="flex flex-col xl:flex-row xl:items-center justify-between gap-4 relative z-10 border-b border-slate-800/80 pb-4">
+                            <div class="space-y-1">
                                 <div class="flex flex-wrap items-center gap-2">
                                     <span class="px-2.5 py-0.5 rounded-full bg-sky-500/20 border border-sky-400/40 text-sky-300 text-[10px] font-extrabold uppercase tracking-widest">Rede Neural Industrial • 9 Perceptrons</span>
-                                    <span id="neuralStatusBadge" class="px-2.5 py-0.5 rounded-full bg-slate-800 text-slate-200 border border-slate-700 text-[10px] font-extrabold">● Aguardando Estímulo (ERP)</span>
+                                    <span id="neuralStatusBadge" class="px-2.5 py-0.5 rounded-full bg-slate-800 text-slate-200 border border-slate-700 text-[10px] font-extrabold">Aguardando Estímulo (ERP)</span>
                                 </div>
-                                <h3 class="text-base sm:text-xl font-extrabold text-white tracking-tight">Orquestração Neural em Tempo Real — Maestro Delegando Funções</h3>
+                                <h3 class="text-lg sm:text-xl font-extrabold text-white tracking-tight">Orquestração Neural em Tempo Real — Maestro Delegando Funções</h3>
+                                <p class="text-xs text-slate-400 font-medium">Clique em qualquer perceptron abaixo para filtrar suas interações e ver exatamente o que ele recebeu e retornou.</p>
                             </div>
-                            <div class="flex flex-wrap items-center gap-2">
-                                <button type="button" id="btnToggleNeuralSpeed" onclick="alternarVelocidadeRedeNeural()" style="background:#1e293b;color:#e2e8f0;border:1px solid #475569;" class="px-3 py-1.5 rounded-xl bg-slate-800 hover:bg-slate-700 border border-slate-700 text-slate-200 text-xs font-extrabold transition-colors">
-                                    🎬 Animação: Cinemática
+
+                            <div class="flex flex-wrap items-center gap-2 shrink-0">
+                                <!-- Seletor claro de Ritmo de Visualização -->
+                                <div class="inline-flex rounded-xl p-1 bg-slate-900 border border-slate-700/90 text-[11px] font-extrabold" role="group" aria-label="Ritmo de execução ao vivo">
+                                    <button type="button" id="btnRitmoPassoAPasso" onclick="definirRitmoRedeNeural('passo_a_passo')" style="background:#0284c7;color:#ffffff;" class="px-3 py-1.5 rounded-lg transition-all" title="Processa OM por OM lentamente (~260ms cada) para você acompanhar os nós conversando">Passo a Passo (Ao Vivo)</button>
+                                    <button type="button" id="btnRitmoRapido" onclick="definirRitmoRedeNeural('rapido')" style="background:transparent;color:#94a3b8;" class="px-3 py-1.5 rounded-lg transition-all" title="Executa em ondas rápidas (~1,2s) exibindo todo o resultado">Rápido (Turbo)</button>
+                                </div>
+
+                                <button type="button" id="btnPauseResumeNeural" onclick="alternarPausaRedeNeural()" style="background:#1e293b;color:#cbd5e1;border:1px solid #475569;" class="inline-flex items-center gap-1.5 px-3 py-2 rounded-xl text-xs font-extrabold transition-colors">
+                                    <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 9v6m4-6v6m7-3a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+                                    <span id="lblBtnPauseNeural">Pausar</span>
                                 </button>
-                                <button type="button" onclick="reanimarRedeNeuralLive()" class="px-3.5 py-1.5 rounded-xl bg-sky-500 hover:bg-sky-400 text-slate-950 text-xs font-extrabold shadow-lg shadow-sky-500/25 transition-all">
-                                    ▶ Reanimar Fluxo Neural
+
+                                <button type="button" onclick="reanimarRedeNeuralLive()" class="inline-flex items-center gap-1.5 px-4 py-2 rounded-xl bg-sky-500 hover:bg-sky-400 text-slate-950 text-xs font-extrabold shadow-lg shadow-sky-500/25 transition-all">
+                                    <svg class="w-3.5 h-3.5" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM9.555 7.168A1 1 0 008 8v4a1 1 0 001.555.832l3-2a1 1 0 000-1.664l-3-2z" clip-rule="evenodd"/></svg>
+                                    <span>Executar Fluxo ao Vivo</span>
                                 </button>
-                                <button type="button" onclick="reexecutarNosPosConferencia()" class="px-3 py-1.5 rounded-xl bg-indigo-500/90 hover:bg-indigo-400 text-white text-xs font-extrabold transition-colors">
-                                    ↻ Reprocessar Nós 6→9 (R$ 0)
+
+                                <button type="button" onclick="reexecutarNosPosConferencia()" style="background:rgba(79,70,229,0.9);color:#ffffff;" class="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-xl hover:bg-indigo-400 text-xs font-extrabold transition-colors">
+                                    <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"/></svg>
+                                    <span>Reprocessar Nós 6→9</span>
                                 </button>
                             </div>
                         </div>
 
-                        <!-- HUB CENTRAL DO MAESTRO + CANVAS DA REDE NEURAL -->
-                        <div id="neuralCanvasInner" class="neural-grid-bg relative rounded-2xl border border-slate-800/90 bg-slate-950/60 p-3 sm:p-5 space-y-5 overflow-hidden">
-                            <!-- SVG DE SINAPSES E PARTÍCULAS ANIMADAS -->
-                            <svg id="neuralSynapseSvg" viewBox="0 0 1200 540" preserveAspectRatio="none" class="hidden lg:block absolute inset-0 w-full h-full pointer-events-none" style="z-index:1;"></svg>
+                        <!-- TOPOLOGIA ESPACIAL AMPLIADA: MAESTRO + 5 CAMADAS DE PERCEPTRONS -->
+                        <div id="neuralCanvasInner" class="neural-grid-bg relative rounded-2xl border border-slate-800/90 bg-slate-950/75 p-5 sm:p-6 lg:p-8 xl:p-10 space-y-12 min-h-[680px] overflow-hidden">
+                            <!-- SVG DE SINAPSES EDGE-TO-EDGE E PARTÍCULAS ANIMADAS -->
+                            <svg id="neuralSynapseSvg" viewBox="0 0 1200 680" preserveAspectRatio="none" class="hidden lg:block absolute inset-0 w-full h-full pointer-events-none" style="z-index:1;"></svg>
 
                             <!-- CAMADA COORDENADORA: MAESTRO DELEGANDO -->
-                            <div class="relative z-10 flex justify-center">
-                                <div id="neuralMaestroHub" data-neural-id="maestro" class="maestro-hub max-w-2xl w-full px-5 py-3 flex flex-col sm:flex-row items-center justify-between gap-3">
-                                    <div class="flex items-center gap-3 min-w-0">
-                                        <div class="w-11 h-11 rounded-2xl bg-sky-500/20 border border-sky-400/60 flex items-center justify-center text-xl shrink-0">👑</div>
+                            <div class="relative z-10 flex justify-center pb-2">
+                                <div id="neuralMaestroHub" data-neural-id="maestro" onclick="selecionarNoInspecao('maestro')" class="maestro-hub max-w-3xl w-full px-6 py-4 flex flex-col sm:flex-row items-center justify-between gap-4">
+                                    <div class="flex items-center gap-3.5 min-w-0">
+                                        <div class="w-12 h-12 rounded-2xl bg-sky-500/20 border border-sky-400/60 flex items-center justify-center text-sky-300 shrink-0">
+                                            <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 3v2m6-2v2M9 19v2m6-2v2M5 9H3m2 6H3m18-6h-2m2 6h-2M7 19h10a2 2 0 002-2V7a2 2 0 00-2-2H7a2 2 0 00-2 2v10a2 2 0 002 2zM9 9h6v6H9V9z"/></svg>
+                                        </div>
                                         <div class="min-w-0">
                                             <div class="flex items-center gap-2">
                                                 <span class="text-[10px] font-extrabold uppercase tracking-widest text-sky-300">Maestro • Núcleo Orquestrador</span>
                                                 <span id="maestroPhasePill" class="px-2 py-0.5 rounded bg-sky-500/25 text-sky-200 font-mono text-[9px] font-extrabold">PRONTO</span>
                                             </div>
-                                            <div id="maestroDelegacaoMsg" class="text-xs sm:text-sm font-extrabold text-white truncate">Pronto para receber o CSV/XLSX de Novembro e distribuir carga entre os 9 perceptrons.</div>
+                                            <div id="maestroDelegacaoMsg" class="text-xs sm:text-sm font-extrabold text-white truncate">Pronto para receber o CSV/XLSX de Nov/2026 e distribuir carga entre os 9 perceptrons.</div>
                                         </div>
                                     </div>
-                                    <div class="flex items-center gap-3 shrink-0 font-mono text-[11px]">
+                                    <div class="flex items-center gap-4 shrink-0 font-mono text-xs">
                                         <div class="text-right">
                                             <div class="text-[9px] uppercase text-slate-400 font-bold">Taxa Sináptica</div>
                                             <div id="maestroThroughputTxt" class="font-extrabold text-emerald-400">0 OMs/ciclo</div>
                                         </div>
-                                        <div class="h-7 w-px bg-slate-700"></div>
+                                        <div class="h-8 w-px bg-slate-700"></div>
                                         <div class="text-right">
                                             <div class="text-[9px] uppercase text-slate-400 font-bold">Custo Lote</div>
                                             <div id="maestroCustoLiveTxt" class="font-extrabold text-sky-300">R$ 0,00</div>
@@ -497,91 +543,95 @@
                                 </div>
                             </div>
 
-                            <!-- 5 CAMADAS DE PERCEPTRONS EM REDE NEURAL (ESQUERDA → DIREITA) -->
-                            <div id="neuralLayersGrid" class="relative z-10 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-3.5 lg:gap-4 items-center">
+                            <!-- 5 CAMADAS DE PERCEPTRONS COM ESPAÇAMENTO AMPLO PARA AS SINAPSES -->
+                            <div id="neuralLayersGrid" class="relative z-10 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-6 lg:gap-8 xl:gap-10 2xl:gap-14 items-stretch pt-2">
                                 <!-- Camada 1: Entrada & Nó 1 -->
-                                <div class="space-y-3">
-                                    <div class="text-center text-[9px] font-extrabold uppercase tracking-widest text-slate-400">Camada 1 • Entrada</div>
-                                    <div id="pNode_input_erp" data-neural-id="input_erp" onclick="document.getElementById('inputUploadPlanilhaErp').click()" class="perceptron-node is-idle">
+                                <div class="flex flex-col justify-center gap-6 lg:gap-7">
+                                    <div class="text-center"><span class="inline-block px-2.5 py-0.5 rounded-full bg-slate-950/90 border border-slate-800/80 text-[10px] font-extrabold uppercase tracking-widest text-slate-300">Camada 1 • Entrada</span></div>
+                                    <div id="pNode_input_erp" data-neural-id="input_erp" onclick="selecionarNoInspecao('input_erp')" class="perceptron-node is-idle">
                                         <div class="flex items-center gap-2.5">
-                                            <span class="perceptron-core text-base">📥</span>
+                                            <span class="perceptron-core text-sky-300">
+                                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12"/></svg>
+                                            </span>
                                             <div class="min-w-0 flex-1">
                                                 <div class="text-[9px] font-mono font-bold text-sky-400">INPUT ERP</div>
-                                                <div class="text-xs font-extrabold text-white truncate">Planilha Vigente</div>
-                                                <div id="pStat_input_erp" class="text-[10px] font-semibold text-slate-400 truncate">CSV / XLSX / JSON</div>
+                                                <div class="text-xs font-extrabold text-white leading-tight">Planilha Vigente</div>
+                                                <div id="pStat_input_erp" class="text-[10px] font-semibold text-slate-400 truncate mt-0.5">CSV / XLSX / JSON</div>
                                             </div>
                                         </div>
                                     </div>
-                                    <div id="pNode_no1" data-neural-id="no1" onclick="inspecionarNoNeural('no1')" class="perceptron-node is-idle">
+                                    <div id="pNode_no1" data-neural-id="no1" onclick="selecionarNoInspecao('no1')" class="perceptron-node is-idle">
                                         <div class="flex items-center gap-2.5">
                                             <span class="perceptron-core font-mono text-xs font-extrabold text-sky-300">N1</span>
                                             <div class="min-w-0 flex-1">
                                                 <div class="flex items-center justify-between gap-1">
-                                                    <span class="text-[9px] font-mono font-bold text-sky-400">PERCEPTRON 1</span>
+                                                    <span class="text-[9px] font-mono font-bold text-sky-400">NÓ 1</span>
                                                     <span id="pPct_no1" class="text-[9px] font-mono font-extrabold text-emerald-400">0%</span>
                                                 </div>
-                                                <div class="text-xs font-extrabold text-white truncate">Coletor &amp; Filtro</div>
-                                                <div id="pStat_no1" class="text-[10px] font-semibold text-slate-400 truncate">Filtra OMs + ob_linhas</div>
+                                                <div class="text-xs font-extrabold text-white leading-tight">Coletor &amp; Filtro</div>
+                                                <div id="pStat_no1" class="text-[10px] font-semibold text-slate-400 truncate mt-0.5">Filtra OMs + ob_linhas</div>
                                             </div>
                                         </div>
-                                        <div class="mt-2 h-1 rounded-full bg-slate-800 overflow-hidden"><div id="pBar_no1" class="h-full bg-sky-400 transition-all duration-300" style="width:0%"></div></div>
+                                        <div class="mt-2.5 h-1.5 rounded-full bg-slate-800 overflow-hidden"><div id="pBar_no1" class="h-full bg-sky-400 transition-all duration-300" style="width:0%"></div></div>
                                     </div>
                                     <div id="pNode_hist_base" data-neural-id="hist_base" onclick="inspecionarHistoricoSetOut()" class="perceptron-node is-done">
                                         <div class="flex items-center gap-2.5">
-                                            <span class="perceptron-core text-sm">📚</span>
+                                            <span class="perceptron-core text-emerald-300">
+                                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 7v10c0 2.21 3.582 4 8 4s8-1.79 8-4V7M4 7c0 2.21 3.582 4 8 4s8-1.79 8-4M4 7c0-2.21 3.582-4 8-4s8 1.79 8 4"/></svg>
+                                            </span>
                                             <div class="min-w-0 flex-1">
                                                 <div class="text-[9px] font-mono font-bold text-indigo-300">PESOS TREINO</div>
-                                                <div class="text-xs font-extrabold text-white truncate">Base Set/Out</div>
-                                                <div class="text-[10px] font-semibold text-emerald-300 truncate">1.234 OMs • Calibrado</div>
+                                                <div class="text-xs font-extrabold text-white leading-tight">Base Set/Out</div>
+                                                <div class="text-[10px] font-semibold text-emerald-300 truncate mt-0.5">1.234 OMs • Calibrado</div>
                                             </div>
                                         </div>
                                     </div>
                                 </div>
 
                                 <!-- Camada 2: Fast-Path R$ 0 + Nó 3 Multi-Lote -->
-                                <div class="space-y-4">
-                                    <div class="text-center text-[9px] font-extrabold uppercase tracking-widest text-slate-400">Camada 2 • Filtragem &amp; IA</div>
-                                    <div id="pNode_no2" data-neural-id="no2" onclick="inspecionarNoNeural('no2')" class="perceptron-node is-idle">
+                                <div class="flex flex-col justify-center gap-8 lg:gap-10">
+                                    <div class="text-center"><span class="inline-block px-2.5 py-0.5 rounded-full bg-slate-950/90 border border-slate-800/80 text-[10px] font-extrabold uppercase tracking-widest text-slate-300">Camada 2 • IA</span></div>
+                                    <div id="pNode_no2" data-neural-id="no2" onclick="selecionarNoInspecao('no2')" class="perceptron-node is-idle">
                                         <div class="flex items-center gap-2.5">
                                             <span class="perceptron-core font-mono text-xs font-extrabold text-emerald-300">N2</span>
                                             <div class="min-w-0 flex-1">
                                                 <div class="flex items-center justify-between gap-1">
-                                                    <span class="text-[9px] font-mono font-bold text-emerald-400">VIA RÁPIDA R$ 0</span>
+                                                    <span class="text-[9px] font-mono font-bold text-emerald-400">VIA R$ 0</span>
                                                     <span id="pPct_no2" class="text-[9px] font-mono font-extrabold text-emerald-400">0%</span>
                                                 </div>
-                                                <div class="text-xs font-extrabold text-white truncate">Fast-Path + Memória</div>
-                                                <div id="pStat_no2" class="text-[10px] font-semibold text-slate-400 truncate">Custo zero (63%+ das OMs)</div>
+                                                <div class="text-xs font-extrabold text-white leading-tight">Fast-Path + Memória</div>
+                                                <div id="pStat_no2" class="text-[10px] font-semibold text-slate-400 truncate mt-0.5">Custo zero (63%+ das OMs)</div>
                                             </div>
                                         </div>
-                                        <div class="mt-2 h-1 rounded-full bg-slate-800 overflow-hidden"><div id="pBar_no2" class="h-full bg-emerald-400 transition-all duration-300" style="width:0%"></div></div>
+                                        <div class="mt-2.5 h-1.5 rounded-full bg-slate-800 overflow-hidden"><div id="pBar_no2" class="h-full bg-emerald-400 transition-all duration-300" style="width:0%"></div></div>
                                     </div>
 
-                                    <div id="pNode_no3" data-neural-id="no3" onclick="inspecionarNoNeural('no3')" class="perceptron-node is-idle">
+                                    <div id="pNode_no3" data-neural-id="no3" onclick="selecionarNoInspecao('no3')" class="perceptron-node is-idle">
                                         <div class="flex items-center gap-2.5">
                                             <span class="perceptron-core font-mono text-xs font-extrabold text-indigo-300">N3</span>
                                             <div class="min-w-0 flex-1">
                                                 <div class="flex items-center justify-between gap-1">
-                                                    <span class="text-[9px] font-mono font-bold text-indigo-300">AUDITOR LOTE 20</span>
+                                                    <span class="text-[9px] font-mono font-bold text-indigo-300">LOTE 20</span>
                                                     <span id="pPct_no3" class="text-[9px] font-mono font-extrabold text-sky-300">0%</span>
                                                 </div>
-                                                <div class="text-xs font-extrabold text-white truncate">Gemini Flash EN 13306</div>
-                                                <div id="pStat_no3" class="text-[10px] font-semibold text-slate-400 truncate">Sub-perceptrons paralelos</div>
+                                                <div class="text-xs font-extrabold text-white leading-tight">Auditor EN 13306</div>
+                                                <div id="pStat_no3" class="text-[10px] font-semibold text-slate-400 truncate mt-0.5">Sub-perceptrons paralelos</div>
                                             </div>
                                         </div>
                                         <!-- Sub-perceptrons trabalhando em paralelo -->
-                                        <div id="no3WorkersRow" class="mt-2 grid grid-cols-3 gap-1 text-[9px] font-mono font-extrabold">
-                                            <span class="px-1.5 py-0.5 rounded bg-slate-900 border border-slate-700 text-center text-slate-400">W1: 20</span>
-                                            <span class="px-1.5 py-0.5 rounded bg-slate-900 border border-slate-700 text-center text-slate-400">W2: 20</span>
-                                            <span class="px-1.5 py-0.5 rounded bg-slate-900 border border-slate-700 text-center text-slate-400">W3: 20</span>
+                                        <div id="no3WorkersRow" class="mt-2.5 grid grid-cols-3 gap-1.5 text-[9px] font-mono font-extrabold">
+                                            <span class="px-1 py-0.5 rounded bg-slate-900 border border-slate-700 text-center text-slate-400">W1: 20</span>
+                                            <span class="px-1 py-0.5 rounded bg-slate-900 border border-slate-700 text-center text-slate-400">W2: 20</span>
+                                            <span class="px-1 py-0.5 rounded bg-slate-900 border border-slate-700 text-center text-slate-400">W3: 20</span>
                                         </div>
-                                        <div class="mt-2 h-1 rounded-full bg-slate-800 overflow-hidden"><div id="pBar_no3" class="h-full bg-indigo-400 transition-all duration-300" style="width:0%"></div></div>
+                                        <div class="mt-2.5 h-1.5 rounded-full bg-slate-800 overflow-hidden"><div id="pBar_no3" class="h-full bg-indigo-400 transition-all duration-300" style="width:0%"></div></div>
                                     </div>
                                 </div>
 
                                 <!-- Camada 3: Governança Humana & Aprendizado Contínuo -->
-                                <div class="space-y-3">
-                                    <div class="text-center text-[9px] font-extrabold uppercase tracking-widest text-slate-400">Camada 3 • Sinapse Humana</div>
-                                    <div id="pNode_no4" data-neural-id="no4" onclick="inspecionarNoNeural('no4')" class="perceptron-node is-idle">
+                                <div class="flex flex-col justify-center gap-6 lg:gap-7">
+                                    <div class="text-center"><span class="inline-block px-2.5 py-0.5 rounded-full bg-slate-950/90 border border-slate-800/80 text-[10px] font-extrabold uppercase tracking-widest text-slate-300">Camada 3 • Sinapse</span></div>
+                                    <div id="pNode_no4" data-neural-id="no4" onclick="selecionarNoInspecao('no4')" class="perceptron-node is-idle">
                                         <div class="flex items-center gap-2.5">
                                             <span class="perceptron-core font-mono text-xs font-extrabold text-sky-300">N4</span>
                                             <div class="min-w-0 flex-1">
@@ -589,48 +639,48 @@
                                                     <span class="text-[9px] font-mono font-bold text-sky-400">ROTEADOR</span>
                                                     <span id="pPct_no4" class="text-[9px] font-mono font-extrabold text-emerald-400">0%</span>
                                                 </div>
-                                                <div class="text-xs font-extrabold text-white truncate">4 Equipes &amp; Qualidade</div>
-                                                <div id="pStat_no4" class="text-[10px] font-semibold text-slate-400 truncate">AUTO / CONFERIR / REVISÃO</div>
+                                                <div class="text-xs font-extrabold text-white leading-tight">4 Equipes &amp; Nota</div>
+                                                <div id="pStat_no4" class="text-[10px] font-semibold text-slate-400 truncate mt-0.5">AUTO / CONFERIR / REVISÃO</div>
                                             </div>
                                         </div>
-                                        <div class="mt-2 h-1 rounded-full bg-slate-800 overflow-hidden"><div id="pBar_no4" class="h-full bg-sky-400 transition-all duration-300" style="width:0%"></div></div>
+                                        <div class="mt-2.5 h-1.5 rounded-full bg-slate-800 overflow-hidden"><div id="pBar_no4" class="h-full bg-sky-400 transition-all duration-300" style="width:0%"></div></div>
                                     </div>
 
-                                    <div id="pNode_no5" data-neural-id="no5" onclick="switchView('conferente')" class="perceptron-node is-idle">
+                                    <div id="pNode_no5" data-neural-id="no5" onclick="selecionarNoInspecao('no5')" class="perceptron-node is-idle">
                                         <div class="flex items-center gap-2.5">
                                             <span class="perceptron-core font-mono text-xs font-extrabold text-amber-300">N5</span>
                                             <div class="min-w-0 flex-1">
                                                 <div class="flex items-center justify-between gap-1">
-                                                    <span class="text-[9px] font-mono font-bold text-amber-300">SUPERVISOR</span>
+                                                    <span class="text-[9px] font-mono font-bold text-amber-300">CONFERENTE</span>
                                                     <span id="pPct_no5" class="text-[9px] font-mono font-extrabold text-amber-300">0%</span>
                                                 </div>
-                                                <div class="text-xs font-extrabold text-white truncate">Mesa Conferente 2-Toques</div>
-                                                <div id="pStat_no5" class="text-[10px] font-semibold text-slate-400 truncate">Valida ambíguas/graves</div>
+                                                <div class="text-xs font-extrabold text-white leading-tight">Mesa 2-Toques</div>
+                                                <div id="pStat_no5" class="text-[10px] font-semibold text-slate-400 truncate mt-0.5">Valida ambíguas/graves</div>
                                             </div>
                                         </div>
-                                        <div class="mt-2 h-1 rounded-full bg-slate-800 overflow-hidden"><div id="pBar_no5" class="h-full bg-amber-400 transition-all duration-300" style="width:0%"></div></div>
+                                        <div class="mt-2.5 h-1.5 rounded-full bg-slate-800 overflow-hidden"><div id="pBar_no5" class="h-full bg-amber-400 transition-all duration-300" style="width:0%"></div></div>
                                     </div>
 
-                                    <div id="pNode_no6" data-neural-id="no6" onclick="switchView('bibliotecario')" class="perceptron-node is-idle">
+                                    <div id="pNode_no6" data-neural-id="no6" onclick="selecionarNoInspecao('no6')" class="perceptron-node is-idle">
                                         <div class="flex items-center gap-2.5">
                                             <span class="perceptron-core font-mono text-xs font-extrabold text-violet-300">N6</span>
                                             <div class="min-w-0 flex-1">
                                                 <div class="flex items-center justify-between gap-1">
-                                                    <span class="text-[9px] font-mono font-bold text-violet-300">RETROALIMENTAÇÃO</span>
+                                                    <span class="text-[9px] font-mono font-bold text-violet-300">MEMÓRIA</span>
                                                     <span id="pPct_no6" class="text-[9px] font-mono font-extrabold text-violet-300">0%</span>
                                                 </div>
-                                                <div class="text-xs font-extrabold text-white truncate">Bibliotecário R$ 0</div>
-                                                <div id="pStat_no6" class="text-[10px] font-semibold text-slate-400 truncate">Realimenta N2 &amp; N3</div>
+                                                <div class="text-xs font-extrabold text-white leading-tight">Bibliotecário R$ 0</div>
+                                                <div id="pStat_no6" class="text-[10px] font-semibold text-slate-400 truncate mt-0.5">Realimenta N2 &amp; N3</div>
                                             </div>
                                         </div>
-                                        <div class="mt-2 h-1 rounded-full bg-slate-800 overflow-hidden"><div id="pBar_no6" class="h-full bg-violet-400 transition-all duration-300" style="width:0%"></div></div>
+                                        <div class="mt-2.5 h-1.5 rounded-full bg-slate-800 overflow-hidden"><div id="pBar_no6" class="h-full bg-violet-400 transition-all duration-300" style="width:0%"></div></div>
                                     </div>
                                 </div>
 
                                 <!-- Camada 4: Engenharia de Confiabilidade & Caçador AQF -->
-                                <div class="space-y-4">
-                                    <div class="text-center text-[9px] font-extrabold uppercase tracking-widest text-slate-400">Camada 4 • Engenharia</div>
-                                    <div id="pNode_no7" data-neural-id="no7" onclick="switchView('confiabilidade')" class="perceptron-node is-idle">
+                                <div class="flex flex-col justify-center gap-8 lg:gap-10">
+                                    <div class="text-center"><span class="inline-block px-2.5 py-0.5 rounded-full bg-slate-950/90 border border-slate-800/80 text-[10px] font-extrabold uppercase tracking-widest text-slate-300">Camada 4 • AQF</span></div>
+                                    <div id="pNode_no7" data-neural-id="no7" onclick="selecionarNoInspecao('no7')" class="perceptron-node is-idle">
                                         <div class="flex items-center gap-2.5">
                                             <span class="perceptron-core font-mono text-xs font-extrabold text-rose-300">N7</span>
                                             <div class="min-w-0 flex-1">
@@ -638,14 +688,14 @@
                                                     <span class="text-[9px] font-mono font-bold text-rose-300">RADAR AQF</span>
                                                     <span id="pPct_no7" class="text-[9px] font-mono font-extrabold text-rose-300">0%</span>
                                                 </div>
-                                                <div class="text-xs font-extrabold text-white truncate">Confiabilidade &amp; MTBF</div>
-                                                <div id="pStat_no7" class="text-[10px] font-semibold text-slate-400 truncate">Cruza Rota &amp; Obsolescência</div>
+                                                <div class="text-xs font-extrabold text-white leading-tight">Confiabilidade</div>
+                                                <div id="pStat_no7" class="text-[10px] font-semibold text-slate-400 truncate mt-0.5">Cruza Rota &amp; Obsol.</div>
                                             </div>
                                         </div>
-                                        <div class="mt-2 h-1 rounded-full bg-slate-800 overflow-hidden"><div id="pBar_no7" class="h-full bg-rose-400 transition-all duration-300" style="width:0%"></div></div>
+                                        <div class="mt-2.5 h-1.5 rounded-full bg-slate-800 overflow-hidden"><div id="pBar_no7" class="h-full bg-rose-400 transition-all duration-300" style="width:0%"></div></div>
                                     </div>
 
-                                    <div id="pNode_no8" data-neural-id="no8" onclick="switchView('cacador')" class="perceptron-node is-idle">
+                                    <div id="pNode_no8" data-neural-id="no8" onclick="selecionarNoInspecao('no8')" class="perceptron-node is-idle">
                                         <div class="flex items-center gap-2.5">
                                             <span class="perceptron-core font-mono text-xs font-extrabold text-sky-300">N8</span>
                                             <div class="min-w-0 flex-1">
@@ -653,45 +703,112 @@
                                                     <span class="text-[9px] font-mono font-bold text-sky-300">CAUSA RAIZ</span>
                                                     <span id="pPct_no8" class="text-[9px] font-mono font-extrabold text-sky-300">0%</span>
                                                 </div>
-                                                <div class="text-xs font-extrabold text-white truncate">Caçador AQF 2.0</div>
-                                                <div id="pStat_no8" class="text-[10px] font-semibold text-slate-400 truncate">Ishikawa 6M + DOCS-ATIVOS</div>
+                                                <div class="text-xs font-extrabold text-white leading-tight">Caçador AQF 2.0</div>
+                                                <div id="pStat_no8" class="text-[10px] font-semibold text-slate-400 truncate mt-0.5">Ishikawa + DOCS-ATIVOS</div>
                                             </div>
                                         </div>
-                                        <div class="mt-2 h-1 rounded-full bg-slate-800 overflow-hidden"><div id="pBar_no8" class="h-full bg-sky-400 transition-all duration-300" style="width:0%"></div></div>
+                                        <div class="mt-2.5 h-1.5 rounded-full bg-slate-800 overflow-hidden"><div id="pBar_no8" class="h-full bg-sky-400 transition-all duration-300" style="width:0%"></div></div>
                                     </div>
                                 </div>
 
                                 <!-- Camada 5: Output & Saída no Portal PCM -->
-                                <div class="space-y-3">
-                                    <div class="text-center text-[9px] font-extrabold uppercase tracking-widest text-slate-400">Camada 5 • Ação na Fábrica</div>
-                                    <div id="pNode_no9" data-neural-id="no9" onclick="switchView('cacador')" class="perceptron-node is-idle">
+                                <div class="flex flex-col justify-center gap-6 lg:gap-7">
+                                    <div class="text-center"><span class="inline-block px-2.5 py-0.5 rounded-full bg-slate-950/90 border border-slate-800/80 text-[10px] font-extrabold uppercase tracking-widest text-slate-300">Camada 5 • Ação</span></div>
+                                    <div id="pNode_no9" data-neural-id="no9" onclick="selecionarNoInspecao('no9')" class="perceptron-node is-idle">
                                         <div class="flex items-center gap-2.5">
                                             <span class="perceptron-core font-mono text-xs font-extrabold text-emerald-300">N9</span>
                                             <div class="min-w-0 flex-1">
                                                 <div class="flex items-center justify-between gap-1">
-                                                    <span class="text-[9px] font-mono font-bold text-emerald-300">OUTPUT PORTAL</span>
+                                                    <span class="text-[9px] font-mono font-bold text-emerald-300">SAÍDA PCM</span>
                                                     <span id="pPct_no9" class="text-[9px] font-mono font-extrabold text-emerald-300">0%</span>
                                                 </div>
-                                                <div class="text-xs font-extrabold text-white truncate">Planejador 1-Clique</div>
-                                                <div id="pStat_no9" class="text-[10px] font-semibold text-slate-400 truncate">Preventiva 52S / Rota / Agenda</div>
+                                                <div class="text-xs font-extrabold text-white leading-tight">Planejador 1-Clique</div>
+                                                <div id="pStat_no9" class="text-[10px] font-semibold text-slate-400 truncate mt-0.5">Preventiva 52S / Rota</div>
                                             </div>
                                         </div>
-                                        <div class="mt-2 h-1 rounded-full bg-slate-800 overflow-hidden"><div id="pBar_no9" class="h-full bg-emerald-400 transition-all duration-300" style="width:0%"></div></div>
+                                        <div class="mt-2.5 h-1.5 rounded-full bg-slate-800 overflow-hidden"><div id="pBar_no9" class="h-full bg-emerald-400 transition-all duration-300" style="width:0%"></div></div>
                                     </div>
-                                    <div class="p-3 rounded-2xl border border-emerald-500/30 bg-emerald-950/35 text-[11px] space-y-1">
-                                        <div class="font-extrabold text-emerald-300">🚀 Entregas Automáticas</div>
-                                        <div class="text-slate-300 text-[10px] leading-snug">• Planos 52S (<code>PREVENTIVAS</code>)<br>• Pontos Cirúrgicos (<code>ROTA</code>)<br>• Ordens (<code>AGENDA-PCM</code>)</div>
+                                    <div class="p-3.5 rounded-2xl border border-emerald-500/30 bg-emerald-950/35 text-[11px] space-y-1.5">
+                                        <div class="flex items-center gap-1.5 font-extrabold text-emerald-300">
+                                            <svg class="w-4 h-4 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8"/></svg>
+                                            <span>Entregas Automáticas</span>
+                                        </div>
+                                        <div class="text-slate-300 text-[10px] leading-relaxed">• Planos 52S (<code>PREVENTIVAS</code>)<br>• Pontos Cirúrgicos (<code>ROTA</code>)<br>• Ordens (<code>AGENDA-PCM</code>)</div>
                                     </div>
                                 </div>
                             </div>
+                        </div>
 
-                            <!-- TELEMETRIA AO VIVO DO MAESTRO (TERMINAL) -->
-                            <div class="relative z-10 rounded-2xl border border-slate-800 bg-slate-950/90 p-3 font-mono text-[11px] space-y-1">
-                                <div class="flex items-center justify-between text-[10px] text-slate-400 border-b border-slate-800 pb-1.5">
-                                    <span class="font-bold text-sky-400">▸ TELEMETRIA NEURAL AO VIVO (DESPACHO DO MAESTRO)</span>
-                                    <span id="neuralTelemetryElapsed">Ciclo pronto</span>
+                        <!-- BARRA DE PROGRESSO & RESUMO AO VIVO DO QUE ESTÁ SENDO AUDITADO -->
+                        <div id="neuralLiveSummaryBar" class="relative z-10 rounded-2xl border border-slate-800 bg-slate-950/85 p-3.5 flex flex-wrap items-center justify-between gap-3 text-xs">
+                            <div class="flex flex-wrap items-center gap-3 flex-1 min-w-[260px]">
+                                <span id="neuralLiveCounterTitle" class="font-mono font-extrabold text-sky-300">0 / 0 OMs processadas</span>
+                                <div class="flex-1 min-w-[140px] max-w-xs h-2 rounded-full bg-slate-800 overflow-hidden">
+                                    <div id="neuralLiveProgressFill" class="h-full bg-gradient-to-r from-sky-400 via-indigo-400 to-emerald-400 transition-all duration-200" style="width:0%"></div>
                                 </div>
-                                <div id="neuralTelemetryFeed" class="space-y-1 max-h-24 overflow-y-auto text-slate-300"></div>
+                                <span id="neuralLiveCountersPills" class="flex flex-wrap items-center gap-1.5 text-[10px] font-extrabold"></span>
+                            </div>
+                            <div class="flex flex-wrap items-center gap-2">
+                                <span id="neuralNodeSelectedPill" class="px-2.5 py-1 rounded-lg bg-slate-800 border border-slate-700 text-slate-300 text-[10px] font-extrabold">Visão: Todos os Nós</span>
+                                <button type="button" id="btnAbrirTelaNoSel" onclick="abrirTelaDoNoSelecionado()" hidden class="hidden px-3 py-1 rounded-lg bg-sky-600 hover:bg-sky-500 text-white text-[10px] font-extrabold">Inspecionar Tela Completa →</button>
+                                <span id="neuralTelemetryElapsed" class="font-mono text-[11px] text-slate-400">Ciclo pronto</span>
+                            </div>
+                        </div>
+
+                        <!-- PAINEL DUPLO DE MONITORAMENTO EM TEMPO REAL (CONVERSA ENTRE NÓS + AUDITORIA ORDEM A ORDEM) -->
+                        <div class="relative z-10 grid grid-cols-1 xl:grid-cols-12 gap-4">
+                            <!-- COLUNA ESQUERDA: CONVERSA E DELEGAÇÃO ENTRE OS NÓS -->
+                            <div class="xl:col-span-5 rounded-2xl border border-slate-800 bg-slate-950/90 p-4 flex flex-col gap-3">
+                                <div class="flex flex-wrap items-center justify-between gap-2 border-b border-slate-800 pb-2.5">
+                                    <div class="flex items-center gap-2">
+                                        <span class="w-7 h-7 rounded-xl bg-sky-500/20 border border-sky-400/40 flex items-center justify-center text-sky-300">
+                                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 10h.01M12 10h.01M16 10h.01M9 16H5a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v8a2 2 0 01-2 2h-5l-5 5v-5z"/></svg>
+                                        </span>
+                                        <div>
+                                            <div class="text-xs font-extrabold text-white">Conversa &amp; Retorno Entre Nós (Ao Vivo)</div>
+                                            <div class="text-[10px] text-slate-400">O que cada agente envia na sinapse e o que recebe de retorno</div>
+                                        </div>
+                                    </div>
+                                    <select id="neuralFiltroNoSelect" onchange="selecionarNoInspecao(this.value)" class="px-2.5 py-1 rounded-lg bg-slate-900 border border-slate-700 text-slate-200 text-[10px] font-extrabold outline-none">
+                                        <option value="">Todos os Nós</option>
+                                        <option value="maestro">Maestro</option>
+                                        <option value="no1">Nó 1 (Coletor)</option>
+                                        <option value="no2">Nó 2 (Fast-Path R$ 0)</option>
+                                        <option value="no3">Nó 3 (Auditor Lote 20)</option>
+                                        <option value="no4">Nó 4 (Roteador)</option>
+                                        <option value="no5">Nó 5 (Conferente)</option>
+                                        <option value="no6">Nó 6 (Bibliotecário)</option>
+                                        <option value="no7">Nó 7 (Confiabilidade)</option>
+                                        <option value="no8">Nó 8 (Caçador AQF)</option>
+                                        <option value="no9">Nó 9 (Planejador)</option>
+                                    </select>
+                                </div>
+                                <div id="neuralInteracoesFeed" class="neural-scroll space-y-2.5 h-[430px] overflow-y-auto pr-1 text-xs"></div>
+                            </div>
+
+                            <!-- COLUNA DIREITA: STREAM ORDEM A ORDEM AUDITADA EM TEMPO REAL -->
+                            <div class="xl:col-span-7 rounded-2xl border border-slate-800 bg-slate-950/90 p-4 flex flex-col gap-3">
+                                <div class="flex flex-wrap items-center justify-between gap-2 border-b border-slate-800 pb-2.5">
+                                    <div class="flex items-center gap-2">
+                                        <span class="w-7 h-7 rounded-xl bg-emerald-500/20 border border-emerald-400/40 flex items-center justify-center text-emerald-300">
+                                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4"/></svg>
+                                        </span>
+                                        <div>
+                                            <div class="text-xs font-extrabold text-white">Decisões Ordem a Ordem (OM por OM ao Vivo)</div>
+                                            <div class="text-[10px] text-slate-400">Caminho percorrido na rede, classificação EN 13306 e parecer retornado</div>
+                                        </div>
+                                    </div>
+                                    <div class="flex flex-wrap items-center gap-1.5">
+                                        <select id="neuralFiltroCategoriaStream" onchange="renderStreamOrdensAoVivo()" class="px-2.5 py-1 rounded-lg bg-slate-900 border border-slate-700 text-slate-200 text-[10px] font-extrabold outline-none">
+                                            <option value="">Todas as Categorias</option>
+                                            <option value="QUEBRA">Apenas QUEBRAS</option>
+                                            <option value="FALHA OPERACIONAL">FALHA OPERACIONAL</option>
+                                            <option value="FAST_PATH">Resolvidas a R$ 0</option>
+                                            <option value="PENDENTES">Fila Conferir / Revisão</option>
+                                        </select>
+                                    </div>
+                                </div>
+                                <div id="neuralOrdensLiveFeed" class="neural-scroll space-y-2.5 h-[430px] overflow-y-auto pr-1 text-xs"></div>
                             </div>
                         </div>
                     </div>
@@ -710,7 +827,8 @@
                                 <label for="compSelectBaseline" class="text-[11px] font-extrabold text-slate-600">Comparar Vigente contra:</label>
                                 <select id="compSelectBaseline" onchange="renderComparativoHistorico()" class="input-clean py-1.5 text-xs font-extrabold w-auto"></select>
                                 <button type="button" onclick="salvarRodadaAtualNoHistorico(true)" class="btn-touch bg-indigo-600 hover:bg-indigo-700 text-white text-xs py-2 px-3.5">
-                                    💾 Arquivar Ciclo no Histórico
+                                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7H5a2 2 0 00-2 2v9a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2h-3m-1 4l-3 3m0 0l-3-3m3 3V4"/></svg>
+                                    <span>Arquivar Ciclo no Histórico</span>
                                 </button>
                             </div>
                         </div>
@@ -750,8 +868,8 @@
                                 <h3 class="text-base font-extrabold text-slate-900">Inspect Checkpoints — Detalhamento Técnico dos 9 Nós</h3>
                             </div>
                             <div class="flex flex-wrap items-center gap-2 text-[11px] font-extrabold">
-                                <span class="px-2.5 py-1 rounded-full bg-emerald-50 text-emerald-800 border border-emerald-200">● Nó Concluído</span>
-                                <span class="px-2.5 py-1 rounded-full bg-amber-50 text-amber-800 border border-amber-200">● Aguardando Supervisão</span>
+                                <span class="px-2.5 py-1 rounded-full bg-emerald-50 text-emerald-800 border border-emerald-200">Nó Concluído</span>
+                                <span class="px-2.5 py-1 rounded-full bg-amber-50 text-amber-800 border border-amber-200">Aguardando Supervisão</span>
                             </div>
                         </div>
                         <div id="pipelineNodesGrid" class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-3.5"></div>
@@ -785,7 +903,10 @@
                                 <h3 class="text-base font-extrabold text-slate-900">Base Auditada de Ordens de Manutenção</h3>
                             </div>
                             <div class="flex flex-wrap items-center gap-2">
-                                <button type="button" onclick="exportarCsvAuditadoMaestri()" class="btn-touch bg-emerald-600 hover:bg-emerald-700 text-white text-xs py-2 px-3.5">⬇ Exportar OMs_Auditadas.csv</button>
+                                <button type="button" onclick="exportarCsvAuditadoMaestri()" class="btn-touch bg-emerald-600 hover:bg-emerald-700 text-white text-xs py-2 px-3.5">
+                                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"/></svg>
+                                    <span>Exportar OMs_Auditadas.csv</span>
+                                </button>
                             </div>
                         </div>
 
@@ -839,10 +960,10 @@
                                 <thead>
                                     <tr class="bg-slate-900 text-white text-[10px] font-extrabold uppercase tracking-wider">
                                         <th class="py-3 px-3">OM / Data</th>
-                                        <th class="py-3 px-3">Ativo & Linha (ob_linhas)</th>
-                                        <th class="py-3 px-3">Problema & Serviço Executado</th>
+                                        <th class="py-3 px-3">Ativo &amp; Linha (ob_linhas)</th>
+                                        <th class="py-3 px-3">Problema &amp; Serviço Executado</th>
                                         <th class="py-3 px-3 text-center">Equipe / Parada</th>
-                                        <th class="py-3 px-3 text-center">Categoria & B×C</th>
+                                        <th class="py-3 px-3 text-center">Categoria &amp; B×C</th>
                                         <th class="py-3 px-3 text-center">Origem / Fila</th>
                                         <th class="py-3 px-3 text-right">Ações</th>
                                     </tr>
@@ -878,7 +999,10 @@
                                 <option value="REVISAO">Apenas Bloqueio REVISÃO</option>
                                 <option value="REVISADAS">Já Conferidas por Supervisor</option>
                             </select>
-                            <button type="button" onclick="confirmarLoteConferenteVisiveis()" class="btn-touch bg-emerald-600 hover:bg-emerald-700 text-white text-xs py-2 px-3.5">✓ Confirmar Visíveis</button>
+                            <button type="button" onclick="confirmarLoteConferenteVisiveis()" class="btn-touch bg-emerald-600 hover:bg-emerald-700 text-white text-xs py-2 px-3.5">
+                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg>
+                                <span>Confirmar Visíveis</span>
+                            </button>
                         </div>
                     </div>
 
@@ -890,12 +1014,15 @@
                 <section id="view-bibliotecario" hidden class="hidden space-y-5">
                     <div class="glass-card p-5 rounded-3xl border-2 border-indigo-200 bg-gradient-to-r from-indigo-50/70 via-white to-emerald-50/40 flex flex-col lg:flex-row lg:items-center justify-between gap-4">
                         <div class="space-y-1">
-                            <span class="px-2.5 py-0.5 rounded-full bg-indigo-600 text-white text-[10px] font-extrabold uppercase">Nó 6 • Bibliotecário & Memória Contínua</span>
-                            <h3 class="text-base sm:text-lg font-extrabold text-slate-900">Biblioteca de Correções (correcoes.jsonl) & Detector de Divergência</h3>
+                            <span class="px-2.5 py-0.5 rounded-full bg-indigo-600 text-white text-[10px] font-extrabold uppercase">Nó 6 • Bibliotecário &amp; Memória Contínua</span>
+                            <h3 class="text-base sm:text-lg font-extrabold text-slate-900">Biblioteca de Correções (correcoes.jsonl) &amp; Detector de Divergência</h3>
                             <p class="text-xs font-semibold text-slate-600">Regras curadas aqui são injetadas no <strong>Nó 2 (Fast-Path R$ 0,00)</strong> e como <em>few-shot</em> dinâmico por similaridade Jaccard no <strong>Nó 3</strong>.</p>
                         </div>
                         <div class="flex flex-wrap items-center gap-2 shrink-0">
-                            <button type="button" onclick="exportarCorrecoesJsonl()" class="btn-touch bg-slate-900 hover:bg-slate-800 text-white text-xs py-2 px-4">⬇ Baixar correcoes.jsonl</button>
+                            <button type="button" onclick="exportarCorrecoesJsonl()" class="btn-touch bg-slate-900 hover:bg-slate-800 text-white text-xs py-2 px-4">
+                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"/></svg>
+                                <span>Baixar correcoes.jsonl</span>
+                            </button>
                         </div>
                     </div>
 
@@ -904,7 +1031,7 @@
                         <div class="flex flex-wrap items-center justify-between gap-2">
                             <div>
                                 <span class="text-[10px] font-extrabold uppercase tracking-wider text-rose-700">Governança de Critério • Consenso entre Equipes</span>
-                                <h3 class="text-sm font-extrabold text-slate-900">Detector de Divergência entre Supervisores (Jaccard ≥ 45% com Categorias Opostas)</h3>
+                                <h3 class="text-sm font-extrabold text-slate-900">Detector de Divergência entre Supervisores (Jaccard ≥ 35% com Categorias Opostas)</h3>
                             </div>
                             <span id="biblioDivCountBadge" class="px-2.5 py-1 rounded-full bg-emerald-100 text-emerald-800 text-[11px] font-extrabold">0 divergências</span>
                         </div>
@@ -930,9 +1057,9 @@
                         <div class="flex flex-wrap items-center justify-between gap-2">
                             <div>
                                 <span class="text-[10px] font-extrabold uppercase tracking-wider text-rose-700">Nó 7 • Inteligência Cruzada (ERP × Inspeção de Rota × Obsolescência)</span>
-                                <h3 class="text-base font-extrabold text-slate-900">Radar de "Quebra Evitável" & Risco de Obsolescência nos Top Ofensores</h3>
+                                <h3 class="text-base font-extrabold text-slate-900">Radar de "Quebra Evitável" &amp; Risco de Obsolescência nos Top Ofensores</h3>
                             </div>
-                            <span class="text-[11px] font-bold text-slate-500">Clique em "🎯 Gerar AQF" para abrir o estudo completo no Caçador</span>
+                            <span class="text-[11px] font-bold text-slate-500">Clique em "Gerar AQF" para abrir o estudo completo no Caçador</span>
                         </div>
                         <div class="overflow-x-auto">
                             <table class="w-full text-left border-collapse text-xs">
@@ -960,14 +1087,17 @@
                         <div class="space-y-1">
                             <div class="flex flex-wrap items-center gap-2">
                                 <span class="px-2.5 py-0.5 rounded-full bg-sky-600 text-white text-[10px] font-extrabold uppercase">Nó 8 (Caçador AQF 2.0) + Nó 9 (Planejador 1-Clique)</span>
-                                <span class="px-2.5 py-0.5 rounded-full bg-indigo-50 text-indigo-800 border border-indigo-200 text-[10px] font-extrabold">Integrado com DOCS-ATIVOS.html & GESTAO-ATIVOS.html</span>
+                                <span class="px-2.5 py-0.5 rounded-full bg-indigo-50 text-indigo-800 border border-indigo-200 text-[10px] font-extrabold">Integrado com DOCS-ATIVOS.html &amp; GESTAO-ATIVOS.html</span>
                             </div>
-                            <h3 class="text-base sm:text-lg font-extrabold text-slate-900">Estudos de Causa Raiz (RAE + Ishikawa 6M + 5 Porquês + 5W2H) & Planejador</h3>
+                            <h3 class="text-base sm:text-lg font-extrabold text-slate-900">Estudos de Causa Raiz (RAE + Ishikawa 6M + 5 Porquês + 5W2H) &amp; Planejador</h3>
                             <p class="text-xs font-semibold text-slate-600">Selecione qualquer ativo ofensor para gerar o estudo técnico em 2 chamadas estruturadas, consultar os manuais vigentes do ativo e disparar ações em 1 clique para Preventivas, Rotas 52S ou Agenda PCM.</p>
                         </div>
                         <div class="flex flex-wrap items-center gap-2 shrink-0">
                             <select id="cacadorSelectAtivo" class="input-clean py-2 text-xs font-extrabold w-64"></select>
-                            <button type="button" onclick="gerarEstudoCacadorAtivoSelecionado()" class="btn-pill-dark text-xs py-2.5 px-4">🎯 Gerar / Atualizar Estudo AQF</button>
+                            <button type="button" onclick="gerarEstudoCacadorAtivoSelecionado()" class="btn-pill-dark text-xs py-2.5 px-4">
+                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"/></svg>
+                                <span>Gerar / Atualizar Estudo AQF</span>
+                            </button>
                         </div>
                     </div>
 
@@ -978,7 +1108,7 @@
                 <section id="view-master-maestri" hidden class="hidden space-y-5">
                     <div class="glass-card p-5 rounded-3xl border-2 border-rose-200 bg-gradient-to-r from-rose-50/80 via-white to-amber-50/50 flex flex-col lg:flex-row lg:items-center justify-between gap-4">
                         <div class="space-y-1">
-                            <span class="px-2.5 py-0.5 rounded-full bg-rose-600 text-white text-[10px] font-extrabold uppercase">Privilégio Admin Master • Cofre Local & Governança</span>
+                            <span class="px-2.5 py-0.5 rounded-full bg-rose-600 text-white text-[10px] font-extrabold uppercase">Privilégio Admin Master • Cofre Local &amp; Governança</span>
                             <h3 class="text-lg font-extrabold text-slate-900">Central Admin Master do Maestri 2.0</h3>
                             <p class="text-xs font-semibold text-slate-600">Configure a chave Gemini API no cofre local deste navegador (substituindo o antigo <code>Api_key.txt</code>), ajuste o tamanho do lote (20 OMs) e gerencie registros em lote.</p>
                         </div>
@@ -990,7 +1120,10 @@
 
                     <!-- COFRE DE CHAVE GEMINI API & PARÂMETROS DE LOTE -->
                     <div class="glass-card p-5 rounded-3xl space-y-4">
-                        <h4 class="text-sm font-extrabold text-slate-900">🔐 Cofre Local de IA (Restrito ao Computador do Gestor — Nunca Salvo no GitHub)</h4>
+                        <h4 class="inline-flex items-center gap-2 text-sm font-extrabold text-slate-900">
+                            <svg class="w-4 h-4 text-rose-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"/></svg>
+                            <span>Cofre Local de IA (Restrito ao Computador do Gestor — Nunca Salvo no GitHub)</span>
+                        </h4>
                         <div class="grid grid-cols-1 md:grid-cols-3 gap-3 text-xs">
                             <div>
                                 <label class="block text-[10px] font-extrabold uppercase text-slate-500 mb-1">Chave Gemini API (Google AI Studio)</label>
@@ -1017,7 +1150,10 @@
                             <span id="masterVaultStatusTxt" class="text-xs font-bold text-slate-600">Status do Cofre: Verificando...</span>
                             <div class="flex gap-2">
                                 <button type="button" onclick="limparCofreIaMaster()" class="btn-touch bg-rose-50 text-rose-700 border border-rose-200 text-xs">Remover Chave Local</button>
-                                <button type="button" onclick="salvarCofreIaMaster()" class="btn-touch bg-emerald-600 hover:bg-emerald-700 text-white text-xs">💾 Salvar Configuração do Cofre</button>
+                                <button type="button" onclick="salvarCofreIaMaster()" class="btn-touch bg-emerald-600 hover:bg-emerald-700 text-white text-xs">
+                                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7H5a2 2 0 00-2 2v9a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2h-3m-1 4l-3 3m0 0l-3-3m3 3V4"/></svg>
+                                    <span>Salvar Configuração do Cofre</span>
+                                </button>
                             </div>
                         </div>
                     </div>
@@ -1028,7 +1164,10 @@
                             <h4 class="text-sm font-extrabold text-slate-900">Edição e Exclusão Direta Master de Ordens Auditadas</h4>
                             <div class="flex flex-wrap items-center gap-2">
                                 <input type="text" id="masterOmBusca" oninput="renderMasterMaestriView()" placeholder="Buscar OM, ativo, categoria..." class="input-clean py-1.5 text-xs font-bold w-60">
-                                <button type="button" onclick="excluirOrdensSelecionadasMasterMaestri()" class="btn-touch bg-rose-600 hover:bg-rose-700 text-white text-xs py-1.5 px-3">🗑️ Excluir Selecionadas (<span id="masterOmSelCount">0</span>)</button>
+                                <button type="button" onclick="excluirOrdensSelecionadasMasterMaestri()" class="btn-touch bg-rose-600 hover:bg-rose-700 text-white text-xs py-1.5 px-3">
+                                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/></svg>
+                                    <span>Excluir Selecionadas (<span id="masterOmSelCount">0</span>)</span>
+                                </button>
                             </div>
                         </div>
                         <div id="masterOmLista" class="space-y-2 max-h-[55vh] overflow-y-auto"></div>
@@ -1057,7 +1196,7 @@
                     <span class="text-[10px] font-extrabold uppercase tracking-widest text-amber-600">Nó 5 (Conferente) → Nó 6 (Bibliotecário)</span>
                     <h2 id="corrModalTitulo" class="text-lg font-extrabold text-slate-900">Corrigir Classificação & Ensinar IA</h2>
                 </div>
-                <button type="button" onclick="fecharModal('modalCorrigirOmSupervisor')" class="w-8 h-8 rounded-full bg-slate-100 text-slate-600 font-bold">✕</button>
+                <button type="button" onclick="fecharModal('modalCorrigirOmSupervisor')" aria-label="Fechar" class="w-8 h-8 rounded-full bg-slate-100 text-slate-600 flex items-center justify-center"><svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg></button>
             </div>
             <form onsubmit="salvarCorrecaoSupervisor(event)" class="space-y-3.5 text-xs">
                 <input type="hidden" id="corrOmId" value="">
@@ -1106,7 +1245,7 @@
                 </div>
                 <div class="flex gap-2 pt-2 border-t border-slate-100">
                     <button type="button" onclick="fecharModal('modalCorrigirOmSupervisor')" class="btn-touch bg-slate-100 text-slate-700 flex-1 text-xs">Cancelar</button>
-                    <button type="submit" class="btn-pill-dark flex-1 text-xs">✓ Salvar & Ensinar Bibliotecário</button>
+                    <button type="submit" class="btn-pill-dark inline-flex items-center justify-center gap-1.5 flex-1 text-xs"><svg class="w-4 h-4 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg><span>Salvar &amp; Ensinar Bibliotecário</span></button>
                 </div>
             </form>
         </div>
@@ -1123,7 +1262,7 @@
                     </div>
                     <h2 class="text-lg font-extrabold text-slate-900">Acesso Admin Master</h2>
                 </div>
-                <button type="button" onclick="fecharModal('modalAdminMasterMaestri')" class="w-8 h-8 rounded-full bg-slate-100 text-slate-600 font-bold">✕</button>
+                <button type="button" onclick="fecharModal('modalAdminMasterMaestri')" aria-label="Fechar" class="w-8 h-8 rounded-full bg-slate-100 text-slate-600 flex items-center justify-center"><svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg></button>
             </div>
             <form id="masterMaestriUnlockBox" onsubmit="desbloquearAdminMasterMaestri(event)" class="space-y-4">
                 <p class="text-xs text-slate-600 leading-relaxed">Digite a <strong>senha oculta Admin Master</strong> do Portal PCM para liberar o Cofre de Chave Gemini API, edição direta e arbitragem de divergências.</p>
@@ -1138,7 +1277,7 @@
             </form>
             <div id="masterMaestriActiveBox" hidden class="hidden space-y-4">
                 <div class="p-3.5 rounded-2xl bg-rose-50 border border-rose-200 text-xs text-rose-900 space-y-1">
-                    <div class="font-extrabold">✓ Admin Master Ativo no Maestri 2.0</div>
+                    <div class="font-extrabold flex items-center gap-1.5"><svg class="w-4 h-4 text-rose-600 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/></svg><span>Admin Master Ativo no Maestri 2.0</span></div>
                     <div class="text-[11px] text-rose-800">Cofre de IA, arbitragem do Bibliotecário e edição direta em lote liberados.</div>
                 </div>
                 <div class="p-3.5 rounded-2xl bg-slate-50 border border-slate-200 space-y-2.5">
@@ -1163,7 +1302,7 @@
                     <span class="text-[10px] font-extrabold uppercase tracking-widest text-sky-600">Preferências Visuais</span>
                     <h2 class="text-lg font-extrabold text-slate-900">Espaço do Usuário</h2>
                 </div>
-                <button type="button" onclick="fecharModal('modalEspacoUsuario')" class="w-8 h-8 rounded-full bg-slate-100 text-slate-600 font-bold">✕</button>
+                <button type="button" onclick="fecharModal('modalEspacoUsuario')" aria-label="Fechar" class="w-8 h-8 rounded-full bg-slate-100 text-slate-600 flex items-center justify-center"><svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg></button>
             </div>
             <div class="space-y-4 text-xs">
                 <div>
@@ -1350,10 +1489,15 @@
             arquivoNome: "",
             tipo: "VIGENTE"
         };
-        let neuralAnimacaoModo = "cinematica"; // "cinematica" | "instantanea"
+        let neuralRitmoModo = "passo_a_passo"; // "passo_a_passo" | "rapido"
+        let neuralAnimacaoModo = "cinematica"; // "cinematica" | "instantanea" (retrocompatibilidade testes)
         let neuralAnimacaoTimer = null;
         let neuralAnimandoAgora = false;
-        let neuralLogsLive = [];
+        let neuralPausado = false;
+        let neuralPauseContinuarFn = null;
+        let neuralNoSelecionado = "";
+        let neuralInteracoesLive = [];
+        let neuralOrdensLive = [];
         let custoRodada = {
             oms_total: 0,
             oms_fast_path_r0: 0,
@@ -1366,6 +1510,17 @@
             economia_pct: 0
         };
         let masterSelecionadasOms = new Set();
+
+        const SVG_ICO = {
+            check: '<svg class="w-3.5 h-3.5 inline-block shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg>',
+            edit: '<svg class="w-3.5 h-3.5 inline-block shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/></svg>',
+            alert: '<svg class="w-3.5 h-3.5 inline-block shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"/></svg>',
+            target: '<svg class="w-3.5 h-3.5 inline-block shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>',
+            bolt: '<svg class="w-3.5 h-3.5 inline-block shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"/></svg>',
+            print: '<svg class="w-3.5 h-3.5 inline-block shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z"/></svg>',
+            arrowR: '<svg class="w-3 h-3 inline-block shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 5l7 7m0 0l-7 7m7-7H3"/></svg>',
+            cpu: '<svg class="w-3.5 h-3.5 inline-block shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 3v2m6-2v2M9 19v2m6-2v2M5 9H3m2 6H3m18-6h-2m2 6h-2M7 19h10a2 2 0 002-2V7a2 2 0 00-2-2H7a2 2 0 00-2 2v10a2 2 0 002 2zM9 9h6v6H9V9z"/></svg>'
+        };
 
         // ================= HELPERS PUROS & SHA-256 =================
         function escapeHtml(val) {
@@ -1618,7 +1773,7 @@
             if (selL) selL.value = String(lote);
             if (st) {
                 st.innerText = k
-                    ? `✓ Chave configurada localmente (${k.slice(0, 6)}...${k.slice(-3)}) • Modo: ${modo.toUpperCase()} • Lote: ${lote} OMs`
+                    ? `Ativa: Chave configurada localmente (${k.slice(0, 6)}...${k.slice(-3)}) • Modo: ${modo.toUpperCase()} • Lote: ${lote} OMs`
                     : `Modo Custo Zero Ativo (Fast-Path + Motor Determinístico PCM R$ 0,00 • Lote ${lote} OMs)`;
             }
             return { key: k, modo, lote };
@@ -2042,8 +2197,8 @@
                 }) || /(?:fryma|boatopack 1|serac 2|cozinha 3)/.test(na);
 
                 const statusRota = (nQ > 0 && temAnomaliaRota)
-                    ? "⚠ Anomalia prévia na Rota não tratada a tempo"
-                    : (rotasprev.length > 0 ? "✓ Coberto por Rota / Preventiva" : (nQ > 0 ? "🚨 Quebra sem ponto de Inspeção de Rota ativo" : "Operação Estável"));
+                    ? "Alerta: Anomalia prévia na Rota não tratada a tempo"
+                    : (rotasprev.length > 0 ? "Coberto por Rota / Preventiva" : (nQ > 0 ? "Quebra sem ponto de Inspeção de Rota ativo" : "Operação Estável"));
 
                 const ref = list[0];
                 return {
@@ -2412,10 +2567,20 @@
             };
             custoRodada = { oms_total: 0, oms_fast_path_r0: 0, oms_ia_lote: 0, chamadas_ia: 0, lote_size: Number(safeStorage.get("cepera_maestri_lote_size") || 20), custo_brl: 0, custo_sem_otimizacao_brl: 0, economia_brl: 0, economia_pct: 0 };
             recalcularNosPosAuditoria();
-            neuralLogsLive = [
-                `[SISTEMA] Base histórica Set/Out carregada (1.234 OMs • Memória ativa: ${bibliotecaCorrecoes.filter(b => b.status !== "REVERTIDO").length} regras R$ 0,00).`,
-                `[MAESTRO] Pronto para receber a planilha de ${rodadaVigenteInfo.periodo}. Arraste o arquivo ERP para iniciar a Rede Neural!`
-            ];
+            neuralPausado = false;
+            neuralPauseContinuarFn = null;
+            neuralNoSelecionado = "";
+            neuralInteracoesLive = [{
+                id: "init-boot",
+                hora: agoraHMS(),
+                origem: "MAESTRO",
+                destino: "N1/N2",
+                titulo: "Base histórica Set/Out carregada em prontidão",
+                retorno: `1.234 OMs na memória de treino • ${bibliotecaCorrecoes.filter(b => b.status !== "REVERTIDO").length} regras ativas R$ 0,00. Aguardando CSV de ${rodadaVigenteInfo.periodo}.`,
+                status: "pronto",
+                om: ""
+            }];
+            neuralOrdensLive = [];
             renderCurrentView();
             resetarVisualRedeNeuralAguardando();
         };
@@ -2608,10 +2773,10 @@ OMs:\n${JSON.stringify(listaPrompt)}`;
             salvarEstadoPersistidoMaestri();
             renderCurrentView();
 
-            if (opts.animar !== false && neuralAnimacaoModo === "cinematica" && typeof window.setTimeout === "function") {
+            if (opts.animar !== false && neuralAnimacaoModo !== "instantanea" && typeof window.setTimeout === "function") {
                 executarAnimacaoRedeNeural({ total: omsAuditadas.length, fastCnt, loteCnt, chamadas: custoRodada.chamadas_ia });
             } else {
-                aplicarEstadoFinalRedeNeural({ total: omsAuditadas.length, fastCnt, loteCnt, chamadas: custoRodada.chamadas_ia });
+                aplicarEstadoFinalRedeNeural({ total: omsAuditadas.length, fastCnt, loteCnt, chamadas: custoRodada.chamadas_ia, forcarSyncStream: true });
             }
 
             showToast(`Rede Neural Maestri concluída (${omsAuditadas.length} OMs de ${rodadaVigenteInfo.periodo} • Custo R$ ${custoRodada.custo_brl.toFixed(2)})!`, "success");
@@ -2621,25 +2786,213 @@ OMs:\n${JSON.stringify(listaPrompt)}`;
             recalcularNosPosAuditoria();
             salvarEstadoPersistidoMaestri();
             renderCurrentView();
-            aplicarEstadoFinalRedeNeural({ total: omsAuditadas.length, fastCnt: custoRodada.oms_fast_path_r0, loteCnt: custoRodada.oms_ia_lote, chamadas: custoRodada.chamadas_ia });
+            aplicarEstadoFinalRedeNeural({ total: omsAuditadas.length, fastCnt: custoRodada.oms_fast_path_r0, loteCnt: custoRodada.oms_ia_lote, chamadas: custoRodada.chamadas_ia, forcarSyncStream: true });
             showToast("Nós 6, 7, 8 e 9 reprocessados a R$ 0,00 com as correções dos supervisores!", "success");
         };
 
-        // ================= MOTOR VISUAL DA REDE NEURAL (MAESTRO + PERCEPTRONS + SVG SINAPSES) =================
-        function adicionarLogNeural(msg) {
-            const feedEl = document.getElementById("neuralTelemetryFeed");
-            const semHoraPrev = (neuralLogsLive[0] || "").replace(/^\[\d{2}:\d{2}:\d{2}\]\s*/, "");
-            if (semHoraPrev !== msg) {
-                const hh = new Date().toTimeString().slice(0, 8);
-                neuralLogsLive.unshift(`[${hh}] ${msg}`);
-                if (neuralLogsLive.length > 8) neuralLogsLive = neuralLogsLive.slice(0, 8);
-            }
-            if (feedEl) {
-                feedEl.innerHTML = neuralLogsLive.map((l, idx) =>
-                    `<div class="${idx === 0 ? "text-sky-300 font-bold" : "text-slate-400"} truncate">${escapeHtml(l)}</div>`
-                ).join("");
-            }
+        // ================= MOTOR VISUAL DA REDE NEURAL (MAESTRO + PERCEPTRONS + SVG SINAPSES EDGE-TO-EDGE) =================
+        function agoraHMS() {
+            return new Date().toTimeString().slice(0, 8);
         }
+
+        const MAPA_CODIGOS_NO = {
+            maestro: "MAESTRO",
+            input_erp: "INPUT",
+            hist_base: "BASE",
+            no1: "N1",
+            no2: "N2",
+            no3: "N3",
+            no4: "N4",
+            no5: "N5",
+            no6: "N6",
+            no7: "N7",
+            no8: "N8",
+            no9: "N9"
+        };
+
+        const NOMES_EXIBICAO_NO = {
+            maestro: "Maestro Orquestrador",
+            input_erp: "Planilha Vigente ERP",
+            hist_base: "Base Histórica Set/Out",
+            no1: "Nó 1 — Coletor & Filtro",
+            no2: "Nó 2 — Fast-Path R$ 0",
+            no3: "Nó 3 — Auditor Lote 20",
+            no4: "Nó 4 — Roteador 4 Equipes",
+            no5: "Nó 5 — Mesa Conferente",
+            no6: "Nó 6 — Bibliotecário",
+            no7: "Nó 7 — Confiabilidade",
+            no8: "Nó 8 — Caçador AQF 2.0",
+            no9: "Nó 9 — Planejador 1-Clique"
+        };
+
+        function registrarInteracaoNeural(item) {
+            neuralInteracoesLive.unshift({
+                id: item.id || `int-${Date.now()}-${Math.random().toString(36).slice(2, 6)}`,
+                hora: item.hora || agoraHMS(),
+                origem: item.origem || "MAESTRO",
+                destino: item.destino || "N1",
+                titulo: item.titulo || "",
+                retorno: item.retorno || "",
+                status: item.status || "info",
+                om: item.om || ""
+            });
+            if (neuralInteracoesLive.length > 140) neuralInteracoesLive = neuralInteracoesLive.slice(0, 140);
+            renderInteracoesAoVivo();
+        }
+
+        function atualizarBarraResumoLive(atual = 0, total = 0, listaParcial = [], statusTxt = "") {
+            const titleEl = document.getElementById("neuralLiveCounterTitle");
+            const fillEl = document.getElementById("neuralLiveProgressFill");
+            const pillsEl = document.getElementById("neuralLiveCountersPills");
+            const elTime = document.getElementById("neuralTelemetryElapsed");
+
+            const totSafe = Math.max(0, total || omsAuditadas.length || 0);
+            const curSafe = Math.min(totSafe, Math.max(0, atual || 0));
+            const pct = totSafe ? Math.round((curSafe / totSafe) * 100) : 0;
+
+            if (titleEl) {
+                titleEl.innerText = totSafe
+                    ? `${curSafe} / ${totSafe} OMs auditadas (${pct}%)`
+                    : "0 / 0 OMs processadas";
+            }
+            if (fillEl && fillEl.style) fillEl.style.width = `${pct}%`;
+
+            const src = listaParcial && listaParcial.length ? listaParcial : [];
+            const r0Cnt = src.filter(o => ["FAST_PATH_R0", "BIBLIOTECA_MEMORIA", "DEDUP_RODADA"].includes(o.origem)).length;
+            const iaCnt = src.length - r0Cnt;
+            const qbrCnt = src.filter(o => o.categoria === "QUEBRA").length;
+            const confCnt = src.filter(o => o.fila === "CONFERIR" || o.fila === "REVISAO").length;
+
+            if (pillsEl) {
+                pillsEl.innerHTML = src.length ? [
+                    `<span class="px-2 py-0.5 rounded-full bg-emerald-500/20 text-emerald-300 border border-emerald-500/40">R$ 0: ${r0Cnt}</span>`,
+                    `<span class="px-2 py-0.5 rounded-full bg-indigo-500/20 text-indigo-300 border border-indigo-500/40">Lote 20: ${iaCnt}</span>`,
+                    `<span class="px-2 py-0.5 rounded-full bg-rose-500/20 text-rose-300 border border-rose-500/40">Quebras: ${qbrCnt}</span>`,
+                    `<span class="px-2 py-0.5 rounded-full bg-amber-500/20 text-amber-300 border border-amber-500/40">Conferir: ${confCnt}</span>`
+                ].join("") : `<span class="text-slate-500">Aguardando envio do lote ERP...</span>`;
+            }
+
+            if (elTime && statusTxt) elTime.innerText = statusTxt;
+        }
+
+        window.renderInteracoesAoVivo = () => {
+            const box = document.getElementById("neuralInteracoesFeed");
+            if (!box) return;
+            const filtroCod = MAPA_CODIGOS_NO[neuralNoSelecionado] || "";
+            const lista = filtroCod
+                ? neuralInteracoesLive.filter(it =>
+                    String(it.origem).includes(filtroCod) ||
+                    String(it.destino).includes(filtroCod)
+                )
+                : neuralInteracoesLive;
+
+            if (!lista.length) {
+                box.innerHTML = `<div class="p-6 rounded-xl border border-slate-800/80 bg-slate-900/60 text-center text-slate-400">Nenhuma interação registrada para <strong>${escapeHtml(NOMES_EXIBICAO_NO[neuralNoSelecionado] || "este filtro")}</strong> nesta etapa.</div>`;
+                return;
+            }
+
+            const clsMapa = {
+                pronto: "border-slate-700/80 bg-slate-900/70",
+                r0: "border-emerald-500/40 bg-emerald-950/30",
+                ia: "border-indigo-500/40 bg-indigo-950/30",
+                conferir: "border-amber-500/40 bg-amber-950/30",
+                aqf: "border-rose-500/40 bg-rose-950/30",
+                concluido: "border-sky-500/40 bg-sky-950/30"
+            };
+            const badgeMapa = {
+                pronto: "bg-slate-800 text-slate-300",
+                r0: "bg-emerald-500/25 text-emerald-300",
+                ia: "bg-indigo-500/25 text-indigo-300",
+                conferir: "bg-amber-500/25 text-amber-300",
+                aqf: "bg-rose-500/25 text-rose-300",
+                concluido: "bg-sky-500/25 text-sky-300"
+            };
+
+            box.innerHTML = lista.slice(0, 90).map(it => {
+                const cardCls = clsMapa[it.status] || "border-slate-800 bg-slate-900/80";
+                const bCls = badgeMapa[it.status] || "bg-slate-800 text-slate-300";
+                return `
+                    <div class="neural-stream-card p-3 rounded-xl border ${cardCls} space-y-1.5">
+                        <div class="flex items-center justify-between gap-2">
+                            <div class="flex items-center gap-1.5 font-mono text-[10px] font-extrabold">
+                                <span class="px-1.5 py-0.5 rounded ${bCls}">${escapeHtml(it.origem)}</span>
+                                <span class="text-slate-400">${SVG_ICO.arrowR}</span>
+                                <span class="px-1.5 py-0.5 rounded bg-slate-800 text-sky-300">${escapeHtml(it.destino)}</span>
+                                ${it.om ? `<span class="px-1.5 py-0.5 rounded bg-slate-950 border border-slate-700 text-slate-200">OM #${escapeHtml(it.om)}</span>` : ""}
+                            </div>
+                            <span class="font-mono text-[10px] text-slate-500">${escapeHtml(it.hora)}</span>
+                        </div>
+                        <div class="text-[11px] font-bold text-slate-100 leading-snug">${escapeHtml(it.titulo)}</div>
+                        ${it.retorno ? `<div class="text-[10px] font-mono text-emerald-300/95 bg-slate-950/75 rounded-lg px-2.5 py-1.5 border border-slate-800/90 leading-relaxed"><span class="text-slate-400 font-bold uppercase">Retorno:</span> ${escapeHtml(it.retorno)}</div>` : ""}
+                    </div>`;
+            }).join("");
+        };
+
+        window.renderStreamOrdensAoVivo = () => {
+            const box = document.getElementById("neuralOrdensLiveFeed");
+            if (!box) return;
+            const filtro = document.getElementById("neuralFiltroCategoriaStream")?.value || "";
+            const base = neuralOrdensLive;
+            const filtradas = base.filter(o => {
+                if (filtro === "QUEBRA") return o.categoria === "QUEBRA";
+                if (filtro === "FALHA OPERACIONAL") return o.categoria === "FALHA OPERACIONAL";
+                if (filtro === "FAST_PATH") return ["FAST_PATH_R0", "BIBLIOTECA_MEMORIA", "DEDUP_RODADA"].includes(o.origem);
+                if (filtro === "PENDENTES") return o.fila === "CONFERIR" || o.fila === "REVISAO";
+                return true;
+            });
+
+            if (!filtradas.length) {
+                box.innerHTML = `<div class="p-6 rounded-xl border border-slate-800/80 bg-slate-900/60 text-center text-slate-400">Nenhuma ordem auditada para exibir ainda. Clique em <strong>Executar Fluxo ao Vivo</strong> ou <strong>Simular Lote Novembro</strong>.</div>`;
+                return;
+            }
+
+            const totalVis = Math.min(filtradas.length, 100);
+            const notaRodape = filtradas.length > 100
+                ? `<div class="p-2.5 rounded-xl bg-slate-900 border border-slate-800 text-center text-[10px] font-bold text-slate-400">Exibindo as ${totalVis} decisões mais recentes de ${filtradas.length} OMs filtradas (consulte a lista completa na aba Auditoria).</div>`
+                : "";
+
+            box.innerHTML = filtradas.slice(0, 100).map(o => {
+                const isR0 = ["FAST_PATH_R0", "BIBLIOTECA_MEMORIA", "DEDUP_RODADA"].includes(o.origem);
+                const viaTxt = isR0 ? "N1 → N2 (R$ 0) → N4" : "N1 → N2 → N3 (Lote 20) → N4";
+                const extraPath = o.categoria === "QUEBRA" ? `${viaTxt} → N7 → N8` : (o.fila !== "AUTOMATICO" ? `${viaTxt} → N5` : viaTxt);
+                const catCls = o.categoria === "QUEBRA"
+                    ? "bg-rose-500/20 text-rose-300 border-rose-500/40"
+                    : (o.categoria === "FALHA OPERACIONAL"
+                        ? "bg-amber-500/20 text-amber-300 border-amber-500/40"
+                        : "bg-sky-500/20 text-sky-300 border-sky-500/40");
+                const filaCls = o.fila === "AUTOMATICO"
+                    ? "bg-emerald-500/20 text-emerald-300"
+                    : "bg-amber-500/25 text-amber-200";
+                const bxTxt = o.categoria === "QUEBRA" && o.b && o.c ? ` • B${o.b}×C${o.c} (${o.severidade})` : "";
+                const qNota = Number(o.qualidade_score ?? 75);
+                const qCls = qNota >= 75 ? "text-emerald-300" : (qNota >= 50 ? "text-amber-300" : "text-rose-300");
+
+                return `
+                    <div class="neural-stream-card p-3 rounded-xl border border-slate-800 bg-slate-900/80 hover:border-sky-500/50 transition-colors space-y-1.5">
+                        <div class="flex flex-wrap items-center justify-between gap-2">
+                            <div class="flex flex-wrap items-center gap-1.5">
+                                <span class="font-mono text-xs font-extrabold text-white">OM #${escapeHtml(o.om)}</span>
+                                <span class="px-2 py-0.5 rounded-full bg-slate-800 text-sky-300 text-[10px] font-bold">${escapeHtml(o.ativo)}</span>
+                                <span class="px-2 py-0.5 rounded-full border text-[10px] font-extrabold ${catCls}">${escapeHtml(o.categoria)}${escapeHtml(bxTxt)}</span>
+                            </div>
+                            <div class="flex items-center gap-1.5 font-mono text-[10px] font-extrabold">
+                                <span class="px-2 py-0.5 rounded ${isR0 ? "bg-emerald-500/20 text-emerald-300" : "bg-indigo-500/20 text-indigo-300"}">${isR0 ? "FAST-PATH R$ 0" : "IA LOTE 20"}</span>
+                                <span class="px-2 py-0.5 rounded ${filaCls}">${escapeHtml(o.fila)} • ${escapeHtml(o.equipe || "PCM")}</span>
+                            </div>
+                        </div>
+                        <div class="text-[11px] text-slate-300 leading-snug">
+                            <span class="font-bold text-slate-400">Problema:</span> ${escapeHtml(o.problema || "Sem descrição")} • <span class="font-bold text-slate-400">Serviço:</span> ${escapeHtml(o.servico || "—")}
+                        </div>
+                        <div class="flex flex-wrap items-center justify-between gap-2 text-[10px] bg-slate-950/75 rounded-lg px-2.5 py-1.5 border border-slate-800/90">
+                            <div class="text-slate-300 truncate flex-1 min-w-[200px]"><span class="font-bold text-sky-400">Decisão:</span> ${escapeHtml(o.justificativa || "Regra aplicada")}</div>
+                            <div class="flex items-center gap-2.5 font-mono shrink-0">
+                                <span class="text-slate-400">${escapeHtml(extraPath)}</span>
+                                <span class="font-extrabold ${qCls}">Qual. ${qNota}/100</span>
+                            </div>
+                        </div>
+                    </div>`;
+            }).join("") + notaRodape;
+        };
 
         function setEstadoPerceptronUI(nodeId, estado, pct, textoStat) {
             const el = document.getElementById(`pNode_${nodeId}`);
@@ -2656,38 +3009,38 @@ OMs:\n${JSON.stringify(listaPrompt)}`;
         }
 
         const COORD_FALLBACK_NEURAL = {
-            maestro: { x: 600, y: 60 },
-            input_erp: { x: 115, y: 195 },
-            no1: { x: 115, y: 315 },
-            hist_base: { x: 115, y: 445 },
-            no2: { x: 355, y: 235 },
-            no3: { x: 355, y: 410 },
-            no4: { x: 600, y: 205 },
-            no5: { x: 600, y: 340 },
-            no6: { x: 600, y: 470 },
-            no7: { x: 855, y: 245 },
-            no8: { x: 855, y: 410 },
-            no9: { x: 1085, y: 295 }
+            maestro:   { x: 600, y: 55,  left: 340, right: 860, top: 20,  bottom: 90,  w: 520, h: 70 },
+            input_erp: { x: 115, y: 185, left: 25,  right: 205, top: 145, bottom: 225, w: 180, h: 80 },
+            no1:       { x: 115, y: 315, left: 25,  right: 205, top: 270, bottom: 360, w: 180, h: 90 },
+            hist_base: { x: 115, y: 445, left: 25,  right: 205, top: 405, bottom: 485, w: 180, h: 80 },
+            no2:       { x: 360, y: 225, left: 270, right: 450, top: 180, bottom: 270, w: 180, h: 90 },
+            no3:       { x: 360, y: 410, left: 270, right: 450, top: 355, bottom: 465, w: 180, h: 110 },
+            no4:       { x: 605, y: 195, left: 515, right: 695, top: 150, bottom: 240, w: 180, h: 90 },
+            no5:       { x: 605, y: 335, left: 515, right: 695, top: 290, bottom: 380, w: 180, h: 90 },
+            no6:       { x: 605, y: 470, left: 515, right: 695, top: 425, bottom: 515, w: 180, h: 90 },
+            no7:       { x: 855, y: 235, left: 765, right: 945, top: 190, bottom: 280, w: 180, h: 90 },
+            no8:       { x: 855, y: 410, left: 765, right: 945, top: 365, bottom: 455, w: 180, h: 90 },
+            no9:       { x: 1090, y: 285, left: 1000, right: 1180, top: 240, bottom: 330, w: 180, h: 90 }
         };
 
         const DEFINICAO_SINAPSES = [
-            { id: "s_in_n1", de: "input_erp", para: "no1", cor: "#38bdf8", label: "Planilha Bruta" },
-            { id: "s_hist_n2", de: "hist_base", para: "no2", cor: "#a78bfa", label: "Pesos Set/Out" },
-            { id: "s_n1_n2", de: "no1", para: "no2", cor: "#34d399", label: "Filtradas" },
-            { id: "s_n2_n4", de: "no2", para: "no4", cor: "#10b981", label: "Fast-Path R$ 0", curva: -36 },
-            { id: "s_n2_n3", de: "no2", para: "no3", cor: "#6366f1", label: "Ambíguas (Lote 20)" },
-            { id: "s_n3_n4", de: "no3", para: "no4", cor: "#38bdf8", label: "EN 13306 B×C" },
-            { id: "s_n4_n5", de: "no4", para: "no5", cor: "#fbbf24", label: "Fila Conferir" },
-            { id: "s_n5_n6", de: "no5", para: "no6", cor: "#c084fc", label: "Correções Sup." },
-            { id: "s_n6_n2", de: "no6", para: "no2", cor: "#a855f7", label: "Retroalimentação R$ 0", curva: 85 },
-            { id: "s_n4_n7", de: "no4", para: "no7", cor: "#f43f5e", label: "Base Confiável" },
-            { id: "s_n7_n8", de: "no7", para: "no8", cor: "#0ea5e9", label: "Top Ofensores" },
-            { id: "s_n8_n9", de: "no8", para: "no9", cor: "#34d399", label: "Ações 5W2H" },
-            { id: "s_m_n1", de: "maestro", para: "no1", cor: "#38bdf8", tracejado: true },
-            { id: "s_m_n2", de: "maestro", para: "no2", cor: "#34d399", tracejado: true },
-            { id: "s_m_n3", de: "maestro", para: "no3", cor: "#818cf8", tracejado: true },
-            { id: "s_m_n7", de: "maestro", para: "no7", cor: "#fb7185", tracejado: true },
-            { id: "s_m_n9", de: "maestro", para: "no9", cor: "#34d399", tracejado: true }
+            { id: "s_in_n1", de: "input_erp", para: "no1", cor: "#38bdf8", modo: "vertical" },
+            { id: "s_hist_n2", de: "hist_base", para: "no2", cor: "#a78bfa", offsetY2: 14 },
+            { id: "s_n1_n2", de: "no1", para: "no2", cor: "#34d399", offsetY2: -8 },
+            { id: "s_n2_n4", de: "no2", para: "no4", cor: "#10b981", curva: -38, offsetY1: -14, offsetY2: -14 },
+            { id: "s_n2_n3", de: "no2", para: "no3", cor: "#6366f1", modo: "vertical" },
+            { id: "s_n3_n4", de: "no3", para: "no4", cor: "#38bdf8", offsetY1: -8, offsetY2: 14 },
+            { id: "s_n4_n5", de: "no4", para: "no5", cor: "#fbbf24", modo: "vertical" },
+            { id: "s_n5_n6", de: "no5", para: "no6", cor: "#c084fc", modo: "vertical" },
+            { id: "s_n6_n2", de: "no6", para: "no2", cor: "#a855f7", modo: "feedback" },
+            { id: "s_n4_n7", de: "no4", para: "no7", cor: "#f43f5e", offsetY2: -10 },
+            { id: "s_n7_n8", de: "no7", para: "no8", cor: "#0ea5e9", modo: "vertical" },
+            { id: "s_n8_n9", de: "no8", para: "no9", cor: "#34d399" },
+            { id: "s_m_n1", de: "maestro", para: "no1", cor: "#38bdf8", tracejado: true, fanX: -200 },
+            { id: "s_m_n2", de: "maestro", para: "no2", cor: "#34d399", tracejado: true, fanX: -95 },
+            { id: "s_m_n3", de: "maestro", para: "no3", cor: "#818cf8", tracejado: true, fanX: 0 },
+            { id: "s_m_n7", de: "maestro", para: "no7", cor: "#fb7185", tracejado: true, fanX: 105 },
+            { id: "s_m_n9", de: "maestro", para: "no9", cor: "#34d399", tracejado: true, fanX: 205 }
         ];
 
         function obterPontosSinapsesCanvas() {
@@ -2695,17 +3048,25 @@ OMs:\n${JSON.stringify(listaPrompt)}`;
             const svg = document.getElementById("neuralSynapseSvg");
             if (canvas && svg && typeof canvas.getBoundingClientRect === "function") {
                 const cRect = canvas.getBoundingClientRect();
-                if (cRect.width > 100 && cRect.height > 100) {
+                if (cRect.width > 120 && cRect.height > 120) {
                     svg.setAttribute("viewBox", `0 0 ${Math.round(cRect.width)} ${Math.round(cRect.height)}`);
                     const pts = {};
                     Object.keys(COORD_FALLBACK_NEURAL).forEach(k => {
                         const nodeEl = canvas.querySelector(`[data-neural-id="${k}"]`);
                         if (nodeEl && typeof nodeEl.getBoundingClientRect === "function") {
                             const r = nodeEl.getBoundingClientRect();
-                            if (r.width > 0) {
+                            if (r.width > 0 && r.height > 0) {
+                                const left = r.left - cRect.left;
+                                const top = r.top - cRect.top;
                                 pts[k] = {
-                                    x: Math.round((r.left - cRect.left) + r.width / 2),
-                                    y: Math.round((r.top - cRect.top) + r.height / 2)
+                                    x: Math.round(left + r.width / 2),
+                                    y: Math.round(top + r.height / 2),
+                                    left: Math.round(left),
+                                    right: Math.round(left + r.width),
+                                    top: Math.round(top),
+                                    bottom: Math.round(top + r.height),
+                                    w: Math.round(r.width),
+                                    h: Math.round(r.height)
                                 };
                             }
                         }
@@ -2713,7 +3074,7 @@ OMs:\n${JSON.stringify(listaPrompt)}`;
                     if (Object.keys(pts).length >= 6) return { ...COORD_FALLBACK_NEURAL, ...pts };
                 }
             }
-            if (svg && typeof svg.setAttribute === "function") svg.setAttribute("viewBox", "0 0 1200 540");
+            if (svg && typeof svg.setAttribute === "function") svg.setAttribute("viewBox", "0 0 1200 600");
             return COORD_FALLBACK_NEURAL;
         }
 
@@ -2725,37 +3086,180 @@ OMs:\n${JSON.stringify(listaPrompt)}`;
                 const p1 = pts[edge.de];
                 const p2 = pts[edge.para];
                 if (!p1 || !p2) return "";
-                const dx = (p2.x - p1.x) * 0.48;
-                const dyCurva = edge.curva || 0;
-                const cx1 = p1.x + dx;
-                const cy1 = p1.y + dyCurva;
-                const cx2 = p2.x - dx;
-                const cy2 = p2.y + dyCurva;
-                const d = `M ${p1.x},${p1.y} C ${cx1},${cy1} ${cx2},${cy2} ${p2.x},${p2.y}`;
-                const isActive = activeEdges.has(edge.id);
+
+                const isSelectedIncident = Boolean(neuralNoSelecionado && (edge.de === neuralNoSelecionado || edge.para === neuralNoSelecionado));
+                let x1, y1, x2, y2, cx1, cy1, cx2, cy2;
+
+                if (edge.de === "maestro") {
+                    x1 = Math.round(p1.x + (edge.fanX || 0));
+                    y1 = p1.bottom + 2;
+                    x2 = p2.x;
+                    y2 = p2.top - 4;
+                    const dy = Math.max(24, (y2 - y1) * 0.48);
+                    cx1 = x1;
+                    cy1 = y1 + dy;
+                    cx2 = x2;
+                    cy2 = y2 - dy;
+                } else if (edge.modo === "vertical") {
+                    x1 = p1.x;
+                    y1 = p1.bottom + 2;
+                    x2 = p2.x;
+                    y2 = p2.top - 4;
+                    const dy = Math.max(12, Math.abs(y2 - y1) * 0.45);
+                    cx1 = x1;
+                    cy1 = y1 + dy;
+                    cx2 = x2;
+                    cy2 = y2 - dy;
+                } else if (edge.modo === "feedback") {
+                    x1 = p1.left - 3;
+                    y1 = p1.y + 10;
+                    x2 = p2.right + 4;
+                    y2 = p2.bottom - 12;
+                    cx1 = x1 - 46;
+                    cy1 = p1.bottom + 36;
+                    cx2 = x2 + 46;
+                    cy2 = p2.bottom + 36;
+                } else {
+                    x1 = p1.right + 3;
+                    y1 = p1.y + (edge.offsetY1 || 0);
+                    x2 = p2.left - 4;
+                    y2 = p2.y + (edge.offsetY2 || 0);
+                    const dx = Math.max(26, Math.abs(x2 - x1) * 0.48);
+                    const dyCurva = edge.curva || 0;
+                    cx1 = x1 + dx;
+                    cy1 = y1 + dyCurva;
+                    cx2 = x2 - dx;
+                    cy2 = y2 + dyCurva;
+                }
+
+                const d = `M ${x1},${y1} C ${cx1},${cy1} ${cx2},${cy2} ${x2},${y2}`;
+                const isActive = activeEdges.has(edge.id) || isSelectedIncident;
                 const isDone = doneEdges.has(edge.id);
                 const cls = isActive ? "is-active" : (isDone ? "is-done" : "is-idle");
-                const width = isActive ? (edge.tracejado ? 2.5 : 3.6) : (edge.tracejado ? 1.3 : 2.2);
+                const width = isActive ? (edge.tracejado ? 2.6 : 3.4) : (edge.tracejado ? 1.3 : 2.1);
                 const opacityAttr = edge.tracejado && !isActive ? ' opacity="0.22"' : "";
                 const pathHtml = `<path id="syn_${edge.id}" d="${d}" stroke="${edge.cor}" stroke-width="${width}" class="synapse-path ${cls}"${opacityAttr}/>`;
-                if (!isActive || edge.tracejado) return pathHtml;
-                return `${pathHtml}<circle r="4.5" fill="${edge.cor}"><animateMotion dur="0.9s" repeatCount="indefinite" path="${d}"/></circle>`;
+                const dotHtml = isActive && !edge.tracejado ? `<circle cx="${x2}" cy="${y2}" r="3.4" fill="${edge.cor}"/>` : "";
+                if (!isActive || edge.tracejado) return pathHtml + dotHtml;
+                return `${pathHtml}${dotHtml}<circle r="4.6" fill="${edge.cor}"><animateMotion dur="${neuralRitmoModo === "rapido" ? "0.55s" : "0.9s"}" repeatCount="indefinite" path="${d}"/></circle>`;
             }).join("");
             svg.innerHTML = svgPaths;
         }
 
+        function atualizarBotoesControleRitmoUI() {
+            const btnPasso = document.getElementById("btnRitmoPassoAPasso");
+            const btnRapido = document.getElementById("btnRitmoRapido");
+            if (btnPasso && btnRapido) {
+                if (neuralRitmoModo === "passo_a_passo") {
+                    btnPasso.style.background = "#0284c7";
+                    btnPasso.style.color = "#ffffff";
+                    btnRapido.style.background = "transparent";
+                    btnRapido.style.color = "#94a3b8";
+                } else {
+                    btnRapido.style.background = "#0284c7";
+                    btnRapido.style.color = "#ffffff";
+                    btnPasso.style.background = "transparent";
+                    btnPasso.style.color = "#94a3b8";
+                }
+            }
+            const btnPause = document.getElementById("btnPauseResumeNeural");
+            const lblPause = document.getElementById("lblBtnPauseNeural");
+            if (lblPause) lblPause.innerText = neuralPausado ? "Retomar" : "Pausar";
+            if (btnPause) {
+                btnPause.style.background = neuralPausado ? "#f59e0b" : "#1e293b";
+                btnPause.style.color = neuralPausado ? "#0f172a" : "#cbd5e1";
+                btnPause.style.border = neuralPausado ? "1px solid #fbbf24" : "1px solid #475569";
+            }
+        }
+
+        window.definirRitmoRedeNeural = (modo) => {
+            neuralRitmoModo = modo === "rapido" ? "rapido" : "passo_a_passo";
+            neuralAnimacaoModo = "cinematica";
+            atualizarBotoesControleRitmoUI();
+            const txtModo = neuralRitmoModo === "passo_a_passo" ? "Passo a Passo (OM por OM ao vivo)" : "Rápido (Ondas Turbo)";
+            showToast(`Ritmo alterado para ${txtModo}.`, "info");
+        };
+
+        window.alternarPausaRedeNeural = () => {
+            if (!neuralAnimandoAgora) {
+                showToast("Inicie o fluxo em 'Executar Fluxo ao Vivo' para pausar/retomar a execução.", "info");
+                return;
+            }
+            neuralPausado = !neuralPausado;
+            atualizarBotoesControleRitmoUI();
+            const ph = document.getElementById("maestroPhasePill");
+            if (neuralPausado) {
+                if (ph) ph.innerText = "PAUSADO";
+                showToast("Rede Neural pausada no ponto exato. Clique em Retomar para continuar.", "info");
+            } else {
+                if (ph) ph.innerText = "EXECUTANDO";
+                const fn = neuralPauseContinuarFn;
+                neuralPauseContinuarFn = null;
+                if (typeof fn === "function") fn();
+            }
+        };
+
+        window.selecionarNoInspecao = (nodeId = "") => {
+            const normalizado = nodeId || "";
+            if (neuralNoSelecionado === normalizado && normalizado !== "") {
+                neuralNoSelecionado = "";
+            } else {
+                neuralNoSelecionado = normalizado;
+            }
+
+            if (typeof document.querySelectorAll === "function") {
+                document.querySelectorAll("[data-neural-id]").forEach(el => {
+                    const nid = el.getAttribute("data-neural-id");
+                    el.classList.toggle("is-selected", Boolean(neuralNoSelecionado && nid === neuralNoSelecionado));
+                });
+            }
+
+            const sel = document.getElementById("neuralFiltroNoSelect");
+            if (sel && sel.value !== neuralNoSelecionado) sel.value = neuralNoSelecionado;
+
+            const pill = document.getElementById("neuralNodeSelectedPill");
+            if (pill) {
+                pill.innerText = neuralNoSelecionado
+                    ? `Filtrando: ${NOMES_EXIBICAO_NO[neuralNoSelecionado] || neuralNoSelecionado}`
+                    : "Visão: Todos os Nós";
+            }
+
+            const btnAbrir = document.getElementById("btnAbrirTelaNoSel");
+            const podeAbrirTela = /^no[1-9]$/.test(neuralNoSelecionado);
+            if (btnAbrir) {
+                btnAbrir.hidden = !podeAbrirTela;
+                btnAbrir.classList.toggle("hidden", !podeAbrirTela);
+            }
+
+            if (!neuralAnimandoAgora) {
+                const doneAll = omsAuditadas.length ? new Set(DEFINICAO_SINAPSES.map(e => e.id)) : new Set(["s_hist_n2"]);
+                const act = omsAuditadas.length ? new Set(["s_n2_n4", "s_n6_n2", "s_n8_n9"]) : new Set();
+                renderNeuralSvgTopology(act, doneAll);
+            }
+            renderInteracoesAoVivo();
+        };
+
+        window.abrirTelaDoNoSelecionado = () => {
+            if (!neuralNoSelecionado) return;
+            window.inspecionarNoNeural(neuralNoSelecionado);
+        };
+
         function resetarVisualRedeNeuralAguardando() {
             if (neuralAnimacaoTimer) { try { clearTimeout(neuralAnimacaoTimer); } catch (_) {} neuralAnimacaoTimer = null; }
             neuralAnimandoAgora = false;
+            neuralPausado = false;
+            neuralPauseContinuarFn = null;
+            atualizarBotoesControleRitmoUI();
+
             const hub = document.getElementById("neuralMaestroHub");
             if (hub) hub.classList.remove("is-delegating");
             const badge = document.getElementById("neuralStatusBadge");
             if (badge) {
-                badge.innerText = "● Aguardando Estímulo (ERP)";
+                badge.innerText = "Aguardando Estímulo (ERP)";
                 badge.className = "px-2.5 py-0.5 rounded-full bg-slate-800 text-slate-200 border border-slate-700 text-[10px] font-extrabold";
             }
             const msg = document.getElementById("maestroDelegacaoMsg");
-            if (msg) msg.innerText = `Pronto para receber o CSV/XLSX de ${rodadaVigenteInfo.periodo} e delegar os 9 perceptrons.`;
+            if (msg) msg.innerText = `Pronto para receber o CSV/XLSX de ${rodadaVigenteInfo.periodo} e distribuir carga entre os 9 perceptrons.`;
             const ph = document.getElementById("maestroPhasePill");
             if (ph) ph.innerText = "PRONTO";
             const thr = document.getElementById("maestroThroughputTxt");
@@ -2771,29 +3275,76 @@ OMs:\n${JSON.stringify(listaPrompt)}`;
             if (workers) {
                 workers.innerHTML = `<span class="px-1.5 py-0.5 rounded bg-slate-900 border border-slate-700 text-center text-slate-400">W1: Lote</span><span class="px-1.5 py-0.5 rounded bg-slate-900 border border-slate-700 text-center text-slate-400">W2: Lote</span><span class="px-1.5 py-0.5 rounded bg-slate-900 border border-slate-700 text-center text-slate-400">W3: Lote</span>`;
             }
+
+            atualizarBarraResumoLive(0, 0, [], "Ciclo pronto");
             renderNeuralSvgTopology(new Set(), new Set(["s_hist_n2"]));
-            adicionarLogNeural(`[MAESTRO] Núcleo pronto. Treino Set/Out carregado; aguardando lote de ${rodadaVigenteInfo.periodo}.`);
+            renderInteracoesAoVivo();
+            renderStreamOrdensAoVivo();
+        }
+
+        function gerarResumoHandshakesFinais(tot, fast, lote, pctF, ativas) {
+            const pend = omsAuditadas.filter(o => o.fila === "CONFERIR" || o.fila === "REVISAO").length;
+            const hh = agoraHMS();
+            return [
+                {
+                    id: "end-n9", hora: hh, origem: "N8", destino: "N9", status: "aqf",
+                    titulo: `Planejador recebeu ${estudosAqf.length} Estudo(s) AQF 2.0 prontos`,
+                    retorno: `${propostasPlanejador.length} propostas 1-clique disponíveis para Preventivas 52S / Rota / Agenda PCM`
+                },
+                {
+                    id: "end-n7", hora: hh, origem: "N4", destino: "N7", status: "aqf",
+                    titulo: `Confiabilidade processou ${tot} OMs vs Inspeção de Rotas`,
+                    retorno: `${confiabilidadeData.total_quebras || 0} Quebras analisadas • Top ofensor: ${confiabilidadeData.top_ofensores?.[0]?.ativo || "—"}`
+                },
+                {
+                    id: "end-n6", hora: hh, origem: "N6", destino: "N2", status: "r0",
+                    titulo: `Retroalimentação sincronizada na Memória do Bibliotecário`,
+                    retorno: `${ativas} regras ativas gravadas para interceptar a R$ 0,00 nos próximos lotes`
+                },
+                {
+                    id: "end-n5", hora: hh, origem: "N4", destino: "N5", status: pend > 0 ? "conferir" : "concluido",
+                    titulo: `Roteamento concluído para as 4 equipes de manutenção`,
+                    retorno: `${tot - pend} liberadas AUTO • ${pend} na Mesa Conferente 2-toques`
+                },
+                {
+                    id: "end-n3", hora: hh, origem: "N2", destino: "N3", status: "ia",
+                    titulo: `${lote} OM(s) ambíguas enviadas para Sub-Perceptrons em Lote de 20`,
+                    retorno: `Auditoria EN 13306 B×C finalizada em ${custoRodada.chamadas_ia || 0} chamada(s) • R$ ${custoRodada.custo_brl.toFixed(2)}`
+                },
+                {
+                    id: "end-n2", hora: hh, origem: "N1", destino: "N2", status: "r0",
+                    titulo: `Fast-Path + Pesos Set/Out interceptaram ${fast} OMs (${pctF}%)`,
+                    retorno: `Decisão local a R$ 0,00 • Economia de ${custoRodada.economia_pct}%`
+                },
+                {
+                    id: "end-n1", hora: hh, origem: "MAESTRO", destino: "N1", status: "concluido",
+                    titulo: `Ingestão do ciclo ${rodadaVigenteInfo.periodo} finalizada (${tot} OMs)`,
+                    retorno: `Filtradas concluídas e vinculadas à árvore ob_linhas`
+                }
+            ];
         }
 
         function aplicarEstadoFinalRedeNeural(stats = {}) {
             if (!omsAuditadas.length) { resetarVisualRedeNeuralAguardando(); return; }
             const tot = stats.total || omsAuditadas.length;
             const fast = stats.fastCnt !== undefined ? stats.fastCnt : omsAuditadas.filter(o => ["FAST_PATH_R0", "BIBLIOTECA_MEMORIA", "DEDUP_RODADA"].includes(o.origem)).length;
+            const lote = stats.loteCnt !== undefined ? stats.loteCnt : Math.max(0, tot - fast);
             const pctF = tot ? Math.round((fast / tot) * 100) : 0;
             const pend = omsAuditadas.filter(o => o.fila === "CONFERIR" || o.fila === "REVISAO").length;
             const ativas = bibliotecaCorrecoes.filter(b => b.status !== "REVERTIDO").length;
 
+            atualizarBotoesControleRitmoUI();
             const hub = document.getElementById("neuralMaestroHub");
             if (hub) hub.classList.remove("is-delegating");
             const badge = document.getElementById("neuralStatusBadge");
             if (badge) {
-                badge.innerText = `✓ Rede Sincronizada (${tot} OMs • ${rodadaVigenteInfo.periodo})`;
+                badge.innerText = `Rede Sincronizada (${tot} OMs • ${rodadaVigenteInfo.periodo})`;
                 badge.className = "px-2.5 py-0.5 rounded-full bg-emerald-500/20 text-emerald-300 border border-emerald-400/50 text-[10px] font-extrabold";
             }
             const ph = document.getElementById("maestroPhasePill");
             if (ph) ph.innerText = "CONCLUÍDO";
             const msg = document.getElementById("maestroDelegacaoMsg");
-            if (msg) msg.innerText = `Ciclo ${rodadaVigenteInfo.periodo} concluído: ${fast}/${tot} OMs (${pctF}%) decididas a R$ 0 + ${estudosAqf.length} Estudo(s) AQF gerados!`;
+            if (msg) msg.innerText = `Ciclo ${rodadaVigenteInfo.periodo} concluído: ${fast}/${tot} OMs (${pctF}%) decididas a R$ 0 + ${estudosAqf.length} Estudo(s) AQF gerados.`;
             const thr = document.getElementById("maestroThroughputTxt");
             if (thr) thr.innerText = `${tot} OMs OK`;
             const cu = document.getElementById("maestroCustoLiveTxt");
@@ -2803,7 +3354,7 @@ OMs:\n${JSON.stringify(listaPrompt)}`;
             setEstadoPerceptronUI("hist_base", "is-done", 100, "1.234 OMs • Calibrado");
             setEstadoPerceptronUI("no1", "is-done", 100, `${tot} OMs validadas`);
             setEstadoPerceptronUI("no2", "is-done", 100, `${fast} OMs (${pctF}%) a R$ 0,00`);
-            setEstadoPerceptronUI("no3", "is-done", 100, `${custoRodada.oms_ia_lote || 0} casos • ${custoRodada.chamadas_ia} lote(s)`);
+            setEstadoPerceptronUI("no3", "is-done", 100, `${lote} casos • ${custoRodada.chamadas_ia} lote(s)`);
             setEstadoPerceptronUI("no4", "is-done", 100, `4 equipes • Nota média ${gerarResumoMetricasRodada(rodadaVigenteInfo.periodo, omsAuditadas).qualidade_media}`);
             setEstadoPerceptronUI("no5", pend > 0 ? "is-waiting" : "is-done", 100, pend > 0 ? `${pend} na fila do supervisor` : "Fila 100% validada");
             setEstadoPerceptronUI("no6", "is-done", 100, `${ativas} regras vivas R$ 0`);
@@ -2816,10 +3367,17 @@ OMs:\n${JSON.stringify(listaPrompt)}`;
                 workers.innerHTML = `<span class="px-1.5 py-0.5 rounded bg-emerald-950/70 border border-emerald-500/40 text-center text-emerald-300">W1: OK</span><span class="px-1.5 py-0.5 rounded bg-emerald-950/70 border border-emerald-500/40 text-center text-emerald-300">W2: OK</span><span class="px-1.5 py-0.5 rounded bg-emerald-950/70 border border-emerald-500/40 text-center text-emerald-300">W3: OK</span>`;
             }
 
+            if (stats.forcarSyncStream || !neuralOrdensLive.length || neuralInteracoesLive.length <= 1) {
+                neuralOrdensLive = omsAuditadas.slice().reverse();
+                neuralInteracoesLive = gerarResumoHandshakesFinais(tot, fast, lote, pctF, ativas);
+            }
+
+            atualizarBarraResumoLive(tot, tot, omsAuditadas, `${tot} OMs • Economia -${custoRodada.economia_pct}%`);
+            renderInteracoesAoVivo();
+            renderStreamOrdensAoVivo();
+
             const doneEdges = new Set(DEFINICAO_SINAPSES.map(e => e.id));
             renderNeuralSvgTopology(new Set(["s_n2_n4", "s_n6_n2", "s_n8_n9"]), doneEdges);
-            const elTime = document.getElementById("neuralTelemetryElapsed");
-            if (elTime) elTime.innerText = `${tot} OMs • Economia −${custoRodada.economia_pct}%`;
         }
 
         function executarAnimacaoRedeNeural(stats = {}) {
@@ -2828,104 +3386,268 @@ OMs:\n${JSON.stringify(listaPrompt)}`;
             const fast = stats.fastCnt !== undefined ? stats.fastCnt : custoRodada.oms_fast_path_r0;
             const lote = stats.loteCnt !== undefined ? stats.loteCnt : custoRodada.oms_ia_lote;
             const chamadas = stats.chamadas !== undefined ? stats.chamadas : custoRodada.chamadas_ia;
+            const ativas = bibliotecaCorrecoes.filter(b => b.status !== "REVERTIDO").length;
+            const tInicio = Date.now();
 
             neuralAnimandoAgora = true;
+            neuralPausado = false;
+            neuralPauseContinuarFn = null;
+            atualizarBotoesControleRitmoUI();
+
+            neuralInteracoesLive = [];
+            neuralOrdensLive = [];
+            renderInteracoesAoVivo();
+            renderStreamOrdensAoVivo();
+            atualizarBarraResumoLive(0, tot, [], "Iniciando sinapses...");
+
             const hub = document.getElementById("neuralMaestroHub");
             if (hub) hub.classList.add("is-delegating");
             const badge = document.getElementById("neuralStatusBadge");
             if (badge) {
-                badge.innerText = "⚡ PROCESSANDO REDE NEURAL AO VIVO";
+                badge.innerText = neuralRitmoModo === "passo_a_passo" ? "AUDITANDO PASSO A PASSO AO VIVO" : "PROCESSANDO MODO TURBO";
                 badge.className = "px-2.5 py-0.5 rounded-full bg-sky-500/30 text-sky-200 border border-sky-400 text-[10px] font-extrabold";
             }
 
             ["no1", "no2", "no3", "no4", "no5", "no6", "no7", "no8", "no9"].forEach(id => setEstadoPerceptronUI(id, "is-idle", 0));
 
-            const etapas = [
-                {
-                    delay: 40,
+            const acoesFila = [];
+            const secStr = () => `${((Date.now() - tInicio) / 1000).toFixed(1)}s`;
+
+            // PASSO 1: MAESTRO -> N1
+            acoesFila.push({
+                wait: 40,
+                run: () => {
+                    document.getElementById("maestroPhasePill").innerText = "N1 • INGESTÃO";
+                    document.getElementById("maestroDelegacaoMsg").innerText = `Maestro despachou ${tot} OMs de ${rodadaVigenteInfo.periodo} para o Perceptron N1 validar árvore ob_linhas.`;
+                    document.getElementById("maestroThroughputTxt").innerText = `${tot} OMs in`;
+                    setEstadoPerceptronUI("input_erp", "is-done", 100, `${tot} OMs recebidas`);
+                    setEstadoPerceptronUI("no1", "is-working", 70, `Filtrando ${tot} OMs...`);
+                    renderNeuralSvgTopology(new Set(["s_in_n1", "s_m_n1"]), new Set());
+                    registrarInteracaoNeural({
+                        origem: "MAESTRO", destino: "N1", status: "concluido",
+                        titulo: `Ingestão do arquivo ${rodadaVigenteInfo.arquivoNome || rodadaVigenteInfo.periodo} (${tot} OMs)`,
+                        retorno: `Validou concluídas, normalizou tempos e cruzou ativos na árvore ob_linhas`
+                    });
+                }
+            });
+
+            if (neuralRitmoModo === "passo_a_passo" && omsAuditadas.length) {
+                // Seleciona todas se <= 28 OMs; ou 24 OMs representativas em lotes enormes (1.234 OMs)
+                let amostraStream = omsAuditadas;
+                if (omsAuditadas.length > 28) {
+                    const idxSet = new Set();
+                    const step = Math.floor(omsAuditadas.length / 24);
+                    for (let i = 0; i < omsAuditadas.length && idxSet.size < 20; i += Math.max(1, step)) idxSet.add(i);
+                    omsAuditadas.forEach((o, i) => { if (idxSet.size < 24 && o.categoria === "QUEBRA") idxSet.add(i); });
+                    amostraStream = Array.from(idxSet).sort((a, b) => a - b).map(i => omsAuditadas[i]);
+                }
+
+                // Abertura N1 -> N2
+                acoesFila.push({
+                    wait: 280,
                     run: () => {
-                        document.getElementById("maestroPhasePill").innerText = "DESPACHO 1/5";
-                        document.getElementById("maestroDelegacaoMsg").innerText = `Recebidas ${tot} OMs de ${rodadaVigenteInfo.periodo}! Despachando Camada de Entrada & Filtro ob_linhas...`;
-                        document.getElementById("maestroThroughputTxt").innerText = `${tot} OMs in`;
-                        setEstadoPerceptronUI("input_erp", "is-done", 100, `${tot} OMs recebidas`);
-                        setEstadoPerceptronUI("no1", "is-working", 65, "Validando concluídas & ob_linhas...");
-                        renderNeuralSvgTopology(new Set(["s_in_n1", "s_m_n1"]), new Set());
-                        adicionarLogNeural(`👑 MAESTRO → PERCEPTRON N1: Ingestão de ${tot} OMs e cruzamento com árvore ob_linhas.`);
-                    }
-                },
-                {
-                    delay: 520,
-                    run: () => {
-                        document.getElementById("maestroPhasePill").innerText = "DESPACHO 2/5";
-                        document.getElementById("maestroDelegacaoMsg").innerText = `N1 concluído! Aplicando memória Set/Out no Fast-Path R$ 0,00 (${fast} OMs) e separando ${lote} casos ambíguos...`;
                         setEstadoPerceptronUI("no1", "is-done", 100, `${tot} OMs higienizadas`);
-                        setEstadoPerceptronUI("no2", "is-working", 78, `Resolvendo ${fast} OMs sem API...`);
+                        setEstadoPerceptronUI("no2", "is-working", 15, `Avaliando regra a regra (Set/Out + Planta)...`);
                         renderNeuralSvgTopology(new Set(["s_n1_n2", "s_hist_n2", "s_m_n2"]), new Set(["s_in_n1"]));
-                        adicionarLogNeural(`⚡ N2 FAST-PATH R$ 0: Pesos de Set/Out + regras da planta interceptaram ${fast} OMs (custo R$ 0,00).`);
+                        registrarInteracaoNeural({
+                            origem: "N1", destino: "N2", status: "concluido",
+                            titulo: `Higienização concluída: ${tot} OMs prontas para triagem neural`,
+                            retorno: `Encaminhadas para Nó 2 (Fast-Path R$ 0) com ${ativas} regras aprendidas`
+                        });
                     }
-                },
-                {
-                    delay: 1050,
-                    run: () => {
-                        document.getElementById("maestroPhasePill").innerText = "PARALELO 3/5";
-                        document.getElementById("maestroDelegacaoMsg").innerText = `Via dupla ativa! Express R$ 0 → N4 | Neural Bridge → N3 disparando sub-perceptrons em paralelo (${chamadas} lote(s) de 20)...`;
-                        setEstadoPerceptronUI("no2", "is-done", 100, `${fast} OMs decididas a R$ 0`);
-                        setEstadoPerceptronUI("no3", "is-working", 72, `Processando ${lote} casos em paralelo...`);
-                        const workers = document.getElementById("no3WorkersRow");
-                        if (workers) {
-                            workers.innerHTML = `<span class="worker-chip-active px-1.5 py-0.5 rounded bg-sky-500/25 border border-sky-400 text-center text-sky-200">W1: 20</span><span class="worker-chip-active px-1.5 py-0.5 rounded bg-indigo-500/25 border border-indigo-400 text-center text-indigo-200">W2: 20</span><span class="worker-chip-active px-1.5 py-0.5 rounded bg-cyan-500/25 border border-cyan-400 text-center text-cyan-200">W3: 20</span>`;
+                });
+
+                const listAcumulada = [];
+                amostraStream.forEach((o, idx) => {
+                    const numPasso = idx + 1;
+                    const totStream = amostraStream.length;
+                    const pctStream = Math.round((numPasso / totStream) * 100);
+                    const isR0 = ["FAST_PATH_R0", "BIBLIOTECA_MEMORIA", "DEDUP_RODADA"].includes(o.origem);
+
+                    acoesFila.push({
+                        wait: omsAuditadas.length > 28 ? 190 : 250,
+                        run: () => {
+                            listAcumulada.push(o);
+                            neuralOrdensLive.unshift(o);
+                            const eqProgressTotal = Math.min(tot, Math.round((numPasso / totStream) * tot));
+
+                            const activeEdges = new Set(["s_n1_n2"]);
+                            const doneEdges = new Set(["s_in_n1", "s_hist_n2"]);
+
+                            if (isR0) {
+                                activeEdges.add("s_n2_n4");
+                                activeEdges.add("s_m_n2");
+                                setEstadoPerceptronUI("no2", "is-working", Math.max(20, pctStream), `OM #${o.om} resolvida a R$ 0`);
+                                setEstadoPerceptronUI("no4", "is-working", Math.max(15, pctStream), `Roteando ${o.equipe || "PCM"}`);
+                                document.getElementById("maestroPhasePill").innerText = `R$ 0 • ${numPasso}/${totStream}`;
+                                document.getElementById("maestroDelegacaoMsg").innerText = `OM #${o.om} (${o.ativo}): interceptada no Nó 2 a custo zero -> ${o.categoria}.`;
+                                registrarInteracaoNeural({
+                                    origem: "N2", destino: "N4", om: o.om, status: "r0",
+                                    titulo: `${o.ativo}: match exato via ${o.origem === "BIBLIOTECA_MEMORIA" ? "Bibliotecário N6" : "Regra Fast-Path R$ 0"}`,
+                                    retorno: `${o.categoria} • Equipe ${o.equipe || "PCM"} • Fila ${o.fila}`
+                                });
+                            } else {
+                                activeEdges.add("s_n2_n3");
+                                activeEdges.add("s_n3_n4");
+                                activeEdges.add("s_m_n3");
+                                setEstadoPerceptronUI("no2", "is-done", pctStream, `Via dupla Fast-Path + Lote 20`);
+                                setEstadoPerceptronUI("no3", "is-working", Math.max(20, pctStream), `Auditando OM #${o.om} (EN 13306)...`);
+                                const wRow = document.getElementById("no3WorkersRow");
+                                if (wRow) {
+                                    const wAtivo = (idx % 3) + 1;
+                                    wRow.innerHTML = [1, 2, 3].map(w =>
+                                        `<span class="px-1.5 py-0.5 rounded border text-center ${w === wAtivo ? "worker-chip-active bg-sky-500/30 border-sky-400 text-sky-100" : "bg-indigo-950/60 border-indigo-500/40 text-indigo-300"}">W${w}: ${w === wAtivo ? "#" + o.om : "Lote"}</span>`
+                                    ).join("");
+                                }
+                                document.getElementById("maestroPhasePill").innerText = `LOTE 20 • ${numPasso}/${totStream}`;
+                                document.getElementById("maestroDelegacaoMsg").innerText = `OM #${o.om} (${o.ativo}): Nó 3 classificou via EN 13306 -> ${o.categoria}${o.b && o.c ? ` B${o.b}×C${o.c}` : ""}.`;
+                                registrarInteracaoNeural({
+                                    origem: "N3", destino: "N4", om: o.om, status: "ia",
+                                    titulo: `${o.ativo}: caso ambíguo auditado via Lote 20 (Confiança ${o.confianca || 4}/5)`,
+                                    retorno: `${o.categoria}${o.b && o.c ? ` (B${o.b}×C${o.c} ${o.severidade})` : ""} • Justificativa: ${(o.justificativa || "").slice(0, 80)}`
+                                });
+                            }
+
+                            if (o.fila === "CONFERIR" || o.fila === "REVISAO") {
+                                activeEdges.add("s_n4_n5");
+                                setEstadoPerceptronUI("no5", "is-working", pctStream, `Separando OM #${o.om}`);
+                                registrarInteracaoNeural({
+                                    origem: "N4", destino: "N5", om: o.om, status: "conferir",
+                                    titulo: `${o.ativo}: marcada para conferência 2-toques (${o.equipe || "PCM"})`,
+                                    retorno: o.justificativa || `Confiança ${o.confianca || 4}/5 ou criticidade alta`
+                                });
+                            }
+                            if (o.categoria === "QUEBRA") {
+                                activeEdges.add("s_n4_n7");
+                                setEstadoPerceptronUI("no7", "is-working", pctStream, `Mapeando Quebra ${o.ativo}`);
+                            }
+
+                            renderNeuralSvgTopology(activeEdges, doneEdges);
+                            atualizarBarraResumoLive(eqProgressTotal, tot, listAcumulada, `${secStr()} • Ao vivo (${numPasso}/${totStream})`);
+                            renderStreamOrdensAoVivo();
                         }
-                        renderNeuralSvgTopology(new Set(["s_n2_n4", "s_n2_n3", "s_m_n3"]), new Set(["s_in_n1", "s_n1_n2", "s_hist_n2"]));
-                        adicionarLogNeural(`🧠 N3 PERCEPTRONS PARALELOS: ${lote} OMs ambíguas auditadas via EN 13306 B×C (Lotes de 20).`);
-                    }
-                },
-                {
-                    delay: 1650,
+                    });
+                });
+
+                // Fechamento Retroalimentação + Confiabilidade/AQF
+                acoesFila.push({
+                    wait: 340,
                     run: () => {
-                        document.getElementById("maestroPhasePill").innerText = "SINAPSE 4/5";
-                        document.getElementById("maestroDelegacaoMsg").innerText = `Roteando 4 equipes (N4), notificando Mesa Conferente (N5) e gravando retroalimentação no Bibliotecário (N6)...`;
-                        setEstadoPerceptronUI("no3", "is-done", 100, `${lote} OMs auditadas`);
-                        setEstadoPerceptronUI("no4", "is-done", 100, "AUTO / CONFERIR + Nota Equipe");
-                        setEstadoPerceptronUI("no5", "is-working", 85, "Separando fila das 4 equipes...");
-                        setEstadoPerceptronUI("no6", "is-working", 88, "Atualizando memória Set/Out → Nov...");
-                        renderNeuralSvgTopology(new Set(["s_n3_n4", "s_n4_n5", "s_n5_n6", "s_n6_n2", "s_n4_n7"]), new Set(["s_in_n1", "s_n1_n2", "s_n2_n4", "s_n2_n3"]));
-                        adicionarLogNeural(`📖 RETROALIMENTAÇÃO N6 → N2: Bibliotecário sincronizou regras para próximo ciclo a R$ 0.`);
+                        if (omsAuditadas.length > 28) neuralOrdensLive = omsAuditadas.slice().reverse();
+                        setEstadoPerceptronUI("no2", "is-done", 100, `${fast} OMs a R$ 0`);
+                        setEstadoPerceptronUI("no3", "is-done", 100, `${lote} casos auditados`);
+                        setEstadoPerceptronUI("no4", "is-done", 100, `4 equipes roteadas`);
+                        setEstadoPerceptronUI("no6", "is-working", 85, `Sincronizando ${ativas} regras...`);
+                        setEstadoPerceptronUI("no7", "is-working", 85, `Cruzando MTBF & Rotas...`);
+                        setEstadoPerceptronUI("no8", "is-working", 85, `Gerando Estudos AQF 2.0...`);
+                        setEstadoPerceptronUI("no9", "is-working", 85, `Preparando ações 1-clique...`);
+                        renderNeuralSvgTopology(new Set(["s_n5_n6", "s_n6_n2", "s_n4_n7", "s_n7_n8", "s_n8_n9", "s_m_n7", "s_m_n9"]), new Set(["s_in_n1", "s_n1_n2", "s_n2_n4", "s_n2_n3", "s_n3_n4"]));
+                        registrarInteracaoNeural({
+                            origem: "N6", destino: "N2", status: "r0",
+                            titulo: `Bibliotecário consolidou regras aprendidas neste lote`,
+                            retorno: `${ativas} regras sincronizadas no Fast-Path para próximas auditorias a R$ 0,00`
+                        });
+                        registrarInteracaoNeural({
+                            origem: "N7", destino: "N8", status: "aqf",
+                            titulo: `Radar cruzou ${confiabilidadeData.total_quebras || 0} Quebras com Inspeção de Rotas`,
+                            retorno: `${estudosAqf.length} Estudo(s) AQF gerados e ${propostasPlanejador.length} ações enviadas ao Nó 9`
+                        });
                     }
-                },
-                {
-                    delay: 2220,
-                    run: () => {
-                        document.getElementById("maestroPhasePill").innerText = "AQF 5/5";
-                        document.getElementById("maestroDelegacaoMsg").innerText = `Calculando MTBF/MTTR (N7), comparando evolução vs Set/Out, caçando causa raiz (N8) e gerando plano 1-clique (N9)!`;
-                        setEstadoPerceptronUI("no7", "is-working", 90, "Cruzando Rota & Obsolescência...");
-                        setEstadoPerceptronUI("no8", "is-working", 92, `Gerando ${estudosAqf.length} Estudo(s) AQF...`);
-                        setEstadoPerceptronUI("no9", "is-working", 95, "Preparando Preventivas 52S / Rotas...");
-                        renderNeuralSvgTopology(new Set(["s_n4_n7", "s_n7_n8", "s_n8_n9", "s_m_n7", "s_m_n9"]), new Set(["s_in_n1", "s_n1_n2", "s_n2_n4", "s_n2_n3", "s_n3_n4", "s_n6_n2"]));
-                        adicionarLogNeural(`🎯 N7→N8→N9: Confiabilidade cruzada com Inspeção de Rota e geradas ${propostasPlanejador.length} propostas 1-clique!`);
-                    }
-                },
-                {
-                    delay: 2800,
+                });
+                acoesFila.push({
+                    wait: 320,
                     run: () => {
                         neuralAnimandoAgora = false;
                         aplicarEstadoFinalRedeNeural(stats);
-                        adicionarLogNeural(`✅ MAESTRO: Ciclo ${rodadaVigenteInfo.periodo} 100% ativo! Veja abaixo se melhoramos ou pioramos vs Set/Out.`);
                     }
-                }
-            ];
+                });
+            } else {
+                // MODO RÁPIDO (TURBO): 5 ondas rápidas (~1,1s no total)
+                acoesFila.push({
+                    wait: 160,
+                    run: () => {
+                        document.getElementById("maestroPhasePill").innerText = "TURBO 1/4";
+                        setEstadoPerceptronUI("input_erp", "is-done", 100, `${tot} OMs recebidas`);
+                        setEstadoPerceptronUI("no1", "is-done", 100, `${tot} OMs higienizadas`);
+                        setEstadoPerceptronUI("no2", "is-working", 80, `Interceptando ${fast} OMs a R$ 0...`);
+                        renderNeuralSvgTopology(new Set(["s_in_n1", "s_n1_n2", "s_hist_n2", "s_m_n2"]), new Set(["s_in_n1"]));
+                        registrarInteracaoNeural({
+                            origem: "N1", destino: "N2", status: "r0",
+                            titulo: `Modo Turbo: ${tot} OMs filtradas e enviadas ao Fast-Path R$ 0`,
+                            retorno: `${fast} OMs decididas instantaneamente a custo zero`
+                        });
+                    }
+                });
+                acoesFila.push({
+                    wait: 240,
+                    run: () => {
+                        document.getElementById("maestroPhasePill").innerText = "TURBO 2/4";
+                        setEstadoPerceptronUI("no2", "is-done", 100, `${fast} OMs a R$ 0`);
+                        setEstadoPerceptronUI("no3", "is-working", 85, `Lotes paralelos (${chamadas})...`);
+                        neuralOrdensLive = omsAuditadas.slice().reverse();
+                        atualizarBarraResumoLive(Math.round(tot * 0.7), tot, omsAuditadas.slice(0, Math.max(1, Math.round(tot * 0.7))), `${secStr()} • Turbo`);
+                        renderStreamOrdensAoVivo();
+                        renderNeuralSvgTopology(new Set(["s_n2_n4", "s_n2_n3", "s_n3_n4", "s_m_n3"]), new Set(["s_in_n1", "s_n1_n2"]));
+                        registrarInteracaoNeural({
+                            origem: "N2", destino: "N3", status: "ia",
+                            titulo: `Sub-Perceptrons W1/W2/W3 processaram ${lote} OMs ambíguas`,
+                            retorno: `EN 13306 B×C aplicado • Custo R$ ${custoRodada.custo_brl.toFixed(2)}`
+                        });
+                    }
+                });
+                acoesFila.push({
+                    wait: 240,
+                    run: () => {
+                        document.getElementById("maestroPhasePill").innerText = "TURBO 3/4";
+                        setEstadoPerceptronUI("no3", "is-done", 100, `${lote} auditadas`);
+                        setEstadoPerceptronUI("no4", "is-done", 100, "4 equipes roteadas");
+                        setEstadoPerceptronUI("no5", "is-working", 90, "Atualizando Conferente");
+                        setEstadoPerceptronUI("no6", "is-done", 100, `${ativas} regras vivas`);
+                        renderNeuralSvgTopology(new Set(["s_n4_n5", "s_n5_n6", "s_n6_n2", "s_n4_n7"]), new Set(["s_in_n1", "s_n1_n2", "s_n2_n4", "s_n2_n3", "s_n3_n4"]));
+                        registrarInteracaoNeural({
+                            origem: "N6", destino: "N2", status: "r0",
+                            titulo: `Sinapse humana + Bibliotecário sincronizados`,
+                            retorno: `${ativas} regras ativas na memória • ${estudosAqf.length} Estudo(s) AQF engatilhados`
+                        });
+                    }
+                });
+                acoesFila.push({
+                    wait: 240,
+                    run: () => {
+                        document.getElementById("maestroPhasePill").innerText = "TURBO 4/4";
+                        setEstadoPerceptronUI("no7", "is-done", 100, `${confiabilidadeData.total_quebras || 0} Quebras`);
+                        setEstadoPerceptronUI("no8", "is-done", 100, `${estudosAqf.length} AQF 2.0`);
+                        setEstadoPerceptronUI("no9", "is-done", 100, `${propostasPlanejador.length} ações`);
+                        renderNeuralSvgTopology(new Set(["s_n7_n8", "s_n8_n9", "s_m_n7", "s_m_n9"]), new Set(DEFINICAO_SINAPSES.map(e => e.id)));
+                        neuralAnimandoAgora = false;
+                        aplicarEstadoFinalRedeNeural(stats);
+                    }
+                });
+            }
 
             let stepIdx = 0;
-            const agendarProximo = () => {
-                if (stepIdx >= etapas.length) return;
-                const prevDelay = stepIdx === 0 ? 0 : etapas[stepIdx - 1].delay;
-                const waitMs = Math.max(20, etapas[stepIdx].delay - prevDelay);
+            const executarPasso = () => {
+                if (stepIdx >= acoesFila.length) return;
+                if (neuralPausado) {
+                    neuralPauseContinuarFn = () => executarPasso();
+                    return;
+                }
+                const acao = acoesFila[stepIdx];
                 neuralAnimacaoTimer = setTimeout(() => {
-                    etapas[stepIdx].run();
+                    if (neuralPausado) {
+                        neuralPauseContinuarFn = () => {
+                            acao.run();
+                            stepIdx++;
+                            executarPasso();
+                        };
+                        return;
+                    }
+                    acao.run();
                     stepIdx++;
-                    agendarProximo();
-                }, waitMs);
+                    executarPasso();
+                }, acao.wait);
             };
-            agendarProximo();
+            executarPasso();
         }
 
         window.reanimarRedeNeuralLive = () => {
@@ -2937,10 +3659,7 @@ OMs:\n${JSON.stringify(listaPrompt)}`;
         };
 
         window.alternarVelocidadeRedeNeural = () => {
-            neuralAnimacaoModo = neuralAnimacaoModo === "cinematica" ? "instantanea" : "cinematica";
-            const btn = document.getElementById("btnToggleNeuralSpeed");
-            if (btn) btn.innerText = neuralAnimacaoModo === "cinematica" ? "🎬 Animação: Cinemática" : "⚡ Animação: Instantânea";
-            showToast(`Modo da Rede Neural ajustado para: ${neuralAnimacaoModo.toUpperCase()}.`, "info");
+            window.definirRitmoRedeNeural(neuralRitmoModo === "passo_a_passo" ? "rapido" : "passo_a_passo");
         };
 
         window.inspecionarNoNeural = (nodeId) => {
@@ -3269,7 +3988,7 @@ OMs:\n${JSON.stringify(listaPrompt)}`;
                     : (melhorou ? "bg-emerald-100 text-emerald-800" : "bg-rose-100 text-rose-800");
                 const badgeTxt = estavel
                     ? `Estável (${sinal}${m.unit})`
-                    : (melhorou ? `✓ Melhorou (${sinal}${m.unit})` : `⚠ Piorou (${sinal}${m.unit})`);
+                    : (melhorou ? `${SVG_ICO.check} Melhorou (${sinal}${m.unit})` : `${SVG_ICO.alert} Piorou (${sinal}${m.unit})`);
 
                 if (!estavel && !melhorou && m.key === "quebras_pct") {
                     msgsRec.push(`A taxa de quebras em <strong>${escapeHtml(atual.periodo)}</strong> subiu de ${refVal}% para ${curVal}%. Acione o <strong>Caçador AQF (Nó 8)</strong> nos top ofensores abaixo.`);
@@ -3286,7 +4005,7 @@ OMs:\n${JSON.stringify(listaPrompt)}`;
                         <div class="text-[10px] font-extrabold uppercase text-slate-500">${m.k}</div>
                         <div class="text-lg font-extrabold text-slate-900">${curVal}${m.unit}</div>
                         <div class="text-[10px] font-semibold text-slate-500">Treino: ${refVal}${m.unit}</div>
-                        <span class="inline-block px-2 py-0.5 rounded-full text-[10px] font-extrabold ${badgeCls}">${badgeTxt}</span>
+                        <span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-extrabold ${badgeCls}">${badgeTxt}</span>
                     </div>`;
             }).join("");
 
@@ -3295,22 +4014,22 @@ OMs:\n${JSON.stringify(listaPrompt)}`;
                 if (!atual) {
                     recBox.innerHTML = `
                         <div class="flex flex-wrap items-center justify-between gap-2">
-                            <div class="text-xs font-extrabold text-indigo-900">👑 Maestro • Proposta de Uso para Agora (${escapeHtml(rodadaVigenteInfo.periodo)})</div>
+                            <div class="text-xs font-extrabold text-indigo-900 inline-flex items-center gap-1.5">${SVG_ICO.cpu} Maestro • Proposta de Uso para Agora (${escapeHtml(rodadaVigenteInfo.periodo)})</div>
                             <span class="px-2.5 py-0.5 rounded-full bg-indigo-100 text-indigo-800 text-[10px] font-extrabold">Memória Treinada em Set/Out Ativa</span>
                         </div>
                         <p class="text-xs font-semibold text-slate-600">Os dados de <strong>Set/Out (1.234 OMs • Quebras: 13,9% • MTTR: 54,7 min • Fast-Path R$ 0: 63,2%)</strong> já foram consolidados como linha de base. Assim que você arrastar o arquivo do ERP de Novembro, o sistema mostrará automaticamente onde melhoramos e quais máquinas exigem AQF e Preventiva imediata.</p>`;
                 } else {
                     const top1 = (confiabilidadeData.top_ofensores || []).find(x => x.quebras > 0);
                     if (top1) {
-                        msgsRec.unshift(`🎯 <strong>Prioridade Imediata (${escapeHtml(atual.periodo)}):</strong> O ativo <strong>${escapeHtml(top1.ativo)}</strong> lidera o Pareto atual (${top1.quebras} quebra(s), MTBF ${top1.mtbf_h}h). Use o <strong>Planejador 1-Clique</strong> no Nó 9 para agendar a preventiva/rota agora.`);
+                        msgsRec.unshift(`${SVG_ICO.target} <strong>Prioridade Imediata (${escapeHtml(atual.periodo)}):</strong> O ativo <strong>${escapeHtml(top1.ativo)}</strong> lidera o Pareto atual (${top1.quebras} quebra(s), MTBF ${top1.mtbf_h}h). Use o <strong>Planejador 1-Clique</strong> no Nó 9 para agendar a preventiva/rota agora.`);
                     }
                     if (melhorouCount > piorouCount && !msgsRec.some(m => m.includes("melhorou"))) {
-                        msgsRec.push(`🚀 <strong>Saldo Positivo:</strong> ${melhorouCount} indicador(es) melhoraram em relação a <strong>${escapeHtml(ref.periodo)}</strong>!`);
+                        msgsRec.push(`${SVG_ICO.bolt} <strong>Saldo Positivo:</strong> ${melhorouCount} indicador(es) melhoraram em relação a <strong>${escapeHtml(ref.periodo)}</strong>!`);
                     }
                     recBox.innerHTML = `
                         <div class="flex flex-wrap items-center justify-between gap-2">
-                            <div class="text-xs font-extrabold text-slate-900">👑 Veredicto do Maestro para ${escapeHtml(atual.periodo)} (${melhorouCount} Melhorias • ${piorouCount} Alertas)</div>
-                            <button type="button" onclick="switchView('cacador')" class="px-3 py-1 rounded-xl bg-sky-600 hover:bg-sky-700 text-white text-[11px] font-extrabold">🎯 Abrir Propostas do Caçador AQF →</button>
+                            <div class="text-xs font-extrabold text-slate-900 inline-flex items-center gap-1.5">${SVG_ICO.cpu} Veredicto do Maestro para ${escapeHtml(atual.periodo)} (${melhorouCount} Melhorias • ${piorouCount} Alertas)</div>
+                            <button type="button" onclick="switchView('cacador')" class="inline-flex items-center gap-1.5 px-3 py-1 rounded-xl bg-sky-600 hover:bg-sky-700 text-white text-[11px] font-extrabold">${SVG_ICO.target} Abrir Propostas do Caçador AQF →</button>
                         </div>
                         <ul class="text-xs font-semibold text-slate-700 space-y-1 list-disc pl-4">
                             ${msgsRec.map(r => `<li>${r}</li>`).join("")}
@@ -3358,7 +4077,7 @@ OMs:\n${JSON.stringify(listaPrompt)}`;
                     statusPill.innerText = "Aguardando planilha do ERP";
                     statusPill.className = "px-2.5 py-0.5 rounded-full bg-amber-100 text-amber-800 border border-amber-200 text-[10px] font-extrabold";
                 } else {
-                    statusPill.innerText = `✓ ${tot} OMs Ativas (${rodadaVigenteInfo.arquivoNome || rodadaVigenteInfo.periodo})`;
+                    statusPill.innerText = `${tot} OMs Ativas (${rodadaVigenteInfo.arquivoNome || rodadaVigenteInfo.periodo})`;
                     statusPill.className = "px-2.5 py-0.5 rounded-full bg-emerald-100 text-emerald-800 border border-emerald-200 text-[10px] font-extrabold";
                 }
             }
@@ -3380,7 +4099,7 @@ OMs:\n${JSON.stringify(listaPrompt)}`;
             document.getElementById("pipelineNodesGrid").innerHTML = DEFINICAO_NOS.map(n => {
                 const st = estadoNos[n.id] || { ...n, status: tot ? "concluido" : "aguardando", resumo: n.papel };
                 const badgeCls = st.status === "aguardando" ? "bg-amber-100 text-amber-800 border-amber-300" : "bg-emerald-100 text-emerald-800 border-emerald-300";
-                const badgeTxt = st.status === "aguardando" ? (tot ? "Aguardando Conferência" : "Pronto • Aguardando ERP") : "✓ Nó Concluído";
+                const badgeTxt = st.status === "aguardando" ? (tot ? "Aguardando Conferência" : "Pronto • Aguardando ERP") : `${SVG_ICO.check} Nó Concluído`;
                 const targetV = mapViewByNo[n.id] || "auditoria";
                 return `
                     <div class="node-card status-${st.status} flex flex-col justify-between gap-2.5">
@@ -3541,8 +4260,8 @@ OMs:\n${JSON.stringify(listaPrompt)}`;
                             <div class="text-[10px] font-bold text-slate-500 mt-0.5">Fila: ${escapeHtml(o.fila)}</div>
                         </td>
                         <td class="py-3 px-3 text-right whitespace-nowrap space-x-1">
-                            <button type="button" onclick="confirmarOmSupervisorDireto('${o.om}')" class="px-2.5 py-1 rounded-lg bg-emerald-50 hover:bg-emerald-100 text-emerald-800 border border-emerald-200 text-[11px] font-extrabold" title="Confirmar classificação">✓</button>
-                            <button type="button" onclick="abrirModalCorrigirOm('${o.om}')" class="px-2.5 py-1 rounded-lg bg-amber-50 hover:bg-amber-100 text-amber-900 border border-amber-200 text-[11px] font-extrabold">✏️ Corrigir</button>
+                            <button type="button" onclick="confirmarOmSupervisorDireto('${o.om}')" class="inline-flex items-center px-2.5 py-1 rounded-lg bg-emerald-50 hover:bg-emerald-100 text-emerald-800 border border-emerald-200 text-[11px] font-extrabold" title="Confirmar classificação">${SVG_ICO.check}</button>
+                            <button type="button" onclick="abrirModalCorrigirOm('${o.om}')" class="inline-flex items-center gap-1 px-2.5 py-1 rounded-lg bg-amber-50 hover:bg-amber-100 text-amber-900 border border-amber-200 text-[11px] font-extrabold">${SVG_ICO.edit} Corrigir</button>
                         </td>
                     </tr>`;
             }).join("");
@@ -3578,7 +4297,7 @@ OMs:\n${JSON.stringify(listaPrompt)}`;
 
             const box = document.getElementById("confCardsLista");
             if (!lista.length) {
-                box.innerHTML = `<div class="col-span-full glass-card p-10 rounded-3xl text-center text-xs font-extrabold text-emerald-700">🎉 Fila limpa! Todas as ordens desta equipe já foram conferidas ou aprovadas automaticamente.</div>`;
+                box.innerHTML = `<div class="col-span-full glass-card p-10 rounded-3xl text-center text-xs font-extrabold text-emerald-700 flex items-center justify-center gap-2">${SVG_ICO.check} Fila limpa! Todas as ordens desta equipe já foram conferidas ou aprovadas automaticamente.</div>`;
                 return;
             }
 
@@ -3604,10 +4323,10 @@ OMs:\n${JSON.stringify(listaPrompt)}`;
                     </div>
                     <div class="flex items-center gap-2 pt-3 border-t border-slate-100">
                         <button type="button" onclick="confirmarOmSupervisorDireto('${o.om}')" class="btn-touch bg-emerald-600 hover:bg-emerald-700 text-white flex-1 text-xs py-2.5">
-                            ✓ 1. Confirmar (${escapeHtml(o.categoria)})
+                            ${SVG_ICO.check} 1. Confirmar (${escapeHtml(o.categoria)})
                         </button>
                         <button type="button" onclick="abrirModalCorrigirOm('${o.om}')" class="btn-touch bg-amber-100 hover:bg-amber-200 text-amber-950 border border-amber-300 flex-1 text-xs py-2.5">
-                            ✏️ 2. Corrigir & Ensinar IA
+                            ${SVG_ICO.edit} 2. Corrigir & Ensinar IA
                         </button>
                     </div>
                 </div>`).join("");
@@ -3733,12 +4452,12 @@ OMs:\n${JSON.stringify(listaPrompt)}`;
 
             const divBox = document.getElementById("biblioDivergenciasLista");
             if (!divergenciasSupervisores.length) {
-                divBox.innerHTML = `<div class="p-4 rounded-2xl bg-emerald-50 border border-emerald-200 text-xs font-bold text-emerald-900">✓ Consenso 100% entre supervisores! Nenhuma regra com assinatura similar e categorias conflitantes.</div>`;
+                divBox.innerHTML = `<div class="p-4 rounded-2xl bg-emerald-50 border border-emerald-200 text-xs font-bold text-emerald-900 flex items-center gap-2">${SVG_ICO.check} Consenso 100% entre supervisores! Nenhuma regra com assinatura similar e categorias conflitantes.</div>`;
             } else {
                 divBox.innerHTML = divergenciasSupervisores.map(d => `
                     <div class="p-4 rounded-2xl bg-rose-50/70 border border-rose-200 space-y-2 text-xs">
                         <div class="flex flex-wrap items-center justify-between gap-2">
-                            <span class="font-extrabold text-rose-900">⚠ Divergência Detectada (Similaridade Jaccard: ${d.sim}%)</span>
+                            <span class="font-extrabold text-rose-900 inline-flex items-center gap-1.5">${SVG_ICO.alert} Divergência Detectada (Similaridade Jaccard: ${d.sim}%)</span>
                             <div class="flex gap-1.5">
                                 <button type="button" onclick="arbitrarDivergenciaSupervisor(${d.idxA}, ${d.idxB})" class="px-2.5 py-1 rounded-lg bg-slate-900 text-white text-[10px] font-extrabold">Manter ${escapeHtml(d.a.categoria_supervisor)}</button>
                                 <button type="button" onclick="arbitrarDivergenciaSupervisor(${d.idxB}, ${d.idxA})" class="px-2.5 py-1 rounded-lg bg-sky-700 text-white text-[10px] font-extrabold">Manter ${escapeHtml(d.b.categoria_supervisor)}</button>
@@ -3825,13 +4544,13 @@ OMs:\n${JSON.stringify(listaPrompt)}`;
                     </td>
                     <td class="py-3 px-3 text-center font-mono font-extrabold ${r.disponibilidade_pct >= 96 ? "text-emerald-700" : "text-amber-700"}">${r.disponibilidade_pct}%</td>
                     <td class="py-3 px-3">
-                        <span class="text-[11px] font-extrabold ${r.status_rota.includes("✓") ? "text-emerald-700" : "text-rose-700"}">${escapeHtml(r.status_rota)}</span>
+                        <span class="text-[11px] font-extrabold ${r.status_rota.includes("Coberto") ? "text-emerald-700" : "text-rose-700"}">${escapeHtml(r.status_rota)}</span>
                     </td>
                     <td class="py-3 px-3 text-center">
-                        <span class="px-2 py-0.5 rounded-full text-[10px] font-extrabold ${r.risco_obsolescencia ? "bg-amber-100 text-amber-900 border border-amber-300" : "bg-slate-100 text-slate-500"}">${r.risco_obsolescencia ? "⚠ Crítico Obsol." : "Normal"}</span>
+                        <span class="px-2 py-0.5 rounded-full text-[10px] font-extrabold ${r.risco_obsolescencia ? "bg-amber-100 text-amber-900 border border-amber-300" : "bg-slate-100 text-slate-500"}">${r.risco_obsolescencia ? "Risco Crítico Obsol." : "Normal"}</span>
                     </td>
                     <td class="py-3 px-3 text-right">
-                        <button type="button" onclick="abrirAtivoNoCacador('${escapeHtml(r.ativo)}')" class="px-3 py-1.5 rounded-xl bg-sky-600 hover:bg-sky-700 text-white text-[11px] font-extrabold">🎯 Gerar AQF</button>
+                        <button type="button" onclick="abrirAtivoNoCacador('${escapeHtml(r.ativo)}')" class="inline-flex items-center gap-1 px-3 py-1.5 rounded-xl bg-sky-600 hover:bg-sky-700 text-white text-[11px] font-extrabold">${SVG_ICO.target} Gerar AQF</button>
                     </td>
                 </tr>`).join("");
         };
@@ -3859,7 +4578,7 @@ OMs:\n${JSON.stringify(listaPrompt)}`;
 
             const box = document.getElementById("cacadorEstudosContainer");
             if (!estudosAqf.length) {
-                box.innerHTML = `<div class="glass-card p-10 rounded-3xl text-center text-xs font-bold text-slate-500">Selecione um ativo acima e clique em "🎯 Gerar / Atualizar Estudo AQF".</div>`;
+                box.innerHTML = `<div class="glass-card p-10 rounded-3xl text-center text-xs font-bold text-slate-500">Selecione um ativo acima e clique em "Gerar / Atualizar Estudo AQF".</div>`;
                 return;
             }
 
@@ -3877,7 +4596,7 @@ OMs:\n${JSON.stringify(listaPrompt)}`;
                         </div>
                         <div class="flex flex-wrap items-center gap-2 shrink-0">
                             <button type="button" onclick="imprimirEstudoAqfA4('${est.id}')" class="btn-touch bg-emerald-50 hover:bg-emerald-100 text-emerald-900 border border-emerald-200 text-xs py-2 px-4">
-                                🖨️ Imprimir Ficha AQF (A4)
+                                ${SVG_ICO.print} Imprimir Ficha AQF (A4)
                             </button>
                         </div>
                     </div>
@@ -3921,7 +4640,7 @@ OMs:\n${JSON.stringify(listaPrompt)}`;
                                         <div class="text-[10px] font-mono font-bold text-slate-500">Equipe: ${escapeHtml(pr.equipe)} • ${escapeHtml(pr.periodicidade)} • ${pr.duracao_min} min</div>
                                     </div>
                                     <button type="button" onclick="executarAcaoPlanejador1Clique('${pr.id}')" class="btn-touch ${pr.corCls} w-full py-2 text-xs">
-                                        ⚡ Enviar 1-Clique para Módulo
+                                        ${SVG_ICO.bolt} Enviar 1-Clique para Módulo
                                     </button>
                                 </div>`).join("")}
                         </div>
@@ -4062,7 +4781,7 @@ OMs:\n${JSON.stringify(listaPrompt)}`;
                             <span class="font-bold text-slate-800 truncate">${escapeHtml(o.ativo)} — ${escapeHtml(o.problema)}</span>
                             <span class="px-2 py-0.5 rounded-full bg-slate-100 text-[10px] font-extrabold">${escapeHtml(o.categoria)}</span>
                         </label>
-                        <button type="button" onclick="abrirModalCorrigirOm('${o.om}')" class="px-2.5 py-1 rounded-lg bg-rose-600 text-white text-[10px] font-extrabold">✏️ Editar Master</button>
+                        <button type="button" onclick="abrirModalCorrigirOm('${o.om}')" class="inline-flex items-center gap-1 px-2.5 py-1 rounded-lg bg-rose-600 text-white text-[10px] font-extrabold">${SVG_ICO.edit} Editar Master</button>
                     </div>`;
             }).join("");
         };
