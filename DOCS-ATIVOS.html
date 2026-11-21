@@ -173,6 +173,7 @@
         .cat-lubrificacao { background: #fef3c7; color: #b45309; border: 1px solid #fde68a; }
         .cat-desenhos { background: #ede9fe; color: #5b21b6; border: 1px solid #ddd6fe; }
         .cat-orcamentos { background: #ffe4e6; color: #be123c; border: 1px solid #fecdd3; }
+        .cat-administrativo { background: #f1f5f9; color: #334155; border: 1px solid #cbd5e1; }
         .cat-fotos { background: #d1fae5; color: #047857; border: 1px solid #a7f3d0; }
         .cat-qualidade { background: #ccfbf1; color: #0f766e; border: 1px solid #99f6e4; }
 
@@ -180,6 +181,36 @@
         .st-pendente { background: #fef3c7; color: #b45309; border: 1px solid #fcd34d; }
         .st-reprovado { background: #ffe4e6; color: #be123c; border: 1px solid #fda4af; }
         .st-obsoleto { background: #f1f5f9; color: #475569; border: 1px solid #cbd5e1; }
+
+        .doc-spotlight-wrap {
+            display: flex;
+            align-items: center;
+            gap: 0.6rem;
+            width: 100%;
+            min-height: 50px;
+            padding: 0.35rem 0.5rem 0.35rem 0.9rem;
+            border-radius: 1rem;
+            border: 1px solid #cbd5e1;
+            background: #ffffff;
+            transition: border-color 0.15s ease, box-shadow 0.15s ease;
+        }
+        .doc-spotlight-wrap:focus-within {
+            border-color: var(--accent);
+            box-shadow: 0 0 0 3px rgba(2, 132, 199, 0.14);
+        }
+        .doc-spotlight-wrap input {
+            flex: 1 1 auto;
+            min-width: 0;
+            width: 100%;
+            border: 0;
+            background: transparent;
+            outline: none !important;
+            font-size: 1rem;
+            line-height: 1.4;
+        }
+        @media (min-width: 1280px) {
+            .doc-spotlight-wrap input { font-size: 0.95rem; }
+        }
 
         .dropzone-docs {
             border: 2px dashed #94a3b8;
@@ -228,7 +259,9 @@
         body.theme-dark .bg-slate-50,
         body.theme-dark .bg-slate-100 { background-color: #0f172a !important; border-color: #334155 !important; color: #f1f5f9 !important; }
         body.theme-dark .border-slate-200, body.theme-dark .border-slate-200\/80, body.theme-dark .border-slate-100 { border-color: #334155 !important; }
-        body.theme-dark .input-clean { background: #0f172a !important; border-color: #475569 !important; color: #ffffff !important; }
+        body.theme-dark .input-clean,
+        body.theme-dark .doc-spotlight-wrap { background: #0f172a !important; border-color: #475569 !important; color: #ffffff !important; }
+        body.theme-dark .doc-spotlight-wrap input { color: #ffffff !important; }
         body.theme-dark .rail-btn,
         body.theme-dark .mob-tab,
         body.theme-dark .pill { background: #0f172a !important; border-color: #334155 !important; color: #cbd5e1 !important; }
@@ -239,9 +272,12 @@
         body.high-contrast .frosted-shell,
         body.high-contrast .glass-card,
         body.high-contrast .glass-rail { background: #ffffff !important; border: 2px solid #000000 !important; box-shadow: none !important; backdrop-filter: none !important; }
-        body.high-contrast .input-clean { border: 2px solid #000000 !important; color: #000000 !important; }
+        body.high-contrast .input-clean,
+        body.high-contrast .doc-spotlight-wrap { border: 2px solid #000000 !important; color: #000000 !important; }
         body.tablet-mode *, body.tablet-mode *::before, body.tablet-mode *::after { transition: none !important; animation: none !important; }
         body.tablet-mode .btn-touch, body.tablet-mode .btn-pill-dark, body.tablet-mode .input-clean, body.tablet-mode .mob-tab { min-height: 46px !important; font-size: 0.92rem !important; }
+        body.tablet-mode .doc-spotlight-wrap { min-height: 56px !important; }
+        body.tablet-mode .doc-spotlight-wrap input { font-size: 1.05rem !important; min-height: 42px !important; }
     </style>
 </head>
 <body class="antialiased selection:bg-sky-100 selection:text-sky-900">
@@ -284,7 +320,7 @@
                             <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
                             <span>Aprovações</span>
                         </button>
-                        <button type="button" id="rail-revisoes" onclick="switchView('revisoes')" class="rail-btn">
+                        <button type="button" id="rail-revisoes" onclick="switchView('revisoes')" hidden class="rail-btn hidden">
                             <span id="badgeRailValidade" hidden class="hidden absolute -top-1 -right-1 px-1.5 py-0.5 rounded-full text-[9px] font-extrabold bg-amber-500 text-white shadow">0</span>
                             <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
                             <span>Revisões</span>
@@ -351,7 +387,7 @@
                 <div id="mobileTabNav" class="md:hidden flex items-center gap-2 overflow-x-auto px-4 py-2.5 bg-white/60 border-b border-slate-200/80 shrink-0">
                     <button type="button" id="mob-biblioteca" onclick="switchView('biblioteca')" class="mob-tab active">Biblioteca</button>
                     <button type="button" id="mob-aprovacoes" onclick="switchView('aprovacoes')" hidden class="mob-tab hidden">Aprovações <span id="badgeMobAprov" class="ml-1 px-1.5 py-0.2 rounded-full bg-rose-600 text-white text-[10px]">0</span></button>
-                    <button type="button" id="mob-revisoes" onclick="switchView('revisoes')" class="mob-tab">Revisões &amp; Validades</button>
+                    <button type="button" id="mob-revisoes" onclick="switchView('revisoes')" hidden class="mob-tab hidden">Revisões &amp; Validades</button>
                     <button type="button" id="mob-sharepoint" onclick="switchView('sharepoint')" hidden class="mob-tab hidden">SharePoint</button>
                 </div>
 
@@ -360,29 +396,30 @@
                     <section id="viewBiblioteca" class="space-y-5 max-w-7xl mx-auto">
                         <!-- Barra de Busca Dinâmica (Spotlight Industrial) + KPIs Rápidos -->
                         <div class="glass-card rounded-3xl p-4 sm:p-5 space-y-4">
-                            <div class="flex flex-col md:flex-row md:items-center gap-3">
-                                <div class="relative flex-1">
-                                    <svg class="w-5 h-5 text-sky-600 absolute left-3.5 top-1/2 -translate-y-1/2 pointer-events-none" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/></svg>
-                                <input type="text" id="docSearchInput" oninput="onFiltroBibliotecaChange()" class="input-clean pl-11 pr-24 py-3 text-sm font-bold" placeholder="Busca rápida: código DOC-, título, inversor CFW11, rolamento, lubrificante, TAG, linha ou máquina...">
-                                <button type="button" onclick="limparFiltrosBiblioteca()" class="absolute right-2.5 top-1/2 -translate-y-1/2 px-2.5 py-1 rounded-lg bg-slate-100 hover:bg-slate-200 text-[11px] font-extrabold text-slate-600">Limpar</button>
-                            </div>
-                            <div class="flex flex-wrap items-center gap-2 shrink-0">
-                                <select id="docFiltroDisciplina" onchange="onFiltroBibliotecaChange()" class="input-clean py-2.5 text-xs font-extrabold w-auto">
-                                    <option value="">Todas Disciplinas</option>
-                                    <option value="Mecânica">Mecânica</option>
-                                    <option value="Elétrica">Elétrica</option>
-                                    <option value="Automação">Automação</option>
-                                    <option value="Lubrificação">Lubrificação</option>
-                                    <option value="Utilidades">Utilidades</option>
-                                    <option value="Qualidade">Qualidade</option>
-                                    <option value="Multidisciplinar">Multidisciplinar</option>
-                                </select>
-                                <select id="docFiltroOrdem" onchange="onFiltroBibliotecaChange()" class="input-clean py-2.5 text-xs font-extrabold w-auto">
-                                    <option value="recentes">Mais Recentes</option>
-                                    <option value="codigo">Código (A–Z)</option>
-                                    <option value="titulo">Título (A–Z)</option>
-                                    <option value="validade">Próximos Vencimentos</option>
-                                </select>
+                            <div class="flex flex-col gap-3">
+                                <div class="doc-spotlight-wrap shadow-sm">
+                                    <svg class="w-5 h-5 text-sky-600 shrink-0 pointer-events-none" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/></svg>
+                                    <input type="text" id="docSearchInput" oninput="onFiltroBibliotecaChange()" class="font-bold text-slate-900 placeholder:text-slate-400" placeholder="Busca rápida: código DOC-, título, inversor CFW11, rolamento, lubrificante, TAG, linha ou máquina...">
+                                    <button type="button" onclick="limparFiltrosBiblioteca()" class="shrink-0 px-3 py-1.5 rounded-xl bg-slate-100 hover:bg-slate-200 text-xs font-extrabold text-slate-700">Limpar</button>
+                                </div>
+                                <div class="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
+                                    <select id="docFiltroDisciplina" onchange="onFiltroBibliotecaChange()" class="input-clean py-2.5 text-xs font-extrabold w-full">
+                                        <option value="">Todas Disciplinas</option>
+                                        <option value="Mecânica">Mecânica</option>
+                                        <option value="Elétrica">Elétrica</option>
+                                        <option value="Automação">Automação</option>
+                                        <option value="Lubrificação">Lubrificação</option>
+                                        <option value="Utilidades">Utilidades</option>
+                                        <option value="Qualidade">Qualidade</option>
+                                        <option value="Multidisciplinar">Multidisciplinar</option>
+                                    </select>
+                                    <select id="docFiltroOrdem" onchange="onFiltroBibliotecaChange()" class="input-clean py-2.5 text-xs font-extrabold w-full">
+                                        <option value="recentes">Mais Recentes</option>
+                                        <option value="codigo">Código (A–Z)</option>
+                                        <option value="titulo">Título (A–Z)</option>
+                                        <option id="docOptValidadeOrdem" value="validade">Próximos Vencimentos</option>
+                                    </select>
+                                </div>
                             </div>
                         </div>
 
@@ -667,7 +704,47 @@
                 </div>
 
                 <div id="ndAvisoSigiloOrcamento" hidden class="hidden p-3 rounded-2xl bg-rose-50 border border-rose-200 text-rose-900 text-[11px] font-bold">
-                    Sigilo ativo: documentos da categoria <strong>Orçamentos</strong> ficam visíveis apenas para Administração, Gerência e Supervisores (ocultos para técnicos de campo).
+                    Sigilo ativo: documentos desta categoria ficam ocultos para mecânicos e eletricistas por padrão (visíveis apenas para Gestão/Admin).
+                </div>
+
+                <!-- Controle de Acesso por Equipe / Pessoa (exclusivo Gestão/Administrativo) -->
+                <div id="ndBoxVisibilidadeDocs" hidden class="hidden p-4 rounded-2xl bg-slate-50 border border-slate-200 space-y-3">
+                    <div class="flex flex-wrap items-center justify-between gap-2">
+                        <div>
+                            <span class="text-[10px] font-extrabold uppercase tracking-wider text-slate-700">🔒 Quem vai ver este documento (Perfil Administrativo / Gestão)</span>
+                            <p class="text-[10px] font-semibold text-slate-500">Defina se o documento fica aberto para o campo ou oculto para equipes e pessoas específicas.</p>
+                        </div>
+                        <span id="ndVisResumoBadge" class="px-2.5 py-1 rounded-full text-[10px] font-extrabold bg-emerald-100 text-emerald-800 border border-emerald-200">Todos liberados</span>
+                    </div>
+                    <div>
+                        <label class="block text-[10px] font-extrabold uppercase text-slate-500 mb-1">Regra de Visibilidade</label>
+                        <select id="ndVisibilidadeModo" onchange="onNdVisibilidadeModoChange()" class="input-clean py-2 text-xs font-extrabold">
+                            <option value="todos">Todos os colaboradores com acesso à Biblioteca</option>
+                            <option value="gestao">Somente Gestão / Administrativo (Admin, Gerente e Supervisores)</option>
+                            <option value="personalizado_ocultos">Todos, EXCETO equipes / pessoas ocultadas abaixo</option>
+                            <option value="personalizado_permitidos">Somente equipes / pessoas selecionadas (+ Admin/Gerência)</option>
+                        </select>
+                    </div>
+                    <div id="ndVisPersonalizacaoBox" hidden class="hidden space-y-3 pt-2 border-t border-slate-200">
+                        <div class="flex flex-wrap items-center justify-between gap-2">
+                            <span id="ndVisModoHint" class="text-[11px] font-extrabold text-rose-700">Marque abaixo as equipes e/ou pessoas que NÃO devem ver este documento:</span>
+                            <div class="flex flex-wrap items-center gap-1.5">
+                                <button type="button" onclick="selecionarEquipesCampoVis(true)" class="px-2.5 py-1 rounded-lg bg-white hover:bg-slate-100 border border-slate-200 text-[10px] font-extrabold text-slate-700">Selecionar Equipes de Campo</button>
+                                <button type="button" onclick="limparSelecoesVisDoc()" class="px-2.5 py-1 rounded-lg bg-white hover:bg-rose-50 border border-slate-200 text-[10px] font-extrabold text-slate-600">Limpar Seleções</button>
+                            </div>
+                        </div>
+                        <div>
+                            <div class="text-[10px] font-extrabold uppercase text-slate-500 mb-1.5">Equipes / Perfis</div>
+                            <div id="ndVisEquipesList" class="flex flex-wrap gap-1.5"></div>
+                        </div>
+                        <div class="space-y-1.5">
+                            <div class="flex flex-wrap items-center justify-between gap-2">
+                                <span class="text-[10px] font-extrabold uppercase text-slate-500">Pessoas Específicas</span>
+                                <input type="text" id="ndVisUsuariosBusca" oninput="renderVisibilidadeUsuariosLista()" class="input-clean py-1 px-2.5 text-[11px] font-bold w-full sm:w-56" placeholder="Filtrar colaborador...">
+                            </div>
+                            <div id="ndVisUsuariosList" class="grid grid-cols-1 sm:grid-cols-2 gap-1.5 max-h-40 overflow-y-auto pr-1"></div>
+                        </div>
+                    </div>
                 </div>
 
                 <!-- Passo 2: Anexo Direto (Arrastar e Soltar PDF / Foto / Excel / Word) + Opção Link SharePoint -->
@@ -775,11 +852,11 @@
 
                 <!-- Passo 3: Busca, Parâmetros Técnicos, Revisão e Validade -->
                 <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                    <div>
+                    <div id="ndTagsCol">
                         <label class="block text-[10px] font-extrabold uppercase text-slate-500 mb-1">Tags / Palavras-chave para Busca (Opcional)</label>
                         <input type="text" id="ndTags" class="input-clean py-2 text-xs font-bold" placeholder="Ex: SEW, redutor, inversor CFW11, óleo VG 220 (auto-sugerido se vazio)">
                     </div>
-                    <div class="grid grid-cols-2 gap-2">
+                    <div id="ndBoxValidade" class="grid grid-cols-2 gap-2">
                         <div>
                             <label class="block text-[10px] font-extrabold uppercase text-slate-500 mb-1">Validade (Opcional)</label>
                             <input type="date" id="ndValidadeEm" class="input-clean py-2 text-xs font-bold">
@@ -973,6 +1050,10 @@
                 id: 'orcamentos', label: 'Orçamentos', pastaSp: '04_ORCAMENTOS_SIGILOSOS', sigilo: 'gestao', badgeCls: 'cat-orcamentos',
                 subtipos: ['Cotação de Fornecedor', 'Proposta Técnica / Escopo', 'Datasheet Comercial', 'Orçamento de Reforma / Retrofitting']
             },
+            administrativo: {
+                id: 'administrativo', label: 'Administrativo / Gestão', pastaSp: '07_ADMINISTRATIVO', sigilo: 'gestao', badgeCls: 'cat-administrativo',
+                subtipos: ['Documento Administrativo', 'Contrato / SLA de Terceiros', 'Nota Fiscal / Pedido de Compra', 'Relatório Gerencial', 'Procedimento Interno']
+            },
             fotos: {
                 id: 'fotos', label: 'Fotos & Referências', pastaSp: '05_FOTOS_REFERENCIA', sigilo: 'geral', badgeCls: 'cat-fotos',
                 subtipos: ['Foto Padrão (Como Deve Ficar)', 'Plaqueta / TAG / Dados de Motor', 'Montagem / Desmontagem Passo a Passo', 'Ponto Crítico de Inspeção', 'Sugestão de Campo']
@@ -1071,6 +1152,10 @@ match /config/{document=**} {
         let pastaOneDriveHandle = null;
         const blobUrlCache = new Map();
         let sharepointCfg = { ...DEFAULT_SHAREPOINT_CFG };
+        let ndVisEquipesSel = new Set();
+        let ndVisUsuariosSel = new Set();
+        let pdfJsLoadPromise = null;
+        const EQUIPES_VIS_DOCS = ['Mecânica', 'Elétrica', 'Automação', 'Utilidades', 'Operação', 'Supervisor Mecânica', 'Supervisor Elétrica'];
 
         let rawLinhasDocs = [];
         let assetNodes = [];
@@ -1145,10 +1230,55 @@ match /config/{document=**} {
 
         function podeVerDocumento(docObj, user = usuarioLogado) {
             if (!docObj) return false;
-            if (docObj.categoria === 'orcamentos' || docObj.sigilo === 'gestao') {
-                return Boolean(user && isPerfilGestaoDocs(user.role));
+            const ehOrcamento = docObj.categoria === 'orcamentos';
+            const ehAdminCat = docObj.categoria === 'administrativo';
+            const gestor = Boolean(user && isPerfilGestaoDocs(user.role));
+
+            if (ehOrcamento && !gestor) return false;
+
+            const modo = docObj.visibilidadeModo || ((ehOrcamento || ehAdminCat || docObj.sigilo === 'gestao') ? 'gestao' : 'todos');
+            if (!user) return modo === 'todos' && !ehOrcamento && docObj.sigilo !== 'gestao';
+            if (isMasterDocsAtivo(user) || isPerfilAdmin(user.role)) return true;
+
+            if (modo === 'gestao') return gestor;
+            if ((ehAdminCat || docObj.sigilo === 'gestao') && modo !== 'personalizado_ocultos' && modo !== 'personalizado_permitidos') {
+                return gestor;
+            }
+
+            const eqPerm = Array.isArray(docObj.visivelEquipes) ? docObj.visivelEquipes : [];
+            const usrPerm = Array.isArray(docObj.visivelUsuarios) ? docObj.visivelUsuarios : [];
+            const eqOc = Array.isArray(docObj.ocultoEquipes) ? docObj.ocultoEquipes : [];
+            const usrOc = Array.isArray(docObj.ocultoUsuarios) ? docObj.ocultoUsuarios : [];
+
+            const matchesUser = (arr) => arr.some(v => {
+                const nv = normKey(v);
+                return (user.user && nv === normKey(user.user)) || (user.id && String(v) === String(user.id));
+            });
+            const matchesEquipe = (arr) => {
+                const ur = normKey(user.role);
+                return Boolean(ur) && arr.some(v => normKey(v) === ur);
+            };
+
+            if (matchesUser(usrOc) || matchesEquipe(eqOc)) return false;
+            if (modo === 'personalizado_permitidos') {
+                return matchesUser(usrPerm) || matchesEquipe(eqPerm);
             }
             return true;
+        }
+
+        function descreverVisibilidadeDoc(docObj) {
+            if (!docObj) return '';
+            const modo = docObj.visibilidadeModo || ((docObj.categoria === 'orcamentos' || docObj.categoria === 'administrativo' || docObj.sigilo === 'gestao') ? 'gestao' : 'todos');
+            if (modo === 'gestao') return '🔒 Somente Gestão';
+            if (modo === 'personalizado_ocultos') {
+                const n = (docObj.ocultoEquipes?.length || 0) + (docObj.ocultoUsuarios?.length || 0);
+                return `🚫 Oculto p/ ${n} seleção(ões)`;
+            }
+            if (modo === 'personalizado_permitidos') {
+                const n = (docObj.visivelEquipes?.length || 0) + (docObj.visivelUsuarios?.length || 0);
+                return `🔒 Restrito a ${n} seleção(ões)`;
+            }
+            return '';
         }
 
         function getCategoriasPermitidas(user = usuarioLogado) {
@@ -1247,7 +1377,7 @@ match /config/{document=**} {
             const segs = [sharepointCfg.pastaRaiz || 'SISTEMA', catMeta.pastaSp];
             if (area) segs.push(slugSegmentSp(area));
             if (maquina) segs.push(slugSegmentSp(maquina));
-            if (equipamento && catMeta.id !== 'orcamentos') segs.push(slugSegmentSp(equipamento));
+            if (equipamento && catMeta.sigilo !== 'gestao') segs.push(slugSegmentSp(equipamento));
             return segs.join('/');
         }
 
@@ -1403,7 +1533,7 @@ match /config/{document=**} {
         function aplicarPerfilInterface() {
             const aprovador = isPerfilAprovadorDocs(usuarioLogado);
             const gestorSp = isPerfilAdmin(usuarioLogado?.role) || aprovador;
-            ['rail-aprovacoes', 'mob-aprovacoes'].forEach(id => {
+            ['rail-aprovacoes', 'mob-aprovacoes', 'rail-revisoes', 'mob-revisoes'].forEach(id => {
                 const el = document.getElementById(id);
                 if (el) { el.hidden = !aprovador; el.classList.toggle('hidden', !aprovador); }
             });
@@ -1411,6 +1541,18 @@ match /config/{document=**} {
                 const el = document.getElementById(id);
                 if (el) { el.hidden = !gestorSp; el.classList.toggle('hidden', !gestorSp); }
             });
+            const optValOrd = document.getElementById('docOptValidadeOrdem');
+            if (optValOrd) {
+                optValOrd.hidden = !aprovador;
+                optValOrd.disabled = !aprovador;
+            }
+            const ordSel = document.getElementById('docFiltroOrdem');
+            if (ordSel && !aprovador && ordSel.value === 'validade') {
+                ordSel.value = 'recentes';
+            }
+            if (!aprovador && ['aprovacoes', 'revisoes', 'sharepoint'].includes(currentView)) {
+                switchView('biblioteca');
+            }
             const uLbl = document.getElementById('userChipLabel');
             if (uLbl && usuarioLogado) uLbl.innerText = `${usuarioLogado.nome || usuarioLogado.user} (${usuarioLogado.role})`;
             const chipMaster = document.getElementById('masterDocsChip');
@@ -1426,16 +1568,15 @@ match /config/{document=**} {
             }
             const aviso = document.getElementById('docSigiloAviso');
             if (aviso) {
-                aviso.innerText = isPerfilGestaoDocs(usuarioLogado?.role)
-                    ? 'Exibindo revisões vigentes e aprovadas (incluindo Orçamentos da Gestão).'
-                    : 'Exibindo apenas revisões vigentes aprovadas para campo (Manuais, Lubrificação, Desenhos, Fotos e Qualidade).';
+                aviso.innerText = aprovador
+                    ? 'Exibindo revisões vigentes e aprovadas (incluindo documentos administrativos/restritos da Gestão).'
+                    : 'Exibindo apenas documentação técnica vigente liberada para a sua equipe.';
             }
             renderCategoriasPills();
         }
 
         window.switchView = (v) => {
-            if (v === 'aprovacoes' && !isPerfilAprovadorDocs(usuarioLogado)) v = 'biblioteca';
-            if (v === 'sharepoint' && !isPerfilAprovadorDocs(usuarioLogado)) v = 'biblioteca';
+            if ((v === 'aprovacoes' || v === 'sharepoint' || v === 'revisoes') && !isPerfilAprovadorDocs(usuarioLogado)) v = 'biblioteca';
             currentView = v;
             ['biblioteca', 'aprovacoes', 'revisoes', 'sharepoint'].forEach(id => {
                 const sec = document.getElementById('view' + id.charAt(0).toUpperCase() + id.slice(1));
@@ -1550,7 +1691,8 @@ match /config/{document=**} {
             const maq = document.getElementById('docFiltroMaquina')?.value || '';
             const eq = document.getElementById('docFiltroEquipamento')?.value || '';
             const cj = document.getElementById('docFiltroConjunto')?.value || '';
-            const ordem = document.getElementById('docFiltroOrdem')?.value || 'recentes';
+            let ordem = document.getElementById('docFiltroOrdem')?.value || 'recentes';
+            if (ordem === 'validade' && !isPerfilAprovadorDocs(usuarioLogado)) ordem = 'recentes';
 
             const tokens = busca ? busca.split(' ').filter(Boolean) : [];
             let lista = docsAtivos.filter(d => {
@@ -1584,39 +1726,42 @@ match /config/{document=**} {
         }
 
         function atualizarBadgesContadores() {
-            const pendentes = docsRevisoes.filter(r => r.status === 'pendente_aprovacao' && podeVerDocumento(r));
+            const aprovador = isPerfilAprovadorDocs(usuarioLogado);
+            const pendentes = aprovador ? docsRevisoes.filter(r => r.status === 'pendente_aprovacao' && podeVerDocumento(r)) : [];
             const aprovEl = document.getElementById('badgeRailAprov');
             const mobAp = document.getElementById('badgeMobAprov');
             if (aprovEl) {
                 aprovEl.innerText = String(pendentes.length);
-                aprovEl.hidden = pendentes.length === 0;
-                aprovEl.classList.toggle('hidden', pendentes.length === 0);
+                aprovEl.hidden = !aprovador || pendentes.length === 0;
+                aprovEl.classList.toggle('hidden', !aprovador || pendentes.length === 0);
             }
             if (mobAp) mobAp.innerText = String(pendentes.length);
 
-            const alertasVal = docsAtivos.filter(d => {
+            const alertasVal = aprovador ? docsAtivos.filter(d => {
                 if (d.status !== 'vigente' || !podeVerDocumento(d)) return false;
                 const sv = getStatusValidade(d.validadeEm);
                 return sv.kind === 'vencido' || sv.kind === 'alerta';
-            }).length;
+            }).length : 0;
             const bVal = document.getElementById('badgeRailValidade');
             if (bVal) {
                 bVal.innerText = String(alertasVal);
-                bVal.hidden = alertasVal === 0;
-                bVal.classList.toggle('hidden', alertasVal === 0);
+                bVal.hidden = !aprovador || alertasVal === 0;
+                bVal.classList.toggle('hidden', !aprovador || alertasVal === 0);
             }
         }
 
         function renderBiblioteca() {
             renderCategoriasPills();
+            const aprovador = isPerfilAprovadorDocs(usuarioLogado);
             const vigentesTotais = docsAtivos.filter(d => d.status === 'vigente' && d.revisaoVigenteNum !== null && podeVerDocumento(d));
             const filtrados = getDocsVigentesFiltrados();
-            const pendentesCount = docsRevisoes.filter(r => r.status === 'pendente_aprovacao' && podeVerDocumento(r)).length;
-            const vencAlertas = vigentesTotais.filter(d => ['vencido', 'alerta'].includes(getStatusValidade(d.validadeEm).kind)).length;
+            const pendentesCount = aprovador ? docsRevisoes.filter(r => r.status === 'pendente_aprovacao' && podeVerDocumento(r)).length : 0;
+            const vencAlertas = aprovador ? vigentesTotais.filter(d => ['vencido', 'alerta'].includes(getStatusValidade(d.validadeEm).kind)).length : 0;
             const equipCobertos = new Set(vigentesTotais.map(d => normKey(`${d.area}|${d.maquina}|${d.equipamento}`))).size;
 
             const kpis = document.getElementById('docKpisStrip');
             if (kpis) {
+                kpis.className = aprovador ? 'grid grid-cols-2 sm:grid-cols-4 gap-3' : 'grid grid-cols-2 gap-3';
                 kpis.innerHTML = `
                     <div class="glass-card p-4 rounded-3xl">
                         <div class="text-[10px] font-extrabold uppercase text-slate-400">Docs Vigentes</div>
@@ -1625,7 +1770,7 @@ match /config/{document=**} {
                     <div class="glass-card p-4 rounded-3xl">
                         <div class="text-[10px] font-extrabold uppercase text-slate-400">Equipamentos Documentados</div>
                         <div class="text-2xl font-extrabold text-slate-900">${equipCobertos}</div>
-                    </div>
+                    </div>` + (aprovador ? `
                     <div class="glass-card p-4 rounded-3xl">
                         <div class="text-[10px] font-extrabold uppercase text-slate-400">Fila de Aprovação</div>
                         <div class="text-2xl font-extrabold ${pendentesCount ? 'text-amber-600' : 'text-emerald-600'}">${pendentesCount}</div>
@@ -1633,7 +1778,7 @@ match /config/{document=**} {
                     <div class="glass-card p-4 rounded-3xl">
                         <div class="text-[10px] font-extrabold uppercase text-slate-400">Validades (Venc./30d)</div>
                         <div class="text-2xl font-extrabold ${vencAlertas ? 'text-rose-600' : 'text-emerald-600'}">${vencAlertas}</div>
-                    </div>`;
+                    </div>` : '');
             }
 
             document.getElementById('docResultadosHeading').innerText = `${filtrados.length} documento(s) vigente(s) encontrado(s)`;
@@ -1643,7 +1788,7 @@ match /config/{document=**} {
                     <div class="text-sm font-extrabold text-slate-700">Nenhum documento vigente encontrado para este filtro.</div>
                     <p class="text-xs text-slate-500">Cadastre manuais, desenhos, cartas de lubrificação ou fotos deste equipamento para liberar consulta após aprovação.</p>
                     <div class="flex justify-center gap-2">
-                        <button type="button" onclick="abrirModalNovoDocumento('doc')" class="btn-pill-dark text-xs py-2 px-5">+ Inserir Documento / Foto</button>
+                        <button type="button" onclick="abrirModalNovoDocumento('doc')" class="btn-pill-dark text-xs py-2 px-5">${aprovador ? '+ Inserir Documento / Foto' : '+ Enviar Foto / Sugestão'}</button>
                     </div>
                 </div>`;
                 return;
@@ -1652,12 +1797,13 @@ match /config/{document=**} {
             const masterOnCards = isMasterDocsAtivo();
             grid.innerHTML = filtrados.map(d => {
                 const cat = CATEGORIAS_DOCS[d.categoria] || CATEGORIAS_DOCS.manuais;
-                const valSt = getStatusValidade(d.validadeEm);
-                const valBadge = valSt.kind === 'vencido'
+                const valSt = aprovador ? getStatusValidade(d.validadeEm) : { kind: 'ok', label: '' };
+                const valBadge = !aprovador ? '' : (valSt.kind === 'vencido'
                     ? `<span class="px-2 py-0.5 rounded-full text-[9px] font-extrabold bg-rose-100 text-rose-800 border border-rose-200">${escapeHtml(valSt.label)}</span>`
                     : (valSt.kind === 'alerta'
                         ? `<span class="px-2 py-0.5 rounded-full text-[9px] font-extrabold bg-amber-100 text-amber-800 border border-amber-200">${escapeHtml(valSt.label)}</span>`
-                        : '');
+                        : ''));
+                const visPill = aprovador ? descreverVisibilidadeDoc(d) : '';
                 const pathTxt = [d.area, d.maquina, d.equipamento, d.conjunto, d.subconjunto].filter(Boolean).map(escapeHtml).join(' › ');
                 const tagsHtml = (Array.isArray(d.tags) ? d.tags : []).slice(0, 4).map(t =>
                     `<span class="px-2 py-0.5 rounded-md bg-slate-100 text-slate-600 text-[10px] font-bold">#${escapeHtml(t)}</span>`
@@ -1691,16 +1837,17 @@ match /config/{document=**} {
                         <div class="flex flex-wrap items-center gap-1">
                             ${tagsHtml}
                             ${valBadge}
+                            ${visPill ? `<span class="px-2 py-0.5 rounded-full text-[9px] font-extrabold bg-slate-100 text-slate-700 border border-slate-300">${escapeHtml(visPill)}</span>` : ''}
                             ${d.arquivoUrl
                                 ? `<span class="px-2 py-0.5 rounded-md bg-sky-50 text-sky-800 border border-sky-200 text-[10px] font-extrabold">${d.arquivoId ? '☁️ Banco + SharePoint' : '🔗 Link SharePoint'}</span>`
                                 : (d.arquivoNome ? `<span class="px-2 py-0.5 rounded-md bg-indigo-50 text-indigo-700 border border-indigo-200 text-[10px] font-extrabold">💾 Banco (${escapeHtml(d.arquivoNome.split('.').pop()?.toUpperCase() || 'DOC')} • ${formatarTamanhoBytes(d.arquivoTamanhoBytes)})</span>` : '')}
-                            ${d.temRevisaoPendente ? '<span class="px-2 py-0.5 rounded-full text-[9px] font-extrabold bg-amber-100 text-amber-800 border border-amber-200">Nova Rev. em aprovação</span>' : ''}
+                            ${aprovador && d.temRevisaoPendente ? '<span class="px-2 py-0.5 rounded-full text-[9px] font-extrabold bg-amber-100 text-amber-800 border border-amber-200">Nova Rev. em aprovação</span>' : ''}
                         </div>
                     </div>
 
                     <div class="pt-3 border-t border-slate-100 flex flex-wrap items-center gap-2">
                         ${d.arquivoId ? `<button type="button" onclick="abrirArquivoDoc('${d.id}')" class="btn-pill-dark flex-1 text-[11px] py-2 px-3">👁️ Abrir Arquivo</button>` : (d.arquivoUrl ? `<a href="${escapeHtml(d.arquivoUrl)}" target="_blank" rel="noopener" class="btn-pill-dark flex-1 text-[11px] py-2 px-3">Abrir Arquivo ↗</a>` : '')}
-                        <button type="button" onclick="abrirDetalheDoc('${d.id}')" class="btn-touch ${(d.arquivoId || d.arquivoUrl) ? 'bg-slate-100 hover:bg-slate-200 text-slate-800' : 'btn-pill-dark flex-1'} text-[11px] py-2 px-3">Detalhes &amp; Revisões</button>
+                        <button type="button" onclick="abrirDetalheDoc('${d.id}')" class="btn-touch ${(d.arquivoId || d.arquivoUrl) ? 'bg-slate-100 hover:bg-slate-200 text-slate-800' : 'btn-pill-dark flex-1'} text-[11px] py-2 px-3">${aprovador ? 'Detalhes &amp; Revisões' : 'Pré-visualizar &amp; Detalhes'}</button>
                         ${masterOnCards ? `<div class="w-full flex items-center gap-1.5">
                             <button type="button" onclick="abrirModalEdicaoMaster('${d.id}')" title="Edição direta (Admin Master) — grava sem fila de aprovação" class="flex-1 px-2.5 py-1.5 rounded-xl bg-amber-50 hover:bg-amber-100 border border-amber-200 text-amber-800 font-extrabold text-[11px]">✏️ Editar (Master)</button>
                             <button type="button" onclick="excluirDocumentoMaster('${d.id}')" title="Exclusão direta (Admin Master) — remove documento, revisões e arquivos" class="px-2.5 py-1.5 rounded-xl bg-rose-50 hover:bg-rose-100 border border-rose-200 text-rose-700 font-extrabold text-[11px]">🗑️ Excluir</button>
@@ -1870,7 +2017,12 @@ match /config/{document=**} {
                     titulo: rev.titulo,
                     categoria: rev.categoria,
                     subtipo: rev.subtipo,
-                    sigilo: catMeta.sigilo,
+                    sigilo: rev.categoria === 'orcamentos' ? 'gestao' : (rev.sigilo || catMeta.sigilo),
+                    visibilidadeModo: rev.visibilidadeModo || ((rev.categoria === 'orcamentos' || rev.categoria === 'administrativo' || catMeta.sigilo === 'gestao') ? 'gestao' : 'todos'),
+                    visivelEquipes: Array.isArray(rev.visivelEquipes) ? rev.visivelEquipes : [],
+                    visivelUsuarios: Array.isArray(rev.visivelUsuarios) ? rev.visivelUsuarios : [],
+                    ocultoEquipes: Array.isArray(rev.ocultoEquipes) ? rev.ocultoEquipes : [],
+                    ocultoUsuarios: Array.isArray(rev.ocultoUsuarios) ? rev.ocultoUsuarios : [],
                     disciplina: rev.disciplina || master.disciplina || 'Mecânica',
                     area: rev.area,
                     maquina: rev.maquina,
@@ -1961,6 +2113,7 @@ match /config/{document=**} {
 
         // ================= REVISÕES & VALIDADES =================
         window.setFiltroRevisoesTab = (tab) => {
+            if (!isPerfilAprovadorDocs(usuarioLogado)) return;
             revTabFiltro = tab;
             ['validades', 'historico', 'obsoletas'].forEach(t => {
                 document.getElementById('btnRevTab_' + t)?.classList.toggle('active', t === tab);
@@ -1971,6 +2124,11 @@ match /config/{document=**} {
         function renderRevisoesView() {
             const box = document.getElementById('revisoesViewContent');
             if (!box) return;
+            const aprovador = isPerfilAprovadorDocs(usuarioLogado);
+            if (!aprovador) {
+                box.innerHTML = '';
+                return;
+            }
 
             if (revTabFiltro === 'validades') {
                 const comVal = docsAtivos
@@ -1997,7 +2155,7 @@ match /config/{document=**} {
                         </div>
                         <div class="flex items-center gap-2">
                             <button type="button" onclick="abrirDetalheDoc('${d.id}')" class="btn-touch bg-white border border-slate-200 text-slate-700 text-xs py-1.5 px-3">Ver / Revisar</button>
-                            <button type="button" onclick="abrirModalNovaRevisao('${d.id}')" class="btn-pill-dark text-xs py-1.5 px-3.5">+ Nova Revisão</button>
+                            ${aprovador ? `<button type="button" onclick="abrirModalNovaRevisao('${d.id}')" class="btn-pill-dark text-xs py-1.5 px-3.5">+ Nova Revisão</button>` : ''}
                         </div>
                     </div>`;
                 }).join('');
@@ -2041,7 +2199,7 @@ match /config/{document=**} {
             Object.values(CATEGORIAS_DOCS).forEach(cat => {
                 const baseCat = `${raiz}/${cat.pastaSp}`;
                 pastas.push(baseCat);
-                if (cat.id === 'orcamentos') {
+                if (cat.sigilo === 'gestao') {
                     [...maqPaths].sort().forEach(k => {
                         const [a, m] = k.split('|');
                         pastas.push(`${baseCat}/${a}/${m}`);
@@ -2291,14 +2449,173 @@ match /config/{document=**} {
             }
             const sigBox = document.getElementById('ndAvisoSigiloOrcamento');
             if (sigBox) {
-                const isOrc = cat.id === 'orcamentos';
-                sigBox.hidden = !isOrc;
-                sigBox.classList.toggle('hidden', !isOrc);
+                const isSigCat = cat.sigilo === 'gestao';
+                sigBox.hidden = !isSigCat;
+                sigBox.classList.toggle('hidden', !isSigCat);
+                if (isSigCat) {
+                    sigBox.innerHTML = cat.id === 'orcamentos'
+                        ? 'Sigilo ativo: documentos da categoria <strong>Orçamentos</strong> ficam visíveis apenas para Administração, Gerência e Supervisores (ocultos para técnicos de campo).'
+                        : 'Sigilo Administrativo: por padrão, documentos de <strong>Administrativo / Gestão</strong> ficam ocultos para mecânicos e eletricistas (ou personalize abaixo quem pode ver).';
+                }
+            }
+            const visSel = document.getElementById('ndVisibilidadeModo');
+            if (visSel && isPerfilAprovadorDocs(usuarioLogado)) {
+                if (cat.id === 'orcamentos' && (visSel.value === 'todos' || visSel.value === 'personalizado_ocultos')) {
+                    visSel.value = 'gestao';
+                } else if (cat.id === 'administrativo' && visSel.value === 'todos') {
+                    visSel.value = 'gestao';
+                }
+                renderVisibilidadeModalControls();
             }
             if (cat.id === 'fotos' && !isPerfilAprovadorDocs(usuarioLogado)) {
                 setModoAnexoDoc('foto_campo');
             }
             atualizarPreviewNomenclaturaDoc();
+        };
+
+        function getEquipesDisponiveisVisDocs() {
+            const seenNorm = new Set();
+            const out = [];
+            const addRole = (r) => {
+                const clean = String(r || '').trim();
+                const nk = normKey(clean);
+                if (!clean || nk === 'admin' || nk === 'gerente' || seenNorm.has(nk)) return;
+                seenNorm.add(nk);
+                out.push(clean);
+            };
+            EQUIPES_VIS_DOCS.forEach(addRole);
+            listaFunc.forEach(f => addRole(f?.role));
+            return out;
+        }
+
+        function atualizarResumoVisibilidadeBadge() {
+            const modo = document.getElementById('ndVisibilidadeModo')?.value || 'todos';
+            const badge = document.getElementById('ndVisResumoBadge');
+            const hint = document.getElementById('ndVisModoHint');
+            const totalSel = ndVisEquipesSel.size + ndVisUsuariosSel.size;
+            if (badge) {
+                if (modo === 'gestao') {
+                    badge.innerText = '🔒 Somente Gestão';
+                    badge.className = 'px-2.5 py-1 rounded-full text-[10px] font-extrabold bg-rose-100 text-rose-800 border border-rose-200';
+                } else if (modo === 'personalizado_ocultos') {
+                    badge.innerText = `🚫 Oculto p/ ${totalSel} seleção(ões)`;
+                    badge.className = 'px-2.5 py-1 rounded-full text-[10px] font-extrabold bg-amber-100 text-amber-900 border border-amber-200';
+                } else if (modo === 'personalizado_permitidos') {
+                    badge.innerText = `🔒 Liberado p/ ${totalSel} seleção(ões)`;
+                    badge.className = 'px-2.5 py-1 rounded-full text-[10px] font-extrabold bg-indigo-100 text-indigo-800 border border-indigo-200';
+                } else {
+                    badge.innerText = 'Todos liberados';
+                    badge.className = 'px-2.5 py-1 rounded-full text-[10px] font-extrabold bg-emerald-100 text-emerald-800 border border-emerald-200';
+                }
+            }
+            if (hint) {
+                if (modo === 'personalizado_ocultos') {
+                    hint.className = 'text-[11px] font-extrabold text-rose-700';
+                    hint.innerText = 'Marque abaixo as equipes e/ou pessoas que NÃO devem ver este documento:';
+                } else {
+                    hint.className = 'text-[11px] font-extrabold text-indigo-700';
+                    hint.innerText = 'Marque abaixo apenas as equipes e/ou pessoas que PODEM ver este documento (Admin/Gerência sempre veem):';
+                }
+            }
+        }
+
+        function renderVisibilidadeEquipesLista() {
+            const box = document.getElementById('ndVisEquipesList');
+            if (!box) return;
+            const equipes = getEquipesDisponiveisVisDocs();
+            const selectedNorms = new Set([...ndVisEquipesSel].map(normKey));
+            box.innerHTML = equipes.map(eq => {
+                const checked = selectedNorms.has(normKey(eq));
+                return `<label class="inline-flex items-center gap-1.5 px-2.5 py-1.5 rounded-xl border ${checked ? 'bg-sky-50 border-sky-400 text-sky-900' : 'bg-white border-slate-200 text-slate-700'} text-[11px] font-extrabold cursor-pointer">
+                    <input type="checkbox" value="${escapeHtml(eq)}" ${checked ? 'checked' : ''} onchange="toggleVisEquipeDoc(decodeURIComponent('${encodeURIComponent(eq)}'), this.checked)" class="w-3.5 h-3.5 accent-sky-600">
+                    <span>${escapeHtml(eq)}</span>
+                </label>`;
+            }).join('');
+        }
+
+        window.renderVisibilidadeUsuariosLista = () => {
+            const box = document.getElementById('ndVisUsuariosList');
+            if (!box) return;
+            const filtro = normKey(document.getElementById('ndVisUsuariosBusca')?.value || '');
+            const selectedNorms = new Set([...ndVisUsuariosSel].map(normKey));
+            const colaboradores = listaFunc
+                .filter(f => f && (f.user || f.nome) && !isPerfilAdmin(f.role))
+                .sort((a, b) => String(a.nome || a.user || '').localeCompare(String(b.nome || b.user || ''), 'pt-BR'))
+                .filter(f => {
+                    if (!filtro) return true;
+                    return normKey(`${f.nome || ''} ${f.user || ''} ${f.role || ''}`).includes(filtro);
+                });
+
+            if (!colaboradores.length) {
+                box.innerHTML = `<div class="col-span-full p-2.5 rounded-xl bg-white border border-slate-200 text-[11px] font-bold text-slate-400">Nenhum colaborador encontrado para este filtro.</div>`;
+                return;
+            }
+            box.innerHTML = colaboradores.map(f => {
+                const key = String(f.user || f.id || '').trim();
+                const checked = selectedNorms.has(normKey(key)) || (f.id && selectedNorms.has(normKey(f.id)));
+                return `<label class="flex items-center justify-between gap-2 px-2.5 py-1.5 rounded-xl border ${checked ? 'bg-sky-50 border-sky-400 text-sky-900' : 'bg-white border-slate-200 text-slate-700'} text-[11px] cursor-pointer">
+                    <span class="flex items-center gap-2 min-w-0">
+                        <input type="checkbox" value="${escapeHtml(key)}" ${checked ? 'checked' : ''} onchange="toggleVisUsuarioDoc(decodeURIComponent('${encodeURIComponent(key)}'), this.checked)" class="w-3.5 h-3.5 accent-sky-600 shrink-0">
+                        <span class="font-extrabold truncate">${escapeHtml(f.nome || key)}</span>
+                    </span>
+                    <span class="text-[10px] font-bold text-slate-500 shrink-0">${escapeHtml(f.role || '')}</span>
+                </label>`;
+            }).join('');
+        };
+
+        function renderVisibilidadeModalControls() {
+            const modo = document.getElementById('ndVisibilidadeModo')?.value || 'todos';
+            const persBox = document.getElementById('ndVisPersonalizacaoBox');
+            const isPers = modo === 'personalizado_ocultos' || modo === 'personalizado_permitidos';
+            if (persBox) {
+                persBox.hidden = !isPers;
+                persBox.classList.toggle('hidden', !isPers);
+            }
+            if (isPers) {
+                renderVisibilidadeEquipesLista();
+                renderVisibilidadeUsuariosLista();
+            }
+            atualizarResumoVisibilidadeBadge();
+        }
+
+        window.onNdVisibilidadeModoChange = () => {
+            renderVisibilidadeModalControls();
+        };
+
+        window.toggleVisEquipeDoc = (eq, checked) => {
+            const clean = String(eq || '').trim();
+            if (!clean) return;
+            for (const cur of [...ndVisEquipesSel]) {
+                if (normKey(cur) === normKey(clean)) ndVisEquipesSel.delete(cur);
+            }
+            if (checked) ndVisEquipesSel.add(clean);
+            renderVisibilidadeEquipesLista();
+            atualizarResumoVisibilidadeBadge();
+        };
+
+        window.toggleVisUsuarioDoc = (userKey, checked) => {
+            const clean = String(userKey || '').trim();
+            if (!clean) return;
+            for (const cur of [...ndVisUsuariosSel]) {
+                if (normKey(cur) === normKey(clean)) ndVisUsuariosSel.delete(cur);
+            }
+            if (checked) ndVisUsuariosSel.add(clean);
+            renderVisibilidadeUsuariosLista();
+            atualizarResumoVisibilidadeBadge();
+        };
+
+        window.selecionarEquipesCampoVis = () => {
+            ['Mecânica', 'Elétrica', 'Automação', 'Utilidades', 'Operação'].forEach(eq => ndVisEquipesSel.add(eq));
+            renderVisibilidadeEquipesLista();
+            atualizarResumoVisibilidadeBadge();
+        };
+
+        window.limparSelecoesVisDoc = () => {
+            ndVisEquipesSel.clear();
+            ndVisUsuariosSel.clear();
+            renderVisibilidadeEquipesLista();
+            renderVisibilidadeUsuariosLista();
+            atualizarResumoVisibilidadeBadge();
         };
 
         function popularNdSelects(prefill = {}) {
@@ -2779,10 +3096,141 @@ match /config/{document=**} {
             const bytes = base64ToUint8Array(b64Joined);
             const blob = new Blob([bytes], { type: finalMime });
             const blobUrl = URL.createObjectURL(blob);
-            const rec = { blobUrl, mimeType: finalMime, fileName: finalName, sizeBytes: bytes.length };
+            const rec = { blobUrl, mimeType: finalMime, fileName: finalName, sizeBytes: bytes.length, bytes };
             blobUrlCache.set(arquivoId, rec);
             return rec;
         }
+
+        let inlinePdfState = { viewerId: 'detDocPreviewDiretoViewer', rec: null, zoom: 1, token: '' };
+
+        function carregarPdfJsDocs() {
+            if (window.pdfjsLib) return Promise.resolve(window.pdfjsLib);
+            if (pdfJsLoadPromise) return pdfJsLoadPromise;
+            if (typeof document === 'undefined' || !document.head && !document.body) {
+                return Promise.reject(new Error('pdfjs_no_dom'));
+            }
+            pdfJsLoadPromise = new Promise((resolve, reject) => {
+                const s = document.createElement('script');
+                s.src = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js';
+                s.async = true;
+                s.onload = () => {
+                    if (window.pdfjsLib) {
+                        try {
+                            window.pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';
+                        } catch (_) {}
+                        resolve(window.pdfjsLib);
+                    } else {
+                        pdfJsLoadPromise = null;
+                        reject(new Error('pdfjs_unavailable'));
+                    }
+                };
+                s.onerror = () => {
+                    pdfJsLoadPromise = null;
+                    reject(new Error('pdfjs_script_error'));
+                };
+                (document.head || document.body).appendChild(s);
+            });
+            return pdfJsLoadPromise;
+        }
+
+        async function renderizarPdfInlineCanvas(viewer, rec, token, zoom = 1) {
+            if (!viewer || !rec) return;
+            inlinePdfState = { viewerId: viewer.id, rec, zoom, token };
+
+            if (!rec.bytes || !rec.bytes.length || typeof window.devicePixelRatio === 'undefined' && typeof navigator === 'undefined') {
+                viewer.innerHTML = `<iframe src="${rec.blobUrl}" class="w-full h-[420px] rounded-xl border border-slate-200 bg-white" title="${escapeHtml(rec.fileName)}"></iframe>`;
+                return;
+            }
+
+            try {
+                viewer.innerHTML = `<div class="p-3 rounded-xl bg-white border border-indigo-200 text-indigo-800 font-bold text-xs">Carregando páginas do PDF na tela...</div>`;
+                const pdfjsLib = await carregarPdfJsDocs();
+                if (!viewer.dataset || viewer.dataset.renderToken !== token) return;
+
+                let pdfDoc = null;
+                try {
+                    pdfDoc = await pdfjsLib.getDocument({ data: new Uint8Array(rec.bytes) }).promise;
+                } catch (_) {
+                    pdfDoc = await pdfjsLib.getDocument({ data: new Uint8Array(rec.bytes), disableWorker: true }).promise;
+                }
+                if (!pdfDoc || viewer.dataset.renderToken !== token) return;
+
+                const numPages = Number(pdfDoc.numPages || 1);
+                const zoomPct = Math.round(zoom * 100);
+                viewer.innerHTML = `
+                    <div class="rounded-xl border border-slate-200 bg-white overflow-hidden">
+                        <div class="px-3 py-2 bg-slate-50 border-b border-slate-200 flex flex-wrap items-center justify-between gap-2 text-[11px] font-extrabold text-slate-700">
+                            <span>📄 Pré-visualização (${numPages} ${numPages === 1 ? 'página' : 'páginas'})</span>
+                            <div class="flex items-center gap-1.5">
+                                <button type="button" onclick="ajustarZoomPdfInline(-0.2)" class="px-2.5 py-1 rounded-lg bg-white hover:bg-slate-100 border border-slate-300 text-slate-800 font-extrabold">−</button>
+                                <button type="button" onclick="ajustarZoomPdfInline('reset')" class="px-2.5 py-1 rounded-lg bg-white hover:bg-slate-100 border border-slate-300 text-slate-800 font-extrabold">${zoomPct}%</button>
+                                <button type="button" onclick="ajustarZoomPdfInline(0.2)" class="px-2.5 py-1 rounded-lg bg-white hover:bg-slate-100 border border-slate-300 text-slate-800 font-extrabold">+</button>
+                            </div>
+                        </div>
+                        <div id="detDocPdfPagesWrap" class="max-h-[58vh] overflow-y-auto overflow-x-auto bg-slate-200/80 p-2 sm:p-3 space-y-3"></div>
+                    </div>`;
+
+                const pagesWrap = document.getElementById('detDocPdfPagesWrap');
+                if (!pagesWrap) return;
+                const availW = Math.max(260, (pagesWrap.clientWidth || viewer.clientWidth || 640) - 24);
+                const dpr = Math.min(2, window.devicePixelRatio || 1);
+
+                for (let pNum = 1; pNum <= numPages; pNum++) {
+                    if (viewer.dataset.renderToken !== token) return;
+                    const page = await pdfDoc.getPage(pNum);
+                    if (viewer.dataset.renderToken !== token) return;
+
+                    const baseVp = page.getViewport({ scale: 1 });
+                    const targetScale = Math.max(0.45, Math.min(3.0, (availW / (baseVp.width || 600)) * zoom));
+                    const vp = page.getViewport({ scale: targetScale });
+
+                    const pageCard = document.createElement('div');
+                    pageCard.className = 'mx-auto text-center space-y-1';
+
+                    const cvs = document.createElement('canvas');
+                    cvs.width = Math.max(1, Math.floor(vp.width * dpr));
+                    cvs.height = Math.max(1, Math.floor(vp.height * dpr));
+                    cvs.style.width = `${Math.round(vp.width)}px`;
+                    cvs.style.maxWidth = zoom <= 1.01 ? '100%' : 'none';
+                    cvs.style.height = 'auto';
+                    cvs.className = 'mx-auto block rounded-lg shadow bg-white border border-slate-200';
+
+                    const lbl = document.createElement('div');
+                    lbl.className = 'text-[10px] font-bold text-slate-500';
+                    lbl.innerText = `Página ${pNum} de ${numPages}`;
+
+                    pageCard.appendChild(cvs);
+                    pageCard.appendChild(lbl);
+                    pagesWrap.appendChild(pageCard);
+
+                    const ctx = cvs.getContext('2d');
+                    if (ctx) {
+                        const renderCtx = {
+                            canvasContext: ctx,
+                            viewport: vp,
+                            transform: dpr !== 1 ? [dpr, 0, 0, dpr, 0, 0] : undefined
+                        };
+                        await page.render(renderCtx).promise;
+                    }
+                }
+            } catch (_) {
+                if (!viewer.dataset || viewer.dataset.renderToken === token) {
+                    viewer.innerHTML = `<iframe src="${rec.blobUrl}" class="w-full h-[420px] rounded-xl border border-slate-200 bg-white" title="${escapeHtml(rec.fileName)}"></iframe>`;
+                }
+            }
+        }
+
+        window.ajustarZoomPdfInline = (delta) => {
+            if (!inlinePdfState?.rec) return;
+            const viewer = document.getElementById(inlinePdfState.viewerId);
+            if (!viewer) return;
+            const nextZoom = delta === 'reset'
+                ? 1
+                : Math.max(0.6, Math.min(2.2, Math.round((inlinePdfState.zoom + Number(delta || 0)) * 10) / 10));
+            const newTok = `pdf_${Date.now()}_${Math.random().toString(36).slice(2, 6)}`;
+            viewer.dataset.renderToken = newTok;
+            renderizarPdfInlineCanvas(viewer, inlinePdfState.rec, newTok, nextZoom);
+        };
 
         function dispararDownloadBlob(url, fileName) {
             const a = document.createElement('a');
@@ -3148,6 +3596,40 @@ match /config/{document=**} {
             }
         }
 
+        function configurarVisibilidadeNoModalDoc(docRef = null, defaultCat = 'manuais') {
+            const aprovador = isPerfilAprovadorDocs(usuarioLogado);
+            const boxVal = document.getElementById('ndBoxValidade');
+            const tagsCol = document.getElementById('ndTagsCol');
+            if (boxVal) { boxVal.hidden = !aprovador; boxVal.classList.toggle('hidden', !aprovador); }
+            if (tagsCol) tagsCol.classList.toggle('sm:col-span-2', !aprovador);
+
+            const boxVis = document.getElementById('ndBoxVisibilidadeDocs');
+            if (boxVis) { boxVis.hidden = !aprovador; boxVis.classList.toggle('hidden', !aprovador); }
+
+            ndVisEquipesSel.clear();
+            ndVisUsuariosSel.clear();
+            const buscaEl = document.getElementById('ndVisUsuariosBusca');
+            if (buscaEl) buscaEl.value = '';
+            if (!aprovador) return;
+
+            const catMeta = CATEGORIAS_DOCS[docRef?.categoria || defaultCat] || CATEGORIAS_DOCS.manuais;
+            const modo = docRef
+                ? (docRef.visibilidadeModo || ((docRef.categoria === 'orcamentos' || docRef.categoria === 'administrativo' || docRef.sigilo === 'gestao') ? 'gestao' : 'todos'))
+                : (catMeta.sigilo === 'gestao' ? 'gestao' : 'todos');
+
+            if (docRef && modo === 'personalizado_ocultos') {
+                (docRef.ocultoEquipes || []).forEach(x => ndVisEquipesSel.add(x));
+                (docRef.ocultoUsuarios || []).forEach(x => ndVisUsuariosSel.add(x));
+            } else if (docRef && modo === 'personalizado_permitidos') {
+                (docRef.visivelEquipes || []).forEach(x => ndVisEquipesSel.add(x));
+                (docRef.visivelUsuarios || []).forEach(x => ndVisUsuariosSel.add(x));
+            }
+
+            const visSel = document.getElementById('ndVisibilidadeModo');
+            if (visSel) visSel.value = modo;
+            renderVisibilidadeModalControls();
+        }
+
         window.abrirModalNovoDocumento = (tipo = 'doc', prefill = {}) => {
             const form = document.getElementById('formNovoDoc');
             if (form) form.reset();
@@ -3168,6 +3650,7 @@ match /config/{document=**} {
                 : 'Enviar Foto / Sugestão de Documento (Vai p/ Aprovação)';
             atualizarRotulosModoModalDoc('novo');
 
+            configurarVisibilidadeNoModalDoc(null, prefill.categoria || 'manuais');
             popularCategoriasSelectModal();
             if (prefill.categoria && CATEGORIAS_DOCS[prefill.categoria]) {
                 const catSel = document.getElementById('ndCategoria');
@@ -3193,6 +3676,9 @@ match /config/{document=**} {
         };
 
         window.abrirModalNovaRevisao = (masterId) => {
+            if (!isPerfilAprovadorDocs(usuarioLogado)) {
+                return showToast('Acesso restrito: apenas Gestão/Supervisão pode submeter nova revisão de documento.', 'error');
+            }
             const d = docsAtivos.find(x => x.id === masterId);
             if (!d) return;
             fecharModal('modalDetalheDoc');
@@ -3234,6 +3720,7 @@ match /config/{document=**} {
             document.getElementById('ndArquivoUrl').value = d.arquivoUrl || '';
             document.getElementById('ndArquivoEmbedUrl').value = d.arquivoEmbedUrl || '';
             document.getElementById('ndMotivoAlteracao').value = '';
+            configurarVisibilidadeNoModalDoc(d);
 
             popularNdSelects({
                 area: d.area, maquina: d.maquina, equipamento: d.equipamento,
@@ -3301,6 +3788,7 @@ match /config/{document=**} {
             document.getElementById('ndArquivoEmbedUrl').value = d.arquivoEmbedUrl || '';
             document.getElementById('ndAtivoSpecs').value = [d.tagAtivo, d.fabricante, d.modelo].filter(Boolean).join(' • ');
             document.getElementById('ndMotivoAlteracao').value = 'Edição direta (Admin Master)';
+            configurarVisibilidadeNoModalDoc(d);
 
             popularNdSelects({
                 area: d.area, maquina: d.maquina, equipamento: d.equipamento,
@@ -3392,11 +3880,17 @@ match /config/{document=**} {
                                     atualizadoEm: agora
                                 }));
                             }
+                            const catFb = CATEGORIAS_DOCS[fallbackVig.categoria] || CATEGORIAS_DOCS.manuais;
                             const masterReset = {
                                 titulo: fallbackVig.titulo,
                                 categoria: fallbackVig.categoria,
                                 subtipo: fallbackVig.subtipo,
-                                sigilo: (CATEGORIAS_DOCS[fallbackVig.categoria] || CATEGORIAS_DOCS.manuais).sigilo,
+                                sigilo: fallbackVig.categoria === 'orcamentos' ? 'gestao' : (fallbackVig.sigilo || catFb.sigilo),
+                                visibilidadeModo: fallbackVig.visibilidadeModo || (catFb.sigilo === 'gestao' ? 'gestao' : 'todos'),
+                                visivelEquipes: Array.isArray(fallbackVig.visivelEquipes) ? fallbackVig.visivelEquipes : [],
+                                visivelUsuarios: Array.isArray(fallbackVig.visivelUsuarios) ? fallbackVig.visivelUsuarios : [],
+                                ocultoEquipes: Array.isArray(fallbackVig.ocultoEquipes) ? fallbackVig.ocultoEquipes : [],
+                                ocultoUsuarios: Array.isArray(fallbackVig.ocultoUsuarios) ? fallbackVig.ocultoUsuarios : [],
                                 disciplina: fallbackVig.disciplina || master.disciplina || 'Mecânica',
                                 area: fallbackVig.area,
                                 maquina: fallbackVig.maquina,
@@ -3477,6 +3971,9 @@ match /config/{document=**} {
             if (modo === 'master_edit' && !isMasterDocsAtivo()) {
                 return showToast('Acesso restrito: apenas Admin Master pode editar documentos diretamente.', 'error');
             }
+            if (modo === 'revisao' && !isPerfilAprovadorDocs(usuarioLogado)) {
+                return showToast('Acesso restrito: apenas Gestão/Supervisão pode submeter nova revisão de documento.', 'error');
+            }
 
             const area = document.getElementById('ndArea').value.trim();
             const maquina = document.getElementById('ndMaquina').value.trim();
@@ -3497,8 +3994,9 @@ match /config/{document=**} {
             if (!tags.length) {
                 tags = [...new Set([equipamento, subtipo, disciplina].filter(Boolean))];
             }
-            const validadeEm = document.getElementById('ndValidadeEm').value || '';
-            const periodicidadeRevalidacaoMeses = parseInt(document.getElementById('ndRevalidacaoMeses').value || '0', 10) || 0;
+            const ehAprovadorForm = isPerfilAprovadorDocs(usuarioLogado);
+            const validadeEm = ehAprovadorForm ? (document.getElementById('ndValidadeEm').value || '') : '';
+            const periodicidadeRevalidacaoMeses = ehAprovadorForm ? (parseInt(document.getElementById('ndRevalidacaoMeses').value || '0', 10) || 0) : 0;
             const resumoTecnico = document.getElementById('ndResumoTecnico').value.trim();
             const motivoAlteracao = document.getElementById('ndMotivoAlteracao').value.trim() || 'Emissão inicial';
 
@@ -3534,6 +4032,44 @@ match /config/{document=**} {
                 : (matchNode?.nodeId || '');
 
             const catMeta = CATEGORIAS_DOCS[categoria] || CATEGORIAS_DOCS.manuais;
+            let visibilidadeModo = 'todos';
+            let visivelEquipes = [];
+            let visivelUsuarios = [];
+            let ocultoEquipes = [];
+            let ocultoUsuarios = [];
+            let sigiloFinal = 'geral';
+
+            if (!ehAprovadorForm) {
+                visibilidadeModo = catMeta.sigilo === 'gestao' ? 'gestao' : 'todos';
+                sigiloFinal = catMeta.sigilo;
+            } else {
+                const rawVis = document.getElementById('ndVisibilidadeModo')?.value || (catMeta.sigilo === 'gestao' ? 'gestao' : 'todos');
+                visibilidadeModo = rawVis;
+                if (catMeta.id === 'orcamentos' && (visibilidadeModo === 'todos' || visibilidadeModo === 'personalizado_ocultos')) {
+                    visibilidadeModo = 'gestao';
+                }
+                if (visibilidadeModo === 'personalizado_permitidos') {
+                    visivelEquipes = [...ndVisEquipesSel];
+                    visivelUsuarios = [...ndVisUsuariosSel];
+                    if (!visivelEquipes.length && !visivelUsuarios.length) {
+                        return showToast('Selecione ao menos uma equipe ou pessoa em "Quem vai ver este documento".', 'error');
+                    }
+                } else if (visibilidadeModo === 'personalizado_ocultos') {
+                    ocultoEquipes = [...ndVisEquipesSel];
+                    ocultoUsuarios = [...ndVisUsuariosSel];
+                    if (!ocultoEquipes.length && !ocultoUsuarios.length) {
+                        return showToast('Selecione ao menos uma equipe ou pessoa para ocultar.', 'error');
+                    }
+                }
+                if (catMeta.id === 'orcamentos' || visibilidadeModo === 'gestao') {
+                    sigiloFinal = 'gestao';
+                } else if (visibilidadeModo === 'personalizado_permitidos' || visibilidadeModo === 'personalizado_ocultos') {
+                    sigiloFinal = 'restrito';
+                } else {
+                    sigiloFinal = catMeta.id === 'administrativo' ? 'geral' : catMeta.sigilo;
+                }
+            }
+
             const pastaSug = montarPastaSharePointRelativa({ categoria, area, maquina, equipamento });
             const refArqNome = arquivoDiretoDraft?.fileName || (temAnexoMantido ? masterEditManterArquivo.arquivoNome : '');
             const fileExt = refArqNome?.includes('.')
@@ -3625,6 +4161,14 @@ match /config/{document=**} {
                     arquivoMeta = await gravarArquivoPartesFirestore(arqId, targetMasterId, revNum, arquivoDiretoDraft);
                 }
 
+                const visPayload = {
+                    visibilidadeModo,
+                    visivelEquipes,
+                    visivelUsuarios,
+                    ocultoEquipes,
+                    ocultoUsuarios
+                };
+
                 if (modo === 'master_edit' && existingMaster) {
                     const oldArquivoId = existingMaster.arquivoId || '';
                     const masterPatch = {
@@ -3632,7 +4176,8 @@ match /config/{document=**} {
                         titulo,
                         categoria,
                         subtipo,
-                        sigilo: catMeta.sigilo,
+                        sigilo: sigiloFinal,
+                        ...visPayload,
                         disciplina,
                         escopoNivel: subconjunto ? 'subconjunto' : (conjunto ? 'conjunto' : 'equipamento'),
                         ...specs,
@@ -3670,7 +4215,8 @@ match /config/{document=**} {
                             titulo,
                             categoria,
                             subtipo,
-                            sigilo: catMeta.sigilo,
+                            sigilo: sigiloFinal,
+                            ...visPayload,
                             disciplina,
                             ...specs,
                             area,
@@ -3718,7 +4264,8 @@ match /config/{document=**} {
                         titulo,
                         categoria,
                         subtipo,
-                        sigilo: catMeta.sigilo,
+                        sigilo: sigiloFinal,
+                        ...visPayload,
                         disciplina,
                         escopoNivel: subconjunto ? 'subconjunto' : (conjunto ? 'conjunto' : 'equipamento'),
                         ...specs,
@@ -3765,7 +4312,8 @@ match /config/{document=**} {
                     titulo,
                     categoria,
                     subtipo,
-                    sigilo: catMeta.sigilo,
+                    sigilo: sigiloFinal,
+                    ...visPayload,
                     disciplina,
                     ...specs,
                     area,
@@ -3829,10 +4377,22 @@ match /config/{document=**} {
             abrirModal('modalZoomFotoDoc');
         };
 
+        window.abrirSugestaoDocDetalhe = (masterId) => {
+            const d = docsAtivos.find(x => x.id === masterId);
+            fecharModal('modalDetalheDoc');
+            abrirModalNovoDocumento('sugestao_foto', d ? {
+                area: d.area, maquina: d.maquina, equipamento: d.equipamento,
+                conjunto: d.conjunto || '', subconjunto: d.subconjunto || ''
+            } : {});
+        };
+
         window.abrirDetalheDoc = (masterId) => {
             const d = docsAtivos.find(x => x.id === masterId);
             if (!d || !podeVerDocumento(d)) return;
             const cat = CATEGORIAS_DOCS[d.categoria] || CATEGORIAS_DOCS.manuais;
+            const ehAprovadorSp = isPerfilAprovadorDocs(usuarioLogado);
+            const masterOnDet = isMasterDocsAtivo();
+            const visDet = ehAprovadorSp ? descreverVisibilidadeDoc(d) : '';
             const revs = docsRevisoes
                 .filter(r => r.docMasterId === d.id)
                 .sort((a, b) => Number(b.revisaoNum || 0) - Number(a.revisaoNum || 0));
@@ -3840,12 +4400,13 @@ match /config/{document=**} {
             document.getElementById('detDocBadges').innerHTML = `
                 <span class="px-2.5 py-0.5 rounded-full text-[10px] font-extrabold ${cat.badgeCls}">${escapeHtml(cat.label)}</span>
                 <span class="px-2 py-0.5 rounded-full text-[10px] font-mono font-extrabold bg-slate-900 text-white">${escapeHtml(d.codigo)} • ${escapeHtml(d.revisaoVigenteLabel || 'REV 00')}</span>
-                <span class="px-2 py-0.5 rounded-full text-[10px] font-extrabold ${d.status === 'vigente' ? 'st-vigente' : 'st-pendente'}">${escapeHtml(String(d.status || '').toUpperCase())}</span>`;
+                <span class="px-2 py-0.5 rounded-full text-[10px] font-extrabold ${d.status === 'vigente' ? 'st-vigente' : 'st-pendente'}">${escapeHtml(String(d.status || '').toUpperCase())}</span>
+                ${visDet ? `<span class="px-2.5 py-0.5 rounded-full text-[10px] font-extrabold bg-slate-100 text-slate-700 border border-slate-300">${escapeHtml(visDet)}</span>` : ''}`;
             document.getElementById('detDocTitulo').innerText = d.titulo;
             document.getElementById('detDocAtivoPath').innerText = [d.area, d.maquina, d.equipamento, d.conjunto, d.subconjunto].filter(Boolean).join(' › ');
 
             const spFolderUrl = d.sharepointPastaSugerida ? montarUrlSharePointPasta(d.sharepointPastaSugerida) : (sharepointCfg.urlPastaRaiz || DEFAULT_SHAREPOINT_CFG.urlPastaRaiz);
-            const embedHtml = d.arquivoEmbedUrl
+            const embedHtml = (!d.arquivoId && d.arquivoEmbedUrl)
                 ? `<div class="rounded-2xl overflow-hidden border border-slate-200 bg-slate-100 space-y-1.5">
                         <div class="px-3 py-2 bg-slate-50 border-b border-slate-200 flex items-center justify-between text-[11px] font-bold">
                             <span>Pré-visualização Incorporada (SharePoint)</span>
@@ -3871,8 +4432,6 @@ match /config/{document=**} {
                    </div>`
                 : '';
 
-            const ehAprovadorSp = isPerfilAprovadorDocs(usuarioLogado);
-            const masterOnDet = isMasterDocsAtivo();
             const nomePadraoSp = d.sharepointNomeSugerido || `${d.codigo || 'DOC'}.pdf`;
             const pastaPadraoSp = d.sharepointPastaSugerida || sharepointCfg.pastaRaiz || 'SISTEMA';
             const spBoxHtml = d.arquivoUrl
@@ -3909,7 +4468,7 @@ match /config/{document=**} {
                    </div>`;
 
             document.getElementById('detDocBody').innerHTML = `
-                <div class="grid grid-cols-1 sm:grid-cols-3 gap-3">
+                <div class="grid grid-cols-1 ${ehAprovadorSp ? 'sm:grid-cols-3' : 'sm:grid-cols-2'} gap-3">
                     <div class="p-3 rounded-2xl bg-slate-50 border border-slate-200">
                         <div class="text-[10px] font-extrabold uppercase text-slate-400">Disciplina / Subtipo</div>
                         <div class="font-extrabold text-slate-900 mt-0.5">${escapeHtml(d.disciplina || 'Geral')} • ${escapeHtml(d.subtipo || '-')}</div>
@@ -3917,11 +4476,11 @@ match /config/{document=**} {
                     <div class="p-3 rounded-2xl bg-slate-50 border border-slate-200">
                         <div class="text-[10px] font-extrabold uppercase text-slate-400">Aprovação Vigente</div>
                         <div class="font-extrabold text-slate-900 mt-0.5">${escapeHtml(d.aprovadoPor || 'Aguardando')} ${d.aprovadoEm ? '• ' + formatDataBR(d.aprovadoEm) : ''}</div>
-                    </div>
+                    </div>` + (ehAprovadorSp ? `
                     <div class="p-3 rounded-2xl bg-slate-50 border border-slate-200">
                         <div class="text-[10px] font-extrabold uppercase text-slate-400">Validade / Revalidação</div>
                         <div class="font-extrabold text-slate-900 mt-0.5">${d.validadeEm ? formatDataBR(d.validadeEm) : 'Sem vencimento'}</div>
-                    </div>
+                    </div>` : '') + `
                 </div>
 
                 ${d.resumoTecnico ? `<div class="p-3.5 rounded-2xl bg-indigo-50/70 border border-indigo-200 font-semibold text-indigo-950"><span class="text-[10px] font-extrabold uppercase text-indigo-700 block mb-0.5">Parâmetros &amp; Resumo Técnico</span>${escapeHtml(d.resumoTecnico)}</div>` : ''}
@@ -3955,7 +4514,9 @@ match /config/{document=**} {
 
             document.getElementById('detDocFooter').innerHTML = `
                 <div class="flex flex-wrap items-center gap-2">
-                    <button type="button" onclick="abrirModalNovaRevisao('${d.id}')" class="btn-pill-dark text-xs py-2 px-4">+ Submeter Nova Revisão</button>
+                    ${ehAprovadorSp
+                        ? `<button type="button" onclick="abrirModalNovaRevisao('${d.id}')" class="btn-pill-dark text-xs py-2 px-4">+ Submeter Nova Revisão</button>`
+                        : `<button type="button" onclick="abrirSugestaoDocDetalhe('${d.id}')" class="btn-touch bg-emerald-600 hover:bg-emerald-700 text-white text-xs py-2 px-4">📷 + Enviar Foto / Sugestão</button>`}
                     ${masterOnDet ? `<button type="button" onclick="abrirModalEdicaoMaster('${d.id}')" title="Edição direta sem fila de aprovação (Admin Master)" class="btn-touch bg-amber-50 hover:bg-amber-100 border border-amber-200 text-amber-800 text-xs py-2 px-4">✏️ Editar (Master)</button>
                     <button type="button" onclick="excluirDocumentoMaster('${d.id}')" title="Exclui documento, todas as revisões e arquivos anexados (Admin Master)" class="btn-touch bg-rose-50 hover:bg-rose-100 border border-rose-200 text-rose-700 text-xs py-2 px-4">🗑️ Excluir Documento (Master)</button>` : ''}
                 </div>
@@ -3964,16 +4525,23 @@ match /config/{document=**} {
             abrirModal('modalDetalheDoc');
 
             if (d.arquivoId) {
+                const previewTok = `pv_${Date.now()}_${Math.random().toString(36).slice(2, 6)}`;
+                const viewerInit = document.getElementById('detDocPreviewDiretoViewer');
+                if (viewerInit?.dataset) viewerInit.dataset.renderToken = previewTok;
                 carregarArquivoBlobPorId(d.arquivoId, d.arquivoMime, d.arquivoNome).then((rec) => {
                     const viewer = document.getElementById('detDocPreviewDiretoViewer');
                     if (!viewer) return;
                     if (!rec) { viewer.innerText = 'Arquivo não encontrado no banco.'; return; }
+                    if (viewer.dataset) viewer.dataset.renderToken = previewTok;
                     if (rec.mimeType.includes('pdf')) {
-                        viewer.innerHTML = `<iframe src="${rec.blobUrl}" class="w-full h-[420px] rounded-xl border border-slate-200 bg-white" title="${escapeHtml(rec.fileName)}"></iframe>`;
+                        renderizarPdfInlineCanvas(viewer, rec, previewTok, 1);
                     } else if (rec.mimeType.startsWith('image/')) {
                         viewer.innerHTML = `<img src="${rec.blobUrl}" onclick="abrirZoomFotoSrc('${rec.blobUrl}', '${escapeHtml(d.titulo)}')" class="max-h-80 mx-auto rounded-xl border border-slate-200 cursor-zoom-in">`;
+                    } else if (rec.mimeType.startsWith('text/') && typeof TextDecoder !== 'undefined' && rec.bytes) {
+                        const txt = new TextDecoder('utf-8').decode(rec.bytes).slice(0, 60000);
+                        viewer.innerHTML = `<pre class="max-h-72 overflow-auto p-3 rounded-xl bg-white border border-slate-200 text-[11px] font-mono text-slate-800 whitespace-pre-wrap">${escapeHtml(txt)}</pre>`;
                     } else {
-                        viewer.innerHTML = `<div class="p-3 rounded-xl bg-white border border-slate-200 text-slate-600 font-semibold">Prévia na tela disponível para PDF e imagens. Clique em <strong>⬇ Baixar</strong> acima para abrir o arquivo (${escapeHtml(rec.fileName)}).</div>`;
+                        viewer.innerHTML = `<div class="p-3 rounded-xl bg-white border border-slate-200 text-slate-600 font-semibold">Prévia rápida disponível para PDF, imagens e texto. Clique em <strong>⬇ Baixar</strong> acima para abrir o arquivo (${escapeHtml(rec.fileName)}).</div>`;
                     }
                 }).catch(() => {});
             }

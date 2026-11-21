@@ -1270,20 +1270,38 @@
             lubrificacao: { label: 'Lubrificação', pastaSp: '02_LUBRIFICACAO', badge: 'bg-amber-50 text-amber-800 border-amber-200' },
             desenhos: { label: 'Desenhos Técnicos', pastaSp: '03_DESENHOS_TECNICOS', badge: 'bg-indigo-50 text-indigo-700 border-indigo-200' },
             orcamentos: { label: 'Orçamentos (Sigiloso)', pastaSp: '04_ORCAMENTOS_SIGILOSOS', badge: 'bg-rose-50 text-rose-700 border-rose-200' },
+            administrativo: { label: 'Administrativo (Gestão)', pastaSp: '07_ADMINISTRATIVO', badge: 'bg-slate-100 text-slate-700 border-slate-300' },
             fotos: { label: 'Fotos & Ref.', pastaSp: '05_FOTOS_REFERENCIA', badge: 'bg-emerald-50 text-emerald-700 border-emerald-200' },
             qualidade: { label: 'Qualidade & Seg.', pastaSp: '06_QUALIDADE_SEGURANCA', badge: 'bg-purple-50 text-purple-700 border-purple-200' }
         };
 
         function isPerfilGestaoDocsGa(role) {
             const r = normKey(role);
-            return r === 'admin' || r === 'gerente' || r.startsWith('supervisor');
+            return r === 'admin' || r === 'gerente' || r.startsWith('supervisor') || r.includes('gestor');
         }
 
-        function podeVerDocGa(d) {
+        function podeVerDocGa(d, userCtx = usuarioLogado) {
             if (!d) return false;
-            if (d.categoria === 'orcamentos' || d.sigilo === 'gestao') {
-                return Boolean(usuarioLogado && isPerfilGestaoDocsGa(usuarioLogado.role));
-            }
+            const ehOrc = d.categoria === 'orcamentos';
+            const ehAdm = d.categoria === 'administrativo';
+            const gestor = Boolean(userCtx && isPerfilGestaoDocsGa(userCtx.role));
+            if (ehOrc && !gestor) return false;
+
+            const modo = d.visibilidadeModo || ((ehOrc || ehAdm || d.sigilo === 'gestao') ? 'gestao' : 'todos');
+            if (!userCtx) return modo === 'todos' && !ehOrc && d.sigilo !== 'gestao';
+            if (isPerfilAdmin(userCtx.role)) return true;
+            if (modo === 'gestao') return gestor;
+            if ((ehAdm || d.sigilo === 'gestao') && modo !== 'personalizado_ocultos' && modo !== 'personalizado_permitidos') return gestor;
+
+            const uRole = normKey(userCtx.role);
+            const matchesUsr = (arr) => Array.isArray(arr) && arr.some(v => {
+                const nv = normKey(v);
+                return (userCtx.user && nv === normKey(userCtx.user)) || (userCtx.id && String(v) === String(userCtx.id));
+            });
+            const matchesEq = (arr) => Boolean(uRole) && Array.isArray(arr) && arr.some(v => normKey(v) === uRole);
+
+            if (matchesUsr(d.ocultoUsuarios) || matchesEq(d.ocultoEquipes)) return false;
+            if (modo === 'personalizado_permitidos') return matchesUsr(d.visivelUsuarios) || matchesEq(d.visivelEquipes);
             return true;
         }
 
@@ -3177,21 +3195,22 @@
                     ? `<div class="max-h-72 overflow-y-auto space-y-2 pr-1">${execCards.join('')}</div>`
                     : `<div class="p-4 rounded-xl bg-white border border-dashed border-slate-300 text-center text-xs font-bold text-slate-400">Nenhuma preventiva ou inspeção concluída registrada ainda para este escopo.</div>`;
             } else if (active360Tab === 'documentos') {
+                const gestor360Docs = isPerfilGestaoDocsGa(usuarioLogado?.role);
                 const barDocs = `
                     <div class="flex flex-wrap items-center justify-between gap-2 mb-2.5 p-2.5 rounded-xl bg-indigo-50/70 border border-indigo-200">
                         <div class="flex flex-wrap items-center gap-2 text-[11px] font-bold text-indigo-900">
                             <span>${d.documentosVigentes.length} vigente(s)</span>
-                            ${d.documentosPendentes.length ? `<span class="px-2 py-0.5 rounded-full bg-amber-100 text-amber-800 text-[10px] font-extrabold">${d.documentosPendentes.length} em aprovação</span>` : ''}
-                            ${d.documentosVencidos.length ? `<span class="px-2 py-0.5 rounded-full bg-rose-100 text-rose-700 text-[10px] font-extrabold">${d.documentosVencidos.length} vencido/a vencer</span>` : ''}
+                            ${gestor360Docs && d.documentosPendentes.length ? `<span class="px-2 py-0.5 rounded-full bg-amber-100 text-amber-800 text-[10px] font-extrabold">${d.documentosPendentes.length} em aprovação</span>` : ''}
+                            ${gestor360Docs && d.documentosVencidos.length ? `<span class="px-2 py-0.5 rounded-full bg-rose-100 text-rose-700 text-[10px] font-extrabold">${d.documentosVencidos.length} vencido/a vencer</span>` : ''}
                         </div>
                         <div class="flex flex-wrap items-center gap-1.5">
-                            <button type="button" onclick="abrirBiblioteca360ScopeGa('submeter_doc')" class="px-2.5 py-1 rounded-lg bg-indigo-600 hover:bg-indigo-700 text-white text-[10px] font-extrabold">+ Submeter Doc</button>
+                            <button type="button" onclick="abrirBiblioteca360ScopeGa('submeter_doc')" class="px-2.5 py-1 rounded-lg bg-indigo-600 hover:bg-indigo-700 text-white text-[10px] font-extrabold">${gestor360Docs ? '+ Submeter Doc' : '+ Enviar Foto/Sugestão'}</button>
                             <button type="button" onclick="abrirBiblioteca360ScopeGa('filtrar_ativo')" class="px-2.5 py-1 rounded-lg bg-white border border-indigo-200 hover:bg-indigo-100 text-indigo-700 text-[10px] font-extrabold">Ver Biblioteca ↗</button>
                         </div>
                     </div>`;
                 bodyHtml = barDocs + (d.documentosTodos.length ? `<div class="max-h-72 overflow-y-auto space-y-2 pr-1">${d.documentosTodos.map(docItem => {
                     const catM = DOCS_CAT_META_GA[docItem.categoria] || { label: docItem.categoria || 'Doc', badge: 'bg-slate-100 text-slate-700 border-slate-200' };
-                    const valSt = getValidadeStatusDocGa(docItem.validadeEm);
+                    const valSt = gestor360Docs ? getValidadeStatusDocGa(docItem.validadeEm) : { kind: 'ok', label: '' };
                     const stCls = docItem.status === 'vigente' ? 'bg-emerald-100 text-emerald-800' : (docItem.status === 'pendente_aprovacao' ? 'bg-amber-100 text-amber-800' : 'bg-rose-100 text-rose-800');
                     const stTxt = docItem.status === 'vigente' ? 'VIGENTE' : (docItem.status === 'pendente_aprovacao' ? 'PENDENTE APROVAÇÃO' : 'REPROVADO');
                     return `
@@ -3212,10 +3231,10 @@
                             </div>
                             <div class="flex items-center gap-1.5 shrink-0">
                                 ${docItem.arquivoId ? `<button type="button" onclick="abrirDocBibliotecaGa('${escapeHtml(docItem.id)}')" class="px-2.5 py-1 rounded-lg bg-indigo-600 hover:bg-indigo-700 text-white text-[10px] font-extrabold">Abrir ↗</button>` : (docItem.arquivoUrl ? `<a href="${escapeHtml(docItem.arquivoUrl)}" target="_blank" rel="noopener noreferrer" class="px-2.5 py-1 rounded-lg bg-indigo-600 hover:bg-indigo-700 text-white text-[10px] font-extrabold">SharePoint ↗</a>` : '')}
-                                <button type="button" onclick="abrirBibliotecaDocsGa('abrir_doc', {}, '', '${escapeHtml(docItem.id)}')" class="px-2.5 py-1 rounded-lg bg-slate-100 hover:bg-slate-200 text-slate-700 text-[10px] font-extrabold">Revisões</button>
+                                <button type="button" onclick="abrirBibliotecaDocsGa('abrir_doc', {}, '', '${escapeHtml(docItem.id)}')" class="px-2.5 py-1 rounded-lg bg-slate-100 hover:bg-slate-200 text-slate-700 text-[10px] font-extrabold">${gestor360Docs ? 'Revisões' : 'Detalhes'}</button>
                             </div>
                         </div>`;
-                }).join('')}</div>` : `<div class="p-4 rounded-xl bg-white border border-dashed border-slate-300 text-center text-xs font-bold text-slate-400">Nenhum documento cadastrado para este ativo ainda. Clique em "+ Submeter Doc" para registrar manual, desenho, lubrificação ou foto.</div>`);
+                }).join('')}</div>` : `<div class="p-4 rounded-xl bg-white border border-dashed border-slate-300 text-center text-xs font-bold text-slate-400">Nenhum documento cadastrado para este ativo ainda. Clique em "${gestor360Docs ? '+ Submeter Doc' : '+ Enviar Foto/Sugestão'}" para registrar manual, desenho, lubrificação ou foto.</div>`);
             } else {
                 bodyHtml = d.historicoTimeline.length
                     ? `<div class="max-h-72 overflow-y-auto space-y-2 pr-1">${d.historicoTimeline.map(ev => `
