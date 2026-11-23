@@ -603,6 +603,12 @@
             </form>
 
             <div id="secMasterAtivoCentral" class="hidden space-y-4 text-xs">
+                <div class="p-3.5 rounded-2xl bg-sky-50 border border-sky-200 space-y-2">
+                    <div class="font-extrabold text-sky-900 uppercase text-[10px] tracking-wider">Módulo de Documentos • Cadastros Master</div>
+                    <p class="text-[11px] text-sky-800 font-medium">Cadastre novas Categorias, Subtipos e Disciplinas na biblioteca técnica sem fila de aprovação.</p>
+                    <button type="button" onclick="abrirMasterDocsTaxonomiaPortal()" class="btn-touch bg-sky-700 hover:bg-sky-800 text-white w-full py-2 text-xs">Cadastrar Categorias, Subtipos e Disciplinas</button>
+                </div>
+
                 <form onsubmit="salvarNovaSenhaMasterCentral(event)" class="p-3.5 rounded-2xl bg-slate-50 border border-slate-200 space-y-2.5">
                     <div class="font-extrabold text-slate-800 uppercase text-[10px] tracking-wider">Alterar Senha Oculta Master</div>
                     <input type="password" id="inpNovaSenhaMaster1" required minlength="6" autocomplete="new-password" class="input-clean py-2 text-xs font-mono" placeholder="Nova senha oculta (mín. 6 caracteres)">
@@ -968,6 +974,22 @@
             } finally {
                 if (btn) { btn.disabled = false; btn.innerText = 'Atualizar Senha Oculta (SHA-256)'; }
             }
+        };
+
+        window.abrirMasterDocsTaxonomiaPortal = () => {
+            if (!isAdminMasterAtivoCentral()) {
+                return showToast('Desbloqueie o modo Admin Master primeiro.', 'error');
+            }
+            if (!usuarioPodeAcessarApp(usuarioLogado, 'docs_ativos')) {
+                return showToast('Este usuário não possui acesso liberado ao módulo de Documentos.', 'error');
+            }
+            safeStorage.set('cepera_agendamento_handoff', JSON.stringify({
+                targetApp: 'docs_ativos',
+                action: 'master_taxonomia',
+                tab: 'cat'
+            }));
+            document.getElementById('modalAdminMaster')?.classList.add('hidden');
+            abrirAppWorkspace('docs_ativos', true);
         };
 
         const DEFAULT_ADMIN = {
