@@ -308,7 +308,7 @@
                         <div class="min-w-0">
                             <div class="flex items-center gap-1.5">
                                 <span class="text-[10px] font-extrabold uppercase tracking-widest text-sky-700">PCM Cepêra</span>
-                                <span class="px-1.5 py-0.5 rounded bg-slate-900 text-white font-mono text-[9px] font-extrabold">v44 • PRÉ-VOO &amp; ATIVOS</span>
+                                <span class="px-1.5 py-0.5 rounded bg-slate-900 text-white font-mono text-[9px] font-extrabold">v45 • GEMINI &amp; CADASTRO ÁRVORE</span>
                             </div>
                             <h1 class="text-sm font-extrabold text-slate-900 truncate">Maestri 2.0 • IA & AQF</h1>
                         </div>
@@ -1167,8 +1167,9 @@
                         </div>
                         <div class="flex flex-wrap items-center justify-between gap-2 pt-2 border-t border-slate-100">
                             <span id="masterVaultStatusTxt" class="text-xs font-bold text-slate-600">Status do Cofre: Verificando...</span>
-                            <div class="flex gap-2">
+                            <div class="flex flex-wrap gap-2">
                                 <button type="button" onclick="limparCofreIaMaster()" class="btn-touch bg-rose-50 text-rose-700 border border-rose-200 text-xs">Remover Chave Local</button>
+                                <button type="button" id="btnTestarGeminiMaster" onclick="testarConexaoGeminiMaster()" class="btn-touch bg-indigo-50 hover:bg-indigo-100 text-indigo-800 border border-indigo-200 text-xs">Testar Conexão Gemini</button>
                                 <button type="button" onclick="salvarCofreIaMaster()" class="btn-touch bg-emerald-600 hover:bg-emerald-700 text-white text-xs">
                                     <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7H5a2 2 0 00-2 2v9a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2h-3m-1 4l-3 3m0 0l-3-3m3 3V4"/></svg>
                                     <span>Salvar Configuração do Cofre</span>
@@ -1449,6 +1450,10 @@
                                 <option value="pendentes">Exibir Pendentes &amp; Sugestões</option>
                                 <option value="todos">Exibir Todos os Ativos do Lote</option>
                             </select>
+                            <button type="button" id="btnPreVooCadastrarTodos" hidden onclick="cadastrarTodosPendentesPreVoo()" class="hidden btn-touch bg-emerald-600 hover:bg-emerald-700 text-white text-xs py-1.5 px-3">
+                                <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/></svg>
+                                <span id="lblBtnCadastrarTodosPreVoo">Cadastrar Faltantes em ob_linhas</span>
+                            </button>
                             <button type="button" id="btnPreVooGeminiAtivos" onclick="autoMapearAtivosComGeminiPreVoo()" class="btn-touch bg-indigo-600 hover:bg-indigo-700 text-white text-xs py-1.5 px-3">
                                 <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"/></svg>
                                 <span>Auto-Mapear Ambíguos c/ Gemini IA</span>
@@ -1924,19 +1929,21 @@
 
         // ================= COFRE LOCAL DE CHAVE GEMINI API =================
         function carregarCofreIaLocal() {
-            const k = safeStorage.get("cepera_maestri_gemini_key_local") || "";
+            const rawK = safeStorage.get("cepera_maestri_gemini_key_local") || "";
+            const k = limparChaveGemini(rawK);
             const modo = safeStorage.get("cepera_maestri_modo_ia") || "auto";
             const lote = Number(safeStorage.get("cepera_maestri_lote_size") || 20);
             const inpK = document.getElementById("masterGeminiKeyInput");
             const selM = document.getElementById("masterModoIaSelect");
             const selL = document.getElementById("masterLoteSizeSelect");
             const st = document.getElementById("masterVaultStatusTxt");
-            if (inpK) inpK.value = k;
+            if (inpK && document.activeElement !== inpK) inpK.value = k;
             if (selM) selM.value = modo;
             if (selL) selL.value = String(lote);
             if (st) {
+                const modInfo = ultimoModeloGeminiOk ? ` • Modelo: ${ultimoModeloGeminiOk}` : "";
                 st.innerText = k
-                    ? `Ativa: Chave configurada localmente (${k.slice(0, 6)}...${k.slice(-3)}) • Modo: ${modo.toUpperCase()} • Lote: ${lote} OMs`
+                    ? `Ativa: Chave configurada (${k.slice(0, 6)}...${k.slice(-3)}) • Modo: ${modo.toUpperCase()} • Lote: ${lote} OMs${modInfo}`
                     : `Modo Custo Zero Ativo (Fast-Path + Motor Determinístico PCM R$ 0,00 • Lote ${lote} OMs)`;
             }
             return { key: k, modo, lote };
@@ -1944,9 +1951,11 @@
 
         window.salvarCofreIaMaster = () => {
             if (!isAdminMasterAtivo()) { showToast("Exige Admin Master.", "error"); return; }
-            const k = (document.getElementById("masterGeminiKeyInput")?.value || "").trim();
+            const k = limparChaveGemini(document.getElementById("masterGeminiKeyInput")?.value || "");
             const modo = document.getElementById("masterModoIaSelect")?.value || "auto";
             const lote = document.getElementById("masterLoteSizeSelect")?.value || "20";
+            const inpK = document.getElementById("masterGeminiKeyInput");
+            if (inpK) inpK.value = k;
             if (k) safeStorage.set("cepera_maestri_gemini_key_local", k);
             else safeStorage.remove("cepera_maestri_gemini_key_local");
             safeStorage.set("cepera_maestri_modo_ia", modo);
@@ -1955,9 +1964,38 @@
             showToast("Configuração do Cofre de IA salva localmente neste computador!", "success");
         };
 
+        window.testarConexaoGeminiMaster = async () => {
+            if (!isAdminMasterAtivo()) { showToast("Exige Admin Master.", "error"); return; }
+            const k = limparChaveGemini(document.getElementById("masterGeminiKeyInput")?.value || safeStorage.get("cepera_maestri_gemini_key_local") || "");
+            const st = document.getElementById("masterVaultStatusTxt");
+            const btn = document.getElementById("btnTestarGeminiMaster");
+            if (!k) {
+                showToast("Cole sua chave Gemini API (AIza...) antes de testar.", "error");
+                return;
+            }
+            if (btn) btn.disabled = true;
+            if (st) st.innerText = "Testando conexão com Google Gemini API (fallback 2.5-flash / 2.0-flash)...";
+            try {
+                const { model } = await chamarGeminiApiComFallback(k, 'Responda SOMENTE JSON Array: [{"status":"OK"}]');
+                safeStorage.set("cepera_maestri_gemini_key_local", k);
+                const inpK = document.getElementById("masterGeminiKeyInput");
+                if (inpK) inpK.value = k;
+                if (st) st.innerText = `Conexão OK! Modelo ativo: ${model} • Chave salva (${k.slice(0, 6)}...${k.slice(-3)}).`;
+                showToast(`Chave Gemini validada e salva no modelo ${model}!`, "success");
+            } catch (err) {
+                const msg = err?.message || "Falha ao conectar.";
+                if (st) st.innerText = `Erro na chave/API: ${msg}`;
+                showToast(`Falha no teste Gemini: ${msg}`, "error");
+            } finally {
+                if (btn) btn.disabled = false;
+            }
+        };
+
         window.limparCofreIaMaster = () => {
             if (!isAdminMasterAtivo()) { showToast("Exige Admin Master.", "error"); return; }
             safeStorage.remove("cepera_maestri_gemini_key_local");
+            safeStorage.remove("cepera_maestri_gemini_modelo_ok");
+            ultimoModeloGeminiOk = "";
             carregarCofreIaLocal();
             showToast("Chave Gemini removida do cofre local.");
         };
@@ -2116,12 +2154,15 @@
                 const eqN = normalizarTextoAtivoFlex(c.equipamento);
                 const areaN = normalizarTextoAtivoFlex(c.area);
 
+                const numsMaq = maqN.split(" ").filter(t => /^\d+$/.test(t));
+                const numeroDivergente = numsMaq.length > 0 && !numsMaq.every(n => contemFrasePalavra(nbExp, n));
+
                 let ptsMaq = 0;
-                if (maqN) {
+                if (maqN && !numeroDivergente) {
                     if (contemFrasePalavra(nb, maqN)) ptsMaq = 65;
                     else if (contemFrasePalavra(nbExp, maqN)) ptsMaq = 50;
                     else {
-                        const toksM = maqN.split(" ").filter(t => t.length >= 2);
+                        const toksM = maqN.split(" ").filter(t => t.length >= 2 || /^\d+$/.test(t));
                         const hitsM = toksM.filter(t => contemFrasePalavra(nbExp, t)).length;
                         if (toksM.length >= 2 && hitsM === toksM.length) ptsMaq = 45;
                     }
@@ -3208,8 +3249,114 @@
         // Mantém alias retrocompatível
         window.carregarRodadaReal1234Oms = window.inspecionarHistoricoSetOut;
 
+        const GEMINI_MODELOS_FALLBACK = [
+            "gemini-2.5-flash",
+            "gemini-2.5-flash-lite",
+            "gemini-2.0-flash",
+            "gemini-2.0-flash-lite",
+            "gemini-1.5-flash"
+        ];
+        let ultimoModeloGeminiOk = safeStorage.get("cepera_maestri_gemini_modelo_ok") || "";
+
+        function limparChaveGemini(k) {
+            return String(k || "").trim().replace(/^["']|["']$/g, "").replace(/\s+/g, "");
+        }
+
+        function extrairJsonArrayGemini(rawTxt) {
+            const clean = String(rawTxt || "").replace(/```json/gi, "").replace(/```/g, "").trim();
+            if (!clean) return [];
+            try {
+                const parsed = JSON.parse(clean);
+                if (Array.isArray(parsed)) return parsed;
+                if (parsed && typeof parsed === "object") {
+                    for (const k of ["itens", "items", "ordens", "mappings", "ativos", "resultados", "data"]) {
+                        if (Array.isArray(parsed[k])) return parsed[k];
+                    }
+                }
+            } catch (_) {}
+            const firstBr = clean.indexOf("[");
+            const lastBr = clean.lastIndexOf("]");
+            if (firstBr >= 0 && lastBr > firstBr) {
+                try {
+                    const sub = JSON.parse(clean.slice(firstBr, lastBr + 1));
+                    if (Array.isArray(sub)) return sub;
+                } catch (_) {}
+            }
+            return [];
+        }
+
+        async function chamarGeminiApiComFallback(apiKeyRaw, promptText, opts = {}) {
+            if (typeof fetch !== "function") throw new Error("API fetch indisponível neste ambiente.");
+            const apiKey = limparChaveGemini(apiKeyRaw);
+            if (!apiKey) throw new Error("Chave Gemini API vazia.");
+
+            const candidatos = [...new Set([
+                ...(ultimoModeloGeminiOk ? [ultimoModeloGeminiOk] : []),
+                ...GEMINI_MODELOS_FALLBACK
+            ])];
+
+            let ultimoErro = "Falha desconhecida ao consultar Gemini.";
+            for (const modelo of candidatos) {
+                for (const tentarSemMime of [false, true]) {
+                    const url = `https://generativelanguage.googleapis.com/v1beta/models/${modelo}:generateContent?key=${encodeURIComponent(apiKey)}`;
+                    const genCfg = { temperature: 0.1 };
+                    if (!tentarSemMime && opts.jsonMode !== false) {
+                        genCfg.responseMimeType = "application/json";
+                    }
+                    let resp;
+                    try {
+                        resp = await fetch(url, {
+                            method: "POST",
+                            headers: { "Content-Type": "application/json" },
+                            body: JSON.stringify({
+                                contents: [{ parts: [{ text: promptText }] }],
+                                generationConfig: genCfg
+                            })
+                        });
+                    } catch (netErr) {
+                        ultimoErro = `[${modelo}] Erro de rede/CORS: ${netErr?.message || "sem conexão"}`;
+                        break;
+                    }
+
+                    let payload = null;
+                    let rawBody = "";
+                    try {
+                        if (typeof resp.text === "function") {
+                            rawBody = await resp.text();
+                            payload = rawBody ? JSON.parse(rawBody) : null;
+                        } else if (typeof resp.json === "function") {
+                            payload = await resp.json();
+                        }
+                    } catch (_) {}
+
+                    if (resp.ok) {
+                        const outTxt = (payload?.candidates?.[0]?.content?.parts || []).map(p => p?.text || "").join("");
+                        if (outTxt) {
+                            ultimoModeloGeminiOk = modelo;
+                            safeStorage.set("cepera_maestri_gemini_modelo_ok", modelo);
+                            return { ok: true, model: modelo, text: outTxt, payload };
+                        }
+                        ultimoErro = `[${modelo}] Resposta vazia do modelo`;
+                        break;
+                    }
+
+                    const apiMsg = payload?.error?.message || rawBody.slice(0, 140) || resp.statusText || "Erro HTTP";
+                    if (resp.status === 401 || resp.status === 403 || /api[_\s]?key|invalid.*key|permission/i.test(apiMsg)) {
+                        throw new Error(`Chave API Gemini inválida ou bloqueada (HTTP ${resp.status}): ${apiMsg}`);
+                    }
+                    if (!tentarSemMime && resp.status === 400 && /mime|json|schema/i.test(apiMsg)) {
+                        continue;
+                    }
+                    ultimoErro = `[${modelo} • HTTP ${resp.status}] ${apiMsg}`;
+                    break;
+                }
+            }
+            throw new Error(ultimoErro);
+        }
+        window.chamarGeminiApiComFallback = chamarGeminiApiComFallback;
+
         async function chamarGeminiLote20NoNavegador(loteOms, apiKey) {
-            if (typeof fetch !== "function" || !apiKey) return null;
+            if (typeof fetch !== "function" || !limparChaveGemini(apiKey)) return null;
             const exemplosBib = bibliotecaCorrecoes
                 .filter(b => b.status !== "REVERTIDO" && b.categoria_supervisor)
                 .slice(0, 6)
@@ -3230,18 +3377,8 @@ Regras aprendidas do Bibliotecário da planta:\n${exemplosBib || "- Sem correç�
 Responda SOMENTE um JSON Array no formato [{"om":"...","categoria":"...","b":null,"c":null,"confianca":4,"justificativa":"..."}].
 OMs:\n${JSON.stringify(listaPrompt)}`;
 
-            const resp = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${encodeURIComponent(apiKey)}`, {
-                method: "POST",
-                headers: { "Content-Type": "application/json" },
-                body: JSON.stringify({
-                    contents: [{ parts: [{ text: promptText }] }],
-                    generationConfig: { temperature: 0.1, responseMimeType: "application/json" }
-                })
-            });
-            if (!resp.ok) throw new Error(`HTTP ${resp.status}`);
-            const data = await resp.json();
-            const txt = data?.candidates?.[0]?.content?.parts?.[0]?.text || "[]";
-            const parsed = JSON.parse(txt.replace(/```json|```/g, "").trim());
+            const { text } = await chamarGeminiApiComFallback(apiKey, promptText);
+            const parsed = extrairJsonArrayGemini(text);
             const mapRes = new Map();
             if (Array.isArray(parsed)) {
                 parsed.forEach(item => {
@@ -3320,6 +3457,7 @@ OMs:\n${JSON.stringify(listaPrompt)}`;
             // Chamada real em lotes de 20 OMs se chave Gemini estiver configurada no Cofre Master e modo !== deterministico
             const iaMap = new Map();
             let chamadasReais = 0;
+            let erroIaN3Aviso = "";
             if (cfg.key && cfg.modo !== "deterministico" && pendentesIa.length > 0 && typeof fetch === "function" && !opts.usarBenchmarkSetOut) {
                 const loteSz = Math.max(5, Math.min(30, Number(cfg.lote || 20)));
                 for (let i = 0; i < pendentesIa.length; i += loteSz) {
@@ -3328,9 +3466,12 @@ OMs:\n${JSON.stringify(listaPrompt)}`;
                     try {
                         const resMap = await chamarGeminiLote20NoNavegador(chunk, cfg.key);
                         if (resMap) resMap.forEach((val, k) => iaMap.set(k, val));
-                    } catch (_) {
-                        // Fallback silencioso para motor determinístico em caso de indisponibilidade/offline
+                    } catch (errIa) {
+                        if (!erroIaN3Aviso) erroIaN3Aviso = errIa?.message || "Erro na API Gemini";
                     }
+                }
+                if (erroIaN3Aviso) {
+                    showToast(`Nó 3 Gemini (${erroIaN3Aviso}) — aplicado motor determinístico local neste lote.`, "error");
                 }
             }
 
@@ -4778,20 +4919,83 @@ OMs:\n${JSON.stringify(listaPrompt)}`;
             }
         };
 
+        function sugerirCadastroParaAtivoErp(ativoErp, catalogo = []) {
+            const bruto = String(ativoErp || "").trim();
+            const nb = normalizarTextoAtivoFlex(bruto);
+            const partes = bruto.split(/[-–—]/).map(s => s.trim()).filter(Boolean);
+            let maq = partes[0] || bruto || "ATIVO GERAL";
+            let eq = partes.slice(1).join(" - ").trim() || maq;
+
+            // Corrige inversão do ERP quando lado esquerdo é termo genérico ("ENVASADORA - SYSTEMPACK M400 1")
+            if (partes.length >= 2) {
+                const ladoATok = normalizarTextoAtivoFlex(partes[0]).split(" ")[0] || "";
+                const ladoBTok = normalizarTextoAtivoFlex(partes[1]).split(" ")[0] || "";
+                if (
+                    (TERMOS_EQ_GENERICOS.has(normalizarTextoAtivoFlex(partes[0])) || TERMOS_EQ_GENERICOS.has(ladoATok) || nb.startsWith("resfriador"))
+                    && !TERMOS_EQ_GENERICOS.has(ladoBTok)
+                ) {
+                    maq = partes.slice(1).join(" - ").trim();
+                    eq = partes[0];
+                }
+            }
+
+            // Herda a Área/Setor de máquina irmã já cadastrada em ob_linhas (ex: BOATOPACK 1 -> Envase Sachet)
+            let area = "";
+            const prefixMaq = normalizarTextoAtivoFlex(maq).split(" ")[0] || "";
+            if (prefixMaq.length >= 4 && Array.isArray(catalogo) && catalogo.length) {
+                const irmao = catalogo.find(c => normalizarTextoAtivoFlex(c.maquina).includes(prefixMaq));
+                if (irmao && irmao.area) area = irmao.area;
+            }
+            if (!area) {
+                area = /(?:boatopack|systempack|volpack|solupack|flowpack)/.test(nb) ? "Envase Sachet"
+                    : /(?:serac|posimec|multipet|dmon|dmom|linear)/.test(nb) ? "Envase Frascos"
+                    : /(?:cozinha|fryma|moinho|moagem|buller|tanque|preparacao)/.test(nb) ? "Cozinha & Moagem"
+                    : /(?:conserva|lata|cft|tetra|dende)/.test(nb) ? "Conservas & Latas"
+                    : "Utilidades & Predial";
+            }
+
+            const pareceGenerico = /\b(?:setor [a-z0-9]+|banheiro|vestiari\w*|refeitori\w*|predio|corredor|portaria)\b/.test(nb);
+            const crit = /(?:boatopack|serac|multipet|fryma|systempack|volpack|linear|cozinha|caldeira|compressor|dmom|dende|conserva)/.test(nb)
+                ? "A"
+                : (pareceGenerico ? "C" : "B");
+            const disc = /\b(?:painel|dosador|clp|sensor|eletric|encoder|inversor|iluminac)/.test(nb) ? "Elétrica" : "Mecânica";
+
+            return {
+                area,
+                maquina: maq,
+                equipamento: eq,
+                criticidade: crit,
+                disciplina: disc,
+                pareceGenerico
+            };
+        }
+
         window.renderPreVooAtivos = () => {
             if (!preVooEstado) return;
             atualizarDatalistCatalogoPreVoo();
-            // Reavalia apenas os que ainda não foram editados manualmente nesta sessão do modal
             const catalogo = extrairCatalogoAtivosOficiais();
             preVooEstado.analiseAtivos.forEach(item => {
-                if (item.editadoNoModal) return;
-                const res = cruzarAtivoComArvore(item.ativoErp, catalogo);
-                item.status = res.status_vinculo || "PENDENTE";
-                item.sugestao = res.ativo_oficial || "";
-                item.setor = res.setor;
-                item.criticidade = res.criticidade_linha;
-                item.candidatos = res.candidatos || [];
-                item.selecionado = res.vinculado_ob_linhas ? res.ativo_oficial : "";
+                if (!item.editadoNoModal) {
+                    const res = cruzarAtivoComArvore(item.ativoErp, catalogo);
+                    if (item.confirmadoNaoCadastrado && res.status_vinculo === "SUGESTAO") {
+                        item.status = "PENDENTE";
+                        item.sugestao = item.ativoErp;
+                        item.setor = res.setor;
+                        item.criticidade = res.criticidade_linha;
+                        item.candidatos = res.candidatos || [];
+                        item.selecionado = "";
+                    } else {
+                        item.status = res.status_vinculo || "PENDENTE";
+                        item.sugestao = res.ativo_oficial || "";
+                        item.setor = res.setor;
+                        item.criticidade = res.criticidade_linha;
+                        item.candidatos = res.candidatos || [];
+                        item.selecionado = res.vinculado_ob_linhas ? res.ativo_oficial : "";
+                    }
+                }
+                if (!item.sugestaoCadastro) {
+                    item.sugestaoCadastro = sugerirCadastroParaAtivoErp(item.ativoErp, catalogo);
+                }
             });
 
             const lista = preVooEstado.analiseAtivos;
@@ -4799,6 +5003,7 @@ OMs:\n${JSON.stringify(listaPrompt)}`;
             const verdCnt = lista.filter(x => x.status === "DEPARA" || x.status === "AUTO_EXATO").length;
             const sugCnt = lista.filter(x => x.status === "SUGESTAO").length;
             const pendCnt = lista.filter(x => x.status === "PENDENTE").length;
+            const pendentesProcesso = lista.filter(x => x.status === "PENDENTE" && !x.sugestaoCadastro?.pareceGenerico);
             const omsVinculadas = lista.filter(x => x.status !== "PENDENTE").reduce((s, x) => s + x.qtdOms, 0);
 
             const kpiEl = document.getElementById("preVooAtivosKpis");
@@ -4806,9 +5011,17 @@ OMs:\n${JSON.stringify(listaPrompt)}`;
                 kpiEl.innerHTML = [
                     `<span class="px-2.5 py-1 rounded-full bg-emerald-100 text-emerald-900 text-[10px] font-extrabold">${verdCnt} Exato(s) / De-Para</span>`,
                     `<span class="px-2.5 py-1 rounded-full bg-amber-100 text-amber-900 text-[10px] font-extrabold">${sugCnt} Sugestão / Barra (1/2)</span>`,
-                    `<span class="px-2.5 py-1 rounded-full bg-slate-200 text-slate-800 text-[10px] font-extrabold">${pendCnt} Sem vínculo em ob_linhas</span>`,
+                    `<span class="px-2.5 py-1 rounded-full bg-rose-100 text-rose-900 text-[10px] font-extrabold">${pendCnt} Não Cadastrado(s) / Sem Vínculo</span>`,
                     `<span class="px-2.5 py-1 rounded-full bg-sky-100 text-sky-900 text-[10px] font-extrabold">${omsVinculadas}/${preVooEstado.diag.aprovadas} OMs mapeadas</span>`
                 ].join("");
+            }
+
+            const btnLoteCad = document.getElementById("btnPreVooCadastrarTodos");
+            if (btnLoteCad) {
+                btnLoteCad.hidden = pendentesProcesso.length === 0;
+                btnLoteCad.classList.toggle("hidden", pendentesProcesso.length === 0);
+                const lbl = document.getElementById("lblBtnCadastrarTodosPreVoo");
+                if (lbl) lbl.innerText = `Cadastrar Faltantes (${pendentesProcesso.length}) em ob_linhas`;
             }
 
             const tbody = document.getElementById("preVooTabelaAtivosBody");
@@ -4824,25 +5037,48 @@ OMs:\n${JSON.stringify(listaPrompt)}`;
                     DEPARA: '<span class="px-2 py-0.5 rounded-full bg-indigo-100 text-indigo-800 text-[10px] font-extrabold">De-Para Salvo</span>',
                     AUTO_EXATO: '<span class="px-2 py-0.5 rounded-full bg-emerald-100 text-emerald-800 text-[10px] font-extrabold">Auto Exato</span>',
                     SUGESTAO: '<span class="px-2 py-0.5 rounded-full bg-amber-100 text-amber-900 text-[10px] font-extrabold">Sugestão / Barra</span>',
-                    PENDENTE: '<span class="px-2 py-0.5 rounded-full bg-slate-200 text-slate-700 text-[10px] font-extrabold">Sem Vínculo</span>'
+                    PENDENTE: '<span class="px-2 py-0.5 rounded-full bg-rose-100 text-rose-800 text-[10px] font-extrabold">Não Cadastrado</span>'
                 };
                 tbody.innerHTML = exibidos.map(row => {
                     const chips = (row.candidatos || []).slice(0, 3).map(c =>
                         `<button type="button" onclick="aplicarSugestaoChipPreVoo(${row.idx}, '${escapeHtml(c.label).replace(/'/g, "\\'")}')" class="px-2 py-0.5 rounded bg-sky-50 hover:bg-sky-100 text-sky-800 border border-sky-200 text-[9px] font-bold transition-colors" title="${escapeHtml(c.area)} • ${c.score} pts">${escapeHtml(c.label)}</button>`
                     ).join("");
+                    const sug = row.sugestaoCadastro || {};
+                    const boxSugCadastro = row.status === "PENDENTE" ? `
+                        <div class="mt-1.5 p-2 rounded-xl bg-emerald-50/80 border border-emerald-200 text-[10px] space-y-1.5">
+                            <div class="flex flex-wrap items-center justify-between gap-1">
+                                <span class="font-extrabold text-emerald-900">Sugestão para Árvore: ${escapeHtml(sug.area)} › ${escapeHtml(sug.maquina)} › ${escapeHtml(sug.equipamento)} (Cl. ${escapeHtml(sug.criticidade)})</span>
+                                <button type="button" onclick="toggleEditarCadastroPreVoo(${row.idx})" class="text-[9px] font-extrabold text-sky-700 hover:underline">${row.editandoCadastro ? "Fechar Edição" : "Ajustar Campos"}</button>
+                            </div>
+                            ${row.editandoCadastro ? `
+                                <div class="grid grid-cols-1 sm:grid-cols-4 gap-1.5 pt-1">
+                                    <input type="text" value="${escapeHtml(sug.area)}" onchange="atualizarCampoCadastroPreVoo(${row.idx}, 'area', this.value)" placeholder="Setor / Área" class="input-clean py-1 px-2 text-[10px] font-bold">
+                                    <input type="text" value="${escapeHtml(sug.maquina)}" onchange="atualizarCampoCadastroPreVoo(${row.idx}, 'maquina', this.value)" placeholder="Máquina / Linha" class="input-clean py-1 px-2 text-[10px] font-bold">
+                                    <input type="text" value="${escapeHtml(sug.equipamento)}" onchange="atualizarCampoCadastroPreVoo(${row.idx}, 'equipamento', this.value)" placeholder="Equipamento" class="input-clean py-1 px-2 text-[10px] font-bold">
+                                    <select onchange="atualizarCampoCadastroPreVoo(${row.idx}, 'criticidade', this.value)" class="input-clean py-1 px-2 text-[10px] font-extrabold">
+                                        <option value="A" ${sug.criticidade === "A" ? "selected" : ""}>Classe A</option>
+                                        <option value="B" ${sug.criticidade === "B" ? "selected" : ""}>Classe B</option>
+                                        <option value="C" ${sug.criticidade === "C" ? "selected" : ""}>Classe C</option>
+                                    </select>
+                                </div>` : ""}
+                        </div>` : "";
                     return `
                         <tr class="hover:bg-slate-50/80 border-b border-slate-100">
-                            <td class="py-2.5 px-3">
+                            <td class="py-2.5 px-3 align-top">
                                 <div class="font-extrabold text-slate-900 text-xs">${escapeHtml(row.ativoErp)}</div>
                                 <div class="text-[10px] font-mono font-bold text-slate-500">${row.qtdOms} OM(s) • Fallback: ${escapeHtml(row.setor)} (Cl. ${escapeHtml(row.criticidade)})</div>
+                                ${boxSugCadastro}
                             </td>
-                            <td class="py-2.5 px-2 text-center whitespace-nowrap">${stBadge[row.status] || stBadge.PENDENTE}</td>
-                            <td class="py-2.5 px-2">
-                                <input type="text" list="preVooCatalogoDatalist" value="${escapeHtml(row.selecionado)}" onchange="atualizarSelecaoDeParaPreVoo(${row.idx}, this.value)" oninput="atualizarSelecaoDeParaPreVoo(${row.idx}, this.value)" placeholder="Manter nome ERP ou escolher de ob_linhas..." class="input-clean py-1.5 px-2.5 text-xs font-bold w-full">
+                            <td class="py-2.5 px-2 text-center whitespace-nowrap align-top">${stBadge[row.status] || stBadge.PENDENTE}</td>
+                            <td class="py-2.5 px-2 align-top">
+                                <input type="text" list="preVooCatalogoDatalist" value="${escapeHtml(row.selecionado)}" onchange="atualizarSelecaoDeParaPreVoo(${row.idx}, this.value)" oninput="atualizarSelecaoDeParaPreVoo(${row.idx}, this.value)" placeholder="Vincular a ativo existente em ob_linhas..." class="input-clean py-1.5 px-2.5 text-xs font-bold w-full">
                                 ${chips ? `<div class="flex flex-wrap gap-1 mt-1">${chips}</div>` : ""}
                             </td>
-                            <td class="py-2.5 px-2 text-right whitespace-nowrap">
-                                <button type="button" onclick="salvarLinhaDeParaPreVoo(${row.idx})" class="px-2.5 py-1.5 rounded-xl bg-slate-900 hover:bg-slate-800 text-white text-[10px] font-extrabold">Salvar De-Para</button>
+                            <td class="py-2.5 px-2 text-right whitespace-nowrap align-top">
+                                <div class="flex flex-col gap-1 items-end">
+                                    ${row.status === "PENDENTE" ? `<button type="button" onclick="cadastrarAtivoNaArvorePreVoo(${row.idx})" class="px-2.5 py-1.5 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white text-[10px] font-extrabold shadow-sm">+ Cadastrar em ob_linhas</button>` : ""}
+                                    <button type="button" onclick="salvarLinhaDeParaPreVoo(${row.idx})" class="px-2.5 py-1 rounded-xl bg-slate-900 hover:bg-slate-800 text-white text-[10px] font-extrabold">Salvar De-Para</button>
+                                </div>
                             </td>
                         </tr>`;
                 }).join("");
@@ -4851,8 +5087,132 @@ OMs:\n${JSON.stringify(listaPrompt)}`;
             const rodape = document.getElementById("preVooRodapeResumo");
             if (rodape) {
                 rodape.innerText = pendCnt > 0
-                    ? `Modo Flexível: ${pendCnt} ativo(s) sem vínculo usarão o nome do ERP com criticidade inferida, ou você pode mapeá-los acima.`
-                    : "Todos os ativos estão conciliados com a árvore Gestão de Ativos (ob_linhas).";
+                    ? `${pendCnt} ativo(s) do ERP ainda não constam na árvore — clique em '+ Cadastrar em ob_linhas' ou vincule a um existente (ou siga no modo flexível).`
+                    : "100% dos ativos estão conciliados com a árvore Gestão de Ativos (ob_linhas).";
+            }
+        };
+
+        window.toggleEditarCadastroPreVoo = (idx) => {
+            if (!preVooEstado?.analiseAtivos?.[idx]) return;
+            preVooEstado.analiseAtivos[idx].editandoCadastro = !preVooEstado.analiseAtivos[idx].editandoCadastro;
+            renderPreVooAtivos();
+        };
+
+        window.atualizarCampoCadastroPreVoo = (idx, campo, val) => {
+            const row = preVooEstado?.analiseAtivos?.[idx];
+            if (!row) return;
+            row.sugestaoCadastro = row.sugestaoCadastro || sugerirCadastroParaAtivoErp(row.ativoErp, extrairCatalogoAtivosOficiais());
+            row.sugestaoCadastro[campo] = String(val || "").trim();
+            if (campo === "criticidade") {
+                const c = row.sugestaoCadastro.criticidade.toUpperCase();
+                row.sugestaoCadastro.criticidade = ["A", "B", "C"].includes(c) ? c : "A";
+            }
+        };
+
+        async function registrarAtivoUnicoNaArvore(row) {
+            const catalogo = extrairCatalogoAtivosOficiais();
+            const sug = row.sugestaoCadastro || sugerirCadastroParaAtivoErp(row.ativoErp, catalogo);
+            const area = String(sug.area || "Produção").trim();
+            const maquina = String(sug.maquina || "").trim();
+            const equipamento = String(sug.equipamento || maquina).trim();
+            const crit = ["A", "B", "C"].includes(String(sug.criticidade || "").toUpperCase()) ? String(sug.criticidade).toUpperCase() : "A";
+            if (!maquina || !equipamento) throw new Error("Informe Máquina e Equipamento válidos para cadastrar.");
+
+            const existente = catalogo.find(c =>
+                normKey(c.maquina) === normKey(maquina) && normKey(c.equipamento) === normKey(equipamento)
+            );
+            const labelFinal = existente ? existente.label : formatarNomeAtivoOficial(maquina, equipamento);
+
+            if (!existente) {
+                const agora = new Date().toISOString();
+                const autor = usuarioLogado?.nome || usuarioLogado?.user || "Maestri Pré-Voo";
+                const payload = {
+                    setor: area,
+                    area,
+                    maquina,
+                    equipamento,
+                    conjunto: "Conjunto Geral",
+                    subconjunto: "Estrutura Principal",
+                    tag: "",
+                    criticidade: crit,
+                    criticidade_linha: crit,
+                    periodicidade_preventiva: "Mensal",
+                    periodicidade_semanas: 4,
+                    disciplina: sug.disciplina || "Mecânica",
+                    inspecao_ativa: false,
+                    inspecao_conjunto_ativa: false,
+                    fabricante: "",
+                    modelo: "",
+                    serie: "",
+                    numeroSerie: "",
+                    status_ativo: "Ativo",
+                    origem_cadastro: "maestri_prevoo",
+                    ativo_erp_origem: row.ativoErp,
+                    criado_em: agora,
+                    atualizado_em: agora,
+                    atualizado_por: autor
+                };
+                let docId = `local_${Date.now()}_${Math.random().toString(36).slice(2, 6)}`;
+                try {
+                    const ref = await addDoc(colLinhas, payload);
+                    if (ref && ref.id) docId = ref.id;
+                } catch (_) {}
+                if (!rawLinhasDocs.some(d => d.id === docId)) {
+                    rawLinhasDocs.push({ id: docId, ...payload });
+                }
+            }
+
+            deParaAtivosMap[normKey(row.ativoErp)] = {
+                area: existente?.area || area,
+                maquina: existente?.maquina || maquina,
+                equipamento: existente?.equipamento || equipamento,
+                criticidade_linha: existente?.criticidade_linha || crit,
+                label: labelFinal,
+                origem: "CADASTRADO_ARVORE",
+                ativo_erp: row.ativoErp
+            };
+            row.selecionado = labelFinal;
+            row.confirmadoNaoCadastrado = false;
+            row.editadoNoModal = false;
+            row.editandoCadastro = false;
+            return labelFinal;
+        }
+
+        window.cadastrarAtivoNaArvorePreVoo = async (idx) => {
+            const row = preVooEstado?.analiseAtivos?.[idx];
+            if (!row) return;
+            try {
+                const label = await registrarAtivoUnicoNaArvore(row);
+                await salvarDeParaAtivosPersistente();
+                renderPreVooAtivos();
+                showToast(`Ativo "${label}" cadastrado em ob_linhas e vinculado ao lote!`, "success");
+            } catch (e) {
+                showToast(e?.message || "Erro ao cadastrar ativo na árvore ob_linhas.", "error");
+            }
+        };
+
+        window.cadastrarTodosPendentesPreVoo = async () => {
+            if (!preVooEstado) return;
+            const alvos = preVooEstado.analiseAtivos.filter(x => x.status === "PENDENTE" && !x.sugestaoCadastro?.pareceGenerico);
+            if (!alvos.length) {
+                showToast("Nenhum equipamento de processo pendente para cadastro.", "info");
+                return;
+            }
+            const btn = document.getElementById("btnPreVooCadastrarTodos");
+            if (btn) btn.disabled = true;
+            let cadCnt = 0;
+            try {
+                for (const row of alvos) {
+                    await registrarAtivoUnicoNaArvore(row);
+                    cadCnt++;
+                }
+                await salvarDeParaAtivosPersistente();
+                renderPreVooAtivos();
+                showToast(`${cadCnt} ativo(s) regularizado(s) na árvore ob_linhas e vinculados!`, "success");
+            } catch (e) {
+                showToast(`Cadastro em lote interrompido: ${e?.message || e}`, "error");
+            } finally {
+                if (btn) btn.disabled = false;
             }
         };
 
@@ -4953,51 +5313,64 @@ OMs:\n${JSON.stringify(listaPrompt)}`;
                 showToast("Chave Gemini não configurada no Admin Master. Preencha manualmente ou cadastre a chave.", "info");
                 return;
             }
-            if (!catalogo.length) {
-                showToast("Árvore ob_linhas vazia offline — aguarde sincronização com o Firestore.", "error");
-                return;
-            }
             const btn = document.getElementById("btnPreVooGeminiAtivos");
             if (btn) btn.disabled = true;
             try {
-                const promptAtivos = `Você é especialista em Gestão de Ativos industriais (PCM Cepêra).
-Relacione cada nome de ativo vindo do ERP com o melhor ativo oficial cadastrado em ob_linhas abaixo (ou null se for genérico predial/setor sem máquina específica).
-Lembre-se que o ERP às vezes inverte Máquina-Equipamento ou junta linhas com barra (ex: "LINEAR 1/2 - ROTULADORA PELATINA" pertence às Lineares).
-Ativos oficiais ob_linhas:\n${JSON.stringify(catalogo.slice(0, 220).map(c => c.label))}
-Ativos pendentes do ERP:\n${JSON.stringify(pendentes.map(p => p.ativoErp))}
-Responda SOMENTE JSON Array: [{"ativo_erp":"...","catalogo_label":"..." | null,"confianca":4}]`;
-
-                const resp = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${encodeURIComponent(cfg.key)}`, {
-                    method: "POST",
-                    headers: { "Content-Type": "application/json" },
-                    body: JSON.stringify({
-                        contents: [{ parts: [{ text: promptAtivos }] }],
-                        generationConfig: { temperature: 0.1, responseMimeType: "application/json" }
-                    })
-                });
-                if (!resp.ok) throw new Error(`HTTP ${resp.status}`);
-                const data = await resp.json();
-                const txt = data?.candidates?.[0]?.content?.parts?.[0]?.text || "[]";
-                const parsed = JSON.parse(txt.replace(/```json|```/g, "").trim());
+                const listaCatTexto = catalogo.slice(0, 180).map(c => `${c.label} (${c.area})`);
                 let mappedCnt = 0;
-                if (Array.isArray(parsed)) {
-                    parsed.forEach(item => {
-                        if (item?.ativo_erp && item?.catalogo_label) {
+                let sugCadCnt = 0;
+                let modeloUsado = "";
+
+                for (let i = 0; i < pendentes.length; i += 25) {
+                    const bloco = pendentes.slice(i, i + 25);
+                    const promptAtivos = `Você é especialista em Gestão de Ativos industriais (PCM Cepêra).
+Compare cada nome de ativo vindo do ERP com os ativos oficiais já cadastrados em ob_linhas abaixo.
+Regras:
+1. Se existir na lista oficial (mesmo com ordem invertida, sem zeros ou grafia parecida), retorne "catalogo_label" EXATO da lista e "nao_cadastrado": false.
+2. Se NÃO existir na lista oficial, retorne "catalogo_label": null, "nao_cadastrado": true, e sugira os campos limpos para cadastrar na árvore ("area_sugerida", "maquina_sugerida", "equipamento_sugerido", "criticidade_sugerida": "A"|"B"|"C").
+Ativos oficiais ob_linhas:\n${JSON.stringify(listaCatTexto)}
+Ativos do ERP neste lote:\n${JSON.stringify(bloco.map(p => p.ativoErp))}
+Responda SOMENTE JSON Array: [{"ativo_erp":"...","catalogo_label":string|null,"nao_cadastrado":boolean,"area_sugerida":string,"maquina_sugerida":string,"equipamento_sugerido":string,"criticidade_sugerida":"A"}]`;
+
+                    const { text, model } = await chamarGeminiApiComFallback(cfg.key, promptAtivos);
+                    modeloUsado = model;
+                    const parsed = extrairJsonArrayGemini(text);
+                    if (Array.isArray(parsed)) {
+                        parsed.forEach(item => {
+                            if (!item?.ativo_erp) return;
                             const row = preVooEstado.analiseAtivos.find(x => normKey(x.ativoErp) === normKey(item.ativo_erp));
-                            if (row) {
-                                row.selecionado = String(item.catalogo_label).trim();
+                            if (!row) return;
+                            if (item.catalogo_label) {
+                                const lblLimpo = String(item.catalogo_label).replace(/\s*\([^)]+\)\s*$/, "").trim();
+                                const matchOficial = catalogo.find(c => normKey(c.label) === normKey(lblLimpo)) || catalogo.find(c => normKey(lblLimpo).includes(normKey(c.label)));
+                                row.selecionado = matchOficial ? matchOficial.label : lblLimpo;
                                 gravarEscolhaDePara(row.ativoErp, row.selecionado, "IA_GEMINI");
                                 row.editadoNoModal = false;
                                 mappedCnt++;
+                            } else if (item.nao_cadastrado && (item.maquina_sugerida || item.equipamento_sugerido)) {
+                                const base = row.sugestaoCadastro || sugerirCadastroParaAtivoErp(row.ativoErp, catalogo);
+                                const critRaw = String(item.criticidade_sugerida || base.criticidade || "A").toUpperCase();
+                                row.sugestaoCadastro = {
+                                    ...base,
+                                    area: String(item.area_sugerida || base.area).trim(),
+                                    maquina: String(item.maquina_sugerida || base.maquina).trim(),
+                                    equipamento: String(item.equipamento_sugerido || base.equipamento).trim(),
+                                    criticidade: ["A", "B", "C"].includes(critRaw) ? critRaw : base.criticidade
+                                };
+                                row.confirmadoNaoCadastrado = true;
+                                sugCadCnt++;
                             }
-                        }
-                    });
+                        });
+                    }
                 }
-                await salvarDeParaAtivosPersistente();
+                if (mappedCnt > 0) await salvarDeParaAtivosPersistente();
                 renderPreVooAtivos();
-                showToast(`Gemini IA mapeou ${mappedCnt} ativo(s) ambíguo(s) com ob_linhas!`, "success");
-            } catch (_) {
-                showToast("Falha ao consultar Gemini Flash para De-Para de ativos.", "error");
+                showToast(`Gemini (${modeloUsado}): ${mappedCnt} vinculado(s) em ob_linhas e ${sugCadCnt} sugestão(ões) de novo cadastro!`, "success");
+            } catch (err) {
+                const msg = err?.message || "Erro ao conectar com Google Gemini API.";
+                const st = document.getElementById("preVooStatusIaTxt");
+                if (st) st.innerText = `Erro Gemini: ${msg}`;
+                showToast(`Falha Gemini Flash: ${msg}`, "error");
             } finally {
                 if (btn) btn.disabled = false;
             }
