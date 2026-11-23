@@ -962,8 +962,12 @@
                                     <option value="semanal">Semanalmente</option>
                                     <option value="mensal">Mensalmente</option>
                                     <option value="trimestral">Trimestralmente</option>
-                                    <option value="semestral">Semestralmente</option>
-                                    <option value="anual">Anualmente</option>
+                                    <option value="semestral">Semestralmente (6 meses)</option>
+                                    <option value="anual">Anualmente (12 meses)</option>
+                                    <option value="bienal">Bienal (24 meses)</option>
+                                    <option value="trienal">Trienal (36 meses)</option>
+                                    <option value="quadrienal">Quadrienal (48 meses)</option>
+                                    <option value="quinquenal">Quinquenal (60 meses)</option>
                                 </select>
                             </div>
                             <div>
@@ -2197,6 +2201,10 @@
                         else if (freq === 'trimestral') currDate.setMonth(currDate.getMonth() + 3);
                         else if (freq === 'semestral') currDate.setMonth(currDate.getMonth() + 6);
                         else if (freq === 'anual') currDate.setFullYear(currDate.getFullYear() + 1);
+                        else if (freq === 'bienal') currDate.setFullYear(currDate.getFullYear() + 2);
+                        else if (freq === 'trienal') currDate.setFullYear(currDate.getFullYear() + 3);
+                        else if (freq === 'quadrienal') currDate.setFullYear(currDate.getFullYear() + 4);
+                        else if (freq === 'quinquenal') currDate.setFullYear(currDate.getFullYear() + 5);
 
                         if (currDate <= limitDate) datasParaSalvar.push(chaveDia(currDate.getFullYear(), currDate.getMonth(), currDate.getDate()));
                         count++;

@@ -377,6 +377,10 @@
                     </div>
 
                     <div class="flex items-center gap-2">
+                        <button type="button" id="btnMasterAtivos" onclick="abrirModalAdminMasterAtivos()" title="Acesso Admin Master (Desbloquear exclusão de Setores, Equipamentos e Conjuntos na Árvore)" class="hidden px-3 py-2 rounded-full bg-white hover:bg-slate-50 border border-slate-200 text-xs font-extrabold text-slate-700 items-center gap-1.5 shadow-sm transition-colors">
+                            <svg class="w-3.5 h-3.5 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"/></svg>
+                            <span id="lblBtnMasterAtivos">Master</span>
+                        </button>
                         <button type="button" onclick="abrirModalNovoAtivo()" title="Cadastrar novo ativo ou subconjuntos (Tecla N)" class="btn-pill-dark text-xs py-2 px-4">
                             <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M12 4v16m8-8H4"/></svg>
                             <span>Novo Ativo</span>
@@ -455,6 +459,10 @@
                                 <option value="Trimestral">Trimestral</option>
                                 <option value="Semestral">Semestral</option>
                                 <option value="Anual">Anual</option>
+                                <option value="Bienal">Bienal</option>
+                                <option value="Trienal">Trienal</option>
+                                <option value="Quadrienal">Quadrienal</option>
+                                <option value="Quinquenal">Quinquenal</option>
                                 <option value="Horímetro / Condição">Horímetro / Condição</option>
                                 <option value="Sob Demanda">Sob Demanda</option>
                                 <option value="NONE">Sem Periodicidade</option>
@@ -498,6 +506,10 @@
                                         <button type="button" onclick="setFiltroLinhaRapido('AB')" id="btnLinhaCrit_AB" class="px-2 py-1 rounded-lg text-[10px] font-extrabold bg-amber-50 hover:bg-amber-100 text-amber-800 border border-amber-200 transition-colors">Linhas A+B</button>
                                         <button type="button" onclick="setFiltroLinhaRapido('UNDEF')" id="btnLinhaCrit_UNDEF" class="px-2 py-1 rounded-lg text-[10px] font-extrabold bg-slate-100 hover:bg-slate-200 text-slate-600 border border-slate-200 transition-colors">Sem Linha A/B/C</button>
                                         <button type="button" onclick="toggleOrdenarLinhasCrit()" id="btnOrdenarLinhasCrit" title="Ordenar Linhas por criticidade (A → B → C)" class="ml-auto px-2 py-1 rounded-lg text-[10px] font-extrabold bg-indigo-600 text-white border border-indigo-700 transition-colors">Ordem: A→B→C ✓</button>
+                                    </div>
+                                    <div id="treeMasterBanner" hidden class="hidden px-3 py-2 rounded-xl bg-rose-50 border border-rose-200 text-[11px] text-rose-900 flex items-center justify-between gap-2">
+                                        <span class="font-bold">Admin Master ativo: exclusão de Setores, Máquinas, Equipamentos e Conjuntos liberada na árvore.</span>
+                                        <button type="button" onclick="travarAdminMasterAtivos()" class="px-2 py-0.5 rounded-lg bg-white hover:bg-rose-100 border border-rose-200 text-rose-700 font-extrabold text-[10px] shrink-0">Bloquear</button>
                                     </div>
                                 </div>
                                 <div id="treeContainer" class="flex-1 overflow-y-auto space-y-1 pr-1"></div>
@@ -631,6 +643,10 @@
                                 <option value="Trimestral">Trimestral</option>
                                 <option value="Semestral">Semestral</option>
                                 <option value="Anual">Anual</option>
+                                <option value="Bienal">Bienal</option>
+                                <option value="Trienal">Trienal</option>
+                                <option value="Quadrienal">Quadrienal</option>
+                                <option value="Quinquenal">Quinquenal</option>
                                 <option value="Horímetro / Condição">Horímetro / Condição</option>
                                 <option value="Sob Demanda">Sob Demanda</option>
                                 <option value="NONE">Sem Periodicidade</option>
@@ -665,8 +681,12 @@
                                         <option value="Mensal">Mensal (4 sem)</option>
                                         <option value="Bimestral">Bimestral (8 sem)</option>
                                         <option value="Trimestral">Trimestral (13 sem)</option>
-                                        <option value="Semestral">Semestral (26 sem)</option>
-                                        <option value="Anual">Anual (52 sem)</option>
+                                        <option value="Semestral">Semestral (6 meses / 26 sem)</option>
+                                        <option value="Anual">Anual (12 meses / 52 sem)</option>
+                                        <option value="Bienal">Bienal (24 meses)</option>
+                                        <option value="Trienal">Trienal (36 meses)</option>
+                                        <option value="Quadrienal">Quadrienal (48 meses)</option>
+                                        <option value="Quinquenal">Quinquenal (60 meses)</option>
                                         <option value="Horímetro / Condição">Horímetro / Condição</option>
                                         <option value="Sob Demanda">Sob Demanda</option>
                                     </select>
@@ -817,8 +837,12 @@
                                 <option value="Mensal" selected>Mensal (4 sem)</option>
                                 <option value="Bimestral">Bimestral (8 sem)</option>
                                 <option value="Trimestral">Trimestral (13 sem)</option>
-                                <option value="Semestral">Semestral (26 sem)</option>
-                                <option value="Anual">Anual (52 sem)</option>
+                                <option value="Semestral">Semestral (6 meses / 26 sem)</option>
+                                <option value="Anual">Anual (12 meses / 52 sem)</option>
+                                <option value="Bienal">Bienal (24 meses)</option>
+                                <option value="Trienal">Trienal (36 meses)</option>
+                                <option value="Quadrienal">Quadrienal (48 meses)</option>
+                                <option value="Quinquenal">Quinquenal (60 meses)</option>
                                 <option value="Horímetro / Condição">Horímetro / Condição</option>
                                 <option value="Sob Demanda">Sob Demanda</option>
                             </select>
@@ -1149,6 +1173,53 @@
         </div>
     </div>
 
+    <!-- ==================== MODAL ADMIN MASTER (EXCLUSÃO DE GALHOS DA ÁRVORE) ==================== -->
+    <div id="modalAdminMasterAtivos" role="dialog" aria-modal="true" hidden class="hidden fixed inset-0 bg-slate-900/65 backdrop-blur-sm z-[76] flex items-end sm:items-center justify-center p-0 sm:p-4">
+        <div class="bg-white w-full sm:max-w-md rounded-t-3xl sm:rounded-3xl p-6 shadow-2xl border border-slate-200 space-y-4">
+            <div class="flex items-center justify-between border-b border-slate-100 pb-3">
+                <div>
+                    <div class="flex items-center gap-2">
+                        <span class="text-[10px] font-extrabold uppercase tracking-widest text-rose-600">Segurança Master</span>
+                        <span id="masterAtivosModalBadge" class="text-[10px] font-extrabold uppercase px-2 py-0.5 rounded-full bg-slate-100 text-slate-600">Bloqueado</span>
+                    </div>
+                    <h2 class="text-lg font-extrabold text-slate-900">Acesso Admin Master</h2>
+                </div>
+                <button type="button" onclick="fecharModal('modalAdminMasterAtivos')" class="w-8 h-8 rounded-full bg-slate-100 text-slate-600 font-bold">✕</button>
+            </div>
+
+            <form id="masterAtivosUnlockBox" onsubmit="desbloquearAdminMasterAtivos(event)" class="space-y-4">
+                <p class="text-xs text-slate-600 leading-relaxed">
+                    Digite a <strong>senha oculta Admin Master</strong> (a mesma do Portal PCM) para liberar a <strong>exclusão definitiva de galhos da árvore</strong>: Setores inteiros, Máquinas/Linhas, Equipamentos, Conjuntos e Subconjuntos.
+                </p>
+                <div>
+                    <label for="masterAtivosPassInput" class="block text-[11px] font-extrabold uppercase text-slate-500 mb-1">Senha Oculta Master *</label>
+                    <input type="password" id="masterAtivosPassInput" required autocomplete="off" class="input-clean py-2.5 text-sm font-mono" placeholder="••••••••••••">
+                </div>
+                <div class="flex gap-2">
+                    <button type="button" onclick="fecharModal('modalAdminMasterAtivos')" class="btn-touch bg-slate-100 text-slate-700 flex-1 text-xs">Cancelar</button>
+                    <button type="submit" class="btn-touch bg-rose-600 hover:bg-rose-700 text-white flex-1 text-xs shadow-md">Desbloquear Master</button>
+                </div>
+            </form>
+
+            <div id="masterAtivosActiveBox" hidden class="hidden space-y-4">
+                <div class="p-3.5 rounded-2xl bg-rose-50 border border-rose-200 text-xs text-rose-900 space-y-1">
+                    <div class="font-extrabold">Admin Master Desbloqueado nesta Sessão</div>
+                    <p class="text-[11px] text-rose-800">Os botões de exclusão para <strong>Setor/Área</strong>, <strong>Máquina/Linha</strong>, <strong>Equipamento</strong>, <strong>Conjunto</strong> e <strong>Subconjunto</strong> estão ativos na Árvore e no Prontuário à direita.</p>
+                </div>
+                <div class="p-3.5 rounded-2xl bg-slate-50 border border-slate-200 space-y-2.5">
+                    <div class="text-[11px] font-extrabold uppercase text-slate-600">Alterar Senha Oculta Master (Todo o Portal)</div>
+                    <input type="password" id="masterAtivosNewPass1" autocomplete="new-password" class="input-clean py-2 text-xs font-mono" placeholder="Nova senha oculta (mín. 6 caracteres)">
+                    <input type="password" id="masterAtivosNewPass2" autocomplete="new-password" class="input-clean py-2 text-xs font-mono" placeholder="Confirmar nova senha oculta">
+                    <button type="button" onclick="salvarNovaSenhaMasterAtivos()" class="btn-touch bg-slate-900 hover:bg-slate-800 text-white w-full py-2 text-xs">Atualizar Senha Oculta</button>
+                </div>
+                <div class="flex gap-2">
+                    <button type="button" onclick="fecharModal('modalAdminMasterAtivos')" class="btn-touch bg-slate-900 hover:bg-slate-800 text-white flex-1 text-xs">Ir para Árvore</button>
+                    <button type="button" onclick="travarAdminMasterAtivos()" class="btn-touch bg-slate-100 hover:bg-slate-200 text-slate-800 flex-1 text-xs">Bloquear / Sair</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
     <div id="toastStack" aria-live="polite" class="fixed bottom-4 right-4 z-[9999] space-y-2 pointer-events-none"></div>
 
     <script type="module">
@@ -1158,11 +1229,15 @@
 
         // ================= STORAGE & CONFIG =================
         const memStore = {};
+        const memSession = {};
         const safeStorage = {
             get(k) { try { return window.localStorage.getItem(k); } catch (_) { return memStore[k] || null; } },
             set(k, v) { memStore[k] = v; try { window.localStorage.setItem(k, v); } catch (_) {} },
             remove(k) { delete memStore[k]; try { window.localStorage.removeItem(k); } catch (_) {} }
         };
+        function safeSessionGet(k) { try { return window.sessionStorage.getItem(k); } catch (_) { return memSession[k] || null; } }
+        function safeSessionSet(k, v) { memSession[k] = String(v); try { window.sessionStorage.setItem(k, String(v)); } catch (_) {} }
+        function safeSessionRemove(k) { delete memSession[k]; try { window.sessionStorage.removeItem(k); } catch (_) {} }
 
         const firebaseConfig = {
             apiKey: "AIzaSyAGbFTTCgbqe9XFKFSb6ltB5lYj5O6QipE",
@@ -1188,6 +1263,9 @@
         const refDocsAtivos = collection(db, "docs_ativos");
         const refDocsRevisoes = collection(db, "docs_revisoes");
         const refDocsArquivosPartes = collection(db, "docs_arquivos_partes");
+        const refMasterCfgAtivos = doc(db, "pcm_config", "admin_master");
+        const DEFAULT_MASTER_HASH_ATIVOS = "7c2cce436d043699877f19ad8a6aef78dc5b1f167d97fbfa5d316885c2150a59";
+        let customMasterHashAtivos = null;
         const blobCacheDocsGa = new Map();
 
         // ================= DOMÍNIO DE ENGENHARIA =================
@@ -1198,8 +1276,12 @@
             'Mensal': { semanas: 4, label: 'Mensal (4 sem)' },
             'Bimestral': { semanas: 8, label: 'Bimestral (8 sem)' },
             'Trimestral': { semanas: 13, label: 'Trimestral (13 sem)' },
-            'Semestral': { semanas: 26, label: 'Semestral (26 sem)' },
-            'Anual': { semanas: 52, label: 'Anual (52 sem)' },
+            'Semestral': { semanas: 26, label: 'Semestral (6 meses / 26 sem)' },
+            'Anual': { semanas: 52, label: 'Anual (12 meses / 52 sem)' },
+            'Bienal': { semanas: 104, label: 'Bienal (24 meses)' },
+            'Trienal': { semanas: 156, label: 'Trienal (36 meses)' },
+            'Quadrienal': { semanas: 208, label: 'Quadrienal (48 meses)' },
+            'Quinquenal': { semanas: 260, label: 'Quinquenal (60 meses)' },
             'Horímetro / Condição': { semanas: 0, label: 'Horímetro / Condição' },
             'Sob Demanda': { semanas: 0, label: 'Sob Demanda' }
         };
@@ -1264,6 +1346,215 @@
             const r = String(role || '').trim();
             return r === 'Admin' || r === 'Gerente';
         }
+
+        // ================= ADMIN MASTER (SENHA OCULTA COMPARTILHADA COM PORTAL PCM) =================
+        function sha256FallbackAtivos(texto) {
+            const rightRotate = (val, amt) => (val >>> amt) | (val << (32 - amt));
+            const maxWord = Math.pow(2, 32);
+            let result = '';
+            const words = [];
+            const rawStr = String(texto || '');
+            let bytes;
+            if (typeof TextEncoder !== 'undefined') {
+                bytes = new TextEncoder().encode(rawStr);
+            } else {
+                const utf8 = unescape(encodeURIComponent(rawStr));
+                bytes = Array.from({ length: utf8.length }, (_, idx) => utf8.charCodeAt(idx));
+            }
+            const bitLen = bytes.length * 8;
+            const hash = [];
+            const k = [];
+            let primeCounter = 0;
+            const isPrime = (n) => { for (let f = 2; f * f <= n; f++) if (n % f === 0) return false; return true; };
+            for (let candidate = 2; primeCounter < 64; candidate++) {
+                if (isPrime(candidate)) {
+                    if (primeCounter < 8) hash[primeCounter] = ((Math.pow(candidate, 0.5) * maxWord) | 0);
+                    k[primeCounter++] = ((Math.pow(candidate, 1 / 3) * maxWord) | 0);
+                }
+            }
+            const padded = Array.from(bytes);
+            padded.push(0x80);
+            while ((padded.length % 64) !== 56) padded.push(0);
+            const hi = Math.floor(bitLen / maxWord);
+            const lo = bitLen >>> 0;
+            padded.push((hi >>> 24) & 0xff, (hi >>> 16) & 0xff, (hi >>> 8) & 0xff, hi & 0xff);
+            padded.push((lo >>> 24) & 0xff, (lo >>> 16) & 0xff, (lo >>> 8) & 0xff, lo & 0xff);
+            for (let i = 0; i < padded.length; i += 4) {
+                words.push((padded[i] << 24) | (padded[i + 1] << 16) | (padded[i + 2] << 8) | padded[i + 3]);
+            }
+            for (let j = 0; j < words.length; j += 16) {
+                const w = words.slice(j, j + 16);
+                const old = hash.slice(0);
+                for (let i = 0; i < 64; i++) {
+                    if (i >= 16) {
+                        const s0 = rightRotate(w[i - 15], 7) ^ rightRotate(w[i - 15], 18) ^ (w[i - 15] >>> 3);
+                        const s1 = rightRotate(w[i - 2], 17) ^ rightRotate(w[i - 2], 19) ^ (w[i - 2] >>> 10);
+                        w[i] = (w[i - 16] + s0 + w[i - 7] + s1) | 0;
+                    }
+                    const a = hash[0], b = hash[1], c = hash[2], d = hash[3], e = hash[4], f = hash[5], g = hash[6], h = hash[7];
+                    const S1 = rightRotate(e, 6) ^ rightRotate(e, 11) ^ rightRotate(e, 25);
+                    const ch = (e & f) ^ ((~e) & g);
+                    const t1 = (h + S1 + ch + k[i] + w[i]) | 0;
+                    const S0 = rightRotate(a, 2) ^ rightRotate(a, 13) ^ rightRotate(a, 22);
+                    const maj = (a & b) ^ (a & c) ^ (b & c);
+                    const t2 = (S0 + maj) | 0;
+                    hash.unshift((t1 + t2) | 0);
+                    hash.pop();
+                    hash[4] = (hash[4] + t1) | 0;
+                }
+                for (let i = 0; i < 8; i++) hash[i] = (hash[i] + old[i]) | 0;
+            }
+            for (let i = 0; i < 8; i++) result += (hash[i] >>> 0).toString(16).padStart(8, '0');
+            return result;
+        }
+
+        async function sha256HexAtivos(texto) {
+            const raw = String(texto || '');
+            if (typeof window !== 'undefined' && window.crypto && window.crypto.subtle && typeof TextEncoder !== 'undefined') {
+                try {
+                    const buf = await window.crypto.subtle.digest('SHA-256', new TextEncoder().encode(raw));
+                    return Array.from(new Uint8Array(buf)).map(b => b.toString(16).padStart(2, '0')).join('');
+                } catch (_) {}
+            }
+            return sha256FallbackAtivos(raw);
+        }
+
+        function getActiveMasterHashAtivos() {
+            return customMasterHashAtivos || DEFAULT_MASTER_HASH_ATIVOS;
+        }
+
+        async function verifyAdminMasterPassAtivos(pass) {
+            if (!pass) return false;
+            const h = await sha256HexAtivos(pass);
+            return h === getActiveMasterHashAtivos();
+        }
+
+        window.isAdminMasterAtivo = (user = usuarioLogado) => {
+            return Boolean(user && isPerfilAdmin(user.role) && safeSessionGet('cepera_admin_master_auth') === getActiveMasterHashAtivos());
+        };
+
+        function setAdminMasterSessaoAtivos(ativo) {
+            if (ativo) safeSessionSet('cepera_admin_master_auth', getActiveMasterHashAtivos());
+            else safeSessionRemove('cepera_admin_master_auth');
+            atualizarBadgeMasterAtivos();
+        }
+
+        function atualizarBadgeMasterAtivos() {
+            const btn = document.getElementById('btnMasterAtivos');
+            const lbl = document.getElementById('lblBtnMasterAtivos');
+            const banner = document.getElementById('treeMasterBanner');
+            const isAdm = Boolean(usuarioLogado && isPerfilAdmin(usuarioLogado.role));
+            const ativo = isAdminMasterAtivo();
+
+            if (btn) {
+                if (!isAdm) {
+                    btn.hidden = true;
+                    btn.classList.add('hidden');
+                    btn.classList.remove('inline-flex');
+                } else {
+                    btn.hidden = false;
+                    btn.classList.remove('hidden');
+                    btn.classList.add('inline-flex');
+                    if (ativo) {
+                        btn.className = 'inline-flex px-3 py-2 rounded-full bg-rose-600 hover:bg-rose-700 border border-rose-700 text-xs font-extrabold text-white items-center gap-1.5 shadow-sm transition-colors';
+                        if (lbl) lbl.innerText = 'Master Ativo';
+                    } else {
+                        btn.className = 'inline-flex px-3 py-2 rounded-full bg-white hover:bg-slate-50 border border-slate-200 text-xs font-extrabold text-slate-700 items-center gap-1.5 shadow-sm transition-colors';
+                        if (lbl) lbl.innerText = 'Master';
+                    }
+                }
+            }
+
+            if (banner) {
+                banner.hidden = !ativo;
+                banner.classList.toggle('hidden', !ativo);
+            }
+        }
+
+        function renderModalAdminMasterAtivos() {
+            const ativo = isAdminMasterAtivo();
+            const badge = document.getElementById('masterAtivosModalBadge');
+            const unlockBox = document.getElementById('masterAtivosUnlockBox');
+            const activeBox = document.getElementById('masterAtivosActiveBox');
+            if (badge) {
+                badge.innerText = ativo ? 'Desbloqueado' : 'Bloqueado';
+                badge.className = ativo
+                    ? 'text-[10px] font-extrabold uppercase px-2 py-0.5 rounded-full bg-rose-600 text-white'
+                    : 'text-[10px] font-extrabold uppercase px-2 py-0.5 rounded-full bg-slate-100 text-slate-600';
+            }
+            if (unlockBox) { unlockBox.hidden = ativo; unlockBox.classList.toggle('hidden', ativo); }
+            if (activeBox) { activeBox.hidden = !ativo; activeBox.classList.toggle('hidden', !ativo); }
+        }
+
+        window.abrirModalAdminMasterAtivos = () => {
+            if (!usuarioLogado || !isPerfilAdmin(usuarioLogado.role)) {
+                showToast('Recurso exclusivo para administradores.', 'error');
+                return;
+            }
+            const inp = document.getElementById('masterAtivosPassInput');
+            if (inp) inp.value = '';
+            renderModalAdminMasterAtivos();
+            abrirModal('modalAdminMasterAtivos');
+            setTimeout(() => document.getElementById('masterAtivosPassInput')?.focus(), 80);
+        };
+
+        window.desbloquearAdminMasterAtivos = async (e) => {
+            e.preventDefault();
+            if (!usuarioLogado || !isPerfilAdmin(usuarioLogado.role)) {
+                showToast('Recurso exclusivo para administradores.', 'error');
+                return;
+            }
+            const pass = document.getElementById('masterAtivosPassInput')?.value || '';
+            const ok = await verifyAdminMasterPassAtivos(pass);
+            if (!ok) {
+                showToast('Senha oculta do Admin Master incorreta.', 'error');
+                return;
+            }
+            setAdminMasterSessaoAtivos(true);
+            renderModalAdminMasterAtivos();
+            atualizarTudo();
+            showToast('Modo Admin Master ativo! Exclusão de Setores, Máquinas, Equipamentos e Conjuntos liberada na Árvore.');
+        };
+
+        window.travarAdminMasterAtivos = () => {
+            setAdminMasterSessaoAtivos(false);
+            renderModalAdminMasterAtivos();
+            fecharModal('modalAdminMasterAtivos');
+            atualizarTudo();
+            showToast('Modo Admin Master bloqueado.');
+        };
+
+        window.salvarNovaSenhaMasterAtivos = async () => {
+            if (!isAdminMasterAtivo()) {
+                showToast('Desbloqueie o modo Admin Master primeiro.', 'error');
+                return;
+            }
+            const s1 = document.getElementById('masterAtivosNewPass1')?.value || '';
+            const s2 = document.getElementById('masterAtivosNewPass2')?.value || '';
+            if (s1.length < 6) {
+                showToast('A nova senha oculta deve ter pelo menos 6 caracteres.', 'error');
+                return;
+            }
+            if (s1 !== s2) {
+                showToast('As senhas digitadas não conferem.', 'error');
+                return;
+            }
+            try {
+                const novoHash = await sha256HexAtivos(s1);
+                await setDoc(refMasterCfgAtivos, {
+                    pass_hash: novoHash,
+                    updated_by: usuarioLogado?.nome || 'Admin Master',
+                    updated_at: Date.now()
+                });
+                customMasterHashAtivos = novoHash;
+                safeSessionSet('cepera_admin_master_auth', novoHash);
+                document.getElementById('masterAtivosNewPass1').value = '';
+                document.getElementById('masterAtivosNewPass2').value = '';
+                showToast('Senha oculta Admin Master atualizada em todo o Portal PCM!');
+            } catch (_) {
+                showToast('Erro ao atualizar senha oculta no Firestore.', 'error');
+            }
+        };
 
         const DOCS_CAT_META_GA = {
             manuais: { label: 'Manuais', pastaSp: '01_MANUAIS', badge: 'bg-sky-50 text-sky-700 border-sky-200' },
@@ -2065,6 +2356,7 @@
         window.fazerLogout = () => {
             safeStorage.remove('cepera_ir_user');
             safeStorage.remove('cepera_central_session');
+            safeSessionRemove('cepera_admin_master_auth');
             if (window.parent && window.parent !== window) {
                 window.parent.postMessage({ type: 'CEPERA_LOGOUT_CENTRAL' }, '*');
             } else {
@@ -2171,6 +2463,13 @@
                     snap.forEach(d => listaDocsRevisoes.push({ id: d.id, ...d.data() }));
                     onDadosCruzadosUpdate();
                 });
+
+                onSnapshot(refMasterCfgAtivos, (snapDoc) => {
+                    const data = (snapDoc && typeof snapDoc.exists === 'function' && snapDoc.exists()) ? snapDoc.data() : null;
+                    customMasterHashAtivos = (data && data.pass_hash) ? String(data.pass_hash) : null;
+                    atualizarBadgeMasterAtivos();
+                    atualizarTudo();
+                }, () => {});
             } catch (_) {
                 const errB = document.getElementById('errBanner');
                 if (errB) { errB.hidden = false; errB.classList.remove('hidden'); }
@@ -2229,6 +2528,7 @@
         }
 
         function atualizarTudo() {
+            atualizarBadgeMasterAtivos();
             atualizarDatalists();
             atualizarBadgesSaneamento();
             if (currentView === 'arvore') { renderTree(); renderDetailPanel(); }
@@ -2392,6 +2692,7 @@
         }
 
         const CHEVRON_SVG = `<svg class="w-3 h-3 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M9 5l7 7-7 7"/></svg>`;
+        const TRASH_TREE_SVG = `<svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/></svg>`;
 
         function renderTree(autoExpand = false) {
             const box = document.getElementById('treeContainer');
@@ -2399,6 +2700,7 @@
             const filtrados = getNodesFiltradosArvore();
             const badge = document.getElementById('treeTotalBadge');
             if (badge) badge.innerText = `${filtrados.length} de ${assetNodes.length} registro(s)`;
+            const masterAtivo = isAdminMasterAtivo();
 
             if (!filtrados.length) {
                 box.innerHTML = `<div class="p-8 text-center space-y-2">
@@ -2432,9 +2734,10 @@
                 if (ordenarLinhasPorCriticidade) {
                     linhasEntries.sort((a, b) => (b.linhaInfo.peso - a.linhaInfo.peso) || a.maq.localeCompare(b.maq, 'pt-BR'));
                 }
+                const aJs = JSON.stringify(area).replace(/"/g, '&quot;');
 
                 html += `<div>
-                    <div class="tree-row ${isSelected('area', area) ? 'selected' : ''}" onclick="selecionarAlvo('area', ${JSON.stringify(area).replace(/"/g, '&quot;')})">
+                    <div class="tree-row ${isSelected('area', area) ? 'selected' : ''}" onclick="selecionarAlvo('area', ${aJs})">
                         <div class="flex items-center gap-1.5 min-w-0">
                             <span class="tree-chevron ${openA ? 'open' : ''}" onclick="event.stopPropagation(); toggleBranch(${JSON.stringify(kA).replace(/"/g, '&quot;')})">${CHEVRON_SVG}</span>
                             <svg class="w-4 h-4 text-sky-600 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4"/></svg>
@@ -2443,7 +2746,8 @@
                         <div class="flex items-center gap-1 shrink-0">
                             ${areaLinhasA ? `<span class="px-1.5 py-0.5 rounded-full text-[9px] font-extrabold bg-rose-600 text-white" title="${areaLinhasA} linha(s) Classe A neste setor">${areaLinhasA} Linha A</span>` : (critA ? renderBadgeCrit(critA, 'xs') : '')}
                             <span class="text-[10px] font-bold text-slate-400">${mMap.size}L</span>
-                            <button type="button" title="Adicionar Máquina/Linha neste Setor" onclick="event.stopPropagation(); abrirModalNovoAtivo({ area: ${JSON.stringify(area).replace(/"/g, '&quot;')} })" class="w-5 h-5 rounded-md bg-slate-100 hover:bg-sky-100 text-slate-600 hover:text-sky-700 font-extrabold text-xs flex items-center justify-center">+</button>
+                            <button type="button" title="Adicionar Máquina/Linha neste Setor" onclick="event.stopPropagation(); abrirModalNovoAtivo({ area: ${aJs} })" class="w-5 h-5 rounded-md bg-slate-100 hover:bg-sky-100 text-slate-600 hover:text-sky-700 font-extrabold text-xs flex items-center justify-center">+</button>
+                            ${masterAtivo ? `<button type="button" title="Excluir Setor inteiro (Master)" aria-label="Excluir setor ${escapeHtml(area)}" onclick="event.stopPropagation(); solicitarExclusaoGalho('area', ${aJs})" class="w-5 h-5 rounded-md bg-rose-50 hover:bg-rose-600 text-rose-600 hover:text-white flex items-center justify-center transition-colors">${TRASH_TREE_SVG}</button>` : ''}
                         </div>
                     </div>`;
 
@@ -2458,9 +2762,10 @@
                                 ? 'border-l-4 border-l-amber-500 bg-amber-50/35 hover:bg-amber-50/70'
                                 : (linhaInfo.classe === 'C' ? 'border-l-4 border-l-emerald-500 bg-emerald-50/25' : ''));
                         const iconCorCls = linhaInfo.classe === 'A' ? 'text-rose-600' : (linhaInfo.classe === 'B' ? 'text-amber-600' : (linhaInfo.classe === 'C' ? 'text-emerald-600' : 'text-indigo-600'));
+                        const mJs = JSON.stringify(maq).replace(/"/g, '&quot;');
 
                         html += `<div>
-                            <div class="tree-row ${linhaHighlightCls} ${isSelected('maquina', area, maq) ? 'selected' : ''}" onclick="selecionarAlvo('maquina', ${JSON.stringify(area).replace(/"/g, '&quot;')}, ${JSON.stringify(maq).replace(/"/g, '&quot;')})">
+                            <div class="tree-row ${linhaHighlightCls} ${isSelected('maquina', area, maq) ? 'selected' : ''}" onclick="selecionarAlvo('maquina', ${aJs}, ${mJs})">
                                 <div class="flex items-center gap-1.5 min-w-0">
                                     <span class="tree-chevron ${openM ? 'open' : ''}" onclick="event.stopPropagation(); toggleBranch(${JSON.stringify(kM).replace(/"/g, '&quot;')})">${CHEVRON_SVG}</span>
                                     <svg class="w-3.5 h-3.5 ${iconCorCls} shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"/></svg>
@@ -2469,7 +2774,8 @@
                                 <div class="flex items-center gap-1 shrink-0">
                                     ${renderBadgeCritLinha(linhaInfo, 'xs')}
                                     <span class="text-[10px] font-bold text-slate-400">${eMap.size}E</span>
-                                    <button type="button" title="Adicionar Equipamento nesta Linha" onclick="event.stopPropagation(); abrirModalNovoAtivo({ area: ${JSON.stringify(area).replace(/"/g, '&quot;')}, maquina: ${JSON.stringify(maq).replace(/"/g, '&quot;')} })" class="w-5 h-5 rounded-md bg-slate-100 hover:bg-sky-100 text-slate-600 hover:text-sky-700 font-extrabold text-xs flex items-center justify-center">+</button>
+                                    <button type="button" title="Adicionar Equipamento nesta Linha" onclick="event.stopPropagation(); abrirModalNovoAtivo({ area: ${aJs}, maquina: ${mJs} })" class="w-5 h-5 rounded-md bg-slate-100 hover:bg-sky-100 text-slate-600 hover:text-sky-700 font-extrabold text-xs flex items-center justify-center">+</button>
+                                    ${masterAtivo ? `<button type="button" title="Excluir Máquina/Linha inteira (Master)" aria-label="Excluir máquina ${escapeHtml(maq)}" onclick="event.stopPropagation(); solicitarExclusaoGalho('maquina', ${aJs}, ${mJs})" class="w-5 h-5 rounded-md bg-rose-50 hover:bg-rose-600 text-rose-600 hover:text-white flex items-center justify-center transition-colors">${TRASH_TREE_SVG}</button>` : ''}
                                 </div>
                             </div>`;
 
@@ -2481,9 +2787,10 @@
                                 const eqNodes = maqNodes.filter(n => n.equipamento === eq);
                                 const critE = maiorCriticidade(eqNodes);
                                 const eqTag = eqNodes.find(n => n.tag)?.tag || '';
+                                const eqJs = JSON.stringify(eq).replace(/"/g, '&quot;');
 
                                 html += `<div>
-                                    <div class="tree-row ${isSelected('equipamento', area, maq, eq) ? 'selected' : ''}" onclick="selecionarAlvo('equipamento', ${JSON.stringify(area).replace(/"/g, '&quot;')}, ${JSON.stringify(maq).replace(/"/g, '&quot;')}, ${JSON.stringify(eq).replace(/"/g, '&quot;')})">
+                                    <div class="tree-row ${isSelected('equipamento', area, maq, eq) ? 'selected' : ''}" onclick="selecionarAlvo('equipamento', ${aJs}, ${mJs}, ${eqJs})">
                                         <div class="flex items-center gap-1.5 min-w-0">
                                             <span class="tree-chevron ${openE ? 'open' : ''}" onclick="event.stopPropagation(); toggleBranch(${JSON.stringify(kE).replace(/"/g, '&quot;')})">${CHEVRON_SVG}</span>
                                             <svg class="w-3.5 h-3.5 text-emerald-600 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"/><circle cx="12" cy="12" r="3" stroke-width="2"/></svg>
@@ -2492,7 +2799,8 @@
                                         </div>
                                         <div class="flex items-center gap-1 shrink-0">
                                             ${critE ? renderBadgeCrit(critE, 'xs') : ''}
-                                            <button type="button" title="Adicionar Conjunto/Subconjunto neste Equipamento" onclick="event.stopPropagation(); abrirModalNovoAtivo({ area: ${JSON.stringify(area).replace(/"/g, '&quot;')}, maquina: ${JSON.stringify(maq).replace(/"/g, '&quot;')}, equipamento: ${JSON.stringify(eq).replace(/"/g, '&quot;')} })" class="w-5 h-5 rounded-md bg-slate-100 hover:bg-sky-100 text-slate-600 hover:text-sky-700 font-extrabold text-xs flex items-center justify-center">+</button>
+                                            <button type="button" title="Adicionar Conjunto/Subconjunto neste Equipamento" onclick="event.stopPropagation(); abrirModalNovoAtivo({ area: ${aJs}, maquina: ${mJs}, equipamento: ${eqJs} })" class="w-5 h-5 rounded-md bg-slate-100 hover:bg-sky-100 text-slate-600 hover:text-sky-700 font-extrabold text-xs flex items-center justify-center">+</button>
+                                            ${masterAtivo ? `<button type="button" title="Excluir Equipamento inteiro (Master)" aria-label="Excluir equipamento ${escapeHtml(eq)}" onclick="event.stopPropagation(); solicitarExclusaoGalho('equipamento', ${aJs}, ${mJs}, ${eqJs})" class="w-5 h-5 rounded-md bg-rose-50 hover:bg-rose-600 text-rose-600 hover:text-white flex items-center justify-center transition-colors">${TRASH_TREE_SVG}</button>` : ''}
                                         </div>
                                     </div>`;
 
@@ -2508,9 +2816,10 @@
                                             : (stInspConj.subsAtivosCount > 0
                                                 ? `<span title="${stInspConj.subsAtivosCount} subconjunto(s) com inspeção filtrada ativa" class="text-[9px] font-extrabold px-1.5 py-0.5 rounded-full bg-amber-50 text-amber-800 border border-amber-200">${stInspConj.subsAtivosCount} Sub</span>`
                                                 : `<span title="Oculto das rotas de inspeção 52 Semanas" class="text-[9px] font-bold px-1.5 py-0.5 rounded-full bg-slate-100 text-slate-400 border border-slate-200">Oculto</span>`);
+                                        const cjJs = JSON.stringify(cj).replace(/"/g, '&quot;');
 
                                         html += `<div>
-                                            <div class="tree-row ${isSelected('conjunto', area, maq, eq, cj) ? 'selected' : ''}" onclick="selecionarAlvo('conjunto', ${JSON.stringify(area).replace(/"/g, '&quot;')}, ${JSON.stringify(maq).replace(/"/g, '&quot;')}, ${JSON.stringify(eq).replace(/"/g, '&quot;')}, ${JSON.stringify(cj).replace(/"/g, '&quot;')})">
+                                            <div class="tree-row ${isSelected('conjunto', area, maq, eq, cj) ? 'selected' : ''}" onclick="selecionarAlvo('conjunto', ${aJs}, ${mJs}, ${eqJs}, ${cjJs})">
                                                 <div class="flex items-center gap-1.5 min-w-0">
                                                     <span class="tree-chevron ${openC ? 'open' : ''}" onclick="event.stopPropagation(); toggleBranch(${JSON.stringify(kC).replace(/"/g, '&quot;')})">${CHEVRON_SVG}</span>
                                                     <svg class="w-3.5 h-3.5 text-amber-600 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4"/></svg>
@@ -2520,8 +2829,9 @@
                                                     ${inspBadgeConj}
                                                     ${critC ? renderBadgeCrit(critC, 'xs') : ''}
                                                     <span class="text-[10px] font-bold text-slate-400">${leafs.length}</span>
-                                                    <button type="button" title="Agendar programada para este conjunto" aria-label="Agendar programada para ${escapeHtml(cj)}" onclick="event.stopPropagation(); abrirModalAgendarConjunto(${JSON.stringify(area).replace(/"/g, '&quot;')}, ${JSON.stringify(maq).replace(/"/g, '&quot;')}, ${JSON.stringify(eq).replace(/"/g, '&quot;')}, ${JSON.stringify(cj).replace(/"/g, '&quot;')})" class="w-5 h-5 rounded-md bg-slate-100 hover:bg-emerald-100 text-slate-500 hover:text-emerald-700 flex items-center justify-center transition-colors"><svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/></svg></button>
-                                                    <button type="button" title="Adicionar Subconjunto neste Conjunto" onclick="event.stopPropagation(); abrirModalNovoAtivo({ area: ${JSON.stringify(area).replace(/"/g, '&quot;')}, maquina: ${JSON.stringify(maq).replace(/"/g, '&quot;')}, equipamento: ${JSON.stringify(eq).replace(/"/g, '&quot;')}, conjunto: ${JSON.stringify(cj).replace(/"/g, '&quot;')} })" class="w-5 h-5 rounded-md bg-slate-100 hover:bg-sky-100 text-slate-600 hover:text-sky-700 font-extrabold text-xs flex items-center justify-center">+</button>
+                                                    <button type="button" title="Agendar programada para este conjunto" aria-label="Agendar programada para ${escapeHtml(cj)}" onclick="event.stopPropagation(); abrirModalAgendarConjunto(${aJs}, ${mJs}, ${eqJs}, ${cjJs})" class="w-5 h-5 rounded-md bg-slate-100 hover:bg-emerald-100 text-slate-500 hover:text-emerald-700 flex items-center justify-center transition-colors"><svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/></svg></button>
+                                                    <button type="button" title="Adicionar Subconjunto neste Conjunto" onclick="event.stopPropagation(); abrirModalNovoAtivo({ area: ${aJs}, maquina: ${mJs}, equipamento: ${eqJs}, conjunto: ${cjJs} })" class="w-5 h-5 rounded-md bg-slate-100 hover:bg-sky-100 text-slate-600 hover:text-sky-700 font-extrabold text-xs flex items-center justify-center">+</button>
+                                                    ${masterAtivo ? `<button type="button" title="Excluir Conjunto inteiro (Master)" aria-label="Excluir conjunto ${escapeHtml(cj)}" onclick="event.stopPropagation(); solicitarExclusaoGalho('conjunto', ${aJs}, ${mJs}, ${eqJs}, ${cjJs})" class="w-5 h-5 rounded-md bg-rose-50 hover:bg-rose-600 text-rose-600 hover:text-white flex items-center justify-center transition-colors">${TRASH_TREE_SVG}</button>` : ''}
                                                 </div>
                                             </div>`;
 
@@ -2530,7 +2840,8 @@
                                             leafs.forEach(leaf => {
                                                 const stDot = (STATUS_ATIVOS[leaf.status_ativo] || STATUS_ATIVOS['Ativo']).dot;
                                                 const nomeSub = leaf.subconjunto || '(Subconjunto não definido)';
-                                                html += `<div class="tree-row ${isSelected('leaf', area, maq, eq, cj, leaf.nodeId) ? 'selected' : ''}" onclick="selecionarAlvo('leaf', ${JSON.stringify(area).replace(/"/g, '&quot;')}, ${JSON.stringify(maq).replace(/"/g, '&quot;')}, ${JSON.stringify(eq).replace(/"/g, '&quot;')}, ${JSON.stringify(cj).replace(/"/g, '&quot;')}, ${JSON.stringify(leaf.nodeId).replace(/"/g, '&quot;')})">
+                                                const nJs = JSON.stringify(leaf.nodeId).replace(/"/g, '&quot;');
+                                                html += `<div class="tree-row ${isSelected('leaf', area, maq, eq, cj, leaf.nodeId) ? 'selected' : ''}" onclick="selecionarAlvo('leaf', ${aJs}, ${mJs}, ${eqJs}, ${cjJs}, ${nJs})">
                                                     <div class="flex items-center gap-1.5 min-w-0">
                                                         <span class="w-2 h-2 rounded-full ${stDot} shrink-0" title="${escapeHtml(leaf.status_ativo)}"></span>
                                                         <span class="text-[11px] font-semibold ${leaf.subconjunto ? 'text-slate-700' : 'text-slate-400 italic'} truncate">${escapeHtml(nomeSub)}</span>
@@ -2538,6 +2849,7 @@
                                                     <div class="flex items-center gap-1 shrink-0">
                                                         ${leaf.periodicidade_preventiva ? `<span class="text-[9px] font-extrabold px-1.5 py-0.5 rounded-full bg-sky-50 text-sky-700 border border-sky-200">${escapeHtml(leaf.periodicidade_preventiva)}</span>` : ''}
                                                         ${renderBadgeCrit(leaf.criticidade, 'xs')}
+                                                        ${masterAtivo ? `<button type="button" title="Excluir Subconjunto (Master)" aria-label="Excluir subconjunto ${escapeHtml(nomeSub)}" onclick="event.stopPropagation(); solicitarExclusaoNode(${nJs})" class="w-5 h-5 rounded-md bg-rose-50 hover:bg-rose-600 text-rose-600 hover:text-white flex items-center justify-center transition-colors">${TRASH_TREE_SVG}</button>` : ''}
                                                     </div>
                                                 </div>`;
                                             });
@@ -3618,6 +3930,10 @@
             const inspConjBlock = selectedTarget.level === 'conjunto'
                 ? renderPainelInspecaoConjunto(selectedTarget.area, selectedTarget.maquina, selectedTarget.equipamento, selectedTarget.conjunto, branchNodes)
                 : '';
+            const masterAtivoPanel = isAdminMasterAtivo();
+            const eqJson = JSON.stringify(selectedTarget.equipamento || '').replace(/"/g, '&quot;');
+            const cjJson = JSON.stringify(selectedTarget.conjunto || '').replace(/"/g, '&quot;');
+            const lvlShortDel = { area: 'Setor', maquina: 'Linha', equipamento: 'Equipamento', conjunto: 'Conjunto' };
 
             panel.innerHTML = `
             <div class="space-y-5">
@@ -3633,11 +3949,12 @@
                         </p>
                     </div>
                     <div class="flex flex-wrap items-center gap-1.5">
-                        ${podeAgendarConj ? `<button type="button" onclick="abrirModalAgendarConjunto(${areaJson}, ${maqJson}, ${JSON.stringify(selectedTarget.equipamento || '').replace(/"/g, '&quot;')}, ${JSON.stringify(selectedTarget.conjunto || '').replace(/"/g, '&quot;')})" class="btn-touch bg-emerald-50 hover:bg-emerald-100 text-emerald-800 border border-emerald-200 text-[11px] py-2 px-3 inline-flex items-center gap-1.5"><svg class="w-3.5 h-3.5 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/></svg><span>Agendar Programada</span></button>` : ''}
+                        ${podeAgendarConj ? `<button type="button" onclick="abrirModalAgendarConjunto(${areaJson}, ${maqJson}, ${eqJson}, ${cjJson})" class="btn-touch bg-emerald-50 hover:bg-emerald-100 text-emerald-800 border border-emerald-200 text-[11px] py-2 px-3 inline-flex items-center gap-1.5"><svg class="w-3.5 h-3.5 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/></svg><span>Agendar Programada</span></button>` : ''}
                         <button type="button" onclick='abrirModalNovoAtivo(${JSON.stringify(prefill).replace(/'/g, "&#39;")})' class="btn-pill-dark text-[11px] py-2 px-3.5">+ Adicionar Filho</button>
                         <button type="button" onclick="abrirModalRenomearGalho()" class="btn-touch bg-amber-50 hover:bg-amber-100 text-amber-800 border border-amber-200 text-[11px] py-2 px-3">Renomear Galho</button>
                         ${podeClonar ? `<button type="button" onclick="abrirModalClonarGalho()" class="btn-touch bg-indigo-50 hover:bg-indigo-100 text-indigo-700 border border-indigo-200 text-[11px] py-2 px-3">Clonar Estrutura</button>` : ''}
-                        <button type="button" onclick="imprimirDossieAtivoA4('${selectedTarget.level}', ${areaJson}, ${maqJson}, ${JSON.stringify(selectedTarget.equipamento || '').replace(/"/g, '&quot;')})" class="btn-touch bg-slate-900 hover:bg-slate-800 text-white text-[11px] py-2 px-3">Dossiê A4</button>
+                        <button type="button" onclick="imprimirDossieAtivoA4('${selectedTarget.level}', ${areaJson}, ${maqJson}, ${eqJson})" class="btn-touch bg-slate-900 hover:bg-slate-800 text-white text-[11px] py-2 px-3">Dossiê A4</button>
+                        ${masterAtivoPanel ? `<button type="button" onclick="solicitarExclusaoGalho('${selectedTarget.level}', ${areaJson}, ${maqJson}, ${eqJson}, ${cjJson})" class="btn-touch bg-rose-50 hover:bg-rose-600 text-rose-700 hover:text-white border border-rose-200 text-[11px] py-2 px-3 inline-flex items-center gap-1.5 transition-colors"><svg class="w-3.5 h-3.5 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/></svg><span>Excluir ${lvlShortDel[selectedTarget.level] || 'Galho'}</span></button>` : ''}
                     </div>
                 </div>
 
@@ -3969,6 +4286,55 @@
             } catch (_) { showToast("Erro ao duplicar.", "error"); }
         };
 
+        async function removerIndicesLegadoLote(rawEntry, idxSet) {
+            if (!rawEntry || !Array.isArray(rawEntry.data?.conjuntos)) {
+                if (rawEntry?.id) await deleteDoc(doc(db, "ob_linhas", rawEntry.id));
+                return;
+            }
+            const origArr = rawEntry.data.conjuntos;
+            const restantes = origArr.filter((_, idx) => !idxSet.has(idx));
+            if (restantes.length === 0) {
+                await deleteDoc(doc(db, "ob_linhas", rawEntry.id));
+                return;
+            }
+            const indexShiftMap = [];
+            let newSeq = 0;
+            origArr.forEach((_, oldIdx) => {
+                if (!idxSet.has(oldIdx)) {
+                    indexShiftMap.push({ oldIdx, newIdx: newSeq++ });
+                }
+            });
+            const inatAtual = Array.isArray(rawEntry.data.conjuntos_insp_inativos) ? rawEntry.data.conjuntos_insp_inativos : [];
+            const novoInat = [];
+            indexShiftMap.forEach(({ oldIdx, newIdx }) => {
+                if (inatAtual.includes(oldIdx)) novoInat.push(newIdx);
+            });
+            await updateDoc(doc(db, "ob_linhas", rawEntry.id), {
+                conjuntos: restantes,
+                conjuntos_insp_inativos: novoInat
+            });
+            for (const { oldIdx, newIdx } of indexShiftMap) {
+                if (oldIdx === newIdx) continue;
+                const cItem = origArr[oldIdx];
+                const cjNome = typeof cItem === 'object' ? (pickField(cItem, ['conjunto', 'nome']) || 'Conjunto Geral') : String(cItem || 'Conjunto Geral').trim();
+                await migrarReferenciasAtivo(
+                    [`${rawEntry.id}_${oldIdx}`, `${rawEntry.id}__leg_${oldIdx}`],
+                    {
+                        nodeId: `${rawEntry.id}__leg_${newIdx}`,
+                        docId: rawEntry.id,
+                        isLegacyArray: true,
+                        legacyIndex: newIdx,
+                        area: pickField(rawEntry.data, ['setor', 'area', 'área']) || '',
+                        maquina: pickField(rawEntry.data, ['maquina', 'máquina', 'linha']) || '',
+                        equipamento: pickField(rawEntry.data, ['equipamento']) || '',
+                        conjunto: cjNome,
+                        subconjunto: typeof cItem === 'object' ? pickField(cItem, ['subconjunto']) : ''
+                    },
+                    { updateNames: false }
+                );
+            }
+        }
+
         window.solicitarExclusaoNode = (nodeId) => {
             const node = assetNodes.find(n => n.nodeId === nodeId);
             if (!node) return;
@@ -3982,9 +4348,112 @@
                     }
                 } else {
                     await deleteDoc(doc(db, "ob_linhas", node.docId));
+                    selectedGradeIds.delete(node.docId);
                 }
+                selectedGradeIds.delete(node.nodeId);
                 selectedTarget = null;
+                atualizarTudo();
                 showToast("Registro excluído da árvore.");
+            };
+            abrirModal('deleteOverlay');
+        };
+
+        window.solicitarExclusaoGalho = (level, area, maquina = '', equipamento = '', conjunto = '') => {
+            if (!isAdminMasterAtivo()) {
+                showToast("Exclusão de galhos da árvore exige Modo Admin Master ativo.", "error");
+                abrirModalAdminMasterAtivos();
+                return;
+            }
+            if (!['area', 'maquina', 'equipamento', 'conjunto'].includes(level)) return;
+
+            const isInTargetBranch = (n) => {
+                if (n.area !== area) return false;
+                if (level === 'area') return true;
+                if (n.maquina !== maquina) return false;
+                if (level === 'maquina') return true;
+                if (n.equipamento !== equipamento) return false;
+                if (level === 'equipamento') return true;
+                if (level === 'conjunto') return n.conjunto === conjunto;
+                return false;
+            };
+
+            const branchNodes = assetNodes.filter(isInTargetBranch);
+            if (!branchNodes.length) {
+                showToast("Nenhum registro encontrado neste galho da árvore.", "error");
+                return;
+            }
+
+            const titulos = {
+                area: 'Excluir Setor / Área Inteiro?',
+                maquina: 'Excluir Máquina / Linha Inteira?',
+                equipamento: 'Excluir Equipamento Inteiro?',
+                conjunto: 'Excluir Conjunto Inteiro?'
+            };
+            const nomes = {
+                area: `Setor "${area}"`,
+                maquina: `Máquina/Linha "${area} › ${maquina}"`,
+                equipamento: `Equipamento "${equipamento}" (${maquina})`,
+                conjunto: `Conjunto "${conjunto}" (${equipamento})`
+            };
+            const qtdMaqs = new Set(branchNodes.map(n => n.maquina)).size;
+            const qtdEqs = new Set(branchNodes.map(n => `${n.maquina}||${n.equipamento}`)).size;
+            const qtdConjs = new Set(branchNodes.map(n => `${n.maquina}||${n.equipamento}||${n.conjunto}`)).size;
+            const qtdSubs = branchNodes.length;
+
+            const escopoResumo = level === 'area'
+                ? `${qtdMaqs} máquina(s)/linha(s), ${qtdEqs} equipamento(s), ${qtdConjs} conjunto(s) e ${qtdSubs} registro(s)/subconjunto(s)`
+                : (level === 'maquina'
+                    ? `${qtdEqs} equipamento(s), ${qtdConjs} conjunto(s) e ${qtdSubs} registro(s)/subconjunto(s)`
+                    : (level === 'equipamento'
+                        ? `${qtdConjs} conjunto(s) e ${qtdSubs} registro(s)/subconjunto(s)`
+                        : `${qtdSubs} registro(s)/subconjunto(s)`));
+
+            const cruz = getDadosCruzados360(branchNodes, level);
+            const totalVinc = (cruz.rotasAgendadas?.length || 0) + (cruz.planos?.length || 0) + (cruz.planosPreventiva?.length || 0) + (cruz.programacoes?.length || 0) + (cruz.anomaliasTodas?.length || 0) + (cruz.documentosTodos?.length || 0);
+            const avisoVinc = totalVinc > 0
+                ? ` Obs.: ${totalVinc} vínculo(s) histórico(s) (rotas/preventivas/anomalias/docs) ficarão órfãos e preservados na aba Saneamento.`
+                : '';
+
+            document.getElementById('deleteOverlayTitle').innerText = titulos[level];
+            document.getElementById('deleteOverlayDesc').innerText = `Remover definitivamente ${nomes[level]} da árvore ob_linhas? Serão apagados ${escopoResumo}.${avisoVinc}`;
+
+            pendingDeleteAction = async () => {
+                if (!isAdminMasterAtivo()) {
+                    showToast("Modo Admin Master bloqueado.", "error");
+                    return;
+                }
+                const flatDocIds = [...new Set(branchNodes.filter(n => !n.isLegacyArray).map(n => n.docId))];
+                const legacyMap = new Map();
+                branchNodes.filter(n => n.isLegacyArray).forEach(n => {
+                    if (!legacyMap.has(n.docId)) legacyMap.set(n.docId, new Set());
+                    legacyMap.get(n.docId).add(n.legacyIndex);
+                });
+
+                for (const id of flatDocIds) {
+                    await deleteDoc(doc(db, "ob_linhas", id));
+                    selectedGradeIds.delete(id);
+                }
+                for (const [legDocId, idxSet] of legacyMap.entries()) {
+                    const rawEntry = rawLinhasDocs.find(d => d.id === legDocId);
+                    await removerIndicesLegadoLote(rawEntry, idxSet);
+                }
+
+                branchNodes.forEach(n => selectedGradeIds.delete(n.nodeId));
+                if (selectedTarget && isInTargetBranch({
+                    area: selectedTarget.area || '',
+                    maquina: selectedTarget.maquina || '',
+                    equipamento: selectedTarget.equipamento || '',
+                    conjunto: selectedTarget.conjunto || ''
+                })) {
+                    selectedTarget = null;
+                }
+                if (level === 'area') expandedKeys.delete(`A|${area}`);
+                else if (level === 'maquina') expandedKeys.delete(`M|${area}|${maquina}`);
+                else if (level === 'equipamento') expandedKeys.delete(`E|${area}|${maquina}|${equipamento}`);
+                else if (level === 'conjunto') expandedKeys.delete(`C|${area}|${maquina}|${equipamento}|${conjunto}`);
+
+                atualizarTudo();
+                showToast(`${nomes[level]} excluído da árvore (${qtdSubs} registro(s) removido(s))!`);
             };
             abrirModal('deleteOverlay');
         };
@@ -3993,11 +4462,15 @@
             if (!pendingDeleteAction) return;
             const fn = pendingDeleteAction;
             pendingDeleteAction = null;
+            const btn = document.getElementById('confirmDeleteBtn');
+            if (btn) { btn.disabled = true; btn.innerText = 'Excluindo...'; }
             try {
                 await fn();
                 fecharModal('deleteOverlay');
             } catch (_) {
                 showToast("Erro ao excluir registro.", "error");
+            } finally {
+                if (btn) { btn.disabled = false; btn.innerText = 'Sim, Excluir'; }
             }
         };
 
@@ -4323,6 +4796,7 @@
                 tbody.innerHTML = `<tr><td colspan="8" class="py-8 text-center text-slate-400 font-bold">Nenhum ativo cadastrado em ob_linhas ainda.</td></tr>`;
                 return;
             }
+            const masterAtivoDash = isAdminMasterAtivo();
             tbody.innerHTML = areasArr.map(area => {
                 const sub = assetNodes.filter(n => n.area === area);
                 const linsSet = new Set(sub.map(n => n.maquina));
@@ -4332,6 +4806,7 @@
                 const conjs = new Set(sub.map(n => `${n.maquina}|${n.equipamento}|${n.conjunto}`)).size;
                 const qA = sub.filter(n => n.criticidade === 'A').length;
                 const comp = sub.length ? Math.round(sub.reduce((acc, n) => acc + calcularCompletudeNode(n), 0) / sub.length) : 0;
+                const areaJs = JSON.stringify(area).replace(/"/g, '&quot;');
                 return `<tr class="hover:bg-slate-50/80 transition-colors">
                     <td class="py-3 px-4 font-extrabold text-slate-900">${escapeHtml(area)}</td>
                     <td class="py-3 px-3 text-center font-bold">${lins}${linsA ? ` <span class="ml-1 px-1.5 py-0.5 rounded-full text-[9px] font-extrabold crit-A" title="${linsA} linha(s) Classe A">${linsA} A</span>` : ''}</td>
@@ -4340,7 +4815,7 @@
                     <td class="py-3 px-3 text-center font-extrabold text-slate-900">${sub.length}</td>
                     <td class="py-3 px-3 text-center">${qA ? `<span class="px-2 py-0.5 rounded-full text-[10px] font-extrabold crit-A">${qA}</span>` : '<span class="text-slate-400">0</span>'}</td>
                     <td class="py-3 px-3 text-center"><span class="font-extrabold ${comp >= 80 ? 'text-emerald-600' : 'text-amber-600'}">${comp}%</span></td>
-                    <td class="py-3 px-4 text-right"><button type="button" onclick="abrirSetorNaArvore(${JSON.stringify(area).replace(/"/g, '&quot;')})" class="px-3 py-1 rounded-xl bg-sky-50 hover:bg-sky-100 text-sky-700 border border-sky-200 font-extrabold text-[11px]">Explorar →</button></td>
+                    <td class="py-3 px-4 text-right whitespace-nowrap space-x-1.5"><button type="button" onclick="abrirSetorNaArvore(${areaJs})" class="px-3 py-1 rounded-xl bg-sky-50 hover:bg-sky-100 text-sky-700 border border-sky-200 font-extrabold text-[11px]">Explorar →</button>${masterAtivoDash ? `<button type="button" onclick="solicitarExclusaoGalho('area', ${areaJs})" title="Excluir Setor inteiro (Master)" class="px-2.5 py-1 rounded-xl bg-rose-50 hover:bg-rose-600 text-rose-700 hover:text-white border border-rose-200 font-extrabold text-[11px] transition-colors">Excluir</button>` : ''}</td>
                 </tr>`;
             }).join('');
         }
@@ -5918,7 +6393,7 @@
         // ================= ATALHOS DE TECLADO =================
         document.addEventListener('keydown', (e) => {
             if (e.key === 'Escape') {
-                ['deleteOverlay', 'modalAgendarConjunto', 'modalImportCsv', 'modalRenomear', 'modalClonar', 'modalNovoAtivo', 'modalEspacoUsuario', 'modalAtalhos'].forEach(fecharModal);
+                ['deleteOverlay', 'modalAdminMasterAtivos', 'modalAgendarConjunto', 'modalImportCsv', 'modalRenomear', 'modalClonar', 'modalNovoAtivo', 'modalEspacoUsuario', 'modalAtalhos'].forEach(fecharModal);
                 return;
             }
             if ((e.ctrlKey || e.metaKey) && (e.key === '?' || e.key === '/')) {
@@ -5939,13 +6414,29 @@
                 if (k === '4') { e.preventDefault(); switchView('saneamento'); return; }
             }
             if (e.ctrlKey || e.altKey || e.metaKey) return;
-            const algumModal = ['deleteOverlay', 'modalAgendarConjunto', 'modalImportCsv', 'modalRenomear', 'modalClonar', 'modalNovoAtivo', 'modalEspacoUsuario', 'modalAtalhos']
+            const algumModal = ['deleteOverlay', 'modalAdminMasterAtivos', 'modalAgendarConjunto', 'modalImportCsv', 'modalRenomear', 'modalClonar', 'modalNovoAtivo', 'modalEspacoUsuario', 'modalAtalhos']
                 .some(id => { const el = document.getElementById(id); return el && !el.hidden; });
             if (!algumModal && (e.key === 'n' || e.key === 'N')) {
                 e.preventDefault();
                 abrirModalNovoAtivo();
             }
         });
+
+        if (typeof window.addEventListener === 'function') {
+            let ultimoEstadoMasterSync = null;
+            const sincronizarEstadoMasterPorFoco = () => {
+                if (!acessoAutorizado) return;
+                const atual = isAdminMasterAtivo();
+                if (ultimoEstadoMasterSync !== atual) {
+                    ultimoEstadoMasterSync = atual;
+                    atualizarTudo();
+                } else {
+                    atualizarBadgeMasterAtivos();
+                }
+            };
+            window.addEventListener('focus', sincronizarEstadoMasterPorFoco);
+            window.addEventListener('storage', sincronizarEstadoMasterPorFoco);
+        }
 
         // ================= GUARDA CENTRAL SSO & EXCLUSIVIDADE ADMIN =================
         (function verificarAcessoAdminSSO() {
@@ -5982,6 +6473,7 @@
                 acessoAutorizado = true;
                 usuarioLogado = sess;
                 carregarPreferenciasUsuario(sess);
+                atualizarBadgeMasterAtivos();
 
                 const appEl = document.getElementById('mainApp');
                 if (appEl) { appEl.hidden = false; appEl.classList.remove('hidden'); }
