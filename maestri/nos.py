@@ -66,6 +66,69 @@ DEFINICAO_NOS = [
 CUSTO_POR_OM_V40_BRL = 30.60 / 1234.0  # R$ 0,0248/OM na v40 sequencial
 
 
+def _detectar_indice_cabecalho(linhas_raw):
+    if not linhas_raw:
+        return 0
+    best_idx = 0
+    best_score = -99
+    limite = min(25, len(linhas_raw))
+    for i in range(limite):
+        row = linhas_raw[i]
+        vals = [normalizar(c) for c in row if str(c or "").strip()]
+        if len(vals) < 2:
+            continue
+        papeis = set()
+        for c in vals:
+            if c in ("om", "ordem", "num om", "numero om", "n om"):
+                papeis.add("om")
+            elif c in ("status", "status om", "situacao", "situacao om"):
+                papeis.add("status")
+            elif c in ("ativo", "descricao ativo", "equipamento", "maquina"):
+                papeis.add("ativo")
+            elif c in ("problema", "descricao", "descricao problema", "defeito"):
+                papeis.add("problema")
+            elif c in ("servico", "descricao do servico", "descricao servico", "servico executado", "solucao"):
+                papeis.add("servico")
+            elif c in ("data", "data conclusao") or c.startswith("data e hora de"):
+                papeis.add("data")
+            elif c in ("tempo", "tempo min", "duracao total parada", "tempo total trabalhado", "tempo de maquina parada"):
+                papeis.add("tempo")
+            elif c in ("equipe", "descricao tipo de servico de manutencao", "descricao tipos de manutencao"):
+                papeis.add("equipe")
+            elif c in ("categoria ia", "categoria", "origem decisao"):
+                papeis.add("auditada")
+        score = len(papeis) * 4 + (1 if len(vals) >= 4 else 0)
+        if any(c.startswith("emissao ") or c.startswith("total de registros") for c in vals):
+            score -= 10
+        if score > best_score:
+            best_score = score
+            best_idx = i
+    if best_idx > 0 and best_score < 8:
+        return 0
+    idx = best_idx
+    while idx < len(linhas_raw) - 1 and not any(str(c or "").strip() for c in linhas_raw[idx]):
+        idx += 1
+    return idx
+
+
+def _matriz_para_dicts(linhas_raw):
+    if len(linhas_raw) < 2:
+        return []
+    hdr_idx = _detectar_indice_cabecalho(linhas_raw)
+    if hdr_idx >= len(linhas_raw) - 1:
+        return []
+    headers = [str(h or "").strip() for h in linhas_raw[hdr_idx]]
+    out = []
+    for r in linhas_raw[hdr_idx + 1:]:
+        d = {}
+        for i, h in enumerate(headers):
+            if h:
+                d[h] = r[i] if i < len(r) else ""
+        if any(str(v or "").strip() for v in d.values()):
+            out.append(d)
+    return out
+
+
 def ler_planilha_generica(caminho):
     """Lê CSV (separador ';' ou ',') ou XLSX nativo sem depender de pandas."""
     if not os.path.exists(caminho):
@@ -76,9 +139,10 @@ def ler_planilha_generica(caminho):
 
     with open(caminho, "r", encoding="utf-8-sig", errors="replace", newline="") as f:
         bruto = f.read()
-    delim = ";" if bruto[:4096].count(";") >= bruto[:4096].count(",") else ","
-    reader = csv.DictReader(io.StringIO(bruto), delimiter=delim)
-    return [dict(r) for r in reader]
+    amostra = bruto[:8192]
+    delim = ";" if amostra.count(";") >= amostra.count(",") else ","
+    linhas_raw = [row for row in csv.reader(io.StringIO(bruto), delimiter=delim) if any(str(c).strip() for c in row)]
+    return _matriz_para_dicts(linhas_raw)
 
 
 def _ler_xlsx_stdlib(caminho):
@@ -119,18 +183,7 @@ def _ler_xlsx_stdlib(caminho):
             if vals:
                 max_c = max(vals.keys())
                 linhas_raw.append([vals.get(i, "") for i in range(1, max_c + 1)])
-        if len(linhas_raw) < 2:
-            return []
-        headers = [str(h).strip() for h in linhas_raw[0]]
-        out = []
-        for r in linhas_raw[1:]:
-            d = {}
-            for i, h in enumerate(headers):
-                if h:
-                    d[h] = r[i] if i < len(r) else ""
-            if any(str(v).strip() for v in d.values()):
-                out.append(d)
-        return out
+        return _matriz_para_dicts(linhas_raw)
 
 
 def resolver_colunas_erp(linhas):
@@ -369,6 +422,8 @@ class MaestriPipeline:
                 continue
             status_val = row.get(mapa.get("status", ""), "")
             tempo_val = converter_tempo(row.get(mapa.get("tempo", ""), ""))
+            if not tempo_val:
+                tempo_val = converter_tempo(row.get("Tempo total trabalhado") or row.get("Tempo de máquina parada") or "")
             ok_conc, _ = om_esta_concluida(status_val, tempo_val, modo=filtro_status)
             if not ok_conc:
                 ignoradas += 1
@@ -378,12 +433,16 @@ class MaestriPipeline:
             ativo_str = str(row.get(mapa.get("ativo", ""), "") or "").strip()
             problema = str(row.get(mapa.get("problema", ""), "") or "").strip()
             servico = str(row.get(mapa.get("servico", ""), "") or "").strip()
-            data_str = str(row.get(mapa.get("data", ""), "") or "").strip()
+            data_str = str(row.get(mapa.get("data", ""), "") or row.get("Data e hora de entrada", "") or row.get("Data e hora de cadastro", "") or "").strip()
+            if data_str and re.match(r"^\d+(?:[.,]\d+)?$", data_str):
+                dt_xl = parse_data(data_str)
+                if dt_xl is not None:
+                    data_str = dt_xl.strftime("%Y-%m-%d %H:%M")
             eq_raw = str(row.get(mapa.get("equipe", ""), "") or "").strip()
             tipo_m = str(row.get(mapa.get("tipo_manut", ""), "") or "").strip()
 
             info_arvore = cruzar_ativo_arvore(ativo_str, self.linhas_arvore)
-            equipe = classificar_equipe({"equipe": eq_raw, "problema": problema, "servico": servico})
+            equipe = classificar_equipe({"equipe": eq_raw, "tipo_manut": tipo_m, "problema": problema, "servico": servico})
 
             coletadas.append({
                 "om": om_num,
