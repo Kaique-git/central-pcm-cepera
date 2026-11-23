@@ -1984,7 +1984,12 @@
                 showToast(`Chave Gemini validada e salva no modelo ${model}!`, "success");
             } catch (err) {
                 const msg = err?.message || "Falha ao conectar.";
-                if (st) st.innerText = `Erro na chave/API: ${msg}`;
+                let extra = "";
+                try {
+                    const list = await descobrirModelosAtivosGemini(k);
+                    if (list.length) extra = ` • Modelos listados na sua conta: ${list.slice(0, 5).join(", ")}`;
+                } catch (_) {}
+                if (st) st.innerText = `Erro na chave/API: ${msg}${extra}`;
                 showToast(`Falha no teste Gemini: ${msg}`, "error");
             } finally {
                 if (btn) btn.disabled = false;
@@ -3252,6 +3257,9 @@
         const GEMINI_MODELOS_FALLBACK = [
             "gemini-2.5-flash",
             "gemini-2.5-flash-lite",
+            "gemini-3.8-flash",
+            "gemini-3.5-flash-lite",
+            "gemini-3.1-flash-lite",
             "gemini-2.0-flash",
             "gemini-2.0-flash-lite",
             "gemini-1.5-flash"
@@ -3261,6 +3269,27 @@
         function limparChaveGemini(k) {
             return String(k || "").trim().replace(/^["']|["']$/g, "").replace(/\s+/g, "");
         }
+
+        async function descobrirModelosAtivosGemini(apiKey) {
+            if (typeof fetch !== "function" || !apiKey) return [];
+            try {
+                const url = `https://generativelanguage.googleapis.com/v1beta/models?key=${encodeURIComponent(apiKey)}`;
+                const r = await fetch(url);
+                if (!r.ok) return [];
+                const data = await r.json();
+                const list = Array.isArray(data?.models) ? data.models : [];
+                return list
+                    .filter(m => {
+                        const methods = m?.supportedGenerationMethods || [];
+                        return methods.includes("generateContent") || methods.includes("generateMessage");
+                    })
+                    .map(m => String(m.name || "").replace(/^models\//, ""))
+                    .filter(Boolean);
+            } catch (_) {
+                return [];
+            }
+        }
+        window.descobrirModelosAtivosGemini = descobrirModelosAtivosGemini;
 
         function extrairJsonArrayGemini(rawTxt) {
             const clean = String(rawTxt || "").replace(/```json/gi, "").replace(/```/g, "").trim();
@@ -3290,13 +3319,16 @@
             const apiKey = limparChaveGemini(apiKeyRaw);
             if (!apiKey) throw new Error("Chave Gemini API vazia.");
 
-            const candidatos = [...new Set([
+            let candidatos = [...new Set([
                 ...(ultimoModeloGeminiOk ? [ultimoModeloGeminiOk] : []),
                 ...GEMINI_MODELOS_FALLBACK
             ])];
 
             let ultimoErro = "Falha desconhecida ao consultar Gemini.";
-            for (const modelo of candidatos) {
+            let tentouDescobertaDinamica = false;
+
+            for (let idx = 0; idx < candidatos.length; idx++) {
+                const modelo = candidatos[idx];
                 for (const tentarSemMime of [false, true]) {
                     const url = `https://generativelanguage.googleapis.com/v1beta/models/${modelo}:generateContent?key=${encodeURIComponent(apiKey)}`;
                     const genCfg = { temperature: 0.1 };
@@ -3347,6 +3379,21 @@
                     if (!tentarSemMime && resp.status === 400 && /mime|json|schema/i.test(apiMsg)) {
                         continue;
                     }
+
+                    // Se tomou 404 no modelo, tenta descobrir a lista real de modelos suportados pela chave do usuário via ListModels
+                    if (resp.status === 404 && !tentouDescobertaDinamica && idx >= candidatos.length - 2) {
+                        tentouDescobertaDinamica = true;
+                        try {
+                            const modelosAtivos = await descobrirModelosAtivosGemini(apiKey);
+                            if (modelosAtivos.length) {
+                                const novos = modelosAtivos.filter(m => !candidatos.includes(m));
+                                if (novos.length) {
+                                    candidatos = [...candidatos, ...novos];
+                                }
+                            }
+                        } catch (_) {}
+                    }
+
                     ultimoErro = `[${modelo} • HTTP ${resp.status}] ${apiMsg}`;
                     break;
                 }
