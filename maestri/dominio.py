@@ -1315,20 +1315,29 @@ def calcular_score_qualidade_apontamento(problema, servico):
     return {"score": pts, "nivel": nivel, "motivo": motivo}
 
 
+def _contem_frase_norm(texto_norm, frase_norm):
+    if not texto_norm or not frase_norm:
+        return False
+    return bool(re.search(rf"(?<![a-z0-9]){re.escape(frase_norm)}(?![a-z0-9])", texto_norm))
+
+
 def cruzar_ativo_arvore(ativo_erp, linhas_arvore=None):
     """
     Cruza a string 'Descrição (Ativo)' do ERP (ex.: 'BOATOPACK 1 - ENVASADORA',
-    'MULTIPET 2 - SOPRADORA 2/5', 'SERAC 3 - POSICIONADOR POSIMEC') com os ativos
+    'ENVASADORA - SYSTEMPACK M400 1', 'LINEAR 1/2 - ROTULADORA PELATINA') com os ativos
     reais de ob_linhas (GESTAO-ATIVOS.html), retornando Setor, Máquina, Equipamento
-    e Criticidade da Linha (A/B/C) sem depender de Conjuntos.xlsx.
+    e Criticidade da Linha (A/B/C) sem falso-positivo em termos genéricos.
     """
     bruto = (ativo_erp or "").strip()
-    partes = [p.strip() for p in bruto.split("-") if p.strip()]
+    partes = [p.strip() for p in re.split(r"[-–—]", bruto) if p.strip()]
     maq_guess = partes[0] if partes else bruto
     eq_guess = partes[1] if len(partes) > 1 else maq_guess
     norm_b = normalizar(bruto)
+    norm_sem_zero = re.sub(r"\b0+(\d+)\b", r"\1", norm_b)
+    norm_exp = re.sub(r"\b([a-z0-9]+)\s+(\d+)\s+(\d+)\b", lambda m: f"{m.group(0)} {m.group(1)} {m.group(2)} {m.group(1)} {m.group(3)}", norm_sem_zero)
 
     if linhas_arvore:
+        genericos = {"envasadora", "tampadora", "seladora", "rotuladora", "posicionador", "encaixotadora", "bomba", "esteira", "tanque", "painel", "linha"}
         melhor = None
         melhor_pts = 0
         for node in linhas_arvore:
@@ -1336,13 +1345,35 @@ def cruzar_ativo_arvore(ativo_erp, linhas_arvore=None):
             maq = str(node.get("maquina") or "").strip()
             eq = str(node.get("equipamento") or "").strip()
             crit = str(node.get("criticidade_linha") or node.get("criticidade") or "").strip().upper()
-            pts = 0
-            if maq and normalizar(maq) in norm_b:
-                pts += 3
-            if eq and normalizar(eq) in norm_b:
-                pts += 4
-            if area and normalizar(area) in norm_b:
-                pts += 1
+
+            maq_n = re.sub(r"\b0+(\d+)\b", r"\1", normalizar(maq))
+            eq_n = re.sub(r"\b0+(\d+)\b", r"\1", normalizar(eq))
+            area_n = normalizar(area)
+
+            pts_maq = 0
+            if maq_n:
+                if _contem_frase_norm(norm_sem_zero, maq_n):
+                    pts_maq = 65
+                elif _contem_frase_norm(norm_exp, maq_n):
+                    pts_maq = 50
+
+            pts_eq = 0
+            if eq_n:
+                if _contem_frase_norm(norm_sem_zero, eq_n):
+                    pts_eq = 30
+                else:
+                    toks_eq = [t for t in eq_n.split() if len(t) >= 3]
+                    hits = sum(1 for t in toks_eq if _contem_frase_norm(norm_sem_zero, t))
+                    if toks_eq and hits == len(toks_eq):
+                        pts_eq = 22
+
+            # Evita que equipamento genérico ('ENVASADORA') sequestre OM de outra máquina
+            if pts_maq == 0:
+                eq_eh_generico = any(g == eq_n or eq_n.startswith(g + " ") for g in genericos)
+                if eq_eh_generico or pts_eq < 30:
+                    continue
+
+            pts = pts_maq + pts_eq + (5 if area_n and _contem_frase_norm(norm_sem_zero, area_n) else 0)
             if pts > melhor_pts:
                 melhor_pts = pts
                 melhor = {
@@ -1352,7 +1383,7 @@ def cruzar_ativo_arvore(ativo_erp, linhas_arvore=None):
                     "criticidade_linha": crit if crit in ("A", "B", "C") else "A",
                     "vinculado_ob_linhas": True,
                 }
-        if melhor and melhor_pts >= 3:
+        if melhor and melhor_pts >= 45:
             return melhor
 
     # Heurística industrial Cepêra quando ob_linhas ainda não foi carregado no CLI offline

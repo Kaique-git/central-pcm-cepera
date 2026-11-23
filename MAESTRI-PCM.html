@@ -308,7 +308,7 @@
                         <div class="min-w-0">
                             <div class="flex items-center gap-1.5">
                                 <span class="text-[10px] font-extrabold uppercase tracking-widest text-sky-700">PCM Cepêra</span>
-                                <span class="px-1.5 py-0.5 rounded bg-slate-900 text-white font-mono text-[9px] font-extrabold">v43 • XLSX &amp; CSV ERP</span>
+                                <span class="px-1.5 py-0.5 rounded bg-slate-900 text-white font-mono text-[9px] font-extrabold">v44 • PRÉ-VOO &amp; ATIVOS</span>
                             </div>
                             <h1 class="text-sm font-extrabold text-slate-900 truncate">Maestri 2.0 • IA & AQF</h1>
                         </div>
@@ -1386,6 +1386,111 @@
         </div>
     </div>
 
+    <!-- ==================== MODAL: PRÉ-VOO / PORTÃO DE ENTRADA (CONFERÊNCIA & DE-PARA ATIVOS) ==================== -->
+    <div id="modalPreProcessamentoErp" role="dialog" aria-modal="true" hidden class="hidden fixed inset-0 bg-slate-900/70 backdrop-blur-sm z-[74] flex items-end sm:items-center justify-center p-0 sm:p-4">
+        <div class="bg-white w-full sm:max-w-4xl max-h-[92vh] sm:rounded-3xl rounded-t-3xl shadow-2xl border border-slate-200 flex flex-col overflow-hidden">
+            <!-- Header Pré-Voo -->
+            <div class="px-6 py-4 border-b border-slate-100 flex items-center justify-between gap-3 bg-gradient-to-r from-sky-50/90 via-white to-indigo-50/60 shrink-0">
+                <div class="flex items-center gap-3 min-w-0">
+                    <span class="w-10 h-10 rounded-2xl bg-sky-600 text-white flex items-center justify-center shrink-0 shadow-sm">
+                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+                    </span>
+                    <div class="min-w-0">
+                        <span class="text-[10px] font-extrabold uppercase tracking-widest text-sky-700">Pré-Etapa • Portão de Entrada de Dados</span>
+                        <h2 class="text-base sm:text-lg font-extrabold text-slate-900 truncate">Conferência de Pré-Processamento &amp; De-Para de Ativos</h2>
+                        <div id="preVooSubtitleFile" class="text-[11px] font-bold text-slate-500 truncate">Analisando planilha ERP...</div>
+                    </div>
+                </div>
+                <button type="button" onclick="fecharModal('modalPreProcessamentoErp')" aria-label="Fechar" class="w-9 h-9 rounded-full bg-slate-100 hover:bg-slate-200 text-slate-600 flex items-center justify-center shrink-0">
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
+                </button>
+            </div>
+
+            <!-- Corpo Rolável -->
+            <div class="p-5 sm:p-6 space-y-5 overflow-y-auto flex-1">
+                <!-- Alerta caso lote já tenha sido auditado antes -->
+                <div id="preVooAlertaDuplicado" hidden class="hidden p-3.5 rounded-2xl bg-amber-50 border border-amber-300 text-xs text-amber-950 font-semibold flex items-center gap-2.5">
+                    <svg class="w-4 h-4 text-amber-600 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"/></svg>
+                    <span><strong>Lote já auditado anteriormente:</strong> ao prosseguir, suas revisões humanas salvas no Nó 5 permanecerão protegidas e apenas regras/pendentes serão reavaliadas.</span>
+                </div>
+
+                <!-- 1. Checklist de Integridade -->
+                <div class="space-y-2">
+                    <div class="text-[11px] font-extrabold uppercase tracking-wider text-slate-500">1. Checklist de Validação de Entrada (Nó 1)</div>
+                    <div id="preVooChecklistGrid" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3"></div>
+                </div>
+
+                <!-- 2. Ciclo & Estratégia IA -->
+                <div class="p-4 rounded-2xl bg-slate-50 border border-slate-200 grid grid-cols-1 sm:grid-cols-12 gap-3 items-end">
+                    <div class="sm:col-span-4 space-y-1">
+                        <label for="preVooInputPeriodo" class="block text-[10px] font-extrabold uppercase text-slate-600">Ciclo / Mês Detectado</label>
+                        <input type="text" id="preVooInputPeriodo" class="input-clean py-2 text-xs font-extrabold w-full" placeholder="Ex: Nov/2026">
+                    </div>
+                    <div class="sm:col-span-8 space-y-1">
+                        <label for="preVooSelectModoIa" class="block text-[10px] font-extrabold uppercase text-slate-600">Estratégia dos Nós 2 &amp; 3 nesta Rodada</label>
+                        <select id="preVooSelectModoIa" onchange="atualizarModoIaPreVoo()" class="input-clean py-2 text-xs font-extrabold w-full">
+                            <option value="auto">Híbrido Inteligente (Fast-Path R$ 0 nas regras certas + Nó 3 IA nas ambíguas)</option>
+                            <option value="gemini">Auditoria Total via Gemini Flash (Lotes de 20 OMs em todas elegíveis)</option>
+                            <option value="deterministico">100% Motor Determinístico Local (R$ 0,00 sem chamadas externas)</option>
+                        </select>
+                        <div id="preVooStatusIaTxt" class="text-[11px] font-semibold text-slate-500">Verificando Cofre Gemini...</div>
+                    </div>
+                </div>
+
+                <!-- 3. Conciliação de Ativos ERP <-> Gestão de Ativos (ob_linhas) -->
+                <div class="space-y-3">
+                    <div class="flex flex-wrap items-center justify-between gap-2">
+                        <div>
+                            <div class="text-[11px] font-extrabold uppercase tracking-wider text-slate-700">2. Conciliação De-Para de Ativos (ERP ↔ Gestão de Ativos ob_linhas)</div>
+                            <p class="text-[11px] font-semibold text-slate-500">O nome oficial do Gestão de Ativos aparecerá em destaque nos cards, MTBF e Caçador AQF; o nome ERP fica guardado em legenda.</p>
+                        </div>
+                        <div class="flex flex-wrap items-center gap-2">
+                            <select id="preVooFiltroAtivos" onchange="atualizarFiltroPreVooAtivos(this.value)" class="input-clean py-1.5 text-xs font-extrabold w-auto">
+                                <option value="pendentes">Exibir Pendentes &amp; Sugestões</option>
+                                <option value="todos">Exibir Todos os Ativos do Lote</option>
+                            </select>
+                            <button type="button" id="btnPreVooGeminiAtivos" onclick="autoMapearAtivosComGeminiPreVoo()" class="btn-touch bg-indigo-600 hover:bg-indigo-700 text-white text-xs py-1.5 px-3">
+                                <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"/></svg>
+                                <span>Auto-Mapear Ambíguos c/ Gemini IA</span>
+                            </button>
+                        </div>
+                    </div>
+
+                    <div id="preVooAtivosKpis" class="flex flex-wrap gap-1.5"></div>
+                    <datalist id="preVooCatalogoDatalist"></datalist>
+
+                    <div class="rounded-2xl border border-slate-200 overflow-hidden bg-white">
+                        <div class="max-h-72 overflow-y-auto overflow-x-auto">
+                            <table class="w-full text-left border-collapse">
+                                <thead class="bg-slate-50 text-[10px] font-extrabold uppercase text-slate-500 border-b border-slate-200 sticky top-0">
+                                    <tr>
+                                        <th class="py-2.5 px-3">Ativo Exportado do ERP</th>
+                                        <th class="py-2.5 px-2 text-center">Vínculo</th>
+                                        <th class="py-2.5 px-2">Ativo Oficial (ob_linhas)</th>
+                                        <th class="py-2.5 px-2 text-right">Ação</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="preVooTabelaAtivosBody" class="text-xs"></tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Rodapé Fixo -->
+            <div class="px-6 py-4 bg-slate-50 border-t border-slate-200 flex flex-col sm:flex-row sm:items-center justify-between gap-3 shrink-0">
+                <div id="preVooRodapeResumo" class="text-[11px] font-bold text-slate-600">Pronto para validar entrada.</div>
+                <div class="flex flex-wrap items-center gap-2 shrink-0">
+                    <button type="button" onclick="fecharModal('modalPreProcessamentoErp')" class="btn-touch bg-white hover:bg-slate-100 border border-slate-300 text-slate-700 text-xs py-2.5 px-4">Cancelar</button>
+                    <button type="button" id="btnConfirmarPreVoo" onclick="confirmarPreVooEIniciarOrquestracao()" class="btn-touch bg-emerald-600 hover:bg-emerald-700 text-white text-xs py-2.5 px-5 shadow-sm">
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14.752 11.168l-3.197-2.132A1 1 0 0010 9.87v4.263a1 1 0 001.555.832l3.197-2.132a1 1 0 000-1.664z"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+                        <span>Aprovar Pré-Conferência e Iniciar Orquestração</span>
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
     <!-- ==================== MODAL CONFIRMAÇÃO EXCLUSÃO ==================== -->
     <div id="deleteOverlay" role="dialog" aria-modal="true" hidden class="hidden fixed inset-0 bg-slate-900/60 z-[75] flex items-center justify-center p-4">
         <div class="bg-white w-full max-w-sm rounded-3xl p-6 shadow-2xl border border-slate-200 space-y-4">
@@ -1440,6 +1545,7 @@
         const colMaestriEstudos = collection(db, "maestri_estudos");
         const colMaestriRodadas = collection(db, "maestri_rodadas");
         const refMasterCfg = doc(db, "pcm_config", "admin_master");
+        const refAtivosDePara = doc(db, "config", "maestri_ativos_depara");
 
         const DEFAULT_MASTER_HASH = "7c2cce436d043699877f19ad8a6aef78dc5b1f167d97fbfa5d316885c2150a59";
         let customMasterHash = null;
@@ -1894,43 +2000,196 @@
             return ne > nm ? "ELETRICA" : "MECANICA";
         }
 
-        function cruzarAtivoComArvore(ativoErp) {
+        let deParaAtivosMap = {};
+
+        function carregarDeParaAtivosLocal() {
+            try {
+                const raw = safeStorage.get("cepera_maestri_ativos_depara");
+                if (raw) {
+                    const parsed = JSON.parse(raw);
+                    if (parsed && typeof parsed === "object") deParaAtivosMap = parsed;
+                }
+            } catch (_) {}
+            return deParaAtivosMap;
+        }
+
+        async function salvarDeParaAtivosPersistente() {
+            try {
+                safeStorage.set("cepera_maestri_ativos_depara", JSON.stringify(deParaAtivosMap));
+            } catch (_) {}
+            try {
+                await setDoc(refAtivosDePara, {
+                    mappings: deParaAtivosMap,
+                    updated_by: usuarioLogado?.nome || usuarioLogado?.user || "PCM",
+                    updated_at: Date.now()
+                });
+            } catch (_) {}
+        }
+
+        function formatarNomeAtivoOficial(maq, eq) {
+            const m = String(maq || "").trim();
+            const e = String(eq || "").trim();
+            if (m && e && normKey(m) !== normKey(e)) return `${m} › ${e}`;
+            return m || e || "ATIVO GERAL";
+        }
+
+        function extrairCatalogoAtivosOficiais(linhasOverride = null) {
+            const docs = Array.isArray(linhasOverride) ? linhasOverride : rawLinhasDocs;
+            const mapa = new Map();
+            (docs || []).forEach(docLinha => {
+                if (!docLinha || typeof docLinha !== "object") return;
+                const st = normKey(docLinha.status_ativo || docLinha.status || "");
+                if (st === "desativado" || st === "inativo" || st === "excluido") return;
+                const area = String(docLinha.area || docLinha.setor || "Produção").trim();
+                const maq = String(docLinha.maquina || docLinha.linha || "").trim();
+                const eq = String(docLinha.equipamento || "").trim();
+                if (!maq && !eq) return;
+                const critRaw = String(docLinha.criticidade_linha || docLinha.criticidade || "A").toUpperCase().trim();
+                const crit = ["A", "B", "C"].includes(critRaw) ? critRaw : "A";
+                const key = `${normKey(area)}||${normKey(maq)}||${normKey(eq)}`;
+                if (!mapa.has(key)) {
+                    mapa.set(key, {
+                        key,
+                        area,
+                        maquina: maq || eq,
+                        equipamento: eq || maq,
+                        criticidade_linha: crit,
+                        label: formatarNomeAtivoOficial(maq, eq)
+                    });
+                }
+            });
+            return [...mapa.values()].sort((a, b) => a.label.localeCompare(b.label, "pt-BR"));
+        }
+        window.extrairCatalogoAtivosOficiais = extrairCatalogoAtivosOficiais;
+
+        function normalizarTextoAtivoFlex(str) {
+            return normKey(str)
+                .replace(/\bboaotopack\b/g, "boatopack")
+                .replace(/\bdmon\b/g, "dmom")
+                .replace(/\bmultipets\b/g, "multipet")
+                .replace(/\bbullers\b/g, "buller")
+                .replace(/\b0+(\d+)\b/g, "$1");
+        }
+
+        function contemFrasePalavra(textoNorm, fraseNorm) {
+            if (!textoNorm || !fraseNorm) return false;
+            const esc = fraseNorm.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+            return new RegExp(`(?:^| )${esc}(?:$| )`).test(textoNorm);
+        }
+
+        const TERMOS_EQ_GENERICOS = new Set([
+            "envasadora", "tampadora", "seladora", "rotuladora", "posicionador",
+            "encaixotadora", "bomba", "esteira", "tanque", "painel", "linha", "embaladora"
+        ]);
+
+        function cruzarAtivoComArvore(ativoErp, catalogoOverride = null) {
             const bruto = String(ativoErp || "").trim();
-            const partes = bruto.split("-").map(s => s.trim()).filter(Boolean);
+            const keyErp = normKey(bruto);
+            const partes = bruto.split(/[-–—]/).map(s => s.trim()).filter(Boolean);
             const maqGuess = partes[0] || bruto || "LINHA GERAL";
             const eqGuess = partes[1] || maqGuess;
-            const nb = normKey(bruto);
+            const nb = normalizarTextoAtivoFlex(bruto);
 
-            for (const docLinha of rawLinhasDocs) {
-                const area = docLinha.area || docLinha.setor || "";
-                const maq = docLinha.maquina || "";
-                const eq = docLinha.equipamento || "";
-                const crit = String(docLinha.criticidade_linha || docLinha.criticidade || "A").toUpperCase();
-                if ((maq && nb.includes(normKey(maq))) || (eq && nb.includes(normKey(eq)))) {
-                    return {
-                        setor: area || "Produção",
-                        maquina: maq || maqGuess,
-                        equipamento: eq || eqGuess,
-                        criticidade_linha: ["A", "B", "C"].includes(crit) ? crit : "A",
-                        vinculado_ob_linhas: true
-                    };
+            // 1. Dicionário De-Para aprendido (Exato)
+            const aprendido = deParaAtivosMap[keyErp] || deParaAtivosMap[bruto];
+            if (aprendido && (aprendido.maquina || aprendido.label)) {
+                return {
+                    setor: aprendido.area || "Produção",
+                    maquina: aprendido.maquina || maqGuess,
+                    equipamento: aprendido.equipamento || eqGuess,
+                    criticidade_linha: ["A", "B", "C"].includes(String(aprendido.criticidade_linha).toUpperCase()) ? String(aprendido.criticidade_linha).toUpperCase() : "A",
+                    ativo_oficial: aprendido.label || formatarNomeAtivoOficial(aprendido.maquina, aprendido.equipamento),
+                    vinculado_ob_linhas: true,
+                    status_vinculo: "DEPARA",
+                    candidatos: []
+                };
+            }
+
+            // 2. Pontuação inteligente contra catálogo oficial ob_linhas
+            const catalogo = Array.isArray(catalogoOverride) ? catalogoOverride : extrairCatalogoAtivosOficiais();
+            const nbExp = nb.replace(/\b([a-z][a-z0-9]*)\s+(\d+)\s+(\d+)\b/g, "$& $1 $2 $1 $3");
+            const temBarraOuDual = /\//.test(bruto);
+            const pontuados = [];
+
+            for (const c of catalogo) {
+                const maqN = normalizarTextoAtivoFlex(c.maquina);
+                const eqN = normalizarTextoAtivoFlex(c.equipamento);
+                const areaN = normalizarTextoAtivoFlex(c.area);
+
+                let ptsMaq = 0;
+                if (maqN) {
+                    if (contemFrasePalavra(nb, maqN)) ptsMaq = 65;
+                    else if (contemFrasePalavra(nbExp, maqN)) ptsMaq = 50;
+                    else {
+                        const toksM = maqN.split(" ").filter(t => t.length >= 2);
+                        const hitsM = toksM.filter(t => contemFrasePalavra(nbExp, t)).length;
+                        if (toksM.length >= 2 && hitsM === toksM.length) ptsMaq = 45;
+                    }
+                }
+
+                let ptsEq = 0;
+                if (eqN) {
+                    if (contemFrasePalavra(nb, eqN)) ptsEq = 30;
+                    else {
+                        const toksE = eqN.split(" ").filter(t => t.length >= 3);
+                        const hitsE = toksE.filter(t => contemFrasePalavra(nb, t)).length;
+                        if (toksE.length && hitsE === toksE.length) ptsEq = 22;
+                        else if (toksE.length && hitsE > 0) ptsEq = 10;
+                    }
+                }
+
+                if (ptsMaq === 0) {
+                    const primeiroTokEq = eqN.split(" ")[0] || "";
+                    if (TERMOS_EQ_GENERICOS.has(eqN) || TERMOS_EQ_GENERICOS.has(primeiroTokEq) || ptsEq < 30) {
+                        continue;
+                    }
+                }
+
+                const bonusArea = areaN && contemFrasePalavra(nb, areaN) ? 6 : 0;
+                const score = ptsMaq + ptsEq + bonusArea;
+                if (score >= 45) {
+                    pontuados.push({ ...c, score });
                 }
             }
 
+            pontuados.sort((a, b) => b.score - a.score || a.label.localeCompare(b.label, "pt-BR"));
+            const candidatosTop = pontuados.slice(0, 4);
+            if (pontuados.length) {
+                const best = pontuados[0];
+                const second = pontuados[1];
+                const empateProximo = Boolean(second && (best.score - second.score) <= 12 && normKey(best.maquina) !== normKey(second.maquina));
+                const ehAutoExato = best.score >= 85 && !empateProximo && !(temBarraOuDual && second && second.score >= 50);
+                return {
+                    setor: best.area || "Produção",
+                    maquina: best.maquina,
+                    equipamento: best.equipamento,
+                    criticidade_linha: best.criticidade_linha,
+                    ativo_oficial: best.label,
+                    vinculado_ob_linhas: true,
+                    status_vinculo: ehAutoExato ? "AUTO_EXATO" : "SUGESTAO",
+                    candidatos: candidatosTop
+                };
+            }
+
+            // 3. Fallback Flexível (Mantém ERP quando ativo não consta ou genérico/setor sem vínculo)
             const critDefault = /(?:boatopack|serac|multipet|fryma|systempack|cozinha|caldeira)/.test(nb) ? "A" : "B";
-            const setorDefault = /(?:boatopack|systempack|volpack|solupack)/.test(nb) ? "Envase Sachet"
-                : /(?:serac|posimec|multipet|dmon|dmom)/.test(nb) ? "Envase Frascos"
+            const setorDefault = /(?:boatopack|systempack|volpack|solupack|flowpack)/.test(nb) ? "Envase Sachet"
+                : /(?:serac|posimec|multipet|dmon|dmom|linear)/.test(nb) ? "Envase Frascos"
                 : /(?:cozinha|fryma|moinho|moagem|buller|tanque)/.test(nb) ? "Cozinha & Moagem"
-                : /(?:conserva|lata|cft|tetra)/.test(nb) ? "Conservas & Latas"
+                : /(?:conserva|lata|cft|tetra|dende)/.test(nb) ? "Conservas & Latas"
                 : "Utilidades & Predial";
             return {
                 setor: setorDefault,
                 maquina: maqGuess,
                 equipamento: eqGuess,
                 criticidade_linha: critDefault,
-                vinculado_ob_linhas: false
+                ativo_oficial: bruto || maqGuess,
+                vinculado_ob_linhas: false,
+                status_vinculo: "PENDENTE",
+                candidatos: []
             };
         }
+        window.cruzarAtivoComArvore = cruzarAtivoComArvore;
 
         function calcularScoreQualidadeOM(problema, servico) {
             const s = String(servico || "").trim();
@@ -2057,10 +2316,13 @@
                 res = { categoria: "MANUTENCAO PROGRAMADA", b: null, c: null, confianca: 4, origem: "IA_LOTE20", justificativa: "Intervenção planejada / revisão de componente em janela programada." };
             } else if (temTroca) {
                 res = { categoria: "QUEBRA", b: 1, c: 2, confianca: 4, origem: "IA_LOTE20", justificativa: "Substituição corretiva pontual de elemento de desgaste." };
-            } else if (!temTroca && !falhaDestrutiva && tempo <= 60) {
+            } else if (
+                !temTroca && !falhaDestrutiva && tempo <= 60
+                && /\b(?:ajust\w*|regul\w*|alinh\w*|calibr\w*|apert\w*|reapert\w*|lubrific\w*|posicion\w*|desentup\w*|destrav\w*|desobstru\w*|tension\w*|tencion\w*|centraliz\w*|repass\w*|fix\w*|recoloc\w*)\b/.test(tn)
+            ) {
                 res = { categoria: "AJUSTE", b: null, c: null, confianca: 5, origem: "FAST_PATH_R0", justificativa: "Fast-Path PCM: ajuste, regulagem ou alinhamento operacional com função mantida." };
             } else {
-                res = { categoria: "AJUSTE", b: null, c: null, confianca: 4, origem: "IA_LOTE20", justificativa: "Restauração de parâmetro/regulagem sem troca de componente." };
+                res = { categoria: "AJUSTE", b: null, c: null, confianca: 4, origem: "IA_LOTE20", justificativa: "Restauração de parâmetro/regulagem encaminhada ao Auditor Nó 3." };
             }
 
             if (cacheDedup && dedupKey) cacheDedup.set(dedupKey, res);
@@ -2104,7 +2366,9 @@
 
         // ================= EXECUÇÃO DOS 9 NÓS NO NAVEGADOR =================
         function construirItemAuditadoCompleto(omRaw, decisao) {
-            const infoArvore = cruzarAtivoComArvore(omRaw.ativo);
+            const ativoErp = String(omRaw.ativo_erp || omRaw.ativo || "ATIVO GERAL").trim();
+            const infoArvore = cruzarAtivoComArvore(ativoErp);
+            const ativoPrincipal = infoArvore.ativo_oficial || ativoErp || "ATIVO GERAL";
             const eq = inferirEquipeOM(omRaw.equipe || omRaw.tipo_manutencao, omRaw.problema, omRaw.servico);
             const tempo = Number(omRaw.tempo_min || 0);
             const cat = decisao.categoria || "AJUSTE";
@@ -2135,7 +2399,9 @@
             return {
                 om: String(omRaw.om),
                 data: omRaw.data || "2026-09-01",
-                ativo: omRaw.ativo || "ATIVO GERAL",
+                ativo: ativoPrincipal,
+                ativo_erp: ativoErp,
+                ativo_vinculo_status: infoArvore.status_vinculo || "PENDENTE",
                 setor: infoArvore.setor,
                 maquina: infoArvore.maquina,
                 equipamento: infoArvore.equipamento,
@@ -2158,6 +2424,35 @@
                 qualidade_nivel: qual.nivel,
                 qualidade_motivo: qual.motivo
             };
+        }
+
+        function reEnriquecerAtivosOmsAuditadas() {
+            if (!Array.isArray(omsAuditadas) || !omsAuditadas.length) return;
+            const catalogo = extrairCatalogoAtivosOficiais();
+            omsAuditadas.forEach(o => {
+                const ativoErp = String(o.ativo_erp || o.ativo || "ATIVO GERAL").trim();
+                const info = cruzarAtivoComArvore(ativoErp, catalogo);
+                o.ativo_erp = ativoErp;
+                o.ativo = info.ativo_oficial || ativoErp;
+                o.ativo_vinculo_status = info.status_vinculo || "PENDENTE";
+                o.setor = info.setor;
+                o.maquina = info.maquina;
+                o.equipamento = info.equipamento;
+                o.criticidade_linha = info.criticidade_linha;
+                o.vinculado_ob_linhas = info.vinculado_ob_linhas;
+            });
+            if (Array.isArray(neuralOrdensLive) && neuralOrdensLive.length) {
+                const mapByOm = new Map(omsAuditadas.map(x => [String(x.om), x]));
+                neuralOrdensLive.forEach(lo => {
+                    const ref = mapByOm.get(String(lo.om));
+                    if (ref) {
+                        lo.ativo = ref.ativo;
+                        lo.ativo_erp = ref.ativo_erp;
+                        lo.setor = ref.setor;
+                        lo.criticidade_linha = ref.criticidade_linha;
+                    }
+                });
+            }
         }
 
         function recalcularNosPosAuditoria() {
@@ -2260,6 +2555,7 @@
                 const ref = list[0];
                 return {
                     ativo,
+                    ativo_erp: ref.ativo_erp || "",
                     setor: ref.setor,
                     maquina: ref.maquina,
                     equipamento: ref.equipamento,
@@ -3010,7 +3306,9 @@ OMs:\n${JSON.stringify(listaPrompt)}`;
                     };
                 }
                 const dec = classificarOmNoMotorMaestri(om, cacheDedup);
-                if (["FAST_PATH_R0", "BIBLIOTECA_MEMORIA", "DEDUP_RODADA", "BLOQUEIO_APONTAMENTO", "PRE_AUDITADA", "SUPERVISOR"].includes(dec.origem)) {
+                const forcarGeminiTotal = cfg.modo === "gemini" && Boolean(cfg.key);
+                const isBloqOuPre = ["BLOQUEIO_APONTAMENTO", "PRE_AUDITADA", "SUPERVISOR"].includes(dec.origem);
+                if (isBloqOuPre || (!forcarGeminiTotal && ["FAST_PATH_R0", "BIBLIOTECA_MEMORIA", "DEDUP_RODADA"].includes(dec.origem))) {
                     fastCnt++;
                 } else {
                     loteCnt++;
@@ -3338,6 +3636,7 @@ OMs:\n${JSON.stringify(listaPrompt)}`;
                             <div class="flex flex-wrap items-center gap-1.5">
                                 <span class="font-mono text-xs font-extrabold text-white">OM #${escapeHtml(o.om)}</span>
                                 <span class="px-2 py-0.5 rounded-full bg-slate-800 text-sky-300 text-[10px] font-bold">${escapeHtml(o.ativo)}</span>
+                                ${o.ativo_erp && normKey(o.ativo_erp) !== normKey(o.ativo) ? `<span class="px-1.5 py-0.5 rounded bg-slate-950 border border-slate-700 font-mono text-[9px] text-slate-400">ERP: ${escapeHtml(o.ativo_erp)}</span>` : ""}
                                 <span class="px-2 py-0.5 rounded-full border text-[10px] font-extrabold ${catCls}">${escapeHtml(o.categoria)}${escapeHtml(bxTxt)}</span>
                             </div>
                             <div class="flex items-center gap-1.5 font-mono text-[10px] font-extrabold">
@@ -4076,7 +4375,7 @@ OMs:\n${JSON.stringify(listaPrompt)}`;
             e.preventDefault();
             window.onErpDragLeave();
             const file = e?.dataTransfer?.files?.[0];
-            if (file) processarArquivoFileObjErp(file);
+            if (file) processarArquivoFileObjErp(file, { abrirPreVoo: true });
         };
 
         function parseCsvTexto(bruto) {
@@ -4250,6 +4549,7 @@ OMs:\n${JSON.stringify(listaPrompt)}`;
                 }
                 if (hasVal) out.push(obj);
             }
+            extrairLinhasDeMatrizPlanilha.lastMeta = { hdrIdx, bannerLinhas: hdrIdx, totalMatriz: matriz.length, headersCount: headers.filter(Boolean).length };
             return out;
         }
         window.extrairLinhasDeMatrizPlanilha = extrairLinhasDeMatrizPlanilha;
@@ -4380,6 +4680,389 @@ OMs:\n${JSON.stringify(listaPrompt)}`;
             });
         }
 
+        let preVooEstado = null;
+        let preVooFiltroModo = "pendentes";
+
+        function analisarAtivosLotePreVoo(brutasList = []) {
+            const contagem = new Map();
+            brutasList.forEach(item => {
+                const raw = String(item.ativo || "").trim();
+                if (!raw) return;
+                contagem.set(raw, (contagem.get(raw) || 0) + 1);
+            });
+            const catalogo = extrairCatalogoAtivosOficiais();
+            return [...contagem.entries()]
+                .sort((a, b) => b[1] - a[1])
+                .map(([ativoErp, qtdOms]) => {
+                    const res = cruzarAtivoComArvore(ativoErp, catalogo);
+                    const selecionado = res.vinculado_ob_linhas ? res.ativo_oficial : "";
+                    return {
+                        ativoErp,
+                        qtdOms,
+                        status: res.status_vinculo || "PENDENTE",
+                        sugestao: res.ativo_oficial || "",
+                        setor: res.setor,
+                        criticidade: res.criticidade_linha,
+                        selecionado,
+                        candidatos: res.candidatos || []
+                    };
+                });
+        }
+
+        function atualizarDatalistCatalogoPreVoo() {
+            const dl = document.getElementById("preVooCatalogoDatalist");
+            if (!dl) return;
+            const catalogo = extrairCatalogoAtivosOficiais();
+            dl.innerHTML = catalogo.map(c =>
+                `<option value="${escapeHtml(c.label)}">${escapeHtml(c.area || "Produção")} • Classe ${escapeHtml(c.criticidade_linha)}</option>`
+            ).join("");
+        }
+
+        window.renderPreVooChecklist = () => {
+            if (!preVooEstado) return;
+            const d = preVooEstado.diag;
+            const grid = document.getElementById("preVooChecklistGrid");
+            if (!grid) return;
+
+            const cards = [
+                {
+                    ok: true,
+                    badge: "ESTRUTURA OK",
+                    cls: "border-emerald-200 bg-emerald-50/70",
+                    bCls: "bg-emerald-100 text-emerald-800",
+                    titulo: `Cabeçalho na Linha ${d.hdrLinha1Based}`,
+                    desc: `${d.bannerLinhas > 0 ? `${d.bannerLinhas} linha(s) de banner/emissão ignoradas • ` : ""}${d.totalBrutasPlanilha} linha(s) de OS lidas (${d.formato}).`
+                },
+                {
+                    ok: d.aprovadas > 0,
+                    badge: "FILTRO NÓ 1",
+                    cls: "border-sky-200 bg-sky-50/70",
+                    bCls: "bg-sky-100 text-sky-800",
+                    titulo: `${d.aprovadas} Concluída(s) Válida(s)`,
+                    desc: `${d.totalIgnoradas} filtrada(s): ${d.ignSolicitada} Solicitadas, ${d.ignCancelada} Canceladas, ${d.ignAndamento + d.ignAberta} Abertas/Andamento.`
+                },
+                {
+                    ok: d.semTempo === 0,
+                    badge: d.semTempo > 0 ? "ATENÇÃO TEMPO" : "DATAS & TEMPO",
+                    cls: d.semTempo > 0 ? "border-amber-200 bg-amber-50/70" : "border-emerald-200 bg-emerald-50/70",
+                    bCls: d.semTempo > 0 ? "bg-amber-100 text-amber-800" : "bg-emerald-100 text-emerald-800",
+                    titulo: d.dataMin && d.dataMax ? `${d.dataMin.slice(0, 10)} → ${d.dataMax.slice(0, 10)}` : `Ciclo ${preVooEstado.periodoDetectado}`,
+                    desc: `Tempo médio: ${d.tempoMedioMin} min${d.semTempo > 0 ? ` • ${d.semTempo} OM(s) com 0 min` : " • Todas com duração validada"}.`
+                },
+                {
+                    ok: d.servEmBranco === 0,
+                    badge: d.servEmBranco > 0 ? "REVISÃO MANUAL" : "APONTAMENTO OK",
+                    cls: d.servEmBranco > 0 ? "border-amber-200 bg-amber-50/70" : "border-emerald-200 bg-emerald-50/70",
+                    bCls: d.servEmBranco > 0 ? "bg-amber-100 text-amber-800" : "bg-emerald-100 text-emerald-800",
+                    titulo: `${d.servPreenchido}/${d.aprovadas} c/ Serviço (${d.pctServico}%)`,
+                    desc: d.servEmBranco > 0
+                        ? `${d.servEmBranco} OM(s) vieram com Serviço vazio no ERP e irão direto para Revisão no Nó 5.`
+                        : "100% das ordens concluídas trazem descrição do serviço executado."
+                }
+            ];
+
+            grid.innerHTML = cards.map(c => `
+                <div class="p-3.5 rounded-2xl border ${c.cls} space-y-1">
+                    <div class="flex items-center justify-between gap-2">
+                        <span class="px-2 py-0.5 rounded-full text-[9px] font-extrabold uppercase ${c.bCls}">${c.badge}</span>
+                        ${c.ok ? SVG_ICO.check : SVG_ICO.alert}
+                    </div>
+                    <div class="text-xs sm:text-sm font-extrabold text-slate-900">${escapeHtml(c.titulo)}</div>
+                    <div class="text-[11px] font-semibold text-slate-600 leading-snug">${escapeHtml(c.desc)}</div>
+                </div>`).join("");
+
+            const alDup = document.getElementById("preVooAlertaDuplicado");
+            if (alDup) {
+                alDup.hidden = !preVooEstado.jaAuditado;
+                alDup.classList.toggle("hidden", !preVooEstado.jaAuditado);
+            }
+        };
+
+        window.renderPreVooAtivos = () => {
+            if (!preVooEstado) return;
+            atualizarDatalistCatalogoPreVoo();
+            // Reavalia apenas os que ainda não foram editados manualmente nesta sessão do modal
+            const catalogo = extrairCatalogoAtivosOficiais();
+            preVooEstado.analiseAtivos.forEach(item => {
+                if (item.editadoNoModal) return;
+                const res = cruzarAtivoComArvore(item.ativoErp, catalogo);
+                item.status = res.status_vinculo || "PENDENTE";
+                item.sugestao = res.ativo_oficial || "";
+                item.setor = res.setor;
+                item.criticidade = res.criticidade_linha;
+                item.candidatos = res.candidatos || [];
+                item.selecionado = res.vinculado_ob_linhas ? res.ativo_oficial : "";
+            });
+
+            const lista = preVooEstado.analiseAtivos;
+            const totAtivos = lista.length;
+            const verdCnt = lista.filter(x => x.status === "DEPARA" || x.status === "AUTO_EXATO").length;
+            const sugCnt = lista.filter(x => x.status === "SUGESTAO").length;
+            const pendCnt = lista.filter(x => x.status === "PENDENTE").length;
+            const omsVinculadas = lista.filter(x => x.status !== "PENDENTE").reduce((s, x) => s + x.qtdOms, 0);
+
+            const kpiEl = document.getElementById("preVooAtivosKpis");
+            if (kpiEl) {
+                kpiEl.innerHTML = [
+                    `<span class="px-2.5 py-1 rounded-full bg-emerald-100 text-emerald-900 text-[10px] font-extrabold">${verdCnt} Exato(s) / De-Para</span>`,
+                    `<span class="px-2.5 py-1 rounded-full bg-amber-100 text-amber-900 text-[10px] font-extrabold">${sugCnt} Sugestão / Barra (1/2)</span>`,
+                    `<span class="px-2.5 py-1 rounded-full bg-slate-200 text-slate-800 text-[10px] font-extrabold">${pendCnt} Sem vínculo em ob_linhas</span>`,
+                    `<span class="px-2.5 py-1 rounded-full bg-sky-100 text-sky-900 text-[10px] font-extrabold">${omsVinculadas}/${preVooEstado.diag.aprovadas} OMs mapeadas</span>`
+                ].join("");
+            }
+
+            const tbody = document.getElementById("preVooTabelaAtivosBody");
+            if (!tbody) return;
+            const exibidos = lista
+                .map((x, idx) => ({ ...x, idx }))
+                .filter(x => preVooFiltroModo === "todos" || x.status === "SUGESTAO" || x.status === "PENDENTE");
+
+            if (!exibidos.length) {
+                tbody.innerHTML = `<tr><td colspan="4" class="py-6 text-center text-xs font-extrabold text-emerald-700">100% dos ${totAtivos} ativos deste lote já estão vinculados à árvore oficial ob_linhas!</td></tr>`;
+            } else {
+                const stBadge = {
+                    DEPARA: '<span class="px-2 py-0.5 rounded-full bg-indigo-100 text-indigo-800 text-[10px] font-extrabold">De-Para Salvo</span>',
+                    AUTO_EXATO: '<span class="px-2 py-0.5 rounded-full bg-emerald-100 text-emerald-800 text-[10px] font-extrabold">Auto Exato</span>',
+                    SUGESTAO: '<span class="px-2 py-0.5 rounded-full bg-amber-100 text-amber-900 text-[10px] font-extrabold">Sugestão / Barra</span>',
+                    PENDENTE: '<span class="px-2 py-0.5 rounded-full bg-slate-200 text-slate-700 text-[10px] font-extrabold">Sem Vínculo</span>'
+                };
+                tbody.innerHTML = exibidos.map(row => {
+                    const chips = (row.candidatos || []).slice(0, 3).map(c =>
+                        `<button type="button" onclick="aplicarSugestaoChipPreVoo(${row.idx}, '${escapeHtml(c.label).replace(/'/g, "\\'")}')" class="px-2 py-0.5 rounded bg-sky-50 hover:bg-sky-100 text-sky-800 border border-sky-200 text-[9px] font-bold transition-colors" title="${escapeHtml(c.area)} • ${c.score} pts">${escapeHtml(c.label)}</button>`
+                    ).join("");
+                    return `
+                        <tr class="hover:bg-slate-50/80 border-b border-slate-100">
+                            <td class="py-2.5 px-3">
+                                <div class="font-extrabold text-slate-900 text-xs">${escapeHtml(row.ativoErp)}</div>
+                                <div class="text-[10px] font-mono font-bold text-slate-500">${row.qtdOms} OM(s) • Fallback: ${escapeHtml(row.setor)} (Cl. ${escapeHtml(row.criticidade)})</div>
+                            </td>
+                            <td class="py-2.5 px-2 text-center whitespace-nowrap">${stBadge[row.status] || stBadge.PENDENTE}</td>
+                            <td class="py-2.5 px-2">
+                                <input type="text" list="preVooCatalogoDatalist" value="${escapeHtml(row.selecionado)}" onchange="atualizarSelecaoDeParaPreVoo(${row.idx}, this.value)" oninput="atualizarSelecaoDeParaPreVoo(${row.idx}, this.value)" placeholder="Manter nome ERP ou escolher de ob_linhas..." class="input-clean py-1.5 px-2.5 text-xs font-bold w-full">
+                                ${chips ? `<div class="flex flex-wrap gap-1 mt-1">${chips}</div>` : ""}
+                            </td>
+                            <td class="py-2.5 px-2 text-right whitespace-nowrap">
+                                <button type="button" onclick="salvarLinhaDeParaPreVoo(${row.idx})" class="px-2.5 py-1.5 rounded-xl bg-slate-900 hover:bg-slate-800 text-white text-[10px] font-extrabold">Salvar De-Para</button>
+                            </td>
+                        </tr>`;
+                }).join("");
+            }
+
+            const rodape = document.getElementById("preVooRodapeResumo");
+            if (rodape) {
+                rodape.innerText = pendCnt > 0
+                    ? `Modo Flexível: ${pendCnt} ativo(s) sem vínculo usarão o nome do ERP com criticidade inferida, ou você pode mapeá-los acima.`
+                    : "Todos os ativos estão conciliados com a árvore Gestão de Ativos (ob_linhas).";
+            }
+        };
+
+        window.atualizarFiltroPreVooAtivos = (modo) => {
+            preVooFiltroModo = modo === "todos" ? "todos" : "pendentes";
+            const selF = document.getElementById("preVooFiltroAtivos");
+            if (selF) selF.value = preVooFiltroModo;
+            renderPreVooAtivos();
+        };
+
+        window.atualizarSelecaoDeParaPreVoo = (idx, val) => {
+            if (!preVooEstado?.analiseAtivos?.[idx]) return;
+            preVooEstado.analiseAtivos[idx].selecionado = String(val || "").trim();
+            preVooEstado.analiseAtivos[idx].editadoNoModal = true;
+        };
+
+        window.aplicarSugestaoChipPreVoo = (idx, label) => {
+            if (!preVooEstado?.analiseAtivos?.[idx]) return;
+            preVooEstado.analiseAtivos[idx].selecionado = label;
+            preVooEstado.analiseAtivos[idx].editadoNoModal = true;
+            salvarLinhaDeParaPreVoo(idx);
+        };
+
+        function gravarEscolhaDePara(ativoErp, selecionadoLabel, origemTag = "MANUAL") {
+            const labelLimpo = String(selecionadoLabel || "").trim();
+            const keyErp = normKey(ativoErp);
+            if (!keyErp) return false;
+            if (!labelLimpo) {
+                delete deParaAtivosMap[keyErp];
+                return false;
+            }
+            const catalogo = extrairCatalogoAtivosOficiais();
+            const matchCat = catalogo.find(c => normKey(c.label) === normKey(labelLimpo))
+                || catalogo.find(c => normKey(c.maquina) === normKey(labelLimpo));
+            if (matchCat) {
+                deParaAtivosMap[keyErp] = {
+                    area: matchCat.area,
+                    maquina: matchCat.maquina,
+                    equipamento: matchCat.equipamento,
+                    criticidade_linha: matchCat.criticidade_linha,
+                    label: matchCat.label,
+                    origem: origemTag,
+                    ativo_erp: ativoErp
+                };
+            } else {
+                const partes = labelLimpo.split(/[›>-]/).map(s => s.trim()).filter(Boolean);
+                deParaAtivosMap[keyErp] = {
+                    area: "Produção",
+                    maquina: partes[0] || labelLimpo,
+                    equipamento: partes[1] || partes[0] || labelLimpo,
+                    criticidade_linha: "A",
+                    label: labelLimpo,
+                    origem: origemTag,
+                    ativo_erp: ativoErp
+                };
+            }
+            return true;
+        }
+
+        window.salvarLinhaDeParaPreVoo = async (idx) => {
+            const row = preVooEstado?.analiseAtivos?.[idx];
+            if (!row) return;
+            const gravou = gravarEscolhaDePara(row.ativoErp, row.selecionado, "MANUAL");
+            row.editadoNoModal = false;
+            await salvarDeParaAtivosPersistente();
+            renderPreVooAtivos();
+            showToast(gravou ? `De-Para salvo: "${row.ativoErp}" → "${row.selecionado}"` : `Vínculo manual removido de "${row.ativoErp}".`, "success");
+        };
+
+        window.atualizarModoIaPreVoo = () => {
+            const sel = document.getElementById("preVooSelectModoIa");
+            const st = document.getElementById("preVooStatusIaTxt");
+            const cfg = carregarCofreIaLocal();
+            const modoSel = sel ? sel.value : cfg.modo;
+            if (st) {
+                if (modoSel === "gemini" && !cfg.key) {
+                    st.innerText = "Atenção: você escolheu Gemini Flash Total, mas nenhuma chave Gemini API está salva no Admin Master. Sem chave, o Nó 3 usará o motor determinístico local.";
+                } else if (cfg.key) {
+                    st.innerText = modoSel === "deterministico"
+                        ? "Chave Gemini presente, porém modo 100% Custo Zero (Determinístico) selecionado para esta rodada."
+                        : `Chave Gemini ativa (${cfg.key.slice(0, 6)}...): Nó 3 enviará lotes de ${cfg.lote} OMs para o Gemini Flash.`;
+                } else {
+                    st.innerText = "Cofre sem chave Gemini configurada: Fast-Path R$ 0 + Motor Determinístico PCM (cadastre no Admin Master se desejar chamar o Gemini).";
+                }
+            }
+        };
+
+        window.autoMapearAtivosComGeminiPreVoo = async () => {
+            if (!preVooEstado) return;
+            const cfg = carregarCofreIaLocal();
+            const catalogo = extrairCatalogoAtivosOficiais();
+            const pendentes = preVooEstado.analiseAtivos.filter(x => x.status === "SUGESTAO" || x.status === "PENDENTE");
+            if (!pendentes.length) {
+                showToast("Nenhum ativo pendente ou ambíguo para mapear!", "info");
+                return;
+            }
+            if (!cfg.key || typeof fetch !== "function") {
+                showToast("Chave Gemini não configurada no Admin Master. Preencha manualmente ou cadastre a chave.", "info");
+                return;
+            }
+            if (!catalogo.length) {
+                showToast("Árvore ob_linhas vazia offline — aguarde sincronização com o Firestore.", "error");
+                return;
+            }
+            const btn = document.getElementById("btnPreVooGeminiAtivos");
+            if (btn) btn.disabled = true;
+            try {
+                const promptAtivos = `Você é especialista em Gestão de Ativos industriais (PCM Cepêra).
+Relacione cada nome de ativo vindo do ERP com o melhor ativo oficial cadastrado em ob_linhas abaixo (ou null se for genérico predial/setor sem máquina específica).
+Lembre-se que o ERP às vezes inverte Máquina-Equipamento ou junta linhas com barra (ex: "LINEAR 1/2 - ROTULADORA PELATINA" pertence às Lineares).
+Ativos oficiais ob_linhas:\n${JSON.stringify(catalogo.slice(0, 220).map(c => c.label))}
+Ativos pendentes do ERP:\n${JSON.stringify(pendentes.map(p => p.ativoErp))}
+Responda SOMENTE JSON Array: [{"ativo_erp":"...","catalogo_label":"..." | null,"confianca":4}]`;
+
+                const resp = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${encodeURIComponent(cfg.key)}`, {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify({
+                        contents: [{ parts: [{ text: promptAtivos }] }],
+                        generationConfig: { temperature: 0.1, responseMimeType: "application/json" }
+                    })
+                });
+                if (!resp.ok) throw new Error(`HTTP ${resp.status}`);
+                const data = await resp.json();
+                const txt = data?.candidates?.[0]?.content?.parts?.[0]?.text || "[]";
+                const parsed = JSON.parse(txt.replace(/```json|```/g, "").trim());
+                let mappedCnt = 0;
+                if (Array.isArray(parsed)) {
+                    parsed.forEach(item => {
+                        if (item?.ativo_erp && item?.catalogo_label) {
+                            const row = preVooEstado.analiseAtivos.find(x => normKey(x.ativoErp) === normKey(item.ativo_erp));
+                            if (row) {
+                                row.selecionado = String(item.catalogo_label).trim();
+                                gravarEscolhaDePara(row.ativoErp, row.selecionado, "IA_GEMINI");
+                                row.editadoNoModal = false;
+                                mappedCnt++;
+                            }
+                        }
+                    });
+                }
+                await salvarDeParaAtivosPersistente();
+                renderPreVooAtivos();
+                showToast(`Gemini IA mapeou ${mappedCnt} ativo(s) ambíguo(s) com ob_linhas!`, "success");
+            } catch (_) {
+                showToast("Falha ao consultar Gemini Flash para De-Para de ativos.", "error");
+            } finally {
+                if (btn) btn.disabled = false;
+            }
+        };
+
+        function abrirModalPreProcessamentoErp(estado) {
+            preVooEstado = estado;
+            preVooFiltroModo = "pendentes";
+            const sub = document.getElementById("preVooSubtitleFile");
+            if (sub) sub.innerText = `${estado.nomeArquivo || "Planilha ERP"} • ${estado.diag.aprovadas} OM(s) prontas para orquestração`;
+            const inpP = document.getElementById("preVooInputPeriodo");
+            if (inpP) inpP.value = estado.periodoDetectado || getPeriodoAtualPadrao();
+            const selF = document.getElementById("preVooFiltroAtivos");
+            if (selF) selF.value = "pendentes";
+            const cfg = carregarCofreIaLocal();
+            const selM = document.getElementById("preVooSelectModoIa");
+            if (selM) selM.value = cfg.modo || "auto";
+
+            renderPreVooChecklist();
+            atualizarModoIaPreVoo();
+            renderPreVooAtivos();
+            abrirModal("modalPreProcessamentoErp");
+        }
+
+        window.confirmarPreVooEIniciarOrquestracao = async () => {
+            if (!preVooEstado) return;
+            const estado = preVooEstado;
+            // Salva eventuais edições manuais ainda não salvas na tabela De-Para
+            let alterouDePara = false;
+            estado.analiseAtivos.forEach(row => {
+                if (row.editadoNoModal) {
+                    gravarEscolhaDePara(row.ativoErp, row.selecionado, "MANUAL");
+                    alterouDePara = true;
+                }
+            });
+            if (alterouDePara) await salvarDeParaAtivosPersistente();
+
+            const periodoEscolhido = (document.getElementById("preVooInputPeriodo")?.value || estado.periodoDetectado || getPeriodoAtualPadrao()).trim();
+            const inpMainP = document.getElementById("inputPeriodoRodada");
+            if (inpMainP) inpMainP.value = periodoEscolhido;
+
+            const modoSel = document.getElementById("preVooSelectModoIa")?.value;
+            if (modoSel) {
+                safeStorage.set("cepera_maestri_modo_ia", modoSel);
+                carregarCofreIaLocal();
+            }
+
+            fecharModal("modalPreProcessamentoErp");
+            preVooEstado = null;
+
+            rodadaVigenteInfo = {
+                periodo: periodoEscolhido,
+                status: "ativo",
+                arquivoNome: estado.nomeArquivo || "Planilha_ERP",
+                tipo: "VIGENTE",
+                hashLote: ""
+            };
+            omsBrutasCarregadas = estado.novasBrutas;
+            return await executarPipelineCompletoUI({
+                animar: true,
+                ...(estado.jaAuditado ? { forcarReavaliacao: true } : {}),
+                ...(estado.opts || {})
+            });
+        };
+
         window.carregarDadosPlanilhaBrutaOuAuditada = async (rows, nomeArquivo = "", opts = {}) => {
             if (!Array.isArray(rows) || !rows.length) {
                 showToast("Nenhum registro válido encontrado no arquivo.", "error");
@@ -4387,29 +5070,38 @@ OMs:\n${JSON.stringify(listaPrompt)}`;
             }
             let listaRows = rows;
             const keysPrimeira = Object.keys(listaRows[0] || {});
+            let metaHdr = opts._hdrMeta || extrairLinhasDeMatrizPlanilha.lastMeta || null;
             if (keysPrimeira.some(k => /^__EMPTY/.test(k))) {
                 const matRec = [keysPrimeira, ...listaRows.map(r => keysPrimeira.map(k => r?.[k] ?? ""))];
                 const reext = extrairLinhasDeMatrizPlanilha(matRec);
-                if (reext.length) listaRows = reext;
+                if (reext.length) {
+                    listaRows = reext;
+                    metaHdr = extrairLinhasDeMatrizPlanilha.lastMeta || metaHdr;
+                }
             }
             const first = listaRows[0];
             const isPreAudited = Boolean(lerCampoPlanilha(first, ["Categoria_IA", "categoria"]));
             const temColStatus = listaRows.slice(0, 8).some(x => lerCampoPlanilha(x, ["Status", "Status_OM", "status", "Situacao", "Situacao_OM"]) !== "");
             const novasBrutas = [];
             const vistas = new Set();
+            const statsFiltro = {
+                ignSolicitada: 0, ignCancelada: 0, ignAndamento: 0, ignAberta: 0,
+                ignOutrasStatus: 0, ignDuplicada: 0, ignVazia: 0
+            };
 
             listaRows.forEach((r, idx) => {
-                if (!r || typeof r !== "object") return;
+                if (!r || typeof r !== "object") { statsFiltro.ignVazia++; return; }
                 const omCol = lerCampoPlanilha(r, ["OM", "om", "Ordem", "ordem", "Num_OM", "Numero_OM", "N_OM", "Nº OM", "N° OM"]);
                 const ativoRaw = lerCampoPlanilha(r, ["Ativo", "ativo", "Descrição (Ativo)", "Descricao (Ativo)", "Equipamento", "Maquina"]);
                 const problemaRaw = lerCampoPlanilha(r, ["Problema", "problema", "Descrição", "Descricao", "Descrição (Problema)", "Defeito"]);
                 const servicoRaw = lerCampoPlanilha(r, ["Servico", "servico", "Descrição do Serviço", "Descricao do Servico", "Serviço Executado", "Solucao"]);
 
-                if (!omCol && !ativoRaw && !problemaRaw && !servicoRaw) return;
+                if (!omCol && !ativoRaw && !problemaRaw && !servicoRaw) { statsFiltro.ignVazia++; return; }
                 const omRaw = String(omCol || (idx + 1)).replace(/\.0+$/, "").trim();
                 const mNum = omRaw.match(/\d+/);
                 const omId = mNum ? mNum[0] : omRaw;
-                if (!omId || /^(?:om|ordem)$/i.test(omId) || vistas.has(omId)) return;
+                if (!omId || /^(?:om|ordem)$/i.test(omId)) { statsFiltro.ignVazia++; return; }
+                if (vistas.has(omId)) { statsFiltro.ignDuplicada++; return; }
 
                 const statusRaw = lerCampoPlanilha(r, ["Status", "Status_OM", "status", "Situacao", "Situacao_OM"]) || (temColStatus ? "" : "Concluída");
                 const stNorm = normKey(statusRaw);
@@ -4422,18 +5114,12 @@ OMs:\n${JSON.stringify(listaPrompt)}`;
                 const tempoMin = tempoParada > 0 ? tempoParada : tempoTrab;
 
                 if (!isPreAudited) {
-                    if (
-                        stNorm.includes("solicitad")
-                        || stNorm.includes("cancelad")
-                        || stNorm.includes("abert")
-                        || stNorm.includes("pendent")
-                        || stNorm.includes("andament")
-                        || stNorm.includes("aguardand")
-                        || stNorm.includes("reprovad")
-                    ) {
-                        return;
-                    }
+                    if (stNorm.includes("solicitad")) { statsFiltro.ignSolicitada++; return; }
+                    if (stNorm.includes("cancelad") || stNorm.includes("reprovad")) { statsFiltro.ignCancelada++; return; }
+                    if (stNorm.includes("andament") || stNorm.includes("aguardand")) { statsFiltro.ignAndamento++; return; }
+                    if (stNorm.includes("abert") || stNorm.includes("pendent")) { statsFiltro.ignAberta++; return; }
                     if (temColStatus && !stNorm.includes("concluid") && !stNorm.includes("encerrad") && !stNorm.includes("finalizad") && !stNorm.includes("fechad") && tempoMin <= 0) {
+                        statsFiltro.ignOutrasStatus++;
                         return;
                     }
                 }
@@ -4476,8 +5162,44 @@ OMs:\n${JSON.stringify(listaPrompt)}`;
             const inpP = document.getElementById("inputPeriodoRodada");
             if (inpP) inpP.value = periodoDetectado;
             const hashNovo = calcularAssinaturaDataset(novasBrutas);
-
             const jaAud = Boolean((omsAuditadas.length && rodadaVigenteInfo.hashLote === hashNovo) || lotesAuditadosMap[hashNovo]);
+
+            if (opts?.abrirPreVoo && !isPreAudited) {
+                const datasValidas = novasBrutas.map(x => x.data).filter(d => /^\d{4}-\d{2}-\d{2}/.test(d)).sort();
+                const servPreenchido = novasBrutas.filter(x => x.servico && x.servico.trim().length >= 4).length;
+                const semTempo = novasBrutas.filter(x => Number(x.tempo_min || 0) <= 0).length;
+                const somaTempo = novasBrutas.reduce((s, x) => s + Number(x.tempo_min || 0), 0);
+                const extArq = String(nomeArquivo || "").split(".").pop().toUpperCase() || "PLANILHA";
+                const diag = {
+                    formato: extArq,
+                    hdrLinha1Based: metaHdr ? (metaHdr.hdrIdx + 1) : 1,
+                    bannerLinhas: metaHdr ? metaHdr.bannerLinhas : 0,
+                    totalBrutasPlanilha: listaRows.length,
+                    aprovadas: novasBrutas.length,
+                    ...statsFiltro,
+                    totalIgnoradas: statsFiltro.ignSolicitada + statsFiltro.ignCancelada + statsFiltro.ignAndamento + statsFiltro.ignAberta + statsFiltro.ignOutrasStatus + statsFiltro.ignDuplicada,
+                    dataMin: datasValidas[0] || "",
+                    dataMax: datasValidas[datasValidas.length - 1] || "",
+                    semTempo,
+                    tempoMedioMin: novasBrutas.length ? Math.round(somaTempo / novasBrutas.length) : 0,
+                    servPreenchido,
+                    servEmBranco: novasBrutas.length - servPreenchido,
+                    pctServico: novasBrutas.length ? Math.round((servPreenchido / novasBrutas.length) * 100) : 100
+                };
+                const analiseAtivos = analisarAtivosLotePreVoo(novasBrutas);
+                abrirModalPreProcessamentoErp({
+                    novasBrutas,
+                    diag,
+                    analiseAtivos,
+                    nomeArquivo: nomeArquivo || "Planilha_ERP",
+                    periodoDetectado,
+                    hashNovo,
+                    jaAuditado: jaAud,
+                    opts
+                });
+                return { preVooAberto: true, aprovadas: novasBrutas.length, ignoradas: diag.totalIgnoradas, ativosAnalise: analiseAtivos };
+            }
+
             if (jaAud && !opts?.forcarReavaliacao) {
                 return await restaurarOuAlertarLoteJaAuditado({
                     brutas: novasBrutas,
@@ -4500,7 +5222,7 @@ OMs:\n${JSON.stringify(listaPrompt)}`;
             return await executarPipelineCompletoUI({ animar: true, ...(opts || {}) });
         };
 
-        async function processarArquivoFileObjErp(file) {
+        async function processarArquivoFileObjErp(file, opts = {}) {
             if (!file) return;
             const lname = file.name.toLowerCase();
             if (lname.endsWith(".xlsx") || lname.endsWith(".xls")) {
@@ -4527,7 +5249,7 @@ OMs:\n${JSON.stringify(listaPrompt)}`;
                         matriz = XLSXLib.utils.sheet_to_json(wb.Sheets[firstSheet], { header: 1, defval: "", raw: true });
                     }
                     const rows = extrairLinhasDeMatrizPlanilha(matriz);
-                    await carregarDadosPlanilhaBrutaOuAuditada(rows, file.name);
+                    return await carregarDadosPlanilhaBrutaOuAuditada(rows, file.name, { _hdrMeta: extrairLinhasDeMatrizPlanilha.lastMeta, ...opts });
                 } catch (_) {
                     showToast("Não foi possível ler o .xlsx offline. Exporte em .CSV no ERP ou conecte à internet.", "error");
                 }
@@ -4541,11 +5263,11 @@ OMs:\n${JSON.stringify(listaPrompt)}`;
                     if (lname.endsWith(".json")) {
                         const parsed = JSON.parse(txt);
                         if (Array.isArray(parsed.ordens)) {
-                            await carregarDadosPlanilhaBrutaOuAuditada(parsed.ordens, file.name);
+                            await carregarDadosPlanilhaBrutaOuAuditada(parsed.ordens, file.name, opts);
                             return;
                         }
                         if (Array.isArray(parsed)) {
-                            await carregarDadosPlanilhaBrutaOuAuditada(parsed, file.name);
+                            await carregarDadosPlanilhaBrutaOuAuditada(parsed, file.name, opts);
                             return;
                         }
                     }
@@ -4558,11 +5280,11 @@ OMs:\n${JSON.stringify(listaPrompt)}`;
                             showToast(`${lines.length} regras carregadas no Bibliotecário (Nó 6)!`, "success");
                             return;
                         }
-                        await carregarDadosPlanilhaBrutaOuAuditada(lines, file.name);
+                        await carregarDadosPlanilhaBrutaOuAuditada(lines, file.name, opts);
                         return;
                     }
                     const rows = parseCsvTexto(txt);
-                    await carregarDadosPlanilhaBrutaOuAuditada(rows, file.name);
+                    await carregarDadosPlanilhaBrutaOuAuditada(rows, file.name, { _hdrMeta: extrairLinhasDeMatrizPlanilha.lastMeta, ...opts });
                 } catch (_) {
                     showToast("Erro ao processar planilha. Verifique o formato (.CSV, .XLSX ou .JSON).", "error");
                 }
@@ -4573,7 +5295,7 @@ OMs:\n${JSON.stringify(listaPrompt)}`;
 
         window.processarArquivoUploadErp = (event) => {
             const file = event?.target?.files?.[0];
-            if (file) processarArquivoFileObjErp(file);
+            if (file) processarArquivoFileObjErp(file, { abrirPreVoo: true });
             if (event?.target) event.target.value = "";
         };
 
@@ -4897,7 +5619,7 @@ OMs:\n${JSON.stringify(listaPrompt)}`;
                 if (fSev && o.severidade !== fSev) return false;
                 if (fOrig && o.origem !== fOrig) return false;
                 if (busca) {
-                    const h = normKey(`${o.om} ${o.ativo} ${o.setor} ${o.problema} ${o.servico} ${o.categoria} ${o.justificativa}`);
+                    const h = normKey(`${o.om} ${o.ativo} ${o.ativo_erp || ""} ${o.setor} ${o.problema} ${o.servico} ${o.categoria} ${o.justificativa}`);
                     if (!h.includes(busca)) return false;
                 }
                 return true;
@@ -4944,6 +5666,7 @@ OMs:\n${JSON.stringify(listaPrompt)}`;
                         <td class="py-3 px-3">
                             <div class="font-extrabold text-slate-900">${escapeHtml(o.ativo)}</div>
                             <div class="text-[10px] font-bold text-slate-500">${escapeHtml(o.setor)} • Linha Classe ${escapeHtml(o.criticidade_linha)}</div>
+                            ${o.ativo_erp && normKey(o.ativo_erp) !== normKey(o.ativo) ? `<div class="inline-block mt-0.5 px-1.5 py-0.5 rounded bg-slate-100 border border-slate-200 font-mono text-[9px] font-bold text-slate-500">ERP: ${escapeHtml(o.ativo_erp)}</div>` : ""}
                         </td>
                         <td class="py-3 px-3 max-w-md">
                             <div class="font-bold text-slate-800">Prob: ${escapeHtml(o.problema)}</div>
@@ -5014,7 +5737,11 @@ OMs:\n${JSON.stringify(listaPrompt)}`;
                             </div>
                             <span class="text-[11px] font-mono font-bold text-slate-500">${escapeHtml(o.data)} • ${o.tempo_min} min</span>
                         </div>
-                        <div class="text-sm font-extrabold text-slate-900">${escapeHtml(o.ativo)} <span class="text-xs font-bold text-slate-500">(${escapeHtml(o.setor)} • Linha ${escapeHtml(o.criticidade_linha)})</span></div>
+                        <div class="text-sm font-extrabold text-slate-900">
+                            <span>${escapeHtml(o.ativo)}</span>
+                            <span class="text-xs font-bold text-slate-500">(${escapeHtml(o.setor)} • Linha ${escapeHtml(o.criticidade_linha)})</span>
+                            ${o.ativo_erp && normKey(o.ativo_erp) !== normKey(o.ativo) ? `<div class="inline-block ml-1 px-1.5 py-0.5 rounded bg-slate-100 border border-slate-200 font-mono text-[9px] font-bold text-slate-500">ERP: ${escapeHtml(o.ativo_erp)}</div>` : ""}
+                        </div>
                         <div class="p-3 rounded-2xl bg-slate-50 border border-slate-200 text-xs space-y-1">
                             <div><strong class="text-slate-700">Problema:</strong> ${escapeHtml(o.problema)}</div>
                             <div><strong class="text-slate-700">Serviço Executado:</strong> ${escapeHtml(o.servico || "(EM BRANCO / INSUFICIENTE)")}</div>
@@ -5272,6 +5999,7 @@ OMs:\n${JSON.stringify(listaPrompt)}`;
                     <td class="py-3 px-3">
                         <div class="font-extrabold text-slate-900">#${i + 1} ${escapeHtml(r.ativo)}</div>
                         <div class="text-[10px] font-bold text-slate-500">${escapeHtml(r.setor)} • ${r.total_oms} OM(s) na rodada</div>
+                        ${r.ativo_erp && normKey(r.ativo_erp) !== normKey(r.ativo) ? `<div class="inline-block mt-0.5 px-1.5 py-0.5 rounded bg-slate-100 border border-slate-200 font-mono text-[9px] font-bold text-slate-500">ERP: ${escapeHtml(r.ativo_erp)}</div>` : ""}
                     </td>
                     <td class="py-3 px-3 text-center">
                         <span class="px-2.5 py-0.5 rounded-full text-[10px] font-extrabold ${r.criticidade_linha === "A" ? "bg-rose-100 text-rose-800" : "bg-amber-100 text-amber-800"}">Classe ${escapeHtml(r.criticidade_linha)}</span>
@@ -5714,11 +6442,13 @@ OMs:\n${JSON.stringify(listaPrompt)}`;
             main.hidden = false; main.classList.remove("hidden");
             aplicarPerfilNaInterface();
 
+            carregarDeParaAtivosLocal();
             if (!bibliotecaCorrecoes.length) {
                 bibliotecaCorrecoes = SEED_BIBLIOTECA_INICIAL.map(x => ({ ...x }));
             }
             const tinhaVigenteSalva = restaurarEstadoPersistidoMaestri();
             if (tinhaVigenteSalva && omsAuditadas.length) {
+                reEnriquecerAtivosOmsAuditadas();
                 recalcularNosPosAuditoria();
                 renderCurrentView();
                 aplicarEstadoFinalRedeNeural({ total: omsAuditadas.length, fastCnt: custoRodada.oms_fast_path_r0, loteCnt: custoRodada.oms_ia_lote, chamadas: custoRodada.chamadas_ia, forcarSyncStream: true });
@@ -5747,10 +6477,34 @@ OMs:\n${JSON.stringify(listaPrompt)}`;
                 }, () => {});
             } catch (_) {}
 
+            try {
+                onSnapshot(refAtivosDePara, snapDoc => {
+                    const data = (snapDoc && typeof snapDoc.exists === "function" && snapDoc.exists()) ? snapDoc.data() : null;
+                    if (data && data.mappings && typeof data.mappings === "object") {
+                        deParaAtivosMap = { ...data.mappings, ...deParaAtivosMap };
+                        safeStorage.set("cepera_maestri_ativos_depara", JSON.stringify(deParaAtivosMap));
+                        if (omsAuditadas.length) {
+                            reEnriquecerAtivosOmsAuditadas();
+                            recalcularNosPosAuditoria();
+                            renderCurrentView();
+                        }
+                        if (!document.getElementById("modalPreProcessamentoErp")?.hidden) {
+                            renderPreVooAtivos();
+                        }
+                    }
+                }, () => {});
+            } catch (_) {}
+
             onSnapshot(colLinhas, snap => {
                 rawLinhasDocs = snap.docs.map(d => ({ id: d.id, ...d.data() }));
+                if (omsAuditadas.length) {
+                    reEnriquecerAtivosOmsAuditadas();
+                }
                 recalcularNosPosAuditoria();
                 renderCurrentView();
+                if (!document.getElementById("modalPreProcessamentoErp")?.hidden) {
+                    renderPreVooAtivos();
+                }
             }, () => {});
 
             onSnapshot(colDocsAtivos, snap => {
