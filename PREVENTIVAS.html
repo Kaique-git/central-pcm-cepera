@@ -591,8 +591,12 @@
                                     <option value="Mensal">Mensal</option>
                                     <option value="Bimestral">Bimestral</option>
                                     <option value="Trimestral">Trimestral</option>
-                                    <option value="Semestral">Semestral</option>
-                                    <option value="Anual">Anual</option>
+                                    <option value="Semestral">Semestral (6 meses)</option>
+                                    <option value="Anual">Anual (12 meses)</option>
+                                    <option value="Bienal">Bienal (24 meses)</option>
+                                    <option value="Trienal">Trienal (36 meses)</option>
+                                    <option value="Quadrienal">Quadrienal (48 meses)</option>
+                                    <option value="Quinquenal">Quinquenal (60 meses)</option>
                                 </select>
                                 <select id="sem52FiltroAgenda" onchange="renderCalendario52Semanas()" class="input-clean py-1.5 text-xs font-extrabold text-sky-800 border-sky-200 bg-sky-50/60 w-auto">
                                     <option value="">Exibição: Todos no Ano</option>
@@ -656,8 +660,12 @@
                                 <option value="Mensal">Mensal</option>
                                 <option value="Bimestral">Bimestral</option>
                                 <option value="Trimestral">Trimestral</option>
-                                <option value="Semestral">Semestral</option>
-                                <option value="Anual">Anual</option>
+                                <option value="Semestral">Semestral (6 meses)</option>
+                                <option value="Anual">Anual (12 meses)</option>
+                                <option value="Bienal">Bienal (24 meses)</option>
+                                <option value="Trienal">Trienal (36 meses)</option>
+                                <option value="Quadrienal">Quadrienal (48 meses)</option>
+                                <option value="Quinquenal">Quinquenal (60 meses)</option>
                             </select>
                             <select id="planosFiltroDisc" onchange="renderPlanos()" class="input-clean py-1.5 text-xs font-bold">
                                 <option value="">Disciplina</option>
@@ -1005,6 +1013,10 @@
                             <option value="Trimestral">Trimestral (3 meses)</option>
                             <option value="Semestral">Semestral (6 meses)</option>
                             <option value="Anual">Anual (12 meses)</option>
+                            <option value="Bienal">Bienal (24 meses)</option>
+                            <option value="Trienal">Trienal (36 meses)</option>
+                            <option value="Quadrienal">Quadrienal (48 meses)</option>
+                            <option value="Quinquenal">Quinquenal (60 meses)</option>
                         </select>
                     </div>
                     <div>
@@ -1783,8 +1795,12 @@
                             <option value="Mensal">Mensal</option>
                             <option value="Bimestral">Bimestral</option>
                             <option value="Trimestral">Trimestral</option>
-                            <option value="Semestral">Semestral</option>
-                            <option value="Anual">Anual</option>
+                            <option value="Semestral">Semestral (6 meses)</option>
+                            <option value="Anual">Anual (12 meses)</option>
+                            <option value="Bienal">Bienal (24 meses)</option>
+                            <option value="Trienal">Trienal (36 meses)</option>
+                            <option value="Quadrienal">Quadrienal (48 meses)</option>
+                            <option value="Quinquenal">Quinquenal (60 meses)</option>
                             <option value="Avulsa">Avulsa</option>
                         </select>
                     </div>
@@ -1888,7 +1904,11 @@
             'Bimestral': { dias: 0, meses: 2, semanas: 8 },
             'Trimestral': { dias: 0, meses: 3, semanas: 13 },
             'Semestral': { dias: 0, meses: 6, semanas: 26 },
-            'Anual': { dias: 0, meses: 12, semanas: 52 }
+            'Anual': { dias: 0, meses: 12, semanas: 52 },
+            'Bienal': { dias: 0, meses: 24, semanas: 104 },
+            'Trienal': { dias: 0, meses: 36, semanas: 156 },
+            'Quadrienal': { dias: 0, meses: 48, semanas: 208 },
+            'Quinquenal': { dias: 0, meses: 60, semanas: 260 }
         };
         const CRITICIDADES = {
             A: { label: 'Classe A', desc: 'Crítico', cls: 'crit-A' },
@@ -2721,7 +2741,7 @@
         }
 
         function getQtdPreviasDefaultPorPeriodicidade(periodicidade) {
-            if (periodicidade === 'Anual') return 2;
+            if (['Anual', 'Bienal', 'Trienal', 'Quadrienal', 'Quinquenal'].includes(periodicidade)) return 2;
             if (periodicidade === 'Semestral') return 2;
             if (periodicidade === 'Trimestral') return 3;
             if (periodicidade === 'Bimestral') return 5;
@@ -3122,7 +3142,7 @@
             if (anoSel && anoSel.options.length === 0) {
                 const curIsoY = getIsoWeekInfo(new Date()).isoYear;
                 sem52Ano = curIsoY;
-                anoSel.innerHTML = [curIsoY - 1, curIsoY, curIsoY + 1, curIsoY + 2]
+                anoSel.innerHTML = [curIsoY - 1, curIsoY, curIsoY + 1, curIsoY + 2, curIsoY + 3, curIsoY + 4, curIsoY + 5, curIsoY + 6]
                     .map(y => `<option value="${y}" ${y === sem52Ano ? 'selected' : ''}>${y}</option>`).join('');
             }
         }
