@@ -308,7 +308,7 @@
                         <div class="min-w-0">
                             <div class="flex items-center gap-1.5">
                                 <span class="text-[10px] font-extrabold uppercase tracking-widest text-sky-700">PCM Cepêra</span>
-                                <span class="px-1.5 py-0.5 rounded bg-slate-900 text-white font-mono text-[9px] font-extrabold">v42 • PROTEÇÃO NÓ 5</span>
+                                <span class="px-1.5 py-0.5 rounded bg-slate-900 text-white font-mono text-[9px] font-extrabold">v43 • XLSX &amp; CSV ERP</span>
                             </div>
                             <h1 class="text-sm font-extrabold text-slate-900 truncate">Maestri 2.0 • IA & AQF</h1>
                         </div>
@@ -2105,7 +2105,7 @@
         // ================= EXECUÇÃO DOS 9 NÓS NO NAVEGADOR =================
         function construirItemAuditadoCompleto(omRaw, decisao) {
             const infoArvore = cruzarAtivoComArvore(omRaw.ativo);
-            const eq = inferirEquipeOM(omRaw.equipe, omRaw.problema, omRaw.servico);
+            const eq = inferirEquipeOM(omRaw.equipe || omRaw.tipo_manutencao, omRaw.problema, omRaw.servico);
             const tempo = Number(omRaw.tempo_min || 0);
             const cat = decisao.categoria || "AJUSTE";
             const conf = Number(decisao.confianca || 4);
@@ -4083,7 +4083,8 @@ OMs:\n${JSON.stringify(listaPrompt)}`;
             const text = String(bruto || "").replace(/^\uFEFF/, "").replace(/\r\n/g, "\n").replace(/\r/g, "\n");
             const lines = text.split("\n").filter(l => l.trim().length > 0);
             if (lines.length < 2) return [];
-            const delim = lines[0].split(";").length >= lines[0].split(",").length ? ";" : ",";
+            const amostraDelim = lines.slice(0, Math.min(8, lines.length)).join("\n");
+            const delim = amostraDelim.split(";").length >= amostraDelim.split(",").length ? ";" : ",";
             const splitLine = (line) => {
                 const res = [];
                 let cur = "";
@@ -4103,33 +4104,278 @@ OMs:\n${JSON.stringify(listaPrompt)}`;
                 res.push(cur.trim());
                 return res;
             };
-            const headers = splitLine(lines[0]);
-            return lines.slice(1).map(l => {
-                const cols = splitLine(l);
-                const obj = {};
-                headers.forEach((h, idx) => { if (h) obj[h] = cols[idx] ?? ""; });
-                return obj;
-            });
+            const matriz = lines.map(splitLine);
+            return extrairLinhasDeMatrizPlanilha(matriz);
         }
 
         function converterTempoMinutosUI(val) {
-            if (val === null || val === undefined) return 0;
-            if (typeof val === "number" && val > 0 && val < 1) return Math.round(val * 24 * 60);
+            if (val === null || val === undefined || val === "") return 0;
+            if (typeof val === "number") {
+                if (val > 0 && val < 1) return Math.round(val * 24 * 60);
+                return val >= 0 ? Math.round(val) : 0;
+            }
             const s = String(val).trim();
             if (!s) return 0;
-            const m = s.match(/^(\d{1,3}):(\d{2})/);
-            if (m) return Number(m[1]) * 60 + Number(m[2]);
+            const m = s.match(/^(\d{1,3}):(\d{2})(?::(\d{2}))?/);
+            if (m) return Number(m[1]) * 60 + Number(m[2]) + (Number(m[3] || 0) >= 30 ? 1 : 0);
             const n = Number(s.replace(",", "."));
-            return isNaN(n) ? 0 : Math.round(n);
+            if (isNaN(n) || n < 0) return 0;
+            if (n > 0 && n < 1) return Math.round(n * 24 * 60);
+            return Math.round(n);
         }
+
+        function normalizarDataPlanilha(val) {
+            if (val === null || val === undefined || val === "") return "";
+            if (val instanceof Date && !isNaN(val.getTime())) {
+                const Y = val.getUTCFullYear();
+                const M = String(val.getUTCMonth() + 1).padStart(2, "0");
+                const D = String(val.getUTCDate()).padStart(2, "0");
+                const h = String(val.getUTCHours()).padStart(2, "0");
+                const mi = String(val.getUTCMinutes()).padStart(2, "0");
+                return `${Y}-${M}-${D} ${h}:${mi}`;
+            }
+            const s = String(val).trim();
+            if (!s) return "";
+            const num = Number(s.replace(",", "."));
+            if (/^\d+(?:[.,]\d+)?$/.test(s) && !isNaN(num) && num >= 30000 && num <= 80000) {
+                const dt = new Date(Math.round((num - 25569) * 1440) * 60000);
+                if (!isNaN(dt.getTime())) {
+                    const Y = dt.getUTCFullYear();
+                    const M = String(dt.getUTCMonth() + 1).padStart(2, "0");
+                    const D = String(dt.getUTCDate()).padStart(2, "0");
+                    const h = String(dt.getUTCHours()).padStart(2, "0");
+                    const mi = String(dt.getUTCMinutes()).padStart(2, "0");
+                    return `${Y}-${M}-${D} ${h}:${mi}`;
+                }
+            }
+            const mBr = s.match(/^(\d{1,2})[\/\-](\d{1,2})[\/\-](\d{2,4})(?:[ T](\d{1,2}):(\d{2}))?/);
+            if (mBr) {
+                const dd = mBr[1].padStart(2, "0");
+                const mm = mBr[2].padStart(2, "0");
+                const yy = mBr[3].length === 2 ? `20${mBr[3]}` : mBr[3];
+                const hm = mBr[4] ? ` ${mBr[4].padStart(2, "0")}:${mBr[5].padStart(2, "0")}` : "";
+                return `${yy}-${mm}-${dd}${hm}`;
+            }
+            return s.replace("T", " ").slice(0, 19).trim();
+        }
+        window.normalizarDataPlanilha = normalizarDataPlanilha;
+
+        const _cacheNormKeysRow = new WeakMap();
+        function lerCampoPlanilha(row, aliases = []) {
+            if (!row || typeof row !== "object") return "";
+            for (const al of aliases) {
+                if (Object.prototype.hasOwnProperty.call(row, al)) {
+                    const raw = row[al];
+                    const s = raw === null || raw === undefined ? "" : String(raw).trim();
+                    if (s !== "") return s;
+                }
+            }
+            let mapa = _cacheNormKeysRow.get(row);
+            if (!mapa) {
+                mapa = new Map();
+                for (const k of Object.keys(row)) {
+                    const nk = normKey(k);
+                    const s = row[k] === null || row[k] === undefined ? "" : String(row[k]).trim();
+                    if (nk && s !== "" && !mapa.has(nk)) mapa.set(nk, s);
+                }
+                _cacheNormKeysRow.set(row, mapa);
+            }
+            for (const al of aliases) {
+                const nal = normKey(al);
+                if (nal && mapa.has(nal)) return mapa.get(nal);
+            }
+            return "";
+        }
+
+        function pontuarLinhaCabecalhoPlanilha(row) {
+            if (!Array.isArray(row)) return -99;
+            const vals = row.map(c => String(c ?? "").trim()).filter(Boolean);
+            if (vals.length < 2) return -50;
+            const normCells = vals.map(c => normKey(c));
+            const papeis = new Set();
+            for (const c of normCells) {
+                if (c === "om" || c === "ordem" || c === "num om" || c === "numero om" || c === "n om") papeis.add("om");
+                else if (c === "status" || c === "status om" || c === "situacao" || c === "situacao om") papeis.add("status");
+                else if (c === "ativo" || c === "descricao ativo" || c === "equipamento" || c === "maquina") papeis.add("ativo");
+                else if (c === "problema" || c === "descricao" || c === "descricao problema" || c === "defeito") papeis.add("problema");
+                else if (c === "servico" || c === "descricao do servico" || c === "descricao servico" || c === "servico executado" || c === "solucao") papeis.add("servico");
+                else if (c === "data" || c === "data conclusao" || c.startsWith("data e hora de")) papeis.add("data");
+                else if (c === "tempo" || c === "tempo min" || c === "duracao total parada" || c === "tempo total trabalhado" || c === "tempo de maquina parada") papeis.add("tempo");
+                else if (c === "equipe" || c === "descricao tipo de servico de manutencao" || c === "descricao tipos de manutencao") papeis.add("equipe");
+                else if (c === "categoria ia" || c === "categoria" || c === "origem decisao") papeis.add("auditada");
+            }
+            let score = papeis.size * 4 + (vals.length >= 4 ? 1 : 0);
+            if (normCells.some(c => c.startsWith("emissao ") || c.startsWith("total de registros"))) score -= 10;
+            return score;
+        }
+
+        function extrairLinhasDeMatrizPlanilha(matriz) {
+            if (!Array.isArray(matriz) || !matriz.length) return [];
+            let bestIdx = 0;
+            let bestScore = -99;
+            const lim = Math.min(25, matriz.length);
+            for (let i = 0; i < lim; i++) {
+                const sc = pontuarLinhaCabecalhoPlanilha(matriz[i]);
+                if (sc > bestScore) { bestScore = sc; bestIdx = i; }
+            }
+            let hdrIdx = (bestIdx > 0 && bestScore < 6) ? 0 : bestIdx;
+            while (hdrIdx < matriz.length - 1 && (!Array.isArray(matriz[hdrIdx]) || !matriz[hdrIdx].some(c => String(c ?? "").trim()))) {
+                hdrIdx++;
+            }
+            if (hdrIdx >= matriz.length - 1) return [];
+            const rawHeaders = matriz[hdrIdx].map(c => String(c ?? "").trim());
+            const seenHdr = new Set();
+            const headers = rawHeaders.map(h => {
+                if (!h) return "";
+                if (!seenHdr.has(h)) { seenHdr.add(h); return h; }
+                let n = 2;
+                while (seenHdr.has(`${h}_${n}`)) n++;
+                const alt = `${h}_${n}`;
+                seenHdr.add(alt);
+                return alt;
+            });
+            const out = [];
+            for (let r = hdrIdx + 1; r < matriz.length; r++) {
+                const rowArr = matriz[r];
+                if (!Array.isArray(rowArr)) continue;
+                const obj = {};
+                let hasVal = false;
+                for (let c = 0; c < headers.length; c++) {
+                    const h = headers[c];
+                    if (!h) continue;
+                    const v = rowArr[c];
+                    const clean = v === null || v === undefined ? "" : (typeof v === "number" ? v : String(v).trim());
+                    obj[h] = clean;
+                    if (clean !== "") hasVal = true;
+                }
+                if (hasVal) out.push(obj);
+            }
+            return out;
+        }
+        window.extrairLinhasDeMatrizPlanilha = extrairLinhasDeMatrizPlanilha;
+
+        async function _lerXlsxNativoBrowser(buf) {
+            const bytes = new Uint8Array(buf);
+            const dv = new DataView(bytes.buffer, bytes.byteOffset, bytes.byteLength);
+            let eocd = -1;
+            for (let p = bytes.length - 22; p >= Math.max(0, bytes.length - 65560); p--) {
+                if (dv.getUint32(p, true) === 0x06054b50) { eocd = p; break; }
+            }
+            if (eocd < 0) throw new Error("ZIP EOCD inválido");
+            const cdEntries = dv.getUint16(eocd + 10, true);
+            let pos = dv.getUint32(eocd + 16, true);
+            const entries = new Map();
+            const dec = new TextDecoder("utf-8");
+            for (let i = 0; i < cdEntries && pos + 46 <= bytes.length; i++) {
+                if (dv.getUint32(pos, true) !== 0x02014b50) break;
+                const method = dv.getUint16(pos + 10, true);
+                const compSize = dv.getUint32(pos + 20, true);
+                const fnameLen = dv.getUint16(pos + 28, true);
+                const extraLen = dv.getUint16(pos + 30, true);
+                const commentLen = dv.getUint16(pos + 32, true);
+                const localOff = dv.getUint32(pos + 42, true);
+                const fname = dec.decode(bytes.subarray(pos + 46, pos + 46 + fnameLen));
+                pos += 46 + fnameLen + extraLen + commentLen;
+                if (fname === "xl/sharedStrings.xml" || /^xl\/worksheets\/sheet\d+\.xml$/i.test(fname)) {
+                    const lFname = dv.getUint16(localOff + 26, true);
+                    const lExtra = dv.getUint16(localOff + 28, true);
+                    entries.set(fname, { method, compSize, dataStart: localOff + 30 + lFname + lExtra });
+                }
+            }
+            const lerXml = async (entry) => {
+                const chunk = bytes.subarray(entry.dataStart, entry.dataStart + entry.compSize);
+                let rawBytes = chunk;
+                if (entry.method === 8) {
+                    const ab = await new Response(new Blob([chunk]).stream().pipeThrough(new DecompressionStream("deflate-raw"))).arrayBuffer();
+                    rawBytes = new Uint8Array(ab);
+                }
+                return new DOMParser().parseFromString(dec.decode(rawBytes), "application/xml");
+            };
+            const getTags = (node, tag) => {
+                const nsList = node.getElementsByTagNameNS ? node.getElementsByTagNameNS("*", tag) : [];
+                return (nsList && nsList.length) ? nsList : node.getElementsByTagName(tag);
+            };
+            const shared = [];
+            if (entries.has("xl/sharedStrings.xml")) {
+                const xmlS = await lerXml(entries.get("xl/sharedStrings.xml"));
+                const sis = getTags(xmlS, "si");
+                for (let i = 0; i < sis.length; i++) {
+                    const ts = getTags(sis[i], "t");
+                    let txt = "";
+                    for (let j = 0; j < ts.length; j++) txt += (ts[j].textContent || "");
+                    shared.push(txt);
+                }
+            }
+            const sheetNames = [...entries.keys()]
+                .filter(k => /^xl\/worksheets\/sheet\d+\.xml$/i.test(k))
+                .sort((a, b) => Number(a.match(/\d+/)?.[0] || 0) - Number(b.match(/\d+/)?.[0] || 0));
+            if (!sheetNames.length) return [];
+            const xmlW = await lerXml(entries.get(sheetNames[0]));
+            const rowsEl = getTags(xmlW, "row");
+            const matriz = [];
+            for (let r = 0; r < rowsEl.length; r++) {
+                const cells = getTags(rowsEl[r], "c");
+                const mapaCol = new Map();
+                let maxCol = 0;
+                let autoCol = 0;
+                for (let c = 0; c < cells.length; c++) {
+                    const cel = cells[c];
+                    const ref = cel.getAttribute("r") || "";
+                    const letters = ref.replace(/[^A-Za-z]/g, "").toUpperCase();
+                    let colIdx = 0;
+                    if (letters) {
+                        for (let k = 0; k < letters.length; k++) colIdx = colIdx * 26 + (letters.charCodeAt(k) - 64);
+                    } else {
+                        colIdx = autoCol + 1;
+                    }
+                    autoCol = colIdx;
+                    if (colIdx > maxCol) maxCol = colIdx;
+                    const t = cel.getAttribute("t") || "";
+                    const vs = getTags(cel, "v");
+                    const isEls = getTags(cel, "is");
+                    let val = "";
+                    if (t === "s" && vs.length) {
+                        const sIdx = Number(vs[0].textContent || -1);
+                        val = shared[sIdx] ?? "";
+                    } else if (t === "inlineStr" && isEls.length) {
+                        const ts = getTags(isEls[0], "t");
+                        for (let j = 0; j < ts.length; j++) val += (ts[j].textContent || "");
+                    } else if (vs.length) {
+                        val = vs[0].textContent ?? "";
+                    }
+                    mapaCol.set(colIdx, val);
+                }
+                if (maxCol > 0) {
+                    const arr = new Array(maxCol).fill("");
+                    for (const [ci, v] of mapaCol.entries()) arr[ci - 1] = v;
+                    matriz.push(arr);
+                }
+            }
+            return matriz;
+        }
+        window._lerXlsxNativoBrowser = _lerXlsxNativoBrowser;
 
         async function carregarSheetJsSeNecessario() {
             if (typeof window.XLSX !== "undefined") return window.XLSX;
             return new Promise((resolve, reject) => {
+                let done = false;
+                const timer = setTimeout(() => {
+                    if (!done) { done = true; reject(new Error("Timeout ao carregar leitor .xlsx")); }
+                }, 3000);
                 const sc = document.createElement("script");
                 sc.src = "https://cdn.sheetjs.com/xlsx-0.20.3/package/dist/xlsx.full.min.js";
-                sc.onload = () => resolve(window.XLSX);
-                sc.onerror = () => reject(new Error("Falha ao carregar leitor .xlsx"));
+                sc.onload = () => {
+                    if (done) return;
+                    done = true;
+                    clearTimeout(timer);
+                    resolve(window.XLSX);
+                };
+                sc.onerror = () => {
+                    if (done) return;
+                    done = true;
+                    clearTimeout(timer);
+                    reject(new Error("Falha ao carregar leitor .xlsx"));
+                };
                 document.head?.appendChild(sc) || document.body?.appendChild(sc);
             });
         }
@@ -4139,48 +4385,83 @@ OMs:\n${JSON.stringify(listaPrompt)}`;
                 showToast("Nenhum registro válido encontrado no arquivo.", "error");
                 return;
             }
-            const first = rows[0];
-            const isPreAudited = Boolean(first.Categoria_IA || first.categoria);
+            let listaRows = rows;
+            const keysPrimeira = Object.keys(listaRows[0] || {});
+            if (keysPrimeira.some(k => /^__EMPTY/.test(k))) {
+                const matRec = [keysPrimeira, ...listaRows.map(r => keysPrimeira.map(k => r?.[k] ?? ""))];
+                const reext = extrairLinhasDeMatrizPlanilha(matRec);
+                if (reext.length) listaRows = reext;
+            }
+            const first = listaRows[0];
+            const isPreAudited = Boolean(lerCampoPlanilha(first, ["Categoria_IA", "categoria"]));
+            const temColStatus = listaRows.slice(0, 8).some(x => lerCampoPlanilha(x, ["Status", "Status_OM", "status", "Situacao", "Situacao_OM"]) !== "");
             const novasBrutas = [];
             const vistas = new Set();
 
-            rows.forEach((r, idx) => {
-                const omRaw = String(r.OM || r.om || r.Ordem || (idx + 1)).replace(/\.0$/, "").trim();
+            listaRows.forEach((r, idx) => {
+                if (!r || typeof r !== "object") return;
+                const omCol = lerCampoPlanilha(r, ["OM", "om", "Ordem", "ordem", "Num_OM", "Numero_OM", "N_OM", "Nº OM", "N° OM"]);
+                const ativoRaw = lerCampoPlanilha(r, ["Ativo", "ativo", "Descrição (Ativo)", "Descricao (Ativo)", "Equipamento", "Maquina"]);
+                const problemaRaw = lerCampoPlanilha(r, ["Problema", "problema", "Descrição", "Descricao", "Descrição (Problema)", "Defeito"]);
+                const servicoRaw = lerCampoPlanilha(r, ["Servico", "servico", "Descrição do Serviço", "Descricao do Servico", "Serviço Executado", "Solucao"]);
+
+                if (!omCol && !ativoRaw && !problemaRaw && !servicoRaw) return;
+                const omRaw = String(omCol || (idx + 1)).replace(/\.0+$/, "").trim();
                 const mNum = omRaw.match(/\d+/);
                 const omId = mNum ? mNum[0] : omRaw;
-                if (!omId || vistas.has(omId)) return;
+                if (!omId || /^(?:om|ordem)$/i.test(omId) || vistas.has(omId)) return;
 
-                const statusRaw = String(r.Status || r.Status_OM || r.status || "Concluída").trim();
+                const statusRaw = lerCampoPlanilha(r, ["Status", "Status_OM", "status", "Situacao", "Situacao_OM"]) || (temColStatus ? "" : "Concluída");
                 const stNorm = normKey(statusRaw);
-                const tempoMin = converterTempoMinutosUI(r.Tempo_min ?? r.tempo_min ?? r.Duracao_Total_Parada ?? r.Tempo);
+                const tempoParada = converterTempoMinutosUI(
+                    lerCampoPlanilha(r, ["Tempo_min", "tempo_min", "Duracao_Total_Parada", "Duracao Total Parada", "Tempo de máquina parada", "Tempo de Maquina Parada"])
+                );
+                const tempoTrab = converterTempoMinutosUI(
+                    lerCampoPlanilha(r, ["Tempo total trabalhado", "Tempo Total Trabalhado", "Tempo_Trabalhado", "Tempo trabalhado", "Tempo"])
+                );
+                const tempoMin = tempoParada > 0 ? tempoParada : tempoTrab;
 
                 if (!isPreAudited) {
-                    if (stNorm.includes("solicitad") || stNorm.includes("cancelad") || stNorm.includes("abert") || stNorm.includes("pendent")) {
+                    if (
+                        stNorm.includes("solicitad")
+                        || stNorm.includes("cancelad")
+                        || stNorm.includes("abert")
+                        || stNorm.includes("pendent")
+                        || stNorm.includes("andament")
+                        || stNorm.includes("aguardand")
+                        || stNorm.includes("reprovad")
+                    ) {
                         return;
                     }
-                    if (!stNorm.includes("concluid") && !stNorm.includes("encerrad") && tempoMin <= 0) {
+                    if (temColStatus && !stNorm.includes("concluid") && !stNorm.includes("encerrad") && !stNorm.includes("finalizad") && !stNorm.includes("fechad") && tempoMin <= 0) {
                         return;
                     }
                 }
                 vistas.add(omId);
 
+                const eqCol = lerCampoPlanilha(r, ["Equipe", "equipe", "Descrição (Tipo de serviço de manutenção)", "Tipo de serviço de manutenção"]);
+                const tipoManutCol = lerCampoPlanilha(r, ["Tipo_Manut_ERP", "tipo_manutencao", "Descrição (Tipos de Manutenção)", "Tipos de Manutenção"]);
+                const dataRaw = lerCampoPlanilha(r, ["Data", "data", "Data e hora de conclusão", "Data_Conclusao", "Data e hora de entrada", "Data e hora de cadastro"]);
+
                 const item = {
                     om: omId,
-                    data: String(r.Data || r.data || r["Data e hora de conclusão"] || "").trim(),
-                    ativo: String(r.Ativo || r.ativo || r["Descrição (Ativo)"] || "").trim(),
-                    equipe: String(r.Equipe || r.equipe || r["Descrição (Tipo de serviço de manutenção)"] || "").trim(),
+                    data: normalizarDataPlanilha(dataRaw),
+                    ativo: ativoRaw,
+                    equipe: eqCol || tipoManutCol,
+                    tipo_manutencao: tipoManutCol,
                     tempo_min: tempoMin,
-                    problema: String(r.Problema || r.problema || r["Descrição"] || "").trim(),
-                    servico: String(r.Servico || r.servico || r["Descrição do Serviço"] || "").trim()
+                    problema: problemaRaw,
+                    servico: servicoRaw
                 };
                 if (isPreAudited) {
+                    const catPre = lerCampoPlanilha(r, ["Categoria_IA", "categoria"]) || "AJUSTE";
                     item._pre_auditada = {
-                        categoria: String(r.Categoria_IA || r.categoria || "AJUSTE").toUpperCase(),
-                        b: Number(r.B_IA || r.b) || null,
-                        c: Number(r.C_IA || r.c) || null,
-                        confianca: Number(r.Confianca || r.confianca) || 5,
-                        origem: String(r.Origem_Decisao || r.origem || "PRE_AUDITADA").toUpperCase(),
-                        justificativa: String(r.Justificativa_IA || r.justificativa || "Carregado de arquivo auditado.").trim()
+                        categoria: String(catPre).toUpperCase(),
+                        b: Number(lerCampoPlanilha(r, ["B_IA", "b"])) || null,
+                        c: Number(lerCampoPlanilha(r, ["C_IA", "c"])) || null,
+                        confianca: Number(lerCampoPlanilha(r, ["Confianca", "confianca"])) || 5,
+                        origem: String(lerCampoPlanilha(r, ["Origem_Decisao", "origem"]) || "PRE_AUDITADA").toUpperCase(),
+                        justificativa: String(lerCampoPlanilha(r, ["Justificativa_IA", "justificativa"]) || "Carregado de arquivo auditado.").trim()
                     };
                 }
                 novasBrutas.push(item);
@@ -4224,11 +4505,28 @@ OMs:\n${JSON.stringify(listaPrompt)}`;
             const lname = file.name.toLowerCase();
             if (lname.endsWith(".xlsx") || lname.endsWith(".xls")) {
                 try {
-                    const XLSXLib = await carregarSheetJsSeNecessario();
                     const buf = await file.arrayBuffer();
-                    const wb = XLSXLib.read(buf, { type: "array" });
-                    const firstSheet = wb.SheetNames[0];
-                    const rows = XLSXLib.utils.sheet_to_json(wb.Sheets[firstSheet], { defval: "" });
+                    let matriz = null;
+                    if (typeof window.XLSX !== "undefined") {
+                        const wb = window.XLSX.read(buf, { type: "array" });
+                        const firstSheet = wb.SheetNames[0];
+                        matriz = window.XLSX.utils.sheet_to_json(wb.Sheets[firstSheet], { header: 1, defval: "", raw: true });
+                    } else if (lname.endsWith(".xlsx") && typeof DecompressionStream !== "undefined" && typeof DOMParser !== "undefined") {
+                        try {
+                            matriz = await _lerXlsxNativoBrowser(buf);
+                        } catch (_) {
+                            const XLSXLib = await carregarSheetJsSeNecessario();
+                            const wb = XLSXLib.read(buf, { type: "array" });
+                            const firstSheet = wb.SheetNames[0];
+                            matriz = XLSXLib.utils.sheet_to_json(wb.Sheets[firstSheet], { header: 1, defval: "", raw: true });
+                        }
+                    } else {
+                        const XLSXLib = await carregarSheetJsSeNecessario();
+                        const wb = XLSXLib.read(buf, { type: "array" });
+                        const firstSheet = wb.SheetNames[0];
+                        matriz = XLSXLib.utils.sheet_to_json(wb.Sheets[firstSheet], { header: 1, defval: "", raw: true });
+                    }
+                    const rows = extrairLinhasDeMatrizPlanilha(matriz);
                     await carregarDadosPlanilhaBrutaOuAuditada(rows, file.name);
                 } catch (_) {
                     showToast("Não foi possível ler o .xlsx offline. Exporte em .CSV no ERP ou conecte à internet.", "error");
@@ -4271,6 +4569,7 @@ OMs:\n${JSON.stringify(listaPrompt)}`;
             };
             reader.readAsText(file, "UTF-8");
         }
+        window.processarArquivoFileObjErp = processarArquivoFileObjErp;
 
         window.processarArquivoUploadErp = (event) => {
             const file = event?.target?.files?.[0];

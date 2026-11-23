@@ -179,6 +179,10 @@ def norm_sev(v):
 def converter_tempo(valor):
     if valor is None:
         return None
+    if isinstance(valor, (int, float)) and not isinstance(valor, bool):
+        if 0 < valor < 1:
+            return int(round(valor * 1440))
+        return int(round(valor)) if valor >= 0 else None
     s = str(valor).strip()
     if not s:
         return None
@@ -190,6 +194,8 @@ def converter_tempo(valor):
     s_num = s.replace(",", ".")
     try:
         v = float(s_num)
+        if 0 < v < 1:
+            return int(round(v * 1440))
         return int(round(v)) if v >= 0 else None
     except ValueError:
         return None
@@ -200,11 +206,20 @@ _DIAS_ABREV = ["SEG", "TER", "QUA", "QUI", "SEX", "SAB", "DOM"]
 
 
 def parse_data(v):
-    if not v:
+    if v is None or v == "":
         return None
+    if isinstance(v, datetime):
+        return v
     s = str(v).strip()
     if not s:
         return None
+    try:
+        num = float(s.replace(",", "."))
+        if 30000 <= num <= 80000:
+            from datetime import timedelta
+            return datetime(1899, 12, 30) + timedelta(minutes=round(num * 1440))
+    except ValueError:
+        pass
     s = s.split(" ")[0].split("T")[0]
     for fmt in ("%Y-%m-%d", "%d/%m/%Y", "%d-%m-%Y", "%Y/%m/%d", "%d.%m.%Y"):
         try:
@@ -675,7 +690,7 @@ def categoria_por_problema(problema, servico=""):
 
 
 def classificar_equipe(om, t_norm=""):
-    bruto = normalizar(om.get("equipe") or "")
+    bruto = normalizar(om.get("equipe") or om.get("tipo_manut") or "")
     if "eletr" in bruto:
         return "ELETRICA"
     if "mecan" in bruto:
