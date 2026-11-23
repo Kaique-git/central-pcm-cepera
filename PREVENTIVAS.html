@@ -985,7 +985,8 @@
                 <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
                     <div>
                         <label class="block text-[10px] font-extrabold uppercase text-slate-500 mb-1">Código do Plano *</label>
-                        <input type="text" id="plCodigo" required class="input-clean py-2 text-xs font-mono font-extrabold" placeholder="Ex: PM-ENV-001">
+                        <input type="text" id="plCodigo" required oninput="validarCodigoPlanoUnicoUI()" class="input-clean py-2 text-xs font-mono font-extrabold" placeholder="Ex: PM-ENV-001">
+                        <div id="plCodigoFeedback" class="mt-1 text-[10px] font-bold text-slate-400"></div>
                     </div>
                     <div>
                         <label class="block text-[10px] font-extrabold uppercase text-slate-500 mb-1">Revisão</label>
@@ -4650,6 +4651,95 @@
         };
         window.onPlSubconjuntoChange = () => atualizarInfoAtivoSelecionado(true);
 
+        function normalizarCodigoPlanoKey(cod) {
+            return String(cod || '')
+                .normalize('NFD')
+                .replace(/[\u0300-\u036f]/g, '')
+                .trim()
+                .replace(/\s+/g, ' ')
+                .toUpperCase();
+        }
+
+        function encontrarPlanoConflitoCodigo(codigo, ignorePlanoId = '') {
+            const key = normalizarCodigoPlanoKey(codigo);
+            if (!key) return null;
+            return getPlanosPreventiva().find(p => p.id !== ignorePlanoId && normalizarCodigoPlanoKey(p.codigo) === key) || null;
+        }
+
+        function gerarProximoCodigoPlanoUnico(prefix = 'PM-') {
+            const planos = getPlanosPreventiva();
+            const usados = new Set(planos.map(p => normalizarCodigoPlanoKey(p.codigo)).filter(Boolean));
+            let maxNum = 0;
+            const prefUpper = normalizarCodigoPlanoKey(prefix);
+            planos.forEach(p => {
+                const raw = normalizarCodigoPlanoKey(p.codigo);
+                if (raw.startsWith(prefUpper)) {
+                    const m = raw.slice(prefUpper.length).match(/^(\d+)/);
+                    if (m) maxNum = Math.max(maxNum, parseInt(m[1], 10) || 0);
+                }
+            });
+            let seq = Math.max(maxNum + 1, planos.length + 1);
+            let cand = `${prefix}${String(seq).padStart(3, '0')}`;
+            while (usados.has(normalizarCodigoPlanoKey(cand))) {
+                seq++;
+                cand = `${prefix}${String(seq).padStart(3, '0')}`;
+            }
+            return cand;
+        }
+
+        function gerarCodigoCopiaPlanoUnico(baseCodigo) {
+            const usados = new Set(getPlanosPreventiva().map(p => normalizarCodigoPlanoKey(p.codigo)).filter(Boolean));
+            const raw = String(baseCodigo || 'PM').trim() || 'PM';
+            const root = raw.replace(/-COPIA(?:-\d+)?$/i, '').trim() || raw;
+            let cand = `${root}-COPIA`;
+            let n = 2;
+            while (usados.has(normalizarCodigoPlanoKey(cand))) {
+                cand = `${root}-COPIA-${n++}`;
+            }
+            return cand;
+        }
+
+        window.validarCodigoPlanoUnicoUI = () => {
+            const inp = document.getElementById('plCodigo');
+            const fb = document.getElementById('plCodigoFeedback');
+            const editId = document.getElementById('planoEditId')?.value || '';
+            const val = (inp?.value || '').trim();
+            if (!inp) return true;
+
+            if (!val) {
+                inp.classList.remove('border-rose-500', 'bg-rose-50/40', 'border-emerald-400');
+                if (typeof inp.setCustomValidity === 'function') inp.setCustomValidity('');
+                if (fb) {
+                    fb.className = 'mt-1 text-[10px] font-bold text-slate-400';
+                    fb.innerText = 'Informe um código individual para o plano.';
+                }
+                return false;
+            }
+
+            const conflito = encontrarPlanoConflitoCodigo(val, editId);
+            if (conflito) {
+                inp.classList.add('border-rose-500', 'bg-rose-50/40');
+                inp.classList.remove('border-emerald-400');
+                if (typeof inp.setCustomValidity === 'function') {
+                    inp.setCustomValidity(`O código "${val}" já pertence a outro plano.`);
+                }
+                if (fb) {
+                    fb.className = 'mt-1 text-[10px] font-extrabold text-rose-600';
+                    fb.innerText = `Código duplicado — já usado em: "${conflito.titulo || conflito.codigo}".`;
+                }
+                return false;
+            }
+
+            inp.classList.remove('border-rose-500', 'bg-rose-50/40');
+            inp.classList.add('border-emerald-400');
+            if (typeof inp.setCustomValidity === 'function') inp.setCustomValidity('');
+            if (fb) {
+                fb.className = 'mt-1 text-[10px] font-bold text-emerald-700';
+                fb.innerText = 'Código individual disponível.';
+            }
+            return true;
+        };
+
         window.criarPlanoDoAtivo = (nodeId) => {
             const node = assetNodes.find(n => n.nodeId === nodeId);
             abrirModalEditorPlano('', node || null);
@@ -4673,8 +4763,9 @@
                 skipAuto: Boolean(plano)
             });
 
-            const nextCode = `PM-${String(getPlanosPreventiva().length + 1).padStart(3, '0')}`;
+            const nextCode = gerarProximoCodigoPlanoUnico('PM-');
             document.getElementById('plCodigo').value = plano?.codigo || nextCode;
+            validarCodigoPlanoUnicoUI();
             document.getElementById('plRevisao').value = plano?.revisao || 'Rev. 01';
             const alvoPlanoNom = ativoPre ? (ativoPre.subconjunto || ativoPre.conjunto || '') : '';
             document.getElementById('plTitulo').value = plano?.titulo || (ativoPre ? `Preventiva ${ativoPre.periodicidade_preventiva || ''} — ${ativoPre.equipamento}${alvoPlanoNom ? ' (' + alvoPlanoNom + ')' : ''}`.trim() : '');
@@ -4801,6 +4892,21 @@
         window.salvarPlanoPreventiva = async (e) => {
             e.preventDefault();
             const editId = document.getElementById('planoEditId').value;
+            const codigoLimpo = document.getElementById('plCodigo').value.trim();
+            if (!codigoLimpo) {
+                showToast('Informe o Código do Plano (individual e obrigatório).', 'error');
+                validarCodigoPlanoUnicoUI();
+                document.getElementById('plCodigo')?.focus?.();
+                return;
+            }
+            const conflitoCodigo = encontrarPlanoConflitoCodigo(codigoLimpo, editId);
+            if (conflitoCodigo) {
+                validarCodigoPlanoUnicoUI();
+                showToast(`O código "${codigoLimpo}" já pertence ao plano "${conflitoCodigo.titulo || conflitoCodigo.codigo}". Cada plano deve ter um código individual.`, 'error');
+                document.getElementById('plCodigo')?.focus?.();
+                return;
+            }
+
             const pastePendente = document.getElementById('planoExcelPaste').value.trim();
             if (pastePendente) {
                 planoChecklistDraft = [...planoChecklistDraft, ...parseExcelChecklistText(pastePendente)];
@@ -4818,9 +4924,10 @@
             const maquinaPl = document.getElementById('plAtivoMaquina').value;
             const prioPlano = normalizarPrioridadePlano(document.getElementById('plCriticidade').value) || 'P3';
             const critLinhaPl = getClasseLinhaAtivo(setorPl, maquinaPl).classe || normalizarCriticidade(matchAtivo?.criticidade_linha);
+            const planoAnterior = editId ? getPlanosPreventiva().find(p => p.id === editId) : null;
             const payload = {
                 kind: 'plano_preventiva',
-                codigo: document.getElementById('plCodigo').value.trim(),
+                codigo: codigoLimpo,
                 revisao: document.getElementById('plRevisao').value.trim() || 'Rev. 01',
                 titulo: document.getElementById('plTitulo').value.trim(),
                 ativoId: matchAtivo?.nodeId || '',
@@ -4855,6 +4962,12 @@
             try {
                 if (editId) {
                     await updateDoc(doc(db, 'ag_manutencao', editId), payload);
+                    if (planoAnterior && normalizarCodigoPlanoKey(planoAnterior.codigo) !== normalizarCodigoPlanoKey(codigoLimpo)) {
+                        const ordensRelacionadas = getOrdensPreventiva().filter(o => o.planoId === editId);
+                        for (const o of ordensRelacionadas) {
+                            await updateDoc(doc(db, 'ag_manutencao', o.id), { planoCodigo: codigoLimpo });
+                        }
+                    }
                     showToast(`Plano ${payload.codigo} atualizado com sucesso!`, 'success');
                 } else {
                     payload.criadoPor = usuarioLogado?.nome || 'PCM';
@@ -4874,16 +4987,17 @@
             const p = getPlanosPreventiva().find(x => x.id === planoId);
             if (!p) return;
             const { id, ...rest } = p;
+            const novoCodigo = gerarCodigoCopiaPlanoUnico(p.codigo || 'PM');
             try {
                 await addDoc(colManutencao, {
                     ...rest,
-                    codigo: `${p.codigo || 'PM'}-COPIA`,
+                    codigo: novoCodigo,
                     titulo: `${p.titulo} (Cópia)`,
                     criadoPor: usuarioLogado?.nome || 'PCM',
                     criadoEm: new Date().toISOString(),
                     atualizadoEm: new Date().toISOString()
                 });
-                showToast('Plano clonado! Edite o ativo/código conforme necessário.', 'success');
+                showToast(`Plano clonado com código exclusivo "${novoCodigo}"!`, 'success');
             } catch (_) { showToast('Erro ao duplicar plano.', 'error'); }
         };
 

@@ -176,6 +176,13 @@
         .cat-administrativo { background: #f1f5f9; color: #334155; border: 1px solid #cbd5e1; }
         .cat-fotos { background: #d1fae5; color: #047857; border: 1px solid #a7f3d0; }
         .cat-qualidade { background: #ccfbf1; color: #0f766e; border: 1px solid #99f6e4; }
+        .cat-custom-sky { background: #e0f2fe; color: #0369a1; border: 1px solid #bae6fd; }
+        .cat-custom-indigo { background: #e0e7ff; color: #3730a3; border: 1px solid #c7d2fe; }
+        .cat-custom-emerald { background: #d1fae5; color: #047857; border: 1px solid #a7f3d0; }
+        .cat-custom-amber { background: #fef3c7; color: #b45309; border: 1px solid #fde68a; }
+        .cat-custom-rose { background: #ffe4e6; color: #be123c; border: 1px solid #fecdd3; }
+        .cat-custom-violet { background: #ede9fe; color: #5b21b6; border: 1px solid #ddd6fe; }
+        .cat-custom-slate { background: #f1f5f9; color: #334155; border: 1px solid #cbd5e1; }
 
         .st-vigente { background: #dcfce7; color: #15803d; border: 1px solid #86efac; }
         .st-pendente { background: #fef3c7; color: #b45309; border: 1px solid #fcd34d; }
@@ -370,10 +377,14 @@
                             <span class="w-2 h-2 rounded-full bg-sky-500"></span>
                             <span id="userChipLabel">Usuário</span>
                         </div>
-                        <span id="masterDocsChip" hidden title="Modo Admin Master ativo: edição e exclusão direta de documentos liberadas" class="hidden items-center gap-1.5 px-3 py-1.5 rounded-full bg-rose-50 border border-rose-200 text-[11px] font-extrabold text-rose-700">
-                            <span class="w-2 h-2 rounded-full bg-rose-500"></span>
+                        <button type="button" id="btnMasterDocs" onclick="abrirModalAdminMasterDocs()" hidden title="Desbloquear Menu Admin Master (Categorias, Subtipos, Disciplinas e Edição Direta)" class="hidden btn-touch bg-white hover:bg-slate-50 border border-slate-200 text-slate-700 text-xs py-2 px-3 items-center gap-1.5 shadow-sm">
+                            <svg class="w-3.5 h-3.5 text-slate-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"/></svg>
+                            <span id="lblBtnMasterDocs">Master</span>
+                        </button>
+                        <button type="button" id="masterDocsChip" onclick="abrirModalAdminMasterDocs()" hidden title="Modo Admin Master ativo: clique para abrir Menu Master (Categorias, Subtipos, Disciplinas)" class="hidden items-center gap-1.5 px-3 py-1.5 rounded-full bg-rose-600 hover:bg-rose-700 border border-rose-700 text-[11px] font-extrabold text-white shadow-sm cursor-pointer">
+                            <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 11V7a4 4 0 118 0m-4 8v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2z"/></svg>
                             <span>MASTER</span>
-                        </span>
+                        </button>
                         <button type="button" onclick="abrirModalNovoDocumento('doc')" id="btnNovoDocHeader" class="btn-pill-dark text-xs py-2 px-4">
                             <span>+ Novo Documento / Foto</span>
                         </button>
@@ -982,6 +993,144 @@
         </div>
     </div>
 
+    <!-- ==================== MODAL MENU ADMIN MASTER (CATEGORIAS, SUBTIPOS, DISCIPLINAS & SENHA) ==================== -->
+    <div id="modalAdminMasterDocs" role="dialog" aria-modal="true" hidden class="hidden fixed inset-0 bg-slate-900/65 backdrop-blur-sm z-[90] flex items-end sm:items-center justify-center p-0 sm:p-4">
+        <div class="bg-white w-full max-w-2xl rounded-t-3xl sm:rounded-3xl shadow-2xl border border-slate-200 max-h-[92vh] flex flex-col overflow-hidden text-xs">
+            <div class="px-6 py-4 border-b border-slate-100 bg-slate-50/90 flex items-center justify-between gap-3 shrink-0">
+                <div>
+                    <div class="flex items-center gap-2 mb-0.5">
+                        <span class="text-[10px] font-extrabold uppercase tracking-widest text-rose-600">Menu Admin Master • Documentos</span>
+                        <span id="masterDocsModalBadge" class="text-[10px] font-extrabold uppercase px-2 py-0.5 rounded-full bg-slate-100 text-slate-600">Bloqueado</span>
+                    </div>
+                    <h2 class="text-base sm:text-lg font-extrabold text-slate-900">Administração Master &amp; Taxonomia da Biblioteca</h2>
+                </div>
+                <button type="button" onclick="fecharModal('modalAdminMasterDocs')" class="w-8 h-8 rounded-full bg-white border border-slate-200 hover:bg-slate-100 text-slate-600 font-bold shrink-0">✕</button>
+            </div>
+
+            <div class="flex-1 overflow-y-auto p-5 sm:p-6 space-y-4">
+                <form id="masterDocsUnlockBox" onsubmit="desbloquearAdminMasterDocs(event)" class="space-y-4">
+                    <div class="p-4 rounded-2xl bg-slate-50 border border-slate-200 text-slate-700 leading-relaxed">
+                        Digite a <strong>senha oculta Admin Master</strong> (a mesma do Portal PCM) para liberar edição direta, exclusão de revisões e o <strong>cadastro de Categorias, Subtipos e Disciplinas</strong> no módulo de Documentos.
+                    </div>
+                    <div>
+                        <label for="masterDocsPassInput" class="block text-[11px] font-extrabold uppercase text-slate-500 mb-1">Senha Oculta Master *</label>
+                        <input type="password" id="masterDocsPassInput" required autocomplete="off" class="input-clean py-2.5 text-sm font-mono" placeholder="••••••••••••">
+                    </div>
+                    <div class="flex gap-2 pt-2 border-t border-slate-100">
+                        <button type="button" onclick="fecharModal('modalAdminMasterDocs')" class="btn-touch bg-slate-100 text-slate-700 flex-1 text-xs">Cancelar</button>
+                        <button type="submit" class="btn-touch bg-rose-600 hover:bg-rose-700 text-white flex-1 text-xs shadow-md">Desbloquear Menu Master</button>
+                    </div>
+                </form>
+
+                <div id="masterDocsActiveBox" hidden class="hidden space-y-4">
+                    <div class="flex flex-wrap items-center gap-1.5 p-1 rounded-2xl bg-slate-100 border border-slate-200">
+                        <button type="button" id="btnMasterDocsTabCat" onclick="switchMasterDocsTab('cat')" class="flex-1 py-2 px-3 rounded-xl font-extrabold text-[11px] bg-slate-900 text-white shadow-sm">Categorias &amp; Subtipos</button>
+                        <button type="button" id="btnMasterDocsTabDisc" onclick="switchMasterDocsTab('disc')" class="flex-1 py-2 px-3 rounded-xl font-extrabold text-[11px] text-slate-600 hover:text-slate-900">Disciplinas</button>
+                        <button type="button" id="btnMasterDocsTabSeg" onclick="switchMasterDocsTab('seg')" class="flex-1 py-2 px-3 rounded-xl font-extrabold text-[11px] text-slate-600 hover:text-slate-900">Segurança Master</button>
+                    </div>
+
+                    <!-- TAB 1: CATEGORIAS & SUBTIPOS -->
+                    <div id="masterDocsTabCat" class="space-y-4">
+                        <form id="formMasterDocCat" onsubmit="cadastrarCategoriaMasterDocs(event)" class="p-4 rounded-2xl bg-sky-50/70 border border-sky-200 space-y-3">
+                            <div class="flex items-center justify-between gap-2">
+                                <h3 class="text-xs font-extrabold uppercase tracking-wider text-sky-900">1. Cadastrar Nova Categoria</h3>
+                                <span class="text-[10px] font-bold text-sky-700">Sincronizado para todo o time</span>
+                            </div>
+                            <div class="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
+                                <div>
+                                    <label for="masterDocCatNome" class="block text-[10px] font-extrabold uppercase text-slate-600 mb-1">Nome da Categoria *</label>
+                                    <input type="text" id="masterDocCatNome" required class="input-clean py-2 text-xs font-bold" placeholder="Ex: Instrumentação / Metrologia">
+                                </div>
+                                <div>
+                                    <label for="masterDocCatSubInicial" class="block text-[10px] font-extrabold uppercase text-slate-600 mb-1">1º Subtipo (Opcional)</label>
+                                    <input type="text" id="masterDocCatSubInicial" class="input-clean py-2 text-xs font-bold" placeholder="Ex: Certificado de Malha">
+                                </div>
+                                <div>
+                                    <label for="masterDocCatSigilo" class="block text-[10px] font-extrabold uppercase text-slate-600 mb-1">Visibilidade Padrão</label>
+                                    <select id="masterDocCatSigilo" class="input-clean py-2 text-xs font-bold">
+                                        <option value="geral">Geral (Biblioteca + Campo)</option>
+                                        <option value="gestao">Restrito Gestão (Admin / Supervisão)</option>
+                                    </select>
+                                </div>
+                                <div class="grid grid-cols-2 gap-2">
+                                    <div>
+                                        <label for="masterDocCatCor" class="block text-[10px] font-extrabold uppercase text-slate-600 mb-1">Cor do Selo</label>
+                                        <select id="masterDocCatCor" class="input-clean py-2 text-xs font-bold">
+                                            <option value="cat-custom-sky">Azul</option>
+                                            <option value="cat-custom-indigo">Índigo</option>
+                                            <option value="cat-custom-emerald">Esmeralda</option>
+                                            <option value="cat-custom-amber">Âmbar</option>
+                                            <option value="cat-custom-violet">Violeta</option>
+                                            <option value="cat-custom-rose">Rosa</option>
+                                            <option value="cat-custom-slate">Grafite</option>
+                                        </select>
+                                    </div>
+                                    <div>
+                                        <label for="masterDocCatPasta" class="block text-[10px] font-extrabold uppercase text-slate-600 mb-1">Pasta SharePoint</label>
+                                        <input type="text" id="masterDocCatPasta" class="input-clean py-2 text-xs font-mono font-bold" placeholder="Auto">
+                                    </div>
+                                </div>
+                            </div>
+                            <button type="submit" id="btnSalvarCatMasterDocs" class="btn-touch bg-sky-700 hover:bg-sky-800 text-white w-full py-2 text-xs shadow-sm">+ Cadastrar Categoria</button>
+                        </form>
+
+                        <form id="formMasterDocSub" onsubmit="cadastrarSubtipoMasterDocs(event)" class="p-4 rounded-2xl bg-indigo-50/70 border border-indigo-200 space-y-3">
+                            <h3 class="text-xs font-extrabold uppercase tracking-wider text-indigo-900">2. Cadastrar Novo Subtipo em Categoria</h3>
+                            <div class="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
+                                <div>
+                                    <label for="masterDocSubCatId" class="block text-[10px] font-extrabold uppercase text-slate-600 mb-1">Categoria Destino *</label>
+                                    <select id="masterDocSubCatId" required class="input-clean py-2 text-xs font-extrabold"></select>
+                                </div>
+                                <div>
+                                    <label for="masterDocSubNome" class="block text-[10px] font-extrabold uppercase text-slate-600 mb-1">Nome do Subtipo *</label>
+                                    <input type="text" id="masterDocSubNome" required class="input-clean py-2 text-xs font-bold" placeholder="Ex: Lista de I/O CLP">
+                                </div>
+                            </div>
+                            <button type="submit" id="btnSalvarSubMasterDocs" class="btn-touch bg-indigo-600 hover:bg-indigo-700 text-white w-full py-2 text-xs shadow-sm">+ Adicionar Subtipo à Categoria</button>
+                        </form>
+
+                        <div class="space-y-2">
+                            <div class="text-[10px] font-extrabold uppercase tracking-wider text-slate-500">Categorias e Subtipos Cadastrados</div>
+                            <div id="masterDocsTaxListaCat" class="space-y-2.5 max-h-60 overflow-y-auto pr-1"></div>
+                        </div>
+                    </div>
+
+                    <!-- TAB 2: DISCIPLINAS -->
+                    <div id="masterDocsTabDisc" hidden class="hidden space-y-4">
+                        <form id="formMasterDocDisc" onsubmit="cadastrarDisciplinaMasterDocs(event)" class="p-4 rounded-2xl bg-emerald-50/70 border border-emerald-200 space-y-3">
+                            <h3 class="text-xs font-extrabold uppercase tracking-wider text-emerald-900">Cadastrar Nova Disciplina</h3>
+                            <p class="text-[11px] font-semibold text-emerald-800">Fica disponível imediatamente no filtro da Biblioteca e no formulário de envio/edição de documentos.</p>
+                            <div class="flex flex-col sm:flex-row gap-2">
+                                <input type="text" id="masterDocDiscNome" required class="input-clean py-2 text-xs font-bold flex-1" placeholder="Ex: Instrumentação, Refrigeração, Caldeiraria...">
+                                <button type="submit" id="btnSalvarDiscMasterDocs" class="btn-touch bg-emerald-600 hover:bg-emerald-700 text-white px-5 py-2 text-xs shrink-0">+ Cadastrar Disciplina</button>
+                            </div>
+                        </form>
+
+                        <div class="space-y-2">
+                            <div class="text-[10px] font-extrabold uppercase tracking-wider text-slate-500">Disciplinas Disponíveis no Módulo</div>
+                            <div id="masterDocsTaxListaDisc" class="flex flex-wrap gap-2"></div>
+                        </div>
+                    </div>
+
+                    <!-- TAB 3: SEGURANÇA MASTER -->
+                    <div id="masterDocsTabSeg" hidden class="hidden space-y-4">
+                        <div class="p-3.5 rounded-2xl bg-rose-50 border border-rose-200 text-xs text-rose-900 space-y-1">
+                            <div class="font-extrabold">Admin Master Desbloqueado nesta Sessão</div>
+                            <p class="text-[11px] text-rose-800">Edição direta, exclusão de documentos/revisões e cadastro de Categorias, Subtipos e Disciplinas liberados.</p>
+                        </div>
+                        <div class="p-3.5 rounded-2xl bg-slate-50 border border-slate-200 space-y-2.5">
+                            <div class="text-[11px] font-extrabold uppercase text-slate-600">Alterar Senha Oculta Master (Todo o Portal)</div>
+                            <input type="password" id="masterDocsNewPass1" autocomplete="new-password" class="input-clean py-2 text-xs font-mono" placeholder="Nova senha oculta (mín. 6 caracteres)">
+                            <input type="password" id="masterDocsNewPass2" autocomplete="new-password" class="input-clean py-2 text-xs font-mono" placeholder="Confirmar nova senha oculta">
+                            <button type="button" onclick="salvarNovaSenhaMasterDocs()" class="btn-touch bg-slate-900 hover:bg-slate-800 text-white w-full py-2 text-xs">Atualizar Senha Oculta</button>
+                        </div>
+                        <button type="button" onclick="travarAdminMasterDocs()" class="btn-touch bg-rose-50 hover:bg-rose-100 text-rose-700 border border-rose-200 w-full py-2 text-xs">Bloquear / Sair do Modo Master</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
         import { getAuth, signInAnonymously } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
@@ -995,6 +1144,12 @@
         };
         function safeSessionGet(k) {
             try { return window.sessionStorage.getItem(k); } catch (_) { return null; }
+        }
+        function safeSessionSet(k, v) {
+            try { window.sessionStorage.setItem(k, String(v)); } catch (_) {}
+        }
+        function safeSessionRemove(k) {
+            try { window.sessionStorage.removeItem(k); } catch (_) {}
         }
 
         const firebaseConfig = {
@@ -1017,6 +1172,7 @@
         const refLinhas = collection(db, "ob_linhas");
         const refFunc = collection(db, "ir_funcionarios");
         const refSpConfig = doc(db, "config", "docs_sharepoint");
+        const refTaxonomiaDocs = doc(db, "config", "docs_taxonomia");
         // Admin Master (mesma convenção da Central PCM / Inspeção de Rota: pcm_config/admin_master + sessão cepera_admin_master_auth)
         const refMasterCfgDocs = doc(db, "pcm_config", "admin_master");
         const DEFAULT_MASTER_HASH_DOCS = "7c2cce436d043699877f19ad8a6aef78dc5b1f167d97fbfa5d316885c2150a59";
@@ -1032,7 +1188,7 @@
             urlPastaRaiz: "https://ceperaind.sharepoint.com/sites/PCMCEPERA-LevantamentoManutenoPreventiva/Documentos%20Compartilhados/Forms/AllItems.aspx?id=%2Fsites%2FPCMCEPERA%2DLevantamentoManutenoPreventiva%2FDocumentos%20Compartilhados%2FSISTEMA&viewid=da8a2e7e%2D0d98%2D46b8%2Db619%2D61b655535ada"
         };
 
-        const CATEGORIAS_DOCS = {
+        const DEFAULT_CATEGORIAS_DOCS = {
             manuais: {
                 id: 'manuais', label: 'Manuais', pastaSp: '01_MANUAIS', sigilo: 'geral', badgeCls: 'cat-manuais',
                 subtipos: ['Manual de Manutenção', 'Manual de Operação', 'Catálogo de Peças / Vista Explodida', 'Manual do Fabricante', 'Parâmetros / IHM / CLP']
@@ -1062,6 +1218,17 @@
                 subtipos: ['POP / Instrução de Trabalho (IT)', 'Procedimento BPF / APPCC', 'Laudo NR-12 / Integridade', 'Certificado de Calibração', 'Procedimento LOTO (Bloqueio)']
             }
         };
+
+        const DEFAULT_DISCIPLINAS_DOCS = ['Mecânica', 'Elétrica', 'Automação', 'Lubrificação', 'Utilidades', 'Qualidade', 'Multidisciplinar'];
+        const CATEGORIAS_DOCS = {};
+        let taxonomiaDocsCfg = {
+            categoriasCustom: [],
+            subtiposExtras: {},
+            disciplinasCustom: []
+        };
+        for (const [k, v] of Object.entries(DEFAULT_CATEGORIAS_DOCS)) {
+            CATEGORIAS_DOCS[k] = { ...v, isCustom: false, subtipos: [...v.subtipos] };
+        }
 
         const MAX_DB_UPLOAD_BYTES = 7 * 1024 * 1024;
         const CHUNK_B64_CHARS = 260000;
@@ -1221,10 +1388,544 @@ match /config/{document=**} {
             return customMasterHashDocs || DEFAULT_MASTER_HASH_DOCS;
         }
 
-        // Funções Master (edição direta / exclusão direta): somente Admin/Gerente com sessão Admin Master ativa
+        // Funções Master (edição direta / exclusão direta / taxonomia): somente Admin/Gerente com sessão Admin Master ativa
         window.isMasterDocsAtivo = (user = usuarioLogado) => {
             if (!user || !isPerfilAdmin(user.role)) return false;
             return safeSessionGet('cepera_admin_master_auth') === getActiveMasterHashDocs();
+        };
+
+        function sha256FallbackDocs(ascii) {
+            const rightRotate = (value, amount) => (value >>> amount) | (value << (32 - amount));
+            const maxWord = Math.pow(2, 32);
+            let i, j, result = '';
+            const words = [], asciiBitLength = ascii.length * 8;
+            const hash = [];
+            const k = [];
+            let primeCounter = 0;
+            const isComposite = {};
+            for (let candidate = 2; primeCounter < 64; candidate++) {
+                if (!isComposite[candidate]) {
+                    for (i = 0; i < 313; i += candidate) isComposite[i] = candidate;
+                    hash[primeCounter] = (Math.pow(candidate, 0.5) * maxWord) | 0;
+                    k[primeCounter++] = (Math.pow(candidate, 1 / 3) * maxWord) | 0;
+                }
+            }
+            ascii += '\x80';
+            while ((ascii.length % 64) - 56) ascii += '\x00';
+            for (i = 0; i < ascii.length; i++) {
+                j = ascii.charCodeAt(i);
+                words[i >> 2] |= j << ((3 - i) % 4) * 8;
+            }
+            words[words.length] = (asciiBitLength / maxWord) | 0;
+            words[words.length] = asciiBitLength;
+            for (j = 0; j < words.length;) {
+                const w = words.slice(j, j += 16);
+                const oldHash = hash.slice(0);
+                for (i = 0; i < 64; i++) {
+                    const w15 = w[i - 15], w2 = w[i - 2];
+                    const a = hash[0], e = hash[4];
+                    const temp1 = hash[7]
+                        + (rightRotate(e, 6) ^ rightRotate(e, 11) ^ rightRotate(e, 25))
+                        + ((e & hash[5]) ^ ((~e) & hash[6]))
+                        + k[i]
+                        + (w[i] = (i < 16) ? w[i] : (
+                            w[i - 16]
+                            + (rightRotate(w15, 7) ^ rightRotate(w15, 18) ^ (w15 >>> 3))
+                            + w[i - 7]
+                            + (rightRotate(w2, 17) ^ rightRotate(w2, 19) ^ (w2 >>> 10))
+                        ) | 0);
+                    const temp2 = (rightRotate(a, 2) ^ rightRotate(a, 13) ^ rightRotate(a, 22))
+                        + ((a & hash[1]) ^ (a & hash[2]) ^ (hash[1] & hash[2]));
+                    hash[7] = hash[6]; hash[6] = hash[5]; hash[5] = hash[4];
+                    hash[4] = (hash[3] + temp1) | 0;
+                    hash[3] = hash[2]; hash[2] = hash[1]; hash[1] = hash[0];
+                    hash[0] = (temp1 + temp2) | 0;
+                }
+                for (i = 0; i < 8; i++) hash[i] = (hash[i] + oldHash[i]) | 0;
+            }
+            for (i = 0; i < 8; i++) {
+                for (j = 3; j + 1; j--) {
+                    const b = (hash[i] >> (j * 8)) & 255;
+                    result += ((b < 16) ? 0 : '') + b.toString(16);
+                }
+            }
+            return result;
+        }
+
+        async function sha256HexDocs(str) {
+            const raw = String(str || '');
+            if (window.crypto?.subtle && typeof TextEncoder !== 'undefined') {
+                try {
+                    const buf = await window.crypto.subtle.digest('SHA-256', new TextEncoder().encode(raw));
+                    return Array.from(new Uint8Array(buf)).map(b => b.toString(16).padStart(2, '0')).join('');
+                } catch (_) {}
+            }
+            return sha256FallbackDocs(raw);
+        }
+
+        function slugCategoriaIdDocs(label) {
+            const base = String(label || '')
+                .normalize('NFD')
+                .replace(/[\u0300-\u036f]/g, '')
+                .toLowerCase()
+                .replace(/[^a-z0-9]+/g, '_')
+                .replace(/^_+|_+$/g, '')
+                .slice(0, 28);
+            return base || 'categoria';
+        }
+
+        function rebuildCatalogoTaxonomiaDocs() {
+            for (const k of Object.keys(CATEGORIAS_DOCS)) delete CATEGORIAS_DOCS[k];
+            const extrasMap = (taxonomiaDocsCfg && typeof taxonomiaDocsCfg.subtiposExtras === 'object' && taxonomiaDocsCfg.subtiposExtras) || {};
+
+            const mesclarSubtipos = (catId, baseList = []) => {
+                const seen = new Set();
+                const out = [];
+                const pushSub = (s) => {
+                    const clean = String(s || '').trim();
+                    const nk = normKey(clean);
+                    if (!clean || seen.has(nk)) return;
+                    seen.add(nk);
+                    out.push(clean);
+                };
+                baseList.forEach(pushSub);
+                (Array.isArray(extrasMap[catId]) ? extrasMap[catId] : []).forEach(pushSub);
+                return out;
+            };
+
+            for (const [k, def] of Object.entries(DEFAULT_CATEGORIAS_DOCS)) {
+                CATEGORIAS_DOCS[k] = {
+                    ...def,
+                    isCustom: false,
+                    subtiposPadrao: [...def.subtipos],
+                    subtipos: mesclarSubtipos(k, def.subtipos)
+                };
+            }
+
+            const customs = Array.isArray(taxonomiaDocsCfg?.categoriasCustom) ? taxonomiaDocsCfg.categoriasCustom : [];
+            customs.forEach(c => {
+                if (!c || !c.id || !c.label || DEFAULT_CATEGORIAS_DOCS[c.id]) return;
+                const baseSubs = Array.isArray(c.subtipos) && c.subtipos.length ? c.subtipos : [c.label];
+                CATEGORIAS_DOCS[c.id] = {
+                    id: String(c.id),
+                    label: String(c.label).trim(),
+                    pastaSp: slugSegmentSp(c.pastaSp || `CAT_${c.label}`),
+                    sigilo: c.sigilo === 'gestao' ? 'gestao' : 'geral',
+                    badgeCls: c.badgeCls || 'cat-custom-sky',
+                    isCustom: true,
+                    subtiposPadrao: [...baseSubs],
+                    subtipos: mesclarSubtipos(c.id, baseSubs)
+                };
+            });
+        }
+
+        function getDisciplinasDisponiveisDocs() {
+            const seen = new Set();
+            const out = [];
+            const pushDisc = (d) => {
+                const clean = String(d || '').trim();
+                const nk = normKey(clean);
+                if (!clean || seen.has(nk)) return;
+                seen.add(nk);
+                out.push(clean);
+            };
+            DEFAULT_DISCIPLINAS_DOCS.forEach(pushDisc);
+            (Array.isArray(taxonomiaDocsCfg?.disciplinasCustom) ? taxonomiaDocsCfg.disciplinasCustom : []).forEach(pushDisc);
+            docsAtivos.forEach(d => { if (d?.disciplina) pushDisc(d.disciplina); });
+            return out;
+        }
+
+        function popularDisciplinasSelectsDocs(selectedModalValue = null) {
+            const discs = getDisciplinasDisponiveisDocs();
+            const fSel = document.getElementById('docFiltroDisciplina');
+            if (fSel) {
+                const prevF = fSel.value || '';
+                fSel.innerHTML = `<option value="">Todas Disciplinas</option>` +
+                    discs.map(d => `<option value="${escapeHtml(d)}">${escapeHtml(d)}</option>`).join('');
+                if (prevF && discs.some(d => normKey(d) === normKey(prevF))) {
+                    const exact = discs.find(d => normKey(d) === normKey(prevF));
+                    fSel.value = exact || prevF;
+                }
+            }
+            const mSel = document.getElementById('ndDisciplina');
+            if (mSel) {
+                const target = selectedModalValue !== null ? String(selectedModalValue || '').trim() : (mSel.value || 'Mecânica');
+                const opts = [...discs];
+                if (target && !opts.some(d => normKey(d) === normKey(target))) opts.push(target);
+                mSel.innerHTML = opts.map(d => `<option value="${escapeHtml(d)}">${escapeHtml(d)}</option>`).join('');
+                const matchOpt = opts.find(d => normKey(d) === normKey(target));
+                if (matchOpt) mSel.value = matchOpt;
+                else if (opts.length) mSel.value = opts[0];
+            }
+        }
+
+        function atualizarUIAposMudancaTaxonomiaDocs() {
+            rebuildCatalogoTaxonomiaDocs();
+            popularDisciplinasSelectsDocs();
+            const modalDocEl = document.getElementById('modalNovoDoc');
+            if (modalDocEl && !modalDocEl.hidden) {
+                const prevCat = document.getElementById('ndCategoria')?.value || '';
+                const prevSub = document.getElementById('ndSubtipo')?.value || '';
+                popularCategoriasSelectModal();
+                const catSel = document.getElementById('ndCategoria');
+                if (catSel && prevCat && CATEGORIAS_DOCS[prevCat]) {
+                    catSel.value = prevCat;
+                    onNdCategoriaChange();
+                    const subSel = document.getElementById('ndSubtipo');
+                    if (subSel && prevSub && [...subSel.options].some(o => o.value === prevSub)) {
+                        subSel.value = prevSub;
+                    }
+                }
+            } else {
+                popularCategoriasSelectModal();
+            }
+            renderCategoriasPills();
+            renderModalMasterTaxonomiaDocs();
+            renderCurrentView();
+        }
+
+        let masterDocsTabAtual = 'cat';
+
+        function atualizarBadgeMasterDocs() {
+            const admin = Boolean(usuarioLogado && isPerfilAdmin(usuarioLogado.role));
+            const ativo = isMasterDocsAtivo();
+            const btn = document.getElementById('btnMasterDocs');
+            const chip = document.getElementById('masterDocsChip');
+            const modalBadge = document.getElementById('masterDocsModalBadge');
+            const unlockBox = document.getElementById('masterDocsUnlockBox');
+            const activeBox = document.getElementById('masterDocsActiveBox');
+
+            if (btn) {
+                const showUnlockBtn = admin && !ativo;
+                btn.hidden = !showUnlockBtn;
+                btn.classList.toggle('hidden', !showUnlockBtn);
+                btn.classList.toggle('inline-flex', showUnlockBtn);
+            }
+            if (chip) {
+                chip.hidden = !ativo;
+                chip.classList.toggle('hidden', !ativo);
+                chip.classList.toggle('inline-flex', ativo);
+            }
+            if (modalBadge) {
+                modalBadge.innerText = ativo ? 'Desbloqueado' : 'Bloqueado';
+                modalBadge.className = ativo
+                    ? 'text-[10px] font-extrabold uppercase px-2 py-0.5 rounded-full bg-rose-600 text-white'
+                    : 'text-[10px] font-extrabold uppercase px-2 py-0.5 rounded-full bg-slate-100 text-slate-600';
+            }
+            if (unlockBox) {
+                unlockBox.hidden = ativo;
+                unlockBox.classList.toggle('hidden', ativo);
+            }
+            if (activeBox) {
+                activeBox.hidden = !ativo;
+                activeBox.classList.toggle('hidden', !ativo);
+            }
+            if (ativo) renderModalMasterTaxonomiaDocs();
+        }
+
+        window.switchMasterDocsTab = (tab = 'cat') => {
+            masterDocsTabAtual = (tab === 'disc' || tab === 'seg') ? tab : 'cat';
+            const tabs = { cat: 'masterDocsTabCat', disc: 'masterDocsTabDisc', seg: 'masterDocsTabSeg' };
+            const btns = { cat: 'btnMasterDocsTabCat', disc: 'btnMasterDocsTabDisc', seg: 'btnMasterDocsTabSeg' };
+            for (const [k, elId] of Object.entries(tabs)) {
+                const sec = document.getElementById(elId);
+                if (sec) {
+                    sec.hidden = k !== masterDocsTabAtual;
+                    sec.classList.toggle('hidden', k !== masterDocsTabAtual);
+                }
+                const btn = document.getElementById(btns[k]);
+                if (btn) {
+                    btn.className = k === masterDocsTabAtual
+                        ? 'flex-1 py-2 px-3 rounded-xl font-extrabold text-[11px] bg-slate-900 text-white shadow-sm'
+                        : 'flex-1 py-2 px-3 rounded-xl font-extrabold text-[11px] text-slate-600 hover:text-slate-900';
+                }
+            }
+            if (isMasterDocsAtivo()) renderModalMasterTaxonomiaDocs();
+        };
+
+        function renderModalMasterTaxonomiaDocs() {
+            const subCatSel = document.getElementById('masterDocSubCatId');
+            const cats = Object.values(CATEGORIAS_DOCS);
+            if (subCatSel) {
+                const prev = subCatSel.value || '';
+                subCatSel.innerHTML = cats.map(c => `<option value="${escapeHtml(c.id)}">${escapeHtml(c.label)}${c.isCustom ? ' (Custom)' : ''}</option>`).join('');
+                if (prev && CATEGORIAS_DOCS[prev]) subCatSel.value = prev;
+            }
+
+            const listaCat = document.getElementById('masterDocsTaxListaCat');
+            if (listaCat) {
+                const extrasMap = (taxonomiaDocsCfg && taxonomiaDocsCfg.subtiposExtras) || {};
+                listaCat.innerHTML = cats.map(c => {
+                    const extrasSet = new Set((Array.isArray(extrasMap[c.id]) ? extrasMap[c.id] : []).map(normKey));
+                    const subsHtml = (c.subtipos || []).map(sub => {
+                        const ehExtra = extrasSet.has(normKey(sub)) && !DEFAULT_CATEGORIAS_DOCS[c.id]?.subtipos.some(ds => normKey(ds) === normKey(sub));
+                        const catJs = JSON.stringify(c.id).replace(/"/g, '&quot;');
+                        const subJs = JSON.stringify(sub).replace(/"/g, '&quot;');
+                        return `<span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-lg ${ehExtra ? 'bg-indigo-50 text-indigo-800 border border-indigo-200' : 'bg-slate-100 text-slate-700 border border-slate-200'} text-[10px] font-bold">
+                            <span>${escapeHtml(sub)}</span>
+                            ${ehExtra ? `<button type="button" onclick="removerSubtipoMasterDocs(${catJs}, ${subJs})" title="Remover subtipo adicionado" class="text-rose-600 hover:text-rose-800 font-extrabold ml-0.5">✕</button>` : ''}
+                        </span>`;
+                    }).join('');
+                    const catIdJs = JSON.stringify(c.id).replace(/"/g, '&quot;');
+                    return `
+                    <div class="p-3 rounded-2xl bg-white border border-slate-200 space-y-2">
+                        <div class="flex flex-wrap items-center justify-between gap-2">
+                            <div class="flex flex-wrap items-center gap-1.5">
+                                <span class="px-2.5 py-0.5 rounded-full text-[10px] font-extrabold ${c.badgeCls}">${escapeHtml(c.label)}</span>
+                                <span class="px-2 py-0.5 rounded-md bg-slate-100 text-slate-600 text-[9px] font-extrabold uppercase">${c.isCustom ? 'Custom' : 'Padrão'}</span>
+                                <span class="text-[10px] font-mono text-slate-500">${escapeHtml(c.pastaSp)} • ${c.sigilo === 'gestao' ? 'Restrito Gestão' : 'Geral'}</span>
+                            </div>
+                            ${c.isCustom ? `<button type="button" onclick="removerCategoriaMasterDocs(${catIdJs})" class="px-2.5 py-1 rounded-lg bg-rose-50 hover:bg-rose-100 border border-rose-200 text-rose-700 text-[10px] font-extrabold">Excluir Categoria</button>` : ''}
+                        </div>
+                        <div class="flex flex-wrap gap-1.5">${subsHtml}</div>
+                    </div>`;
+                }).join('');
+            }
+
+            const listaDisc = document.getElementById('masterDocsTaxListaDisc');
+            if (listaDisc) {
+                const padraoSet = new Set(DEFAULT_DISCIPLINAS_DOCS.map(normKey));
+                const discs = getDisciplinasDisponiveisDocs();
+                listaDisc.innerHTML = discs.map(d => {
+                    const ehCustom = !padraoSet.has(normKey(d)) && (taxonomiaDocsCfg?.disciplinasCustom || []).some(cd => normKey(cd) === normKey(d));
+                    const dJs = JSON.stringify(d).replace(/"/g, '&quot;');
+                    return `
+                    <span class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl ${ehCustom ? 'bg-emerald-50 border border-emerald-200 text-emerald-900' : 'bg-slate-100 border border-slate-200 text-slate-700'} text-xs font-extrabold">
+                        <span>${escapeHtml(d)}</span>
+                        ${ehCustom ? `<button type="button" onclick="removerDisciplinaMasterDocs(${dJs})" title="Remover disciplina customizada" class="text-rose-600 hover:text-rose-800 font-extrabold">✕</button>` : '<span class="text-[9px] font-bold text-slate-400 uppercase">Padrão</span>'}
+                    </span>`;
+                }).join('');
+            }
+        }
+
+        async function persistirTaxonomiaDocs() {
+            const payload = sanitizarPayloadFirestore({
+                categoriasCustom: Array.isArray(taxonomiaDocsCfg.categoriasCustom) ? taxonomiaDocsCfg.categoriasCustom : [],
+                subtiposExtras: (taxonomiaDocsCfg.subtiposExtras && typeof taxonomiaDocsCfg.subtiposExtras === 'object') ? taxonomiaDocsCfg.subtiposExtras : {},
+                disciplinasCustom: Array.isArray(taxonomiaDocsCfg.disciplinasCustom) ? taxonomiaDocsCfg.disciplinasCustom : [],
+                atualizadoPor: usuarioLogado?.nome || 'Admin Master PCM',
+                atualizadoEm: Date.now()
+            });
+            await setDoc(refTaxonomiaDocs, payload);
+        }
+
+        window.abrirModalAdminMasterDocs = (tabPreferida = 'cat') => {
+            if (!usuarioLogado || !isPerfilAdmin(usuarioLogado.role)) {
+                return showToast('Acesso restrito: apenas administradores podem acessar o Menu Master.', 'error');
+            }
+            const inp = document.getElementById('masterDocsPassInput');
+            if (inp) inp.value = '';
+            atualizarBadgeMasterDocs();
+            if (isMasterDocsAtivo()) {
+                switchMasterDocsTab(tabPreferida || 'cat');
+            }
+            abrirModal('modalAdminMasterDocs');
+            if (!isMasterDocsAtivo()) setTimeout(() => inp?.focus?.(), 60);
+        };
+
+        window.desbloquearAdminMasterDocs = async (e) => {
+            if (e?.preventDefault) e.preventDefault();
+            if (!usuarioLogado || !isPerfilAdmin(usuarioLogado.role)) {
+                return showToast('Acesso restrito ao perfil Admin.', 'error');
+            }
+            const pass = document.getElementById('masterDocsPassInput')?.value || '';
+            const h = await sha256HexDocs(pass);
+            if (h !== getActiveMasterHashDocs()) {
+                return showToast('Senha oculta do Admin Master incorreta.', 'error');
+            }
+            safeSessionSet('cepera_admin_master_auth', getActiveMasterHashDocs());
+            aplicarPerfilInterface();
+            renderCurrentView();
+            switchMasterDocsTab(masterDocsTabAtual || 'cat');
+            showToast('Menu Admin Master desbloqueado com sucesso!', 'success');
+        };
+
+        window.travarAdminMasterDocs = () => {
+            safeSessionRemove('cepera_admin_master_auth');
+            aplicarPerfilInterface();
+            renderCurrentView();
+            fecharModal('modalAdminMasterDocs');
+            showToast('Modo Admin Master travado.');
+        };
+
+        window.salvarNovaSenhaMasterDocs = async () => {
+            if (!isMasterDocsAtivo()) return showToast('Desbloqueie o Admin Master primeiro.', 'error');
+            const s1 = document.getElementById('masterDocsNewPass1')?.value || '';
+            const s2 = document.getElementById('masterDocsNewPass2')?.value || '';
+            if (s1.length < 6) return showToast('A nova senha deve ter no mínimo 6 caracteres.', 'error');
+            if (s1 !== s2) return showToast('As duas senhas digitadas não conferem.', 'error');
+            try {
+                const novoHash = await sha256HexDocs(s1);
+                await setDoc(refMasterCfgDocs, {
+                    pass_hash: novoHash,
+                    updated_by: usuarioLogado?.nome || 'Admin Master',
+                    updated_at: Date.now()
+                });
+                customMasterHashDocs = novoHash;
+                safeSessionSet('cepera_admin_master_auth', novoHash);
+                const i1 = document.getElementById('masterDocsNewPass1');
+                const i2 = document.getElementById('masterDocsNewPass2');
+                if (i1) i1.value = '';
+                if (i2) i2.value = '';
+                aplicarPerfilInterface();
+                showToast('Senha oculta Admin Master atualizada com sucesso!', 'success');
+            } catch (err) {
+                showToast('Erro ao salvar nova senha Master no Firestore.', 'error');
+            }
+        };
+
+        window.cadastrarCategoriaMasterDocs = async (e) => {
+            if (e?.preventDefault) e.preventDefault();
+            if (!isMasterDocsAtivo()) return showToast('Desbloqueie o Menu Admin Master para cadastrar categorias.', 'error');
+            const label = (document.getElementById('masterDocCatNome')?.value || '').trim();
+            const subInicial = (document.getElementById('masterDocCatSubInicial')?.value || '').trim();
+            const sigilo = document.getElementById('masterDocCatSigilo')?.value === 'gestao' ? 'gestao' : 'geral';
+            const badgeCls = document.getElementById('masterDocCatCor')?.value || 'cat-custom-sky';
+            const pastaInp = (document.getElementById('masterDocCatPasta')?.value || '').trim();
+
+            if (!label) return showToast('Informe o nome da Categoria.', 'error');
+            if (Object.values(CATEGORIAS_DOCS).some(c => normKey(c.label) === normKey(label))) {
+                return showToast(`A categoria "${label}" já existe no módulo.`, 'error');
+            }
+
+            let baseId = slugCategoriaIdDocs(label);
+            let catId = baseId;
+            let seq = 2;
+            while (CATEGORIAS_DOCS[catId]) catId = `${baseId}_${seq++}`;
+
+            const subtiposIniciais = subInicial ? [subInicial] : [label];
+            const pastaSp = slugSegmentSp(pastaInp || `CAT_${label}`);
+            const novaCat = { id: catId, label, pastaSp, sigilo, badgeCls, subtipos: subtiposIniciais };
+
+            const btn = document.getElementById('btnSalvarCatMasterDocs');
+            if (btn) { btn.disabled = true; btn.innerText = 'Salvando...'; }
+            try {
+                taxonomiaDocsCfg.categoriasCustom = [...(taxonomiaDocsCfg.categoriasCustom || []), novaCat];
+                await persistirTaxonomiaDocs();
+                atualizarUIAposMudancaTaxonomiaDocs();
+                const catSel = document.getElementById('masterDocSubCatId');
+                if (catSel) catSel.value = catId;
+                ['masterDocCatNome', 'masterDocCatSubInicial', 'masterDocCatPasta'].forEach(fid => {
+                    const el = document.getElementById(fid);
+                    if (el) el.value = '';
+                });
+                showToast(`Categoria "${label}" cadastrada no módulo de documentos!`, 'success');
+            } catch (err) {
+                const info = formatarErroFirestoreDocs(err);
+                if (info.tipo === 'regras_firestore') abrirModalAlertaRegrasFirestore(info);
+                else showToast(info.resumo, 'error');
+            } finally {
+                if (btn) { btn.disabled = false; btn.innerText = '+ Cadastrar Categoria'; }
+            }
+        };
+
+        window.removerCategoriaMasterDocs = async (catId) => {
+            if (!isMasterDocsAtivo()) return showToast('Acesso restrito ao Admin Master.', 'error');
+            const cat = CATEGORIAS_DOCS[catId];
+            if (!cat || !cat.isCustom) return showToast('Apenas categorias customizadas podem ser removidas.', 'error');
+            const emUso = docsAtivos.filter(d => d.categoria === catId).length + docsRevisoes.filter(r => r.categoria === catId).length;
+            if (emUso > 0) {
+                return showToast(`Não é possível excluir "${cat.label}": há ${emUso} documento(s)/revisão(ões) vinculados a ela.`, 'error');
+            }
+            try {
+                taxonomiaDocsCfg.categoriasCustom = (taxonomiaDocsCfg.categoriasCustom || []).filter(c => c.id !== catId);
+                if (taxonomiaDocsCfg.subtiposExtras) delete taxonomiaDocsCfg.subtiposExtras[catId];
+                if (categoriaFiltro === catId) categoriaFiltro = '';
+                await persistirTaxonomiaDocs();
+                atualizarUIAposMudancaTaxonomiaDocs();
+                showToast(`Categoria "${cat.label}" removida.`, 'info');
+            } catch (err) {
+                showToast('Erro ao remover categoria customizada.', 'error');
+            }
+        };
+
+        window.cadastrarSubtipoMasterDocs = async (e) => {
+            if (e?.preventDefault) e.preventDefault();
+            if (!isMasterDocsAtivo()) return showToast('Desbloqueie o Menu Admin Master para cadastrar subtipos.', 'error');
+            const catId = (document.getElementById('masterDocSubCatId')?.value || '').trim();
+            const subNome = (document.getElementById('masterDocSubNome')?.value || '').trim();
+            const cat = CATEGORIAS_DOCS[catId];
+            if (!cat) return showToast('Selecione uma categoria válida.', 'error');
+            if (!subNome) return showToast('Informe o nome do Subtipo.', 'error');
+            if ((cat.subtipos || []).some(s => normKey(s) === normKey(subNome))) {
+                return showToast(`O subtipo "${subNome}" já existe na categoria "${cat.label}".`, 'error');
+            }
+
+            const btn = document.getElementById('btnSalvarSubMasterDocs');
+            if (btn) { btn.disabled = true; btn.innerText = 'Salvando...'; }
+            try {
+                taxonomiaDocsCfg.subtiposExtras ||= {};
+                const cur = Array.isArray(taxonomiaDocsCfg.subtiposExtras[catId]) ? taxonomiaDocsCfg.subtiposExtras[catId] : [];
+                taxonomiaDocsCfg.subtiposExtras[catId] = [...cur, subNome];
+                await persistirTaxonomiaDocs();
+                atualizarUIAposMudancaTaxonomiaDocs();
+                const inp = document.getElementById('masterDocSubNome');
+                if (inp) inp.value = '';
+                showToast(`Subtipo "${subNome}" adicionado à categoria "${cat.label}"!`, 'success');
+            } catch (err) {
+                const info = formatarErroFirestoreDocs(err);
+                if (info.tipo === 'regras_firestore') abrirModalAlertaRegrasFirestore(info);
+                else showToast(info.resumo, 'error');
+            } finally {
+                if (btn) { btn.disabled = false; btn.innerText = '+ Adicionar Subtipo à Categoria'; }
+            }
+        };
+
+        window.removerSubtipoMasterDocs = async (catId, subNome) => {
+            if (!isMasterDocsAtivo()) return showToast('Acesso restrito ao Admin Master.', 'error');
+            const extras = taxonomiaDocsCfg?.subtiposExtras?.[catId];
+            if (!Array.isArray(extras)) return;
+            taxonomiaDocsCfg.subtiposExtras[catId] = extras.filter(s => normKey(s) !== normKey(subNome));
+            try {
+                await persistirTaxonomiaDocs();
+                atualizarUIAposMudancaTaxonomiaDocs();
+                showToast(`Subtipo "${subNome}" removido.`, 'info');
+            } catch (_) {
+                showToast('Erro ao remover subtipo.', 'error');
+            }
+        };
+
+        window.cadastrarDisciplinaMasterDocs = async (e) => {
+            if (e?.preventDefault) e.preventDefault();
+            if (!isMasterDocsAtivo()) return showToast('Desbloqueie o Menu Admin Master para cadastrar disciplinas.', 'error');
+            const discNome = (document.getElementById('masterDocDiscNome')?.value || '').trim();
+            if (!discNome) return showToast('Informe o nome da Disciplina.', 'error');
+            if (getDisciplinasDisponiveisDocs().some(d => normKey(d) === normKey(discNome))) {
+                return showToast(`A disciplina "${discNome}" já está cadastrada.`, 'error');
+            }
+
+            const btn = document.getElementById('btnSalvarDiscMasterDocs');
+            if (btn) { btn.disabled = true; btn.innerText = 'Salvando...'; }
+            try {
+                taxonomiaDocsCfg.disciplinasCustom = [...(taxonomiaDocsCfg.disciplinasCustom || []), discNome];
+                await persistirTaxonomiaDocs();
+                atualizarUIAposMudancaTaxonomiaDocs();
+                const inp = document.getElementById('masterDocDiscNome');
+                if (inp) inp.value = '';
+                showToast(`Disciplina "${discNome}" cadastrada com sucesso!`, 'success');
+            } catch (err) {
+                const info = formatarErroFirestoreDocs(err);
+                if (info.tipo === 'regras_firestore') abrirModalAlertaRegrasFirestore(info);
+                else showToast(info.resumo, 'error');
+            } finally {
+                if (btn) { btn.disabled = false; btn.innerText = '+ Cadastrar Disciplina'; }
+            }
+        };
+
+        window.removerDisciplinaMasterDocs = async (discNome) => {
+            if (!isMasterDocsAtivo()) return showToast('Acesso restrito ao Admin Master.', 'error');
+            const emUso = docsAtivos.some(d => normKey(d.disciplina) === normKey(discNome));
+            if (emUso) {
+                return showToast(`A disciplina "${discNome}" já está vinculada a documentos existentes e permanece disponível.`, 'error');
+            }
+            taxonomiaDocsCfg.disciplinasCustom = (taxonomiaDocsCfg.disciplinasCustom || []).filter(d => normKey(d) !== normKey(discNome));
+            try {
+                await persistirTaxonomiaDocs();
+                atualizarUIAposMudancaTaxonomiaDocs();
+                showToast(`Disciplina "${discNome}" removida.`, 'info');
+            } catch (_) {
+                showToast('Erro ao remover disciplina.', 'error');
+            }
         };
 
         function podeVerDocumento(docObj, user = usuarioLogado) {
@@ -1505,6 +2206,7 @@ match /config/{document=**} {
         window.fazerLogout = () => {
             safeStorage.remove('cepera_ir_user');
             safeStorage.remove('cepera_central_session');
+            safeSessionRemove('cepera_admin_master_auth');
             if (window.parent && window.parent !== window) {
                 window.parent.postMessage({ type: 'CEPERA_LOGOUT_CENTRAL' }, '*');
             } else {
@@ -1554,13 +2256,7 @@ match /config/{document=**} {
             }
             const uLbl = document.getElementById('userChipLabel');
             if (uLbl && usuarioLogado) uLbl.innerText = `${usuarioLogado.nome || usuarioLogado.user} (${usuarioLogado.role})`;
-            const chipMaster = document.getElementById('masterDocsChip');
-            if (chipMaster) {
-                const mOn = isMasterDocsAtivo();
-                chipMaster.hidden = !mOn;
-                chipMaster.classList.toggle('hidden', !mOn);
-                chipMaster.classList.toggle('inline-flex', mOn);
-            }
+            atualizarBadgeMasterDocs();
             const btnNew = document.getElementById('btnNovoDocHeader');
             if (btnNew) {
                 btnNew.innerText = aprovador ? '+ Novo Documento / Foto' : '+ Enviar Foto / Sugestão';
@@ -1571,6 +2267,7 @@ match /config/{document=**} {
                     ? 'Exibindo revisões vigentes e aprovadas (incluindo documentos administrativos/restritos da Gestão).'
                     : 'Exibindo apenas documentação técnica vigente liberada para a sua equipe.';
             }
+            popularDisciplinasSelectsDocs();
             renderCategoriasPills();
         }
 
@@ -3651,6 +4348,7 @@ match /config/{document=**} {
 
             configurarVisibilidadeNoModalDoc(null, prefill.categoria || 'manuais');
             popularCategoriasSelectModal();
+            popularDisciplinasSelectsDocs('Mecânica');
             if (prefill.categoria && CATEGORIAS_DOCS[prefill.categoria]) {
                 const catSel = document.getElementById('ndCategoria');
                 if (catSel && [...catSel.options].some(o => o.value === prefill.categoria)) {
@@ -3706,8 +4404,14 @@ match /config/{document=**} {
             popularCategoriasSelectModal();
             document.getElementById('ndCategoria').value = d.categoria;
             onNdCategoriaChange();
-            if (d.subtipo) document.getElementById('ndSubtipo').value = d.subtipo;
-            document.getElementById('ndDisciplina').value = d.disciplina || 'Mecânica';
+            const subSelRev = document.getElementById('ndSubtipo');
+            if (d.subtipo && subSelRev) {
+                if (![...subSelRev.options].some(o => o.value === d.subtipo)) {
+                    subSelRev.innerHTML += `<option value="${escapeHtml(d.subtipo)}">${escapeHtml(d.subtipo)}</option>`;
+                }
+                subSelRev.value = d.subtipo;
+            }
+            popularDisciplinasSelectsDocs(d.disciplina || 'Mecânica');
             document.getElementById('ndCodigo').value = d.codigo;
             document.getElementById('ndCodigo').readOnly = true;
             document.getElementById('ndTitulo').value = d.titulo;
@@ -3773,8 +4477,14 @@ match /config/{document=**} {
                 document.getElementById('ndCategoria').value = d.categoria;
                 onNdCategoriaChange();
             }
-            if (d.subtipo) document.getElementById('ndSubtipo').value = d.subtipo;
-            document.getElementById('ndDisciplina').value = d.disciplina || 'Mecânica';
+            const subSelMaster = document.getElementById('ndSubtipo');
+            if (d.subtipo && subSelMaster) {
+                if (![...subSelMaster.options].some(o => o.value === d.subtipo)) {
+                    subSelMaster.innerHTML += `<option value="${escapeHtml(d.subtipo)}">${escapeHtml(d.subtipo)}</option>`;
+                }
+                subSelMaster.value = d.subtipo;
+            }
+            popularDisciplinasSelectsDocs(d.disciplina || 'Mecânica');
             document.getElementById('ndCodigo').value = d.codigo || '';
             document.getElementById('ndCodigo').readOnly = false;
             document.getElementById('ndTitulo').value = d.titulo || '';
@@ -4585,6 +5295,11 @@ match /config/{document=**} {
             safeStorage.remove('cepera_agendamento_handoff');
 
             const a = h.ativo || {};
+            if (h.action === 'master_taxonomia' && isPerfilAdmin(usuarioLogado?.role)) {
+                switchView('biblioteca');
+                abrirModalAdminMasterDocs(h.tab || 'cat');
+                return;
+            }
             if (h.action === 'aprovar_fila' && isPerfilAprovadorDocs(usuarioLogado)) {
                 switchView('aprovacoes');
                 return;
@@ -4665,6 +5380,18 @@ match /config/{document=**} {
             }, () => {});
 
             try {
+                onSnapshot(refTaxonomiaDocs, (snapDoc) => {
+                    const data = snapDoc && snapDoc.exists() ? (snapDoc.data() || {}) : {};
+                    taxonomiaDocsCfg = {
+                        categoriasCustom: Array.isArray(data.categoriasCustom) ? data.categoriasCustom : [],
+                        subtiposExtras: (data.subtiposExtras && typeof data.subtiposExtras === 'object') ? data.subtiposExtras : {},
+                        disciplinasCustom: Array.isArray(data.disciplinasCustom) ? data.disciplinasCustom : []
+                    };
+                    atualizarUIAposMudancaTaxonomiaDocs();
+                }, () => {});
+            } catch (_) {}
+
+            try {
                 onSnapshot(refMasterCfgDocs, (snapDoc) => {
                     const data = snapDoc && snapDoc.exists() ? snapDoc.data() : null;
                     customMasterHashDocs = (data && data.pass_hash) ? String(data.pass_hash) : null;
@@ -4689,6 +5416,7 @@ match /config/{document=**} {
             onSnapshot(refDocsAtivos, (snap) => {
                 docsAtivos = snap.docs.map(d => ({ id: d.id, ...d.data() }));
                 handoffDocsLoaded = true;
+                popularDisciplinasSelectsDocs();
                 renderCurrentView();
                 tentarAplicarHandoffDocs();
             });
@@ -4696,6 +5424,19 @@ match /config/{document=**} {
             onSnapshot(refDocsRevisoes, (snap) => {
                 docsRevisoes = snap.docs.map(d => ({ id: d.id, ...d.data() }));
                 renderCurrentView();
+            });
+
+            window.addEventListener('focus', () => {
+                if (usuarioLogado) {
+                    aplicarPerfilInterface();
+                    renderCurrentView();
+                }
+            });
+            window.addEventListener('storage', (ev) => {
+                if (!ev.key || ev.key === 'cepera_central_session' || ev.key === 'cepera_ir_user') {
+                    usuarioLogado = lerSessaoCentral();
+                    if (usuarioLogado) { aplicarPerfilInterface(); renderCurrentView(); }
+                }
             });
         }
 
