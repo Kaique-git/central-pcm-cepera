@@ -365,6 +365,10 @@
                             </p>
                         </div>
                         <div class="flex flex-wrap items-center gap-2">
+                            <button type="button" id="btnMasterRbacToggle" onclick="abrirModalAdminMaster()" class="btn-touch bg-amber-50 hover:bg-amber-100 text-amber-800 text-xs py-2.5 px-4 border border-amber-200" title="Desbloqueie com a Senha Master para editar quais telas perfis Admin/Gerente podem acessar">
+                                <svg class="w-3.5 h-3.5 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"/></svg>
+                                <span id="lblMasterRbacToggle">Liberar Edição de Admins (Master)</span>
+                            </button>
                             <button type="button" onclick="aplicarPadraoCargoTodos()" class="btn-touch bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs py-2.5 px-4 border border-slate-200" title="Preenche permissões padrão para usuários que ainda não foram customizados">
                                 <svg class="w-3.5 h-3.5 text-amber-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M13 10V3L4 14h7v7l9-11h-7z"/></svg>
                                 <span>Sincronizar Padrões de Cargo</span>
@@ -400,13 +404,13 @@
                             </div>
                             <div class="text-[11px] font-bold text-slate-500 flex items-center gap-1.5">
                                 <svg class="w-4 h-4 text-sky-600 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
-                                <span>Clique nas chaves verdes para liberar ou bloquear um App instantaneamente. Gestão de Ativos é exclusivo Admin/Gerente.</span>
+                                <span>Clique nas chaves verdes para liberar ou bloquear um App. Para editar telas de perfis <strong>Admin / Gerente</strong>, desbloqueie o modo <strong>Master</strong> com a senha oculta.</span>
                             </div>
                         </div>
 
-                        <!-- TABELA MATRIZ DE ACESSOS (USUÁRIOS x 7 APPS) -->
+                        <!-- TABELA MATRIZ DE ACESSOS (USUÁRIOS x 9 APPS) -->
                         <div class="overflow-x-auto rounded-2xl border border-slate-200">
-                            <table class="w-full border-collapse text-left min-w-[1160px]">
+                            <table class="w-full border-collapse text-left min-w-[1320px]">
                                 <thead>
                                     <tr class="bg-slate-50 border-b border-slate-200 text-[11px] font-extrabold uppercase text-slate-600">
                                         <th class="py-3.5 px-4">Colaborador / Login</th>
@@ -418,6 +422,8 @@
                                         <th class="py-3.5 px-3 text-center">Multipet</th>
                                         <th class="py-3.5 px-3 text-center">Gestão de Ativos</th>
                                         <th class="py-3.5 px-3 text-center">Preventivas</th>
+                                        <th class="py-3.5 px-3 text-center">Biblioteca Docs</th>
+                                        <th class="py-3.5 px-3 text-center">Auditoria &amp; AQF</th>
                                         <th class="py-3.5 px-4 text-right">Ações Rápidas</th>
                                     </tr>
                                 </thead>
@@ -879,11 +885,37 @@
             if (ativo) safeSessionSet('cepera_admin_master_auth', getActiveMasterHash());
             else safeSessionRemove('cepera_admin_master_auth');
             atualizarBadgeMasterCentral();
+            if (typeof window.renderizarMatrizRbac === 'function' && usuarioLogado && isPerfilAdminCentral(usuarioLogado.role)) {
+                window.renderizarMatrizRbac();
+            }
+            const modalUser = document.getElementById('modalUsuarioRbac');
+            if (modalUser && !modalUser.classList.contains('hidden')) {
+                const editId = document.getElementById('uEditId')?.value?.trim() || '';
+                const roleAtual = document.getElementById('uRole')?.value || 'Mecânica';
+                const uEdit = editId ? listaFunc.find(x => x.id === editId) : null;
+                const atuais = Array.from(document.querySelectorAll('input[name="chkModalAppRbac"]:checked')).map(el => el.value);
+                renderCheckboxesAppsNoModal(uEdit ? getAppsPermitidosUsuario(uEdit) : atuais, roleAtual);
+            }
+        }
+
+        function atualizarBotaoMasterRbac() {
+            const btn = document.getElementById('btnMasterRbacToggle');
+            const lbl = document.getElementById('lblMasterRbacToggle');
+            if (!btn) return;
+            const ativo = isAdminMasterAtivoCentral();
+            if (ativo) {
+                btn.className = 'btn-touch bg-rose-600 hover:bg-rose-700 text-white text-xs py-2.5 px-4 border border-rose-700 shadow-sm';
+                if (lbl) lbl.innerText = 'Modo Master Ativo • Edição de Admins Liberada';
+            } else {
+                btn.className = 'btn-touch bg-amber-50 hover:bg-amber-100 text-amber-800 text-xs py-2.5 px-4 border border-amber-200';
+                if (lbl) lbl.innerText = 'Liberar Edição de Admins (Master)';
+            }
         }
 
         function atualizarBadgeMasterCentral() {
             const btn = document.getElementById('btnMasterCentral');
             const lbl = document.getElementById('lblBtnMasterCentral');
+            atualizarBotaoMasterRbac();
             if (!btn) return;
             if (!usuarioLogado || !isPerfilAdminCentral(usuarioLogado.role)) {
                 btn.classList.add('hidden');
@@ -912,8 +944,8 @@
                     ? 'p-3.5 rounded-2xl bg-rose-50 border border-rose-200 text-xs text-rose-900 space-y-1'
                     : 'p-3.5 rounded-2xl bg-slate-50 border border-slate-200 text-xs text-slate-700 space-y-1';
                 banner.innerHTML = ativo
-                    ? '<div class="font-extrabold text-rose-800">Admin Master DESBLOQUEADO nesta sessão</div><p>A limpeza definitiva de anomalias, planos e fichas está liberada nos módulos integrados. Feche a aba ou clique em travar quando finalizar.</p>'
-                    : '<div class="font-extrabold text-slate-900">Acesso Master Bloqueado</div><p>Digite a senha oculta restrita para liberar exclusões definitivas de banco sem sair do app.</p>';
+                    ? '<div class="font-extrabold text-rose-800">Admin Master DESBLOQUEADO nesta sessão</div><p>A edição de telas RBAC para perfis Admin/Gerente e a limpeza definitiva de registros nos módulos estão liberadas. Feche a aba ou clique em travar quando finalizar.</p>'
+                    : '<div class="font-extrabold text-slate-900">Acesso Master Bloqueado</div><p>Digite a senha oculta restrita para liberar a edição de telas RBAC de perfis Admin/Gerente e exclusões definitivas de banco.</p>';
             }
             if (formUnlock) formUnlock.classList.toggle('hidden', ativo);
             if (secAtivo) secAtivo.classList.toggle('hidden', !ativo);
@@ -1173,13 +1205,21 @@
 
         export function getAppsPermitidosUsuario(userObj) {
             if (!userObj) return [];
-            // Admin e Gerente têm sempre acesso total garantido à Central e a todos os módulos
+            const validIds = new Set(APPS_CATALOG.map(a => a.id));
+            // Sessão oculta Admin Master sempre mantém acesso irrestrito a todos os módulos
+            if (userObj.isMaster) {
+                return APPS_CATALOG.map(a => a.id);
+            }
+            // Admin e Gerente: quando customizado pelo Modo Master no RBAC, respeita exatamente as telas liberadas; caso contrário, mantém acesso total padrão
             if (isPerfilAdminCentral(userObj.role)) {
+                if (userObj.rbac_admin_custom === true && Array.isArray(userObj.apps_permitidos)) {
+                    return userObj.apps_permitidos.filter(id => validIds.has(id));
+                }
                 return APPS_CATALOG.map(a => a.id);
             }
             const adminOnlyIds = new Set(APPS_CATALOG.filter(a => a.adminOnly).map(a => a.id));
             if (Array.isArray(userObj.apps_permitidos)) {
-                return userObj.apps_permitidos.filter(id => !adminOnlyIds.has(id));
+                return userObj.apps_permitidos.filter(id => validIds.has(id) && !adminOnlyIds.has(id));
             }
             return getAppsPadraoPorRole(userObj.role);
         }
@@ -1202,6 +1242,7 @@
                 user: userObj.user,
                 role: userObj.role,
                 isMaster: Boolean(userObj.isMaster),
+                rbac_admin_custom: Boolean(userObj.rbac_admin_custom),
                 apps_permitidos: appsPermitidos,
                 preferencias: (userObj.preferencias && typeof userObj.preferencias === 'object') ? userObj.preferencias : { ...userPrefs },
                 ts: Date.now()
@@ -1602,6 +1643,8 @@
         // ================= GESTÃO DE RBAC & USUÁRIOS (EXCLUSIVO ADMIN / GERENTE) =================
         window.renderizarMatrizRbac = () => {
             if (!usuarioLogado || !isPerfilAdminCentral(usuarioLogado.role)) return;
+            atualizarBotaoMasterRbac();
+            const masterAtivo = isAdminMasterAtivoCentral();
 
             // 1. Renderiza KPIs
             const kpiRow = document.getElementById('rbacKpiRow');
@@ -1637,13 +1680,16 @@
 
             const tbody = document.getElementById('tbodyMatrizRbac');
             if (filtrados.length === 0) {
-                tbody.innerHTML = `<tr><td colspan="10" class="p-8 text-center text-slate-400 font-bold">Nenhum colaborador encontrado para este filtro.</td></tr>`;
+                tbody.innerHTML = `<tr><td colspan="12" class="p-8 text-center text-slate-400 font-bold">Nenhum colaborador encontrado para este filtro.</td></tr>`;
                 return;
             }
 
             tbody.innerHTML = filtrados.map(u => {
                 const isAdmin = isPerfilAdminCentral(u.role);
+                const isDefaultAdmin = u.id === 'default_admin';
+                const podeEditarTelasAdmin = masterAtivo && !isDefaultAdmin;
                 const appsUser = getAppsPermitidosUsuario(u);
+                const adminCustomAtivo = isAdmin && u.rbac_admin_custom === true;
                 const badgeRole = isAdmin
                     ? 'bg-slate-900 text-white'
                     : (String(u.role).includes('Supervisor')
@@ -1662,10 +1708,18 @@
                         `;
                     }
                     const checked = appsUser.includes(app.id);
+                    const disabled = isAdmin && !podeEditarTelasAdmin;
+                    const tooltip = isAdmin
+                        ? (isDefaultAdmin
+                            ? 'Administrador padrão de fallback (acesso total)'
+                            : (masterAtivo
+                                ? `${checked ? 'Acesso Liberado' : 'Acesso Bloqueado'} (${app.shortTitle}) • Edição Master`
+                                : `Desbloqueie o Modo Master com a senha oculta para editar telas de perfis Admin/Gerente`))
+                        : `${checked ? 'Acesso Liberado' : 'Acesso Bloqueado'} (${app.shortTitle})`;
                     return `
                         <td class="py-3 px-3 text-center align-middle">
-                            <label class="rbac-toggle" title="${checked ? 'Acesso Liberado' : 'Acesso Bloqueado'} (${escapeHtml(app.shortTitle)})">
-                                <input type="checkbox" ${checked ? 'checked' : ''} ${isAdmin ? 'disabled' : ''} onchange="alternarPermissaoAppUsuario('${u.id}', '${app.id}', this.checked)">
+                            <label class="rbac-toggle" title="${escapeHtml(tooltip)}">
+                                <input type="checkbox" ${checked ? 'checked' : ''} ${disabled ? 'disabled' : ''} onchange="alternarPermissaoAppUsuario('${u.id}', '${app.id}', this.checked)">
                                 <span class="rbac-slider"></span>
                             </label>
                         </td>
@@ -1679,17 +1733,22 @@
                             <div class="font-mono text-[11px] text-slate-500">Login: <strong>${escapeHtml(u.user)}</strong> • Senha: ${escapeHtml(u.pass || '••••')}</div>
                         </td>
                         <td class="py-3 px-3">
-                            <span class="text-[10px] font-extrabold uppercase px-2.5 py-1 rounded-full ${badgeRole}">
-                                ${escapeHtml(u.role)}
-                            </span>
+                            <div class="flex flex-col items-start gap-1">
+                                <span class="text-[10px] font-extrabold uppercase px-2.5 py-1 rounded-full ${badgeRole}">
+                                    ${escapeHtml(u.role)}
+                                </span>
+                                ${adminCustomAtivo ? `<span class="text-[9px] font-extrabold px-2 py-0.5 rounded-full bg-rose-50 text-rose-700 border border-rose-200" title="Telas filtradas via Modo Master (mantém poderes de Admin nas telas liberadas)">Master: ${appsUser.length}/${APPS_CATALOG.length} telas</span>` : ''}
+                            </div>
                         </td>
                         ${colSwitches}
                         <td class="py-3 px-4 text-right whitespace-nowrap">
                             <div class="inline-flex items-center gap-1.5">
-                                ${!isAdmin ? `
+                                ${(!isAdmin || podeEditarTelasAdmin) ? `
                                     <button type="button" onclick="definirTodosAppsUsuario('${u.id}', true)" title="Liberar todos os aplicativos disponíveis para este perfil" class="px-2 py-1 rounded-lg bg-emerald-50 hover:bg-emerald-100 text-emerald-700 font-extrabold text-[10px] border border-emerald-200">Todos</button>
                                     <button type="button" onclick="resetarAppsPadraoUsuario('${u.id}')" title="Restaurar apps padrão do cargo" class="px-2 py-1 rounded-lg bg-slate-100 hover:bg-slate-200 text-slate-600 font-extrabold text-[10px]">Padrão</button>
-                                ` : ''}
+                                ` : (!isDefaultAdmin ? `
+                                    <button type="button" onclick="abrirModalAdminMaster()" title="Desbloquear com Senha Master para editar as telas deste Admin/Gerente" class="px-2 py-1 rounded-lg bg-amber-50 hover:bg-amber-100 text-amber-800 font-extrabold text-[10px] border border-amber-200">🔒 Master</button>
+                                ` : '')}
                                 <button type="button" onclick="abrirModalEditarUsuarioRbac('${u.id}')" class="px-2.5 py-1 rounded-lg bg-sky-50 hover:bg-sky-100 text-sky-700 font-extrabold text-[11px] border border-sky-200">Editar</button>
                                 ${u.id !== 'default_admin' ? `
                                     <button type="button" onclick="excluirUsuarioRbac('${u.id}')" class="px-2 py-1 rounded-lg bg-rose-50 hover:bg-rose-100 text-rose-600 font-extrabold text-[11px] border border-rose-200">✕</button>
@@ -1704,9 +1763,21 @@
         window.alternarPermissaoAppUsuario = async (userId, appId, liberar) => {
             if (!usuarioLogado || !isPerfilAdminCentral(usuarioLogado.role)) return;
             const alvo = listaFunc.find(u => u.id === userId);
-            if (!alvo || isPerfilAdminCentral(alvo.role)) return;
+            if (!alvo) return;
+            const isAlvoAdmin = isPerfilAdminCentral(alvo.role);
 
-            if (isAppRestritoAdmin(appId)) {
+            if (isAlvoAdmin) {
+                if (alvo.id === 'default_admin') {
+                    showToast("O administrador padrão de fallback não pode ser restringido.", "error");
+                    renderizarMatrizRbac();
+                    return;
+                }
+                if (!isAdminMasterAtivoCentral()) {
+                    showToast("Desbloqueie o Modo Master com a senha oculta para editar telas de perfis Admin/Gerente.", "error");
+                    renderizarMatrizRbac();
+                    return;
+                }
+            } else if (isAppRestritoAdmin(appId)) {
                 showToast("Gestão de Ativos é um módulo exclusivo para perfis Admin e Gerente.", "error");
                 renderizarMatrizRbac();
                 return;
@@ -1717,12 +1788,13 @@
             else atuais.delete(appId);
 
             const novoArray = Array.from(atuais);
+            const patch = isAlvoAdmin
+                ? { apps_permitidos: novoArray, rbac_admin_custom: novoArray.length < APPS_CATALOG.length }
+                : { apps_permitidos: novoArray };
             try {
-                await updateDoc(doc(db, "ir_funcionarios", userId), {
-                    apps_permitidos: novoArray
-                });
+                await updateDoc(doc(db, "ir_funcionarios", userId), patch);
                 const appNome = APPS_CATALOG.find(a => a.id === appId)?.shortTitle || appId;
-                showToast(`${liberar ? 'Liberado' : 'Bloqueado'} "${appNome}" para ${alvo.nome}.`);
+                showToast(`${liberar ? 'Liberado' : 'Bloqueado'} "${appNome}" para ${alvo.nome}${isAlvoAdmin ? ' (Modo Master)' : ''}.`);
             } catch (err) {
                 showToast("Erro ao salvar permissão no banco.", "error");
             }
@@ -1733,13 +1805,18 @@
             const alvo = listaFunc.find(u => u.id === userId);
             if (!alvo) return;
             const isAlvoAdmin = isPerfilAdminCentral(alvo.role);
+            if (isAlvoAdmin && (!isAdminMasterAtivoCentral() || alvo.id === 'default_admin')) {
+                showToast("Desbloqueie o Modo Master com a senha oculta para editar telas de perfis Admin/Gerente.", "error");
+                return;
+            }
             const novoArray = todos
                 ? APPS_CATALOG.filter(a => isAlvoAdmin || !a.adminOnly).map(a => a.id)
                 : [];
+            const patch = isAlvoAdmin
+                ? { apps_permitidos: novoArray, rbac_admin_custom: !todos }
+                : { apps_permitidos: novoArray };
             try {
-                await updateDoc(doc(db, "ir_funcionarios", userId), {
-                    apps_permitidos: novoArray
-                });
+                await updateDoc(doc(db, "ir_funcionarios", userId), patch);
                 showToast(`Todos os ${novoArray.length} aplicativos permitidos foram liberados para ${alvo.nome}!`);
             } catch (err) {
                 showToast("Erro ao atualizar permissões.", "error");
@@ -1750,11 +1827,17 @@
             if (!usuarioLogado || !isPerfilAdminCentral(usuarioLogado.role)) return;
             const alvo = listaFunc.find(u => u.id === userId);
             if (!alvo) return;
+            const isAlvoAdmin = isPerfilAdminCentral(alvo.role);
+            if (isAlvoAdmin && (!isAdminMasterAtivoCentral() || alvo.id === 'default_admin')) {
+                showToast("Desbloqueie o Modo Master com a senha oculta para editar telas de perfis Admin/Gerente.", "error");
+                return;
+            }
             const padrao = getAppsPadraoPorRole(alvo.role);
+            const patch = isAlvoAdmin
+                ? { apps_permitidos: padrao, rbac_admin_custom: false }
+                : { apps_permitidos: padrao };
             try {
-                await updateDoc(doc(db, "ir_funcionarios", userId), {
-                    apps_permitidos: padrao
-                });
+                await updateDoc(doc(db, "ir_funcionarios", userId), patch);
                 showToast(`Permissões padrão de ${alvo.role} aplicadas para ${alvo.nome}.`);
             } catch (err) {
                 showToast("Erro ao restaurar padrão.", "error");
@@ -1787,13 +1870,31 @@
             const container = document.getElementById('modalListaCheckApps');
             const roleEfetiva = roleAtual || document.getElementById('uRole')?.value || 'Mecânica';
             const isAdminModal = isPerfilAdminCentral(roleEfetiva);
+            const editIdAtual = document.getElementById('uEditId')?.value?.trim() || '';
+            const isDefaultAdminModal = editIdAtual === 'default_admin';
+            const masterAtivo = isAdminMasterAtivoCentral();
+            const podeEditarAdminModal = masterAtivo && !isDefaultAdminModal;
             const setSel = new Set(selecionados);
-            container.innerHTML = APPS_CATALOG.map(app => {
+
+            const avisoAdminHtml = isAdminModal
+                ? (podeEditarAdminModal
+                    ? `<div class="p-2.5 rounded-xl bg-rose-50 border border-rose-200 text-[11px] text-rose-900 font-semibold flex items-center justify-between gap-2">
+                           <span>🔓 <strong>Modo Master ativo:</strong> marque exatamente quais telas este perfil <strong>${escapeHtml(roleEfetiva)}</strong> poderá acessar (mantendo poderes de Admin nas telas liberadas).</span>
+                       </div>`
+                    : `<div class="p-2.5 rounded-xl bg-amber-50 border border-amber-200 text-[11px] text-amber-900 font-semibold flex items-center justify-between gap-2">
+                           <span>🔒 Perfis <strong>Admin / Gerente</strong> só podem ter suas telas editadas com a <strong>Senha Master</strong>.</span>
+                           ${!isDefaultAdminModal ? `<button type="button" onclick="abrirModalAdminMaster()" class="px-2.5 py-1 rounded-lg bg-amber-600 hover:bg-amber-700 text-white font-extrabold text-[10px] shrink-0">Desbloquear Master</button>` : ''}
+                       </div>`)
+                : '';
+
+            container.innerHTML = avisoAdminHtml + APPS_CATALOG.map(app => {
                 const bloqueadoPorPerfil = Boolean(app.adminOnly && !isAdminModal);
-                const checked = isAdminModal ? true : (!bloqueadoPorPerfil && setSel.has(app.id));
-                const disabled = isAdminModal || bloqueadoPorPerfil;
+                const checked = isAdminModal
+                    ? setSel.has(app.id)
+                    : (!bloqueadoPorPerfil && setSel.has(app.id));
+                const disabled = isAdminModal ? !podeEditarAdminModal : bloqueadoPorPerfil;
                 return `
-                <label class="flex items-center justify-between p-2.5 rounded-xl bg-white border border-slate-200 ${bloqueadoPorPerfil ? 'opacity-60 cursor-not-allowed bg-slate-50' : 'cursor-pointer hover:bg-slate-50'}">
+                <label class="flex items-center justify-between p-2.5 rounded-xl bg-white border border-slate-200 ${disabled ? 'opacity-65 cursor-not-allowed bg-slate-50' : 'cursor-pointer hover:bg-slate-50'}">
                     <div class="flex items-center gap-2.5 min-w-0">
                         <input type="checkbox" name="chkModalAppRbac" value="${app.id}" ${checked ? 'checked' : ''} ${disabled ? 'disabled' : ''} class="w-4 h-4 accent-sky-600 rounded">
                         <div class="min-w-0">
@@ -1811,13 +1912,26 @@
         }
 
         window.preencherAppsPadraoNoModal = (role) => {
-            const padrao = getAppsPadraoPorRole(role);
-            renderCheckboxesAppsNoModal(padrao, role);
+            const roleEfetiva = role || document.getElementById('uRole')?.value || 'Mecânica';
+            if (isPerfilAdminCentral(roleEfetiva) && !isAdminMasterAtivoCentral()) {
+                const editId = document.getElementById('uEditId')?.value?.trim() || '';
+                const uExist = editId ? listaFunc.find(x => x.id === editId) : null;
+                if (uExist && isPerfilAdminCentral(uExist.role)) {
+                    renderCheckboxesAppsNoModal(getAppsPermitidosUsuario(uExist), roleEfetiva);
+                    return;
+                }
+            }
+            const padrao = getAppsPadraoPorRole(roleEfetiva);
+            renderCheckboxesAppsNoModal(padrao, roleEfetiva);
         };
 
         window.marcarTodosAppsModal = (todos) => {
             const roleAtual = document.getElementById('uRole')?.value || 'Mecânica';
             const isAdminModal = isPerfilAdminCentral(roleAtual);
+            if (isAdminModal && !isAdminMasterAtivoCentral()) {
+                showToast('Desbloqueie o Modo Master com a senha oculta para editar telas de perfis Admin/Gerente.', 'error');
+                return;
+            }
             const lista = todos
                 ? APPS_CATALOG.filter(a => isAdminModal || !a.adminOnly).map(a => a.id)
                 : [];
@@ -1872,11 +1986,32 @@
                 return;
             }
 
-            const appsMarcados = isPerfilAdminCentral(role)
-                ? APPS_CATALOG.map(a => a.id)
-                : Array.from(document.querySelectorAll('input[name="chkModalAppRbac"]:checked'))
+            const isRoleAdmin = isPerfilAdminCentral(role);
+            const existente = editId ? listaFunc.find(f => f.id === editId) : null;
+            const masterAtivo = isAdminMasterAtivoCentral();
+
+            let appsMarcados;
+            let rbacAdminCustom = false;
+
+            if (isRoleAdmin) {
+                if (masterAtivo && editId !== 'default_admin') {
+                    appsMarcados = Array.from(document.querySelectorAll('input[name="chkModalAppRbac"]:checked'))
+                        .map(el => el.value);
+                    rbacAdminCustom = appsMarcados.length < APPS_CATALOG.length;
+                } else if (existente && isPerfilAdminCentral(existente.role) && existente.rbac_admin_custom === true && Array.isArray(existente.apps_permitidos)) {
+                    // Preserva a restrição definida pelo Master caso um Admin sem senha Master edite outros dados do usuário
+                    appsMarcados = [...existente.apps_permitidos];
+                    rbacAdminCustom = true;
+                } else {
+                    appsMarcados = APPS_CATALOG.map(a => a.id);
+                    rbacAdminCustom = false;
+                }
+            } else {
+                appsMarcados = Array.from(document.querySelectorAll('input[name="chkModalAppRbac"]:checked'))
                     .map(el => el.value)
                     .filter(id => !isAppRestritoAdmin(id));
+                rbacAdminCustom = false;
+            }
 
             const btn = document.getElementById('btnSalvarUsuarioRbac');
             btn.disabled = true;
@@ -1887,7 +2022,8 @@
                 user,
                 pass,
                 role,
-                apps_permitidos: appsMarcados
+                apps_permitidos: appsMarcados,
+                rbac_admin_custom: rbacAdminCustom
             };
 
             try {
