@@ -686,11 +686,11 @@
                     </div>
                     <div>
                         <label class="block text-[10px] font-extrabold uppercase text-slate-500 mb-1">Subtipo *</label>
-                        <select id="ndSubtipo" required class="input-clean py-2 text-xs font-bold"></select>
+                        <select id="ndSubtipo" required onchange="onNdSubtipoChange()" class="input-clean py-2 text-xs font-bold"></select>
                     </div>
                     <div>
                         <label class="block text-[10px] font-extrabold uppercase text-slate-500 mb-1">Disciplina</label>
-                        <select id="ndDisciplina" class="input-clean py-2 text-xs font-bold">
+                        <select id="ndDisciplina" onchange="onNdDisciplinaChange()" class="input-clean py-2 text-xs font-bold">
                             <option value="Mecânica">Mecânica</option>
                             <option value="Elétrica">Elétrica</option>
                             <option value="Automação">Automação</option>
@@ -714,6 +714,29 @@
                     <div>
                         <label class="block text-[10px] font-extrabold uppercase text-slate-500 mb-1">Revisão</label>
                         <input type="text" id="ndRevisaoLabel" readonly class="input-clean py-2 text-xs font-mono font-extrabold bg-slate-100 text-indigo-700" value="REV 00">
+                    </div>
+                </div>
+
+                <!-- Perfil de Fluxo de Aprovação Vinculado ao Tipo de Documento -->
+                <div id="ndBoxFluxoAprovacaoDoc" class="p-3.5 rounded-2xl bg-sky-50/75 border border-sky-200 space-y-2.5 text-xs">
+                    <div class="flex flex-wrap items-center justify-between gap-2">
+                        <div>
+                            <span class="text-[10px] font-extrabold uppercase tracking-wider text-sky-900">Fluxo de Aprovação por Tipo de Documento</span>
+                            <p id="ndFluxoRegraDescricao" class="text-[11px] font-semibold text-slate-600">O sistema seleciona automaticamente os aprovadores de acordo com a Disciplina, Categoria e Subtipo.</p>
+                        </div>
+                        <span id="ndFluxoPerfilBadge" class="px-2.5 py-0.5 rounded-full text-[10px] font-extrabold bg-sky-600 text-white">Automático</span>
+                    </div>
+                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-2.5 items-center">
+                        <div>
+                            <label for="ndPerfilFluxoSelect" class="block text-[10px] font-extrabold uppercase text-slate-500 mb-1">Perfil de Fluxo Aplicado</label>
+                            <select id="ndPerfilFluxoSelect" onchange="onNdPerfilFluxoChange()" class="input-clean py-1.5 text-xs font-extrabold">
+                                <option value="auto">Automático pelo Tipo de Documento (Disciplina / Categoria / Subtipo)</option>
+                            </select>
+                        </div>
+                        <div>
+                            <div class="text-[10px] font-extrabold uppercase text-slate-500 mb-1">Aprovadores Exigidos para este Documento</div>
+                            <div id="ndFluxoAprovadoresPreview" class="flex flex-wrap gap-1.5 min-h-[26px] p-1.5 rounded-xl bg-white border border-sky-200"></div>
+                        </div>
                     </div>
                 </div>
 
@@ -999,14 +1022,14 @@
 
     <!-- ==================== MODAL MENU ADMIN MASTER (FLUXO DE APROVAÇÃO, CATEGORIAS, SUBTIPOS, DISCIPLINAS & SENHA) ==================== -->
     <div id="modalAdminMasterDocs" role="dialog" aria-modal="true" hidden class="hidden fixed inset-0 bg-slate-900/65 backdrop-blur-sm z-[90] flex items-end sm:items-center justify-center p-0 sm:p-4">
-        <div class="bg-white w-full max-w-2xl rounded-t-3xl sm:rounded-3xl shadow-2xl border border-slate-200 max-h-[92vh] flex flex-col overflow-hidden text-xs">
+        <div class="bg-white w-full max-w-3xl rounded-t-3xl sm:rounded-3xl shadow-2xl border border-slate-200 max-h-[93vh] flex flex-col overflow-hidden text-xs">
             <div class="px-6 py-4 border-b border-slate-100 bg-slate-50/90 flex items-center justify-between gap-3 shrink-0">
                 <div>
                     <div class="flex items-center gap-2 mb-0.5">
                         <span class="text-[10px] font-extrabold uppercase tracking-widest text-rose-600">Menu Admin Master • Documentos</span>
                         <span id="masterDocsModalBadge" class="text-[10px] font-extrabold uppercase px-2 py-0.5 rounded-full bg-slate-100 text-slate-600">Bloqueado</span>
                     </div>
-                    <h2 class="text-base sm:text-lg font-extrabold text-slate-900">Administração Master, Fluxo de Aprovação &amp; Taxonomia</h2>
+                    <h2 class="text-base sm:text-lg font-extrabold text-slate-900">Administração Master, Perfis de Fluxo de Aprovação &amp; Taxonomia</h2>
                 </div>
                 <button type="button" onclick="fecharModal('modalAdminMasterDocs')" class="w-8 h-8 rounded-full bg-white border border-slate-200 hover:bg-slate-100 text-slate-600 font-bold shrink-0">✕</button>
             </div>
@@ -1014,7 +1037,7 @@
             <div class="flex-1 overflow-y-auto p-5 sm:p-6 space-y-4">
                 <form id="masterDocsUnlockBox" onsubmit="desbloquearAdminMasterDocs(event)" class="space-y-4">
                     <div class="p-4 rounded-2xl bg-slate-50 border border-slate-200 text-slate-700 leading-relaxed">
-                        Digite a <strong>senha oculta Admin Master</strong> (a mesma do Portal PCM) para liberar a configuração do <strong>Fluxo de Aprovação por Usuários</strong>, edição direta, exclusão de revisões e o <strong>cadastro de Categorias, Subtipos e Disciplinas</strong>.
+                        Digite a <strong>senha oculta Admin Master</strong> (a mesma do Portal PCM) para liberar a configuração de <strong>Perfis de Fluxo de Aprovação por Tipo de Documento</strong>, edição direta, exclusão de revisões e o <strong>cadastro de Categorias, Subtipos e Disciplinas</strong>.
                     </div>
                     <div>
                         <label for="masterDocsPassInput" class="block text-[11px] font-extrabold uppercase text-slate-500 mb-1">Senha Oculta Master *</label>
@@ -1034,40 +1057,155 @@
                         <button type="button" id="btnMasterDocsTabSeg" onclick="switchMasterDocsTab('seg')" class="flex-1 py-2 px-3 rounded-xl font-extrabold text-[11px] text-slate-600 hover:text-slate-900">Segurança Master</button>
                     </div>
 
-                    <!-- TAB 0: FLUXO DE APROVAÇÃO MULTI-USUÁRIO -->
+                    <!-- TAB 0: PERFIS DE FLUXO DE APROVAÇÃO POR TIPO DE DOCUMENTO -->
                     <div id="masterDocsTabAprov" hidden class="hidden space-y-4">
-                        <div class="p-4 rounded-2xl bg-amber-50/75 border border-amber-200 space-y-2">
+                        <div class="p-4 rounded-2xl bg-amber-50/75 border border-amber-200 space-y-2.5">
                             <div class="flex flex-wrap items-center justify-between gap-2">
-                                <h3 class="text-xs font-extrabold uppercase tracking-wider text-amber-950">Fluxo de Aprovação Descentralizado por Usuários</h3>
+                                <h3 class="text-xs font-extrabold uppercase tracking-wider text-amber-950">Perfis de Fluxo de Aprovação por Tipo de Documento</h3>
                                 <span id="masterDocsAprovStatusBadge" class="px-2.5 py-0.5 rounded-full text-[10px] font-extrabold bg-white border border-amber-300 text-amber-900">Padrão Geral</span>
                             </div>
                             <p class="text-[11px] font-semibold text-amber-900 leading-relaxed">
-                                Selecione abaixo todos os usuários cadastrados cuja aprovação será exigida antes de o documento ou revisão ser lançado como vigente no sistema. Não fica centralizado em 1 única pessoa: quando você seleciona múltiplos aprovadores, o arquivo só entra em vigor após a validação de <strong>todos os usuários marcados</strong>.
+                                Configure perfis personalizados de aprovação de acordo com a <strong>Disciplina</strong>, <strong>Categoria</strong> e/ou <strong>Subtipo</strong> do documento inserido. Exemplo: documentos de <strong>Mecânica</strong> exigem aprovação apenas da Supervisão Mecânica (sem passar pelo Supervisor Elétrica) e vice-versa.
                             </p>
+                            <div class="pt-1 flex flex-wrap items-center gap-1.5">
+                                <span class="text-[10px] font-extrabold uppercase text-amber-900 mr-1">Modelos Rápidos (1-Clique):</span>
+                                <button type="button" onclick="carregarTemplatePerfilFluxoMaster('mecanica')" class="px-2.5 py-1 rounded-lg bg-white hover:bg-sky-50 border border-amber-300 text-slate-800 font-extrabold text-[10px]">+ Perfil Mecânica</button>
+                                <button type="button" onclick="carregarTemplatePerfilFluxoMaster('eletrica')" class="px-2.5 py-1 rounded-lg bg-white hover:bg-sky-50 border border-amber-300 text-slate-800 font-extrabold text-[10px]">+ Perfil Elétrica</button>
+                                <button type="button" onclick="carregarTemplatePerfilFluxoMaster('automacao')" class="px-2.5 py-1 rounded-lg bg-white hover:bg-sky-50 border border-amber-300 text-slate-800 font-extrabold text-[10px]">+ Perfil Automação</button>
+                                <button type="button" onclick="carregarTemplatePerfilFluxoMaster('lubrificacao')" class="px-2.5 py-1 rounded-lg bg-white hover:bg-sky-50 border border-amber-300 text-slate-800 font-extrabold text-[10px]">+ Perfil Lubrificação</button>
+                                <button type="button" onclick="carregarTemplatePerfilFluxoMaster('orcamentos')" class="px-2.5 py-1 rounded-lg bg-white hover:bg-sky-50 border border-amber-300 text-slate-800 font-extrabold text-[10px]">+ Perfil Orçamentos &amp; Gestão</button>
+                                <button type="button" onclick="carregarTemplatePerfilFluxoMaster('qualidade')" class="px-2.5 py-1 rounded-lg bg-white hover:bg-sky-50 border border-amber-300 text-slate-800 font-extrabold text-[10px]">+ Perfil Qualidade &amp; NR-12</button>
+                                <button type="button" onclick="iniciarNovoPerfilFluxoMaster()" class="px-2.5 py-1 rounded-lg bg-slate-900 hover:bg-slate-800 text-white font-extrabold text-[10px]">+ Novo Perfil Personalizado</button>
+                            </div>
                         </div>
 
-                        <div class="p-4 rounded-2xl bg-slate-50 border border-slate-200 space-y-3">
+                        <!-- 1. LISTA DE PERFIS DE FLUXO CADASTRADOS + FLUXO PADRÃO GERAL -->
+                        <div class="p-4 rounded-2xl bg-white border border-slate-200 space-y-2.5">
                             <div class="flex flex-wrap items-center justify-between gap-2">
-                                <div class="text-[10px] font-extrabold uppercase tracking-wider text-slate-600">Aprovadores Obrigatórios Selecionados (<span id="masterDocsAprovSelCount">0</span>)</div>
-                                <div class="flex flex-wrap items-center gap-1.5">
-                                    <button type="button" onclick="selecionarGestaoFluxoAprovacaoMaster()" class="px-2.5 py-1 rounded-lg bg-white hover:bg-slate-100 border border-slate-200 text-slate-700 font-extrabold text-[10px]">Selecionar Gestão / Supervisão</button>
-                                    <button type="button" onclick="selecionarTodosFluxoAprovacaoMaster()" class="px-2.5 py-1 rounded-lg bg-white hover:bg-slate-100 border border-slate-200 text-slate-700 font-extrabold text-[10px]">Selecionar Todos</button>
-                                    <button type="button" onclick="limparSelecaoFluxoAprovacaoMaster()" class="px-2.5 py-1 rounded-lg bg-white hover:bg-rose-50 border border-slate-200 text-rose-700 font-extrabold text-[10px]">Limpar Seleção</button>
+                                <div>
+                                    <div class="text-[10px] font-extrabold uppercase tracking-wider text-slate-600">1. Perfis de Fluxo Configurados (<span id="masterDocsPerfisCount">0</span> perfil(is) + Fluxo Padrão)</div>
+                                    <p class="text-[11px] text-slate-500 font-semibold">Clique em qualquer perfil abaixo para editar suas regras de tipo de documento e seus aprovadores.</p>
+                                </div>
+                                <button type="button" onclick="iniciarNovoPerfilFluxoMaster()" class="px-3 py-1.5 rounded-xl bg-sky-600 hover:bg-sky-700 text-white font-extrabold text-[11px]">+ Adicionar Perfil de Fluxo</button>
+                            </div>
+                            <div id="masterDocsPerfisFluxoLista" class="space-y-2 max-h-60 overflow-y-auto pr-1"></div>
+                        </div>
+
+                        <!-- 2. EDITOR COMPLETO DO PERFIL / ESCOPO SELECIONADO -->
+                        <div id="masterDocsEditorPerfilBox" class="p-4 rounded-2xl bg-slate-50 border border-slate-200 space-y-3.5">
+                            <div class="flex flex-wrap items-center justify-between gap-2 pb-2 border-b border-slate-200">
+                                <div>
+                                    <span id="masterPerfilEditorKicker" class="text-[10px] font-extrabold uppercase tracking-wider text-indigo-700">2. Configurar Escopo / Perfil de Aprovação</span>
+                                    <h4 id="masterPerfilEditorTitulo" class="text-sm font-extrabold text-slate-900">Fluxo Padrão Geral (ou preencha abaixo para criar Perfil por Tipo)</h4>
+                                </div>
+                                <div class="flex items-center gap-1.5">
+                                    <label for="masterPerfilSelectEscopo" class="text-[10px] font-extrabold uppercase text-slate-500">Escopo:</label>
+                                    <select id="masterPerfilSelectEscopo" onchange="selecionarEscopoFluxoMaster(this.value)" class="input-clean py-1 px-2.5 text-xs font-extrabold w-auto">
+                                        <option value="padrao_geral">Fluxo Padrão Geral (Fallback)</option>
+                                        <option value="novo_perfil">+ Criar Novo Perfil por Tipo de Documento</option>
+                                    </select>
                                 </div>
                             </div>
 
-                            <div id="masterDocsAprovSelecionadosChips" class="flex flex-wrap gap-1.5 min-h-[28px] p-2.5 rounded-xl bg-white border border-slate-200"></div>
-
-                            <div>
-                                <label for="masterAprovBuscaInput" class="block text-[10px] font-extrabold uppercase text-slate-500 mb-1">Filtrar Usuários Cadastrados (ir_funcionarios)</label>
-                                <input type="text" id="masterAprovBuscaInput" oninput="renderModalMasterFluxoAprovacaoDocs()" class="input-clean py-2 text-xs font-bold" placeholder="Buscar por nome, usuário ou cargo/equipe...">
+                            <!-- Identificação do Perfil & Regra de Quórum -->
+                            <div class="grid grid-cols-1 sm:grid-cols-12 gap-2.5">
+                                <div class="sm:col-span-5">
+                                    <label for="masterPerfilNomeInput" class="block text-[10px] font-extrabold uppercase text-slate-500 mb-1">Nome do Perfil de Fluxo</label>
+                                    <input type="text" id="masterPerfilNomeInput" oninput="onMasterPerfilMetaInput()" class="input-clean py-2 text-xs font-extrabold" placeholder="Ex: Documentos Mecânica, Fluxo Elétrica...">
+                                </div>
+                                <div class="sm:col-span-4">
+                                    <label for="masterPerfilModoAprov" class="block text-[10px] font-extrabold uppercase text-slate-500 mb-1">Regra de Liberação</label>
+                                    <select id="masterPerfilModoAprov" onchange="onMasterPerfilMetaInput()" class="input-clean py-2 text-xs font-bold">
+                                        <option value="todos">Exigir TODOS os usuários marcados (100%)</option>
+                                        <option value="minimo">Exigir Quórum Mínimo (N aprovadores)</option>
+                                    </select>
+                                </div>
+                                <div class="sm:col-span-3">
+                                    <label for="masterPerfilMinimoAprov" class="block text-[10px] font-extrabold uppercase text-slate-500 mb-1">Mín. Aprovações</label>
+                                    <input type="number" id="masterPerfilMinimoAprov" min="1" max="20" value="1" oninput="onMasterPerfilMetaInput()" class="input-clean py-2 text-xs font-mono font-extrabold">
+                                </div>
+                                <div class="sm:col-span-12">
+                                    <label for="masterPerfilDescInput" class="block text-[10px] font-extrabold uppercase text-slate-500 mb-1">Descrição / Observação da Regra (Opcional)</label>
+                                    <input type="text" id="masterPerfilDescInput" oninput="onMasterPerfilMetaInput()" class="input-clean py-1.5 text-xs font-semibold" placeholder="Ex: Documentos de Mecânica não exigem aprovação do Supervisor Elétrica e vice-versa">
+                                </div>
                             </div>
 
-                            <div id="masterDocsAprovUsersList" class="space-y-2 max-h-64 overflow-y-auto pr-1"></div>
+                            <!-- Gatilhos por Tipo de Documento (Disciplina, Categoria e Subtipo) -->
+                            <div class="p-3.5 rounded-2xl bg-white border border-slate-200 space-y-3">
+                                <div class="flex flex-wrap items-center justify-between gap-2">
+                                    <div>
+                                        <div class="text-[10px] font-extrabold uppercase tracking-wider text-sky-900">Critérios do Tipo de Documento que Acionam este Perfil na Inserção</div>
+                                        <p class="text-[11px] text-slate-500 font-semibold">Marque as Disciplinas, Categorias e/ou Subtipos que usarão este fluxo de aprovação automaticamente:</p>
+                                    </div>
+                                    <button type="button" onclick="limparCriteriosTipoDocPerfilMaster()" class="px-2.5 py-1 rounded-lg bg-slate-100 hover:bg-slate-200 text-slate-700 font-extrabold text-[10px]">Limpar Critérios</button>
+                                </div>
 
-                            <div class="flex flex-col sm:flex-row gap-2 pt-2 border-t border-slate-200">
+                                <div>
+                                    <div class="flex items-center justify-between mb-1">
+                                        <span class="text-[10px] font-extrabold uppercase text-slate-500">A) Disciplina(s) do Documento</span>
+                                        <span id="masterPerfilDiscResumo" class="text-[10px] font-bold text-sky-700">Qualquer Disciplina</span>
+                                    </div>
+                                    <div id="masterPerfilDisciplinasBox" class="flex flex-wrap gap-1.5"></div>
+                                </div>
+
+                                <div>
+                                    <div class="flex items-center justify-between mb-1">
+                                        <span class="text-[10px] font-extrabold uppercase text-slate-500">B) Categoria(s) do Documento</span>
+                                        <span id="masterPerfilCatResumo" class="text-[10px] font-bold text-indigo-700">Todas as Categorias</span>
+                                    </div>
+                                    <div id="masterPerfilCategoriasBox" class="flex flex-wrap gap-1.5"></div>
+                                </div>
+
+                                <div>
+                                    <div class="flex items-center justify-between mb-1">
+                                        <span class="text-[10px] font-extrabold uppercase text-slate-500">C) Subtipo(s) Específico(s) (Opcional — deixe desmarcado p/ valer em todos os subtipos)</span>
+                                        <span id="masterPerfilSubResumo" class="text-[10px] font-bold text-emerald-700">Todos os Subtipos</span>
+                                    </div>
+                                    <div id="masterPerfilSubtiposBox" class="flex flex-wrap gap-1.5 max-h-28 overflow-y-auto p-1"></div>
+                                </div>
+                            </div>
+
+                            <!-- Seleção de Usuários Aprovadores para este Perfil / Escopo -->
+                            <div class="space-y-2.5">
+                                <div class="flex flex-wrap items-center justify-between gap-2">
+                                    <div class="text-[10px] font-extrabold uppercase tracking-wider text-slate-600">Aprovadores Obrigatórios deste Fluxo (<span id="masterDocsAprovSelCount">0</span>)</div>
+                                    <div class="flex flex-wrap items-center gap-1.5">
+                                        <button type="button" onclick="selecionarPorAreaFluxoMaster('mecanica')" class="px-2.5 py-1 rounded-lg bg-white hover:bg-sky-50 border border-slate-200 text-sky-800 font-extrabold text-[10px]">Marcar Mecânica</button>
+                                        <button type="button" onclick="selecionarPorAreaFluxoMaster('eletrica')" class="px-2.5 py-1 rounded-lg bg-white hover:bg-amber-50 border border-slate-200 text-amber-900 font-extrabold text-[10px]">Marcar Elétrica</button>
+                                        <button type="button" onclick="selecionarPorAreaFluxoMaster('automacao')" class="px-2.5 py-1 rounded-lg bg-white hover:bg-indigo-50 border border-slate-200 text-indigo-800 font-extrabold text-[10px]">Marcar Automação</button>
+                                        <button type="button" onclick="selecionarGestaoFluxoAprovacaoMaster()" class="px-2.5 py-1 rounded-lg bg-white hover:bg-slate-100 border border-slate-200 text-slate-700 font-extrabold text-[10px]">Selecionar Gestão / Supervisão</button>
+                                        <button type="button" onclick="selecionarTodosFluxoAprovacaoMaster()" class="px-2.5 py-1 rounded-lg bg-white hover:bg-slate-100 border border-slate-200 text-slate-700 font-extrabold text-[10px]">Selecionar Todos</button>
+                                        <button type="button" onclick="limparSelecaoFluxoAprovacaoMaster()" class="px-2.5 py-1 rounded-lg bg-white hover:bg-rose-50 border border-slate-200 text-rose-700 font-extrabold text-[10px]">Limpar Seleção</button>
+                                    </div>
+                                </div>
+
+                                <div id="masterDocsAprovSelecionadosChips" class="flex flex-wrap gap-1.5 min-h-[28px] p-2.5 rounded-xl bg-white border border-slate-200"></div>
+
+                                <div class="grid grid-cols-1 sm:grid-cols-3 gap-2">
+                                    <div class="sm:col-span-2">
+                                        <label for="masterAprovBuscaInput" class="block text-[10px] font-extrabold uppercase text-slate-500 mb-1">Filtrar Usuários Cadastrados (ir_funcionarios)</label>
+                                        <input type="text" id="masterAprovBuscaInput" oninput="renderModalMasterFluxoAprovacaoDocs()" class="input-clean py-2 text-xs font-bold" placeholder="Buscar por nome, usuário ou cargo/equipe...">
+                                    </div>
+                                    <div>
+                                        <label for="masterAprovFiltroRole" class="block text-[10px] font-extrabold uppercase text-slate-500 mb-1">Filtrar por Área / Cargo</label>
+                                        <select id="masterAprovFiltroRole" onchange="renderModalMasterFluxoAprovacaoDocs()" class="input-clean py-2 text-xs font-bold">
+                                            <option value="">Todos os Cargos / Equipes</option>
+                                            <option value="gestao">Gestão &amp; Supervisores</option>
+                                            <option value="mecanica">Mecânica / Sup. Mecânica</option>
+                                            <option value="eletrica">Elétrica / Sup. Elétrica</option>
+                                            <option value="automacao">Automação</option>
+                                            <option value="utilidades">Utilidades</option>
+                                        </select>
+                                    </div>
+                                </div>
+
+                                <div id="masterDocsAprovUsersList" class="space-y-2 max-h-60 overflow-y-auto pr-1"></div>
+                            </div>
+
+                            <div class="flex flex-col sm:flex-row flex-wrap gap-2 pt-2 border-t border-slate-200">
                                 <button type="button" id="btnSalvarFluxoAprovacaoMasterDocs" onclick="salvarFluxoAprovacaoMasterDocs()" class="btn-touch bg-slate-900 hover:bg-slate-800 text-white flex-1 py-2.5 text-xs shadow-sm">Salvar Fluxo de Aprovação</button>
-                                <button type="button" id="btnRestaurarFluxoAprovacaoMasterDocs" onclick="restaurarFluxoAprovacaoPadraoMasterDocs()" class="btn-touch bg-white hover:bg-rose-50 border border-slate-200 text-slate-700 hover:text-rose-700 py-2.5 px-4 text-xs">Voltar ao Padrão (Sem Lista Fixa)</button>
+                                <button type="button" id="btnSalvarPerfilEspecificoMasterDocs" onclick="salvarPerfilFluxoAprovacaoMasterDocs()" class="btn-touch bg-sky-600 hover:bg-sky-700 text-white py-2.5 px-4 text-xs shadow-sm">Salvar como Perfil por Tipo de Doc.</button>
+                                <button type="button" id="btnRestaurarFluxoAprovacaoMasterDocs" onclick="restaurarFluxoAprovacaoPadraoMasterDocs()" class="btn-touch bg-white hover:bg-rose-50 border border-slate-200 text-slate-700 hover:text-rose-700 py-2.5 px-4 text-xs">Voltar Padrão Geral</button>
                             </div>
                         </div>
                     </div>
@@ -1223,11 +1361,25 @@
         let customMasterHashDocs = null;
         let fluxoAprovacaoDocsCfg = {
             usuariosExigidos: [],
+            perfisFluxo: [],
             atualizadoPor: '',
             atualizadoEm: 0
         };
         let masterAprovadoresSel = [];
         let masterAprovadoresDraftDirty = false;
+        let masterFluxoEscopoAtual = 'padrao_geral';
+        let masterPerfilDraft = {
+            id: '',
+            nome: '',
+            descricao: '',
+            modoAprovacao: 'todos',
+            minimoAprovacoes: 1,
+            disciplinas: [],
+            categorias: [],
+            subtipos: [],
+            ativo: true
+        };
+        let aprovFilaFiltroPerfil = '';
 
         const DEFAULT_SHAREPOINT_CFG = {
             tenantUrl: "https://ceperaind.sharepoint.com",
@@ -1461,13 +1613,15 @@ match /config/{document=**} {
                 pushUser(usuarioLogado);
             }
             (Array.isArray(fluxoAprovacaoDocsCfg?.usuariosExigidos) ? fluxoAprovacaoDocsCfg.usuariosExigidos : []).forEach(pushUser);
+            (Array.isArray(fluxoAprovacaoDocsCfg?.perfisFluxo) ? fluxoAprovacaoDocsCfg.perfisFluxo : []).forEach(p => {
+                (Array.isArray(p?.usuariosExigidos) ? p.usuariosExigidos : []).forEach(pushUser);
+            });
             return Array.from(map.values()).sort((a, b) => a.nome.localeCompare(b.nome, 'pt-BR'));
         }
 
-        function getAprovadoresFluxoAtivoDocs() {
-            const rawList = Array.isArray(fluxoAprovacaoDocsCfg?.usuariosExigidos) ? fluxoAprovacaoDocsCfg.usuariosExigidos : [];
-            if (!rawList.length) return [];
-            const cadastrados = obterUsuariosCadastradosParaFluxoDocs();
+        function normalizarListaUsuariosFluxoDocs(rawList = [], cadastradosOpt = null) {
+            if (!Array.isArray(rawList) || !rawList.length) return [];
+            const cadastrados = Array.isArray(cadastradosOpt) ? cadastradosOpt : obterUsuariosCadastradosParaFluxoDocs();
             const seen = new Set();
             const out = [];
             rawList.forEach(item => {
@@ -1490,6 +1644,188 @@ match /config/{document=**} {
                 });
             });
             return out;
+        }
+
+        function getAprovadoresFluxoAtivoDocs() {
+            const rawList = Array.isArray(fluxoAprovacaoDocsCfg?.usuariosExigidos) ? fluxoAprovacaoDocsCfg.usuariosExigidos : [];
+            return normalizarListaUsuariosFluxoDocs(rawList);
+        }
+
+        function getPerfisFluxoAprovacaoDocs(apenasAtivos = false) {
+            const rawPerfis = Array.isArray(fluxoAprovacaoDocsCfg?.perfisFluxo) ? fluxoAprovacaoDocsCfg.perfisFluxo : [];
+            if (!rawPerfis.length) return [];
+            const cadastrados = obterUsuariosCadastradosParaFluxoDocs();
+            const out = [];
+            rawPerfis.forEach((p, idx) => {
+                if (!p || typeof p !== 'object') return;
+                const ativo = p.ativo !== false;
+                if (apenasAtivos && !ativo) return;
+                const usuarios = normalizarListaUsuariosFluxoDocs(p.usuariosExigidos, cadastrados);
+                const disciplinas = Array.isArray(p.disciplinas) ? p.disciplinas.map(x => String(x || '').trim()).filter(x => x && x !== '*') : [];
+                const categorias = Array.isArray(p.categorias) ? p.categorias.map(x => String(x || '').trim()).filter(x => x && x !== '*') : [];
+                const subtipos = Array.isArray(p.subtipos) ? p.subtipos.map(x => String(x || '').trim()).filter(x => x && x !== '*') : [];
+                const modo = p.modoAprovacao === 'minimo' ? 'minimo' : 'todos';
+                const min = modo === 'minimo'
+                    ? Math.max(1, Math.min(Math.max(1, usuarios.length), Number(p.minimoAprovacoes || 1)))
+                    : Math.max(1, usuarios.length);
+                out.push({
+                    id: String(p.id || `perfil_${idx + 1}`),
+                    nome: String(p.nome || `Perfil #${idx + 1}`).trim(),
+                    descricao: String(p.descricao || '').trim(),
+                    ativo,
+                    disciplinas,
+                    categorias,
+                    subtipos,
+                    modoAprovacao: modo,
+                    minimoAprovacoes: min,
+                    usuariosExigidos: usuarios,
+                    atualizadoPor: p.atualizadoPor || '',
+                    atualizadoEm: Number(p.atualizadoEm || 0)
+                });
+            });
+            return out;
+        }
+
+        function descreverCriteriosTipoDocPerfil(perfil = {}) {
+            const pDiscs = Array.isArray(perfil.disciplinas) ? perfil.disciplinas.filter(Boolean) : [];
+            const pCats = Array.isArray(perfil.categorias) ? perfil.categorias.filter(Boolean) : [];
+            const pSubs = Array.isArray(perfil.subtipos) ? perfil.subtipos.filter(Boolean) : [];
+            const partes = [];
+            if (pDiscs.length > 0) {
+                partes.push(`Disciplina: ${pDiscs.join(', ')}`);
+            } else {
+                partes.push('Qualquer Disciplina');
+            }
+            if (pCats.length > 0) {
+                const catLabels = pCats.map(cid => CATEGORIAS_DOCS[cid]?.label || cid);
+                partes.push(`Categoria: ${catLabels.join(', ')}`);
+            } else {
+                partes.push('Todas as Categorias');
+            }
+            if (pSubs.length > 0) {
+                partes.push(`Subtipo: ${pSubs.join(', ')}`);
+            }
+            return partes.join(' • ');
+        }
+
+        function resolverPerfilFluxoParaDocumento(docLike = {}) {
+            const cat = String(docLike?.categoria || '').trim();
+            const sub = String(docLike?.subtipo || '').trim();
+            const disc = String(docLike?.disciplina || '').trim();
+            const explicitId = String(docLike?.perfilFluxoId || '').trim();
+
+            const perfisAtivos = getPerfisFluxoAprovacaoDocs(true).filter(p => p.usuariosExigidos.length > 0);
+
+            if (explicitId && explicitId !== 'auto' && explicitId !== 'padrao_geral') {
+                const hitExp = perfisAtivos.find(p => normKey(p.id) === normKey(explicitId) || normKey(p.nome) === normKey(explicitId));
+                if (hitExp) {
+                    return {
+                        origem: 'perfil_especifico',
+                        id: hitExp.id,
+                        nome: hitExp.nome,
+                        descricao: hitExp.descricao || descreverCriteriosTipoDocPerfil(hitExp),
+                        criteriosResumo: descreverCriteriosTipoDocPerfil(hitExp),
+                        modoAprovacao: hitExp.modoAprovacao,
+                        minimoAprovacoes: hitExp.minimoAprovacoes,
+                        usuariosExigidos: hitExp.usuariosExigidos,
+                        perfil: hitExp
+                    };
+                }
+            }
+
+            let melhorPerfil = null;
+            let melhorScore = -1;
+
+            for (const p of perfisAtivos) {
+                const pDiscs = p.disciplinas || [];
+                const pCats = p.categorias || [];
+                const pSubs = p.subtipos || [];
+
+                if (pDiscs.length > 0) {
+                    if (!disc || !pDiscs.some(d => normKey(d) === normKey(disc))) continue;
+                }
+                if (pCats.length > 0) {
+                    const catLabel = CATEGORIAS_DOCS[cat]?.label || '';
+                    if (!cat || !pCats.some(c => normKey(c) === normKey(cat) || (catLabel && normKey(c) === normKey(catLabel)))) continue;
+                }
+                if (pSubs.length > 0) {
+                    if (!sub || !pSubs.some(s => normKey(s) === normKey(sub))) continue;
+                }
+
+                const score = (pSubs.length > 0 ? 4 : 0) + (pDiscs.length > 0 ? 2 : 0) + (pCats.length > 0 ? 2 : 0) + 1;
+                if (score > melhorScore) {
+                    melhorScore = score;
+                    melhorPerfil = p;
+                }
+            }
+
+            if (melhorPerfil) {
+                return {
+                    origem: 'perfil_tipo_doc',
+                    id: melhorPerfil.id,
+                    nome: melhorPerfil.nome,
+                    descricao: melhorPerfil.descricao || descreverCriteriosTipoDocPerfil(melhorPerfil),
+                    criteriosResumo: descreverCriteriosTipoDocPerfil(melhorPerfil),
+                    modoAprovacao: melhorPerfil.modoAprovacao,
+                    minimoAprovacoes: melhorPerfil.minimoAprovacoes,
+                    usuariosExigidos: melhorPerfil.usuariosExigidos,
+                    perfil: melhorPerfil
+                };
+            }
+
+            const globalExigidos = getAprovadoresFluxoAtivoDocs();
+            if (globalExigidos.length > 0) {
+                return {
+                    origem: 'padrao_master',
+                    id: 'padrao_geral',
+                    nome: 'Fluxo Padrão Geral (Master)',
+                    descricao: 'Aplicado aos documentos sem perfil específico por tipo',
+                    criteriosResumo: 'Padrão Geral (Qualquer Tipo de Documento)',
+                    modoAprovacao: 'todos',
+                    minimoAprovacoes: globalExigidos.length,
+                    usuariosExigidos: globalExigidos,
+                    perfil: null
+                };
+            }
+
+            return {
+                origem: 'gestao_simples',
+                id: 'padrao_geral',
+                nome: 'Fluxo Padrão (Gestão / Supervisão)',
+                descricao: 'Aprovação em 1 etapa por qualquer Gestor ou Supervisor',
+                criteriosResumo: '1 aprovação de Gestão / Supervisão',
+                modoAprovacao: 'qualquer_gestor',
+                minimoAprovacoes: 1,
+                usuariosExigidos: [],
+                perfil: null
+            };
+        }
+
+        function getMetaFluxoParaRevisao(rev = null) {
+            if (!rev) return resolverPerfilFluxoParaDocumento({});
+            const resolvido = resolverPerfilFluxoParaDocumento(rev);
+            if (resolvido.usuariosExigidos.length > 0) {
+                return resolvido;
+            }
+            const snapUsers = normalizarListaUsuariosFluxoDocs(rev.aprovadoresExigidos || []);
+            if (snapUsers.length > 0) {
+                const modo = rev.perfilFluxoModo === 'minimo' ? 'minimo' : 'todos';
+                const min = modo === 'minimo'
+                    ? Math.max(1, Math.min(snapUsers.length, Number(rev.perfilFluxoMinimo || 1)))
+                    : snapUsers.length;
+                return {
+                    origem: 'snapshot_revisao',
+                    id: rev.perfilFluxoId || 'padrao_geral',
+                    nome: rev.perfilFluxoNome || 'Fluxo Master Vinculado',
+                    descricao: rev.perfilFluxoCriterios || '',
+                    criteriosResumo: rev.perfilFluxoCriterios || '',
+                    modoAprovacao: modo,
+                    minimoAprovacoes: min,
+                    usuariosExigidos: snapUsers,
+                    perfil: null
+                };
+            }
+            return resolvido;
         }
 
         function isUsuarioMatchAprovadorDocs(userA, userB) {
@@ -1515,8 +1851,14 @@ match /config/{document=**} {
 
         function isUsuarioNoFluxoAprovacaoDocs(user = usuarioLogado) {
             if (!user) return false;
-            const exigidos = getAprovadoresFluxoAtivoDocs();
-            return isUsuarioNaListaExigidos(user, exigidos);
+            const exigidosGlobal = getAprovadoresFluxoAtivoDocs();
+            if (isUsuarioNaListaExigidos(user, exigidosGlobal)) return true;
+            const perfisAtivos = getPerfisFluxoAprovacaoDocs(true);
+            if (perfisAtivos.some(p => isUsuarioNaListaExigidos(user, p.usuariosExigidos))) return true;
+            if (Array.isArray(docsRevisoes) && docsRevisoes.some(r => r && r.status === 'pendente_aprovacao' && isUsuarioNaListaExigidos(user, r.aprovadoresExigidos))) {
+                return true;
+            }
+            return false;
         }
 
         function isPerfilAprovadorDocs(user) {
@@ -1526,9 +1868,22 @@ match /config/{document=**} {
         }
 
         function getAprovadoresExigidosParaRevisao(rev = null) {
+            if (rev) {
+                return getMetaFluxoParaRevisao(rev).usuariosExigidos;
+            }
             const ativosNoMaster = getAprovadoresFluxoAtivoDocs();
             if (ativosNoMaster.length > 0) return ativosNoMaster;
             return [];
+        }
+
+        function getMinimoAprovacoesParaRevisao(rev = null, exigidosOpt = null) {
+            const meta = getMetaFluxoParaRevisao(rev);
+            const exigidos = Array.isArray(exigidosOpt) ? exigidosOpt : meta.usuariosExigidos;
+            if (!exigidos.length) return 0;
+            if (meta.modoAprovacao === 'minimo') {
+                return Math.max(1, Math.min(exigidos.length, Number(meta.minimoAprovacoes || 1)));
+            }
+            return exigidos.length;
         }
 
         function getAprovacoesValidasDaRevisao(rev = null, exigidosOpt = null) {
@@ -1769,9 +2124,76 @@ match /config/{document=**} {
 
         let masterDocsTabAtual = 'cat';
 
-        function sincronizarDraftFluxoAprovacaoMaster() {
-            masterAprovadoresSel = getAprovadoresFluxoAtivoDocs().map(u => u.key);
+        function sincronizarInputsDomEditorPerfilMaster() {
+            const nmEl = document.getElementById('masterPerfilNomeInput');
+            const dsEl = document.getElementById('masterPerfilDescInput');
+            const mdEl = document.getElementById('masterPerfilModoAprov');
+            const mnEl = document.getElementById('masterPerfilMinimoAprov');
+            if (nmEl) nmEl.value = masterPerfilDraft.nome || '';
+            if (dsEl) dsEl.value = masterPerfilDraft.descricao || '';
+            if (mdEl) mdEl.value = masterPerfilDraft.modoAprovacao || 'todos';
+            if (mnEl) {
+                mnEl.value = String(masterPerfilDraft.minimoAprovacoes || 1);
+                mnEl.disabled = (masterPerfilDraft.modoAprovacao !== 'minimo');
+            }
+        }
+
+        function sincronizarDraftFluxoAprovacaoMaster(escopoOpt = null) {
+            if (escopoOpt !== null && escopoOpt !== undefined) {
+                masterFluxoEscopoAtual = String(escopoOpt || 'padrao_geral');
+            }
+            const perfis = getPerfisFluxoAprovacaoDocs(false);
+            if (masterFluxoEscopoAtual !== 'padrao_geral' && masterFluxoEscopoAtual !== 'novo_perfil') {
+                const hit = perfis.find(p => p.id === masterFluxoEscopoAtual);
+                if (hit) {
+                    masterAprovadoresSel = hit.usuariosExigidos.map(u => u.key);
+                    masterPerfilDraft = {
+                        id: hit.id,
+                        nome: hit.nome,
+                        descricao: hit.descricao || '',
+                        modoAprovacao: hit.modoAprovacao || 'todos',
+                        minimoAprovacoes: Number(hit.minimoAprovacoes || 1),
+                        disciplinas: [...(hit.disciplinas || [])],
+                        categorias: [...(hit.categorias || [])],
+                        subtipos: [...(hit.subtipos || [])],
+                        ativo: hit.ativo !== false
+                    };
+                    masterAprovadoresDraftDirty = false;
+                    sincronizarInputsDomEditorPerfilMaster();
+                    return;
+                }
+                masterFluxoEscopoAtual = 'padrao_geral';
+            }
+
+            if (masterFluxoEscopoAtual === 'novo_perfil') {
+                masterAprovadoresSel = [];
+                masterPerfilDraft = {
+                    id: '',
+                    nome: '',
+                    descricao: '',
+                    modoAprovacao: 'todos',
+                    minimoAprovacoes: 1,
+                    disciplinas: [],
+                    categorias: [],
+                    subtipos: [],
+                    ativo: true
+                };
+            } else {
+                masterAprovadoresSel = getAprovadoresFluxoAtivoDocs().map(u => u.key);
+                masterPerfilDraft = {
+                    id: 'padrao_geral',
+                    nome: '',
+                    descricao: '',
+                    modoAprovacao: 'todos',
+                    minimoAprovacoes: Math.max(1, masterAprovadoresSel.length),
+                    disciplinas: [],
+                    categorias: [],
+                    subtipos: [],
+                    ativo: true
+                };
+            }
             masterAprovadoresDraftDirty = false;
+            sincronizarInputsDomEditorPerfilMaster();
         }
 
         function atualizarBadgeMasterDocs() {
@@ -1853,24 +2275,588 @@ match /config/{document=**} {
             }
         };
 
+        window.selecionarEscopoFluxoMaster = (escopoId = 'padrao_geral') => {
+            if (!isMasterDocsAtivo()) {
+                return showToast('Desbloqueie o Menu Admin Master para configurar o fluxo de aprovação.', 'error');
+            }
+            sincronizarDraftFluxoAprovacaoMaster(escopoId);
+            renderModalMasterFluxoAprovacaoDocs();
+        };
+
+        window.iniciarNovoPerfilFluxoMaster = () => {
+            if (!isMasterDocsAtivo()) {
+                return showToast('Desbloqueie o Menu Admin Master para criar perfis de fluxo de aprovação.', 'error');
+            }
+            sincronizarDraftFluxoAprovacaoMaster('novo_perfil');
+            renderModalMasterFluxoAprovacaoDocs();
+            setTimeout(() => document.getElementById('masterPerfilNomeInput')?.focus?.(), 40);
+        };
+
+        window.editarPerfilFluxoMaster = (perfilId) => {
+            if (!isMasterDocsAtivo()) {
+                return showToast('Desbloqueie o Menu Admin Master para editar perfis de fluxo.', 'error');
+            }
+            sincronizarDraftFluxoAprovacaoMaster(perfilId);
+            renderModalMasterFluxoAprovacaoDocs();
+        };
+
+        window.duplicarPerfilFluxoMaster = (perfilId) => {
+            if (!isMasterDocsAtivo()) {
+                return showToast('Desbloqueie o Menu Admin Master para duplicar perfis de fluxo.', 'error');
+            }
+            const perfis = getPerfisFluxoAprovacaoDocs(false);
+            const orig = perfis.find(p => p.id === perfilId);
+            if (!orig) return;
+            masterFluxoEscopoAtual = 'novo_perfil';
+            masterAprovadoresSel = orig.usuariosExigidos.map(u => u.key);
+            masterPerfilDraft = {
+                id: '',
+                nome: `${orig.nome} (Cópia)`,
+                descricao: orig.descricao || '',
+                modoAprovacao: orig.modoAprovacao || 'todos',
+                minimoAprovacoes: Number(orig.minimoAprovacoes || 1),
+                disciplinas: [...(orig.disciplinas || [])],
+                categorias: [...(orig.categorias || [])],
+                subtipos: [...(orig.subtipos || [])],
+                ativo: true
+            };
+            masterAprovadoresDraftDirty = true;
+            sincronizarInputsDomEditorPerfilMaster();
+            renderModalMasterFluxoAprovacaoDocs();
+            showToast(`Perfil "${orig.nome}" carregado como cópia. Ajuste e clique em Salvar!`, 'info');
+        };
+
+        window.carregarTemplatePerfilFluxoMaster = (templateKey = 'mecanica') => {
+            if (!isMasterDocsAtivo()) {
+                return showToast('Desbloqueie o Menu Admin Master para criar perfis de fluxo de aprovação.', 'error');
+            }
+            const todos = obterUsuariosCadastradosParaFluxoDocs();
+            const pickUsersByPredicate = (pred) => {
+                const hits = todos.filter(pred).map(u => u.key);
+                return [...new Set(hits)];
+            };
+
+            let nome = 'Perfil Personalizado';
+            let descricao = '';
+            let disciplinas = [];
+            let categorias = [];
+            let subtipos = [];
+            let usersKeys = [];
+
+            if (templateKey === 'mecanica') {
+                nome = 'Documentos Mecânica';
+                descricao = 'Aprovação técnica de documentos de Mecânica (não exige aprovação do Supervisor Elétrica)';
+                disciplinas = ['Mecânica'];
+                usersKeys = pickUsersByPredicate(u => {
+                    const rk = normKey(u.role);
+                    return rk.includes('supervisor') && rk.includes('mecan');
+                });
+                if (!usersKeys.length) {
+                    usersKeys = pickUsersByPredicate(u => normKey(u.role).includes('mecan'));
+                }
+            } else if (templateKey === 'eletrica') {
+                nome = 'Documentos Elétrica';
+                descricao = 'Aprovação técnica de esquemas e documentos de Elétrica (não exige aprovação do Supervisor Mecânica)';
+                disciplinas = ['Elétrica'];
+                usersKeys = pickUsersByPredicate(u => {
+                    const rk = normKey(u.role);
+                    return rk.includes('supervisor') && rk.includes('eletr');
+                });
+                if (!usersKeys.length) {
+                    usersKeys = pickUsersByPredicate(u => normKey(u.role).includes('eletr'));
+                }
+            } else if (templateKey === 'automacao') {
+                nome = 'Documentos Automação & CLP';
+                descricao = 'Aprovação de backups, parâmetros IHM/CLP e instrumentação';
+                disciplinas = ['Automação'];
+                usersKeys = pickUsersByPredicate(u => normKey(u.role).includes('autom') || (normKey(u.role).includes('supervisor') && normKey(u.role).includes('eletr')));
+            } else if (templateKey === 'lubrificacao') {
+                nome = 'Cartas & Planos de Lubrificação';
+                descricao = 'Aprovação de cartas de lubrificação, mapas de pontos e FISPQ';
+                disciplinas = ['Lubrificação'];
+                categorias = ['lubrificacao'];
+                usersKeys = pickUsersByPredicate(u => normKey(u.role).includes('mecan') && normKey(u.role).includes('supervisor'));
+            } else if (templateKey === 'orcamentos') {
+                nome = 'Orçamentos & Contratos (Gestão)';
+                descricao = 'Aprovação financeira e técnica exclusiva da Gerência / Administração PCM';
+                categorias = ['orcamentos', 'administrativo'];
+                usersKeys = pickUsersByPredicate(u => isPerfilAdmin(u.role));
+            } else if (templateKey === 'qualidade') {
+                nome = 'Qualidade, BPF & Laudos NR-12';
+                descricao = 'Aprovação de POPs, certificados de calibração, bloqueio LOTO e laudos NR-12';
+                disciplinas = ['Qualidade'];
+                categorias = ['qualidade'];
+                usersKeys = pickUsersByPredicate(u => isPerfilGestaoDocs(u.role));
+            }
+
+            const perfisExistentes = getPerfisFluxoAprovacaoDocs(false);
+            const existenteMesmoNome = perfisExistentes.find(p => normKey(p.nome) === normKey(nome));
+
+            masterFluxoEscopoAtual = existenteMesmoNome ? existenteMesmoNome.id : 'novo_perfil';
+            masterAprovadoresSel = existenteMesmoNome && existenteMesmoNome.usuariosExigidos.length
+                ? existenteMesmoNome.usuariosExigidos.map(u => u.key)
+                : usersKeys;
+            masterPerfilDraft = {
+                id: existenteMesmoNome ? existenteMesmoNome.id : '',
+                nome,
+                descricao,
+                modoAprovacao: 'todos',
+                minimoAprovacoes: Math.max(1, masterAprovadoresSel.length || 1),
+                disciplinas,
+                categorias,
+                subtipos,
+                ativo: true
+            };
+            masterAprovadoresDraftDirty = true;
+            sincronizarInputsDomEditorPerfilMaster();
+            renderModalMasterFluxoAprovacaoDocs();
+            showToast(`Modelo "${nome}" carregado! Revise os aprovadores marcados e clique em Salvar.`, 'info');
+        };
+
+        window.onMasterPerfilMetaInput = () => {
+            const nmEl = document.getElementById('masterPerfilNomeInput');
+            const dsEl = document.getElementById('masterPerfilDescInput');
+            const mdEl = document.getElementById('masterPerfilModoAprov');
+            const mnEl = document.getElementById('masterPerfilMinimoAprov');
+            if (nmEl) masterPerfilDraft.nome = nmEl.value;
+            if (dsEl) masterPerfilDraft.descricao = dsEl.value;
+            if (mdEl) masterPerfilDraft.modoAprovacao = mdEl.value === 'minimo' ? 'minimo' : 'todos';
+            if (mnEl) {
+                mnEl.disabled = masterPerfilDraft.modoAprovacao !== 'minimo';
+                masterPerfilDraft.minimoAprovacoes = Math.max(1, parseInt(mnEl.value || '1', 10) || 1);
+            }
+            masterAprovadoresDraftDirty = true;
+        };
+
+        window.toggleDisciplinaPerfilFluxoMaster = (disc, checked) => {
+            if (!isMasterDocsAtivo()) {
+                return showToast('Desbloqueie o Menu Admin Master para configurar o perfil.', 'error');
+            }
+            if (disc === '*') {
+                masterPerfilDraft.disciplinas = [];
+            } else {
+                const atual = Array.isArray(masterPerfilDraft.disciplinas) ? [...masterPerfilDraft.disciplinas] : [];
+                const jaTem = atual.some(d => normKey(d) === normKey(disc));
+                const marcar = checked === undefined ? !jaTem : Boolean(checked);
+                if (marcar && !jaTem) atual.push(disc);
+                else if (!marcar && jaTem) {
+                    masterPerfilDraft.disciplinas = atual.filter(d => normKey(d) !== normKey(disc));
+                }
+                if (marcar) masterPerfilDraft.disciplinas = atual;
+            }
+            if (masterFluxoEscopoAtual === 'padrao_geral' && masterPerfilDraft.disciplinas.length > 0 && !masterPerfilDraft.nome) {
+                masterPerfilDraft.nome = `Fluxo ${masterPerfilDraft.disciplinas.join(' + ')}`;
+                sincronizarInputsDomEditorPerfilMaster();
+            }
+            masterAprovadoresDraftDirty = true;
+            renderModalMasterFluxoAprovacaoDocs();
+        };
+
+        window.toggleCategoriaPerfilFluxoMaster = (catId, checked) => {
+            if (!isMasterDocsAtivo()) {
+                return showToast('Desbloqueie o Menu Admin Master para configurar o perfil.', 'error');
+            }
+            if (catId === '*') {
+                masterPerfilDraft.categorias = [];
+            } else {
+                const atual = Array.isArray(masterPerfilDraft.categorias) ? [...masterPerfilDraft.categorias] : [];
+                const jaTem = atual.some(c => normKey(c) === normKey(catId));
+                const marcar = checked === undefined ? !jaTem : Boolean(checked);
+                if (marcar && !jaTem) atual.push(catId);
+                else if (!marcar && jaTem) {
+                    masterPerfilDraft.categorias = atual.filter(c => normKey(c) !== normKey(catId));
+                }
+                if (marcar) masterPerfilDraft.categorias = atual;
+            }
+            if (masterFluxoEscopoAtual === 'padrao_geral' && masterPerfilDraft.categorias.length > 0 && !masterPerfilDraft.nome) {
+                const lbls = masterPerfilDraft.categorias.map(cid => CATEGORIAS_DOCS[cid]?.label || cid);
+                masterPerfilDraft.nome = `Fluxo ${lbls.join(' + ')}`;
+                sincronizarInputsDomEditorPerfilMaster();
+            }
+            masterAprovadoresDraftDirty = true;
+            renderModalMasterFluxoAprovacaoDocs();
+        };
+
+        window.toggleSubtipoPerfilFluxoMaster = (subtipo, checked) => {
+            if (!isMasterDocsAtivo()) {
+                return showToast('Desbloqueie o Menu Admin Master para configurar o perfil.', 'error');
+            }
+            if (subtipo === '*') {
+                masterPerfilDraft.subtipos = [];
+            } else {
+                const atual = Array.isArray(masterPerfilDraft.subtipos) ? [...masterPerfilDraft.subtipos] : [];
+                const jaTem = atual.some(s => normKey(s) === normKey(subtipo));
+                const marcar = checked === undefined ? !jaTem : Boolean(checked);
+                if (marcar && !jaTem) atual.push(subtipo);
+                else if (!marcar && jaTem) {
+                    masterPerfilDraft.subtipos = atual.filter(s => normKey(s) !== normKey(subtipo));
+                }
+                if (marcar) masterPerfilDraft.subtipos = atual;
+            }
+            masterAprovadoresDraftDirty = true;
+            renderModalMasterFluxoAprovacaoDocs();
+        };
+
+        window.limparCriteriosTipoDocPerfilMaster = () => {
+            if (!isMasterDocsAtivo()) return;
+            masterPerfilDraft.disciplinas = [];
+            masterPerfilDraft.categorias = [];
+            masterPerfilDraft.subtipos = [];
+            masterAprovadoresDraftDirty = true;
+            renderModalMasterFluxoAprovacaoDocs();
+        };
+
+        window.selecionarPorAreaFluxoMaster = (areaKey = 'mecanica') => {
+            if (!isMasterDocsAtivo()) {
+                return showToast('Desbloqueie o Menu Admin Master para configurar o fluxo de aprovação.', 'error');
+            }
+            const todos = obterUsuariosCadastradosParaFluxoDocs();
+            const ak = normKey(areaKey);
+            const filtrados = todos.filter(u => {
+                const rk = normKey(u.role);
+                const nk = normKey(u.nome);
+                if (ak === 'mecanica') return rk.includes('mecan') || nk.includes('mecan');
+                if (ak === 'eletrica') return rk.includes('eletr') || nk.includes('eletr');
+                if (ak === 'automacao') return rk.includes('autom') || nk.includes('autom');
+                if (ak === 'utilidades') return rk.includes('utilid') || nk.includes('utilid');
+                return false;
+            }).map(u => u.key);
+            masterAprovadoresSel = [...new Set([...masterAprovadoresSel, ...filtrados])];
+            masterAprovadoresDraftDirty = true;
+            renderModalMasterFluxoAprovacaoDocs();
+        };
+
+        async function persistirConfigFluxoAprovacaoDocs(novoPayload) {
+            const clean = sanitizarPayloadFirestore({
+                usuariosExigidos: Array.isArray(novoPayload.usuariosExigidos) ? novoPayload.usuariosExigidos : [],
+                perfisFluxo: Array.isArray(novoPayload.perfisFluxo) ? novoPayload.perfisFluxo : [],
+                atualizadoPor: usuarioLogado?.nome || usuarioLogado?.user || 'Admin Master PCM',
+                atualizadoEm: Date.now()
+            });
+            await setDoc(refFluxoAprovacaoDocs, clean);
+            fluxoAprovacaoDocsCfg = clean;
+            masterAprovadoresDraftDirty = false;
+            aplicarPerfilInterface();
+            popularSelectPerfisFluxoModalDoc();
+            atualizarPreviewFluxoAprovacaoModalDoc();
+            renderModalMasterFluxoAprovacaoDocs();
+            renderCurrentView();
+        }
+
+        window.toggleAtivoPerfilFluxoMaster = async (perfilId) => {
+            if (!isMasterDocsAtivo()) {
+                return showToast('Apenas Admin Master pode alterar perfis de fluxo.', 'error');
+            }
+            const perfis = getPerfisFluxoAprovacaoDocs(false);
+            const alvo = perfis.find(p => p.id === perfilId);
+            if (!alvo) return;
+            const novosPerfis = perfis.map(p => p.id === perfilId ? { ...p, ativo: !p.ativo } : p);
+            try {
+                await persistirConfigFluxoAprovacaoDocs({
+                    usuariosExigidos: getAprovadoresFluxoAtivoDocs(),
+                    perfisFluxo: novosPerfis
+                });
+                showToast(`Perfil "${alvo.nome}" ${!alvo.ativo ? 'ativado' : 'pausado'} com sucesso.`, 'info');
+            } catch (err) {
+                showToast('Falha ao atualizar status do perfil.', 'error');
+            }
+        };
+
+        window.excluirPerfilFluxoMaster = async (perfilId) => {
+            if (!isMasterDocsAtivo()) {
+                return showToast('Apenas Admin Master pode excluir perfis de fluxo.', 'error');
+            }
+            const perfis = getPerfisFluxoAprovacaoDocs(false);
+            const alvo = perfis.find(p => p.id === perfilId);
+            if (!alvo) return;
+            const novosPerfis = perfis.filter(p => p.id !== perfilId);
+            try {
+                if (masterFluxoEscopoAtual === perfilId) {
+                    masterFluxoEscopoAtual = 'padrao_geral';
+                }
+                await persistirConfigFluxoAprovacaoDocs({
+                    usuariosExigidos: getAprovadoresFluxoAtivoDocs(),
+                    perfisFluxo: novosPerfis
+                });
+                sincronizarDraftFluxoAprovacaoMaster(masterFluxoEscopoAtual);
+                renderModalMasterFluxoAprovacaoDocs();
+                showToast(`Perfil "${alvo.nome}" removido do fluxo de aprovação.`, 'info');
+            } catch (err) {
+                showToast('Falha ao excluir perfil de fluxo.', 'error');
+            }
+        };
+
+        window.salvarPerfilFluxoAprovacaoMasterDocs = async () => {
+            if (!isMasterDocsAtivo()) {
+                return showToast('Acesso restrito: apenas Admin Master pode configurar perfis de fluxo de aprovação.', 'error');
+            }
+            onMasterPerfilMetaInput();
+            const todos = obterUsuariosCadastradosParaFluxoDocs();
+            const mapPorKey = new Map(todos.map(u => [u.key, u]));
+            const usuariosExigidos = masterAprovadoresSel.map(k => {
+                const hit = mapPorKey.get(k);
+                return {
+                    key: k,
+                    id: hit?.id || k,
+                    user: hit?.user || k,
+                    nome: hit?.nome || k,
+                    role: hit?.role || 'Aprovador'
+                };
+            });
+
+            if (!usuariosExigidos.length) {
+                return showToast('Selecione pelo menos 1 usuário cadastrado para fazer parte deste Perfil de Fluxo de Aprovação.', 'error');
+            }
+
+            let nomePerfil = String(masterPerfilDraft.nome || '').trim();
+            if (!nomePerfil) {
+                if (masterPerfilDraft.disciplinas.length > 0) {
+                    nomePerfil = `Documentos ${masterPerfilDraft.disciplinas.join(' / ')}`;
+                } else if (masterPerfilDraft.categorias.length > 0) {
+                    const catLbls = masterPerfilDraft.categorias.map(c => CATEGORIAS_DOCS[c]?.label || c);
+                    nomePerfil = `Documentos ${catLbls.join(' / ')}`;
+                } else {
+                    nomePerfil = `Perfil Personalizado #${getPerfisFluxoAprovacaoDocs(false).length + 1}`;
+                }
+                masterPerfilDraft.nome = nomePerfil;
+            }
+
+            const perfisAtuais = getPerfisFluxoAprovacaoDocs(false);
+            const editId = (masterFluxoEscopoAtual !== 'padrao_geral' && masterFluxoEscopoAtual !== 'novo_perfil' && masterFluxoEscopoAtual)
+                ? masterFluxoEscopoAtual
+                : (masterPerfilDraft.id && masterPerfilDraft.id !== 'padrao_geral' ? masterPerfilDraft.id : '');
+
+            const matchExistente = editId
+                ? perfisAtuais.find(p => p.id === editId)
+                : perfisAtuais.find(p => normKey(p.nome) === normKey(nomePerfil));
+
+            const finalId = matchExistente ? matchExistente.id : `perfil_${slugCategoriaIdDocs(nomePerfil)}_${Date.now().toString(36).slice(-4)}`;
+            const modo = masterPerfilDraft.modoAprovacao === 'minimo' ? 'minimo' : 'todos';
+            const minAprov = modo === 'minimo'
+                ? Math.max(1, Math.min(usuariosExigidos.length, Number(masterPerfilDraft.minimoAprovacoes || 1)))
+                : usuariosExigidos.length;
+
+            const novoPerfil = {
+                id: finalId,
+                nome: nomePerfil,
+                descricao: String(masterPerfilDraft.descricao || '').trim(),
+                ativo: masterPerfilDraft.ativo !== false,
+                disciplinas: [...new Set(masterPerfilDraft.disciplinas || [])],
+                categorias: [...new Set(masterPerfilDraft.categorias || [])],
+                subtipos: [...new Set(masterPerfilDraft.subtipos || [])],
+                modoAprovacao: modo,
+                minimoAprovacoes: minAprov,
+                usuariosExigidos,
+                atualizadoPor: usuarioLogado?.nome || usuarioLogado?.user || 'Admin Master PCM',
+                atualizadoEm: Date.now()
+            };
+
+            const novosPerfis = matchExistente
+                ? perfisAtuais.map(p => p.id === finalId ? novoPerfil : p)
+                : [...perfisAtuais, novoPerfil];
+
+            const btn = document.getElementById('btnSalvarPerfilEspecificoMasterDocs');
+            if (btn) { btn.disabled = true; btn.innerText = 'Salvando Perfil...'; }
+            try {
+                masterFluxoEscopoAtual = finalId;
+                await persistirConfigFluxoAprovacaoDocs({
+                    usuariosExigidos: getAprovadoresFluxoAtivoDocs(),
+                    perfisFluxo: novosPerfis
+                });
+                sincronizarDraftFluxoAprovacaoMaster(finalId);
+                renderModalMasterFluxoAprovacaoDocs();
+                showToast(`Perfil "${nomePerfil}" salvo com ${usuariosExigidos.length} aprovador(es): ${usuariosExigidos.map(u => u.nome).join(', ')}!`, 'success');
+            } catch (err) {
+                const info = formatarErroFirestoreDocs(err);
+                if (info.tipo === 'regras_firestore') abrirModalAlertaRegrasFirestore(info);
+                else showToast(info.resumo, 'error');
+            } finally {
+                if (btn) { btn.disabled = false; btn.innerText = 'Salvar como Perfil por Tipo de Doc.'; }
+            }
+        };
+
         function renderModalMasterFluxoAprovacaoDocs() {
             const ativosSalvos = getAprovadoresFluxoAtivoDocs();
+            const perfisSalvos = getPerfisFluxoAprovacaoDocs(false);
+            const perfisAtivos = perfisSalvos.filter(p => p.ativo !== false && p.usuariosExigidos.length > 0);
+            const totalConfigurados = perfisAtivos.length + (ativosSalvos.length > 0 ? 1 : 0);
+
             const tabBtn = document.getElementById('btnMasterDocsTabAprov');
             if (tabBtn) {
-                tabBtn.innerText = ativosSalvos.length
-                    ? `Fluxo de Aprovação (${ativosSalvos.length})`
-                    : 'Fluxo de Aprovação';
+                if (perfisAtivos.length > 0) {
+                    tabBtn.innerText = `Fluxo de Aprovação (${perfisAtivos.length} perfil(is))`;
+                } else if (ativosSalvos.length > 0) {
+                    tabBtn.innerText = `Fluxo de Aprovação (${ativosSalvos.length})`;
+                } else {
+                    tabBtn.innerText = 'Fluxo de Aprovação';
+                }
             }
 
             const statusBadge = document.getElementById('masterDocsAprovStatusBadge');
             if (statusBadge) {
-                if (ativosSalvos.length > 0) {
+                if (perfisAtivos.length > 0) {
+                    statusBadge.innerText = `${perfisAtivos.length} Perfil(is) por Tipo Ativo(s)`;
+                    statusBadge.className = 'px-2.5 py-0.5 rounded-full text-[10px] font-extrabold bg-sky-600 text-white border border-sky-700';
+                } else if (ativosSalvos.length > 0) {
                     statusBadge.innerText = `Ativo • Exige ${ativosSalvos.length} aprovação(ões)`;
                     statusBadge.className = 'px-2.5 py-0.5 rounded-full text-[10px] font-extrabold bg-emerald-600 text-white border border-emerald-700';
                 } else {
                     statusBadge.innerText = 'Padrão Geral (1 aprovação Gestão)';
                     statusBadge.className = 'px-2.5 py-0.5 rounded-full text-[10px] font-extrabold bg-white border border-amber-300 text-amber-900';
                 }
+            }
+
+            const perfisCountEl = document.getElementById('masterDocsPerfisCount');
+            if (perfisCountEl) perfisCountEl.innerText = String(perfisSalvos.length);
+
+            const escopoSel = document.getElementById('masterPerfilSelectEscopo');
+            if (escopoSel) {
+                escopoSel.innerHTML =
+                    `<option value="padrao_geral">Fluxo Padrão Geral (Fallback${ativosSalvos.length ? ` • ${ativosSalvos.length} aprov.` : ''})</option>` +
+                    `<option value="novo_perfil">+ Criar Novo Perfil por Tipo de Documento</option>` +
+                    perfisSalvos.map(p => `<option value="${escapeHtml(p.id)}">Perfil: ${escapeHtml(p.nome)} (${p.usuariosExigidos.length} aprov.)</option>`).join('');
+                if ([...escopoSel.options].some(o => o.value === masterFluxoEscopoAtual)) {
+                    escopoSel.value = masterFluxoEscopoAtual;
+                }
+            }
+
+            const edTitulo = document.getElementById('masterPerfilEditorTitulo');
+            const edKicker = document.getElementById('masterPerfilEditorKicker');
+            if (edTitulo && edKicker) {
+                if (masterFluxoEscopoAtual === 'novo_perfil') {
+                    edKicker.innerText = '2. Criando Novo Perfil Personalizado por Tipo de Documento';
+                    edTitulo.innerText = masterPerfilDraft.nome ? `Novo Perfil: ${masterPerfilDraft.nome}` : 'Novo Perfil por Tipo de Documento (Disciplina / Categoria / Subtipo)';
+                } else if (masterFluxoEscopoAtual !== 'padrao_geral') {
+                    edKicker.innerText = '2. Editando Perfil de Fluxo por Tipo de Documento';
+                    edTitulo.innerText = `Editando Perfil: ${masterPerfilDraft.nome || masterFluxoEscopoAtual}`;
+                } else {
+                    edKicker.innerText = '2. Configurar Fluxo Padrão Geral ou Criar Perfil por Tipo';
+                    edTitulo.innerText = 'Fluxo Padrão Geral (ou informe Nome / Disciplina / Categoria para salvar como Perfil)';
+                }
+            }
+
+            // Renderiza a lista de Perfis de Fluxo cadastrados + Card do Fluxo Padrão Geral
+            const perfisListaEl = document.getElementById('masterDocsPerfisFluxoLista');
+            if (perfisListaEl) {
+                const isPadraoSel = masterFluxoEscopoAtual === 'padrao_geral';
+                const cardPadraoHtml = `
+                <div class="p-3 rounded-2xl border ${isPadraoSel ? 'bg-amber-50/90 border-amber-400 shadow-sm' : 'bg-slate-50 border-slate-200'} flex flex-wrap items-center justify-between gap-2.5">
+                    <div class="space-y-1 min-w-0 flex-1">
+                        <div class="flex flex-wrap items-center gap-1.5">
+                            <span class="px-2 py-0.5 rounded-full text-[10px] font-extrabold bg-slate-800 text-white">Fluxo Padrão Geral (Fallback)</span>
+                            <span class="px-2 py-0.5 rounded-full text-[10px] font-extrabold ${ativosSalvos.length > 0 ? 'bg-emerald-100 text-emerald-800 border border-emerald-300' : 'bg-white text-slate-600 border border-slate-200'}">
+                                ${ativosSalvos.length > 0 ? `Exige ${ativosSalvos.length} aprovador(es)` : '1 aprovação de Gestão/Supervisão'}
+                            </span>
+                            ${isPadraoSel ? '<span class="px-2 py-0.5 rounded-full text-[9px] font-extrabold bg-amber-600 text-white uppercase">Em Edição Abaixo</span>' : ''}
+                        </div>
+                        <div class="text-[11px] text-slate-600 font-semibold">Usado automaticamente quando o tipo de documento inserido não possuir um perfil específico configurado.</div>
+                        ${ativosSalvos.length > 0 ? `<div class="flex flex-wrap gap-1 pt-0.5">${ativosSalvos.map((u, idx) => `<span class="px-2 py-0.5 rounded-lg bg-white border border-slate-200 text-[10px] font-extrabold text-slate-800">#${idx + 1} ${escapeHtml(u.nome)} <span class="text-slate-400 font-normal">(${escapeHtml(u.role)})</span></span>`).join('')}</div>` : ''}
+                    </div>
+                    <div class="flex items-center gap-1.5 shrink-0">
+                        <button type="button" onclick="selecionarEscopoFluxoMaster('padrao_geral')" class="px-3 py-1.5 rounded-xl ${isPadraoSel ? 'bg-slate-900 text-white' : 'bg-white hover:bg-slate-100 border border-slate-200 text-slate-700'} font-extrabold text-[11px]">
+                            ${isPadraoSel ? 'Editando Padrão' : 'Editar Padrão Geral'}
+                        </button>
+                    </div>
+                </div>`;
+
+                const cardsPerfisHtml = perfisSalvos.map(p => {
+                    const isEdit = masterFluxoEscopoAtual === p.id;
+                    const pIdJs = JSON.stringify(p.id).replace(/"/g, '&quot;');
+                    const regraTxt = p.modoAprovacao === 'minimo'
+                        ? `Quórum Mínimo: ${p.minimoAprovacoes} de ${p.usuariosExigidos.length} aprovador(es)`
+                        : `Exige TODOS (${p.usuariosExigidos.length} aprovador(es))`;
+                    return `
+                    <div class="p-3 rounded-2xl border ${isEdit ? 'bg-sky-50/90 border-sky-400 shadow-sm' : (p.ativo ? 'bg-white border-slate-200' : 'bg-slate-100/70 border-slate-200 opacity-75')} space-y-2">
+                        <div class="flex flex-wrap items-start justify-between gap-2">
+                            <div class="space-y-1 min-w-0 flex-1">
+                                <div class="flex flex-wrap items-center gap-1.5">
+                                    <span class="font-extrabold text-slate-900 text-xs">${escapeHtml(p.nome)}</span>
+                                    <span class="px-2 py-0.5 rounded-full text-[9px] font-extrabold ${p.ativo ? 'bg-emerald-100 text-emerald-800 border border-emerald-300' : 'bg-slate-200 text-slate-600'}">${p.ativo ? 'ATIVO' : 'PAUSADO'}</span>
+                                    <span class="px-2 py-0.5 rounded-full text-[10px] font-extrabold bg-indigo-50 text-indigo-800 border border-indigo-200">${escapeHtml(regraTxt)}</span>
+                                    ${isEdit ? '<span class="px-2 py-0.5 rounded-full text-[9px] font-extrabold bg-sky-600 text-white uppercase">Em Edição Abaixo</span>' : ''}
+                                </div>
+                                <div class="text-[11px] font-extrabold text-sky-800">${escapeHtml(descreverCriteriosTipoDocPerfil(p))}</div>
+                                ${p.descricao ? `<div class="text-[10px] font-semibold text-slate-500">${escapeHtml(p.descricao)}</div>` : ''}
+                            </div>
+                            <div class="flex flex-wrap items-center gap-1 shrink-0">
+                                <button type="button" onclick="editarPerfilFluxoMaster(${pIdJs})" class="px-2.5 py-1 rounded-lg ${isEdit ? 'bg-sky-600 text-white' : 'bg-slate-100 hover:bg-slate-200 text-slate-800'} font-extrabold text-[10px]">Editar</button>
+                                <button type="button" onclick="duplicarPerfilFluxoMaster(${pIdJs})" class="px-2 py-1 rounded-lg bg-slate-100 hover:bg-slate-200 text-slate-700 font-extrabold text-[10px]">Duplicar</button>
+                                <button type="button" onclick="toggleAtivoPerfilFluxoMaster(${pIdJs})" class="px-2 py-1 rounded-lg bg-slate-100 hover:bg-slate-200 text-slate-700 font-extrabold text-[10px]">${p.ativo ? 'Pausar' : 'Ativar'}</button>
+                                <button type="button" onclick="excluirPerfilFluxoMaster(${pIdJs})" class="px-2 py-1 rounded-lg bg-rose-50 hover:bg-rose-100 border border-rose-200 text-rose-700 font-extrabold text-[10px]">Excluir</button>
+                            </div>
+                        </div>
+                        <div class="flex flex-wrap gap-1 pt-0.5">
+                            ${p.usuariosExigidos.map((u, idx) => `
+                                <span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-lg bg-slate-900 text-white text-[10px] font-extrabold">
+                                    <span class="text-sky-300 font-mono">#${idx + 1}</span>
+                                    <span>${escapeHtml(u.nome)}</span>
+                                    <span class="text-slate-300 font-normal">(${escapeHtml(u.role)})</span>
+                                </span>`).join('')}
+                        </div>
+                    </div>`;
+                }).join('');
+
+                perfisListaEl.innerHTML = cardsPerfisHtml + cardPadraoHtml;
+            }
+
+            // Renderiza os seletores de critérios do Tipo de Documento (Disciplinas, Categorias e Subtipos)
+            const discBox = document.getElementById('masterPerfilDisciplinasBox');
+            const discResumo = document.getElementById('masterPerfilDiscResumo');
+            const todasDiscs = getDisciplinasDisponiveisDocs();
+            const selDiscs = Array.isArray(masterPerfilDraft.disciplinas) ? masterPerfilDraft.disciplinas : [];
+            if (discResumo) {
+                discResumo.innerText = selDiscs.length ? `${selDiscs.length} selecionada(s): ${selDiscs.join(', ')}` : 'Qualquer Disciplina';
+            }
+            if (discBox) {
+                const allActive = selDiscs.length === 0;
+                discBox.innerHTML =
+                    `<button type="button" onclick="toggleDisciplinaPerfilFluxoMaster('*', true)" class="px-2.5 py-1 rounded-xl border ${allActive ? 'bg-slate-900 text-white border-slate-900' : 'bg-white text-slate-600 border-slate-200 hover:bg-slate-100'} text-[10px] font-extrabold">Todas as Disciplinas</button>` +
+                    todasDiscs.map(d => {
+                        const isOn = selDiscs.some(x => normKey(x) === normKey(d));
+                        const dJs = JSON.stringify(d).replace(/"/g, '&quot;');
+                        return `<button type="button" onclick="toggleDisciplinaPerfilFluxoMaster(${dJs})" class="px-2.5 py-1 rounded-xl border ${isOn ? 'bg-sky-600 text-white border-sky-700 shadow-sm' : 'bg-white text-slate-700 border-slate-200 hover:border-sky-300'} text-[10px] font-extrabold">${isOn ? '✓ ' : ''}${escapeHtml(d)}</button>`;
+                    }).join('');
+            }
+
+            const catBox = document.getElementById('masterPerfilCategoriasBox');
+            const catResumo = document.getElementById('masterPerfilCatResumo');
+            const todasCats = Object.values(CATEGORIAS_DOCS);
+            const selCats = Array.isArray(masterPerfilDraft.categorias) ? masterPerfilDraft.categorias : [];
+            if (catResumo) {
+                catResumo.innerText = selCats.length
+                    ? `${selCats.length} selecionada(s): ${selCats.map(cid => CATEGORIAS_DOCS[cid]?.label || cid).join(', ')}`
+                    : 'Todas as Categorias';
+            }
+            if (catBox) {
+                const allCatActive = selCats.length === 0;
+                catBox.innerHTML =
+                    `<button type="button" onclick="toggleCategoriaPerfilFluxoMaster('*', true)" class="px-2.5 py-1 rounded-xl border ${allCatActive ? 'bg-slate-900 text-white border-slate-900' : 'bg-white text-slate-600 border-slate-200 hover:bg-slate-100'} text-[10px] font-extrabold">Todas as Categorias</button>` +
+                    todasCats.map(c => {
+                        const isOn = selCats.some(x => normKey(x) === normKey(c.id));
+                        const cJs = JSON.stringify(c.id).replace(/"/g, '&quot;');
+                        return `<button type="button" onclick="toggleCategoriaPerfilFluxoMaster(${cJs})" class="px-2.5 py-1 rounded-xl border ${isOn ? 'bg-indigo-600 text-white border-indigo-700 shadow-sm' : 'bg-white text-slate-700 border-slate-200 hover:border-indigo-300'} text-[10px] font-extrabold">${isOn ? '✓ ' : ''}${escapeHtml(c.label)}</button>`;
+                    }).join('');
+            }
+
+            const subBox = document.getElementById('masterPerfilSubtiposBox');
+            const subResumo = document.getElementById('masterPerfilSubResumo');
+            const catsBaseSub = selCats.length > 0
+                ? todasCats.filter(c => selCats.some(x => normKey(x) === normKey(c.id)))
+                : todasCats;
+            const subtiposDisponiveis = [...new Set(catsBaseSub.flatMap(c => c.subtipos || []))];
+            const selSubs = Array.isArray(masterPerfilDraft.subtipos) ? masterPerfilDraft.subtipos : [];
+            if (subResumo) {
+                subResumo.innerText = selSubs.length ? `${selSubs.length} subtipo(s) específico(s)` : 'Todos os Subtipos';
+            }
+            if (subBox) {
+                const allSubActive = selSubs.length === 0;
+                subBox.innerHTML =
+                    `<button type="button" onclick="toggleSubtipoPerfilFluxoMaster('*', true)" class="px-2 py-0.5 rounded-lg border ${allSubActive ? 'bg-slate-900 text-white border-slate-900' : 'bg-white text-slate-600 border-slate-200 hover:bg-slate-100'} text-[10px] font-extrabold">Todos os Subtipos</button>` +
+                    subtiposDisponiveis.map(s => {
+                        const isOn = selSubs.some(x => normKey(x) === normKey(s));
+                        const sJs = JSON.stringify(s).replace(/"/g, '&quot;');
+                        return `<button type="button" onclick="toggleSubtipoPerfilFluxoMaster(${sJs})" class="px-2 py-0.5 rounded-lg border ${isOn ? 'bg-emerald-600 text-white border-emerald-700' : 'bg-slate-50 text-slate-700 border-slate-200 hover:border-emerald-300'} text-[10px] font-bold">${isOn ? '✓ ' : ''}${escapeHtml(s)}</button>`;
+                    }).join('');
             }
 
             const todosUsuarios = obterUsuariosCadastradosParaFluxoDocs();
@@ -1882,7 +2868,7 @@ match /config/{document=**} {
             const chipsBox = document.getElementById('masterDocsAprovSelecionadosChips');
             if (chipsBox) {
                 if (!masterAprovadoresSel.length) {
-                    chipsBox.innerHTML = `<span class="text-[11px] font-semibold text-slate-400">Nenhum aprovador fixo selecionado (qualquer Gestor/Supervisor aprova em 1 etapa).</span>`;
+                    chipsBox.innerHTML = `<span class="text-[11px] font-semibold text-slate-400">Nenhum aprovador fixo selecionado neste escopo (marque os usuários abaixo).</span>`;
                 } else {
                     chipsBox.innerHTML = masterAprovadoresSel.map((k, idx) => {
                         const u = mapPorKey.get(k) || { key: k, nome: k, user: k, role: 'Aprovador' };
@@ -1901,12 +2887,22 @@ match /config/{document=**} {
             if (!listBox) return;
 
             const termo = normKey(document.getElementById('masterAprovBuscaInput')?.value || '');
-            const filtrados = todosUsuarios.filter(u =>
-                !termo ||
-                normKey(u.nome).includes(termo) ||
-                normKey(u.user).includes(termo) ||
-                normKey(u.role).includes(termo)
-            );
+            const roleFiltro = normKey(document.getElementById('masterAprovFiltroRole')?.value || '');
+            const filtrados = todosUsuarios.filter(u => {
+                const matchTermo = !termo ||
+                    normKey(u.nome).includes(termo) ||
+                    normKey(u.user).includes(termo) ||
+                    normKey(u.role).includes(termo);
+                if (!matchTermo) return false;
+                if (!roleFiltro) return true;
+                const rk = normKey(u.role);
+                if (roleFiltro === 'gestao') return isPerfilGestaoDocs(u.role);
+                if (roleFiltro === 'mecanica') return rk.includes('mecan');
+                if (roleFiltro === 'eletrica') return rk.includes('eletr');
+                if (roleFiltro === 'automacao') return rk.includes('autom');
+                if (roleFiltro === 'utilidades') return rk.includes('utilid');
+                return true;
+            });
 
             if (!filtrados.length) {
                 listBox.innerHTML = `<div class="p-4 rounded-xl bg-white border border-slate-200 text-center text-slate-400 font-bold">Nenhum usuário cadastrado encontrado para este filtro.</div>`;
@@ -1986,6 +2982,18 @@ match /config/{document=**} {
             if (!isMasterDocsAtivo()) {
                 return showToast('Acesso restrito: apenas Admin Master pode configurar o fluxo de aprovação.', 'error');
             }
+            onMasterPerfilMetaInput();
+            const temCriteriosPerfil = Boolean(
+                masterFluxoEscopoAtual !== 'padrao_geral' ||
+                (masterPerfilDraft.nome && masterPerfilDraft.nome.trim()) ||
+                (Array.isArray(masterPerfilDraft.disciplinas) && masterPerfilDraft.disciplinas.length > 0) ||
+                (Array.isArray(masterPerfilDraft.categorias) && masterPerfilDraft.categorias.length > 0) ||
+                (Array.isArray(masterPerfilDraft.subtipos) && masterPerfilDraft.subtipos.length > 0)
+            );
+            if (temCriteriosPerfil && masterAprovadoresSel.length > 0) {
+                return await window.salvarPerfilFluxoAprovacaoMasterDocs();
+            }
+
             const todos = obterUsuariosCadastradosParaFluxoDocs();
             const mapPorKey = new Map(todos.map(u => [u.key, u]));
             const usuariosExigidos = masterAprovadoresSel.map(k => {
@@ -2002,21 +3010,14 @@ match /config/{document=**} {
             const btn = document.getElementById('btnSalvarFluxoAprovacaoMasterDocs');
             if (btn) { btn.disabled = true; btn.innerText = 'Salvando...'; }
             try {
-                const payload = sanitizarPayloadFirestore({
+                await persistirConfigFluxoAprovacaoDocs({
                     usuariosExigidos,
-                    atualizadoPor: usuarioLogado?.nome || usuarioLogado?.user || 'Admin Master PCM',
-                    atualizadoEm: Date.now()
+                    perfisFluxo: getPerfisFluxoAprovacaoDocs(false)
                 });
-                await setDoc(refFluxoAprovacaoDocs, payload);
-                fluxoAprovacaoDocsCfg = payload;
-                masterAprovadoresDraftDirty = false;
-                aplicarPerfilInterface();
-                renderModalMasterFluxoAprovacaoDocs();
-                renderCurrentView();
                 if (usuariosExigidos.length > 0) {
                     showToast(`Fluxo de Aprovação salvo! Exigindo aprovação de ${usuariosExigidos.length} usuário(s): ${usuariosExigidos.map(u => u.nome).join(', ')}.`, 'success');
                 } else {
-                    showToast('Fluxo de Aprovação restaurado para o modo padrão (sem lista fixa de aprovadores).', 'info');
+                    showToast('Fluxo de Aprovação Padrão restaurado (sem lista fixa no escopo geral).', 'info');
                 }
             } catch (err) {
                 const info = formatarErroFirestoreDocs(err);
@@ -2031,7 +3032,20 @@ match /config/{document=**} {
             if (!isMasterDocsAtivo()) {
                 return showToast('Acesso restrito: apenas Admin Master pode alterar o fluxo de aprovação.', 'error');
             }
+            masterFluxoEscopoAtual = 'padrao_geral';
             masterAprovadoresSel = [];
+            masterPerfilDraft = {
+                id: 'padrao_geral',
+                nome: '',
+                descricao: '',
+                modoAprovacao: 'todos',
+                minimoAprovacoes: 1,
+                disciplinas: [],
+                categorias: [],
+                subtipos: [],
+                ativo: true
+            };
+            sincronizarInputsDomEditorPerfilMaster();
             masterAprovadoresDraftDirty = true;
             await window.salvarFluxoAprovacaoMasterDocs();
         };
@@ -2966,8 +3980,46 @@ match /config/{document=**} {
 
             const fluxoBanner = document.getElementById('aprovFluxoAtivoBanner');
             const exigidosGlobal = getAprovadoresFluxoAtivoDocs();
+            const perfisAtivos = getPerfisFluxoAprovacaoDocs(true).filter(p => p.usuariosExigidos.length > 0);
             if (fluxoBanner) {
-                if (exigidosGlobal.length > 0) {
+                if (perfisAtivos.length > 0) {
+                    const cardsPerfisBanner = perfisAtivos.map(p => {
+                        const usersTxt = p.usuariosExigidos.map((u, idx) => `#${idx + 1} ${u.nome} (${u.role})`).join(', ');
+                        return `<div class="p-2.5 rounded-xl bg-white border border-sky-200 space-y-1">
+                            <div class="flex flex-wrap items-center justify-between gap-1.5">
+                                <span class="font-extrabold text-slate-900 text-[11px]">${escapeHtml(p.nome)}</span>
+                                <span class="px-2 py-0.5 rounded-full bg-sky-100 text-sky-800 text-[10px] font-extrabold">${p.modoAprovacao === 'minimo' ? `Mín. ${p.minimoAprovacoes}/${p.usuariosExigidos.length}` : `${p.usuariosExigidos.length} aprovador(es)`}</span>
+                            </div>
+                            <div class="text-[10px] font-extrabold text-indigo-700">${escapeHtml(descreverCriteriosTipoDocPerfil(p))}</div>
+                            <div class="text-[10px] font-semibold text-slate-600">Aprovadores: <strong>${escapeHtml(usersTxt)}</strong></div>
+                        </div>`;
+                    }).join('');
+
+                    const meusPendentesCount = pendentes.filter(rev => {
+                        const ex = getAprovadoresExigidosParaRevisao(rev);
+                        const ap = getAprovacoesValidasDaRevisao(rev, ex);
+                        return (ex.length === 0 || isUsuarioNaListaExigidos(usuarioLogado, ex)) && !isUsuarioNaListaExigidos(usuarioLogado, ap);
+                    }).length;
+
+                    const filterPills = [
+                        `<button type="button" onclick="setFiltroPerfilFilaAprov('')" class="px-2.5 py-1 rounded-full text-[10px] font-extrabold ${aprovFilaFiltroPerfil === '' ? 'bg-slate-900 text-white' : 'bg-white text-slate-700 border border-slate-200'}">Todos (${pendentes.length})</button>`,
+                        `<button type="button" onclick="setFiltroPerfilFilaAprov('meus')" class="px-2.5 py-1 rounded-full text-[10px] font-extrabold ${aprovFilaFiltroPerfil === 'meus' ? 'bg-emerald-600 text-white' : 'bg-white text-emerald-800 border border-emerald-200'}">Aguardando Minha Aprovação (${meusPendentesCount})</button>`,
+                        ...perfisAtivos.map(p => {
+                            const cnt = pendentes.filter(r => getMetaFluxoParaRevisao(r).id === p.id).length;
+                            const pJs = JSON.stringify(p.id).replace(/"/g, '&quot;');
+                            return `<button type="button" onclick="setFiltroPerfilFilaAprov(${pJs})" class="px-2.5 py-1 rounded-full text-[10px] font-extrabold ${aprovFilaFiltroPerfil === p.id ? 'bg-sky-600 text-white' : 'bg-white text-sky-800 border border-sky-200'}">${escapeHtml(p.nome)} (${cnt})</button>`;
+                        })
+                    ].join('');
+
+                    fluxoBanner.className = 'p-3.5 rounded-2xl bg-sky-50/80 border border-sky-200 text-xs space-y-2.5';
+                    fluxoBanner.innerHTML = `
+                        <div class="flex flex-wrap items-center justify-between gap-2">
+                            <div class="font-extrabold text-sky-950">Perfis de Fluxo de Aprovação por Tipo de Documento Ativos (${perfisAtivos.length} perfil(is))${exigidosGlobal.length > 0 ? ` • Exigindo aprovação de ${exigidosGlobal.length} usuário(s) no Padrão Geral` : ''}</div>
+                            <span class="px-2 py-0.5 rounded-full bg-sky-600 text-white text-[10px] font-extrabold">Por Tipo de Documento</span>
+                        </div>
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-2">${cardsPerfisBanner}</div>
+                        <div class="flex flex-wrap items-center gap-1.5 pt-1">${filterPills}</div>`;
+                } else if (exigidosGlobal.length > 0) {
                     const chipsGlobal = exigidosGlobal.map((u, idx) =>
                         `<span class="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full bg-white border border-sky-200 text-slate-800 font-extrabold text-[11px]"><span class="text-sky-700 font-mono">#${idx + 1}</span> ${escapeHtml(u.nome)} <span class="text-slate-400 font-normal">(${escapeHtml(u.role)})</span></span>`
                     ).join('');
@@ -2982,18 +4034,28 @@ match /config/{document=**} {
                 } else {
                     fluxoBanner.className = 'p-3 rounded-2xl bg-slate-50 border border-slate-200 text-xs flex flex-wrap items-center justify-between gap-2';
                     fluxoBanner.innerHTML = `
-                        <span class="text-slate-600 font-semibold"><strong>Fluxo Padrão:</strong> Aprovação em 1 etapa pela Gestão / Supervisão (ou selecione múltiplos aprovadores obrigatórios no Menu Master).</span>
-                        ${isMasterDocsAtivo() ? `<button type="button" onclick="abrirModalAdminMasterDocs('aprov')" class="text-sky-700 hover:text-sky-900 font-extrabold underline">Selecionar Aprovadores no Master</button>` : ''}`;
+                        <span class="text-slate-600 font-semibold"><strong>Fluxo Padrão:</strong> Aprovação em 1 etapa pela Gestão / Supervisão (ou configure Perfis por Tipo de Documento no Menu Master).</span>
+                        ${isMasterDocsAtivo() ? `<button type="button" onclick="abrirModalAdminMasterDocs('aprov')" class="text-sky-700 hover:text-sky-900 font-extrabold underline">Configurar Perfis no Master</button>` : ''}`;
                 }
             }
 
+            const pendentesFiltrados = pendentes.filter(rev => {
+                if (!aprovFilaFiltroPerfil) return true;
+                const ex = getAprovadoresExigidosParaRevisao(rev);
+                const ap = getAprovacoesValidasDaRevisao(rev, ex);
+                if (aprovFilaFiltroPerfil === 'meus') {
+                    return (ex.length === 0 || isUsuarioNaListaExigidos(usuarioLogado, ex)) && !isUsuarioNaListaExigidos(usuarioLogado, ap);
+                }
+                return getMetaFluxoParaRevisao(rev).id === aprovFilaFiltroPerfil;
+            });
+
             const box = document.getElementById('aprovacoesLista');
-            if (!pendentes.length) {
+            if (!pendentesFiltrados.length) {
                 box.innerHTML = `<div class="glass-card p-8 rounded-3xl text-center text-xs font-bold text-slate-500 border-2 border-dashed border-emerald-200 bg-emerald-50/30">
-                    ✓ Fila de aprovações zerada! Todos os documentos enviados já foram analisados.
+                    ✓ ${pendentes.length === 0 ? 'Fila de aprovações zerada! Todos os documentos enviados já foram analisados.' : 'Nenhum documento pendente para este filtro de perfil.'}
                 </div>`;
             } else {
-                box.innerHTML = pendentes.map(rev => {
+                box.innerHTML = pendentesFiltrados.map(rev => {
                     const cat = CATEGORIAS_DOCS[rev.categoria] || CATEGORIAS_DOCS.manuais;
                     const master = docsAtivos.find(d => d.id === rev.docMasterId) || {};
                     const pathTxt = [rev.area, rev.maquina, rev.equipamento, rev.conjunto, rev.subconjunto].filter(Boolean).map(escapeHtml).join(' › ');
@@ -3004,7 +4066,9 @@ match /config/{document=**} {
                         ? '<span class="px-2 py-0.5 rounded-full text-[9px] font-extrabold bg-slate-100 text-slate-600">Enviado por você</span>'
                         : '';
 
-                    const exigidos = getAprovadoresExigidosParaRevisao(rev);
+                    const metaFluxo = getMetaFluxoParaRevisao(rev);
+                    const exigidos = metaFluxo.usuariosExigidos;
+                    const minAprov = getMinimoAprovacoesParaRevisao(rev, exigidos);
                     const aprovacoes = getAprovacoesValidasDaRevisao(rev, exigidos);
                     const faltantes = getAprovadoresFaltantesRevisao(rev, aprovacoes, exigidos);
                     const ehExigidoAtual = exigidos.length === 0 || isUsuarioNaListaExigidos(usuarioLogado, exigidos);
@@ -3012,7 +4076,8 @@ match /config/{document=**} {
 
                     let blocoFluxoCard = '';
                     if (exigidos.length > 0) {
-                        const pctAprov = Math.round((aprovacoes.length / exigidos.length) * 100);
+                        const alvoTotal = minAprov > 0 ? minAprov : exigidos.length;
+                        const pctAprov = Math.min(100, Math.round((aprovacoes.length / alvoTotal) * 100));
                         const pillsUsers = exigidos.map((u, idx) => {
                             const hit = aprovacoes.find(a => isUsuarioMatchAprovadorDocs(u, a));
                             return hit
@@ -3023,30 +4088,31 @@ match /config/{document=**} {
                         blocoFluxoCard = `
                         <div class="p-3.5 rounded-2xl bg-sky-50/70 border border-sky-200 space-y-2 text-xs">
                             <div class="flex flex-wrap items-center justify-between gap-2">
-                                <span class="text-[10px] font-extrabold uppercase tracking-wider text-sky-900">Progresso do Fluxo de Aprovação (${aprovacoes.length}/${exigidos.length} aprovadores)</span>
+                                <span class="text-[10px] font-extrabold uppercase tracking-wider text-sky-900">Perfil: ${escapeHtml(metaFluxo.nome)} • Progresso (${aprovacoes.length}/${alvoTotal} aprovadores)</span>
                                 <span class="font-mono text-[11px] font-extrabold text-sky-800">${pctAprov}% concluído</span>
                             </div>
                             <div class="w-full h-1.5 rounded-full bg-slate-200 overflow-hidden">
                                 <div class="h-full bg-emerald-600 transition-all" style="width:${pctAprov}%"></div>
                             </div>
                             <div class="flex flex-wrap gap-1.5 pt-0.5">${pillsUsers}</div>
-                            ${faltantes.length > 0
+                            ${aprovacoes.length < alvoTotal
                                 ? `<div class="text-[11px] font-bold text-amber-900">Falta aprovação de: <strong>${escapeHtml(faltantes.map(f => f.nome).join(', '))}</strong> para lançar o documento como vigente.</div>`
                                 : `<div class="text-[11px] font-bold text-emerald-800">✓ Todos os aprovadores exigidos validaram.</div>`}
                         </div>`;
                     }
 
+                    const alvoTotalBtn = minAprov > 0 ? minAprov : exigidos.length;
                     let btnAprovarHtml = `<button type="button" onclick="aprovarRevisaoDoc('${rev.id}')" class="btn-touch bg-emerald-600 hover:bg-emerald-700 text-white text-xs py-2 px-5 shadow-sm">✓ Aprovar e Publicar Vigente</button>`;
                     if (exigidos.length > 0) {
                         if (jaAprovouAtual) {
-                            btnAprovarHtml = `<button type="button" onclick="aprovarRevisaoDoc('${rev.id}')" class="btn-touch bg-emerald-100 text-emerald-900 border border-emerald-300 text-xs py-2 px-4">✓ Sua Aprovação Registrada (${aprovacoes.length}/${exigidos.length})</button>`;
+                            btnAprovarHtml = `<button type="button" onclick="aprovarRevisaoDoc('${rev.id}')" class="btn-touch bg-emerald-100 text-emerald-900 border border-emerald-300 text-xs py-2 px-4">✓ Sua Aprovação Registrada (${aprovacoes.length}/${alvoTotalBtn})</button>`;
                         } else if (ehExigidoAtual) {
-                            const lblAcao = faltantes.length <= 1
-                                ? `✓ Aprovar (${aprovacoes.length + 1}/${exigidos.length}) e Lançar Vigente`
-                                : `✓ Registrar Minha Aprovação (${aprovacoes.length + 1}/${exigidos.length})`;
+                            const lblAcao = (aprovacoes.length + 1) >= alvoTotalBtn
+                                ? `✓ Aprovar (${aprovacoes.length + 1}/${alvoTotalBtn}) e Lançar Vigente`
+                                : `✓ Registrar Minha Aprovação (${aprovacoes.length + 1}/${alvoTotalBtn})`;
                             btnAprovarHtml = `<button type="button" onclick="aprovarRevisaoDoc('${rev.id}')" class="btn-touch bg-emerald-600 hover:bg-emerald-700 text-white text-xs py-2 px-5 shadow-sm">${lblAcao}</button>`;
                         } else {
-                            btnAprovarHtml = `<button type="button" onclick="aprovarRevisaoDoc('${rev.id}')" class="btn-touch bg-slate-100 text-slate-600 border border-slate-200 text-xs py-2 px-4">Aguardando Fluxo (${aprovacoes.length}/${exigidos.length})</button>`;
+                            btnAprovarHtml = `<button type="button" onclick="aprovarRevisaoDoc('${rev.id}')" class="btn-touch bg-slate-100 text-slate-600 border border-slate-200 text-xs py-2 px-4">Restrito ao ${escapeHtml(metaFluxo.nome)} (${aprovacoes.length}/${alvoTotalBtn})</button>`;
                         }
                     }
 
@@ -3055,9 +4121,10 @@ match /config/{document=**} {
                         <div class="flex flex-wrap items-start justify-between gap-3">
                             <div class="space-y-1">
                                 <div class="flex flex-wrap items-center gap-1.5">
-                                    <span class="px-2.5 py-0.5 rounded-full text-[10px] font-extrabold st-pendente">${exigidos.length > 0 ? `Fluxo de Aprovação (${aprovacoes.length}/${exigidos.length})` : 'Aguardando Aprovação'}</span>
+                                    <span class="px-2.5 py-0.5 rounded-full text-[10px] font-extrabold st-pendente">${exigidos.length > 0 ? `${escapeHtml(metaFluxo.nome)} (${aprovacoes.length}/${alvoTotalBtn})` : 'Aguardando Aprovação'}</span>
                                     <span class="px-2.5 py-0.5 rounded-full text-[10px] font-extrabold ${cat.badgeCls}">${escapeHtml(cat.label)}</span>
-                                    <span class="px-2 py-0.5 rounded-full text-[10px] font-mono font-extrabold bg-slate-900 text-white">${escapeHtml(rev.codigoDoc)} • ${escapeHtml(rev.revisaoLabel)}</span>
+                                    <span class="px-2.5 py-0.5 rounded-full text-[10px] font-extrabold bg-indigo-50 text-indigo-800 border border-indigo-200">${escapeHtml(rev.disciplina || 'Mecânica')} • ${escapeHtml(rev.subtipo || '-')}</span>
+                                    <span class="px-2.5 py-0.5 rounded-full text-[10px] font-mono font-extrabold bg-slate-900 text-white">${escapeHtml(rev.codigoDoc)} • ${escapeHtml(rev.revisaoLabel)}</span>
                                     ${rev.origemEnvio === 'campo_sugestao' ? '<span class="px-2 py-0.5 rounded-full text-[9px] font-extrabold bg-emerald-100 text-emerald-800">Sugestão de Campo</span>' : ''}
                                     ${selfNote}
                                 </div>
@@ -3120,6 +4187,11 @@ match /config/{document=**} {
             }
         }
 
+        window.setFiltroPerfilFilaAprov = (perfilId = '') => {
+            aprovFilaFiltroPerfil = String(perfilId || '');
+            renderAprovacoes();
+        };
+
         window.aprovarRevisaoDoc = async (revId) => {
             if (!isPerfilAprovadorDocs(usuarioLogado)) return showToast('Apenas usuários autorizados ou Gestão/Supervisão podem aprovar documentos.', 'error');
             const rev = docsRevisoes.find(r => r.id === revId);
@@ -3139,12 +4211,14 @@ match /config/{document=**} {
             const aprovRole = usuarioLogado?.role || 'Gestão';
             const catMeta = CATEGORIAS_DOCS[rev.categoria] || CATEGORIAS_DOCS.manuais;
 
-            const exigidos = getAprovadoresExigidosParaRevisao(rev);
+            const metaFluxo = getMetaFluxoParaRevisao(rev);
+            const exigidos = metaFluxo.usuariosExigidos;
+            const minNecessario = getMinimoAprovacoesParaRevisao(rev, exigidos);
             const prevAprov = Array.isArray(rev.aprovacoesRegistradas) ? [...rev.aprovacoesRegistradas] : [];
 
             if (exigidos.length > 0) {
                 if (!isUsuarioNaListaExigidos(usuarioLogado, exigidos)) {
-                    return showToast(`Aprovação restrita aos usuários selecionados no Fluxo Master: ${exigidos.map(u => u.nome).join(', ')}.`, 'error');
+                    return showToast(`Aprovação restrita ao perfil "${metaFluxo.nome}": apenas ${exigidos.map(u => u.nome).join(', ')} pode(m) aprovar este tipo de documento.`, 'error');
                 }
                 if (isUsuarioNaListaExigidos(usuarioLogado, prevAprov)) {
                     const jaFaltantes = getAprovadoresFaltantesRevisao(rev, prevAprov, exigidos);
@@ -3166,12 +4240,15 @@ match /config/{document=**} {
 
             const faltantes = getAprovadoresFaltantesRevisao(rev, novasAprovacoes, exigidos);
             const aprovadosValidos = getAprovacoesValidasDaRevisao({ ...rev, aprovacoesRegistradas: novasAprovacoes }, exigidos);
+            const atingiuQuorum = exigidos.length === 0 || aprovadosValidos.length >= (minNecessario || exigidos.length);
 
             try {
-                // Se o Fluxo Master exige múltiplos aprovadores e ainda faltam aprovações, registra aprovação parcial sem lançar como vigente
-                if (exigidos.length > 0 && faltantes.length > 0) {
+                // Se o Perfil do Fluxo exige mais aprovações do que as registradas até agora, salva aprovação parcial
+                if (!atingiuQuorum && faltantes.length > 0) {
                     await updateDoc(doc(db, 'docs_revisoes', rev.id), sanitizarPayloadFirestore({
                         status: 'pendente_aprovacao',
+                        perfilFluxoId: metaFluxo.id || 'padrao_geral',
+                        perfilFluxoNome: metaFluxo.nome || '',
                         aprovadoresExigidos: exigidos,
                         aprovacoesRegistradas: novasAprovacoes,
                         ultimaAprovacaoParcialPor: aprovNome,
@@ -3179,16 +4256,18 @@ match /config/{document=**} {
                         atualizadoEm: agora
                     }));
                     await updateDoc(doc(db, 'docs_ativos', master.id), sanitizarPayloadFirestore({
+                        perfilFluxoId: metaFluxo.id || 'padrao_geral',
+                        perfilFluxoNome: metaFluxo.nome || '',
                         aprovadoresExigidos: exigidos,
                         aprovacoesRegistradas: novasAprovacoes,
                         atualizadoPor: aprovNome,
                         atualizadoEm: agora
                     }));
-                    showToast(`Aprovação de ${aprovNome} registrada (${aprovadosValidos.length}/${exigidos.length})! Aguardando: ${faltantes.map(u => u.nome).join(', ')} para lançar no sistema.`, 'info');
+                    showToast(`Aprovação de ${aprovNome} registrada (${aprovadosValidos.length}/${minNecessario || exigidos.length}) no perfil "${metaFluxo.nome}"! Aguardando: ${faltantes.map(u => u.nome).join(', ')}.`, 'info');
                     return;
                 }
 
-                const aprovadoresNomesFinal = exigidos.length > 1
+                const aprovadoresNomesFinal = exigidos.length > 1 && aprovadosValidos.length > 1
                     ? aprovadosValidos.map(a => a.nome || a.user).join(', ')
                     : aprovNome;
 
@@ -3664,6 +4743,98 @@ match /config/{document=**} {
             onNdCategoriaChange();
         }
 
+        function popularSelectPerfisFluxoModalDoc(selectedPerfilId = 'auto') {
+            const sel = document.getElementById('ndPerfilFluxoSelect');
+            if (!sel) return;
+            const perfisAtivos = getPerfisFluxoAprovacaoDocs(true).filter(p => p.usuariosExigidos.length > 0);
+            const prev = selectedPerfilId || sel.value || 'auto';
+            sel.innerHTML =
+                `<option value="auto">Automático pelo Tipo de Documento (Disciplina / Categoria / Subtipo)</option>` +
+                perfisAtivos.map(p => `<option value="${escapeHtml(p.id)}">Perfil: ${escapeHtml(p.nome)} (${p.usuariosExigidos.length} aprov.)</option>`).join('');
+            if ([...sel.options].some(o => o.value === prev)) {
+                sel.value = prev;
+            } else {
+                sel.value = 'auto';
+            }
+        }
+
+        function atualizarPreviewFluxoAprovacaoModalDoc() {
+            const modo = document.getElementById('docFormModo')?.value || 'novo';
+            const box = document.getElementById('ndBoxFluxoAprovacaoDoc');
+            if (box) {
+                const esconder = (modo === 'master_edit');
+                box.hidden = esconder;
+                box.classList.toggle('hidden', esconder);
+            }
+            if (modo === 'master_edit') {
+                atualizarRotulosModoModalDoc('master_edit');
+                return;
+            }
+
+            const categoria = document.getElementById('ndCategoria')?.value || 'manuais';
+            const subtipo = document.getElementById('ndSubtipo')?.value || '';
+            const disciplina = document.getElementById('ndDisciplina')?.value || 'Mecânica';
+            const perfilFluxoId = document.getElementById('ndPerfilFluxoSelect')?.value || 'auto';
+
+            const resolvido = resolverPerfilFluxoParaDocumento({
+                categoria,
+                subtipo,
+                disciplina,
+                perfilFluxoId
+            });
+
+            const badge = document.getElementById('ndFluxoPerfilBadge');
+            const desc = document.getElementById('ndFluxoRegraDescricao');
+            const chipsBox = document.getElementById('ndFluxoAprovadoresPreview');
+
+            if (badge) {
+                badge.innerText = resolvido.nome;
+                badge.className = resolvido.usuariosExigidos.length > 0
+                    ? 'px-2.5 py-0.5 rounded-full text-[10px] font-extrabold bg-sky-600 text-white'
+                    : 'px-2.5 py-0.5 rounded-full text-[10px] font-extrabold bg-slate-200 text-slate-800';
+            }
+            if (desc) {
+                desc.innerText = resolvido.criteriosResumo
+                    ? `Regra aplicada: ${resolvido.criteriosResumo}`
+                    : (resolvido.descricao || 'Fluxo automático conforme o tipo de documento.');
+            }
+            if (chipsBox) {
+                if (resolvido.usuariosExigidos.length > 0) {
+                    chipsBox.innerHTML = resolvido.usuariosExigidos.map((u, idx) =>
+                        `<span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-lg bg-slate-900 text-white text-[10px] font-extrabold"><span class="text-sky-300 font-mono">#${idx + 1}</span> ${escapeHtml(u.nome)} <span class="text-slate-300 font-normal">(${escapeHtml(u.role)})</span></span>`
+                    ).join('');
+                } else {
+                    chipsBox.innerHTML = `<span class="text-[11px] font-semibold text-slate-500">Qualquer Gestor ou Supervisor (1 etapa)</span>`;
+                }
+            }
+
+            const nota = document.getElementById('modalDocFooterNota');
+            if (nota) {
+                if (resolvido.usuariosExigidos.length > 0) {
+                    const qtdTxt = resolvido.modoAprovacao === 'minimo'
+                        ? `mínimo ${resolvido.minimoAprovacoes} de ${resolvido.usuariosExigidos.length} usuário(s)`
+                        : `${resolvido.usuariosExigidos.length} usuário(s)`;
+                    nota.innerText = `Fluxo "${resolvido.nome}": exige aprovação de ${qtdTxt} (${resolvido.usuariosExigidos.map(u => u.nome).join(', ')}) antes de lançar no sistema.`;
+                } else {
+                    nota.innerText = 'Será enviado para validação e aprovação de Gestão/Supervisão.';
+                }
+            }
+        }
+
+        window.onNdSubtipoChange = () => {
+            atualizarPreviewNomenclaturaDoc();
+            atualizarPreviewFluxoAprovacaoModalDoc();
+        };
+
+        window.onNdDisciplinaChange = () => {
+            atualizarPreviewNomenclaturaDoc();
+            atualizarPreviewFluxoAprovacaoModalDoc();
+        };
+
+        window.onNdPerfilFluxoChange = () => {
+            atualizarPreviewFluxoAprovacaoModalDoc();
+        };
+
         window.onNdCategoriaChange = () => {
             const catId = document.getElementById('ndCategoria')?.value || 'manuais';
             const cat = CATEGORIAS_DOCS[catId] || CATEGORIAS_DOCS.manuais;
@@ -3695,6 +4866,7 @@ match /config/{document=**} {
                 setModoAnexoDoc('foto_campo');
             }
             atualizarPreviewNomenclaturaDoc();
+            atualizarPreviewFluxoAprovacaoModalDoc();
         };
 
         function getEquipesDisponiveisVisDocs() {
@@ -4880,8 +6052,9 @@ match /config/{document=**} {
             atualizarRotulosModoModalDoc('novo');
 
             configurarVisibilidadeNoModalDoc(null, prefill.categoria || 'manuais');
+            popularSelectPerfisFluxoModalDoc(prefill.perfilFluxoId || 'auto');
             popularCategoriasSelectModal();
-            popularDisciplinasSelectsDocs('Mecânica');
+            popularDisciplinasSelectsDocs(prefill.disciplina || 'Mecânica');
             if (prefill.categoria && CATEGORIAS_DOCS[prefill.categoria]) {
                 const catSel = document.getElementById('ndCategoria');
                 if (catSel && [...catSel.options].some(o => o.value === prefill.categoria)) {
@@ -4902,6 +6075,7 @@ match /config/{document=**} {
             };
             popularNdSelects(prefAtivo);
             setModoAnexoDoc('arquivo_direto');
+            atualizarPreviewFluxoAprovacaoModalDoc();
             abrirModal('modalNovoDoc');
         };
 
@@ -4934,6 +6108,7 @@ match /config/{document=**} {
             document.getElementById('docMasterEditId').value = d.id;
             document.getElementById('modalDocTituloModal').innerText = `Nova Revisão — ${d.codigo} (${nextLbl})`;
             atualizarRotulosModoModalDoc('revisao');
+            popularSelectPerfisFluxoModalDoc(d.perfilFluxoId || 'auto');
             popularCategoriasSelectModal();
             document.getElementById('ndCategoria').value = d.categoria;
             onNdCategoriaChange();
@@ -4963,6 +6138,7 @@ match /config/{document=**} {
                 conjunto: d.conjunto || '', subconjunto: d.subconjunto || ''
             });
             setModoAnexoDoc(d.arquivoUrl && !d.arquivoId ? 'sharepoint' : 'arquivo_direto');
+            atualizarPreviewFluxoAprovacaoModalDoc();
             abrirModal('modalNovoDoc');
             setTimeout(() => document.getElementById('ndMotivoAlteracao')?.focus(), 80);
         };
@@ -5038,6 +6214,7 @@ match /config/{document=**} {
             });
             setModoAnexoDoc(d.arquivoUrl && !d.arquivoId ? 'sharepoint' : 'arquivo_direto');
             atualizarPreviewNomenclaturaDoc();
+            atualizarPreviewFluxoAprovacaoModalDoc();
             abrirModal('modalNovoDoc');
         };
 
@@ -5499,7 +6676,23 @@ match /config/{document=**} {
                     return;
                 }
 
-                const exigidosFluxoAtivo = getAprovadoresFluxoAtivoDocs();
+                const perfilFluxoEscolhidoId = document.getElementById('ndPerfilFluxoSelect')?.value || 'auto';
+                const fluxoResolvido = resolverPerfilFluxoParaDocumento({
+                    categoria,
+                    subtipo,
+                    disciplina,
+                    perfilFluxoId: perfilFluxoEscolhidoId
+                });
+                const exigidosFluxoAtivo = fluxoResolvido.usuariosExigidos;
+                const fluxoMetaPayload = {
+                    perfilFluxoId: fluxoResolvido.id || 'padrao_geral',
+                    perfilFluxoNome: fluxoResolvido.nome || 'Fluxo Padrão',
+                    perfilFluxoCriterios: fluxoResolvido.criteriosResumo || '',
+                    perfilFluxoModo: fluxoResolvido.modoAprovacao || 'todos',
+                    perfilFluxoMinimo: Number(fluxoResolvido.minimoAprovacoes || exigidosFluxoAtivo.length || 0),
+                    aprovadoresExigidos: exigidosFluxoAtivo,
+                    aprovacoesRegistradas: []
+                };
 
                 if (modo === 'novo') {
                     const masterPayload = {
@@ -5525,8 +6718,7 @@ match /config/{document=**} {
                         revisaoVigenteLabel: `Pendente (${revLabel})`,
                         revisaoVigenteId: '',
                         temRevisaoPendente: true,
-                        aprovadoresExigidos: exigidosFluxoAtivo,
-                        aprovacoesRegistradas: [],
+                        ...fluxoMetaPayload,
                         validadeEm,
                         periodicidadeRevalidacaoMeses,
                         arquivoProvider: provider,
@@ -5546,8 +6738,7 @@ match /config/{document=**} {
                 } else if (targetMasterId) {
                     await updateDoc(doc(db, 'docs_ativos', targetMasterId), sanitizarPayloadFirestore({
                         temRevisaoPendente: true,
-                        aprovadoresExigidos: exigidosFluxoAtivo,
-                        aprovacoesRegistradas: [],
+                        ...fluxoMetaPayload,
                         atualizadoPor: autor,
                         atualizadoEm: agora
                     }));
@@ -5576,8 +6767,7 @@ match /config/{document=**} {
                     revisaoNum: revNum,
                     revisaoLabel: revLabel,
                     status: 'pendente_aprovacao',
-                    aprovadoresExigidos: exigidosFluxoAtivo,
-                    aprovacoesRegistradas: [],
+                    ...fluxoMetaPayload,
                     motivoAlteracao,
                     arquivoProvider: provider,
                     ...arquivoMeta,
@@ -5938,10 +7128,13 @@ match /config/{document=**} {
                     const data = snapDoc && snapDoc.exists() ? (snapDoc.data() || {}) : {};
                     fluxoAprovacaoDocsCfg = {
                         usuariosExigidos: Array.isArray(data.usuariosExigidos) ? data.usuariosExigidos : [],
+                        perfisFluxo: Array.isArray(data.perfisFluxo) ? data.perfisFluxo : [],
                         atualizadoPor: data.atualizadoPor || '',
                         atualizadoEm: Number(data.atualizadoEm || 0)
                     };
                     if (!masterAprovadoresDraftDirty) sincronizarDraftFluxoAprovacaoMaster();
+                    popularSelectPerfisFluxoModalDoc();
+                    atualizarPreviewFluxoAprovacaoModalDoc();
                     if (usuarioLogado) {
                         aplicarPerfilInterface();
                         renderCurrentView();
