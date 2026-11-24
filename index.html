@@ -604,9 +604,12 @@
 
             <div id="secMasterAtivoCentral" class="hidden space-y-4 text-xs">
                 <div class="p-3.5 rounded-2xl bg-sky-50 border border-sky-200 space-y-2">
-                    <div class="font-extrabold text-sky-900 uppercase text-[10px] tracking-wider">Módulo de Documentos • Cadastros Master</div>
-                    <p class="text-[11px] text-sky-800 font-medium">Cadastre novas Categorias, Subtipos e Disciplinas na biblioteca técnica sem fila de aprovação.</p>
-                    <button type="button" onclick="abrirMasterDocsTaxonomiaPortal()" class="btn-touch bg-sky-700 hover:bg-sky-800 text-white w-full py-2 text-xs">Cadastrar Categorias, Subtipos e Disciplinas</button>
+                    <div class="font-extrabold text-sky-900 uppercase text-[10px] tracking-wider">Módulo de Documentos • Fluxo de Aprovação &amp; Taxonomia Master</div>
+                    <p class="text-[11px] text-sky-800 font-medium">Configure quais usuários cadastrados devem aprovar documentos antes do lançamento ou cadastre novas Categorias, Subtipos e Disciplinas.</p>
+                    <div class="grid grid-cols-1 gap-2">
+                        <button type="button" onclick="abrirMasterDocsTaxonomiaPortal('aprov')" class="btn-touch bg-slate-900 hover:bg-slate-800 text-white w-full py-2 text-xs">Configurar Fluxo de Aprovação (Usuários)</button>
+                        <button type="button" onclick="abrirMasterDocsTaxonomiaPortal('cat')" class="btn-touch bg-sky-700 hover:bg-sky-800 text-white w-full py-2 text-xs">Cadastrar Categorias, Subtipos e Disciplinas</button>
+                    </div>
                 </div>
 
                 <form onsubmit="salvarNovaSenhaMasterCentral(event)" class="p-3.5 rounded-2xl bg-slate-50 border border-slate-200 space-y-2.5">
@@ -976,7 +979,7 @@
             }
         };
 
-        window.abrirMasterDocsTaxonomiaPortal = () => {
+        window.abrirMasterDocsTaxonomiaPortal = (tab = 'cat') => {
             if (!isAdminMasterAtivoCentral()) {
                 return showToast('Desbloqueie o modo Admin Master primeiro.', 'error');
             }
@@ -986,7 +989,7 @@
             safeStorage.set('cepera_agendamento_handoff', JSON.stringify({
                 targetApp: 'docs_ativos',
                 action: 'master_taxonomia',
-                tab: 'cat'
+                tab: tab || 'cat'
             }));
             document.getElementById('modalAdminMaster')?.classList.add('hidden');
             abrirAppWorkspace('docs_ativos', true);
