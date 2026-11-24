@@ -1658,7 +1658,7 @@
                 <!-- Opções de Compartilhamento e Adaptação -->
                 <div class="p-3.5 rounded-2xl bg-white border border-slate-200 space-y-3">
                     <div class="text-[10px] font-extrabold uppercase tracking-wider text-slate-600">2. Opções de Compartilhamento &amp; Código Individual</div>
-                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                    <div class="space-y-3">
                         <div>
                             <label class="block text-[10px] font-extrabold uppercase text-slate-500 mb-1">Modo de Compartilhamento</label>
                             <select id="clonePlModoOperacao" class="input-clean py-2 text-xs font-extrabold">
@@ -1666,15 +1666,27 @@
                                 <option value="sempre_novo">Criar Sempre um Novo Plano em cada Equipamento</option>
                             </select>
                         </div>
-                        <div>
-                            <label class="block text-[10px] font-extrabold uppercase text-slate-500 mb-1">Conjunto / Subconjunto no Destino</label>
-                            <input type="text" id="clonePlConjuntoAlvo" class="input-clean py-2 text-xs font-bold" placeholder="Deixe vazio p/ Equipamento Inteiro ou informe o Conjunto">
+                        <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                            <div>
+                                <label class="block text-[10px] font-extrabold uppercase text-slate-500 mb-1">Conjunto no Destino</label>
+                                <input type="text" id="clonePlConjuntoAlvo" oninput="renderListaEquipamentosClonePlano()" class="input-clean py-2 text-xs font-bold" placeholder="Deixe vazio p/ Equipamento Inteiro ou informe o Conjunto">
+                            </div>
+                            <div>
+                                <label class="block text-[10px] font-extrabold uppercase text-slate-500 mb-1">Subconjunto no Destino</label>
+                                <input type="text" id="clonePlSubconjuntoAlvo" oninput="renderListaEquipamentosClonePlano()" class="input-clean py-2 text-xs font-bold" placeholder="Opcional — ex.: Válvulas, Rolamentos...">
+                            </div>
                         </div>
                     </div>
-                    <label class="inline-flex items-center gap-2 cursor-pointer font-bold text-slate-700">
-                        <input type="checkbox" id="clonePlAutoTitulo" checked class="w-4 h-4 rounded accent-sky-600">
-                        <span>Adaptar automaticamente o título do plano com o nome de cada equipamento destino (mantendo códigos de plano individuais e únicos)</span>
-                    </label>
+                    <div class="space-y-2 pt-0.5">
+                        <label class="flex items-start gap-2 cursor-pointer font-bold text-slate-700">
+                            <input type="checkbox" id="clonePlCriarNaArvore" checked onchange="renderListaEquipamentosClonePlano()" class="w-4 h-4 mt-0.5 rounded accent-emerald-600 shrink-0">
+                            <span>Criar automaticamente o Conjunto / Subconjunto na <strong>Árvore de Ativos (Gestão de Ativos)</strong> caso ainda não esteja cadastrado no equipamento destino, amarrando o plano ao ativo</span>
+                        </label>
+                        <label class="flex items-start gap-2 cursor-pointer font-bold text-slate-700">
+                            <input type="checkbox" id="clonePlAutoTitulo" checked class="w-4 h-4 mt-0.5 rounded accent-sky-600 shrink-0">
+                            <span>Adaptar automaticamente o título do plano com o nome de cada equipamento destino (mantendo códigos de plano individuais e únicos)</span>
+                        </label>
+                    </div>
                 </div>
             </form>
 
@@ -5152,6 +5164,35 @@
             return tokens[0] || clean;
         }
 
+        function lerAlvoConjuntoSubconjuntoClonePlano() {
+            let conjBase = (document.getElementById('clonePlConjuntoAlvo')?.value || '').trim();
+            let subBase = (document.getElementById('clonePlSubconjuntoAlvo')?.value || '').trim();
+            if (!subBase && conjBase && /[>›]/.test(conjBase)) {
+                const partes = conjBase.split(/[>›]/).map(s => s.trim()).filter(Boolean);
+                if (partes.length >= 2) {
+                    conjBase = partes[0];
+                    subBase = partes.slice(1).join(' › ');
+                }
+            }
+            return { conjBase, subBase };
+        }
+
+        function encontrarNodeAtivoEquipamentoClone(eq, conjFinal, subFinal) {
+            const lista = Array.isArray(eq?.nodes) ? eq.nodes : [];
+            if (!conjFinal) return null;
+            const cKey = normKey(conjFinal);
+            const sKey = normKey(subFinal || '');
+            if (sKey) {
+                return lista.find(n =>
+                    normKey(n.conjunto) === cKey &&
+                    normKey(n.subconjunto || '') === sKey
+                ) || null;
+            }
+            return lista.find(n => normKey(n.conjunto) === cKey && !String(n.subconjunto || '').trim())
+                || lista.find(n => normKey(n.conjunto) === cKey)
+                || null;
+        }
+
         function obterCatalogoEquipamentosParaClonePlano(planoOrigem = null) {
             const map = new Map();
             const radOrigem = extrairRadicalEquipamentoPrev(planoOrigem?.equipamento || '');
@@ -5172,10 +5213,12 @@
                         criticidade: n.criticidade || '',
                         criticidade_linha: n.criticidade_linha || '',
                         conjuntos: new Set(),
-                        subconjuntos: new Set()
+                        subconjuntos: new Set(),
+                        nodes: []
                     };
                     map.set(key, entry);
                 }
+                entry.nodes.push(n);
                 if (n.conjunto) entry.conjuntos.add(n.conjunto);
                 if (n.subconjunto) entry.subconjuntos.add(n.subconjunto);
                 if (!entry.tag && n.tag) entry.tag = n.tag;
@@ -5197,7 +5240,8 @@
                         criticidade: '',
                         criticidade_linha: pl.criticidadeLinha || '',
                         conjuntos: new Set(pl.conjunto ? [pl.conjunto] : []),
-                        subconjuntos: new Set(pl.subconjunto ? [pl.subconjunto] : [])
+                        subconjuntos: new Set(pl.subconjunto ? [pl.subconjunto] : []),
+                        nodes: []
                     });
                 }
             });
@@ -5243,6 +5287,10 @@
 
             document.getElementById('clonePlOrigemId').value = p.id;
             document.getElementById('clonePlConjuntoAlvo').value = p.conjunto || '';
+            const subInp = document.getElementById('clonePlSubconjuntoAlvo');
+            if (subInp) subInp.value = p.subconjunto || '';
+            const chkArvore = document.getElementById('clonePlCriarNaArvore');
+            if (chkArvore) chkArvore.checked = true;
             const chkAutoTit = document.getElementById('clonePlAutoTitulo');
             if (chkAutoTit) chkAutoTit.checked = true;
             const buscaInp = document.getElementById('clonePlBuscaEquip');
@@ -5334,9 +5382,17 @@
                 return;
             }
 
+            const { conjBase: conjPreview, subBase: subPreview } = lerAlvoConjuntoSubconjuntoClonePlano();
+            const criarNaArvorePreview = document.getElementById('clonePlCriarNaArvore')?.checked !== false;
+
             listBox.innerHTML = filtrados.map(eq => {
                 const isSel = clonePlanoEquipSelecionados.has(eq.key);
                 const kJs = JSON.stringify(eq.key).replace(/"/g, '&quot;');
+                const conjPrevEq = conjPreview ? (eq.conjuntosArr.find(c => normKey(c) === normKey(conjPreview)) || conjPreview) : '';
+                const subPrevEq = conjPrevEq ? subPreview : '';
+                const nodePrevExist = conjPrevEq ? encontrarNodeAtivoEquipamentoClone(eq, conjPrevEq, subPrevEq) : null;
+                const vaiCriarNaArvore = !eq.ehOrigem && criarNaArvorePreview && Boolean(conjPrevEq) && !nodePrevExist;
+                const labelCriar = subPrevEq ? `${conjPrevEq} › ${subPrevEq}` : conjPrevEq;
                 return `
                 <label class="flex items-center justify-between gap-2.5 p-2.5 rounded-xl border ${eq.ehOrigem ? 'bg-slate-100 border-slate-200 opacity-70' : (isSel ? 'bg-sky-50/90 border-sky-400' : 'bg-white border-slate-200 hover:border-slate-300')} ${eq.ehOrigem ? 'cursor-not-allowed' : 'cursor-pointer'} transition-colors">
                     <div class="flex items-center gap-2.5 min-w-0">
@@ -5349,6 +5405,7 @@
                     <div class="flex flex-wrap items-center gap-1 shrink-0">
                         ${eq.ehOrigem ? `<span class="px-2 py-0.5 rounded-full bg-slate-800 text-white text-[10px] font-extrabold">Ativo de Origem</span>` : ''}
                         ${eq.ehParecido ? `<span class="px-2 py-0.5 rounded-full bg-sky-100 text-sky-800 border border-sky-300 text-[10px] font-extrabold">★ Equipamento Parecido</span>` : ''}
+                        ${vaiCriarNaArvore ? `<span class="px-2 py-0.5 rounded-full bg-emerald-50 text-emerald-700 border border-emerald-200 text-[10px] font-extrabold" title="Será criado automaticamente na Árvore de Ativos: ${escapeHtml(labelCriar)}">+ Criará na Árvore</span>` : ''}
                         ${eq.planoCompartilhadoExistente ? `<span class="px-2 py-0.5 rounded-full bg-indigo-100 text-indigo-800 border border-indigo-200 text-[10px] font-extrabold">Já possui (${escapeHtml(eq.planoCompartilhadoExistente.codigo)})</span>` : ''}
                     </div>
                 </label>`;
@@ -5451,7 +5508,8 @@
             const catalogo = obterCatalogoEquipamentosParaClonePlano(pOrigem);
             const mapPorKey = new Map(catalogo.map(eq => [eq.key, eq]));
             const modoOp = document.getElementById('clonePlModoOperacao')?.value || 'criar_ou_sincronizar';
-            const conjInput = (document.getElementById('clonePlConjuntoAlvo')?.value || '').trim();
+            const { conjBase, subBase } = lerAlvoConjuntoSubconjuntoClonePlano();
+            const criarNaArvore = document.getElementById('clonePlCriarNaArvore')?.checked !== false;
             const autoTitulo = document.getElementById('clonePlAutoTitulo')?.checked !== false;
             const grpId = pOrigem.grupoPlanoCompartilhadoId || `grp_pl_${pOrigem.id}`;
 
@@ -5471,8 +5529,19 @@
                 return cand;
             };
 
+            const nodeOrigem = assetNodes.find(n =>
+                (pOrigem.ativoId && n.nodeId === pOrigem.ativoId) ||
+                (normKey(n.area) === normKey(pOrigem.setor) &&
+                 normKey(n.maquina) === normKey(pOrigem.maquina) &&
+                 normKey(n.equipamento) === normKey(pOrigem.equipamento) &&
+                 normKey(n.conjunto) === normKey(pOrigem.conjunto || '') &&
+                 normKey(n.subconjunto || '') === normKey(pOrigem.subconjunto || ''))
+            ) || null;
+            const rawOrigem = nodeOrigem ? (rawLinhasDocs.find(d => d.id === nodeOrigem.docId) || null) : null;
+
             let criados = 0;
             let sincronizados = 0;
+            let ativosCriadosNaArvore = 0;
             const agora = new Date().toISOString();
             const autor = usuarioLogado?.nome || 'PCM';
 
@@ -5489,19 +5558,89 @@
                     const eq = mapPorKey.get(key);
                     if (!eq || eq.ehOrigem) continue;
 
-                    const conjFinal = conjInput
-                        ? (eq.conjuntosArr.find(c => normKey(c) === normKey(conjInput)) || conjInput)
-                        : (pOrigem.conjunto && eq.conjuntosArr.some(c => normKey(c) === normKey(pOrigem.conjunto)) ? pOrigem.conjunto : (conjInput || ''));
-
-                    const subFinal = (conjFinal && pOrigem.subconjunto && eq.subconjuntosArr.some(s => normKey(s) === normKey(pOrigem.subconjunto)))
-                        ? pOrigem.subconjunto
+                    const conjFinal = conjBase
+                        ? (eq.conjuntosArr.find(c => normKey(c) === normKey(conjBase)) || conjBase)
                         : '';
+
+                    let nodeDestino = conjFinal ? encontrarNodeAtivoEquipamentoClone(eq, conjFinal, subBase) : null;
+                    const subFinal = conjFinal
+                        ? (subBase ? (nodeDestino?.subconjunto || subBase) : '')
+                        : '';
+
+                    const critLinhaDest = getClasseLinhaAtivo(eq.setor, eq.maquina).classe || eq.criticidade_linha || pOrigem.criticidadeLinha || '';
+
+                    // Se o Conjunto / Subconjunto ainda não existe na Árvore de Ativos (ob_linhas) do equipamento destino, cria automaticamente para amarrar o fluxo
+                    if (criarNaArvore && conjFinal && !nodeDestino) {
+                        const rawConjDestino = rawLinhasDocs.find(d =>
+                            normKey(pickField(d, ['setor', 'area', 'área'])) === normKey(eq.setor) &&
+                            normKey(pickField(d, ['maquina', 'máquina', 'linha'])) === normKey(eq.maquina) &&
+                            normKey(pickField(d, ['equipamento'])) === normKey(eq.equipamento) &&
+                            normKey(pickField(d, ['conjunto'])) === normKey(conjFinal)
+                        ) || null;
+
+                        const critNodeDest = normalizarCriticidade(nodeOrigem?.criticidade || rawOrigem?.criticidade || eq.criticidade || '') || 'B';
+                        const perPrevDest = pOrigem.periodicidade || nodeOrigem?.periodicidade_preventiva || '';
+                        const perSemanasDest = PERIODICIDADES[perPrevDest]?.semanas ?? (Number(rawOrigem?.periodicidade_semanas) || 0);
+                        const discDest = pOrigem.disciplina || nodeOrigem?.disciplina || 'Mecânica';
+                        const inspConjAtiva = rawConjDestino
+                            ? Boolean(rawConjDestino.inspecao_conjunto_ativa)
+                            : Boolean(rawOrigem?.inspecao_conjunto_ativa);
+                        const inspSubAtiva = typeof rawOrigem?.inspecao_ativa === 'boolean'
+                            ? rawOrigem.inspecao_ativa
+                            : !Boolean(subFinal);
+
+                        const novoAtivoRef = await addDoc(colLinhas, {
+                            setor: eq.setor,
+                            area: eq.setor,
+                            maquina: eq.maquina,
+                            equipamento: eq.equipamento,
+                            conjunto: conjFinal,
+                            subconjunto: subFinal,
+                            tag: '',
+                            criticidade: critNodeDest,
+                            criticidade_linha: critLinhaDest || '',
+                            criticidade_criterios: rawOrigem?.criticidade_criterios || null,
+                            periodicidade_preventiva: perPrevDest,
+                            periodicidade_semanas: perSemanasDest,
+                            disciplina: discDest,
+                            fabricante: rawOrigem?.fabricante || '',
+                            modelo: rawOrigem?.modelo || '',
+                            serie: '',
+                            numeroSerie: '',
+                            ano_fabricacao: rawOrigem?.ano_fabricacao || '',
+                            status_ativo: 'Ativo',
+                            inspecao_ativa: inspSubAtiva,
+                            inspecao_conjunto_ativa: inspConjAtiva,
+                            padrinho_mec: rawOrigem?.padrinho_mec || '',
+                            padrinho_ele: rawOrigem?.padrinho_ele || '',
+                            observacoes_tecnicas: rawOrigem?.observacoes_tecnicas || '',
+                            origem_cadastro: 'preventivas_compartilhamento',
+                            criado_em: agora,
+                            atualizado_em: agora,
+                            atualizado_por: autor
+                        });
+
+                        nodeDestino = {
+                            nodeId: novoAtivoRef.id,
+                            docId: novoAtivoRef.id,
+                            area: eq.setor,
+                            maquina: eq.maquina,
+                            equipamento: eq.equipamento,
+                            conjunto: conjFinal,
+                            subconjunto: subFinal,
+                            tag: ''
+                        };
+                        if (Array.isArray(eq.nodes)) eq.nodes.push(nodeDestino);
+                        ativosCriadosNaArvore++;
+                    }
+
+                    const ativoIdDest = nodeDestino?.nodeId || eq.nodeId || '';
+                    const tagDest = nodeDestino?.tag || eq.tag || '';
 
                     const tituloDest = autoTitulo
                         ? adaptarTituloPlanoParaEquipamentoDestino(pOrigem.titulo, pOrigem.equipamento, eq.equipamento)
                         : pOrigem.titulo;
 
-                    const critLinhaDest = getClasseLinhaAtivo(eq.setor, eq.maquina).classe || eq.criticidade_linha || pOrigem.criticidadeLinha || '';
                     const checklistClonado = (Array.isArray(pOrigem.checklist) ? pOrigem.checklist : []).map(it => ({ ...it }));
                     const docsClonados = (Array.isArray(pOrigem.documentosVinculados) ? pOrigem.documentosVinculados : []).map(d => ({ ...d }));
 
@@ -5509,6 +5648,8 @@
                         await updateDoc(doc(db, 'ag_manutencao', eq.planoCompartilhadoExistente.id), {
                             titulo: tituloDest,
                             revisao: pOrigem.revisao || 'Rev. 01',
+                            ativoId: ativoIdDest,
+                            tag: tagDest,
                             conjunto: conjFinal,
                             subconjunto: subFinal,
                             modoAgendamento: pOrigem.modoAgendamento || 'fixo',
@@ -5539,8 +5680,8 @@
                             kind: 'plano_preventiva',
                             codigo: codigoIndividual,
                             titulo: tituloDest,
-                            ativoId: eq.nodeId || '',
-                            tag: eq.tag || '',
+                            ativoId: ativoIdDest,
+                            tag: tagDest,
                             setor: eq.setor,
                             maquina: eq.maquina,
                             equipamento: eq.equipamento,
@@ -5561,7 +5702,11 @@
                 }
 
                 fecharModal('modalClonarPlanoEquipamentos');
-                showToast(`Plano compartilhado com sucesso! ${criados} novo(s) plano(s) criado(s)${sincronizados ? ` e ${sincronizados} sincronizado(s)` : ''}.`, 'success');
+                const partesToast = [];
+                if (criados) partesToast.push(`${criados} novo(s) plano(s) criado(s)`);
+                if (sincronizados) partesToast.push(`${sincronizados} sincronizado(s)`);
+                if (ativosCriadosNaArvore) partesToast.push(`${ativosCriadosNaArvore} conjunto/subconjunto(s) criado(s) na Árvore de Ativos`);
+                showToast(`Plano compartilhado com sucesso! ${partesToast.join(' • ')}.`, 'success');
             } catch (err) {
                 showToast('Erro ao clonar/compartilhar plano para os equipamentos selecionados.', 'error');
             } finally {
