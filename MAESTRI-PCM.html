@@ -131,15 +131,69 @@
             color: #64748b;
         }
         .mobile-tab.active { color: #0284c7; background: #e0f2fe; }
-        body.theme-solido { background: #f1f5f9; }
-        body.theme-solido .glass-card, body.theme-solido .frosted-shell { background: #ffffff; backdrop-filter: none; }
-        body.theme-dark { background: #090d16; color: #f8fafc; }
-        body.theme-dark .glass-card, body.theme-dark .frosted-shell, body.theme-dark .node-card {
-            background: #111827; border-color: #1f2937; color: #f8fafc;
+        body.theme-solid, body.theme-solido { background: #f8fafc !important; }
+        body.theme-solid .glass-card, body.theme-solid .frosted-shell,
+        body.theme-solido .glass-card, body.theme-solido .frosted-shell {
+            background: #ffffff !important;
+            backdrop-filter: none !important;
+            -webkit-backdrop-filter: none !important;
         }
-        body.theme-dark .input-clean { background: #0f172a; border-color: #334155; color: #f8fafc; }
-        body.theme-contraste { filter: contrast(1.12); }
-        body.tablet-mode .btn-touch, body.tablet-mode .btn-pill-dark, body.tablet-mode .input-clean { min-height: 44px; font-size: 13px; }
+        body.theme-solid .backdrop-blur-sm, body.theme-solido .backdrop-blur-sm {
+            backdrop-filter: none !important;
+            -webkit-backdrop-filter: none !important;
+        }
+        body.theme-dark { background: #090d16 !important; color: #f1f5f9 !important; }
+        body.theme-dark .frosted-shell {
+            background: #0f172a !important;
+            border-color: #1e293b !important;
+            backdrop-filter: none !important;
+            -webkit-backdrop-filter: none !important;
+        }
+        body.theme-dark .glass-card,
+        body.theme-dark .node-card,
+        body.theme-dark .neural-stage,
+        body.theme-dark .maestro-hub,
+        body.theme-dark .perceptron-node,
+        body.theme-dark .worker-chip,
+        body.theme-dark .neural-legend-pill {
+            background: #1e293b !important;
+            border-color: #334155 !important;
+            color: #f1f5f9 !important;
+        }
+        body.theme-dark .neural-grid-bg {
+            background: linear-gradient(180deg, #0f172a 0%, #1e293b 55%, #0f172a 100%) !important;
+        }
+        body.theme-dark .backdrop-blur-sm { backdrop-filter: none !important; -webkit-backdrop-filter: none !important; }
+        body.theme-dark .text-slate-900, body.theme-dark .text-slate-950, body.theme-dark .text-slate-800, body.theme-dark .text-slate-700 { color: #f8fafc !important; }
+        body.theme-dark .text-slate-600, body.theme-dark .text-slate-500, body.theme-dark .text-slate-400 { color: #94a3b8 !important; }
+        body.theme-dark .bg-white, body.theme-dark .bg-white\/90, body.theme-dark .bg-white\/85, body.theme-dark .bg-white\/80, body.theme-dark .bg-slate-50, body.theme-dark .bg-slate-50\/90, body.theme-dark .bg-slate-50\/80 {
+            background-color: #0f172a !important;
+            border-color: #334155 !important;
+            color: #f1f5f9 !important;
+        }
+        body.theme-dark .bg-slate-100 { background-color: #1e293b !important; border-color: #334155 !important; color: #f1f5f9 !important; }
+        body.theme-dark .bg-slate-200 { background-color: #334155 !important; border-color: #475569 !important; color: #f8fafc !important; }
+        body.theme-dark .border-slate-200, body.theme-dark .border-slate-200\/80, body.theme-dark .border-slate-100, body.theme-dark .border-slate-300 { border-color: #334155 !important; }
+        body.theme-dark .input-clean { background: #0f172a !important; border-color: #475569 !important; color: #ffffff !important; }
+        body.theme-dark .nav-item { color: #cbd5e1; }
+        body.theme-dark .nav-item:hover { background: #1e293b; color: #ffffff; }
+        body.high-contrast, body.theme-contraste { background: #ffffff !important; color: #000000 !important; }
+        body.high-contrast .frosted-shell, body.high-contrast .glass-card, body.high-contrast .neural-stage, body.high-contrast .maestro-hub, body.high-contrast .perceptron-node,
+        body.theme-contraste .frosted-shell, body.theme-contraste .glass-card, body.theme-contraste .neural-stage, body.theme-contraste .maestro-hub, body.theme-contraste .perceptron-node {
+            background: #ffffff !important;
+            border: 2px solid #000000 !important;
+            box-shadow: none !important;
+            backdrop-filter: none !important;
+            -webkit-backdrop-filter: none !important;
+        }
+        body.high-contrast .border-slate-200, body.theme-contraste .border-slate-200 { border-color: #000000 !important; }
+        body.high-contrast .input-clean, body.theme-contraste .input-clean { border: 2px solid #000000 !important; color: #000000 !important; background: #ffffff !important; }
+        body.tablet-mode * { transition: none !important; animation: none !important; }
+        body.tablet-mode .frosted-shell, body.tablet-mode .glass-card, body.tablet-mode .backdrop-blur-sm {
+            backdrop-filter: none !important;
+            -webkit-backdrop-filter: none !important;
+        }
+        body.tablet-mode .btn-touch, body.tablet-mode .btn-pill-dark, body.tablet-mode .input-clean { min-height: 46px; font-size: 13px; }
         body.font-sm { --font-scale: 0.92; }
         body.font-lg { --font-scale: 1.08; }
 
@@ -1294,41 +1348,55 @@
         </div>
     </div>
 
-    <!-- ==================== MODAL 3: ESPAÇO DO USUÁRIO ==================== -->
-    <div id="modalEspacoUsuario" role="dialog" aria-modal="true" hidden class="hidden fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-[70] flex items-end sm:items-center justify-center p-0 sm:p-4">
-        <div class="bg-white w-full sm:max-w-lg sm:rounded-3xl rounded-t-3xl p-6 shadow-2xl border border-slate-200 space-y-4">
-            <div class="flex items-center justify-between border-b border-slate-100 pb-3">
+    <!-- ==================== MODAL 3: ESPAÇO DO USUÁRIO (PADRONIZADO PCM CEPÊRA) ==================== -->
+    <div id="modalEspacoUsuario" role="dialog" aria-modal="true" hidden class="hidden fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-[80] flex items-end sm:items-center justify-center p-0 sm:p-4">
+        <div class="bg-white w-full sm:max-w-xl sm:rounded-3xl rounded-t-3xl max-h-[92vh] flex flex-col shadow-2xl overflow-hidden border border-slate-200">
+            <div class="p-5 sm:px-7 border-b border-slate-200 bg-slate-50 flex items-center justify-between">
                 <div>
-                    <span class="text-[10px] font-extrabold uppercase tracking-widest text-sky-600">Preferências Visuais</span>
+                    <span class="text-[10px] font-extrabold uppercase tracking-widest text-sky-600">Preferências Sincronizadas</span>
                     <h2 class="text-lg font-extrabold text-slate-900">Espaço do Usuário</h2>
                 </div>
-                <button type="button" onclick="fecharModal('modalEspacoUsuario')" aria-label="Fechar" class="w-8 h-8 rounded-full bg-slate-100 text-slate-600 flex items-center justify-center"><svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg></button>
+                <button type="button" onclick="fecharModal('modalEspacoUsuario')" aria-label="Fechar" class="w-9 h-9 rounded-full bg-white border border-slate-200 text-slate-600 font-bold flex items-center justify-center">&times;</button>
             </div>
-            <div class="space-y-4 text-xs">
-                <div>
-                    <label class="block text-[10px] font-extrabold uppercase text-slate-500 mb-2">Tema da Interface</label>
-                    <div class="grid grid-cols-4 gap-2">
-                        <button type="button" onclick="setTemaUsuario('padrao')" class="pref-tema-btn py-2 rounded-xl border border-slate-200 font-bold" data-tema="padrao">Padrão</button>
-                        <button type="button" onclick="setTemaUsuario('solido')" class="pref-tema-btn py-2 rounded-xl border border-slate-200 font-bold" data-tema="solido">Sólido</button>
-                        <button type="button" onclick="setTemaUsuario('dark')" class="pref-tema-btn py-2 rounded-xl border border-slate-200 font-bold" data-tema="dark">Escuro</button>
-                        <button type="button" onclick="setTemaUsuario('contraste')" class="pref-tema-btn py-2 rounded-xl border border-slate-200 font-bold" data-tema="contraste">Contraste</button>
-                    </div>
-                </div>
-                <div class="flex items-center justify-between p-3 rounded-2xl bg-slate-50 border border-slate-200">
+            <div class="p-5 sm:p-7 overflow-y-auto space-y-6 text-sm">
+                <div class="p-4 rounded-2xl bg-slate-50 border border-slate-200 flex items-center justify-between gap-4">
                     <div>
-                        <div class="font-extrabold text-slate-900">Modo Tablet / Campo</div>
-                        <div class="text-[11px] text-slate-500">Botões ampliados (44px) para conferência rápida</div>
+                        <div class="font-extrabold text-slate-900 text-sm">Modo Tela Leve / Tablet (Alta Performance &amp; Campo)</div>
+                        <p class="text-xs text-slate-500 mt-0.5">Remove desfoque (blur), sombras e animações para deixar a tela mais leve e amplia botões (Atalho: <strong>Alt + T</strong>).</p>
                     </div>
-                    <button type="button" id="btnToggleTablet" onclick="toggleTabletMode()" class="px-3.5 py-1.5 rounded-xl bg-slate-200 font-extrabold text-xs">Desativado</button>
+                    <button type="button" id="btnToggleTabletMode" onclick="toggleModoTablet()" class="px-4 py-2.5 rounded-xl font-extrabold text-xs bg-slate-200 text-slate-800 shrink-0">DESATIVADO</button>
                 </div>
-                <div class="flex items-center justify-between p-3 rounded-2xl bg-slate-50 border border-slate-200">
-                    <div class="font-extrabold text-slate-900">Tamanho do Texto</div>
-                    <div class="flex gap-1.5">
-                        <button type="button" onclick="setFonteUsuario(-1)" class="px-3 py-1 rounded-lg bg-white border border-slate-200 font-extrabold">A-</button>
-                        <button type="button" onclick="setFonteUsuario(0)" class="px-3 py-1 rounded-lg bg-white border border-slate-200 font-extrabold">A</button>
-                        <button type="button" onclick="setFonteUsuario(1)" class="px-3 py-1 rounded-lg bg-white border border-slate-200 font-extrabold">A+</button>
+                <div>
+                    <label class="block text-xs font-extrabold uppercase tracking-wider text-slate-500 mb-2">Tema Visual</label>
+                    <div class="grid grid-cols-2 sm:grid-cols-4 gap-2">
+                        <button type="button" onclick="definirTemaUsuario('padrao')" id="btnTema_padrao" data-tema="padrao" class="pref-tema-btn p-3 rounded-xl border border-slate-200 text-xs font-extrabold text-center text-slate-700">Claro Padrão</button>
+                        <button type="button" onclick="definirTemaUsuario('solido')" id="btnTema_solido" data-tema="solido" class="pref-tema-btn p-3 rounded-xl border border-slate-200 text-xs font-extrabold text-center text-slate-700">Branco Sólido</button>
+                        <button type="button" onclick="definirTemaUsuario('dark')" id="btnTema_dark" data-tema="dark" class="pref-tema-btn p-3 rounded-xl border border-slate-200 text-xs font-extrabold text-center text-slate-700">Escuro Industrial</button>
+                        <button type="button" onclick="definirTemaUsuario('contraste')" id="btnTema_contraste" data-tema="contraste" class="pref-tema-btn p-3 rounded-xl border border-slate-200 text-xs font-extrabold text-center text-slate-700">Alto Contraste</button>
                     </div>
                 </div>
+                <div>
+                    <label class="block text-xs font-extrabold uppercase tracking-wider text-slate-500 mb-2">Cor de Destaque (Accent Color)</label>
+                    <div class="grid grid-cols-5 gap-2">
+                        <button type="button" onclick="definirCorDestaque('#0284c7')" class="py-2.5 rounded-xl text-white font-extrabold text-[11px]" style="background:#0284c7">Azul</button>
+                        <button type="button" onclick="definirCorDestaque('#dc2626')" class="py-2.5 rounded-xl text-white font-extrabold text-[11px]" style="background:#dc2626">Cepêra</button>
+                        <button type="button" onclick="definirCorDestaque('#059669')" class="py-2.5 rounded-xl text-white font-extrabold text-[11px]" style="background:#059669">Esmeralda</button>
+                        <button type="button" onclick="definirCorDestaque('#4f46e5')" class="py-2.5 rounded-xl text-white font-extrabold text-[11px]" style="background:#4f46e5">Índigo</button>
+                        <button type="button" onclick="definirCorDestaque('#0f172a')" class="py-2.5 rounded-xl text-white font-extrabold text-[11px]" style="background:#0f172a">Grafite</button>
+                    </div>
+                </div>
+                <div class="pt-2 border-t border-slate-200 space-y-3">
+                    <span class="block text-xs font-extrabold uppercase tracking-wider text-slate-500">Acessibilidade e Leitura</span>
+                    <div class="grid grid-cols-3 gap-2">
+                        <button type="button" onclick="alterarFonte(-1)" class="py-2.5 rounded-xl bg-slate-100 hover:bg-slate-200 border border-slate-200 font-extrabold text-xs text-slate-800">Texto A-</button>
+                        <button type="button" onclick="alterarFonte(0)" class="py-2.5 rounded-xl bg-slate-100 hover:bg-slate-200 border border-slate-200 font-extrabold text-xs text-slate-800">Padrão</button>
+                        <button type="button" onclick="alterarFonte(1)" class="py-2.5 rounded-xl bg-slate-100 hover:bg-slate-200 border border-slate-200 font-extrabold text-xs text-slate-800">Texto A+</button>
+                    </div>
+                </div>
+            </div>
+            <div class="p-4 sm:px-7 border-t border-slate-200 bg-slate-50 flex items-center justify-between">
+                <span class="text-[11px] font-semibold text-slate-500">Sincronizado com seu perfil PCM Cepêra (Alt + U).</span>
+                <button type="button" onclick="fecharModal('modalEspacoUsuario')" class="btn-pill-dark text-xs py-2 px-6">Concluir</button>
             </div>
         </div>
     </div>
@@ -6788,35 +6856,77 @@ Responda SOMENTE JSON Array: [{"ativo_erp":"...","catalogo_label":string|null,"n
             }
         };
 
-        let userPrefs = { tema: "padrao", tabletMode: false, fontLevel: 0 };
+        let userPrefs = { tema: "padrao", accent: "#0284c7", tabletMode: false, fontLevel: 0 };
+        function getChavePrefsUsuarioMaestri() {
+            const u = usuarioLogado || lerSessaoCentral();
+            return (u && u.user) ? `cepera_prefs_${u.user}` : "cepera_prefs_guest";
+        }
         function carregarPreferenciasVisuais() {
             try {
-                const raw = safeStorage.get("cepera_maestri_prefs");
-                if (raw) userPrefs = { ...userPrefs, ...JSON.parse(raw) };
+                const rawCentral = safeStorage.get(getChavePrefsUsuarioMaestri()) || safeStorage.get("cepera_maestri_prefs") || safeStorage.get("cepera_prefs_guest");
+                if (rawCentral) userPrefs = { ...userPrefs, ...JSON.parse(rawCentral) };
             } catch (_) {}
             aplicarPreferenciasVisuais();
         }
+        function atualizarUIPreferencias() {
+            const btnTab = document.getElementById("btnToggleTabletMode");
+            if (btnTab) {
+                btnTab.innerText = userPrefs.tabletMode ? "ATIVADO" : "DESATIVADO";
+                btnTab.className = userPrefs.tabletMode
+                    ? "px-4 py-2.5 rounded-xl font-extrabold text-xs bg-emerald-600 text-white shrink-0"
+                    : "px-4 py-2.5 rounded-xl font-extrabold text-xs bg-slate-200 text-slate-800 shrink-0";
+            }
+            ["padrao", "solido", "dark", "contraste"].forEach(t => {
+                const b = document.getElementById("btnTema_" + t);
+                if (b) {
+                    b.className = (userPrefs.tema === t)
+                        ? "pref-tema-btn p-3 rounded-xl border-2 border-sky-600 bg-sky-50 text-sky-900 text-xs font-extrabold text-center"
+                        : "pref-tema-btn p-3 rounded-xl border border-slate-200 text-xs font-extrabold text-center text-slate-700";
+                }
+            });
+        }
         function aplicarPreferenciasVisuais() {
-            document.body.classList.remove("theme-solido", "theme-dark", "theme-contraste", "tablet-mode", "font-sm", "font-lg");
-            if (userPrefs.tema && userPrefs.tema !== "padrao") document.body.classList.add(`theme-${userPrefs.tema}`);
+            document.body.classList.remove("theme-solid", "theme-solido", "theme-dark", "high-contrast", "theme-contraste", "tablet-mode", "font-sm", "font-lg");
+            if (userPrefs.tema === "solido") document.body.classList.add("theme-solid", "theme-solido");
+            if (userPrefs.tema === "dark") document.body.classList.add("theme-dark");
+            if (userPrefs.tema === "contraste") document.body.classList.add("high-contrast", "theme-contraste");
             if (userPrefs.tabletMode) document.body.classList.add("tablet-mode");
+            if (document.documentElement?.style) {
+                document.documentElement.style.setProperty("--accent", userPrefs.accent || "#0284c7");
+                const sizes = { "-1": "13px", "0": "14px", "1": "15.5px", "2": "17px", "3": "18.5px" };
+                document.documentElement.style.fontSize = sizes[String(userPrefs.fontLevel || 0)] || "14px";
+            }
             if (userPrefs.fontLevel < 0) document.body.classList.add("font-sm");
             if (userPrefs.fontLevel > 0) document.body.classList.add("font-lg");
-            const bt = document.getElementById("btnToggleTablet");
-            if (bt) {
-                bt.innerText = userPrefs.tabletMode ? "Ativado" : "Desativado";
-                bt.className = `px-3.5 py-1.5 rounded-xl font-extrabold text-xs ${userPrefs.tabletMode ? "bg-sky-600 text-white" : "bg-slate-200 text-slate-700"}`;
-            }
+            atualizarUIPreferencias();
         }
-        function salvarPrefs() { safeStorage.set("cepera_maestri_prefs", JSON.stringify(userPrefs)); aplicarPreferenciasVisuais(); }
-        window.abrirEspacoUsuario = () => { aplicarPreferenciasVisuais(); abrirModal("modalEspacoUsuario"); };
-        window.setTemaUsuario = (t) => { userPrefs.tema = t; salvarPrefs(); };
-        window.toggleTabletMode = () => { userPrefs.tabletMode = !userPrefs.tabletMode; salvarPrefs(); };
+        function salvarPrefs() {
+            const payload = JSON.stringify(userPrefs);
+            safeStorage.set(getChavePrefsUsuarioMaestri(), payload);
+            safeStorage.set("cepera_maestri_prefs", payload);
+            aplicarPreferenciasVisuais();
+        }
+        window.abrirEspacoUsuario = () => { atualizarUIPreferencias(); abrirModal("modalEspacoUsuario"); };
+        window.definirTemaUsuario = (t) => { userPrefs.tema = t; salvarPrefs(); };
+        window.setTemaUsuario = window.definirTemaUsuario;
+        window.definirCorDestaque = (c) => { userPrefs.accent = c; salvarPrefs(); };
+        window.toggleModoTablet = () => { userPrefs.tabletMode = !userPrefs.tabletMode; salvarPrefs(); };
+        window.toggleTabletMode = window.toggleModoTablet;
+        window.alterarFonte = (dir) => {
+            userPrefs.fontLevel = (dir === 0) ? 0 : Math.max(-1, Math.min(3, (userPrefs.fontLevel || 0) + dir));
+            salvarPrefs();
+        };
         window.setFonteUsuario = (lvl) => { userPrefs.fontLevel = lvl; salvarPrefs(); };
 
         document.addEventListener("keydown", (e) => {
             if (e.key === "Escape") {
                 ["modalCorrigirOmSupervisor", "modalAdminMasterMaestri", "modalEspacoUsuario", "deleteOverlay"].forEach(fecharModal);
+            } else if (e.altKey && (e.key === "u" || e.key === "U")) {
+                e.preventDefault();
+                window.abrirEspacoUsuario();
+            } else if (e.altKey && (e.key === "t" || e.key === "T")) {
+                e.preventDefault();
+                window.toggleModoTablet();
             }
         });
 

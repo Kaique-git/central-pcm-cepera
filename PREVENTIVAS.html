@@ -1603,41 +1603,140 @@
         </div>
     </div>
 
-    <!-- ==================== MODAL ESPAÇO DO USUÁRIO ==================== -->
-    <div id="modalEspacoUsuario" role="dialog" aria-modal="true" hidden class="hidden fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-[70] flex items-end sm:items-center justify-center p-0 sm:p-4">
-        <div class="bg-white w-full sm:max-w-lg sm:rounded-3xl rounded-t-3xl p-6 shadow-2xl border border-slate-200 space-y-4">
-            <div class="flex items-center justify-between border-b border-slate-100 pb-3">
+    <!-- ==================== MODAL CLONAR / COMPARTILHAR PLANO PARA EQUIPAMENTOS PARECIDOS ==================== -->
+    <div id="modalClonarPlanoEquipamentos" role="dialog" aria-modal="true" hidden class="hidden fixed inset-0 bg-slate-900/65 backdrop-blur-sm z-[75] flex items-end sm:items-center justify-center p-0 sm:p-4">
+        <div class="bg-white w-full max-w-3xl rounded-t-3xl sm:rounded-3xl shadow-2xl border border-slate-200 max-h-[93vh] flex flex-col overflow-hidden text-xs">
+            <div class="px-6 py-4 border-b border-slate-100 bg-slate-50 flex items-center justify-between gap-3 shrink-0">
                 <div>
-                    <span class="text-[10px] font-extrabold uppercase tracking-widest text-sky-600">Preferências Visuais</span>
+                    <span class="text-[10px] font-extrabold uppercase tracking-widest text-sky-600">Produtividade PCM • Compartilhamento entre Ativos</span>
+                    <h2 class="text-base sm:text-lg font-extrabold text-slate-900">Clonar / Compartilhar Plano para Equipamentos Parecidos</h2>
+                </div>
+                <button type="button" onclick="fecharModal('modalClonarPlanoEquipamentos')" class="w-8 h-8 rounded-full bg-white border border-slate-200 text-slate-600 font-bold shrink-0">✕</button>
+            </div>
+
+            <form id="formClonarPlanoEquipamentos" onsubmit="confirmarClonagemPlanoEquipamentos(event)" class="flex-1 overflow-y-auto p-5 sm:p-6 space-y-4">
+                <input type="hidden" id="clonePlOrigemId" value="">
+
+                <div id="clonePlOrigemResumo" class="p-3.5 rounded-2xl bg-sky-50/80 border border-sky-200 space-y-1"></div>
+
+                <!-- Atalhos de Seleção Inteligente 1-Clique -->
+                <div class="p-3.5 rounded-2xl bg-slate-50 border border-slate-200 space-y-2.5">
+                    <div class="flex flex-wrap items-center justify-between gap-2">
+                        <div class="text-[10px] font-extrabold uppercase tracking-wider text-slate-600">
+                            1. Selecionar Equipamentos Destino (<span id="clonePlSelCount">0</span> selecionado(s))
+                        </div>
+                        <div class="flex flex-wrap items-center gap-1.5">
+                            <button type="button" onclick="selecionarEquipamentosParecidosClonePlano()" class="px-2.5 py-1 rounded-lg bg-sky-600 hover:bg-sky-700 text-white font-extrabold text-[10px]">★ Marcar Equipamentos Parecidos</button>
+                            <button type="button" onclick="selecionarEquipamentosMesmaLinhaClonePlano()" class="px-2.5 py-1 rounded-lg bg-white hover:bg-slate-100 border border-slate-200 text-slate-700 font-extrabold text-[10px]">Mesma Linha / Máquina</button>
+                            <button type="button" onclick="selecionarEquipamentosMesmoSetorClonePlano()" class="px-2.5 py-1 rounded-lg bg-white hover:bg-slate-100 border border-slate-200 text-slate-700 font-extrabold text-[10px]">Mesmo Setor</button>
+                            <button type="button" onclick="selecionarTodosVisiveisClonePlano()" class="px-2.5 py-1 rounded-lg bg-white hover:bg-slate-100 border border-slate-200 text-slate-700 font-extrabold text-[10px]">Marcar Visíveis</button>
+                            <button type="button" onclick="limparSelecaoEquipamentosClonePlano()" class="px-2.5 py-1 rounded-lg bg-white hover:bg-rose-50 border border-slate-200 text-rose-700 font-extrabold text-[10px]">Limpar</button>
+                        </div>
+                    </div>
+
+                    <div id="clonePlSelecionadosChips" class="flex flex-wrap gap-1.5 min-h-[28px] p-2 rounded-xl bg-white border border-slate-200"></div>
+
+                    <!-- Filtros de Busca da Árvore -->
+                    <div class="grid grid-cols-1 sm:grid-cols-3 gap-2">
+                        <div>
+                            <label class="block text-[10px] font-extrabold uppercase text-slate-500 mb-1">Filtrar Setor</label>
+                            <select id="clonePlFiltroSetor" onchange="onClonePlFiltroSetorChange()" class="input-clean py-1.5 text-xs font-bold"></select>
+                        </div>
+                        <div>
+                            <label class="block text-[10px] font-extrabold uppercase text-slate-500 mb-1">Filtrar Linha / Máquina</label>
+                            <select id="clonePlFiltroMaquina" onchange="renderListaEquipamentosClonePlano()" class="input-clean py-1.5 text-xs font-bold"></select>
+                        </div>
+                        <div>
+                            <label class="block text-[10px] font-extrabold uppercase text-slate-500 mb-1">Buscar Equipamento</label>
+                            <input type="text" id="clonePlBuscaEquip" oninput="renderListaEquipamentosClonePlano()" class="input-clean py-1.5 text-xs font-bold" placeholder="Ex: Enchedora, Bomba, Rotuladora...">
+                        </div>
+                    </div>
+
+                    <div id="clonePlListaEquipamentos" class="space-y-1.5 max-h-60 overflow-y-auto pr-1"></div>
+                </div>
+
+                <!-- Opções de Compartilhamento e Adaptação -->
+                <div class="p-3.5 rounded-2xl bg-white border border-slate-200 space-y-3">
+                    <div class="text-[10px] font-extrabold uppercase tracking-wider text-slate-600">2. Opções de Compartilhamento &amp; Código Individual</div>
+                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                        <div>
+                            <label class="block text-[10px] font-extrabold uppercase text-slate-500 mb-1">Modo de Compartilhamento</label>
+                            <select id="clonePlModoOperacao" class="input-clean py-2 text-xs font-extrabold">
+                                <option value="criar_ou_sincronizar">Clonar p/ Novos &amp; Sincronizar Checklist nos que já Compartilham</option>
+                                <option value="sempre_novo">Criar Sempre um Novo Plano em cada Equipamento</option>
+                            </select>
+                        </div>
+                        <div>
+                            <label class="block text-[10px] font-extrabold uppercase text-slate-500 mb-1">Conjunto / Subconjunto no Destino</label>
+                            <input type="text" id="clonePlConjuntoAlvo" class="input-clean py-2 text-xs font-bold" placeholder="Deixe vazio p/ Equipamento Inteiro ou informe o Conjunto">
+                        </div>
+                    </div>
+                    <label class="inline-flex items-center gap-2 cursor-pointer font-bold text-slate-700">
+                        <input type="checkbox" id="clonePlAutoTitulo" checked class="w-4 h-4 rounded accent-sky-600">
+                        <span>Adaptar automaticamente o título do plano com o nome de cada equipamento destino (mantendo códigos de plano individuais e únicos)</span>
+                    </label>
+                </div>
+            </form>
+
+            <div class="px-6 py-4 border-t border-slate-100 bg-slate-50 flex flex-wrap items-center justify-between gap-2 shrink-0">
+                <button type="button" onclick="clonarPlanoNoMesmoEquipamentoModal()" class="btn-touch bg-white hover:bg-slate-100 border border-slate-200 text-slate-700 text-xs">Clonar Cópia no Mesmo Equipamento</button>
+                <div class="flex items-center gap-2">
+                    <button type="button" onclick="fecharModal('modalClonarPlanoEquipamentos')" class="btn-touch bg-slate-100 text-slate-700 text-xs">Cancelar</button>
+                    <button type="submit" form="formClonarPlanoEquipamentos" id="btnConfirmarClonarPlanoEquip" class="btn-pill-dark text-xs px-5">Clonar / Compartilhar Plano</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- ==================== MODAL ESPAÇO DO USUÁRIO (PADRONIZADO PCM CEPÊRA) ==================== -->
+    <div id="modalEspacoUsuario" role="dialog" aria-modal="true" hidden class="hidden fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-[75] flex items-end sm:items-center justify-center p-0 sm:p-4">
+        <div class="bg-white w-full sm:max-w-xl sm:rounded-3xl rounded-t-3xl max-h-[92vh] flex flex-col shadow-2xl overflow-hidden border border-slate-200">
+            <div class="p-5 sm:px-7 border-b border-slate-200 bg-slate-50 flex items-center justify-between">
+                <div>
+                    <span class="text-[10px] font-extrabold uppercase tracking-widest text-sky-600">Preferências Sincronizadas</span>
                     <h2 class="text-lg font-extrabold text-slate-900">Espaço do Usuário</h2>
                 </div>
-                <button type="button" onclick="fecharModal('modalEspacoUsuario')" class="w-8 h-8 rounded-full bg-slate-100 text-slate-600 font-bold">✕</button>
+                <button type="button" onclick="fecharModal('modalEspacoUsuario')" class="w-9 h-9 rounded-full bg-white border border-slate-200 text-slate-600 font-bold flex items-center justify-center">✕</button>
             </div>
-            <div class="space-y-4 text-xs">
-                <div>
-                    <label class="block text-[10px] font-extrabold uppercase text-slate-500 mb-2">Tema da Interface</label>
-                    <div class="grid grid-cols-4 gap-2">
-                        <button type="button" onclick="setTemaUsuario('padrao')" class="pref-tema-btn py-2 rounded-xl border border-slate-200 font-bold" data-tema="padrao">Padrão</button>
-                        <button type="button" onclick="setTemaUsuario('solido')" class="pref-tema-btn py-2 rounded-xl border border-slate-200 font-bold" data-tema="solido">Sólido</button>
-                        <button type="button" onclick="setTemaUsuario('dark')" class="pref-tema-btn py-2 rounded-xl border border-slate-200 font-bold" data-tema="dark">Escuro</button>
-                        <button type="button" onclick="setTemaUsuario('contraste')" class="pref-tema-btn py-2 rounded-xl border border-slate-200 font-bold" data-tema="contraste">Contraste</button>
-                    </div>
-                </div>
-                <div class="flex items-center justify-between p-3 rounded-2xl bg-slate-50 border border-slate-200">
+            <div class="p-5 sm:p-7 overflow-y-auto space-y-6 text-sm">
+                <div class="p-4 rounded-2xl bg-slate-50 border border-slate-200 flex items-center justify-between gap-4">
                     <div>
-                        <div class="font-extrabold text-slate-900">Modo Tablet / Campo</div>
-                        <div class="text-[11px] text-slate-500">Botões ampliados (44px) e toque direto</div>
+                        <div class="font-extrabold text-slate-900 text-sm">Modo Tela Leve / Tablet (Alta Performance &amp; Campo)</div>
+                        <p class="text-xs text-slate-500 mt-0.5">Remove desfoque (blur), sombras e animações para deixar a tela mais leve e amplia botões (Atalho: <strong>Alt + T</strong>).</p>
                     </div>
-                    <button type="button" id="btnToggleTablet" onclick="toggleTabletMode()" class="px-3.5 py-1.5 rounded-xl bg-slate-200 font-extrabold text-xs">Desativado</button>
+                    <button type="button" id="btnToggleTabletMode" onclick="toggleModoTablet()" class="px-4 py-2.5 rounded-xl font-extrabold text-xs bg-slate-200 text-slate-800 shrink-0">DESATIVADO</button>
                 </div>
-                <div class="flex items-center justify-between p-3 rounded-2xl bg-slate-50 border border-slate-200">
-                    <div class="font-extrabold text-slate-900">Tamanho do Texto</div>
-                    <div class="flex gap-1.5">
-                        <button type="button" onclick="setFonteUsuario(-1)" class="px-3 py-1 rounded-lg bg-white border border-slate-200 font-extrabold">A-</button>
-                        <button type="button" onclick="setFonteUsuario(0)" class="px-3 py-1 rounded-lg bg-white border border-slate-200 font-extrabold">A</button>
-                        <button type="button" onclick="setFonteUsuario(1)" class="px-3 py-1 rounded-lg bg-white border border-slate-200 font-extrabold">A+</button>
+                <div>
+                    <label class="block text-xs font-extrabold uppercase tracking-wider text-slate-500 mb-2">Tema Visual</label>
+                    <div class="grid grid-cols-2 sm:grid-cols-4 gap-2">
+                        <button type="button" onclick="definirTemaUsuario('padrao')" id="btnTema_padrao" data-tema="padrao" class="pref-tema-btn p-3 rounded-xl border border-slate-200 text-xs font-extrabold text-center text-slate-700">Claro Padrão</button>
+                        <button type="button" onclick="definirTemaUsuario('solido')" id="btnTema_solido" data-tema="solido" class="pref-tema-btn p-3 rounded-xl border border-slate-200 text-xs font-extrabold text-center text-slate-700">Branco Sólido</button>
+                        <button type="button" onclick="definirTemaUsuario('dark')" id="btnTema_dark" data-tema="dark" class="pref-tema-btn p-3 rounded-xl border border-slate-200 text-xs font-extrabold text-center text-slate-700">Escuro Industrial</button>
+                        <button type="button" onclick="definirTemaUsuario('contraste')" id="btnTema_contraste" data-tema="contraste" class="pref-tema-btn p-3 rounded-xl border border-slate-200 text-xs font-extrabold text-center text-slate-700">Alto Contraste</button>
                     </div>
                 </div>
+                <div>
+                    <label class="block text-xs font-extrabold uppercase tracking-wider text-slate-500 mb-2">Cor de Destaque (Accent Color)</label>
+                    <div class="grid grid-cols-5 gap-2">
+                        <button type="button" onclick="definirCorDestaque('#0284c7')" class="py-2.5 rounded-xl text-white font-extrabold text-[11px]" style="background:#0284c7">Azul</button>
+                        <button type="button" onclick="definirCorDestaque('#dc2626')" class="py-2.5 rounded-xl text-white font-extrabold text-[11px]" style="background:#dc2626">Cepêra</button>
+                        <button type="button" onclick="definirCorDestaque('#059669')" class="py-2.5 rounded-xl text-white font-extrabold text-[11px]" style="background:#059669">Esmeralda</button>
+                        <button type="button" onclick="definirCorDestaque('#4f46e5')" class="py-2.5 rounded-xl text-white font-extrabold text-[11px]" style="background:#4f46e5">Índigo</button>
+                        <button type="button" onclick="definirCorDestaque('#0f172a')" class="py-2.5 rounded-xl text-white font-extrabold text-[11px]" style="background:#0f172a">Grafite</button>
+                    </div>
+                </div>
+                <div class="pt-2 border-t border-slate-200 space-y-3">
+                    <span class="block text-xs font-extrabold uppercase tracking-wider text-slate-500">Acessibilidade e Leitura</span>
+                    <div class="grid grid-cols-3 gap-2">
+                        <button type="button" onclick="alterarFonte(-1)" class="py-2.5 rounded-xl bg-slate-100 hover:bg-slate-200 border border-slate-200 font-extrabold text-xs text-slate-800">Texto A-</button>
+                        <button type="button" onclick="alterarFonte(0)" class="py-2.5 rounded-xl bg-slate-100 hover:bg-slate-200 border border-slate-200 font-extrabold text-xs text-slate-800">Padrão</button>
+                        <button type="button" onclick="alterarFonte(1)" class="py-2.5 rounded-xl bg-slate-100 hover:bg-slate-200 border border-slate-200 font-extrabold text-xs text-slate-800">Texto A+</button>
+                    </div>
+                </div>
+            </div>
+            <div class="p-4 sm:px-7 border-t border-slate-200 bg-slate-50 flex items-center justify-between">
+                <span class="text-[11px] font-semibold text-slate-500">Sincronizado com seu perfil PCM Cepêra (Alt + U).</span>
+                <button type="button" onclick="fecharModal('modalEspacoUsuario')" class="btn-pill-dark text-xs py-2 px-6">Concluir</button>
             </div>
         </div>
     </div>
@@ -2929,36 +3028,67 @@
             }
         };
 
-        // ================= PREFERÊNCIAS VISUAIS =================
-        let userPrefs = { tema: 'padrao', tabletMode: false, fontLevel: 0 };
+        // ================= PREFERÊNCIAS VISUAIS (PADRONIZADO PCM CEPÊRA) =================
+        let userPrefs = { tema: 'padrao', accent: '#0284c7', tabletMode: false, fontLevel: 0 };
+        function getChavePrefsUsuarioPrev() {
+            return (usuarioLogado && usuarioLogado.user) ? `cepera_prefs_${usuarioLogado.user}` : 'cepera_prefs_guest';
+        }
         function carregarPreferenciasVisuais() {
             try {
-                const raw = safeStorage.get('cepera_prev_prefs');
+                const raw = safeStorage.get(getChavePrefsUsuarioPrev()) || safeStorage.get('cepera_prev_prefs') || safeStorage.get('cepera_prefs_guest');
                 if (raw) userPrefs = { ...userPrefs, ...JSON.parse(raw) };
             } catch (_) {}
             aplicarPreferenciasVisuais();
         }
-        function aplicarPreferenciasVisuais() {
-            document.body.classList.remove('theme-solido', 'theme-dark', 'theme-contraste', 'tablet-mode', 'font-sm', 'font-lg');
-            if (userPrefs.tema && userPrefs.tema !== 'padrao') document.body.classList.add(`theme-${userPrefs.tema}`);
-            if (userPrefs.tabletMode) document.body.classList.add('tablet-mode');
-            if (userPrefs.fontLevel < 0) document.body.classList.add('font-sm');
-            if (userPrefs.fontLevel > 0) document.body.classList.add('font-lg');
-            const bt = document.getElementById('btnToggleTablet');
+        function atualizarUIPreferencias() {
+            const bt = document.getElementById('btnToggleTabletMode');
             if (bt) {
-                bt.innerText = userPrefs.tabletMode ? 'Ativado' : 'Desativado';
-                bt.className = `px-3.5 py-1.5 rounded-xl font-extrabold text-xs ${userPrefs.tabletMode ? 'bg-sky-600 text-white' : 'bg-slate-200 text-slate-700'}`;
+                bt.innerText = userPrefs.tabletMode ? 'ATIVADO' : 'DESATIVADO';
+                bt.className = userPrefs.tabletMode
+                    ? 'px-4 py-2.5 rounded-xl font-extrabold text-xs bg-emerald-600 text-white shrink-0'
+                    : 'px-4 py-2.5 rounded-xl font-extrabold text-xs bg-slate-200 text-slate-800 shrink-0';
             }
-            document.querySelectorAll('.pref-tema-btn').forEach(b => {
-                const active = b.dataset.tema === userPrefs.tema;
-                b.className = `pref-tema-btn py-2 rounded-xl border font-bold ${active ? 'bg-sky-600 text-white border-sky-600' : 'border-slate-200 text-slate-700'}`;
+            ['padrao', 'solido', 'dark', 'contraste'].forEach(t => {
+                const b = document.getElementById('btnTema_' + t);
+                if (b) {
+                    b.className = (userPrefs.tema === t)
+                        ? 'pref-tema-btn p-3 rounded-xl border-2 border-sky-600 bg-sky-50 text-sky-900 text-xs font-extrabold text-center'
+                        : 'pref-tema-btn p-3 rounded-xl border border-slate-200 text-xs font-extrabold text-center text-slate-700';
+                }
             });
         }
-        function salvarPrefs() { safeStorage.set('cepera_prev_prefs', JSON.stringify(userPrefs)); aplicarPreferenciasVisuais(); }
-        window.abrirEspacoUsuario = () => { aplicarPreferenciasVisuais(); abrirModal('modalEspacoUsuario'); };
+        function aplicarPreferenciasVisuais() {
+            document.body.classList.remove('theme-solid', 'theme-solido', 'theme-dark', 'high-contrast', 'theme-contraste', 'tablet-mode', 'font-sm', 'font-lg');
+            if (userPrefs.tema === 'solido') document.body.classList.add('theme-solid', 'theme-solido');
+            if (userPrefs.tema === 'dark') document.body.classList.add('theme-dark');
+            if (userPrefs.tema === 'contraste') document.body.classList.add('high-contrast', 'theme-contraste');
+            if (userPrefs.tabletMode) document.body.classList.add('tablet-mode');
+            if (document.documentElement?.style) {
+                document.documentElement.style.setProperty('--accent', userPrefs.accent || '#0284c7');
+                const sizes = { '-1': '13px', '0': '14px', '1': '15.5px', '2': '17px', '3': '18.5px' };
+                document.documentElement.style.fontSize = sizes[String(userPrefs.fontLevel || 0)] || '14px';
+            }
+            if (userPrefs.fontLevel < 0) document.body.classList.add('font-sm');
+            if (userPrefs.fontLevel > 0) document.body.classList.add('font-lg');
+            atualizarUIPreferencias();
+        }
+        function salvarPrefs() {
+            const payload = JSON.stringify(userPrefs);
+            safeStorage.set(getChavePrefsUsuarioPrev(), payload);
+            safeStorage.set('cepera_prev_prefs', payload);
+            aplicarPreferenciasVisuais();
+        }
+        window.abrirEspacoUsuario = () => { atualizarUIPreferencias(); abrirModal('modalEspacoUsuario'); };
         window.abrirModalAtalhos = () => abrirModal('modalAtalhos');
-        window.setTemaUsuario = (t) => { userPrefs.tema = t; salvarPrefs(); };
-        window.toggleTabletMode = () => { userPrefs.tabletMode = !userPrefs.tabletMode; salvarPrefs(); };
+        window.definirTemaUsuario = (t) => { userPrefs.tema = t; salvarPrefs(); };
+        window.setTemaUsuario = window.definirTemaUsuario;
+        window.definirCorDestaque = (c) => { userPrefs.accent = c; salvarPrefs(); };
+        window.toggleModoTablet = () => { userPrefs.tabletMode = !userPrefs.tabletMode; salvarPrefs(); };
+        window.toggleTabletMode = window.toggleModoTablet;
+        window.alterarFonte = (dir) => {
+            userPrefs.fontLevel = (dir === 0) ? 0 : Math.max(-1, Math.min(3, (userPrefs.fontLevel || 0) + dir));
+            salvarPrefs();
+        };
         window.setFonteUsuario = (lvl) => { userPrefs.fontLevel = lvl; salvarPrefs(); };
 
         // ================= NAVEGAÇÃO & SELECTS GLOBAIS =================
@@ -4536,12 +4666,17 @@
                 const itens = Array.isArray(p.checklist) ? p.checklist.length : 0;
                 const ordsPlanoPend = ordens.filter(o => o.planoId === p.id && o.status !== 'concluido' && o.status !== 'cancelado');
                 const prox = ordsPlanoPend.filter(o => o.data >= hoje).sort((a, b) => a.data.localeCompare(b.data))[0];
+                const grpKey = p.grupoPlanoCompartilhadoId || '';
+                const irmaosCompartilhados = grpKey
+                    ? todosPlanos.filter(x => x.grupoPlanoCompartilhadoId === grpKey)
+                    : [];
                 return `
                     <div class="glass-card glass-card-hover p-5 rounded-3xl flex flex-col justify-between gap-3.5">
                         <div class="space-y-2.5">
                             <div class="flex flex-wrap items-center justify-between gap-1.5">
                                 <span class="font-mono text-[11px] font-extrabold text-sky-700 bg-sky-50 px-2.5 py-0.5 rounded-lg border border-sky-200">${escapeHtml(p.codigo || 'PM')} • ${escapeHtml(p.revisao || 'Rev.01')}</span>
                                 <div class="flex flex-wrap items-center gap-1">
+                                    ${irmaosCompartilhados.length > 1 ? `<button type="button" onclick="abrirModalClonarPlanoEquipamentos('${p.id}')" class="px-2 py-0.5 rounded-full text-[10px] font-extrabold bg-indigo-50 hover:bg-indigo-100 text-indigo-800 border border-indigo-200" title="Plano compartilhado entre ${irmaosCompartilhados.length} equipamentos">Compartilhado (${irmaosCompartilhados.length} equip.)</button>` : ''}
                                     <span class="px-2 py-0.5 rounded-full text-[10px] font-extrabold border ${modo.cls}">${modo.lbl}</span>
                                     ${prio ? `<span class="px-2 py-0.5 rounded-full text-[10px] font-extrabold ${prioMeta.cls}" title="Prioridade do Plano">${escapeHtml(prioMeta.full)}</span>` : ''}
                                     ${renderBadgeLinhaCrit(p.setor, p.maquina)}
@@ -4565,7 +4700,7 @@
                         <div class="flex flex-wrap items-center gap-1.5 pt-3 border-t border-slate-100">
                             <button type="button" onclick="abrirModalProgramarPreventiva('${p.id}')" class="flex-1 py-2 px-3 rounded-xl bg-sky-600 hover:bg-sky-700 text-white text-[11px] font-extrabold">Programar</button>
                             <button type="button" onclick="abrirModalEditorPlano('${p.id}')" class="py-2 px-3 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-800 text-[11px] font-extrabold">Editar</button>
-                            <button type="button" onclick="duplicarPlano('${p.id}')" class="py-2 px-2.5 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-700 text-[11px] font-extrabold" title="Duplicar plano">Clonar</button>
+                            <button type="button" onclick="abrirModalClonarPlanoEquipamentos('${p.id}')" class="py-2 px-2.5 rounded-xl bg-indigo-50 hover:bg-indigo-100 border border-indigo-200 text-indigo-800 text-[11px] font-extrabold" title="Clonar e compartilhar este plano diretamente para outros equipamentos parecidos">Clonar / Compartilhar</button>
                             <button type="button" onclick="excluirPlano('${p.id}')" class="py-2 px-2.5 rounded-xl bg-rose-50 hover:bg-rose-100 text-rose-700 text-[11px] font-extrabold">✕</button>
                             ${masterAtivo ? `<div class="w-full flex items-center gap-1.5 pt-1">
                                 <button type="button" onclick="excluirOrdensFuturasPlanoMaster('${p.id}')" title="Admin Master: limpar todas as ordens pendentes/atrasadas vinculadas a este plano" class="flex-1 py-1.5 px-2.5 rounded-xl bg-amber-50 hover:bg-amber-100 border border-amber-200 text-amber-800 text-[10px] font-extrabold">🧹 Limpar Pendentes (${ordsPlanoPend.length})</button>
@@ -4988,17 +5123,450 @@
             if (!p) return;
             const { id, ...rest } = p;
             const novoCodigo = gerarCodigoCopiaPlanoUnico(p.codigo || 'PM');
+            const grpId = p.grupoPlanoCompartilhadoId || `grp_pl_${p.id}`;
             try {
                 await addDoc(colManutencao, {
                     ...rest,
                     codigo: novoCodigo,
                     titulo: `${p.titulo} (Cópia)`,
+                    grupoPlanoCompartilhadoId: grpId,
+                    planoOrigemCloneId: p.id,
                     criadoPor: usuarioLogado?.nome || 'PCM',
                     criadoEm: new Date().toISOString(),
                     atualizadoEm: new Date().toISOString()
                 });
                 showToast(`Plano clonado com código exclusivo "${novoCodigo}"!`, 'success');
             } catch (_) { showToast('Erro ao duplicar plano.', 'error'); }
+        };
+
+        // ================= CLONAR / COMPARTILHAR PLANO PARA EQUIPAMENTOS PARECIDOS =================
+        let clonePlanoEquipSelecionados = new Set();
+
+        function extrairRadicalEquipamentoPrev(nomeEquip) {
+            const clean = normKey(nomeEquip || '')
+                .replace(/\b(linha|maq|maquina|equip|equipamento|n|no|num|numero|unid|unidade)\b/g, ' ')
+                .replace(/[#0-9\-_/().]+/g, ' ')
+                .replace(/\s+/g, ' ')
+                .trim();
+            const tokens = clean.split(' ').filter(t => t.length >= 3);
+            return tokens[0] || clean;
+        }
+
+        function obterCatalogoEquipamentosParaClonePlano(planoOrigem = null) {
+            const map = new Map();
+            const radOrigem = extrairRadicalEquipamentoPrev(planoOrigem?.equipamento || '');
+            const conjOrigem = normKey(planoOrigem?.conjunto || '');
+
+            assetNodes.forEach(n => {
+                if (!n.area || !n.maquina || !n.equipamento) return;
+                const key = `${normKey(n.area)}||${normKey(n.maquina)}||${normKey(n.equipamento)}`;
+                let entry = map.get(key);
+                if (!entry) {
+                    entry = {
+                        key,
+                        setor: n.area,
+                        maquina: n.maquina,
+                        equipamento: n.equipamento,
+                        tag: n.tag || '',
+                        nodeId: n.nodeId || '',
+                        criticidade: n.criticidade || '',
+                        criticidade_linha: n.criticidade_linha || '',
+                        conjuntos: new Set(),
+                        subconjuntos: new Set()
+                    };
+                    map.set(key, entry);
+                }
+                if (n.conjunto) entry.conjuntos.add(n.conjunto);
+                if (n.subconjunto) entry.subconjuntos.add(n.subconjunto);
+                if (!entry.tag && n.tag) entry.tag = n.tag;
+                if (!entry.nodeId && n.nodeId) entry.nodeId = n.nodeId;
+            });
+
+            // Também inclui equipamentos que já existem em planos cadastrados mesmo que não estejam em assetNodes
+            getPlanosPreventiva().forEach(pl => {
+                if (!pl.setor || !pl.maquina || !pl.equipamento) return;
+                const key = `${normKey(pl.setor)}||${normKey(pl.maquina)}||${normKey(pl.equipamento)}`;
+                if (!map.has(key)) {
+                    map.set(key, {
+                        key,
+                        setor: pl.setor,
+                        maquina: pl.maquina,
+                        equipamento: pl.equipamento,
+                        tag: pl.tag || '',
+                        nodeId: pl.ativoId || '',
+                        criticidade: '',
+                        criticidade_linha: pl.criticidadeLinha || '',
+                        conjuntos: new Set(pl.conjunto ? [pl.conjunto] : []),
+                        subconjuntos: new Set(pl.subconjunto ? [pl.subconjunto] : [])
+                    });
+                }
+            });
+
+            const keyOrigem = planoOrigem ? `${normKey(planoOrigem.setor)}||${normKey(planoOrigem.maquina)}||${normKey(planoOrigem.equipamento)}` : '';
+            const grpId = planoOrigem?.grupoPlanoCompartilhadoId || (planoOrigem?.id ? `grp_pl_${planoOrigem.id}` : '');
+            const todosPl = getPlanosPreventiva();
+
+            return [...map.values()].map(eq => {
+                const ehOrigem = (eq.key === keyOrigem);
+                const radEq = extrairRadicalEquipamentoPrev(eq.equipamento);
+                const temMesmoRadical = Boolean(radOrigem && radEq && (radEq === radOrigem || normKey(eq.equipamento).includes(radOrigem)));
+                const temMesmoConjunto = Boolean(conjOrigem && [...eq.conjuntos].some(c => normKey(c) === conjOrigem));
+                const ehParecido = !ehOrigem && (temMesmoRadical || temMesmoConjunto);
+                const planoCompartilhadoExistente = todosPl.find(p =>
+                    p.id !== planoOrigem?.id &&
+                    normKey(p.setor) === normKey(eq.setor) &&
+                    normKey(p.maquina) === normKey(eq.maquina) &&
+                    normKey(p.equipamento) === normKey(eq.equipamento) &&
+                    ((grpId && p.grupoPlanoCompartilhadoId === grpId) || p.planoOrigemCloneId === planoOrigem?.id)
+                ) || null;
+
+                return {
+                    ...eq,
+                    conjuntosArr: [...eq.conjuntos],
+                    subconjuntosArr: [...eq.subconjuntos],
+                    ehOrigem,
+                    ehParecido,
+                    temMesmoRadical,
+                    temMesmoConjunto,
+                    planoCompartilhadoExistente
+                };
+            }).sort((a, b) => {
+                if (a.ehOrigem !== b.ehOrigem) return a.ehOrigem ? 1 : -1;
+                if (a.ehParecido !== b.ehParecido) return a.ehParecido ? -1 : 1;
+                return `${a.setor} ${a.maquina} ${a.equipamento}`.localeCompare(`${b.setor} ${b.maquina} ${b.equipamento}`, 'pt-BR');
+            });
+        }
+
+        window.abrirModalClonarPlanoEquipamentos = (planoId) => {
+            const p = getPlanosPreventiva().find(x => x.id === planoId);
+            if (!p) return showToast('Plano de preventiva não encontrado.', 'error');
+
+            document.getElementById('clonePlOrigemId').value = p.id;
+            document.getElementById('clonePlConjuntoAlvo').value = p.conjunto || '';
+            const chkAutoTit = document.getElementById('clonePlAutoTitulo');
+            if (chkAutoTit) chkAutoTit.checked = true;
+            const buscaInp = document.getElementById('clonePlBuscaEquip');
+            if (buscaInp) buscaInp.value = '';
+
+            const itensCnt = Array.isArray(p.checklist) ? p.checklist.length : 0;
+            const resumoEl = document.getElementById('clonePlOrigemResumo');
+            if (resumoEl) {
+                resumoEl.innerHTML = `
+                    <div class="flex flex-wrap items-center justify-between gap-2">
+                        <span class="font-mono text-xs font-extrabold text-sky-900">${escapeHtml(p.codigo || 'PM')} • ${escapeHtml(p.titulo)}</span>
+                        <span class="px-2.5 py-0.5 rounded-full bg-white border border-sky-200 text-sky-800 text-[10px] font-extrabold">${escapeHtml(p.periodicidade || 'Mensal')} • ${escapeHtml(p.disciplina || 'Mecânica')} • ${itensCnt} item(ns)</span>
+                    </div>
+                    <div class="text-[11px] font-semibold text-slate-600">Ativo Base: <strong>${escapeHtml([p.setor, p.maquina, p.equipamento, p.conjunto, p.subconjunto].filter(Boolean).join(' › '))}</strong></div>`;
+            }
+
+            const catalogo = obterCatalogoEquipamentosParaClonePlano(p);
+            const parecidos = catalogo.filter(eq => eq.ehParecido);
+            clonePlanoEquipSelecionados = new Set(parecidos.map(eq => eq.key));
+
+            const setores = [...new Set(catalogo.map(x => x.setor).filter(Boolean))].sort((a, b) => a.localeCompare(b, 'pt-BR'));
+            const selSetor = document.getElementById('clonePlFiltroSetor');
+            if (selSetor) {
+                selSetor.innerHTML = `<option value="">Todos os Setores</option>` + setores.map(s => `<option value="${escapeHtml(s)}">${escapeHtml(s)}</option>`).join('');
+                selSetor.value = '';
+            }
+            onClonePlFiltroSetorChange();
+            abrirModal('modalClonarPlanoEquipamentos');
+        };
+
+        window.onClonePlFiltroSetorChange = () => {
+            const p = getPlanosPreventiva().find(x => x.id === document.getElementById('clonePlOrigemId')?.value);
+            const catalogo = obterCatalogoEquipamentosParaClonePlano(p);
+            const fSetor = document.getElementById('clonePlFiltroSetor')?.value || '';
+            const maquinas = [...new Set(catalogo.filter(x => !fSetor || x.setor === fSetor).map(x => x.maquina).filter(Boolean))].sort((a, b) => a.localeCompare(b, 'pt-BR'));
+            const selMaq = document.getElementById('clonePlFiltroMaquina');
+            if (selMaq) {
+                selMaq.innerHTML = `<option value="">Todas as Linhas / Máquinas</option>` + maquinas.map(m => `<option value="${escapeHtml(m)}">${escapeHtml(m)}</option>`).join('');
+                selMaq.value = '';
+            }
+            renderListaEquipamentosClonePlano();
+        };
+
+        window.renderListaEquipamentosClonePlano = () => {
+            const p = getPlanosPreventiva().find(x => x.id === document.getElementById('clonePlOrigemId')?.value);
+            if (!p) return;
+            const catalogo = obterCatalogoEquipamentosParaClonePlano(p);
+            const mapPorKey = new Map(catalogo.map(eq => [eq.key, eq]));
+
+            const selCountEl = document.getElementById('clonePlSelCount');
+            if (selCountEl) selCountEl.innerText = String(clonePlanoEquipSelecionados.size);
+
+            const chipsBox = document.getElementById('clonePlSelecionadosChips');
+            if (chipsBox) {
+                if (!clonePlanoEquipSelecionados.size) {
+                    chipsBox.innerHTML = `<span class="text-[11px] font-semibold text-slate-400">Nenhum equipamento destino selecionado. Clique em "★ Marcar Equipamentos Parecidos" ou marque na lista abaixo.</span>`;
+                } else {
+                    chipsBox.innerHTML = [...clonePlanoEquipSelecionados].map(k => {
+                        const eq = mapPorKey.get(k);
+                        if (!eq) return '';
+                        const kJs = JSON.stringify(eq.key).replace(/"/g, '&quot;');
+                        return `<span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-xl bg-slate-900 text-white text-[11px] font-extrabold">
+                            <span>${escapeHtml(eq.equipamento)}</span>
+                            <span class="text-[10px] font-normal text-slate-300">(${escapeHtml(eq.maquina)})</span>
+                            <button type="button" onclick="toggleEquipamentoClonePlano(${kJs}, false)" class="text-rose-300 hover:text-white font-extrabold">✕</button>
+                        </span>`;
+                    }).join('');
+                }
+            }
+
+            const fSetor = document.getElementById('clonePlFiltroSetor')?.value || '';
+            const fMaq = document.getElementById('clonePlFiltroMaquina')?.value || '';
+            const termo = normKey(document.getElementById('clonePlBuscaEquip')?.value || '');
+
+            const filtrados = catalogo.filter(eq => {
+                if (fSetor && eq.setor !== fSetor) return false;
+                if (fMaq && eq.maquina !== fMaq) return false;
+                if (termo) {
+                    const hay = normKey(`${eq.setor} ${eq.maquina} ${eq.equipamento} ${eq.tag} ${eq.conjuntosArr.join(' ')}`);
+                    if (!hay.includes(termo)) return false;
+                }
+                return true;
+            });
+
+            const listBox = document.getElementById('clonePlListaEquipamentos');
+            if (!listBox) return;
+            if (!filtrados.length) {
+                listBox.innerHTML = `<div class="p-4 rounded-xl bg-white border border-slate-200 text-center text-slate-400 font-bold">Nenhum equipamento encontrado para este filtro.</div>`;
+                return;
+            }
+
+            listBox.innerHTML = filtrados.map(eq => {
+                const isSel = clonePlanoEquipSelecionados.has(eq.key);
+                const kJs = JSON.stringify(eq.key).replace(/"/g, '&quot;');
+                return `
+                <label class="flex items-center justify-between gap-2.5 p-2.5 rounded-xl border ${eq.ehOrigem ? 'bg-slate-100 border-slate-200 opacity-70' : (isSel ? 'bg-sky-50/90 border-sky-400' : 'bg-white border-slate-200 hover:border-slate-300')} ${eq.ehOrigem ? 'cursor-not-allowed' : 'cursor-pointer'} transition-colors">
+                    <div class="flex items-center gap-2.5 min-w-0">
+                        <input type="checkbox" ${isSel ? 'checked' : ''} ${eq.ehOrigem ? 'disabled' : ''} onchange="toggleEquipamentoClonePlano(${kJs}, this.checked)" class="w-4 h-4 rounded accent-sky-600 shrink-0">
+                        <div class="min-w-0">
+                            <div class="font-extrabold text-slate-900 truncate">${escapeHtml(eq.equipamento)} ${eq.tag ? `<span class="font-mono text-[10px] text-slate-500">(${escapeHtml(eq.tag)})</span>` : ''}</div>
+                            <div class="text-[10px] font-bold text-slate-500">${escapeHtml(eq.setor)} › ${escapeHtml(eq.maquina)} ${eq.conjuntosArr.length ? `• ${eq.conjuntosArr.length} conj.` : ''}</div>
+                        </div>
+                    </div>
+                    <div class="flex flex-wrap items-center gap-1 shrink-0">
+                        ${eq.ehOrigem ? `<span class="px-2 py-0.5 rounded-full bg-slate-800 text-white text-[10px] font-extrabold">Ativo de Origem</span>` : ''}
+                        ${eq.ehParecido ? `<span class="px-2 py-0.5 rounded-full bg-sky-100 text-sky-800 border border-sky-300 text-[10px] font-extrabold">★ Equipamento Parecido</span>` : ''}
+                        ${eq.planoCompartilhadoExistente ? `<span class="px-2 py-0.5 rounded-full bg-indigo-100 text-indigo-800 border border-indigo-200 text-[10px] font-extrabold">Já possui (${escapeHtml(eq.planoCompartilhadoExistente.codigo)})</span>` : ''}
+                    </div>
+                </label>`;
+            }).join('');
+        };
+
+        window.toggleEquipamentoClonePlano = (eqKey, checked) => {
+            if (!eqKey) return;
+            const tem = clonePlanoEquipSelecionados.has(eqKey);
+            const marcar = checked === undefined ? !tem : Boolean(checked);
+            if (marcar) clonePlanoEquipSelecionados.add(eqKey);
+            else clonePlanoEquipSelecionados.delete(eqKey);
+            renderListaEquipamentosClonePlano();
+        };
+
+        window.selecionarEquipamentosParecidosClonePlano = () => {
+            const p = getPlanosPreventiva().find(x => x.id === document.getElementById('clonePlOrigemId')?.value);
+            if (!p) return;
+            const catalogo = obterCatalogoEquipamentosParaClonePlano(p);
+            const parecidos = catalogo.filter(eq => eq.ehParecido);
+            parecidos.forEach(eq => clonePlanoEquipSelecionados.add(eq.key));
+            renderListaEquipamentosClonePlano();
+            if (!parecidos.length) {
+                showToast('Nenhum outro equipamento com radical de nome idêntico foi encontrado; selecione manualmente na lista.', 'info');
+            } else {
+                showToast(`${parecidos.length} equipamento(s) parecido(s) selecionado(s)!`, 'info');
+            }
+        };
+
+        window.selecionarEquipamentosMesmaLinhaClonePlano = () => {
+            const p = getPlanosPreventiva().find(x => x.id === document.getElementById('clonePlOrigemId')?.value);
+            if (!p) return;
+            const catalogo = obterCatalogoEquipamentosParaClonePlano(p);
+            catalogo.filter(eq => !eq.ehOrigem && normKey(eq.setor) === normKey(p.setor) && normKey(eq.maquina) === normKey(p.maquina))
+                .forEach(eq => clonePlanoEquipSelecionados.add(eq.key));
+            renderListaEquipamentosClonePlano();
+        };
+
+        window.selecionarEquipamentosMesmoSetorClonePlano = () => {
+            const p = getPlanosPreventiva().find(x => x.id === document.getElementById('clonePlOrigemId')?.value);
+            if (!p) return;
+            const catalogo = obterCatalogoEquipamentosParaClonePlano(p);
+            catalogo.filter(eq => !eq.ehOrigem && normKey(eq.setor) === normKey(p.setor))
+                .forEach(eq => clonePlanoEquipSelecionados.add(eq.key));
+            renderListaEquipamentosClonePlano();
+        };
+
+        window.selecionarTodosVisiveisClonePlano = () => {
+            const p = getPlanosPreventiva().find(x => x.id === document.getElementById('clonePlOrigemId')?.value);
+            if (!p) return;
+            const catalogo = obterCatalogoEquipamentosParaClonePlano(p);
+            const fSetor = document.getElementById('clonePlFiltroSetor')?.value || '';
+            const fMaq = document.getElementById('clonePlFiltroMaquina')?.value || '';
+            const termo = normKey(document.getElementById('clonePlBuscaEquip')?.value || '');
+            catalogo.filter(eq => {
+                if (eq.ehOrigem) return false;
+                if (fSetor && eq.setor !== fSetor) return false;
+                if (fMaq && eq.maquina !== fMaq) return false;
+                if (termo && !normKey(`${eq.setor} ${eq.maquina} ${eq.equipamento} ${eq.tag}`).includes(termo)) return false;
+                return true;
+            }).forEach(eq => clonePlanoEquipSelecionados.add(eq.key));
+            renderListaEquipamentosClonePlano();
+        };
+
+        window.limparSelecaoEquipamentosClonePlano = () => {
+            clonePlanoEquipSelecionados.clear();
+            renderListaEquipamentosClonePlano();
+        };
+
+        window.clonarPlanoNoMesmoEquipamentoModal = async () => {
+            const origemId = document.getElementById('clonePlOrigemId')?.value;
+            if (!origemId) return;
+            await window.duplicarPlano(origemId);
+            fecharModal('modalClonarPlanoEquipamentos');
+        };
+
+        function adaptarTituloPlanoParaEquipamentoDestino(tituloOriginal, equipOrigem, equipDestino) {
+            const tit = String(tituloOriginal || '').trim();
+            const orig = String(equipOrigem || '').trim();
+            const dest = String(equipDestino || '').trim();
+            if (!tit || !dest) return tit;
+            if (orig && tit.toLowerCase().includes(orig.toLowerCase())) {
+                const esc = orig.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+                return tit.replace(new RegExp(esc, 'ig'), dest);
+            }
+            if (tit.toLowerCase().includes(dest.toLowerCase())) return tit;
+            return `${tit} — ${dest}`;
+        }
+
+        window.confirmarClonagemPlanoEquipamentos = async (e) => {
+            if (e?.preventDefault) e.preventDefault();
+            const origemId = document.getElementById('clonePlOrigemId')?.value;
+            const pOrigem = getPlanosPreventiva().find(x => x.id === origemId);
+            if (!pOrigem) return showToast('Plano de origem não encontrado.', 'error');
+
+            if (!clonePlanoEquipSelecionados.size) {
+                return showToast('Selecione ao menos 1 equipamento destino para clonar/compartilhar o plano.', 'error');
+            }
+
+            const catalogo = obterCatalogoEquipamentosParaClonePlano(pOrigem);
+            const mapPorKey = new Map(catalogo.map(eq => [eq.key, eq]));
+            const modoOp = document.getElementById('clonePlModoOperacao')?.value || 'criar_ou_sincronizar';
+            const conjInput = (document.getElementById('clonePlConjuntoAlvo')?.value || '').trim();
+            const autoTitulo = document.getElementById('clonePlAutoTitulo')?.checked !== false;
+            const grpId = pOrigem.grupoPlanoCompartilhadoId || `grp_pl_${pOrigem.id}`;
+
+            const btn = document.getElementById('btnConfirmarClonarPlanoEquip');
+            if (btn) { btn.disabled = true; btn.innerText = 'Clonando / Compartilhando...'; }
+
+            const usadosCodigos = new Set(getPlanosPreventiva().map(pl => normalizarCodigoPlanoKey(pl.codigo)).filter(Boolean));
+            const baseCodLimpo = String(pOrigem.codigo || 'PM-001').replace(/-COPIA(?:-\d+)?$/i, '').trim() || 'PM-001';
+            let seqClone = 1;
+            const gerarCodigoUnicoLote = () => {
+                let cand = gerarProximoCodigoPlanoUnico('PM-');
+                while (usadosCodigos.has(normalizarCodigoPlanoKey(cand))) {
+                    seqClone++;
+                    cand = `${baseCodLimpo}-EQ${String(seqClone).padStart(2, '0')}`;
+                }
+                usadosCodigos.add(normalizarCodigoPlanoKey(cand));
+                return cand;
+            };
+
+            let criados = 0;
+            let sincronizados = 0;
+            const agora = new Date().toISOString();
+            const autor = usuarioLogado?.nome || 'PCM';
+
+            try {
+                // Garante que o plano de origem também receba o grupoPlanoCompartilhadoId
+                if (pOrigem.grupoPlanoCompartilhadoId !== grpId) {
+                    await updateDoc(doc(db, 'ag_manutencao', pOrigem.id), {
+                        grupoPlanoCompartilhadoId: grpId,
+                        atualizadoEm: agora
+                    });
+                }
+
+                for (const key of clonePlanoEquipSelecionados) {
+                    const eq = mapPorKey.get(key);
+                    if (!eq || eq.ehOrigem) continue;
+
+                    const conjFinal = conjInput
+                        ? (eq.conjuntosArr.find(c => normKey(c) === normKey(conjInput)) || conjInput)
+                        : (pOrigem.conjunto && eq.conjuntosArr.some(c => normKey(c) === normKey(pOrigem.conjunto)) ? pOrigem.conjunto : (conjInput || ''));
+
+                    const subFinal = (conjFinal && pOrigem.subconjunto && eq.subconjuntosArr.some(s => normKey(s) === normKey(pOrigem.subconjunto)))
+                        ? pOrigem.subconjunto
+                        : '';
+
+                    const tituloDest = autoTitulo
+                        ? adaptarTituloPlanoParaEquipamentoDestino(pOrigem.titulo, pOrigem.equipamento, eq.equipamento)
+                        : pOrigem.titulo;
+
+                    const critLinhaDest = getClasseLinhaAtivo(eq.setor, eq.maquina).classe || eq.criticidade_linha || pOrigem.criticidadeLinha || '';
+                    const checklistClonado = (Array.isArray(pOrigem.checklist) ? pOrigem.checklist : []).map(it => ({ ...it }));
+                    const docsClonados = (Array.isArray(pOrigem.documentosVinculados) ? pOrigem.documentosVinculados : []).map(d => ({ ...d }));
+
+                    if (modoOp === 'criar_ou_sincronizar' && eq.planoCompartilhadoExistente) {
+                        await updateDoc(doc(db, 'ag_manutencao', eq.planoCompartilhadoExistente.id), {
+                            titulo: tituloDest,
+                            revisao: pOrigem.revisao || 'Rev. 01',
+                            conjunto: conjFinal,
+                            subconjunto: subFinal,
+                            modoAgendamento: pOrigem.modoAgendamento || 'fixo',
+                            periodicidade: pOrigem.periodicidade || 'Mensal',
+                            prioridade: getPrioridadePlanoDoc(pOrigem) || 'P3',
+                            criticidade: getPrioridadePlanoDoc(pOrigem) || 'P3',
+                            criticidadeLinha: critLinhaDest,
+                            disciplina: pOrigem.disciplina || 'Mecânica',
+                            duracaoEstimadaMin: Number(pOrigem.duracaoEstimadaMin) || 60,
+                            paradaNecessaria: pOrigem.paradaNecessaria || 'sim',
+                            epis: pOrigem.epis || '',
+                            pecas: pOrigem.pecas || '',
+                            observacoes: pOrigem.observacoes || '',
+                            checklist: checklistClonado,
+                            anexoReferencia: pOrigem.anexoReferencia || null,
+                            documentosVinculados: docsClonados,
+                            grupoPlanoCompartilhadoId: grpId,
+                            planoOrigemCloneId: pOrigem.id,
+                            atualizadoPor: autor,
+                            atualizadoEm: agora
+                        });
+                        sincronizados++;
+                    } else {
+                        const codigoIndividual = gerarCodigoUnicoLote();
+                        const { id: _ignoreId, ...restOrigem } = pOrigem;
+                        await addDoc(colManutencao, {
+                            ...restOrigem,
+                            kind: 'plano_preventiva',
+                            codigo: codigoIndividual,
+                            titulo: tituloDest,
+                            ativoId: eq.nodeId || '',
+                            tag: eq.tag || '',
+                            setor: eq.setor,
+                            maquina: eq.maquina,
+                            equipamento: eq.equipamento,
+                            conjunto: conjFinal,
+                            subconjunto: subFinal,
+                            criticidadeLinha: critLinhaDest,
+                            checklist: checklistClonado,
+                            documentosVinculados: docsClonados,
+                            grupoPlanoCompartilhadoId: grpId,
+                            planoOrigemCloneId: pOrigem.id,
+                            criadoPor: autor,
+                            criadoEm: agora,
+                            atualizadoPor: autor,
+                            atualizadoEm: agora
+                        });
+                        criados++;
+                    }
+                }
+
+                fecharModal('modalClonarPlanoEquipamentos');
+                showToast(`Plano compartilhado com sucesso! ${criados} novo(s) plano(s) criado(s)${sincronizados ? ` e ${sincronizados} sincronizado(s)` : ''}.`, 'success');
+            } catch (err) {
+                showToast('Erro ao clonar/compartilhar plano para os equipamentos selecionados.', 'error');
+            } finally {
+                if (btn) { btn.disabled = false; btn.innerText = 'Clonar / Compartilhar Plano'; }
+            }
         };
 
         window.excluirPlano = (planoId) => {
@@ -6721,7 +7289,7 @@
         // ================= ATALHOS DE TECLADO =================
         document.addEventListener('keydown', (e) => {
             if (e.key === 'Escape') {
-                ['modalZoomFoto', 'deleteOverlay', 'modalEdicaoMasterOrdem', 'modalAdminMasterPrev', 'modalProxFlutuante', 'modalReprogramar', 'modalExecutarPreventiva', 'modalDiaCal', 'modalSemana52Prev', 'modalResumoSemana52', 'modalProgramarPreventiva', 'modalEditorPlano', 'modalEspacoUsuario', 'modalAtalhos'].forEach(fecharModal);
+                ['modalZoomFoto', 'deleteOverlay', 'modalEdicaoMasterOrdem', 'modalAdminMasterPrev', 'modalProxFlutuante', 'modalReprogramar', 'modalExecutarPreventiva', 'modalDiaCal', 'modalSemana52Prev', 'modalResumoSemana52', 'modalProgramarPreventiva', 'modalClonarPlanoEquipamentos', 'modalEditorPlano', 'modalEspacoUsuario', 'modalAtalhos'].forEach(fecharModal);
                 return;
             }
             if (e.ctrlKey && e.key === '?') { e.preventDefault(); abrirModalAtalhos(); return; }
