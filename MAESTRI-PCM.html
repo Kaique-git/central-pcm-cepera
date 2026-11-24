@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>PCM Cepêra • Maestri 2.0 — IA Auditora & Confiabilidade AQF</title>
+    <title>Auditoria de OMs &amp; Confiabilidade AQF — PCM Cepêra</title>
     <link rel="icon" href="CEPERA_LOGO.png" type="image/png">
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -143,101 +143,69 @@
         body.font-sm { --font-scale: 0.92; }
         body.font-lg { --font-scale: 1.08; }
 
-        /* ==================== ORQUESTRAÇÃO TÉCNICA — WHITE GLASSMORPHISM DESIGN SYSTEM ==================== */
-        @keyframes flowSynapse {
-            to { stroke-dashoffset: -36; }
-        }
-        @keyframes maestroPulse {
-            0%, 100% { box-shadow: 0 0 0 0 rgba(2, 132, 199, 0.22), 0 12px 28px -10px rgba(2, 132, 199, 0.14); }
-            50% { box-shadow: 0 0 0 7px rgba(2, 132, 199, 0), 0 16px 32px -10px rgba(2, 132, 199, 0.22); }
-        }
-        @keyframes perceptronRingSpin {
-            from { transform: rotate(0deg); }
-            to { transform: rotate(360deg); }
-        }
-        @keyframes workerBlink {
-            0%, 100% { opacity: 0.72; }
-            50% { opacity: 1; }
-        }
-        @keyframes slideFadeIn {
-            from { opacity: 0; transform: translateY(-4px); }
-            to { opacity: 1; transform: translateY(0); }
-        }
+        /* ==================== ORQUESTRAÇÃO TÉCNICA — LIGHTWEIGHT WHITE DESIGN SYSTEM ==================== */
         .neural-stage {
             position: relative;
-            background: rgba(255, 255, 255, 0.92);
-            backdrop-filter: blur(18px);
-            -webkit-backdrop-filter: blur(18px);
-            border: 1px solid rgba(226, 232, 240, 0.96);
-            box-shadow: 0 18px 42px -16px rgba(15, 23, 42, 0.08), inset 0 1px 0 rgba(255, 255, 255, 0.98);
+            background: #ffffff;
+            border: 1px solid #e2e8f0;
+            box-shadow: 0 10px 28px -14px rgba(15, 23, 42, 0.06);
             color: #0f172a;
         }
         .neural-grid-bg {
-            background: linear-gradient(180deg, rgba(248, 250, 252, 0.9) 0%, rgba(255, 255, 255, 0.97) 52%, rgba(241, 245, 249, 0.85) 100%);
-            box-shadow: inset 0 1px 0 #ffffff, 0 4px 18px -8px rgba(15, 23, 42, 0.05);
+            background: linear-gradient(180deg, #f8fafc 0%, #ffffff 55%, #f8fafc 100%);
         }
         .maestro-hub {
             position: relative;
             border-radius: 1.35rem;
             border: 1.5px solid #cbd5e1;
-            background: rgba(255, 255, 255, 0.96);
-            backdrop-filter: blur(12px);
-            -webkit-backdrop-filter: blur(12px);
-            box-shadow: 0 10px 26px -12px rgba(15, 23, 42, 0.08);
+            background: #ffffff;
+            box-shadow: 0 6px 18px -10px rgba(15, 23, 42, 0.07);
             color: #0f172a;
-            transition: all 0.2s ease;
+            transition: border-color 0.15s ease, box-shadow 0.15s ease;
             cursor: pointer;
         }
         .maestro-hub:hover {
             border-color: #94a3b8;
-            box-shadow: 0 14px 30px -12px rgba(15, 23, 42, 0.12);
         }
         .maestro-hub.is-delegating {
-            animation: maestroPulse 1.6s infinite ease-in-out;
             border-color: #0284c7;
+            box-shadow: 0 0 0 3px rgba(2, 132, 199, 0.12), 0 8px 20px -10px rgba(2, 132, 199, 0.14);
         }
         .perceptron-node {
             position: relative;
             border-radius: 1.25rem;
             border: 1.5px solid #e2e8f0;
-            background: rgba(255, 255, 255, 0.96);
-            backdrop-filter: blur(10px);
-            -webkit-backdrop-filter: blur(10px);
+            background: #ffffff;
             padding: 0.9rem 0.95rem;
-            box-shadow: 0 6px 18px -8px rgba(15, 23, 42, 0.06);
+            box-shadow: 0 4px 12px -6px rgba(15, 23, 42, 0.05);
             color: #0f172a;
-            transition: transform 0.18s ease, border-color 0.18s ease, box-shadow 0.18s ease;
+            transition: border-color 0.15s ease, background-color 0.15s ease;
             cursor: pointer;
             z-index: 2;
         }
         .perceptron-node:hover {
-            transform: translateY(-2px);
             border-color: #94a3b8;
-            box-shadow: 0 12px 24px -10px rgba(15, 23, 42, 0.1);
         }
         .perceptron-node.is-selected {
-            box-shadow: 0 0 0 3px rgba(2, 132, 199, 0.2), 0 12px 26px -10px rgba(2, 132, 199, 0.16) !important;
+            box-shadow: 0 0 0 2.5px rgba(2, 132, 199, 0.22) !important;
             border-color: #0284c7 !important;
         }
         .perceptron-node.is-idle {
             border-color: #e2e8f0;
-            background: rgba(255, 255, 255, 0.9);
+            background: #ffffff;
         }
         .perceptron-node.is-working {
             border-color: #0284c7;
-            background: linear-gradient(180deg, #ffffff 0%, #f0f9ff 100%);
-            box-shadow: 0 0 0 3px rgba(2, 132, 199, 0.14), 0 12px 24px -8px rgba(2, 132, 199, 0.14);
-            transform: translateY(-2px);
+            background: #f0f9ff;
+            box-shadow: 0 0 0 2px rgba(2, 132, 199, 0.12);
         }
         .perceptron-node.is-done {
             border-color: #cbd5e1;
             background: #ffffff;
-            box-shadow: 0 6px 16px -8px rgba(15, 23, 42, 0.06);
         }
         .perceptron-node.is-waiting {
             border-color: #fcd34d;
-            background: linear-gradient(180deg, #ffffff 0%, #fffbeb 100%);
-            box-shadow: 0 8px 20px -10px rgba(217, 119, 6, 0.14);
+            background: #fffbeb;
         }
         .perceptron-core {
             position: relative;
@@ -253,17 +221,9 @@
             flex-shrink: 0;
         }
         .perceptron-node.is-working .perceptron-core {
-            border-color: #38bdf8;
+            border-color: #0284c7;
             background: #e0f2fe;
             color: #0369a1;
-        }
-        .perceptron-node.is-working .perceptron-core::after {
-            content: "";
-            position: absolute;
-            inset: -5px;
-            border-radius: 0.9rem;
-            border: 1.5px dashed #0284c7;
-            animation: perceptronRingSpin 2.6s linear infinite;
         }
         .perceptron-node.is-done .perceptron-core {
             border-color: #86efac;
@@ -278,24 +238,16 @@
         .synapse-path {
             fill: none;
             stroke-linecap: round;
-            transition: stroke 0.25s ease, stroke-width 0.25s ease, opacity 0.25s ease;
         }
         .synapse-path.is-active {
-            stroke-dasharray: 10 8;
-            animation: flowSynapse 0.7s linear infinite;
+            opacity: 0.92;
         }
         .synapse-path.is-idle {
             stroke-dasharray: 4 6;
-            opacity: 0.32;
+            opacity: 0.28;
         }
         .synapse-path.is-done {
-            opacity: 0.58;
-        }
-        .worker-chip-active {
-            animation: workerBlink 0.8s infinite ease-in-out;
-        }
-        .neural-stream-card {
-            animation: slideFadeIn 0.2s ease-out;
+            opacity: 0.52;
         }
         .neural-scroll::-webkit-scrollbar { width: 6px; }
         .neural-scroll::-webkit-scrollbar-track { background: #f1f5f9; border-radius: 9999px; }
@@ -312,7 +264,6 @@
         .dropzone-active {
             border-color: #0284c7 !important;
             background: linear-gradient(135deg, #e0f2fe 0%, #eff6ff 100%) !important;
-            transform: scale(1.006);
         }
     </style>
 </head>
@@ -324,7 +275,7 @@
             <img src="CEPERA_LOGO.png" alt="Cepêra" class="h-14 mx-auto object-contain">
             <span class="inline-block px-3 py-1 rounded-full bg-rose-100 text-rose-800 text-[11px] font-extrabold uppercase tracking-wider">Sessão Não Identificada</span>
             <h1 class="text-xl font-extrabold text-slate-900">Acesso Restrito ao Portal PCM</h1>
-            <p class="text-xs font-semibold text-slate-600 leading-relaxed">Autentique-se na Central PCM Cepêra para acessar o Orquestrador Maestri 2.0 (IA Auditora, Mesa do Conferente e Caçador AQF).</p>
+            <p class="text-xs font-semibold text-slate-600 leading-relaxed">Autentique-se na Central PCM Cepêra para acessar o módulo de Auditoria de OMs, Conferência Técnica e Confiabilidade AQF.</p>
             <button type="button" onclick="voltarParaCentralPCM()" class="btn-pill-dark w-full py-3 text-xs">Ir para o Portal Central PCM</button>
         </div>
     </div>
@@ -338,11 +289,8 @@
                     <div class="flex items-center gap-2.5 min-w-0">
                         <img src="CEPERA_LOGO.png" alt="Cepêra" class="w-10 h-10 object-contain rounded-xl bg-white p-1 border border-slate-200 shadow-sm shrink-0">
                         <div class="min-w-0">
-                            <div class="flex items-center gap-1.5">
-                                <span class="text-[10px] font-extrabold uppercase tracking-widest text-sky-700">PCM Cepêra</span>
-                                <span class="px-1.5 py-0.5 rounded bg-slate-900 text-white font-mono text-[9px] font-extrabold">v45 • GEMINI &amp; CADASTRO ÁRVORE</span>
-                            </div>
-                            <h1 class="text-sm font-extrabold text-slate-900 truncate">Maestri 2.0 • IA & AQF</h1>
+                            <div class="text-[10px] font-extrabold uppercase tracking-widest text-sky-700">PCM Cepêra</div>
+                            <h1 class="text-sm font-extrabold text-slate-900 truncate">Auditoria &amp; Confiabilidade</h1>
                         </div>
                     </div>
                 </div>
@@ -371,7 +319,7 @@
                 </div>
 
                 <!-- NAVEGAÇÃO DOS NÓS -->
-                <nav class="hidden md:flex flex-col gap-1" aria-label="Navegação Maestri">
+                <nav class="hidden md:flex flex-col gap-1" aria-label="Navegação do Módulo">
                     <div class="px-2 pt-1 pb-0.5 text-[10px] font-extrabold uppercase tracking-wider text-slate-400">Fluxo &amp; Auditoria (Etapas 1–4)</div>
                     <button type="button" id="nav-pipeline" onclick="switchView('pipeline')" class="nav-item active">
                         <span>1. Orquestração (9 Etapas)</span>
@@ -398,7 +346,7 @@
                         <span id="badgeQuebrasNav" class="px-2 py-0.5 rounded-full text-[10px] font-extrabold bg-rose-100 text-rose-800">0</span>
                     </button>
                     <button type="button" id="nav-cacador" onclick="switchView('cacador')" class="nav-item">
-                        <span>6. Caçador AQF &amp; Planejador</span>
+                        <span>6. Análise AQF &amp; Planejador</span>
                         <span id="badgeEstudosNav" class="px-2 py-0.5 rounded-full text-[10px] font-extrabold bg-sky-100 text-sky-800">0</span>
                     </button>
 
@@ -430,7 +378,7 @@
                         <span class="text-[10px] font-extrabold uppercase tracking-widest text-sky-700">Governança &amp; Confiabilidade PCM • Norma EN 13306</span>
                         <span id="hdrEconomiaBadge" class="px-2 py-0.5 rounded-full bg-emerald-50 text-emerald-800 border border-emerald-200 text-[10px] font-extrabold">Referência Set/Out</span>
                     </div>
-                    <h2 id="headerTitle" class="text-base sm:text-lg font-extrabold text-slate-900 truncate">Orquestração Técnica Maestri — Auditoria &amp; Confiabilidade</h2>
+                    <h2 id="headerTitle" class="text-base sm:text-lg font-extrabold text-slate-900 truncate">Orquestração Técnica — Auditoria &amp; Confiabilidade</h2>
                     <p id="headerSubtitle" class="text-xs font-semibold text-slate-500 truncate">Triagem ERP › Regras Locais R$ 0 › Auditoria EN 13306 › Roteamento › Conferência › Biblioteca › Confiabilidade › AQF › Planejador</p>
                 </div>
 
@@ -574,7 +522,7 @@
                                         </div>
                                         <div class="min-w-0">
                                             <div class="flex items-center gap-2">
-                                                <span class="text-[10px] font-extrabold uppercase tracking-widest text-sky-700">Coordenação do Fluxo • Maestri PCM</span>
+                                                <span class="text-[10px] font-extrabold uppercase tracking-widest text-sky-700">Coordenação do Fluxo • Engenharia PCM</span>
                                                 <span id="maestroPhasePill" class="px-2 py-0.5 rounded-md bg-slate-100 border border-slate-200 text-slate-700 font-mono text-[9px] font-extrabold">PRONTO</span>
                                             </div>
                                             <div id="maestroDelegacaoMsg" class="text-xs sm:text-sm font-extrabold text-slate-900 truncate mt-0.5">Pronto para processar a planilha de Nov/2026 nas 9 etapas de auditoria e confiabilidade.</div>
@@ -754,7 +702,7 @@
                                                     <span class="text-[9px] font-mono font-bold text-sky-700">CAUSA RAIZ</span>
                                                     <span id="pPct_no8" class="text-[9px] font-mono font-extrabold text-sky-700">0%</span>
                                                 </div>
-                                                <div class="text-xs font-extrabold text-slate-900 leading-tight">Caçador AQF 2.0</div>
+                                                <div class="text-xs font-extrabold text-slate-900 leading-tight">Análise AQF</div>
                                                 <div id="pStat_no8" class="text-[10px] font-semibold text-slate-500 truncate mt-0.5">Ishikawa + DOCS-ATIVOS</div>
                                             </div>
                                         </div>
@@ -1132,12 +1080,12 @@
                     </div>
                 </section>
 
-                <!-- ==================== VIEW 6: NÓ 8 & NÓ 9 — CAÇADOR AQF 2.0 + DOCS-ATIVOS + PLANEJADOR 1-CLIQUE ==================== -->
+                <!-- ==================== VIEW 6: NÓ 8 & NÓ 9 — ANÁLISE AQF + DOCS-ATIVOS + PLANEJADOR 1-CLIQUE ==================== -->
                 <section id="view-cacador" hidden class="hidden space-y-5">
                     <div class="glass-card p-5 rounded-3xl border-2 border-sky-200 bg-gradient-to-r from-sky-50/80 via-white to-emerald-50/50 flex flex-col lg:flex-row lg:items-center justify-between gap-4">
                         <div class="space-y-1">
                             <div class="flex flex-wrap items-center gap-2">
-                                <span class="px-2.5 py-0.5 rounded-full bg-sky-600 text-white text-[10px] font-extrabold uppercase">Nó 8 (Caçador AQF 2.0) + Nó 9 (Planejador 1-Clique)</span>
+                                <span class="px-2.5 py-0.5 rounded-full bg-sky-600 text-white text-[10px] font-extrabold uppercase">Nó 8 (Análise AQF) + Nó 9 (Planejador 1-Clique)</span>
                                 <span class="px-2.5 py-0.5 rounded-full bg-indigo-50 text-indigo-800 border border-indigo-200 text-[10px] font-extrabold">Integrado com DOCS-ATIVOS.html &amp; GESTAO-ATIVOS.html</span>
                             </div>
                             <h3 class="text-base sm:text-lg font-extrabold text-slate-900">Estudos de Causa Raiz (RAE + Ishikawa 6M + 5 Porquês + 5W2H) &amp; Planejador</h3>
@@ -1160,7 +1108,7 @@
                     <div class="glass-card p-5 rounded-3xl border-2 border-rose-200 bg-gradient-to-r from-rose-50/80 via-white to-amber-50/50 flex flex-col lg:flex-row lg:items-center justify-between gap-4">
                         <div class="space-y-1">
                             <span class="px-2.5 py-0.5 rounded-full bg-rose-600 text-white text-[10px] font-extrabold uppercase">Privilégio Admin Master • Cofre Local &amp; Governança</span>
-                            <h3 class="text-lg font-extrabold text-slate-900">Central Admin Master do Maestri 2.0</h3>
+                            <h3 class="text-lg font-extrabold text-slate-900">Central Admin Master • Auditoria &amp; Cofre</h3>
                             <p class="text-xs font-semibold text-slate-600">Configure a chave Gemini API no cofre local deste navegador (substituindo o antigo <code>Api_key.txt</code>), ajuste o tamanho do lote (20 OMs) e gerencie registros em lote.</p>
                         </div>
                         <div class="flex flex-wrap items-center gap-2 shrink-0">
@@ -1329,7 +1277,7 @@
             </form>
             <div id="masterMaestriActiveBox" hidden class="hidden space-y-4">
                 <div class="p-3.5 rounded-2xl bg-rose-50 border border-rose-200 text-xs text-rose-900 space-y-1">
-                    <div class="font-extrabold flex items-center gap-1.5"><svg class="w-4 h-4 text-rose-600 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/></svg><span>Admin Master Ativo no Maestri 2.0</span></div>
+                    <div class="font-extrabold flex items-center gap-1.5"><svg class="w-4 h-4 text-rose-600 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/></svg><span>Admin Master Ativo nesta Sessão</span></div>
                     <div class="text-[11px] text-rose-800">Cofre de IA, arbitragem do Bibliotecário e edição direta em lote liberados.</div>
                 </div>
                 <div class="p-3.5 rounded-2xl bg-slate-50 border border-slate-200 space-y-2.5">
@@ -1644,17 +1592,17 @@
             { id: "no5", ordem: 5, codigo: "NÓ 5", nome: "Conferente (Supervisores)", papel: "Mesa de conferência rápida em 2 toques por equipe no Portal PCM" },
             { id: "no6", ordem: 6, codigo: "NÓ 6", nome: "Bibliotecário & Curadoria", papel: "Aprendizado contínuo (correcoes.jsonl) + Detector de Divergência entre Supervisores" },
             { id: "no7", ordem: 7, codigo: "NÓ 7", nome: "Confiabilidade & Radares", papel: "MTBF, MTTR, Pareto, Escada B×C, Quebra Evitável (Rota) e Risco de Obsolescência" },
-            { id: "no8", ordem: 8, codigo: "NÓ 8", nome: "Caçador AQF 2.0", papel: "RAE, Ishikawa 6M, 5 Porquês e Plano 5W2H lendo manuais vigentes de DOCS-ATIVOS" },
+            { id: "no8", ordem: 8, codigo: "NÓ 8", nome: "Análise AQF", papel: "RAE, Ishikawa 6M, 5 Porquês e Plano 5W2H lendo manuais vigentes de DOCS-ATIVOS" },
             { id: "no9", ordem: 9, codigo: "NÓ 9", nome: "Planejador 1-Clique", papel: "Transforma estudos AQF em Preventivas (52S), Pontos Cirúrgicos de Rota e Agenda PCM" }
         ];
 
         const VIEW_META = {
-            pipeline: { title: "Orquestração Técnica Maestri — Auditoria & Confiabilidade", sub: "Triagem ERP › Regras Locais R$ 0 › Auditoria EN 13306 › Roteamento › Conferência › Biblioteca › Confiabilidade › AQF › Planejador" },
+            pipeline: { title: "Orquestração Técnica — Auditoria & Confiabilidade", sub: "Triagem ERP › Regras Locais R$ 0 › Auditoria EN 13306 › Roteamento › Conferência › Biblioteca › Confiabilidade › AQF › Planejador" },
             auditoria: { title: "Auditoria de OMs, Matriz B×C (EN 13306) & Qualidade de Apontamento", sub: "Inspeção completa das ordens classificadas, origem da decisão e score de preenchimento técnico por equipe" },
             conferente: { title: "Nó 5 — Mesa de Conferência Rápida dos Supervisores (2 Toques)", sub: "Valide ou corrija apenas os ~15%-20% de casos limítrofes/graves da sua equipe para ensinar o Bibliotecário" },
             bibliotecario: { title: "Nó 6 — Bibliotecário, Memória R$ 0,00 & Detector de Divergência", sub: "Curadoria de regras aprendidas (correcoes.jsonl) e arbitragem automática de critérios divergentes entre supervisores" },
             confiabilidade: { title: "Nó 7 — Engenharia de Confiabilidade, Quebra Evitável & Obsolescência", sub: "MTBF, MTTR, Pareto de Top Ofensores cruzado com Inspeção de Rota (ir_anomalias) e Obsolescência (ob_equipamentos)" },
-            cacador: { title: "Nó 8 & Nó 9 — Caçador AQF 2.0 + Biblioteca Técnica + Planejador 1-Clique", sub: "Estudo RAE + Ishikawa 6M + 5 Porquês + 5W2H integrado aos manuais vigentes (DOCS-ATIVOS) com geração de ação em 1 clique" },
+            cacador: { title: "Nó 8 & Nó 9 — Análise AQF + Biblioteca Técnica + Planejador 1-Clique", sub: "Estudo RAE + Ishikawa 6M + 5 Porquês + 5W2H integrado aos manuais vigentes (DOCS-ATIVOS) com geração de ação em 1 clique" },
             "master-maestri": { title: "Central Admin Master & Cofre Local de IA", sub: "Cofre seguro da chave Gemini API, configuração de lote de 20 OMs e gestão direta de registros" }
         };
 
@@ -1915,7 +1863,7 @@
             setAdminMasterSessao(true);
             renderModalAdminMasterMaestri();
             renderCurrentView();
-            showToast("Modo Admin Master desbloqueado no Maestri 2.0!", "success");
+            showToast("Modo Admin Master desbloqueado com sucesso!", "success");
         };
 
         window.travarAdminMasterMaestri = () => {
@@ -3694,7 +3642,7 @@ OMs:\n${JSON.stringify(listaPrompt)}`;
         };
 
         const NOMES_EXIBICAO_NO = {
-            maestro: "Maestro Orquestrador",
+            maestro: "Coordenação do Fluxo",
             input_erp: "Planilha Vigente ERP",
             hist_base: "Base Histórica Set/Out",
             no1: "Nó 1 — Coletor & Filtro",
@@ -3704,7 +3652,7 @@ OMs:\n${JSON.stringify(listaPrompt)}`;
             no5: "Nó 5 — Mesa Conferente",
             no6: "Nó 6 — Bibliotecário",
             no7: "Nó 7 — Confiabilidade",
-            no8: "Nó 8 — Caçador AQF 2.0",
+            no8: "Nó 8 — Análise AQF",
             no9: "Nó 9 — Planejador 1-Clique"
         };
 
@@ -3712,7 +3660,7 @@ OMs:\n${JSON.stringify(listaPrompt)}`;
             neuralInteracoesLive.unshift({
                 id: item.id || `int-${Date.now()}-${Math.random().toString(36).slice(2, 6)}`,
                 hora: item.hora || agoraHMS(),
-                origem: item.origem || "MAESTRO",
+                origem: item.origem || "COORD",
                 destino: item.destino || "N1",
                 titulo: item.titulo || "",
                 retorno: item.retorno || "",
@@ -3791,7 +3739,8 @@ OMs:\n${JSON.stringify(listaPrompt)}`;
                 concluido: "bg-sky-100/90 text-sky-800 border border-sky-200"
             };
 
-            box.innerHTML = lista.slice(0, 90).map(it => {
+            const maxCards = neuralAnimandoAgora ? 20 : 60;
+            box.innerHTML = lista.slice(0, maxCards).map(it => {
                 const cardCls = clsMapa[it.status] || "border-slate-200 bg-slate-50/85";
                 const bCls = badgeMapa[it.status] || "bg-slate-200/80 text-slate-700";
                 return `
@@ -3825,16 +3774,17 @@ OMs:\n${JSON.stringify(listaPrompt)}`;
             });
 
             if (!filtradas.length) {
-                box.innerHTML = `<div class="p-6 rounded-xl border border-slate-200 bg-slate-50/80 text-center text-slate-500">Nenhuma ordem auditada para exibir ainda. Clique em <strong>Executar Fluxo ao Vivo</strong> ou <strong>Simular Lote Novembro</strong>.</div>`;
+                box.innerHTML = `<div class="p-6 rounded-xl border border-slate-200 bg-slate-50/80 text-center text-slate-500">Nenhuma ordem auditada para exibir ainda. Clique em <strong>Reproduzir Fluxo ao Vivo</strong> ou <strong>Simular Lote Novembro</strong>.</div>`;
                 return;
             }
 
-            const totalVis = Math.min(filtradas.length, 100);
-            const notaRodape = filtradas.length > 100
+            const maxOrdCards = neuralAnimandoAgora ? 20 : 80;
+            const totalVis = Math.min(filtradas.length, maxOrdCards);
+            const notaRodape = filtradas.length > maxOrdCards
                 ? `<div class="p-2.5 rounded-xl bg-slate-100 border border-slate-200 text-center text-[10px] font-bold text-slate-600">Exibindo as ${totalVis} decisões mais recentes de ${filtradas.length} OMs filtradas (consulte a lista completa na aba Auditoria).</div>`
                 : "";
 
-            box.innerHTML = filtradas.slice(0, 100).map(o => {
+            box.innerHTML = filtradas.slice(0, maxOrdCards).map(o => {
                 const isR0 = ["FAST_PATH_R0", "BIBLIOTECA_MEMORIA", "DEDUP_RODADA"].includes(o.origem);
                 const viaTxt = isR0 ? "N1 → N2 (R$ 0) → N4" : "N1 → N2 → N3 (Lote 20) → N4";
                 const extraPath = o.categoria === "QUEBRA" ? `${viaTxt} → N7 → N8` : (o.fila !== "AUTOMATICO" ? `${viaTxt} → N5` : viaTxt);
@@ -3927,13 +3877,21 @@ OMs:\n${JSON.stringify(listaPrompt)}`;
             { id: "s_m_n9", de: "maestro", para: "no9", cor: "#059669", tracejado: true, fanX: 205 }
         ];
 
+        let cachedNeuralPts = null;
+        let cachedNeuralBoxStr = "";
+
         function obterPontosSinapsesCanvas() {
             const canvas = document.getElementById("neuralCanvasInner");
             const svg = document.getElementById("neuralSynapseSvg");
+            if (cachedNeuralPts && cachedNeuralBoxStr && svg) {
+                svg.setAttribute("viewBox", cachedNeuralBoxStr);
+                return cachedNeuralPts;
+            }
             if (canvas && svg && typeof canvas.getBoundingClientRect === "function") {
                 const cRect = canvas.getBoundingClientRect();
                 if (cRect.width > 120 && cRect.height > 120) {
-                    svg.setAttribute("viewBox", `0 0 ${Math.round(cRect.width)} ${Math.round(cRect.height)}`);
+                    const vb = `0 0 ${Math.round(cRect.width)} ${Math.round(cRect.height)}`;
+                    svg.setAttribute("viewBox", vb);
                     const pts = {};
                     Object.keys(COORD_FALLBACK_NEURAL).forEach(k => {
                         const nodeEl = canvas.querySelector(`[data-neural-id="${k}"]`);
@@ -3955,7 +3913,11 @@ OMs:\n${JSON.stringify(listaPrompt)}`;
                             }
                         }
                     });
-                    if (Object.keys(pts).length >= 6) return { ...COORD_FALLBACK_NEURAL, ...pts };
+                    if (Object.keys(pts).length >= 6) {
+                        cachedNeuralPts = { ...COORD_FALLBACK_NEURAL, ...pts };
+                        cachedNeuralBoxStr = vb;
+                        return cachedNeuralPts;
+                    }
                 }
             }
             if (svg && typeof svg.setAttribute === "function") svg.setAttribute("viewBox", "0 0 1200 600");
@@ -3966,6 +3928,10 @@ OMs:\n${JSON.stringify(listaPrompt)}`;
             const svg = document.getElementById("neuralSynapseSvg");
             if (!svg) return;
             const pts = obterPontosSinapsesCanvas();
+            let orbsCount = 0;
+            const maxOrbs = neuralAnimandoAgora ? 2 : 1;
+            const repAttr = neuralAnimandoAgora ? "indefinite" : "1";
+
             const svgPaths = DEFINICAO_SINAPSES.map(edge => {
                 const p1 = pts[edge.de];
                 const p2 = pts[edge.para];
@@ -4020,12 +3986,13 @@ OMs:\n${JSON.stringify(listaPrompt)}`;
                 const isActive = activeEdges.has(edge.id) || isSelectedIncident;
                 const isDone = doneEdges.has(edge.id);
                 const cls = isActive ? "is-active" : (isDone ? "is-done" : "is-idle");
-                const width = isActive ? (edge.tracejado ? 2.6 : 3.4) : (edge.tracejado ? 1.3 : 2.1);
+                const width = isActive ? (edge.tracejado ? 2.2 : 2.8) : (edge.tracejado ? 1.2 : 1.8);
                 const opacityAttr = edge.tracejado && !isActive ? ' opacity="0.22"' : "";
                 const pathHtml = `<path id="syn_${edge.id}" d="${d}" stroke="${edge.cor}" stroke-width="${width}" class="synapse-path ${cls}"${opacityAttr}/>`;
-                const dotHtml = isActive && !edge.tracejado ? `<circle cx="${x2}" cy="${y2}" r="3.4" fill="${edge.cor}"/>` : "";
-                if (!isActive || edge.tracejado) return pathHtml + dotHtml;
-                return `${pathHtml}${dotHtml}<circle r="4.6" fill="${edge.cor}"><animateMotion dur="${neuralRitmoModo === "rapido" ? "0.55s" : "0.9s"}" repeatCount="indefinite" path="${d}"/></circle>`;
+                const dotHtml = isActive && !edge.tracejado ? `<circle cx="${x2}" cy="${y2}" r="3.2" fill="${edge.cor}"/>` : "";
+                if (!isActive || edge.tracejado || orbsCount >= maxOrbs) return pathHtml + dotHtml;
+                orbsCount++;
+                return `${pathHtml}${dotHtml}<circle r="4.2" fill="${edge.cor}"><animateMotion dur="${neuralRitmoModo === "rapido" ? "0.45s" : "0.7s"}" repeatCount="${repAttr}" path="${d}"/></circle>`;
             }).join("");
             svg.innerHTML = svgPaths;
         }
@@ -4172,7 +4139,7 @@ OMs:\n${JSON.stringify(listaPrompt)}`;
             return [
                 {
                     id: "end-n9", hora: hh, origem: "N8", destino: "N9", status: "aqf",
-                    titulo: `Planejador recebeu ${estudosAqf.length} Estudo(s) AQF 2.0 prontos`,
+                    titulo: `Planejador recebeu ${estudosAqf.length} Estudo(s) AQF prontos`,
                     retorno: `${propostasPlanejador.length} propostas 1-clique disponíveis para Preventivas 52S / Rota / Agenda PCM`
                 },
                 {
@@ -4201,7 +4168,7 @@ OMs:\n${JSON.stringify(listaPrompt)}`;
                     retorno: `Decisão local a R$ 0,00 • Economia de ${custoRodada.economia_pct}%`
                 },
                 {
-                    id: "end-n1", hora: hh, origem: "MAESTRO", destino: "N1", status: "concluido",
+                    id: "end-n1", hora: hh, origem: "COORD", destino: "N1", status: "concluido",
                     titulo: `Ingestão do ciclo ${rodadaVigenteInfo.periodo} finalizada (${tot} OMs)`,
                     retorno: `Filtradas concluídas e vinculadas à árvore ob_linhas`
                 }
@@ -4269,7 +4236,7 @@ OMs:\n${JSON.stringify(listaPrompt)}`;
                     neuralInteracoesLive.unshift({
                         id: `reav-${Date.now()}`,
                         hora: agoraHMS(),
-                        origem: "MAESTRO",
+                        origem: "COORD",
                         destino: "N2/N6",
                         status: "r0",
                         titulo: `Reavaliação concluída com ${ativas} regras do Bibliotecário (Nó 6 → Nó 2)`,
@@ -4284,7 +4251,7 @@ OMs:\n${JSON.stringify(listaPrompt)}`;
             atualizarBannerLoteAuditado();
 
             const doneEdges = new Set(DEFINICAO_SINAPSES.map(e => e.id));
-            renderNeuralSvgTopology(new Set(["s_n2_n4", "s_n6_n2", "s_n8_n9"]), doneEdges);
+            renderNeuralSvgTopology(new Set(["s_n2_n4"]), doneEdges);
         }
 
         function executarAnimacaoRedeNeural(stats = {}) {
@@ -4320,7 +4287,7 @@ OMs:\n${JSON.stringify(listaPrompt)}`;
             const acoesFila = [];
             const secStr = () => `${((Date.now() - tInicio) / 1000).toFixed(1)}s`;
 
-            // PASSO 1: MAESTRO -> N1
+            // PASSO 1: COORDENAÇÃO -> N1
             acoesFila.push({
                 wait: 40,
                 run: () => {
@@ -4331,7 +4298,7 @@ OMs:\n${JSON.stringify(listaPrompt)}`;
                     setEstadoPerceptronUI("no1", "is-working", 70, `Filtrando ${tot} OMs...`);
                     renderNeuralSvgTopology(new Set(["s_in_n1", "s_m_n1"]), new Set());
                     registrarInteracaoNeural({
-                        origem: "MAESTRO", destino: "N1", status: "concluido",
+                        origem: "COORD", destino: "N1", status: "concluido",
                         titulo: `Ingestão do arquivo ${rodadaVigenteInfo.arquivoNome || rodadaVigenteInfo.periodo} (${tot} OMs)`,
                         retorno: `Validou concluídas, normalizou tempos e cruzou ativos na árvore ob_linhas`
                     });
@@ -4339,19 +4306,19 @@ OMs:\n${JSON.stringify(listaPrompt)}`;
             });
 
             if (neuralRitmoModo === "passo_a_passo" && omsAuditadas.length) {
-                // Seleciona todas se <= 28 OMs; ou 24 OMs representativas em lotes enormes (1.234 OMs)
+                // Seleciona até 10 OMs representativas para animação passo a passo fluida e sem travamento
                 let amostraStream = omsAuditadas;
-                if (omsAuditadas.length > 28) {
+                if (omsAuditadas.length > 10) {
                     const idxSet = new Set();
-                    const step = Math.floor(omsAuditadas.length / 24);
-                    for (let i = 0; i < omsAuditadas.length && idxSet.size < 20; i += Math.max(1, step)) idxSet.add(i);
-                    omsAuditadas.forEach((o, i) => { if (idxSet.size < 24 && o.categoria === "QUEBRA") idxSet.add(i); });
+                    const step = Math.floor(omsAuditadas.length / 10);
+                    for (let i = 0; i < omsAuditadas.length && idxSet.size < 8; i += Math.max(1, step)) idxSet.add(i);
+                    omsAuditadas.forEach((o, i) => { if (idxSet.size < 10 && o.categoria === "QUEBRA") idxSet.add(i); });
                     amostraStream = Array.from(idxSet).sort((a, b) => a - b).map(i => omsAuditadas[i]);
                 }
 
                 // Abertura N1 -> N2
                 acoesFila.push({
-                    wait: 280,
+                    wait: 220,
                     run: () => {
                         setEstadoPerceptronUI("no1", "is-done", 100, `${tot} OMs higienizadas`);
                         setEstadoPerceptronUI("no2", "is-working", 15, `Avaliando regra a regra (Set/Out + Planta)...`);
@@ -4372,7 +4339,7 @@ OMs:\n${JSON.stringify(listaPrompt)}`;
                     const isR0 = ["FAST_PATH_R0", "BIBLIOTECA_MEMORIA", "DEDUP_RODADA"].includes(o.origem);
 
                     acoesFila.push({
-                        wait: omsAuditadas.length > 28 ? 190 : 250,
+                        wait: 185,
                         run: () => {
                             listAcumulada.push(o);
                             neuralOrdensLive.unshift(o);
@@ -4403,7 +4370,7 @@ OMs:\n${JSON.stringify(listaPrompt)}`;
                                 if (wRow) {
                                     const wAtivo = (idx % 3) + 1;
                                     wRow.innerHTML = [1, 2, 3].map(w =>
-                                        `<span class="px-1.5 py-0.5 rounded border text-center font-bold ${w === wAtivo ? "worker-chip-active bg-sky-100 border-sky-300 text-sky-900" : "bg-indigo-50 border-indigo-200 text-indigo-800"}">W${w}: ${w === wAtivo ? "#" + o.om : "Lote"}</span>`
+                                        `<span class="px-1.5 py-0.5 rounded border text-center font-bold ${w === wAtivo ? "bg-sky-100 border-sky-300 text-sky-900" : "bg-indigo-50 border-indigo-200 text-indigo-800"}">W${w}: ${w === wAtivo ? "#" + o.om : "Lote"}</span>`
                                     ).join("");
                                 }
                                 document.getElementById("maestroPhasePill").innerText = `LOTE 20 • ${numPasso}/${totStream}`;
@@ -4438,15 +4405,15 @@ OMs:\n${JSON.stringify(listaPrompt)}`;
 
                 // Fechamento Retroalimentação + Confiabilidade/AQF
                 acoesFila.push({
-                    wait: 340,
+                    wait: 240,
                     run: () => {
-                        if (omsAuditadas.length > 28) neuralOrdensLive = omsAuditadas.slice().reverse();
+                        if (omsAuditadas.length > 10) neuralOrdensLive = omsAuditadas.slice().reverse();
                         setEstadoPerceptronUI("no2", "is-done", 100, `${fast} OMs a R$ 0`);
                         setEstadoPerceptronUI("no3", "is-done", 100, `${lote} casos auditados`);
                         setEstadoPerceptronUI("no4", "is-done", 100, `4 equipes roteadas`);
                         setEstadoPerceptronUI("no6", "is-working", 85, `Sincronizando ${ativas} regras...`);
                         setEstadoPerceptronUI("no7", "is-working", 85, `Cruzando MTBF & Rotas...`);
-                        setEstadoPerceptronUI("no8", "is-working", 85, `Gerando Estudos AQF 2.0...`);
+                        setEstadoPerceptronUI("no8", "is-working", 85, `Gerando Estudos AQF...`);
                         setEstadoPerceptronUI("no9", "is-working", 85, `Preparando ações 1-clique...`);
                         renderNeuralSvgTopology(new Set(["s_n5_n6", "s_n6_n2", "s_n4_n7", "s_n7_n8", "s_n8_n9", "s_m_n7", "s_m_n9"]), new Set(["s_in_n1", "s_n1_n2", "s_n2_n4", "s_n2_n3", "s_n3_n4"]));
                         registrarInteracaoNeural({
@@ -4462,16 +4429,16 @@ OMs:\n${JSON.stringify(listaPrompt)}`;
                     }
                 });
                 acoesFila.push({
-                    wait: 320,
+                    wait: 220,
                     run: () => {
                         neuralAnimandoAgora = false;
                         aplicarEstadoFinalRedeNeural(stats);
                     }
                 });
             } else {
-                // MODO RÁPIDO (TURBO): 5 ondas rápidas (~1,1s no total)
+                // MODO RÁPIDO (TURBO): 5 ondas rápidas (~0,8s no total)
                 acoesFila.push({
-                    wait: 160,
+                    wait: 120,
                     run: () => {
                         document.getElementById("maestroPhasePill").innerText = "TURBO 1/4";
                         setEstadoPerceptronUI("input_erp", "is-done", 100, `${tot} OMs recebidas`);
@@ -4486,7 +4453,7 @@ OMs:\n${JSON.stringify(listaPrompt)}`;
                     }
                 });
                 acoesFila.push({
-                    wait: 240,
+                    wait: 180,
                     run: () => {
                         document.getElementById("maestroPhasePill").innerText = "TURBO 2/4";
                         setEstadoPerceptronUI("no2", "is-done", 100, `${fast} OMs a R$ 0`);
@@ -4503,7 +4470,7 @@ OMs:\n${JSON.stringify(listaPrompt)}`;
                     }
                 });
                 acoesFila.push({
-                    wait: 240,
+                    wait: 180,
                     run: () => {
                         document.getElementById("maestroPhasePill").innerText = "TURBO 3/4";
                         setEstadoPerceptronUI("no3", "is-done", 100, `${lote} auditadas`);
@@ -4513,17 +4480,17 @@ OMs:\n${JSON.stringify(listaPrompt)}`;
                         renderNeuralSvgTopology(new Set(["s_n4_n5", "s_n5_n6", "s_n6_n2", "s_n4_n7"]), new Set(["s_in_n1", "s_n1_n2", "s_n2_n4", "s_n2_n3", "s_n3_n4"]));
                         registrarInteracaoNeural({
                             origem: "N6", destino: "N2", status: "r0",
-                            titulo: `Sinapse humana + Bibliotecário sincronizados`,
+                            titulo: `Conferência humana + Bibliotecário sincronizados`,
                             retorno: `${ativas} regras ativas na memória • ${estudosAqf.length} Estudo(s) AQF engatilhados`
                         });
                     }
                 });
                 acoesFila.push({
-                    wait: 240,
+                    wait: 180,
                     run: () => {
                         document.getElementById("maestroPhasePill").innerText = "TURBO 4/4";
                         setEstadoPerceptronUI("no7", "is-done", 100, `${confiabilidadeData.total_quebras || 0} Quebras`);
-                        setEstadoPerceptronUI("no8", "is-done", 100, `${estudosAqf.length} AQF 2.0`);
+                        setEstadoPerceptronUI("no8", "is-done", 100, `${estudosAqf.length} Estudos AQF`);
                         setEstadoPerceptronUI("no9", "is-done", 100, `${propostasPlanejador.length} ações`);
                         renderNeuralSvgTopology(new Set(["s_n7_n8", "s_n8_n9", "s_m_n7", "s_m_n9"]), new Set(DEFINICAO_SINAPSES.map(e => e.id)));
                         neuralAnimandoAgora = false;
@@ -6576,7 +6543,7 @@ Responda SOMENTE JSON Array: [{"ativo_erp":"...","catalogo_label":string|null,"n
             estudosAqf = [novo, ...estudosAqf.filter(e => e.ativo !== ativo)];
             propostasPlanejador = estudosAqf.flatMap(e => e.propostas);
             renderCacadorView();
-            showToast(`Estudo AQF 2.0 gerado para "${ativo}" com 3 propostas no Planejador!`, "success");
+            showToast(`Estudo AQF gerado para "${ativo}" com 3 propostas no Planejador!`, "success");
         };
 
         window.executarAcaoPlanejador1Clique = async (propostaId) => {
@@ -6607,7 +6574,7 @@ Responda SOMENTE JSON Array: [{"ativo_erp":"...","catalogo_label":string|null,"n
                             { id: "chk_aqf_1", tarefa: pr.titulo, criterio: pr.procedimento, peca: pr.componente, critico: true }
                         ],
                         origem: "maestri_cacador_aqf",
-                        criadoPor: usuarioLogado?.nome || "Maestri IA",
+                        criadoPor: usuarioLogado?.nome || "Engenharia PCM",
                         criadoEm: new Date().toISOString()
                     });
                     showToast(`Plano Preventivo criado em PREVENTIVAS.html para "${pr.ativo}"!`, "success");
@@ -6621,7 +6588,7 @@ Responda SOMENTE JSON Array: [{"ativo_erp":"...","catalogo_label":string|null,"n
                         criterio: pr.procedimento,
                         periodicidade: "Semanal",
                         origem: "maestri_cacador_aqf",
-                        criadoPor: usuarioLogado?.nome || "Maestri IA",
+                        criadoPor: usuarioLogado?.nome || "Engenharia PCM",
                         timestamp: Date.now()
                     });
                     showToast(`Ponto Cirúrgico adicionado em INSPEÇÃO DE ROTA.html para "${pr.ativo}"!`, "success");
@@ -6668,13 +6635,13 @@ Responda SOMENTE JSON Array: [{"ativo_erp":"...","catalogo_label":string|null,"n
                 th{background:#f1f5f9;font-size:10px;text-transform:uppercase}
             </style></head><body>
                 <div class="hdr">
-                    <div><strong style="color:#0284c7;text-transform:uppercase;font-size:10px">PCM Cepêra • Projeto Maestri 2.0 (Caçador AQF)</strong><h1 style="margin:2px 0 0;font-size:16px">Relatório de Análise de Quebra e Falha (AQF) — ${escapeHtml(est.ativo)}</h1></div>
+                    <div><strong style="color:#0284c7;text-transform:uppercase;font-size:10px">PCM Cepêra • Engenharia de Confiabilidade & AQF</strong><h1 style="margin:2px 0 0;font-size:16px">Relatório de Análise de Quebra e Falha (AQF) — ${escapeHtml(est.ativo)}</h1></div>
                     <div style="text-align:right"><strong>Linha Classe ${escapeHtml(est.criticidade_linha)}</strong><br>MTBF: ${est.metricas.mtbf_h}h • MTTR: ${est.metricas.mttr_min} min</div>
                 </div>
                 <div class="box"><strong>1. Resumo de Engenharia (RAE):</strong><br>${escapeHtml(est.rae_resumo)}</div>
                 <div class="box"><strong>2. Diagrama de Ishikawa (6M):</strong><ul>${Object.entries(est.ishikawa_6m).map(([k, v]) => `<li><strong>${escapeHtml(k)}:</strong> ${escapeHtml(v)}</li>`).join("")}</ul></div>
                 <div class="box"><strong>3. Análise dos 5 Porquês & Causa Raiz:</strong><ol>${est.cinco_porques.map(p => `<li>${escapeHtml(p)}</li>`).join("")}</ol></div>
-                <div class="box"><strong>4. Plano de Ação 5W2H (Planejador Maestri):</strong>
+                <div class="box"><strong>4. Plano de Ação 5W2H (Planejador PCM):</strong>
                     <table><thead><tr><th>Destino</th><th>Ação / O Que</th><th>Como / Procedimento</th><th>Equipe / Per.</th></tr></thead>
                     <tbody>${est.propostas.map(p => `<tr><td>${escapeHtml(p.labelDestino)}</td><td><strong>${escapeHtml(p.titulo)}</strong></td><td>${escapeHtml(p.procedimento)}</td><td>${escapeHtml(p.equipe)} (${escapeHtml(p.periodicidade)})</td></tr>`).join("")}</tbody></table>
                 </div>
@@ -7000,6 +6967,11 @@ Responda SOMENTE JSON Array: [{"ativo_erp":"...","catalogo_label":string|null,"n
                 }, () => {});
             } catch (_) {}
         }
+
+        window.addEventListener("resize", () => {
+            cachedNeuralPts = null;
+            cachedNeuralBoxStr = "";
+        });
 
         if (document.readyState === "loading") {
             document.addEventListener("DOMContentLoaded", iniciarAplicacao, { once: true });
