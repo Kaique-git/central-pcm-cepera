@@ -143,114 +143,137 @@
         body.font-sm { --font-scale: 0.92; }
         body.font-lg { --font-scale: 1.08; }
 
-        /* ==================== REDE NEURAL MAESTRO & PERCEPTRONS ==================== */
+        /* ==================== ORQUESTRAÇÃO TÉCNICA — WHITE GLASSMORPHISM DESIGN SYSTEM ==================== */
         @keyframes flowSynapse {
             to { stroke-dashoffset: -36; }
         }
         @keyframes maestroPulse {
-            0%, 100% { box-shadow: 0 0 0 0 rgba(56, 189, 248, 0.55), 0 0 28px rgba(14, 165, 233, 0.45); }
-            50% { box-shadow: 0 0 0 10px rgba(56, 189, 248, 0), 0 0 42px rgba(56, 189, 248, 0.85); }
+            0%, 100% { box-shadow: 0 0 0 0 rgba(2, 132, 199, 0.22), 0 12px 28px -10px rgba(2, 132, 199, 0.14); }
+            50% { box-shadow: 0 0 0 7px rgba(2, 132, 199, 0), 0 16px 32px -10px rgba(2, 132, 199, 0.22); }
         }
         @keyframes perceptronRingSpin {
             from { transform: rotate(0deg); }
             to { transform: rotate(360deg); }
         }
         @keyframes workerBlink {
-            0%, 100% { opacity: 0.45; transform: scale(0.95); }
-            50% { opacity: 1; transform: scale(1.06); }
+            0%, 100% { opacity: 0.72; }
+            50% { opacity: 1; }
         }
         @keyframes slideFadeIn {
-            from { opacity: 0; transform: translateY(-6px); }
+            from { opacity: 0; transform: translateY(-4px); }
             to { opacity: 1; transform: translateY(0); }
         }
         .neural-stage {
             position: relative;
-            background: radial-gradient(circle at 50% 0%, #0d2b45 0%, #07101f 52%, #030712 100%);
-            border: 1.5px solid rgba(56, 189, 248, 0.28);
-            box-shadow: 0 25px 60px -15px rgba(2, 132, 199, 0.35), inset 0 1px 0 rgba(255, 255, 255, 0.08);
-            color: #f8fafc;
+            background: rgba(255, 255, 255, 0.92);
+            backdrop-filter: blur(18px);
+            -webkit-backdrop-filter: blur(18px);
+            border: 1px solid rgba(226, 232, 240, 0.96);
+            box-shadow: 0 18px 42px -16px rgba(15, 23, 42, 0.08), inset 0 1px 0 rgba(255, 255, 255, 0.98);
+            color: #0f172a;
         }
         .neural-grid-bg {
-            background-image: radial-gradient(rgba(148, 163, 184, 0.14) 1px, transparent 1px);
-            background-size: 24px 24px;
+            background: linear-gradient(180deg, rgba(248, 250, 252, 0.9) 0%, rgba(255, 255, 255, 0.97) 52%, rgba(241, 245, 249, 0.85) 100%);
+            box-shadow: inset 0 1px 0 #ffffff, 0 4px 18px -8px rgba(15, 23, 42, 0.05);
         }
         .maestro-hub {
             position: relative;
-            border-radius: 1.5rem;
-            border: 1.5px solid rgba(56, 189, 248, 0.55);
-            background: linear-gradient(135deg, rgba(14, 116, 144, 0.38) 0%, rgba(15, 23, 42, 0.94) 55%, rgba(79, 70, 229, 0.36) 100%);
-            transition: all 0.25s ease;
+            border-radius: 1.35rem;
+            border: 1.5px solid #cbd5e1;
+            background: rgba(255, 255, 255, 0.96);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            box-shadow: 0 10px 26px -12px rgba(15, 23, 42, 0.08);
+            color: #0f172a;
+            transition: all 0.2s ease;
             cursor: pointer;
         }
+        .maestro-hub:hover {
+            border-color: #94a3b8;
+            box-shadow: 0 14px 30px -12px rgba(15, 23, 42, 0.12);
+        }
         .maestro-hub.is-delegating {
-            animation: maestroPulse 1.35s infinite ease-in-out;
-            border-color: #38bdf8;
+            animation: maestroPulse 1.6s infinite ease-in-out;
+            border-color: #0284c7;
         }
         .perceptron-node {
             position: relative;
-            border-radius: 1.35rem;
-            border: 1.5px solid rgba(148, 163, 184, 0.24);
-            background: linear-gradient(180deg, rgba(15, 23, 42, 0.95) 0%, rgba(9, 14, 28, 0.98) 100%);
-            padding: 0.85rem 0.9rem;
-            transition: transform 0.22s ease, border-color 0.22s ease, box-shadow 0.22s ease;
+            border-radius: 1.25rem;
+            border: 1.5px solid #e2e8f0;
+            background: rgba(255, 255, 255, 0.96);
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
+            padding: 0.9rem 0.95rem;
+            box-shadow: 0 6px 18px -8px rgba(15, 23, 42, 0.06);
+            color: #0f172a;
+            transition: transform 0.18s ease, border-color 0.18s ease, box-shadow 0.18s ease;
             cursor: pointer;
             z-index: 2;
         }
         .perceptron-node:hover {
             transform: translateY(-2px);
-            border-color: rgba(56, 189, 248, 0.72);
+            border-color: #94a3b8;
+            box-shadow: 0 12px 24px -10px rgba(15, 23, 42, 0.1);
         }
         .perceptron-node.is-selected {
-            box-shadow: 0 0 0 3px rgba(56, 189, 248, 0.55), 0 0 32px rgba(56, 189, 248, 0.38) !important;
-            border-color: #38bdf8 !important;
+            box-shadow: 0 0 0 3px rgba(2, 132, 199, 0.2), 0 12px 26px -10px rgba(2, 132, 199, 0.16) !important;
+            border-color: #0284c7 !important;
         }
         .perceptron-node.is-idle {
-            border-color: rgba(148, 163, 184, 0.22);
-            opacity: 0.88;
+            border-color: #e2e8f0;
+            background: rgba(255, 255, 255, 0.9);
         }
         .perceptron-node.is-working {
-            border-color: #38bdf8;
-            box-shadow: 0 0 0 3px rgba(56, 189, 248, 0.32), 0 0 30px rgba(14, 165, 233, 0.68);
-            transform: scale(1.03);
-            opacity: 1;
+            border-color: #0284c7;
+            background: linear-gradient(180deg, #ffffff 0%, #f0f9ff 100%);
+            box-shadow: 0 0 0 3px rgba(2, 132, 199, 0.14), 0 12px 24px -8px rgba(2, 132, 199, 0.14);
+            transform: translateY(-2px);
         }
         .perceptron-node.is-done {
-            border-color: rgba(52, 211, 153, 0.72);
-            box-shadow: 0 0 18px rgba(16, 185, 129, 0.22);
-            opacity: 1;
+            border-color: #cbd5e1;
+            background: #ffffff;
+            box-shadow: 0 6px 16px -8px rgba(15, 23, 42, 0.06);
         }
         .perceptron-node.is-waiting {
-            border-color: rgba(251, 191, 36, 0.78);
-            box-shadow: 0 0 18px rgba(245, 158, 11, 0.28);
-            opacity: 1;
+            border-color: #fcd34d;
+            background: linear-gradient(180deg, #ffffff 0%, #fffbeb 100%);
+            box-shadow: 0 8px 20px -10px rgba(217, 119, 6, 0.14);
         }
         .perceptron-core {
             position: relative;
             width: 34px;
             height: 34px;
-            border-radius: 9999px;
+            border-radius: 0.75rem;
             display: inline-flex;
             align-items: center;
             justify-content: center;
-            background: rgba(15, 23, 42, 0.92);
-            border: 2px solid rgba(56, 189, 248, 0.48);
+            background: #f8fafc;
+            border: 1.5px solid #cbd5e1;
+            color: #334155;
             flex-shrink: 0;
+        }
+        .perceptron-node.is-working .perceptron-core {
+            border-color: #38bdf8;
+            background: #e0f2fe;
+            color: #0369a1;
         }
         .perceptron-node.is-working .perceptron-core::after {
             content: "";
             position: absolute;
-            inset: -6px;
-            border-radius: 9999px;
-            border: 2px dashed #38bdf8;
-            animation: perceptronRingSpin 2.2s linear infinite;
+            inset: -5px;
+            border-radius: 0.9rem;
+            border: 1.5px dashed #0284c7;
+            animation: perceptronRingSpin 2.6s linear infinite;
         }
         .perceptron-node.is-done .perceptron-core {
-            border-color: #34d399;
-            background: rgba(16, 185, 129, 0.16);
+            border-color: #86efac;
+            background: #f0fdf4;
+            color: #15803d;
         }
         .perceptron-node.is-waiting .perceptron-core {
-            border-color: #fbbf24;
-            background: rgba(245, 158, 11, 0.16);
+            border-color: #fcd34d;
+            background: #fef3c7;
+            color: #b45309;
         }
         .synapse-path {
             fill: none;
@@ -259,24 +282,33 @@
         }
         .synapse-path.is-active {
             stroke-dasharray: 10 8;
-            animation: flowSynapse 0.65s linear infinite;
+            animation: flowSynapse 0.7s linear infinite;
         }
         .synapse-path.is-idle {
             stroke-dasharray: 4 6;
-            opacity: 0.34;
+            opacity: 0.32;
         }
         .synapse-path.is-done {
-            opacity: 0.78;
+            opacity: 0.58;
         }
         .worker-chip-active {
-            animation: workerBlink 0.7s infinite ease-in-out;
+            animation: workerBlink 0.8s infinite ease-in-out;
         }
         .neural-stream-card {
-            animation: slideFadeIn 0.22s ease-out;
+            animation: slideFadeIn 0.2s ease-out;
         }
         .neural-scroll::-webkit-scrollbar { width: 6px; }
-        .neural-scroll::-webkit-scrollbar-track { background: rgba(15, 23, 42, 0.5); border-radius: 9999px; }
-        .neural-scroll::-webkit-scrollbar-thumb { background: rgba(56, 189, 248, 0.35); border-radius: 9999px; }
+        .neural-scroll::-webkit-scrollbar-track { background: #f1f5f9; border-radius: 9999px; }
+        .neural-scroll::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 9999px; }
+        .neural-scroll::-webkit-scrollbar-thumb:hover { background: #94a3b8; }
+        body.theme-dark .neural-stage,
+        body.theme-dark .neural-grid-bg,
+        body.theme-dark .maestro-hub,
+        body.theme-dark .perceptron-node {
+            background: #111827 !important;
+            border-color: #1f2937 !important;
+            color: #f8fafc !important;
+        }
         .dropzone-active {
             border-color: #0284c7 !important;
             background: linear-gradient(135deg, #e0f2fe 0%, #eff6ff 100%) !important;
@@ -340,9 +372,9 @@
 
                 <!-- NAVEGAÇÃO DOS NÓS -->
                 <nav class="hidden md:flex flex-col gap-1" aria-label="Navegação Maestri">
-                    <div class="px-2 pt-1 pb-0.5 text-[10px] font-extrabold uppercase tracking-wider text-slate-400">Pipeline &amp; Auditoria (Nós 1–4)</div>
+                    <div class="px-2 pt-1 pb-0.5 text-[10px] font-extrabold uppercase tracking-wider text-slate-400">Fluxo &amp; Auditoria (Etapas 1–4)</div>
                     <button type="button" id="nav-pipeline" onclick="switchView('pipeline')" class="nav-item active">
-                        <span>1. Rede Neural (9 Nós)</span>
+                        <span>1. Orquestração (9 Etapas)</span>
                         <span id="badgeNosConcluidos" class="px-2 py-0.5 rounded-full text-[10px] font-extrabold bg-emerald-500 text-white">9/9</span>
                     </button>
                     <button type="button" id="nav-auditoria" onclick="switchView('auditoria')" class="nav-item">
@@ -350,7 +382,7 @@
                         <span id="badgeTotalOmsNav" class="px-2 py-0.5 rounded-full text-[10px] font-extrabold bg-slate-200 text-slate-800">0</span>
                     </button>
 
-                    <div class="px-2 pt-2.5 pb-0.5 text-[10px] font-extrabold uppercase tracking-wider text-slate-400">Aprendizado Humano (Nós 5–6)</div>
+                    <div class="px-2 pt-2.5 pb-0.5 text-[10px] font-extrabold uppercase tracking-wider text-slate-400">Governança Técnica (Etapas 5–6)</div>
                     <button type="button" id="nav-conferente" onclick="switchView('conferente')" class="nav-item">
                         <span>3. Mesa do Conferente</span>
                         <span id="badgeConferirNav" class="px-2 py-0.5 rounded-full text-[10px] font-extrabold bg-amber-100 text-amber-800">0</span>
@@ -360,7 +392,7 @@
                         <span id="badgeBiblioNav" class="px-2 py-0.5 rounded-full text-[10px] font-extrabold bg-indigo-100 text-indigo-800">0</span>
                     </button>
 
-                    <div class="px-2 pt-2.5 pb-0.5 text-[10px] font-extrabold uppercase tracking-wider text-slate-400">Engenharia &amp; Ação (Nós 7–9)</div>
+                    <div class="px-2 pt-2.5 pb-0.5 text-[10px] font-extrabold uppercase tracking-wider text-slate-400">Engenharia &amp; Ação (Etapas 7–9)</div>
                     <button type="button" id="nav-confiabilidade" onclick="switchView('confiabilidade')" class="nav-item">
                         <span>5. Confiabilidade &amp; Radares</span>
                         <span id="badgeQuebrasNav" class="px-2 py-0.5 rounded-full text-[10px] font-extrabold bg-rose-100 text-rose-800">0</span>
@@ -395,11 +427,11 @@
             <header class="frosted-shell border-b border-slate-200/80 px-4 sm:px-6 py-3.5 sticky top-0 z-20 flex flex-wrap items-center justify-between gap-3">
                 <div class="min-w-0">
                     <div class="flex items-center gap-2">
-                        <span class="text-[10px] font-extrabold uppercase tracking-widest text-sky-700">Orquestrador Neural de Agentes • EN 13306</span>
-                        <span id="hdrEconomiaBadge" class="px-2 py-0.5 rounded-full bg-emerald-100 text-emerald-800 border border-emerald-200 text-[10px] font-extrabold">Treino Base Set/Out</span>
+                        <span class="text-[10px] font-extrabold uppercase tracking-widest text-sky-700">Governança &amp; Confiabilidade PCM • Norma EN 13306</span>
+                        <span id="hdrEconomiaBadge" class="px-2 py-0.5 rounded-full bg-emerald-50 text-emerald-800 border border-emerald-200 text-[10px] font-extrabold">Referência Set/Out</span>
                     </div>
-                    <h2 id="headerTitle" class="text-base sm:text-lg font-extrabold text-slate-900 truncate">Rede Neural Maestri 2.0 — Vigente &amp; Comparativo Histórico</h2>
-                    <p id="headerSubtitle" class="text-xs font-semibold text-slate-500 truncate">Coletor ERP › Fast-Path R$ 0 › Auditor Lote 20 › Roteador › Conferente › Bibliotecário › Confiabilidade › Caçador AQF › Planejador</p>
+                    <h2 id="headerTitle" class="text-base sm:text-lg font-extrabold text-slate-900 truncate">Orquestração Técnica Maestri — Auditoria &amp; Confiabilidade</h2>
+                    <p id="headerSubtitle" class="text-xs font-semibold text-slate-500 truncate">Triagem ERP › Regras Locais R$ 0 › Auditoria EN 13306 › Roteamento › Conferência › Biblioteca › Confiabilidade › AQF › Planejador</p>
                 </div>
 
                 <div class="flex flex-wrap items-center gap-2 shrink-0">
@@ -413,17 +445,17 @@
                     </button>
                     <button type="button" id="btnHeaderUploadErp" onclick="document.getElementById('inputUploadPlanilhaErp').click()" class="btn-touch bg-sky-50 hover:bg-sky-100 text-sky-800 border border-sky-200 text-xs py-2 px-3.5">
                         <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12"/></svg>
-                        <span>Processar Novas OMs do ERP</span>
+                        <span>Importar OMs do ERP</span>
                     </button>
                     <button type="button" onclick="executarPipelineCompletoUI({ animar: true })" class="btn-pill-dark text-xs py-2 px-4">
                         <svg class="w-3.5 h-3.5" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM9.555 7.168A1 1 0 008 8v4a1 1 0 001.555.832l3-2a1 1 0 000-1.664l-3-2z" clip-rule="evenodd"/></svg>
-                        <span>Executar Rede Neural (9 Nós)</span>
+                        <span>Executar Orquestração</span>
                     </button>
                 </div>
             </header>
 
             <main class="flex-1 p-4 sm:p-6 space-y-6 max-w-[1840px] w-full mx-auto">
-                <!-- ==================== VIEW 1: PIPELINE VISUAL DE REDE NEURAL (9 NÓS) & UPLOAD ERP ==================== -->
+                <!-- ==================== VIEW 1: ORQUESTRAÇÃO TÉCNICA DE 9 ETAPAS & UPLOAD ERP ==================== -->
                 <section id="view-pipeline" class="space-y-6">
                     <!-- KPI STRIP DE ECONOMIA E RODADA VIGENTE -->
                     <div id="pipelineKpiGrid" class="grid grid-cols-2 lg:grid-cols-5 gap-3"></div>
@@ -433,18 +465,18 @@
                         ondragover="onErpDragOver(event)"
                         ondragleave="onErpDragLeave(event)"
                         ondrop="onErpDrop(event)"
-                        class="glass-card p-5 rounded-3xl border-2 border-dashed border-sky-300 bg-gradient-to-r from-sky-50/80 via-white to-indigo-50/60 flex flex-col xl:flex-row xl:items-center justify-between gap-4 transition-all">
+                        class="glass-card p-5 rounded-3xl border-2 border-dashed border-slate-300 bg-white/95 flex flex-col xl:flex-row xl:items-center justify-between gap-4 transition-all">
                         <div class="space-y-1.5 flex-1">
                             <div class="flex flex-wrap items-center gap-2">
                                 <span id="badgeCicloVigente" class="px-2.5 py-0.5 rounded-full bg-sky-600 text-white text-[10px] font-extrabold uppercase tracking-wider">Lote Vigente • Nov/2026</span>
-                                <span class="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full bg-indigo-100 text-indigo-800 border border-indigo-200 text-[10px] font-extrabold">
-                                    <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253"/></svg>
-                                    <span>Base de Treino Ativa: Set/Out (1.234 OMs)</span>
+                                <span class="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full bg-slate-100 text-slate-700 border border-slate-200 text-[10px] font-extrabold">
+                                    <svg class="w-3 h-3 text-sky-700" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253"/></svg>
+                                    <span>Base de Referência: Set/Out (1.234 OMs)</span>
                                 </span>
-                                <span id="rodadaVigenteStatusPill" class="px-2.5 py-0.5 rounded-full bg-amber-100 text-amber-800 border border-amber-200 text-[10px] font-extrabold">Aguardando planilha do ERP</span>
+                                <span id="rodadaVigenteStatusPill" class="px-2.5 py-0.5 rounded-full bg-amber-50 text-amber-800 border border-amber-200 text-[10px] font-extrabold">Aguardando planilha do ERP</span>
                             </div>
-                            <h3 class="text-sm sm:text-base font-extrabold text-slate-900">Arraste a planilha do ERP de Novembro (.CSV / .XLSX) para acionar o Maestro &amp; Perceptrons</h3>
-                            <p class="text-xs font-semibold text-slate-600">O <strong>Nó 1</strong> identifica o mês automaticamente pelas datas, aplica a memória aprendida de <strong>Set/Out</strong> no <strong>Nó 2 (R$ 0,00)</strong> e compara se a planta <strong>Melhorou ou Piorou</strong>.</p>
+                            <h3 class="text-sm sm:text-base font-extrabold text-slate-900">Arraste a planilha de Ordens de Manutenção do ERP (.CSV / .XLSX) para iniciar a conferência e orquestração</h3>
+                            <p class="text-xs font-semibold text-slate-600">A <strong>Etapa 1</strong> valida as ordens concluídas e vínculos com <code>ob_linhas</code>, aplica as regras consolidadas na <strong>Etapa 2 (R$ 0,00)</strong> e atualiza o comparativo histórico da planta.</p>
                         </div>
                         <div class="flex flex-wrap items-center gap-2 shrink-0">
                             <input type="text" id="inputPeriodoRodada" placeholder="Mês / Ciclo (ex: Nov/2026)" value="Nov/2026" class="input-clean py-2 text-xs font-extrabold w-40" title="Nome do ciclo/mês para comparação histórica">
@@ -453,13 +485,13 @@
                                 <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 7v10a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2h-6l-2-2H5a2 2 0 00-2 2z"/></svg>
                                 <span>Selecionar Planilha (.CSV / .XLSX)</span>
                             </button>
-                            <button type="button" onclick="simularLoteNovembroTeste()" class="btn-touch bg-sky-600 hover:bg-sky-700 text-white text-xs py-2.5 px-3.5" title="Executar simulação realista de Novembro para ver todos os nós conversando ordem a ordem">
+                            <button type="button" onclick="simularLoteNovembroTeste()" class="btn-touch bg-sky-600 hover:bg-sky-700 text-white text-xs py-2.5 px-3.5" title="Executar simulação realista de Novembro para acompanhar o fluxo ordem a ordem">
                                 <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"/></svg>
                                 <span>Simular Lote Teste (Novembro)</span>
                             </button>
-                            <button type="button" onclick="inspecionarHistoricoSetOut()" class="btn-touch bg-white hover:bg-slate-50 border border-slate-200 text-slate-700 text-xs py-2.5 px-3" title="Abrir a amostra de treino de Set/Out (1.234 OMs) apenas para inspeção">
-                                <svg class="w-4 h-4 text-indigo-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253"/></svg>
-                                <span>Inspecionar Treino Set/Out</span>
+                            <button type="button" onclick="inspecionarHistoricoSetOut()" class="btn-touch bg-white hover:bg-slate-50 border border-slate-200 text-slate-700 text-xs py-2.5 px-3" title="Abrir a base de referência de Set/Out (1.234 OMs) para consulta">
+                                <svg class="w-4 h-4 text-sky-700" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253"/></svg>
+                                <span>Inspecionar Base Set/Out</span>
                             </button>
                             <button type="button" onclick="limparRodadaVigente()" class="btn-touch bg-white hover:bg-rose-50 border border-slate-200 text-slate-600 hover:text-rose-700 text-xs py-2.5 px-3" title="Zerar lote atual para subir outro mês">
                                 <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"/></svg>
@@ -472,353 +504,353 @@
                         </div>
                     </div>
 
-                    <!-- ==================== PALCO GIGANTE: REDE NEURAL (MAESTRO + PERCEPTRONS + CONVERSA AO VIVO + STREAM DE OMS) ==================== -->
+                    <!-- ==================== PAINEL DE ORQUESTRAÇÃO TÉCNICA (WHITE GLASSMORPHISM + 9 ETAPAS + MONITORAMENTO) ==================== -->
                     <div id="neuralPipelineStage" class="neural-stage rounded-3xl p-5 sm:p-7 space-y-6 overflow-hidden">
-                        <!-- BARRA SUPERIOR DE CONTROLE DO MOTOR NEURAL -->
-                        <div class="flex flex-col xl:flex-row xl:items-center justify-between gap-4 relative z-10 border-b border-slate-800/80 pb-4">
-                            <div class="space-y-1">
-                                <div class="flex flex-wrap items-center gap-2">
-                                    <span class="px-2.5 py-0.5 rounded-full bg-sky-500/20 border border-sky-400/40 text-sky-300 text-[10px] font-extrabold uppercase tracking-widest">Rede Neural Industrial • 9 Perceptrons</span>
-                                    <span id="neuralStatusBadge" class="px-2.5 py-0.5 rounded-full bg-slate-800 text-slate-200 border border-slate-700 text-[10px] font-extrabold">Aguardando Estímulo (ERP)</span>
+                        <!-- BARRA SUPERIOR DE CONTROLE DA ORQUESTRAÇÃO -->
+                        <div class="flex flex-wrap items-center justify-between gap-4 relative z-10 border-b border-slate-200/90 pb-4">
+                            <div class="space-y-1 flex-1 min-w-[300px]">
+                                <div class="flex flex-wrap items-center gap-2.5">
+                                    <span class="text-[10px] font-extrabold uppercase tracking-widest text-sky-700">Fluxo de Auditoria &amp; Engenharia PCM • 9 Etapas</span>
+                                    <span id="neuralStatusBadge" class="px-2.5 py-0.5 rounded-full bg-slate-100 text-slate-700 border border-slate-200 text-[10px] font-extrabold">Aguardando Lote ERP</span>
                                 </div>
-                                <h3 class="text-lg sm:text-xl font-extrabold text-white tracking-tight">Orquestração Neural em Tempo Real — Maestro Delegando Funções</h3>
-                                <p class="text-xs text-slate-400 font-medium">Clique em qualquer perceptron abaixo para filtrar suas interações e ver exatamente o que ele recebeu e retornou.</p>
+                                <h3 class="text-lg sm:text-xl font-extrabold text-slate-900 tracking-tight">Orquestração Técnica de Ordens de Manutenção</h3>
+                                <p class="text-xs text-slate-500 font-medium">Selecione qualquer etapa do fluxo abaixo para filtrar os registros, regras aplicadas e encaminhamentos.</p>
                             </div>
 
                             <div class="flex flex-wrap items-center gap-2 shrink-0">
-                                <!-- Seletor claro de Ritmo de Visualização -->
-                                <div class="inline-flex rounded-xl p-1 bg-slate-900 border border-slate-700/90 text-[11px] font-extrabold" role="group" aria-label="Ritmo de execução ao vivo">
-                                    <button type="button" id="btnRitmoPassoAPasso" onclick="definirRitmoRedeNeural('passo_a_passo')" style="background:#0284c7;color:#ffffff;" class="px-3 py-1.5 rounded-lg transition-all" title="Processa OM por OM lentamente (~260ms cada) para você acompanhar os nós conversando">Passo a Passo (Ao Vivo)</button>
-                                    <button type="button" id="btnRitmoRapido" onclick="definirRitmoRedeNeural('rapido')" style="background:transparent;color:#94a3b8;" class="px-3 py-1.5 rounded-lg transition-all" title="Executa em ondas rápidas (~1,2s) exibindo todo o resultado">Rápido (Turbo)</button>
+                                <!-- Seletor de Ritmo de Visualização -->
+                                <div class="inline-flex rounded-xl p-1 bg-slate-100 border border-slate-200/90 text-[11px] font-extrabold" role="group" aria-label="Ritmo de execução ao vivo">
+                                    <button type="button" id="btnRitmoPassoAPasso" onclick="definirRitmoRedeNeural('passo_a_passo')" style="background:#0f172a;color:#ffffff;" class="px-3 py-1.5 rounded-lg transition-all shadow-xs" title="Processa OM por OM (~250ms cada) para acompanhamento detalhado entre as etapas">Passo a Passo (Ao Vivo)</button>
+                                    <button type="button" id="btnRitmoRapido" onclick="definirRitmoRedeNeural('rapido')" style="background:transparent;color:#475569;" class="px-3 py-1.5 rounded-lg transition-all" title="Executa em ondas rápidas (~1,1s) consolidando todo o lote">Rápido (Turbo)</button>
                                 </div>
 
-                                <button type="button" id="btnPauseResumeNeural" onclick="alternarPausaRedeNeural()" style="background:#1e293b;color:#cbd5e1;border:1px solid #475569;" class="inline-flex items-center gap-1.5 px-3 py-2 rounded-xl text-xs font-extrabold transition-colors">
+                                <button type="button" id="btnPauseResumeNeural" onclick="alternarPausaRedeNeural()" style="background:#ffffff;color:#334155;border:1px solid #cbd5e1;" class="inline-flex items-center gap-1.5 px-3 py-2 rounded-xl text-xs font-extrabold shadow-2xs transition-colors">
                                     <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 9v6m4-6v6m7-3a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
                                     <span id="lblBtnPauseNeural">Pausar</span>
                                 </button>
 
-                                <button type="button" onclick="reanimarRedeNeuralLive()" class="inline-flex items-center gap-1.5 px-4 py-2 rounded-xl bg-sky-500 hover:bg-sky-400 text-slate-950 text-xs font-extrabold shadow-lg shadow-sky-500/25 transition-all">
+                                <button type="button" onclick="reanimarRedeNeuralLive()" class="inline-flex items-center gap-1.5 px-4 py-2 rounded-xl bg-sky-600 hover:bg-sky-700 text-white text-xs font-extrabold shadow-sm transition-all">
                                      <svg class="w-3.5 h-3.5" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM9.555 7.168A1 1 0 008 8v4a1 1 0 001.555.832l3-2a1 1 0 000-1.664l-3-2z" clip-rule="evenodd"/></svg>
                                      <span>Reproduzir Fluxo ao Vivo</span>
                                  </button>
 
-                                 <button type="button" onclick="reexecutarNosPosConferencia()" style="background:rgba(79,70,229,0.9);color:#ffffff;" class="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-xl hover:bg-indigo-400 text-xs font-extrabold transition-colors">
-                                     <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"/></svg>
-                                     <span>Reprocessar Nós 6→9</span>
+                                 <button type="button" onclick="reexecutarNosPosConferencia()" class="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-xl bg-white hover:bg-slate-50 border border-slate-200 text-slate-700 text-xs font-extrabold shadow-2xs transition-colors">
+                                     <svg class="w-3.5 h-3.5 text-sky-700" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"/></svg>
+                                     <span>Atualizar Etapas 6→9</span>
                                  </button>
                             </div>
                         </div>
 
                         <!-- AVISO DE BASE JÁ AUDITADA & PROTEGIDA CONTRA REEXECUÇÃO -->
-                        <div id="neuralLoteAuditadoBanner" hidden class="hidden relative z-10 rounded-2xl border border-emerald-500/40 bg-emerald-950/35 px-4 py-3 flex flex-col lg:flex-row lg:items-center justify-between gap-3">
+                        <div id="neuralLoteAuditadoBanner" hidden class="hidden relative z-10 rounded-2xl border border-emerald-200 bg-emerald-50/75 px-4 py-3 flex flex-col lg:flex-row lg:items-center justify-between gap-3">
                             <div class="flex items-center gap-3 min-w-0">
-                                <span class="w-9 h-9 rounded-xl bg-emerald-500/20 border border-emerald-400/50 text-emerald-300 flex items-center justify-center shrink-0">
+                                <span class="w-9 h-9 rounded-xl bg-white border border-emerald-200 text-emerald-700 flex items-center justify-center shrink-0 shadow-2xs">
                                     <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"/></svg>
                                 </span>
                                 <div class="min-w-0">
-                                    <div id="bannerLoteAuditadoTitle" class="text-xs font-extrabold text-emerald-300">Base Já Auditada &amp; Protegida</div>
-                                    <div id="bannerLoteAuditadoTxt" class="text-[11px] font-semibold text-slate-300 truncate">Dados já processados anteriormente com revisões do Nó 5 preservadas.</div>
+                                    <div id="bannerLoteAuditadoTitle" class="text-xs font-extrabold text-emerald-900">Base Já Auditada &amp; Protegida</div>
+                                    <div id="bannerLoteAuditadoTxt" class="text-[11px] font-semibold text-emerald-800 truncate">Dados já processados anteriormente com revisões da supervisão (Etapa 5) preservadas.</div>
                                 </div>
                             </div>
                             <div class="flex flex-wrap items-center gap-2 shrink-0">
-                                <button type="button" onclick="reavaliarBaseAtualComNovasRegras()" style="background:#f59e0b;color:#0f172a;" class="inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-xl text-[11px] font-extrabold transition-colors">
-                                    <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"/></svg>
+                                <button type="button" onclick="reavaliarBaseAtualComNovasRegras()" class="inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-xl bg-white hover:bg-amber-50 border border-amber-300 text-amber-900 text-[11px] font-extrabold shadow-2xs transition-colors">
+                                    <svg class="w-3.5 h-3.5 text-amber-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"/></svg>
                                     <span>Reavaliar Pendentes (N6 → N2)</span>
                                 </button>
                             </div>
                         </div>
 
-                        <!-- TOPOLOGIA ESPACIAL AMPLIADA: MAESTRO + 5 CAMADAS DE PERCEPTRONS -->
-                        <div id="neuralCanvasInner" class="neural-grid-bg relative rounded-2xl border border-slate-800/90 bg-slate-950/75 p-5 sm:p-6 lg:p-8 xl:p-10 space-y-12 min-h-[680px] overflow-hidden">
-                            <!-- SVG DE SINAPSES EDGE-TO-EDGE E PARTÍCULAS ANIMADAS -->
+                        <!-- TOPOLOGIA ESPACIAL: COORDENAÇÃO + 5 FASES DO PIPELINE -->
+                        <div id="neuralCanvasInner" class="neural-grid-bg relative rounded-2xl border border-slate-200/95 p-5 sm:p-6 lg:p-8 xl:p-10 space-y-12 min-h-[680px] overflow-hidden">
+                            <!-- SVG DE CONEXÕES EDGE-TO-EDGE E FLUXO ANIMADO -->
                             <svg id="neuralSynapseSvg" viewBox="0 0 1200 680" preserveAspectRatio="none" class="hidden lg:block absolute inset-0 w-full h-full pointer-events-none" style="z-index:1;"></svg>
 
-                            <!-- CAMADA COORDENADORA: MAESTRO DELEGANDO -->
+                            <!-- NÚCLEO DE COORDENAÇÃO DO FLUXO -->
                             <div class="relative z-10 flex justify-center pb-2">
                                 <div id="neuralMaestroHub" data-neural-id="maestro" onclick="selecionarNoInspecao('maestro')" class="maestro-hub max-w-3xl w-full px-6 py-4 flex flex-col sm:flex-row items-center justify-between gap-4">
                                     <div class="flex items-center gap-3.5 min-w-0">
-                                        <div class="w-12 h-12 rounded-2xl bg-sky-500/20 border border-sky-400/60 flex items-center justify-center text-sky-300 shrink-0">
+                                        <div class="w-12 h-12 rounded-2xl bg-sky-50 border border-sky-200 flex items-center justify-center text-sky-700 shrink-0 shadow-2xs">
                                             <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 3v2m6-2v2M9 19v2m6-2v2M5 9H3m2 6H3m18-6h-2m2 6h-2M7 19h10a2 2 0 002-2V7a2 2 0 00-2-2H7a2 2 0 00-2 2v10a2 2 0 002 2zM9 9h6v6H9V9z"/></svg>
                                         </div>
                                         <div class="min-w-0">
                                             <div class="flex items-center gap-2">
-                                                <span class="text-[10px] font-extrabold uppercase tracking-widest text-sky-300">Maestro • Núcleo Orquestrador</span>
-                                                <span id="maestroPhasePill" class="px-2 py-0.5 rounded bg-sky-500/25 text-sky-200 font-mono text-[9px] font-extrabold">PRONTO</span>
+                                                <span class="text-[10px] font-extrabold uppercase tracking-widest text-sky-700">Coordenação do Fluxo • Maestri PCM</span>
+                                                <span id="maestroPhasePill" class="px-2 py-0.5 rounded-md bg-slate-100 border border-slate-200 text-slate-700 font-mono text-[9px] font-extrabold">PRONTO</span>
                                             </div>
-                                            <div id="maestroDelegacaoMsg" class="text-xs sm:text-sm font-extrabold text-white truncate">Pronto para receber o CSV/XLSX de Nov/2026 e distribuir carga entre os 9 perceptrons.</div>
+                                            <div id="maestroDelegacaoMsg" class="text-xs sm:text-sm font-extrabold text-slate-900 truncate mt-0.5">Pronto para processar a planilha de Nov/2026 nas 9 etapas de auditoria e confiabilidade.</div>
                                         </div>
                                     </div>
                                     <div class="flex items-center gap-4 shrink-0 font-mono text-xs">
                                         <div class="text-right">
-                                            <div class="text-[9px] uppercase text-slate-400 font-bold">Taxa Sináptica</div>
-                                            <div id="maestroThroughputTxt" class="font-extrabold text-emerald-400">0 OMs/ciclo</div>
+                                            <div class="text-[9px] uppercase text-slate-500 font-bold">Volume Processado</div>
+                                            <div id="maestroThroughputTxt" class="font-extrabold text-emerald-700">0 OMs/ciclo</div>
                                         </div>
-                                        <div class="h-8 w-px bg-slate-700"></div>
+                                        <div class="h-8 w-px bg-slate-200"></div>
                                         <div class="text-right">
-                                            <div class="text-[9px] uppercase text-slate-400 font-bold">Custo Lote</div>
-                                            <div id="maestroCustoLiveTxt" class="font-extrabold text-sky-300">R$ 0,00</div>
+                                            <div class="text-[9px] uppercase text-slate-500 font-bold">Custo do Lote</div>
+                                            <div id="maestroCustoLiveTxt" class="font-extrabold text-sky-700">R$ 0,00</div>
                                         </div>
                                     </div>
                                 </div>
                             </div>
 
-                            <!-- 5 CAMADAS DE PERCEPTRONS COM ESPAÇAMENTO AMPLO PARA AS SINAPSES -->
+                            <!-- 5 FASES DO PIPELINE DE AUDITORIA E CONFIABILIDADE -->
                             <div id="neuralLayersGrid" class="relative z-10 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-6 lg:gap-8 xl:gap-10 2xl:gap-14 items-stretch pt-2">
-                                <!-- Camada 1: Entrada & Nó 1 -->
+                                <!-- Fase 1: Entrada & Triagem -->
                                 <div class="flex flex-col justify-center gap-6 lg:gap-7">
-                                    <div class="text-center"><span class="inline-block px-2.5 py-0.5 rounded-full bg-slate-950/90 border border-slate-800/80 text-[10px] font-extrabold uppercase tracking-widest text-slate-300">Camada 1 • Entrada</span></div>
+                                    <div class="text-center"><span class="inline-block px-3 py-1 rounded-full bg-white border border-slate-200/90 shadow-2xs text-[10px] font-extrabold uppercase tracking-wider text-slate-600">1. Entrada &amp; Triagem</span></div>
                                     <div id="pNode_input_erp" data-neural-id="input_erp" onclick="selecionarNoInspecao('input_erp')" class="perceptron-node is-idle">
                                         <div class="flex items-center gap-2.5">
-                                            <span class="perceptron-core text-sky-300">
+                                            <span class="perceptron-core text-sky-700">
                                                 <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12"/></svg>
                                             </span>
                                             <div class="min-w-0 flex-1">
-                                                <div class="text-[9px] font-mono font-bold text-sky-400">INPUT ERP</div>
-                                                <div class="text-xs font-extrabold text-white leading-tight">Planilha Vigente</div>
-                                                <div id="pStat_input_erp" class="text-[10px] font-semibold text-slate-400 truncate mt-0.5">CSV / XLSX / JSON</div>
+                                                <div class="text-[9px] font-mono font-bold text-sky-700">ORIGEM ERP</div>
+                                                <div class="text-xs font-extrabold text-slate-900 leading-tight">Planilha Vigente</div>
+                                                <div id="pStat_input_erp" class="text-[10px] font-semibold text-slate-500 truncate mt-0.5">CSV / XLSX / JSON</div>
                                             </div>
                                         </div>
                                     </div>
                                     <div id="pNode_no1" data-neural-id="no1" onclick="selecionarNoInspecao('no1')" class="perceptron-node is-idle">
                                         <div class="flex items-center gap-2.5">
-                                            <span class="perceptron-core font-mono text-xs font-extrabold text-sky-300">N1</span>
+                                            <span class="perceptron-core font-mono text-xs font-extrabold">N1</span>
                                             <div class="min-w-0 flex-1">
                                                 <div class="flex items-center justify-between gap-1">
-                                                    <span class="text-[9px] font-mono font-bold text-sky-400">NÓ 1</span>
-                                                    <span id="pPct_no1" class="text-[9px] font-mono font-extrabold text-emerald-400">0%</span>
+                                                    <span class="text-[9px] font-mono font-bold text-sky-700">ETAPA 1</span>
+                                                    <span id="pPct_no1" class="text-[9px] font-mono font-extrabold text-emerald-700">0%</span>
                                                 </div>
-                                                <div class="text-xs font-extrabold text-white leading-tight">Coletor &amp; Filtro</div>
-                                                <div id="pStat_no1" class="text-[10px] font-semibold text-slate-400 truncate mt-0.5">Filtra OMs + ob_linhas</div>
+                                                <div class="text-xs font-extrabold text-slate-900 leading-tight">Coletor &amp; Filtro</div>
+                                                <div id="pStat_no1" class="text-[10px] font-semibold text-slate-500 truncate mt-0.5">Filtra OMs + ob_linhas</div>
                                             </div>
                                         </div>
-                                        <div class="mt-2.5 h-1.5 rounded-full bg-slate-800 overflow-hidden"><div id="pBar_no1" class="h-full bg-sky-400 transition-all duration-300" style="width:0%"></div></div>
+                                        <div class="mt-2.5 h-1.5 rounded-full bg-slate-100 overflow-hidden"><div id="pBar_no1" class="h-full bg-sky-600 transition-all duration-300" style="width:0%"></div></div>
                                     </div>
                                     <div id="pNode_hist_base" data-neural-id="hist_base" onclick="inspecionarHistoricoSetOut()" class="perceptron-node is-done">
                                         <div class="flex items-center gap-2.5">
-                                            <span class="perceptron-core text-emerald-300">
+                                            <span class="perceptron-core">
                                                 <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 7v10c0 2.21 3.582 4 8 4s8-1.79 8-4V7M4 7c0 2.21 3.582 4 8 4s8-1.79 8-4M4 7c0-2.21 3.582-4 8-4s8 1.79 8 4"/></svg>
                                             </span>
                                             <div class="min-w-0 flex-1">
-                                                <div class="text-[9px] font-mono font-bold text-indigo-300">PESOS TREINO</div>
-                                                <div class="text-xs font-extrabold text-white leading-tight">Base Set/Out</div>
-                                                <div class="text-[10px] font-semibold text-emerald-300 truncate mt-0.5">1.234 OMs • Calibrado</div>
+                                                <div class="text-[9px] font-mono font-bold text-slate-500">HISTÓRICO BASE</div>
+                                                <div class="text-xs font-extrabold text-slate-900 leading-tight">Base Set/Out</div>
+                                                <div class="text-[10px] font-semibold text-emerald-700 truncate mt-0.5">1.234 OMs • Calibrado</div>
                                             </div>
                                         </div>
                                     </div>
                                 </div>
 
-                                <!-- Camada 2: Fast-Path R$ 0 + Nó 3 Multi-Lote -->
+                                <!-- Fase 2: Classificação Técnica -->
                                 <div class="flex flex-col justify-center gap-8 lg:gap-10">
-                                    <div class="text-center"><span class="inline-block px-2.5 py-0.5 rounded-full bg-slate-950/90 border border-slate-800/80 text-[10px] font-extrabold uppercase tracking-widest text-slate-300">Camada 2 • IA</span></div>
+                                    <div class="text-center"><span class="inline-block px-3 py-1 rounded-full bg-white border border-slate-200/90 shadow-2xs text-[10px] font-extrabold uppercase tracking-wider text-slate-600">2. Classificação</span></div>
                                     <div id="pNode_no2" data-neural-id="no2" onclick="selecionarNoInspecao('no2')" class="perceptron-node is-idle">
                                         <div class="flex items-center gap-2.5">
-                                            <span class="perceptron-core font-mono text-xs font-extrabold text-emerald-300">N2</span>
+                                            <span class="perceptron-core font-mono text-xs font-extrabold">N2</span>
                                             <div class="min-w-0 flex-1">
                                                 <div class="flex items-center justify-between gap-1">
-                                                    <span class="text-[9px] font-mono font-bold text-emerald-400">VIA R$ 0</span>
-                                                    <span id="pPct_no2" class="text-[9px] font-mono font-extrabold text-emerald-400">0%</span>
+                                                    <span class="text-[9px] font-mono font-bold text-emerald-700">VIA R$ 0</span>
+                                                    <span id="pPct_no2" class="text-[9px] font-mono font-extrabold text-emerald-700">0%</span>
                                                 </div>
-                                                <div class="text-xs font-extrabold text-white leading-tight">Fast-Path + Memória</div>
-                                                <div id="pStat_no2" class="text-[10px] font-semibold text-slate-400 truncate mt-0.5">Custo zero (63%+ das OMs)</div>
+                                                <div class="text-xs font-extrabold text-slate-900 leading-tight">Fast-Path + Memória</div>
+                                                <div id="pStat_no2" class="text-[10px] font-semibold text-slate-500 truncate mt-0.5">Custo zero (63%+ das OMs)</div>
                                             </div>
                                         </div>
-                                        <div class="mt-2.5 h-1.5 rounded-full bg-slate-800 overflow-hidden"><div id="pBar_no2" class="h-full bg-emerald-400 transition-all duration-300" style="width:0%"></div></div>
+                                        <div class="mt-2.5 h-1.5 rounded-full bg-slate-100 overflow-hidden"><div id="pBar_no2" class="h-full bg-emerald-600 transition-all duration-300" style="width:0%"></div></div>
                                     </div>
 
                                     <div id="pNode_no3" data-neural-id="no3" onclick="selecionarNoInspecao('no3')" class="perceptron-node is-idle">
                                         <div class="flex items-center gap-2.5">
-                                            <span class="perceptron-core font-mono text-xs font-extrabold text-indigo-300">N3</span>
+                                            <span class="perceptron-core font-mono text-xs font-extrabold">N3</span>
                                             <div class="min-w-0 flex-1">
                                                 <div class="flex items-center justify-between gap-1">
-                                                    <span class="text-[9px] font-mono font-bold text-indigo-300">LOTE 20</span>
-                                                    <span id="pPct_no3" class="text-[9px] font-mono font-extrabold text-sky-300">0%</span>
+                                                    <span class="text-[9px] font-mono font-bold text-indigo-700">LOTE 20</span>
+                                                    <span id="pPct_no3" class="text-[9px] font-mono font-extrabold text-sky-700">0%</span>
                                                 </div>
-                                                <div class="text-xs font-extrabold text-white leading-tight">Auditor EN 13306</div>
-                                                <div id="pStat_no3" class="text-[10px] font-semibold text-slate-400 truncate mt-0.5">Sub-perceptrons paralelos</div>
+                                                <div class="text-xs font-extrabold text-slate-900 leading-tight">Auditor EN 13306</div>
+                                                <div id="pStat_no3" class="text-[10px] font-semibold text-slate-500 truncate mt-0.5">Análise em lotes paralelos</div>
                                             </div>
                                         </div>
-                                        <!-- Sub-perceptrons trabalhando em paralelo -->
+                                        <!-- Lotes trabalhando em paralelo -->
                                         <div id="no3WorkersRow" class="mt-2.5 grid grid-cols-3 gap-1.5 text-[9px] font-mono font-extrabold">
-                                            <span class="px-1 py-0.5 rounded bg-slate-900 border border-slate-700 text-center text-slate-400">W1: 20</span>
-                                            <span class="px-1 py-0.5 rounded bg-slate-900 border border-slate-700 text-center text-slate-400">W2: 20</span>
-                                            <span class="px-1 py-0.5 rounded bg-slate-900 border border-slate-700 text-center text-slate-400">W3: 20</span>
+                                            <span class="px-1 py-0.5 rounded bg-slate-50 border border-slate-200 text-center text-slate-600">W1: 20</span>
+                                            <span class="px-1 py-0.5 rounded bg-slate-50 border border-slate-200 text-center text-slate-600">W2: 20</span>
+                                            <span class="px-1 py-0.5 rounded bg-slate-50 border border-slate-200 text-center text-slate-600">W3: 20</span>
                                         </div>
-                                        <div class="mt-2.5 h-1.5 rounded-full bg-slate-800 overflow-hidden"><div id="pBar_no3" class="h-full bg-indigo-400 transition-all duration-300" style="width:0%"></div></div>
+                                        <div class="mt-2.5 h-1.5 rounded-full bg-slate-100 overflow-hidden"><div id="pBar_no3" class="h-full bg-indigo-600 transition-all duration-300" style="width:0%"></div></div>
                                     </div>
                                 </div>
 
-                                <!-- Camada 3: Governança Humana & Aprendizado Contínuo -->
+                                <!-- Fase 3: Governança Humana & Aprendizado Contínuo -->
                                 <div class="flex flex-col justify-center gap-6 lg:gap-7">
-                                    <div class="text-center"><span class="inline-block px-2.5 py-0.5 rounded-full bg-slate-950/90 border border-slate-800/80 text-[10px] font-extrabold uppercase tracking-widest text-slate-300">Camada 3 • Sinapse</span></div>
+                                    <div class="text-center"><span class="inline-block px-3 py-1 rounded-full bg-white border border-slate-200/90 shadow-2xs text-[10px] font-extrabold uppercase tracking-wider text-slate-600">3. Governança</span></div>
                                     <div id="pNode_no4" data-neural-id="no4" onclick="selecionarNoInspecao('no4')" class="perceptron-node is-idle">
                                         <div class="flex items-center gap-2.5">
-                                            <span class="perceptron-core font-mono text-xs font-extrabold text-sky-300">N4</span>
+                                            <span class="perceptron-core font-mono text-xs font-extrabold">N4</span>
                                             <div class="min-w-0 flex-1">
                                                 <div class="flex items-center justify-between gap-1">
-                                                    <span class="text-[9px] font-mono font-bold text-sky-400">ROTEADOR</span>
-                                                    <span id="pPct_no4" class="text-[9px] font-mono font-extrabold text-emerald-400">0%</span>
+                                                    <span class="text-[9px] font-mono font-bold text-sky-700">ROTEADOR</span>
+                                                    <span id="pPct_no4" class="text-[9px] font-mono font-extrabold text-emerald-700">0%</span>
                                                 </div>
-                                                <div class="text-xs font-extrabold text-white leading-tight">4 Equipes &amp; Nota</div>
-                                                <div id="pStat_no4" class="text-[10px] font-semibold text-slate-400 truncate mt-0.5">AUTO / CONFERIR / REVISÃO</div>
+                                                <div class="text-xs font-extrabold text-slate-900 leading-tight">4 Equipes &amp; Nota</div>
+                                                <div id="pStat_no4" class="text-[10px] font-semibold text-slate-500 truncate mt-0.5">AUTO / CONFERIR / REVISÃO</div>
                                             </div>
                                         </div>
-                                        <div class="mt-2.5 h-1.5 rounded-full bg-slate-800 overflow-hidden"><div id="pBar_no4" class="h-full bg-sky-400 transition-all duration-300" style="width:0%"></div></div>
+                                        <div class="mt-2.5 h-1.5 rounded-full bg-slate-100 overflow-hidden"><div id="pBar_no4" class="h-full bg-sky-600 transition-all duration-300" style="width:0%"></div></div>
                                     </div>
 
                                     <div id="pNode_no5" data-neural-id="no5" onclick="selecionarNoInspecao('no5')" class="perceptron-node is-idle">
                                         <div class="flex items-center gap-2.5">
-                                            <span class="perceptron-core font-mono text-xs font-extrabold text-amber-300">N5</span>
+                                            <span class="perceptron-core font-mono text-xs font-extrabold">N5</span>
                                             <div class="min-w-0 flex-1">
                                                 <div class="flex items-center justify-between gap-1">
-                                                    <span class="text-[9px] font-mono font-bold text-amber-300">CONFERENTE</span>
-                                                    <span id="pPct_no5" class="text-[9px] font-mono font-extrabold text-amber-300">0%</span>
+                                                    <span class="text-[9px] font-mono font-bold text-amber-700">CONFERENTE</span>
+                                                    <span id="pPct_no5" class="text-[9px] font-mono font-extrabold text-amber-700">0%</span>
                                                 </div>
-                                                <div class="text-xs font-extrabold text-white leading-tight">Mesa 2-Toques</div>
-                                                <div id="pStat_no5" class="text-[10px] font-semibold text-slate-400 truncate mt-0.5">Valida ambíguas/graves</div>
+                                                <div class="text-xs font-extrabold text-slate-900 leading-tight">Mesa 2-Toques</div>
+                                                <div id="pStat_no5" class="text-[10px] font-semibold text-slate-500 truncate mt-0.5">Valida ambíguas/graves</div>
                                             </div>
                                         </div>
-                                        <div class="mt-2.5 h-1.5 rounded-full bg-slate-800 overflow-hidden"><div id="pBar_no5" class="h-full bg-amber-400 transition-all duration-300" style="width:0%"></div></div>
+                                        <div class="mt-2.5 h-1.5 rounded-full bg-slate-100 overflow-hidden"><div id="pBar_no5" class="h-full bg-amber-500 transition-all duration-300" style="width:0%"></div></div>
                                     </div>
 
                                     <div id="pNode_no6" data-neural-id="no6" onclick="selecionarNoInspecao('no6')" class="perceptron-node is-idle">
                                         <div class="flex items-center gap-2.5">
-                                            <span class="perceptron-core font-mono text-xs font-extrabold text-violet-300">N6</span>
+                                            <span class="perceptron-core font-mono text-xs font-extrabold">N6</span>
                                             <div class="min-w-0 flex-1">
                                                 <div class="flex items-center justify-between gap-1">
-                                                    <span class="text-[9px] font-mono font-bold text-violet-300">MEMÓRIA</span>
-                                                    <span id="pPct_no6" class="text-[9px] font-mono font-extrabold text-violet-300">0%</span>
+                                                    <span class="text-[9px] font-mono font-bold text-indigo-700">MEMÓRIA</span>
+                                                    <span id="pPct_no6" class="text-[9px] font-mono font-extrabold text-indigo-700">0%</span>
                                                 </div>
-                                                <div class="text-xs font-extrabold text-white leading-tight">Bibliotecário R$ 0</div>
-                                                <div id="pStat_no6" class="text-[10px] font-semibold text-slate-400 truncate mt-0.5">Realimenta N2 &amp; N3</div>
+                                                <div class="text-xs font-extrabold text-slate-900 leading-tight">Bibliotecário R$ 0</div>
+                                                <div id="pStat_no6" class="text-[10px] font-semibold text-slate-500 truncate mt-0.5">Realimenta N2 &amp; N3</div>
                                             </div>
                                         </div>
-                                        <div class="mt-2.5 h-1.5 rounded-full bg-slate-800 overflow-hidden"><div id="pBar_no6" class="h-full bg-violet-400 transition-all duration-300" style="width:0%"></div></div>
+                                        <div class="mt-2.5 h-1.5 rounded-full bg-slate-100 overflow-hidden"><div id="pBar_no6" class="h-full bg-indigo-600 transition-all duration-300" style="width:0%"></div></div>
                                     </div>
                                 </div>
 
-                                <!-- Camada 4: Engenharia de Confiabilidade & Caçador AQF -->
+                                <!-- Fase 4: Engenharia de Confiabilidade & Caçador AQF -->
                                 <div class="flex flex-col justify-center gap-8 lg:gap-10">
-                                    <div class="text-center"><span class="inline-block px-2.5 py-0.5 rounded-full bg-slate-950/90 border border-slate-800/80 text-[10px] font-extrabold uppercase tracking-widest text-slate-300">Camada 4 • AQF</span></div>
+                                    <div class="text-center"><span class="inline-block px-3 py-1 rounded-full bg-white border border-slate-200/90 shadow-2xs text-[10px] font-extrabold uppercase tracking-wider text-slate-600">4. Confiabilidade</span></div>
                                     <div id="pNode_no7" data-neural-id="no7" onclick="selecionarNoInspecao('no7')" class="perceptron-node is-idle">
                                         <div class="flex items-center gap-2.5">
-                                            <span class="perceptron-core font-mono text-xs font-extrabold text-rose-300">N7</span>
+                                            <span class="perceptron-core font-mono text-xs font-extrabold">N7</span>
                                             <div class="min-w-0 flex-1">
                                                 <div class="flex items-center justify-between gap-1">
-                                                    <span class="text-[9px] font-mono font-bold text-rose-300">RADAR AQF</span>
-                                                    <span id="pPct_no7" class="text-[9px] font-mono font-extrabold text-rose-300">0%</span>
+                                                    <span class="text-[9px] font-mono font-bold text-rose-700">RADAR AQF</span>
+                                                    <span id="pPct_no7" class="text-[9px] font-mono font-extrabold text-rose-700">0%</span>
                                                 </div>
-                                                <div class="text-xs font-extrabold text-white leading-tight">Confiabilidade</div>
-                                                <div id="pStat_no7" class="text-[10px] font-semibold text-slate-400 truncate mt-0.5">Cruza Rota &amp; Obsol.</div>
+                                                <div class="text-xs font-extrabold text-slate-900 leading-tight">Confiabilidade</div>
+                                                <div id="pStat_no7" class="text-[10px] font-semibold text-slate-500 truncate mt-0.5">Cruza Rota &amp; Obsol.</div>
                                             </div>
                                         </div>
-                                        <div class="mt-2.5 h-1.5 rounded-full bg-slate-800 overflow-hidden"><div id="pBar_no7" class="h-full bg-rose-400 transition-all duration-300" style="width:0%"></div></div>
+                                        <div class="mt-2.5 h-1.5 rounded-full bg-slate-100 overflow-hidden"><div id="pBar_no7" class="h-full bg-rose-500 transition-all duration-300" style="width:0%"></div></div>
                                     </div>
 
                                     <div id="pNode_no8" data-neural-id="no8" onclick="selecionarNoInspecao('no8')" class="perceptron-node is-idle">
                                         <div class="flex items-center gap-2.5">
-                                            <span class="perceptron-core font-mono text-xs font-extrabold text-sky-300">N8</span>
+                                            <span class="perceptron-core font-mono text-xs font-extrabold">N8</span>
                                             <div class="min-w-0 flex-1">
                                                 <div class="flex items-center justify-between gap-1">
-                                                    <span class="text-[9px] font-mono font-bold text-sky-300">CAUSA RAIZ</span>
-                                                    <span id="pPct_no8" class="text-[9px] font-mono font-extrabold text-sky-300">0%</span>
+                                                    <span class="text-[9px] font-mono font-bold text-sky-700">CAUSA RAIZ</span>
+                                                    <span id="pPct_no8" class="text-[9px] font-mono font-extrabold text-sky-700">0%</span>
                                                 </div>
-                                                <div class="text-xs font-extrabold text-white leading-tight">Caçador AQF 2.0</div>
-                                                <div id="pStat_no8" class="text-[10px] font-semibold text-slate-400 truncate mt-0.5">Ishikawa + DOCS-ATIVOS</div>
+                                                <div class="text-xs font-extrabold text-slate-900 leading-tight">Caçador AQF 2.0</div>
+                                                <div id="pStat_no8" class="text-[10px] font-semibold text-slate-500 truncate mt-0.5">Ishikawa + DOCS-ATIVOS</div>
                                             </div>
                                         </div>
-                                        <div class="mt-2.5 h-1.5 rounded-full bg-slate-800 overflow-hidden"><div id="pBar_no8" class="h-full bg-sky-400 transition-all duration-300" style="width:0%"></div></div>
+                                        <div class="mt-2.5 h-1.5 rounded-full bg-slate-100 overflow-hidden"><div id="pBar_no8" class="h-full bg-sky-600 transition-all duration-300" style="width:0%"></div></div>
                                     </div>
                                 </div>
 
-                                <!-- Camada 5: Output & Saída no Portal PCM -->
+                                <!-- Fase 5: Planejamento & Saída no Portal PCM -->
                                 <div class="flex flex-col justify-center gap-6 lg:gap-7">
-                                    <div class="text-center"><span class="inline-block px-2.5 py-0.5 rounded-full bg-slate-950/90 border border-slate-800/80 text-[10px] font-extrabold uppercase tracking-widest text-slate-300">Camada 5 • Ação</span></div>
+                                    <div class="text-center"><span class="inline-block px-3 py-1 rounded-full bg-white border border-slate-200/90 shadow-2xs text-[10px] font-extrabold uppercase tracking-wider text-slate-600">5. Planejamento</span></div>
                                     <div id="pNode_no9" data-neural-id="no9" onclick="selecionarNoInspecao('no9')" class="perceptron-node is-idle">
                                         <div class="flex items-center gap-2.5">
-                                            <span class="perceptron-core font-mono text-xs font-extrabold text-emerald-300">N9</span>
+                                            <span class="perceptron-core font-mono text-xs font-extrabold">N9</span>
                                             <div class="min-w-0 flex-1">
                                                 <div class="flex items-center justify-between gap-1">
-                                                    <span class="text-[9px] font-mono font-bold text-emerald-300">SAÍDA PCM</span>
-                                                    <span id="pPct_no9" class="text-[9px] font-mono font-extrabold text-emerald-300">0%</span>
+                                                    <span class="text-[9px] font-mono font-bold text-emerald-700">SAÍDA PCM</span>
+                                                    <span id="pPct_no9" class="text-[9px] font-mono font-extrabold text-emerald-700">0%</span>
                                                 </div>
-                                                <div class="text-xs font-extrabold text-white leading-tight">Planejador 1-Clique</div>
-                                                <div id="pStat_no9" class="text-[10px] font-semibold text-slate-400 truncate mt-0.5">Preventiva 52S / Rota</div>
+                                                <div class="text-xs font-extrabold text-slate-900 leading-tight">Planejador 1-Clique</div>
+                                                <div id="pStat_no9" class="text-[10px] font-semibold text-slate-500 truncate mt-0.5">Preventiva 52S / Rota</div>
                                             </div>
                                         </div>
-                                        <div class="mt-2.5 h-1.5 rounded-full bg-slate-800 overflow-hidden"><div id="pBar_no9" class="h-full bg-emerald-400 transition-all duration-300" style="width:0%"></div></div>
+                                        <div class="mt-2.5 h-1.5 rounded-full bg-slate-100 overflow-hidden"><div id="pBar_no9" class="h-full bg-emerald-600 transition-all duration-300" style="width:0%"></div></div>
                                     </div>
-                                    <div class="p-3.5 rounded-2xl border border-emerald-500/30 bg-emerald-950/35 text-[11px] space-y-1.5">
-                                        <div class="flex items-center gap-1.5 font-extrabold text-emerald-300">
-                                            <svg class="w-4 h-4 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8"/></svg>
+                                    <div class="p-3.5 rounded-2xl border border-slate-200/90 bg-white/95 shadow-2xs text-[11px] space-y-1.5">
+                                        <div class="flex items-center gap-1.5 font-extrabold text-emerald-800">
+                                            <svg class="w-4 h-4 shrink-0 text-emerald-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8"/></svg>
                                             <span>Entregas Automáticas</span>
                                         </div>
-                                        <div class="text-slate-300 text-[10px] leading-relaxed">• Planos 52S (<code>PREVENTIVAS</code>)<br>• Pontos Cirúrgicos (<code>ROTA</code>)<br>• Ordens (<code>AGENDA-PCM</code>)</div>
+                                        <div class="text-slate-600 text-[10px] font-medium leading-relaxed">• Planos 52S (<code>PREVENTIVAS</code>)<br>• Pontos Cirúrgicos (<code>ROTA</code>)<br>• Ordens (<code>AGENDA-PCM</code>)</div>
                                     </div>
                                 </div>
                             </div>
                         </div>
 
-                        <!-- BARRA DE PROGRESSO & RESUMO AO VIVO DO QUE ESTÁ SENDO AUDITADO -->
-                        <div id="neuralLiveSummaryBar" class="relative z-10 rounded-2xl border border-slate-800 bg-slate-950/85 p-3.5 flex flex-wrap items-center justify-between gap-3 text-xs">
+                        <!-- BARRA DE PROGRESSO & RESUMO AO VIVO DO LOTE -->
+                        <div id="neuralLiveSummaryBar" class="relative z-10 rounded-2xl border border-slate-200/95 bg-slate-50/90 p-3.5 flex flex-wrap items-center justify-between gap-3 text-xs">
                             <div class="flex flex-wrap items-center gap-3 flex-1 min-w-[260px]">
-                                <span id="neuralLiveCounterTitle" class="font-mono font-extrabold text-sky-300">0 / 0 OMs processadas</span>
-                                <div class="flex-1 min-w-[140px] max-w-xs h-2 rounded-full bg-slate-800 overflow-hidden">
-                                    <div id="neuralLiveProgressFill" class="h-full bg-gradient-to-r from-sky-400 via-indigo-400 to-emerald-400 transition-all duration-200" style="width:0%"></div>
+                                <span id="neuralLiveCounterTitle" class="font-mono font-extrabold text-slate-900">0 / 0 OMs processadas</span>
+                                <div class="flex-1 min-w-[140px] max-w-xs h-2 rounded-full bg-slate-200/90 overflow-hidden">
+                                    <div id="neuralLiveProgressFill" class="h-full bg-sky-600 transition-all duration-200" style="width:0%"></div>
                                 </div>
                                 <span id="neuralLiveCountersPills" class="flex flex-wrap items-center gap-1.5 text-[10px] font-extrabold"></span>
                             </div>
                             <div class="flex flex-wrap items-center gap-2">
-                                <span id="neuralNodeSelectedPill" class="px-2.5 py-1 rounded-lg bg-slate-800 border border-slate-700 text-slate-300 text-[10px] font-extrabold">Visão: Todos os Nós</span>
-                                <button type="button" id="btnAbrirTelaNoSel" onclick="abrirTelaDoNoSelecionado()" hidden class="hidden px-3 py-1 rounded-lg bg-sky-600 hover:bg-sky-500 text-white text-[10px] font-extrabold">Inspecionar Tela Completa →</button>
-                                <span id="neuralTelemetryElapsed" class="font-mono text-[11px] text-slate-400">Ciclo pronto</span>
+                                <span id="neuralNodeSelectedPill" class="px-2.5 py-1 rounded-lg bg-white border border-slate-200 text-slate-700 text-[10px] font-extrabold shadow-2xs">Visão: Todas as Etapas</span>
+                                <button type="button" id="btnAbrirTelaNoSel" onclick="abrirTelaDoNoSelecionado()" hidden class="hidden px-3 py-1 rounded-lg bg-sky-600 hover:bg-sky-700 text-white text-[10px] font-extrabold">Abrir Etapa Completa →</button>
+                                <span id="neuralTelemetryElapsed" class="font-mono text-[11px] text-slate-500">Ciclo pronto</span>
                             </div>
                         </div>
 
-                        <!-- PAINEL DUPLO DE MONITORAMENTO EM TEMPO REAL (CONVERSA ENTRE NÓS + AUDITORIA ORDEM A ORDEM) -->
+                        <!-- PAINEL DUPLO DE MONITORAMENTO EM TEMPO REAL (RASTREABILIDADE ENTRE ETAPAS + AUDITORIA ORDEM A ORDEM) -->
                         <div class="relative z-10 grid grid-cols-1 xl:grid-cols-12 gap-4">
-                            <!-- COLUNA ESQUERDA: CONVERSA E DELEGAÇÃO ENTRE OS NÓS -->
-                            <div class="xl:col-span-5 rounded-2xl border border-slate-800 bg-slate-950/90 p-4 flex flex-col gap-3">
-                                <div class="flex flex-wrap items-center justify-between gap-2 border-b border-slate-800 pb-2.5">
+                            <!-- COLUNA ESQUERDA: RASTREABILIDADE ENTRE AS ETAPAS -->
+                            <div class="xl:col-span-5 rounded-2xl border border-slate-200/95 bg-white/95 p-4 flex flex-col gap-3 shadow-xs">
+                                <div class="flex flex-wrap items-center justify-between gap-2 border-b border-slate-200/80 pb-2.5">
                                     <div class="flex items-center gap-2">
-                                        <span class="w-7 h-7 rounded-xl bg-sky-500/20 border border-sky-400/40 flex items-center justify-center text-sky-300">
+                                        <span class="w-7 h-7 rounded-xl bg-sky-50 border border-sky-200 flex items-center justify-center text-sky-700">
                                             <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 10h.01M12 10h.01M16 10h.01M9 16H5a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v8a2 2 0 01-2 2h-5l-5 5v-5z"/></svg>
                                         </span>
                                         <div>
-                                            <div class="text-xs font-extrabold text-white">Conversa &amp; Retorno Entre Nós (Ao Vivo)</div>
-                                            <div class="text-[10px] text-slate-400">O que cada agente envia na sinapse e o que recebe de retorno</div>
+                                            <div class="text-xs font-extrabold text-slate-900">Rastreabilidade entre Etapas (Tempo Real)</div>
+                                            <div class="text-[10px] text-slate-500 font-medium">Registro técnico do que cada etapa recebeu, processou e encaminhou</div>
                                         </div>
                                     </div>
-                                    <select id="neuralFiltroNoSelect" onchange="selecionarNoInspecao(this.value)" class="px-2.5 py-1 rounded-lg bg-slate-900 border border-slate-700 text-slate-200 text-[10px] font-extrabold outline-none">
-                                        <option value="">Todos os Nós</option>
-                                        <option value="maestro">Maestro</option>
-                                        <option value="no1">Nó 1 (Coletor)</option>
-                                        <option value="no2">Nó 2 (Fast-Path R$ 0)</option>
-                                        <option value="no3">Nó 3 (Auditor Lote 20)</option>
-                                        <option value="no4">Nó 4 (Roteador)</option>
-                                        <option value="no5">Nó 5 (Conferente)</option>
-                                        <option value="no6">Nó 6 (Bibliotecário)</option>
-                                        <option value="no7">Nó 7 (Confiabilidade)</option>
-                                        <option value="no8">Nó 8 (Caçador AQF)</option>
-                                        <option value="no9">Nó 9 (Planejador)</option>
+                                    <select id="neuralFiltroNoSelect" onchange="selecionarNoInspecao(this.value)" class="px-2.5 py-1 rounded-lg bg-slate-50 border border-slate-200 text-slate-700 text-[10px] font-extrabold outline-none">
+                                        <option value="">Todas as Etapas</option>
+                                        <option value="maestro">Coordenação Central</option>
+                                        <option value="no1">Etapa 1 (Coletor)</option>
+                                        <option value="no2">Etapa 2 (Fast-Path R$ 0)</option>
+                                        <option value="no3">Etapa 3 (Auditor Lote 20)</option>
+                                        <option value="no4">Etapa 4 (Roteador)</option>
+                                        <option value="no5">Etapa 5 (Conferente)</option>
+                                        <option value="no6">Etapa 6 (Bibliotecário)</option>
+                                        <option value="no7">Etapa 7 (Confiabilidade)</option>
+                                        <option value="no8">Etapa 8 (Caçador AQF)</option>
+                                        <option value="no9">Etapa 9 (Planejador)</option>
                                     </select>
                                 </div>
                                 <div id="neuralInteracoesFeed" class="neural-scroll space-y-2.5 h-[430px] overflow-y-auto pr-1 text-xs"></div>
                             </div>
 
                             <!-- COLUNA DIREITA: STREAM ORDEM A ORDEM AUDITADA EM TEMPO REAL -->
-                            <div class="xl:col-span-7 rounded-2xl border border-slate-800 bg-slate-950/90 p-4 flex flex-col gap-3">
-                                <div class="flex flex-wrap items-center justify-between gap-2 border-b border-slate-800 pb-2.5">
+                            <div class="xl:col-span-7 rounded-2xl border border-slate-200/95 bg-white/95 p-4 flex flex-col gap-3 shadow-xs">
+                                <div class="flex flex-wrap items-center justify-between gap-2 border-b border-slate-200/80 pb-2.5">
                                     <div class="flex items-center gap-2">
-                                        <span class="w-7 h-7 rounded-xl bg-emerald-500/20 border border-emerald-400/40 flex items-center justify-center text-emerald-300">
+                                        <span class="w-7 h-7 rounded-xl bg-emerald-50 border border-emerald-200 flex items-center justify-center text-emerald-700">
                                             <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4"/></svg>
                                         </span>
                                         <div>
-                                            <div class="text-xs font-extrabold text-white">Decisões Ordem a Ordem (OM por OM ao Vivo)</div>
-                                            <div class="text-[10px] text-slate-400">Caminho percorrido na rede, classificação EN 13306 e parecer retornado</div>
+                                            <div class="text-xs font-extrabold text-slate-900">Auditoria Ordem a Ordem (EN 13306)</div>
+                                            <div class="text-[10px] text-slate-500 font-medium">Rota de processamento, classificação técnica e índice de qualidade por OM</div>
                                         </div>
                                     </div>
                                     <div class="flex flex-wrap items-center gap-1.5">
-                                        <select id="neuralFiltroCategoriaStream" onchange="renderStreamOrdensAoVivo()" class="px-2.5 py-1 rounded-lg bg-slate-900 border border-slate-700 text-slate-200 text-[10px] font-extrabold outline-none">
+                                        <select id="neuralFiltroCategoriaStream" onchange="renderStreamOrdensAoVivo()" class="px-2.5 py-1 rounded-lg bg-slate-50 border border-slate-200 text-slate-700 text-[10px] font-extrabold outline-none">
                                             <option value="">Todas as Categorias</option>
                                             <option value="QUEBRA">Apenas QUEBRAS</option>
                                             <option value="FALHA OPERACIONAL">FALHA OPERACIONAL</option>
@@ -1617,7 +1649,7 @@
         ];
 
         const VIEW_META = {
-            pipeline: { title: "Rede Neural Maestri 2.0 — Vigente & Comparativo Histórico", sub: "Upload ERP de Novembro › Maestro Orquestrador › 9 Perceptrons em Ação › Evolução vs Treino Set/Out" },
+            pipeline: { title: "Orquestração Técnica Maestri — Auditoria & Confiabilidade", sub: "Triagem ERP › Regras Locais R$ 0 › Auditoria EN 13306 › Roteamento › Conferência › Biblioteca › Confiabilidade › AQF › Planejador" },
             auditoria: { title: "Auditoria de OMs, Matriz B×C (EN 13306) & Qualidade de Apontamento", sub: "Inspeção completa das ordens classificadas, origem da decisão e score de preenchimento técnico por equipe" },
             conferente: { title: "Nó 5 — Mesa de Conferência Rápida dos Supervisores (2 Toques)", sub: "Valide ou corrija apenas os ~15%-20% de casos limítrofes/graves da sua equipe para ensinar o Bibliotecário" },
             bibliotecario: { title: "Nó 6 — Bibliotecário, Memória R$ 0,00 & Detector de Divergência", sub: "Curadoria de regras aprendidas (correcoes.jsonl) e arbitragem automática de critérios divergentes entre supervisores" },
@@ -3716,10 +3748,10 @@ OMs:\n${JSON.stringify(listaPrompt)}`;
 
             if (pillsEl) {
                 pillsEl.innerHTML = src.length ? [
-                    `<span class="px-2 py-0.5 rounded-full bg-emerald-500/20 text-emerald-300 border border-emerald-500/40">R$ 0: ${r0Cnt}</span>`,
-                    `<span class="px-2 py-0.5 rounded-full bg-indigo-500/20 text-indigo-300 border border-indigo-500/40">Lote 20: ${iaCnt}</span>`,
-                    `<span class="px-2 py-0.5 rounded-full bg-rose-500/20 text-rose-300 border border-rose-500/40">Quebras: ${qbrCnt}</span>`,
-                    `<span class="px-2 py-0.5 rounded-full bg-amber-500/20 text-amber-300 border border-amber-500/40">Conferir: ${confCnt}</span>`
+                    `<span class="px-2 py-0.5 rounded-full bg-emerald-50 text-emerald-800 border border-emerald-200 font-bold">R$ 0: ${r0Cnt}</span>`,
+                    `<span class="px-2 py-0.5 rounded-full bg-indigo-50 text-indigo-800 border border-indigo-200 font-bold">Lote 20: ${iaCnt}</span>`,
+                    `<span class="px-2 py-0.5 rounded-full bg-rose-50 text-rose-800 border border-rose-200 font-bold">Quebras: ${qbrCnt}</span>`,
+                    `<span class="px-2 py-0.5 rounded-full bg-amber-50 text-amber-800 border border-amber-200 font-bold">Conferir: ${confCnt}</span>`
                 ].join("") : `<span class="text-slate-500">Aguardando envio do lote ERP...</span>`;
             }
 
@@ -3738,43 +3770,43 @@ OMs:\n${JSON.stringify(listaPrompt)}`;
                 : neuralInteracoesLive;
 
             if (!lista.length) {
-                box.innerHTML = `<div class="p-6 rounded-xl border border-slate-800/80 bg-slate-900/60 text-center text-slate-400">Nenhuma interação registrada para <strong>${escapeHtml(NOMES_EXIBICAO_NO[neuralNoSelecionado] || "este filtro")}</strong> nesta etapa.</div>`;
+                box.innerHTML = `<div class="p-6 rounded-xl border border-slate-200 bg-slate-50/80 text-center text-slate-500">Nenhuma interação registrada para <strong>${escapeHtml(NOMES_EXIBICAO_NO[neuralNoSelecionado] || "este filtro")}</strong> nesta etapa.</div>`;
                 return;
             }
 
             const clsMapa = {
-                pronto: "border-slate-700/80 bg-slate-900/70",
-                r0: "border-emerald-500/40 bg-emerald-950/30",
-                ia: "border-indigo-500/40 bg-indigo-950/30",
-                conferir: "border-amber-500/40 bg-amber-950/30",
-                aqf: "border-rose-500/40 bg-rose-950/30",
-                concluido: "border-sky-500/40 bg-sky-950/30"
+                pronto: "border-slate-200 bg-slate-50/85",
+                r0: "border-emerald-200 bg-emerald-50/55",
+                ia: "border-indigo-200 bg-indigo-50/55",
+                conferir: "border-amber-200 bg-amber-50/60",
+                aqf: "border-rose-200 bg-rose-50/55",
+                concluido: "border-sky-200 bg-sky-50/55"
             };
             const badgeMapa = {
-                pronto: "bg-slate-800 text-slate-300",
-                r0: "bg-emerald-500/25 text-emerald-300",
-                ia: "bg-indigo-500/25 text-indigo-300",
-                conferir: "bg-amber-500/25 text-amber-300",
-                aqf: "bg-rose-500/25 text-rose-300",
-                concluido: "bg-sky-500/25 text-sky-300"
+                pronto: "bg-slate-200/80 text-slate-700 border border-slate-300/70",
+                r0: "bg-emerald-100/90 text-emerald-800 border border-emerald-200",
+                ia: "bg-indigo-100/90 text-indigo-800 border border-indigo-200",
+                conferir: "bg-amber-100/90 text-amber-800 border border-amber-200",
+                aqf: "bg-rose-100/90 text-rose-800 border border-rose-200",
+                concluido: "bg-sky-100/90 text-sky-800 border border-sky-200"
             };
 
             box.innerHTML = lista.slice(0, 90).map(it => {
-                const cardCls = clsMapa[it.status] || "border-slate-800 bg-slate-900/80";
-                const bCls = badgeMapa[it.status] || "bg-slate-800 text-slate-300";
+                const cardCls = clsMapa[it.status] || "border-slate-200 bg-slate-50/85";
+                const bCls = badgeMapa[it.status] || "bg-slate-200/80 text-slate-700";
                 return `
                     <div class="neural-stream-card p-3 rounded-xl border ${cardCls} space-y-1.5">
                         <div class="flex items-center justify-between gap-2">
                             <div class="flex items-center gap-1.5 font-mono text-[10px] font-extrabold">
                                 <span class="px-1.5 py-0.5 rounded ${bCls}">${escapeHtml(it.origem)}</span>
                                 <span class="text-slate-400">${SVG_ICO.arrowR}</span>
-                                <span class="px-1.5 py-0.5 rounded bg-slate-800 text-sky-300">${escapeHtml(it.destino)}</span>
-                                ${it.om ? `<span class="px-1.5 py-0.5 rounded bg-slate-950 border border-slate-700 text-slate-200">OM #${escapeHtml(it.om)}</span>` : ""}
+                                <span class="px-1.5 py-0.5 rounded bg-white text-sky-800 border border-slate-200">${escapeHtml(it.destino)}</span>
+                                ${it.om ? `<span class="px-1.5 py-0.5 rounded bg-white border border-slate-200 text-slate-700">OM #${escapeHtml(it.om)}</span>` : ""}
                             </div>
                             <span class="font-mono text-[10px] text-slate-500">${escapeHtml(it.hora)}</span>
                         </div>
-                        <div class="text-[11px] font-bold text-slate-100 leading-snug">${escapeHtml(it.titulo)}</div>
-                        ${it.retorno ? `<div class="text-[10px] font-mono text-emerald-300/95 bg-slate-950/75 rounded-lg px-2.5 py-1.5 border border-slate-800/90 leading-relaxed"><span class="text-slate-400 font-bold uppercase">Retorno:</span> ${escapeHtml(it.retorno)}</div>` : ""}
+                        <div class="text-[11px] font-bold text-slate-900 leading-snug">${escapeHtml(it.titulo)}</div>
+                        ${it.retorno ? `<div class="text-[10px] font-mono text-emerald-800 bg-white/95 rounded-lg px-2.5 py-1.5 border border-slate-200/90 leading-relaxed"><span class="text-slate-500 font-bold uppercase">Retorno:</span> ${escapeHtml(it.retorno)}</div>` : ""}
                     </div>`;
             }).join("");
         };
@@ -3793,13 +3825,13 @@ OMs:\n${JSON.stringify(listaPrompt)}`;
             });
 
             if (!filtradas.length) {
-                box.innerHTML = `<div class="p-6 rounded-xl border border-slate-800/80 bg-slate-900/60 text-center text-slate-400">Nenhuma ordem auditada para exibir ainda. Clique em <strong>Executar Fluxo ao Vivo</strong> ou <strong>Simular Lote Novembro</strong>.</div>`;
+                box.innerHTML = `<div class="p-6 rounded-xl border border-slate-200 bg-slate-50/80 text-center text-slate-500">Nenhuma ordem auditada para exibir ainda. Clique em <strong>Executar Fluxo ao Vivo</strong> ou <strong>Simular Lote Novembro</strong>.</div>`;
                 return;
             }
 
             const totalVis = Math.min(filtradas.length, 100);
             const notaRodape = filtradas.length > 100
-                ? `<div class="p-2.5 rounded-xl bg-slate-900 border border-slate-800 text-center text-[10px] font-bold text-slate-400">Exibindo as ${totalVis} decisões mais recentes de ${filtradas.length} OMs filtradas (consulte a lista completa na aba Auditoria).</div>`
+                ? `<div class="p-2.5 rounded-xl bg-slate-100 border border-slate-200 text-center text-[10px] font-bold text-slate-600">Exibindo as ${totalVis} decisões mais recentes de ${filtradas.length} OMs filtradas (consulte a lista completa na aba Auditoria).</div>`
                 : "";
 
             box.innerHTML = filtradas.slice(0, 100).map(o => {
@@ -3807,38 +3839,38 @@ OMs:\n${JSON.stringify(listaPrompt)}`;
                 const viaTxt = isR0 ? "N1 → N2 (R$ 0) → N4" : "N1 → N2 → N3 (Lote 20) → N4";
                 const extraPath = o.categoria === "QUEBRA" ? `${viaTxt} → N7 → N8` : (o.fila !== "AUTOMATICO" ? `${viaTxt} → N5` : viaTxt);
                 const catCls = o.categoria === "QUEBRA"
-                    ? "bg-rose-500/20 text-rose-300 border-rose-500/40"
+                    ? "bg-rose-50 text-rose-800 border-rose-200"
                     : (o.categoria === "FALHA OPERACIONAL"
-                        ? "bg-amber-500/20 text-amber-300 border-amber-500/40"
-                        : "bg-sky-500/20 text-sky-300 border-sky-500/40");
+                        ? "bg-amber-50 text-amber-800 border-amber-200"
+                        : "bg-sky-50 text-sky-800 border-sky-200");
                 const filaCls = o.fila === "AUTOMATICO"
-                    ? "bg-emerald-500/20 text-emerald-300"
-                    : "bg-amber-500/25 text-amber-200";
+                    ? "bg-emerald-50 text-emerald-800 border border-emerald-200"
+                    : "bg-amber-50 text-amber-800 border border-amber-200";
                 const bxTxt = o.categoria === "QUEBRA" && o.b && o.c ? ` • B${o.b}×C${o.c} (${o.severidade})` : "";
                 const qNota = Number(o.qualidade_score ?? 75);
-                const qCls = qNota >= 75 ? "text-emerald-300" : (qNota >= 50 ? "text-amber-300" : "text-rose-300");
+                const qCls = qNota >= 75 ? "text-emerald-700" : (qNota >= 50 ? "text-amber-700" : "text-rose-700");
 
                 return `
-                    <div class="neural-stream-card p-3 rounded-xl border border-slate-800 bg-slate-900/80 hover:border-sky-500/50 transition-colors space-y-1.5">
+                    <div class="neural-stream-card p-3 rounded-xl border border-slate-200/95 bg-slate-50/75 hover:bg-white hover:border-sky-300 transition-colors space-y-1.5">
                         <div class="flex flex-wrap items-center justify-between gap-2">
                             <div class="flex flex-wrap items-center gap-1.5">
-                                <span class="font-mono text-xs font-extrabold text-white">OM #${escapeHtml(o.om)}</span>
-                                <span class="px-2 py-0.5 rounded-full bg-slate-800 text-sky-300 text-[10px] font-bold">${escapeHtml(o.ativo)}</span>
-                                ${o.ativo_erp && normKey(o.ativo_erp) !== normKey(o.ativo) ? `<span class="px-1.5 py-0.5 rounded bg-slate-950 border border-slate-700 font-mono text-[9px] text-slate-400">ERP: ${escapeHtml(o.ativo_erp)}</span>` : ""}
+                                <span class="font-mono text-xs font-extrabold text-slate-900">OM #${escapeHtml(o.om)}</span>
+                                <span class="px-2 py-0.5 rounded-full bg-white border border-slate-200 text-sky-800 text-[10px] font-bold">${escapeHtml(o.ativo)}</span>
+                                ${o.ativo_erp && normKey(o.ativo_erp) !== normKey(o.ativo) ? `<span class="px-1.5 py-0.5 rounded bg-slate-100 border border-slate-200 font-mono text-[9px] text-slate-500">ERP: ${escapeHtml(o.ativo_erp)}</span>` : ""}
                                 <span class="px-2 py-0.5 rounded-full border text-[10px] font-extrabold ${catCls}">${escapeHtml(o.categoria)}${escapeHtml(bxTxt)}</span>
                             </div>
                             <div class="flex items-center gap-1.5 font-mono text-[10px] font-extrabold">
-                                <span class="px-2 py-0.5 rounded ${isR0 ? "bg-emerald-500/20 text-emerald-300" : "bg-indigo-500/20 text-indigo-300"}">${isR0 ? "FAST-PATH R$ 0" : "IA LOTE 20"}</span>
+                                <span class="px-2 py-0.5 rounded border ${isR0 ? "bg-emerald-50 text-emerald-800 border-emerald-200" : "bg-indigo-50 text-indigo-800 border-indigo-200"}">${isR0 ? "FAST-PATH R$ 0" : "IA LOTE 20"}</span>
                                 <span class="px-2 py-0.5 rounded ${filaCls}">${escapeHtml(o.fila)} • ${escapeHtml(o.equipe || "PCM")}</span>
                             </div>
                         </div>
-                        <div class="text-[11px] text-slate-300 leading-snug">
-                            <span class="font-bold text-slate-400">Problema:</span> ${escapeHtml(o.problema || "Sem descrição")} • <span class="font-bold text-slate-400">Serviço:</span> ${escapeHtml(o.servico || "—")}
+                        <div class="text-[11px] text-slate-700 leading-snug">
+                            <span class="font-bold text-slate-500">Problema:</span> ${escapeHtml(o.problema || "Sem descrição")} • <span class="font-bold text-slate-500">Serviço:</span> ${escapeHtml(o.servico || "—")}
                         </div>
-                        <div class="flex flex-wrap items-center justify-between gap-2 text-[10px] bg-slate-950/75 rounded-lg px-2.5 py-1.5 border border-slate-800/90">
-                            <div class="text-slate-300 truncate flex-1 min-w-[200px]"><span class="font-bold text-sky-400">Decisão:</span> ${escapeHtml(o.justificativa || "Regra aplicada")}</div>
+                        <div class="flex flex-wrap items-center justify-between gap-2 text-[10px] bg-white rounded-lg px-2.5 py-1.5 border border-slate-200/90">
+                            <div class="text-slate-700 truncate flex-1 min-w-[200px]"><span class="font-bold text-sky-700">Decisão:</span> ${escapeHtml(o.justificativa || "Regra aplicada")}</div>
                             <div class="flex items-center gap-2.5 font-mono shrink-0">
-                                <span class="text-slate-400">${escapeHtml(extraPath)}</span>
+                                <span class="text-slate-500">${escapeHtml(extraPath)}</span>
                                 <span class="font-extrabold ${qCls}">Qual. ${qNota}/100</span>
                             </div>
                         </div>
@@ -3876,23 +3908,23 @@ OMs:\n${JSON.stringify(listaPrompt)}`;
         };
 
         const DEFINICAO_SINAPSES = [
-            { id: "s_in_n1", de: "input_erp", para: "no1", cor: "#38bdf8", modo: "vertical" },
-            { id: "s_hist_n2", de: "hist_base", para: "no2", cor: "#a78bfa", offsetY2: 14 },
-            { id: "s_n1_n2", de: "no1", para: "no2", cor: "#34d399", offsetY2: -8 },
-            { id: "s_n2_n4", de: "no2", para: "no4", cor: "#10b981", curva: -38, offsetY1: -14, offsetY2: -14 },
-            { id: "s_n2_n3", de: "no2", para: "no3", cor: "#6366f1", modo: "vertical" },
-            { id: "s_n3_n4", de: "no3", para: "no4", cor: "#38bdf8", offsetY1: -8, offsetY2: 14 },
-            { id: "s_n4_n5", de: "no4", para: "no5", cor: "#fbbf24", modo: "vertical" },
-            { id: "s_n5_n6", de: "no5", para: "no6", cor: "#c084fc", modo: "vertical" },
-            { id: "s_n6_n2", de: "no6", para: "no2", cor: "#a855f7", modo: "feedback" },
-            { id: "s_n4_n7", de: "no4", para: "no7", cor: "#f43f5e", offsetY2: -10 },
-            { id: "s_n7_n8", de: "no7", para: "no8", cor: "#0ea5e9", modo: "vertical" },
-            { id: "s_n8_n9", de: "no8", para: "no9", cor: "#34d399" },
-            { id: "s_m_n1", de: "maestro", para: "no1", cor: "#38bdf8", tracejado: true, fanX: -200 },
-            { id: "s_m_n2", de: "maestro", para: "no2", cor: "#34d399", tracejado: true, fanX: -95 },
-            { id: "s_m_n3", de: "maestro", para: "no3", cor: "#818cf8", tracejado: true, fanX: 0 },
-            { id: "s_m_n7", de: "maestro", para: "no7", cor: "#fb7185", tracejado: true, fanX: 105 },
-            { id: "s_m_n9", de: "maestro", para: "no9", cor: "#34d399", tracejado: true, fanX: 205 }
+            { id: "s_in_n1", de: "input_erp", para: "no1", cor: "#0284c7", modo: "vertical" },
+            { id: "s_hist_n2", de: "hist_base", para: "no2", cor: "#6366f1", offsetY2: 14 },
+            { id: "s_n1_n2", de: "no1", para: "no2", cor: "#059669", offsetY2: -8 },
+            { id: "s_n2_n4", de: "no2", para: "no4", cor: "#059669", curva: -38, offsetY1: -14, offsetY2: -14 },
+            { id: "s_n2_n3", de: "no2", para: "no3", cor: "#4f46e5", modo: "vertical" },
+            { id: "s_n3_n4", de: "no3", para: "no4", cor: "#0284c7", offsetY1: -8, offsetY2: 14 },
+            { id: "s_n4_n5", de: "no4", para: "no5", cor: "#d97706", modo: "vertical" },
+            { id: "s_n5_n6", de: "no5", para: "no6", cor: "#7c3aed", modo: "vertical" },
+            { id: "s_n6_n2", de: "no6", para: "no2", cor: "#6366f1", modo: "feedback" },
+            { id: "s_n4_n7", de: "no4", para: "no7", cor: "#e11d48", offsetY2: -10 },
+            { id: "s_n7_n8", de: "no7", para: "no8", cor: "#0284c7", modo: "vertical" },
+            { id: "s_n8_n9", de: "no8", para: "no9", cor: "#059669" },
+            { id: "s_m_n1", de: "maestro", para: "no1", cor: "#0284c7", tracejado: true, fanX: -200 },
+            { id: "s_m_n2", de: "maestro", para: "no2", cor: "#059669", tracejado: true, fanX: -95 },
+            { id: "s_m_n3", de: "maestro", para: "no3", cor: "#4f46e5", tracejado: true, fanX: 0 },
+            { id: "s_m_n7", de: "maestro", para: "no7", cor: "#e11d48", tracejado: true, fanX: 105 },
+            { id: "s_m_n9", de: "maestro", para: "no9", cor: "#059669", tracejado: true, fanX: 205 }
         ];
 
         function obterPontosSinapsesCanvas() {
@@ -4003,24 +4035,24 @@ OMs:\n${JSON.stringify(listaPrompt)}`;
             const btnRapido = document.getElementById("btnRitmoRapido");
             if (btnPasso && btnRapido) {
                 if (neuralRitmoModo === "passo_a_passo") {
-                    btnPasso.style.background = "#0284c7";
+                    btnPasso.style.background = "#0f172a";
                     btnPasso.style.color = "#ffffff";
                     btnRapido.style.background = "transparent";
-                    btnRapido.style.color = "#94a3b8";
+                    btnRapido.style.color = "#475569";
                 } else {
-                    btnRapido.style.background = "#0284c7";
+                    btnRapido.style.background = "#0f172a";
                     btnRapido.style.color = "#ffffff";
                     btnPasso.style.background = "transparent";
-                    btnPasso.style.color = "#94a3b8";
+                    btnPasso.style.color = "#475569";
                 }
             }
             const btnPause = document.getElementById("btnPauseResumeNeural");
             const lblPause = document.getElementById("lblBtnPauseNeural");
             if (lblPause) lblPause.innerText = neuralPausado ? "Retomar" : "Pausar";
             if (btnPause) {
-                btnPause.style.background = neuralPausado ? "#f59e0b" : "#1e293b";
-                btnPause.style.color = neuralPausado ? "#0f172a" : "#cbd5e1";
-                btnPause.style.border = neuralPausado ? "1px solid #fbbf24" : "1px solid #475569";
+                btnPause.style.background = neuralPausado ? "#fef3c7" : "#ffffff";
+                btnPause.style.color = neuralPausado ? "#92400e" : "#334155";
+                btnPause.style.border = neuralPausado ? "1px solid #fcd34d" : "1px solid #cbd5e1";
             }
         }
 
@@ -4042,7 +4074,7 @@ OMs:\n${JSON.stringify(listaPrompt)}`;
             const ph = document.getElementById("maestroPhasePill");
             if (neuralPausado) {
                 if (ph) ph.innerText = "PAUSADO";
-                showToast("Rede Neural pausada no ponto exato. Clique em Retomar para continuar.", "info");
+                showToast("Fluxo pausado no ponto exato. Clique em Retomar para continuar.", "info");
             } else {
                 if (ph) ph.innerText = "EXECUTANDO";
                 const fn = neuralPauseContinuarFn;
@@ -4107,11 +4139,11 @@ OMs:\n${JSON.stringify(listaPrompt)}`;
             if (hub) hub.classList.remove("is-delegating");
             const badge = document.getElementById("neuralStatusBadge");
             if (badge) {
-                badge.innerText = "Aguardando Estímulo (ERP)";
-                badge.className = "px-2.5 py-0.5 rounded-full bg-slate-800 text-slate-200 border border-slate-700 text-[10px] font-extrabold";
+                badge.innerText = "Aguardando Lote ERP";
+                badge.className = "px-2.5 py-0.5 rounded-full bg-slate-100 text-slate-700 border border-slate-200 text-[10px] font-extrabold";
             }
             const msg = document.getElementById("maestroDelegacaoMsg");
-            if (msg) msg.innerText = `Pronto para receber o CSV/XLSX de ${rodadaVigenteInfo.periodo} e distribuir carga entre os 9 perceptrons.`;
+            if (msg) msg.innerText = `Pronto para processar a planilha ERP de ${rodadaVigenteInfo.periodo} e distribuir o lote nas 9 etapas técnicas.`;
             const ph = document.getElementById("maestroPhasePill");
             if (ph) ph.innerText = "PRONTO";
             const thr = document.getElementById("maestroThroughputTxt");
@@ -4125,7 +4157,7 @@ OMs:\n${JSON.stringify(listaPrompt)}`;
             setEstadoPerceptronUI("hist_base", "is-done", 100);
             const workers = document.getElementById("no3WorkersRow");
             if (workers) {
-                workers.innerHTML = `<span class="px-1.5 py-0.5 rounded bg-slate-900 border border-slate-700 text-center text-slate-400">W1: Lote</span><span class="px-1.5 py-0.5 rounded bg-slate-900 border border-slate-700 text-center text-slate-400">W2: Lote</span><span class="px-1.5 py-0.5 rounded bg-slate-900 border border-slate-700 text-center text-slate-400">W3: Lote</span>`;
+                workers.innerHTML = `<span class="px-1.5 py-0.5 rounded bg-slate-50 border border-slate-200 text-center text-slate-600 font-semibold">W1: Lote</span><span class="px-1.5 py-0.5 rounded bg-slate-50 border border-slate-200 text-center text-slate-600 font-semibold">W2: Lote</span><span class="px-1.5 py-0.5 rounded bg-slate-50 border border-slate-200 text-center text-slate-600 font-semibold">W3: Lote</span>`;
             }
 
             atualizarBarraResumoLive(0, 0, [], "Ciclo pronto");
@@ -4160,12 +4192,12 @@ OMs:\n${JSON.stringify(listaPrompt)}`;
                 },
                 {
                     id: "end-n3", hora: hh, origem: "N2", destino: "N3", status: "ia",
-                    titulo: `${lote} OM(s) ambíguas enviadas para Sub-Perceptrons em Lote de 20`,
+                    titulo: `${lote} OM(s) ambíguas enviadas para Auditoria Técnica em Lote de 20`,
                     retorno: `Auditoria EN 13306 B×C finalizada em ${custoRodada.chamadas_ia || 0} chamada(s) • R$ ${custoRodada.custo_brl.toFixed(2)}`
                 },
                 {
                     id: "end-n2", hora: hh, origem: "N1", destino: "N2", status: "r0",
-                    titulo: `Fast-Path + Pesos Set/Out interceptaram ${fast} OMs (${pctF}%)`,
+                    titulo: `Fast-Path + Base Set/Out interceptaram ${fast} OMs (${pctF}%)`,
                     retorno: `Decisão local a R$ 0,00 • Economia de ${custoRodada.economia_pct}%`
                 },
                 {
@@ -4194,11 +4226,11 @@ OMs:\n${JSON.stringify(listaPrompt)}`;
             const badge = document.getElementById("neuralStatusBadge");
             if (badge) {
                 badge.innerText = ehReav
-                    ? `Reavaliada N6→N2 (${tot} OMs • ${revPresCnt} Nó 5 preservadas)`
-                    : `Rede Sincronizada (${tot} OMs • ${rodadaVigenteInfo.periodo})`;
+                    ? `Reavaliado N6→N2 (${tot} OMs • ${revPresCnt} Nó 5 preservadas)`
+                    : `Fluxo Sincronizado (${tot} OMs • ${rodadaVigenteInfo.periodo})`;
                 badge.className = ehReav
-                    ? "px-2.5 py-0.5 rounded-full bg-amber-500/20 text-amber-200 border border-amber-400/50 text-[10px] font-extrabold"
-                    : "px-2.5 py-0.5 rounded-full bg-emerald-500/20 text-emerald-300 border border-emerald-400/50 text-[10px] font-extrabold";
+                    ? "px-2.5 py-0.5 rounded-full bg-amber-50 text-amber-800 border border-amber-200 text-[10px] font-extrabold"
+                    : "px-2.5 py-0.5 rounded-full bg-emerald-50 text-emerald-800 border border-emerald-200 text-[10px] font-extrabold";
             }
             const ph = document.getElementById("maestroPhasePill");
             if (ph) ph.innerText = ehReav ? "REAVALIADO" : "CONCLUÍDO";
@@ -4227,7 +4259,7 @@ OMs:\n${JSON.stringify(listaPrompt)}`;
 
             const workers = document.getElementById("no3WorkersRow");
             if (workers) {
-                workers.innerHTML = `<span class="px-1.5 py-0.5 rounded bg-emerald-950/70 border border-emerald-500/40 text-center text-emerald-300">W1: OK</span><span class="px-1.5 py-0.5 rounded bg-emerald-950/70 border border-emerald-500/40 text-center text-emerald-300">W2: OK</span><span class="px-1.5 py-0.5 rounded bg-emerald-950/70 border border-emerald-500/40 text-center text-emerald-300">W3: OK</span>`;
+                workers.innerHTML = `<span class="px-1.5 py-0.5 rounded bg-emerald-50 border border-emerald-200 text-center text-emerald-800 font-bold">W1: OK</span><span class="px-1.5 py-0.5 rounded bg-emerald-50 border border-emerald-200 text-center text-emerald-800 font-bold">W2: OK</span><span class="px-1.5 py-0.5 rounded bg-emerald-50 border border-emerald-200 text-center text-emerald-800 font-bold">W3: OK</span>`;
             }
 
             if (stats.forcarSyncStream || !neuralOrdensLive.length || neuralInteracoesLive.length <= 1) {
@@ -4273,14 +4305,14 @@ OMs:\n${JSON.stringify(listaPrompt)}`;
             neuralOrdensLive = [];
             renderInteracoesAoVivo();
             renderStreamOrdensAoVivo();
-            atualizarBarraResumoLive(0, tot, [], "Iniciando sinapses...");
+            atualizarBarraResumoLive(0, tot, [], "Iniciando fluxo...");
 
             const hub = document.getElementById("neuralMaestroHub");
             if (hub) hub.classList.add("is-delegating");
             const badge = document.getElementById("neuralStatusBadge");
             if (badge) {
                 badge.innerText = neuralRitmoModo === "passo_a_passo" ? "AUDITANDO PASSO A PASSO AO VIVO" : "PROCESSANDO MODO TURBO";
-                badge.className = "px-2.5 py-0.5 rounded-full bg-sky-500/30 text-sky-200 border border-sky-400 text-[10px] font-extrabold";
+                badge.className = "px-2.5 py-0.5 rounded-full bg-sky-50 text-sky-800 border border-sky-200 text-[10px] font-extrabold";
             }
 
             ["no1", "no2", "no3", "no4", "no5", "no6", "no7", "no8", "no9"].forEach(id => setEstadoPerceptronUI(id, "is-idle", 0));
@@ -4293,7 +4325,7 @@ OMs:\n${JSON.stringify(listaPrompt)}`;
                 wait: 40,
                 run: () => {
                     document.getElementById("maestroPhasePill").innerText = "N1 • INGESTÃO";
-                    document.getElementById("maestroDelegacaoMsg").innerText = `Maestro despachou ${tot} OMs de ${rodadaVigenteInfo.periodo} para o Perceptron N1 validar árvore ob_linhas.`;
+                    document.getElementById("maestroDelegacaoMsg").innerText = `Coordenação enviou ${tot} OMs de ${rodadaVigenteInfo.periodo} para a Etapa 1 validar árvore ob_linhas.`;
                     document.getElementById("maestroThroughputTxt").innerText = `${tot} OMs in`;
                     setEstadoPerceptronUI("input_erp", "is-done", 100, `${tot} OMs recebidas`);
                     setEstadoPerceptronUI("no1", "is-working", 70, `Filtrando ${tot} OMs...`);
@@ -4326,7 +4358,7 @@ OMs:\n${JSON.stringify(listaPrompt)}`;
                         renderNeuralSvgTopology(new Set(["s_n1_n2", "s_hist_n2", "s_m_n2"]), new Set(["s_in_n1"]));
                         registrarInteracaoNeural({
                             origem: "N1", destino: "N2", status: "concluido",
-                            titulo: `Higienização concluída: ${tot} OMs prontas para triagem neural`,
+                            titulo: `Higienização concluída: ${tot} OMs prontas para triagem técnica`,
                             retorno: `Encaminhadas para Nó 2 (Fast-Path R$ 0) com ${ativas} regras aprendidas`
                         });
                     }
@@ -4371,7 +4403,7 @@ OMs:\n${JSON.stringify(listaPrompt)}`;
                                 if (wRow) {
                                     const wAtivo = (idx % 3) + 1;
                                     wRow.innerHTML = [1, 2, 3].map(w =>
-                                        `<span class="px-1.5 py-0.5 rounded border text-center ${w === wAtivo ? "worker-chip-active bg-sky-500/30 border-sky-400 text-sky-100" : "bg-indigo-950/60 border-indigo-500/40 text-indigo-300"}">W${w}: ${w === wAtivo ? "#" + o.om : "Lote"}</span>`
+                                        `<span class="px-1.5 py-0.5 rounded border text-center font-bold ${w === wAtivo ? "worker-chip-active bg-sky-100 border-sky-300 text-sky-900" : "bg-indigo-50 border-indigo-200 text-indigo-800"}">W${w}: ${w === wAtivo ? "#" + o.om : "Lote"}</span>`
                                     ).join("");
                                 }
                                 document.getElementById("maestroPhasePill").innerText = `LOTE 20 • ${numPasso}/${totStream}`;
@@ -4465,7 +4497,7 @@ OMs:\n${JSON.stringify(listaPrompt)}`;
                         renderNeuralSvgTopology(new Set(["s_n2_n4", "s_n2_n3", "s_n3_n4", "s_m_n3"]), new Set(["s_in_n1", "s_n1_n2"]));
                         registrarInteracaoNeural({
                             origem: "N2", destino: "N3", status: "ia",
-                            titulo: `Sub-Perceptrons W1/W2/W3 processaram ${lote} OMs ambíguas`,
+                            titulo: `Lotes Paralelos W1/W2/W3 processaram ${lote} OMs ambíguas`,
                             retorno: `EN 13306 B×C aplicado • Custo R$ ${custoRodada.custo_brl.toFixed(2)}`
                         });
                     }
