@@ -471,15 +471,19 @@
 
                 <!-- ================= VIEW 2: FILA DE APROVAÇÕES & QUALIDADE DE DADOS ================= -->
                 <section id="viewAprovacoes" hidden class="hidden space-y-5">
-                    <div class="glass-card rounded-3xl p-5 flex flex-wrap items-center justify-between gap-3">
-                        <div>
-                            <span class="text-[10px] font-extrabold uppercase tracking-widest text-rose-600">Controle de Qualidade de Dados • Admin, Gerente &amp; Supervisores</span>
-                            <h2 class="text-lg font-extrabold text-slate-900">Fila de Aprovações Pendentes</h2>
-                            <p class="text-xs text-slate-500 font-medium">Todo documento novo, foto de campo ou nova revisão passa por conferência aqui antes de ficar vigente para a fábrica.</p>
+                    <div class="glass-card rounded-3xl p-5 space-y-3">
+                        <div class="flex flex-wrap items-center justify-between gap-3">
+                            <div>
+                                <span class="text-[10px] font-extrabold uppercase tracking-widest text-rose-600">Controle de Qualidade de Dados • Fluxo de Aprovação</span>
+                                <h2 class="text-lg font-extrabold text-slate-900">Fila de Aprovações Pendentes</h2>
+                                <p class="text-xs text-slate-500 font-medium">Todo documento novo, foto de campo ou nova revisão passa pelo fluxo de aprovação antes de ficar vigente para a fábrica.</p>
+                            </div>
+                            <div class="flex flex-wrap items-center gap-2">
+                                <button type="button" id="btnConfigFluxoMasterAprov" onclick="abrirModalAdminMasterDocs('aprov')" hidden class="hidden px-3 py-1.5 rounded-full text-xs font-extrabold bg-rose-50 hover:bg-rose-100 text-rose-700 border border-rose-200 transition-colors">Configurar Fluxo (Master)</button>
+                                <span id="aprovCountBadge" class="px-3 py-1.5 rounded-full text-xs font-extrabold bg-amber-100 text-amber-900 border border-amber-200">0 pendente(s)</span>
+                            </div>
                         </div>
-                        <div class="flex flex-wrap items-center gap-2">
-                            <span id="aprovCountBadge" class="px-3 py-1.5 rounded-full text-xs font-extrabold bg-amber-100 text-amber-900 border border-amber-200">0 pendente(s)</span>
-                        </div>
+                        <div id="aprovFluxoAtivoBanner" class="p-3.5 rounded-2xl bg-slate-50 border border-slate-200 text-xs"></div>
                     </div>
 
                     <div id="aprovacoesLista" class="space-y-4"></div>
@@ -993,7 +997,7 @@
         </div>
     </div>
 
-    <!-- ==================== MODAL MENU ADMIN MASTER (CATEGORIAS, SUBTIPOS, DISCIPLINAS & SENHA) ==================== -->
+    <!-- ==================== MODAL MENU ADMIN MASTER (FLUXO DE APROVAÇÃO, CATEGORIAS, SUBTIPOS, DISCIPLINAS & SENHA) ==================== -->
     <div id="modalAdminMasterDocs" role="dialog" aria-modal="true" hidden class="hidden fixed inset-0 bg-slate-900/65 backdrop-blur-sm z-[90] flex items-end sm:items-center justify-center p-0 sm:p-4">
         <div class="bg-white w-full max-w-2xl rounded-t-3xl sm:rounded-3xl shadow-2xl border border-slate-200 max-h-[92vh] flex flex-col overflow-hidden text-xs">
             <div class="px-6 py-4 border-b border-slate-100 bg-slate-50/90 flex items-center justify-between gap-3 shrink-0">
@@ -1002,7 +1006,7 @@
                         <span class="text-[10px] font-extrabold uppercase tracking-widest text-rose-600">Menu Admin Master • Documentos</span>
                         <span id="masterDocsModalBadge" class="text-[10px] font-extrabold uppercase px-2 py-0.5 rounded-full bg-slate-100 text-slate-600">Bloqueado</span>
                     </div>
-                    <h2 class="text-base sm:text-lg font-extrabold text-slate-900">Administração Master &amp; Taxonomia da Biblioteca</h2>
+                    <h2 class="text-base sm:text-lg font-extrabold text-slate-900">Administração Master, Fluxo de Aprovação &amp; Taxonomia</h2>
                 </div>
                 <button type="button" onclick="fecharModal('modalAdminMasterDocs')" class="w-8 h-8 rounded-full bg-white border border-slate-200 hover:bg-slate-100 text-slate-600 font-bold shrink-0">✕</button>
             </div>
@@ -1010,7 +1014,7 @@
             <div class="flex-1 overflow-y-auto p-5 sm:p-6 space-y-4">
                 <form id="masterDocsUnlockBox" onsubmit="desbloquearAdminMasterDocs(event)" class="space-y-4">
                     <div class="p-4 rounded-2xl bg-slate-50 border border-slate-200 text-slate-700 leading-relaxed">
-                        Digite a <strong>senha oculta Admin Master</strong> (a mesma do Portal PCM) para liberar edição direta, exclusão de revisões e o <strong>cadastro de Categorias, Subtipos e Disciplinas</strong> no módulo de Documentos.
+                        Digite a <strong>senha oculta Admin Master</strong> (a mesma do Portal PCM) para liberar a configuração do <strong>Fluxo de Aprovação por Usuários</strong>, edição direta, exclusão de revisões e o <strong>cadastro de Categorias, Subtipos e Disciplinas</strong>.
                     </div>
                     <div>
                         <label for="masterDocsPassInput" class="block text-[11px] font-extrabold uppercase text-slate-500 mb-1">Senha Oculta Master *</label>
@@ -1024,9 +1028,48 @@
 
                 <div id="masterDocsActiveBox" hidden class="hidden space-y-4">
                     <div class="flex flex-wrap items-center gap-1.5 p-1 rounded-2xl bg-slate-100 border border-slate-200">
+                        <button type="button" id="btnMasterDocsTabAprov" onclick="switchMasterDocsTab('aprov')" class="flex-1 py-2 px-3 rounded-xl font-extrabold text-[11px] text-slate-600 hover:text-slate-900">Fluxo de Aprovação</button>
                         <button type="button" id="btnMasterDocsTabCat" onclick="switchMasterDocsTab('cat')" class="flex-1 py-2 px-3 rounded-xl font-extrabold text-[11px] bg-slate-900 text-white shadow-sm">Categorias &amp; Subtipos</button>
                         <button type="button" id="btnMasterDocsTabDisc" onclick="switchMasterDocsTab('disc')" class="flex-1 py-2 px-3 rounded-xl font-extrabold text-[11px] text-slate-600 hover:text-slate-900">Disciplinas</button>
                         <button type="button" id="btnMasterDocsTabSeg" onclick="switchMasterDocsTab('seg')" class="flex-1 py-2 px-3 rounded-xl font-extrabold text-[11px] text-slate-600 hover:text-slate-900">Segurança Master</button>
+                    </div>
+
+                    <!-- TAB 0: FLUXO DE APROVAÇÃO MULTI-USUÁRIO -->
+                    <div id="masterDocsTabAprov" hidden class="hidden space-y-4">
+                        <div class="p-4 rounded-2xl bg-amber-50/75 border border-amber-200 space-y-2">
+                            <div class="flex flex-wrap items-center justify-between gap-2">
+                                <h3 class="text-xs font-extrabold uppercase tracking-wider text-amber-950">Fluxo de Aprovação Descentralizado por Usuários</h3>
+                                <span id="masterDocsAprovStatusBadge" class="px-2.5 py-0.5 rounded-full text-[10px] font-extrabold bg-white border border-amber-300 text-amber-900">Padrão Geral</span>
+                            </div>
+                            <p class="text-[11px] font-semibold text-amber-900 leading-relaxed">
+                                Selecione abaixo todos os usuários cadastrados cuja aprovação será exigida antes de o documento ou revisão ser lançado como vigente no sistema. Não fica centralizado em 1 única pessoa: quando você seleciona múltiplos aprovadores, o arquivo só entra em vigor após a validação de <strong>todos os usuários marcados</strong>.
+                            </p>
+                        </div>
+
+                        <div class="p-4 rounded-2xl bg-slate-50 border border-slate-200 space-y-3">
+                            <div class="flex flex-wrap items-center justify-between gap-2">
+                                <div class="text-[10px] font-extrabold uppercase tracking-wider text-slate-600">Aprovadores Obrigatórios Selecionados (<span id="masterDocsAprovSelCount">0</span>)</div>
+                                <div class="flex flex-wrap items-center gap-1.5">
+                                    <button type="button" onclick="selecionarGestaoFluxoAprovacaoMaster()" class="px-2.5 py-1 rounded-lg bg-white hover:bg-slate-100 border border-slate-200 text-slate-700 font-extrabold text-[10px]">Selecionar Gestão / Supervisão</button>
+                                    <button type="button" onclick="selecionarTodosFluxoAprovacaoMaster()" class="px-2.5 py-1 rounded-lg bg-white hover:bg-slate-100 border border-slate-200 text-slate-700 font-extrabold text-[10px]">Selecionar Todos</button>
+                                    <button type="button" onclick="limparSelecaoFluxoAprovacaoMaster()" class="px-2.5 py-1 rounded-lg bg-white hover:bg-rose-50 border border-slate-200 text-rose-700 font-extrabold text-[10px]">Limpar Seleção</button>
+                                </div>
+                            </div>
+
+                            <div id="masterDocsAprovSelecionadosChips" class="flex flex-wrap gap-1.5 min-h-[28px] p-2.5 rounded-xl bg-white border border-slate-200"></div>
+
+                            <div>
+                                <label for="masterAprovBuscaInput" class="block text-[10px] font-extrabold uppercase text-slate-500 mb-1">Filtrar Usuários Cadastrados (ir_funcionarios)</label>
+                                <input type="text" id="masterAprovBuscaInput" oninput="renderModalMasterFluxoAprovacaoDocs()" class="input-clean py-2 text-xs font-bold" placeholder="Buscar por nome, usuário ou cargo/equipe...">
+                            </div>
+
+                            <div id="masterDocsAprovUsersList" class="space-y-2 max-h-64 overflow-y-auto pr-1"></div>
+
+                            <div class="flex flex-col sm:flex-row gap-2 pt-2 border-t border-slate-200">
+                                <button type="button" id="btnSalvarFluxoAprovacaoMasterDocs" onclick="salvarFluxoAprovacaoMasterDocs()" class="btn-touch bg-slate-900 hover:bg-slate-800 text-white flex-1 py-2.5 text-xs shadow-sm">Salvar Fluxo de Aprovação</button>
+                                <button type="button" id="btnRestaurarFluxoAprovacaoMasterDocs" onclick="restaurarFluxoAprovacaoPadraoMasterDocs()" class="btn-touch bg-white hover:bg-rose-50 border border-slate-200 text-slate-700 hover:text-rose-700 py-2.5 px-4 text-xs">Voltar ao Padrão (Sem Lista Fixa)</button>
+                            </div>
+                        </div>
                     </div>
 
                     <!-- TAB 1: CATEGORIAS & SUBTIPOS -->
@@ -1116,7 +1159,7 @@
                     <div id="masterDocsTabSeg" hidden class="hidden space-y-4">
                         <div class="p-3.5 rounded-2xl bg-rose-50 border border-rose-200 text-xs text-rose-900 space-y-1">
                             <div class="font-extrabold">Admin Master Desbloqueado nesta Sessão</div>
-                            <p class="text-[11px] text-rose-800">Edição direta, exclusão de documentos/revisões e cadastro de Categorias, Subtipos e Disciplinas liberados.</p>
+                            <p class="text-[11px] text-rose-800">Fluxo de aprovação por usuários, edição direta, exclusão de documentos/revisões e cadastro de Categorias, Subtipos e Disciplinas liberados.</p>
                         </div>
                         <div class="p-3.5 rounded-2xl bg-slate-50 border border-slate-200 space-y-2.5">
                             <div class="text-[11px] font-extrabold uppercase text-slate-600">Alterar Senha Oculta Master (Todo o Portal)</div>
@@ -1173,10 +1216,18 @@
         const refFunc = collection(db, "ir_funcionarios");
         const refSpConfig = doc(db, "config", "docs_sharepoint");
         const refTaxonomiaDocs = doc(db, "config", "docs_taxonomia");
+        const refFluxoAprovacaoDocs = doc(db, "config", "docs_fluxo_aprovacao");
         // Admin Master (mesma convenção da Central PCM / Inspeção de Rota: pcm_config/admin_master + sessão cepera_admin_master_auth)
         const refMasterCfgDocs = doc(db, "pcm_config", "admin_master");
         const DEFAULT_MASTER_HASH_DOCS = "7c2cce436d043699877f19ad8a6aef78dc5b1f167d97fbfa5d316885c2150a59";
         let customMasterHashDocs = null;
+        let fluxoAprovacaoDocsCfg = {
+            usuariosExigidos: [],
+            atualizadoPor: '',
+            atualizadoEm: 0
+        };
+        let masterAprovadoresSel = [];
+        let masterAprovadoresDraftDirty = false;
 
         const DEFAULT_SHAREPOINT_CFG = {
             tenantUrl: "https://ceperaind.sharepoint.com",
@@ -1380,15 +1431,146 @@ match /config/{document=**} {
             return r === 'admin' || r === 'gerente' || r.includes('supervisor') || r.includes('gestor');
         }
 
+        function getChaveUsuarioFluxoDocs(u) {
+            if (!u) return '';
+            if (typeof u === 'string') return normKey(u);
+            return normKey(u.user || u.id || u.nome || '');
+        }
+
+        function obterUsuariosCadastradosParaFluxoDocs() {
+            const map = new Map();
+            const pushUser = (raw) => {
+                if (!raw || typeof raw !== 'object') return;
+                const login = String(raw.user || '').trim();
+                const nome = String(raw.nome || raw.user || '').trim();
+                const role = String(raw.role || raw.cargo || raw.equipe || 'Equipe PCM').trim();
+                const id = String(raw.id || '').trim();
+                const key = normKey(login || id || nome);
+                if (!key) return;
+                const prev = map.get(key);
+                map.set(key, {
+                    key,
+                    id: id || prev?.id || key,
+                    user: login || prev?.user || key,
+                    nome: nome || prev?.nome || login || key,
+                    role: role || prev?.role || 'Equipe PCM'
+                });
+            };
+            (Array.isArray(listaFunc) ? listaFunc : []).forEach(pushUser);
+            if (usuarioLogado && (usuarioLogado.user || usuarioLogado.nome)) {
+                pushUser(usuarioLogado);
+            }
+            (Array.isArray(fluxoAprovacaoDocsCfg?.usuariosExigidos) ? fluxoAprovacaoDocsCfg.usuariosExigidos : []).forEach(pushUser);
+            return Array.from(map.values()).sort((a, b) => a.nome.localeCompare(b.nome, 'pt-BR'));
+        }
+
+        function getAprovadoresFluxoAtivoDocs() {
+            const rawList = Array.isArray(fluxoAprovacaoDocsCfg?.usuariosExigidos) ? fluxoAprovacaoDocsCfg.usuariosExigidos : [];
+            if (!rawList.length) return [];
+            const cadastrados = obterUsuariosCadastradosParaFluxoDocs();
+            const seen = new Set();
+            const out = [];
+            rawList.forEach(item => {
+                const obj = typeof item === 'string' ? { user: item, nome: item } : (item || {});
+                const k = getChaveUsuarioFluxoDocs(obj);
+                if (!k || seen.has(k)) return;
+                seen.add(k);
+                const match = cadastrados.find(c =>
+                    c.key === k ||
+                    (obj.user && normKey(c.user) === normKey(obj.user)) ||
+                    (obj.nome && normKey(c.nome) === normKey(obj.nome)) ||
+                    (obj.id && String(c.id) === String(obj.id))
+                );
+                out.push({
+                    key: match?.key || k,
+                    id: match?.id || obj.id || k,
+                    user: match?.user || obj.user || k,
+                    nome: match?.nome || obj.nome || obj.user || k,
+                    role: match?.role || obj.role || 'Aprovador'
+                });
+            });
+            return out;
+        }
+
+        function isUsuarioMatchAprovadorDocs(userA, userB) {
+            if (!userA || !userB) return false;
+            const aLogin = normKey(userA.user || '');
+            const bLogin = normKey(userB.user || '');
+            if (aLogin && bLogin && aLogin === bLogin) return true;
+            const aId = String(userA.id || '').trim();
+            const bId = String(userB.id || '').trim();
+            if (aId && bId && aId === bId) return true;
+            const aNome = normKey(userA.nome || '');
+            const bNome = normKey(userB.nome || '');
+            if (aNome && bNome && aNome === bNome) return true;
+            const aKey = getChaveUsuarioFluxoDocs(userA);
+            const bKey = getChaveUsuarioFluxoDocs(userB);
+            return Boolean(aKey && bKey && aKey === bKey);
+        }
+
+        function isUsuarioNaListaExigidos(userObj, listaAprov = []) {
+            if (!userObj || !Array.isArray(listaAprov) || !listaAprov.length) return false;
+            return listaAprov.some(item => isUsuarioMatchAprovadorDocs(userObj, typeof item === 'string' ? { user: item, nome: item } : item));
+        }
+
+        function isUsuarioNoFluxoAprovacaoDocs(user = usuarioLogado) {
+            if (!user) return false;
+            const exigidos = getAprovadoresFluxoAtivoDocs();
+            return isUsuarioNaListaExigidos(user, exigidos);
+        }
+
         function isPerfilAprovadorDocs(user) {
-            return Boolean(user && isPerfilGestaoDocs(user.role));
+            if (!user) return false;
+            if (isUsuarioNoFluxoAprovacaoDocs(user)) return true;
+            return Boolean(isPerfilGestaoDocs(user.role));
+        }
+
+        function getAprovadoresExigidosParaRevisao(rev = null) {
+            const ativosNoMaster = getAprovadoresFluxoAtivoDocs();
+            if (ativosNoMaster.length > 0) return ativosNoMaster;
+            return [];
+        }
+
+        function getAprovacoesValidasDaRevisao(rev = null, exigidosOpt = null) {
+            const exigidos = Array.isArray(exigidosOpt) ? exigidosOpt : getAprovadoresExigidosParaRevisao(rev);
+            const regs = Array.isArray(rev?.aprovacoesRegistradas) ? rev.aprovacoesRegistradas : [];
+            const out = [];
+            if (exigidos.length > 0) {
+                exigidos.forEach(ex => {
+                    const hit = regs.find(r => isUsuarioMatchAprovadorDocs(ex, r));
+                    if (hit) {
+                        out.push({
+                            ...ex,
+                            aprovadoEm: hit.aprovadoEm || '',
+                            nome: hit.nome || ex.nome,
+                            role: hit.role || ex.role
+                        });
+                    }
+                });
+                return out;
+            }
+            const seen = new Set();
+            regs.forEach(r => {
+                const k = getChaveUsuarioFluxoDocs(r);
+                if (!k || seen.has(k)) return;
+                seen.add(k);
+                out.push(r);
+            });
+            return out;
+        }
+
+        function getAprovadoresFaltantesRevisao(rev = null, aprovacoesOpt = null, exigidosOpt = null) {
+            const exigidos = Array.isArray(exigidosOpt) ? exigidosOpt : getAprovadoresExigidosParaRevisao(rev);
+            if (!exigidos.length) return [];
+            const regs = Array.isArray(aprovacoesOpt) ? aprovacoesOpt : (Array.isArray(rev?.aprovacoesRegistradas) ? rev.aprovacoesRegistradas : []);
+            return exigidos.filter(ex => !regs.some(r => isUsuarioMatchAprovadorDocs(ex, r)));
         }
 
         function getActiveMasterHashDocs() {
             return customMasterHashDocs || DEFAULT_MASTER_HASH_DOCS;
         }
 
-        // Funções Master (edição direta / exclusão direta / taxonomia): somente Admin/Gerente com sessão Admin Master ativa
+        // Funções Master (edição direta / exclusão direta / taxonomia / fluxo de aprovação): somente Admin/Gerente com sessão Admin Master ativa
         window.isMasterDocsAtivo = (user = usuarioLogado) => {
             if (!user || !isPerfilAdmin(user.role)) return false;
             return safeSessionGet('cepera_admin_master_auth') === getActiveMasterHashDocs();
@@ -1581,10 +1763,16 @@ match /config/{document=**} {
             }
             renderCategoriasPills();
             renderModalMasterTaxonomiaDocs();
+            renderModalMasterFluxoAprovacaoDocs();
             renderCurrentView();
         }
 
         let masterDocsTabAtual = 'cat';
+
+        function sincronizarDraftFluxoAprovacaoMaster() {
+            masterAprovadoresSel = getAprovadoresFluxoAtivoDocs().map(u => u.key);
+            masterAprovadoresDraftDirty = false;
+        }
 
         function atualizarBadgeMasterDocs() {
             const admin = Boolean(usuarioLogado && isPerfilAdmin(usuarioLogado.role));
@@ -1594,6 +1782,7 @@ match /config/{document=**} {
             const modalBadge = document.getElementById('masterDocsModalBadge');
             const unlockBox = document.getElementById('masterDocsUnlockBox');
             const activeBox = document.getElementById('masterDocsActiveBox');
+            const btnCfgAprov = document.getElementById('btnConfigFluxoMasterAprov');
 
             if (btn) {
                 const showUnlockBtn = admin && !ativo;
@@ -1605,6 +1794,10 @@ match /config/{document=**} {
                 chip.hidden = !ativo;
                 chip.classList.toggle('hidden', !ativo);
                 chip.classList.toggle('inline-flex', ativo);
+            }
+            if (btnCfgAprov) {
+                btnCfgAprov.hidden = !ativo;
+                btnCfgAprov.classList.toggle('hidden', !ativo);
             }
             if (modalBadge) {
                 modalBadge.innerText = ativo ? 'Desbloqueado' : 'Bloqueado';
@@ -1620,13 +1813,27 @@ match /config/{document=**} {
                 activeBox.hidden = !ativo;
                 activeBox.classList.toggle('hidden', !ativo);
             }
-            if (ativo) renderModalMasterTaxonomiaDocs();
+            if (ativo) {
+                if (!masterAprovadoresDraftDirty) sincronizarDraftFluxoAprovacaoMaster();
+                renderModalMasterTaxonomiaDocs();
+                renderModalMasterFluxoAprovacaoDocs();
+            }
         }
 
         window.switchMasterDocsTab = (tab = 'cat') => {
-            masterDocsTabAtual = (tab === 'disc' || tab === 'seg') ? tab : 'cat';
-            const tabs = { cat: 'masterDocsTabCat', disc: 'masterDocsTabDisc', seg: 'masterDocsTabSeg' };
-            const btns = { cat: 'btnMasterDocsTabCat', disc: 'btnMasterDocsTabDisc', seg: 'btnMasterDocsTabSeg' };
+            masterDocsTabAtual = (tab === 'aprov' || tab === 'disc' || tab === 'seg') ? tab : 'cat';
+            const tabs = {
+                aprov: 'masterDocsTabAprov',
+                cat: 'masterDocsTabCat',
+                disc: 'masterDocsTabDisc',
+                seg: 'masterDocsTabSeg'
+            };
+            const btns = {
+                aprov: 'btnMasterDocsTabAprov',
+                cat: 'btnMasterDocsTabCat',
+                disc: 'btnMasterDocsTabDisc',
+                seg: 'btnMasterDocsTabSeg'
+            };
             for (const [k, elId] of Object.entries(tabs)) {
                 const sec = document.getElementById(elId);
                 if (sec) {
@@ -1640,7 +1847,193 @@ match /config/{document=**} {
                         : 'flex-1 py-2 px-3 rounded-xl font-extrabold text-[11px] text-slate-600 hover:text-slate-900';
                 }
             }
-            if (isMasterDocsAtivo()) renderModalMasterTaxonomiaDocs();
+            if (isMasterDocsAtivo()) {
+                renderModalMasterTaxonomiaDocs();
+                renderModalMasterFluxoAprovacaoDocs();
+            }
+        };
+
+        function renderModalMasterFluxoAprovacaoDocs() {
+            const ativosSalvos = getAprovadoresFluxoAtivoDocs();
+            const tabBtn = document.getElementById('btnMasterDocsTabAprov');
+            if (tabBtn) {
+                tabBtn.innerText = ativosSalvos.length
+                    ? `Fluxo de Aprovação (${ativosSalvos.length})`
+                    : 'Fluxo de Aprovação';
+            }
+
+            const statusBadge = document.getElementById('masterDocsAprovStatusBadge');
+            if (statusBadge) {
+                if (ativosSalvos.length > 0) {
+                    statusBadge.innerText = `Ativo • Exige ${ativosSalvos.length} aprovação(ões)`;
+                    statusBadge.className = 'px-2.5 py-0.5 rounded-full text-[10px] font-extrabold bg-emerald-600 text-white border border-emerald-700';
+                } else {
+                    statusBadge.innerText = 'Padrão Geral (1 aprovação Gestão)';
+                    statusBadge.className = 'px-2.5 py-0.5 rounded-full text-[10px] font-extrabold bg-white border border-amber-300 text-amber-900';
+                }
+            }
+
+            const todosUsuarios = obterUsuariosCadastradosParaFluxoDocs();
+            const mapPorKey = new Map(todosUsuarios.map(u => [u.key, u]));
+
+            const selCountEl = document.getElementById('masterDocsAprovSelCount');
+            if (selCountEl) selCountEl.innerText = String(masterAprovadoresSel.length);
+
+            const chipsBox = document.getElementById('masterDocsAprovSelecionadosChips');
+            if (chipsBox) {
+                if (!masterAprovadoresSel.length) {
+                    chipsBox.innerHTML = `<span class="text-[11px] font-semibold text-slate-400">Nenhum aprovador fixo selecionado (qualquer Gestor/Supervisor aprova em 1 etapa).</span>`;
+                } else {
+                    chipsBox.innerHTML = masterAprovadoresSel.map((k, idx) => {
+                        const u = mapPorKey.get(k) || { key: k, nome: k, user: k, role: 'Aprovador' };
+                        const kJs = JSON.stringify(u.key).replace(/"/g, '&quot;');
+                        return `<span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-xl bg-slate-900 text-white text-[11px] font-extrabold">
+                            <span class="px-1.5 py-0.2 rounded bg-sky-500/30 text-sky-200 font-mono text-[10px]">#${idx + 1}</span>
+                            <span>${escapeHtml(u.nome)}</span>
+                            <span class="text-[10px] font-normal text-slate-300">(${escapeHtml(u.role)})</span>
+                            <button type="button" onclick="toggleUsuarioFluxoAprovacaoMaster(${kJs}, false)" title="Remover do fluxo de aprovação" class="text-rose-300 hover:text-white font-extrabold ml-0.5">✕</button>
+                        </span>`;
+                    }).join('');
+                }
+            }
+
+            const listBox = document.getElementById('masterDocsAprovUsersList');
+            if (!listBox) return;
+
+            const termo = normKey(document.getElementById('masterAprovBuscaInput')?.value || '');
+            const filtrados = todosUsuarios.filter(u =>
+                !termo ||
+                normKey(u.nome).includes(termo) ||
+                normKey(u.user).includes(termo) ||
+                normKey(u.role).includes(termo)
+            );
+
+            if (!filtrados.length) {
+                listBox.innerHTML = `<div class="p-4 rounded-xl bg-white border border-slate-200 text-center text-slate-400 font-bold">Nenhum usuário cadastrado encontrado para este filtro.</div>`;
+                return;
+            }
+
+            listBox.innerHTML = filtrados.map(u => {
+                const idxSel = masterAprovadoresSel.indexOf(u.key);
+                const isSel = idxSel !== -1;
+                const kJs = JSON.stringify(u.key).replace(/"/g, '&quot;');
+                const ehGestor = isPerfilGestaoDocs(u.role);
+                return `
+                <label class="flex items-center justify-between gap-2.5 p-2.5 rounded-xl border ${isSel ? 'bg-sky-50/90 border-sky-300' : 'bg-white border-slate-200 hover:border-slate-300'} cursor-pointer transition-colors">
+                    <div class="flex items-center gap-2.5 min-w-0">
+                        <input type="checkbox" ${isSel ? 'checked' : ''} onchange="toggleUsuarioFluxoAprovacaoMaster(${kJs}, this.checked)" class="w-4 h-4 rounded accent-slate-900 shrink-0">
+                        <div class="min-w-0">
+                            <div class="font-extrabold text-slate-900 truncate">${escapeHtml(u.nome)} <span class="font-mono text-[10px] font-semibold text-slate-500">@${escapeHtml(u.user)}</span></div>
+                            <div class="text-[10px] font-bold ${ehGestor ? 'text-indigo-700' : 'text-slate-500'}">${escapeHtml(u.role)}</div>
+                        </div>
+                    </div>
+                    <div class="flex items-center gap-1.5 shrink-0">
+                        ${isSel
+                            ? `<span class="px-2 py-0.5 rounded-full bg-slate-900 text-white text-[10px] font-extrabold">Aprovador #${idxSel + 1}</span>`
+                            : `<span class="px-2 py-0.5 rounded-full bg-slate-100 text-slate-500 text-[10px] font-bold">Não exigido</span>`}
+                    </div>
+                </label>`;
+            }).join('');
+        }
+
+        window.toggleUsuarioFluxoAprovacaoMaster = (userKey, checked) => {
+            if (!isMasterDocsAtivo()) {
+                return showToast('Desbloqueie o Menu Admin Master para configurar o fluxo de aprovação.', 'error');
+            }
+            const k = normKey(userKey);
+            if (!k) return;
+            const jaTem = masterAprovadoresSel.includes(k);
+            const deveMarcar = checked === undefined ? !jaTem : Boolean(checked);
+            if (deveMarcar && !jaTem) {
+                masterAprovadoresSel = [...masterAprovadoresSel, k];
+            } else if (!deveMarcar && jaTem) {
+                masterAprovadoresSel = masterAprovadoresSel.filter(x => x !== k);
+            }
+            masterAprovadoresDraftDirty = true;
+            renderModalMasterFluxoAprovacaoDocs();
+        };
+
+        window.selecionarGestaoFluxoAprovacaoMaster = () => {
+            if (!isMasterDocsAtivo()) {
+                return showToast('Desbloqueie o Menu Admin Master para configurar o fluxo de aprovação.', 'error');
+            }
+            const todos = obterUsuariosCadastradosParaFluxoDocs();
+            const gestores = todos.filter(u => isPerfilGestaoDocs(u.role)).map(u => u.key);
+            masterAprovadoresSel = [...new Set(gestores)];
+            masterAprovadoresDraftDirty = true;
+            renderModalMasterFluxoAprovacaoDocs();
+        };
+
+        window.selecionarTodosFluxoAprovacaoMaster = () => {
+            if (!isMasterDocsAtivo()) {
+                return showToast('Desbloqueie o Menu Admin Master para configurar o fluxo de aprovação.', 'error');
+            }
+            masterAprovadoresSel = obterUsuariosCadastradosParaFluxoDocs().map(u => u.key);
+            masterAprovadoresDraftDirty = true;
+            renderModalMasterFluxoAprovacaoDocs();
+        };
+
+        window.limparSelecaoFluxoAprovacaoMaster = () => {
+            if (!isMasterDocsAtivo()) {
+                return showToast('Desbloqueie o Menu Admin Master para configurar o fluxo de aprovação.', 'error');
+            }
+            masterAprovadoresSel = [];
+            masterAprovadoresDraftDirty = true;
+            renderModalMasterFluxoAprovacaoDocs();
+        };
+
+        window.salvarFluxoAprovacaoMasterDocs = async () => {
+            if (!isMasterDocsAtivo()) {
+                return showToast('Acesso restrito: apenas Admin Master pode configurar o fluxo de aprovação.', 'error');
+            }
+            const todos = obterUsuariosCadastradosParaFluxoDocs();
+            const mapPorKey = new Map(todos.map(u => [u.key, u]));
+            const usuariosExigidos = masterAprovadoresSel.map(k => {
+                const hit = mapPorKey.get(k);
+                return {
+                    key: k,
+                    id: hit?.id || k,
+                    user: hit?.user || k,
+                    nome: hit?.nome || k,
+                    role: hit?.role || 'Aprovador'
+                };
+            });
+
+            const btn = document.getElementById('btnSalvarFluxoAprovacaoMasterDocs');
+            if (btn) { btn.disabled = true; btn.innerText = 'Salvando...'; }
+            try {
+                const payload = sanitizarPayloadFirestore({
+                    usuariosExigidos,
+                    atualizadoPor: usuarioLogado?.nome || usuarioLogado?.user || 'Admin Master PCM',
+                    atualizadoEm: Date.now()
+                });
+                await setDoc(refFluxoAprovacaoDocs, payload);
+                fluxoAprovacaoDocsCfg = payload;
+                masterAprovadoresDraftDirty = false;
+                aplicarPerfilInterface();
+                renderModalMasterFluxoAprovacaoDocs();
+                renderCurrentView();
+                if (usuariosExigidos.length > 0) {
+                    showToast(`Fluxo de Aprovação salvo! Exigindo aprovação de ${usuariosExigidos.length} usuário(s): ${usuariosExigidos.map(u => u.nome).join(', ')}.`, 'success');
+                } else {
+                    showToast('Fluxo de Aprovação restaurado para o modo padrão (sem lista fixa de aprovadores).', 'info');
+                }
+            } catch (err) {
+                const info = formatarErroFirestoreDocs(err);
+                if (info.tipo === 'regras_firestore') abrirModalAlertaRegrasFirestore(info);
+                else showToast(info.resumo, 'error');
+            } finally {
+                if (btn) { btn.disabled = false; btn.innerText = 'Salvar Fluxo de Aprovação'; }
+            }
+        };
+
+        window.restaurarFluxoAprovacaoPadraoMasterDocs = async () => {
+            if (!isMasterDocsAtivo()) {
+                return showToast('Acesso restrito: apenas Admin Master pode alterar o fluxo de aprovação.', 'error');
+            }
+            masterAprovadoresSel = [];
+            masterAprovadoresDraftDirty = true;
+            await window.salvarFluxoAprovacaoMasterDocs();
         };
 
         function renderModalMasterTaxonomiaDocs() {
@@ -1715,6 +2108,7 @@ match /config/{document=**} {
             }
             const inp = document.getElementById('masterDocsPassInput');
             if (inp) inp.value = '';
+            sincronizarDraftFluxoAprovacaoMaster();
             atualizarBadgeMasterDocs();
             if (isMasterDocsAtivo()) {
                 switchMasterDocsTab(tabPreferida || 'cat');
@@ -2563,6 +2957,36 @@ match /config/{document=**} {
             const badge = document.getElementById('aprovCountBadge');
             if (badge) badge.innerText = `${pendentes.length} pendente(s)`;
 
+            const btnCfgMaster = document.getElementById('btnConfigFluxoMasterAprov');
+            if (btnCfgMaster) {
+                const masterOn = isMasterDocsAtivo();
+                btnCfgMaster.hidden = !masterOn;
+                btnCfgMaster.classList.toggle('hidden', !masterOn);
+            }
+
+            const fluxoBanner = document.getElementById('aprovFluxoAtivoBanner');
+            const exigidosGlobal = getAprovadoresFluxoAtivoDocs();
+            if (fluxoBanner) {
+                if (exigidosGlobal.length > 0) {
+                    const chipsGlobal = exigidosGlobal.map((u, idx) =>
+                        `<span class="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full bg-white border border-sky-200 text-slate-800 font-extrabold text-[11px]"><span class="text-sky-700 font-mono">#${idx + 1}</span> ${escapeHtml(u.nome)} <span class="text-slate-400 font-normal">(${escapeHtml(u.role)})</span></span>`
+                    ).join('');
+                    fluxoBanner.className = 'p-3.5 rounded-2xl bg-sky-50/80 border border-sky-200 text-xs space-y-2';
+                    fluxoBanner.innerHTML = `
+                        <div class="flex flex-wrap items-center justify-between gap-2">
+                            <div class="font-extrabold text-sky-950">Fluxo de Aprovação Master Ativo • Exigindo aprovação de ${exigidosGlobal.length} usuário(s)</div>
+                            <span class="px-2 py-0.5 rounded-full bg-sky-600 text-white text-[10px] font-extrabold">Descentralizado (${exigidosGlobal.length} etapas)</span>
+                        </div>
+                        <div class="text-[11px] font-medium text-slate-700">O documento só é lançado como vigente no sistema após todos os aprovadores selecionados no Menu Master registrarem seu aceite:</div>
+                        <div class="flex flex-wrap gap-1.5">${chipsGlobal}</div>`;
+                } else {
+                    fluxoBanner.className = 'p-3 rounded-2xl bg-slate-50 border border-slate-200 text-xs flex flex-wrap items-center justify-between gap-2';
+                    fluxoBanner.innerHTML = `
+                        <span class="text-slate-600 font-semibold"><strong>Fluxo Padrão:</strong> Aprovação em 1 etapa pela Gestão / Supervisão (ou selecione múltiplos aprovadores obrigatórios no Menu Master).</span>
+                        ${isMasterDocsAtivo() ? `<button type="button" onclick="abrirModalAdminMasterDocs('aprov')" class="text-sky-700 hover:text-sky-900 font-extrabold underline">Selecionar Aprovadores no Master</button>` : ''}`;
+                }
+            }
+
             const box = document.getElementById('aprovacoesLista');
             if (!pendentes.length) {
                 box.innerHTML = `<div class="glass-card p-8 rounded-3xl text-center text-xs font-bold text-slate-500 border-2 border-dashed border-emerald-200 bg-emerald-50/30">
@@ -2580,12 +3004,58 @@ match /config/{document=**} {
                         ? '<span class="px-2 py-0.5 rounded-full text-[9px] font-extrabold bg-slate-100 text-slate-600">Enviado por você</span>'
                         : '';
 
+                    const exigidos = getAprovadoresExigidosParaRevisao(rev);
+                    const aprovacoes = getAprovacoesValidasDaRevisao(rev, exigidos);
+                    const faltantes = getAprovadoresFaltantesRevisao(rev, aprovacoes, exigidos);
+                    const ehExigidoAtual = exigidos.length === 0 || isUsuarioNaListaExigidos(usuarioLogado, exigidos);
+                    const jaAprovouAtual = exigidos.length > 0 && isUsuarioNaListaExigidos(usuarioLogado, aprovacoes);
+
+                    let blocoFluxoCard = '';
+                    if (exigidos.length > 0) {
+                        const pctAprov = Math.round((aprovacoes.length / exigidos.length) * 100);
+                        const pillsUsers = exigidos.map((u, idx) => {
+                            const hit = aprovacoes.find(a => isUsuarioMatchAprovadorDocs(u, a));
+                            return hit
+                                ? `<span class="inline-flex items-center gap-1 px-2.5 py-1 rounded-xl bg-emerald-100 text-emerald-900 border border-emerald-300 text-[11px] font-extrabold">✓ #${idx + 1} ${escapeHtml(u.nome)} <span class="text-[10px] font-semibold text-emerald-700">(Aprovado)</span></span>`
+                                : `<span class="inline-flex items-center gap-1 px-2.5 py-1 rounded-xl bg-amber-50 text-amber-900 border border-amber-300 text-[11px] font-extrabold">Aguardando #${idx + 1}: ${escapeHtml(u.nome)} <span class="text-[10px] font-normal text-amber-800">(${escapeHtml(u.role)})</span></span>`;
+                        }).join('');
+
+                        blocoFluxoCard = `
+                        <div class="p-3.5 rounded-2xl bg-sky-50/70 border border-sky-200 space-y-2 text-xs">
+                            <div class="flex flex-wrap items-center justify-between gap-2">
+                                <span class="text-[10px] font-extrabold uppercase tracking-wider text-sky-900">Progresso do Fluxo de Aprovação (${aprovacoes.length}/${exigidos.length} aprovadores)</span>
+                                <span class="font-mono text-[11px] font-extrabold text-sky-800">${pctAprov}% concluído</span>
+                            </div>
+                            <div class="w-full h-1.5 rounded-full bg-slate-200 overflow-hidden">
+                                <div class="h-full bg-emerald-600 transition-all" style="width:${pctAprov}%"></div>
+                            </div>
+                            <div class="flex flex-wrap gap-1.5 pt-0.5">${pillsUsers}</div>
+                            ${faltantes.length > 0
+                                ? `<div class="text-[11px] font-bold text-amber-900">Falta aprovação de: <strong>${escapeHtml(faltantes.map(f => f.nome).join(', '))}</strong> para lançar o documento como vigente.</div>`
+                                : `<div class="text-[11px] font-bold text-emerald-800">✓ Todos os aprovadores exigidos validaram.</div>`}
+                        </div>`;
+                    }
+
+                    let btnAprovarHtml = `<button type="button" onclick="aprovarRevisaoDoc('${rev.id}')" class="btn-touch bg-emerald-600 hover:bg-emerald-700 text-white text-xs py-2 px-5 shadow-sm">✓ Aprovar e Publicar Vigente</button>`;
+                    if (exigidos.length > 0) {
+                        if (jaAprovouAtual) {
+                            btnAprovarHtml = `<button type="button" onclick="aprovarRevisaoDoc('${rev.id}')" class="btn-touch bg-emerald-100 text-emerald-900 border border-emerald-300 text-xs py-2 px-4">✓ Sua Aprovação Registrada (${aprovacoes.length}/${exigidos.length})</button>`;
+                        } else if (ehExigidoAtual) {
+                            const lblAcao = faltantes.length <= 1
+                                ? `✓ Aprovar (${aprovacoes.length + 1}/${exigidos.length}) e Lançar Vigente`
+                                : `✓ Registrar Minha Aprovação (${aprovacoes.length + 1}/${exigidos.length})`;
+                            btnAprovarHtml = `<button type="button" onclick="aprovarRevisaoDoc('${rev.id}')" class="btn-touch bg-emerald-600 hover:bg-emerald-700 text-white text-xs py-2 px-5 shadow-sm">${lblAcao}</button>`;
+                        } else {
+                            btnAprovarHtml = `<button type="button" onclick="aprovarRevisaoDoc('${rev.id}')" class="btn-touch bg-slate-100 text-slate-600 border border-slate-200 text-xs py-2 px-4">Aguardando Fluxo (${aprovacoes.length}/${exigidos.length})</button>`;
+                        }
+                    }
+
                     return `
                     <div class="glass-card p-5 rounded-3xl border border-amber-200 space-y-3">
                         <div class="flex flex-wrap items-start justify-between gap-3">
                             <div class="space-y-1">
                                 <div class="flex flex-wrap items-center gap-1.5">
-                                    <span class="px-2.5 py-0.5 rounded-full text-[10px] font-extrabold st-pendente">Aguardando Aprovação</span>
+                                    <span class="px-2.5 py-0.5 rounded-full text-[10px] font-extrabold st-pendente">${exigidos.length > 0 ? `Fluxo de Aprovação (${aprovacoes.length}/${exigidos.length})` : 'Aguardando Aprovação'}</span>
                                     <span class="px-2.5 py-0.5 rounded-full text-[10px] font-extrabold ${cat.badgeCls}">${escapeHtml(cat.label)}</span>
                                     <span class="px-2 py-0.5 rounded-full text-[10px] font-mono font-extrabold bg-slate-900 text-white">${escapeHtml(rev.codigoDoc)} • ${escapeHtml(rev.revisaoLabel)}</span>
                                     ${rev.origemEnvio === 'campo_sugestao' ? '<span class="px-2 py-0.5 rounded-full text-[9px] font-extrabold bg-emerald-100 text-emerald-800">Sugestão de Campo</span>' : ''}
@@ -2599,6 +3069,8 @@ match /config/{document=**} {
                                 <div>Em: ${escapeHtml(formatDataBR(rev.enviadoEm))}</div>
                             </div>
                         </div>
+
+                        ${blocoFluxoCard}
 
                         <div class="grid grid-cols-1 md:grid-cols-2 gap-3 bg-slate-50 p-3.5 rounded-2xl border border-slate-200 text-xs">
                             <div class="space-y-1.5">
@@ -2622,7 +3094,7 @@ match /config/{document=**} {
                         <div class="flex flex-wrap items-center justify-end gap-2 pt-2 border-t border-slate-100">
                             ${isMasterDocsAtivo() ? `<button type="button" onclick="excluirRevisaoMaster('${rev.id}')" title="Exclusão direta (Admin Master)" class="btn-touch bg-white hover:bg-rose-50 text-rose-700 border border-rose-200 text-xs py-2 px-4">🗑️ Excluir (Master)</button>` : ''}
                             <button type="button" onclick="reprovarRevisaoDoc('${rev.id}')" class="btn-touch bg-rose-50 hover:bg-rose-100 text-rose-700 border border-rose-200 text-xs py-2 px-4">✕ Reprovar com Motivo</button>
-                            <button type="button" onclick="aprovarRevisaoDoc('${rev.id}')" class="btn-touch bg-emerald-600 hover:bg-emerald-700 text-white text-xs py-2 px-5 shadow-sm">✓ Aprovar e Publicar Vigente</button>
+                            ${btnAprovarHtml}
                         </div>
                     </div>`;
                 }).join('');
@@ -2649,7 +3121,7 @@ match /config/{document=**} {
         }
 
         window.aprovarRevisaoDoc = async (revId) => {
-            if (!isPerfilAprovadorDocs(usuarioLogado)) return showToast('Apenas Gestão/Supervisão pode aprovar documentos.', 'error');
+            if (!isPerfilAprovadorDocs(usuarioLogado)) return showToast('Apenas usuários autorizados ou Gestão/Supervisão podem aprovar documentos.', 'error');
             const rev = docsRevisoes.find(r => r.id === revId);
             if (!rev) return;
             const master = docsAtivos.find(d => d.id === rev.docMasterId);
@@ -2667,8 +3139,60 @@ match /config/{document=**} {
             const aprovRole = usuarioLogado?.role || 'Gestão';
             const catMeta = CATEGORIAS_DOCS[rev.categoria] || CATEGORIAS_DOCS.manuais;
 
+            const exigidos = getAprovadoresExigidosParaRevisao(rev);
+            const prevAprov = Array.isArray(rev.aprovacoesRegistradas) ? [...rev.aprovacoesRegistradas] : [];
+
+            if (exigidos.length > 0) {
+                if (!isUsuarioNaListaExigidos(usuarioLogado, exigidos)) {
+                    return showToast(`Aprovação restrita aos usuários selecionados no Fluxo Master: ${exigidos.map(u => u.nome).join(', ')}.`, 'error');
+                }
+                if (isUsuarioNaListaExigidos(usuarioLogado, prevAprov)) {
+                    const jaFaltantes = getAprovadoresFaltantesRevisao(rev, prevAprov, exigidos);
+                    return showToast(`Sua aprovação já está registrada! Aguardando: ${jaFaltantes.map(u => u.nome).join(', ')}.`, 'info');
+                }
+            }
+
+            const novasAprovacoes = [
+                ...prevAprov.filter(a => !isUsuarioMatchAprovadorDocs(usuarioLogado, a)),
+                {
+                    key: getChaveUsuarioFluxoDocs(usuarioLogado),
+                    id: usuarioLogado?.id || '',
+                    user: usuarioLogado?.user || normKey(aprovNome),
+                    nome: aprovNome,
+                    role: aprovRole,
+                    aprovadoEm: agora
+                }
+            ];
+
+            const faltantes = getAprovadoresFaltantesRevisao(rev, novasAprovacoes, exigidos);
+            const aprovadosValidos = getAprovacoesValidasDaRevisao({ ...rev, aprovacoesRegistradas: novasAprovacoes }, exigidos);
+
             try {
-                // 0. Se ainda não tem URL no SharePoint mas há OneDrive local ou Webhook ativo neste navegador, espelha na aprovação
+                // Se o Fluxo Master exige múltiplos aprovadores e ainda faltam aprovações, registra aprovação parcial sem lançar como vigente
+                if (exigidos.length > 0 && faltantes.length > 0) {
+                    await updateDoc(doc(db, 'docs_revisoes', rev.id), sanitizarPayloadFirestore({
+                        status: 'pendente_aprovacao',
+                        aprovadoresExigidos: exigidos,
+                        aprovacoesRegistradas: novasAprovacoes,
+                        ultimaAprovacaoParcialPor: aprovNome,
+                        ultimaAprovacaoParcialEm: agora,
+                        atualizadoEm: agora
+                    }));
+                    await updateDoc(doc(db, 'docs_ativos', master.id), sanitizarPayloadFirestore({
+                        aprovadoresExigidos: exigidos,
+                        aprovacoesRegistradas: novasAprovacoes,
+                        atualizadoPor: aprovNome,
+                        atualizadoEm: agora
+                    }));
+                    showToast(`Aprovação de ${aprovNome} registrada (${aprovadosValidos.length}/${exigidos.length})! Aguardando: ${faltantes.map(u => u.nome).join(', ')} para lançar no sistema.`, 'info');
+                    return;
+                }
+
+                const aprovadoresNomesFinal = exigidos.length > 1
+                    ? aprovadosValidos.map(a => a.nome || a.user).join(', ')
+                    : aprovNome;
+
+                // 0. Se ainda não tem URL no SharePoint mas há OneDrive local ou Webhook ativo neste navegador, espelha na aprovação final
                 let finalArquivoUrl = rev.arquivoUrl || '';
                 let finalArquivoEmbedUrl = rev.arquivoEmbedUrl || '';
                 let finalProvider = rev.arquivoProvider || (rev.arquivoId ? 'banco_interno' : 'sharepoint');
@@ -2701,7 +3225,9 @@ match /config/{document=**} {
                     arquivoProvider: finalProvider,
                     arquivoUrl: finalArquivoUrl,
                     arquivoEmbedUrl: finalArquivoEmbedUrl,
-                    analisadoPor: aprovNome,
+                    aprovadoresExigidos: exigidos,
+                    aprovacoesRegistradas: novasAprovacoes,
+                    analisadoPor: aprovadoresNomesFinal,
                     analisadoPorRole: aprovRole,
                     analisadoEm: agora
                 }));
@@ -2749,7 +3275,9 @@ match /config/{document=**} {
                     revisaoVigenteLabel: rev.revisaoLabel,
                     revisaoVigenteId: rev.id,
                     temRevisaoPendente: outrasPend,
-                    aprovadoPor: aprovNome,
+                    aprovadoresExigidos: exigidos,
+                    aprovacoesRegistradas: novasAprovacoes,
+                    aprovadoPor: aprovadoresNomesFinal,
                     aprovadoPorRole: aprovRole,
                     aprovadoEm: agora,
                     atualizadoPor: aprovNome,
@@ -2758,7 +3286,7 @@ match /config/{document=**} {
                 masterUpdate.searchText = construirSearchText({ ...master, ...masterUpdate });
                 await updateDoc(doc(db, 'docs_ativos', master.id), sanitizarPayloadFirestore(masterUpdate));
 
-                showToast(`${master.codigo} • ${rev.revisaoLabel} aprovado e publicado como VIGENTE!${finalArquivoUrl && !rev.arquivoUrl ? ' (Espelhado no SharePoint/OneDrive)' : ''}`, 'success');
+                showToast(`${master.codigo} • ${rev.revisaoLabel} aprovado${exigidos.length > 1 ? ` (${exigidos.length}/${exigidos.length} aprovadores)` : ''} e publicado como VIGENTE!${finalArquivoUrl && !rev.arquivoUrl ? ' (Espelhado no SharePoint/OneDrive)' : ''}`, 'success');
             } catch (err) {
                 console.error('Falha em aprovarRevisaoDoc:', err);
                 const info = formatarErroFirestoreDocs(err);
@@ -4264,8 +4792,13 @@ match /config/{document=**} {
                 if (nota) nota.innerText = 'Modo Admin Master: alterações gravadas diretamente no documento.';
                 if (btn) btn.innerText = '💾 Salvar Edição Direta (Master)';
             } else {
+                const exigidos = getAprovadoresFluxoAtivoDocs();
                 if (kicker) kicker.innerText = 'Qualidade de Dados • Entra na Fila de Aprovação';
-                if (nota) nota.innerText = 'Será enviado para validação e aprovação de Gestão/Supervisão.';
+                if (nota) {
+                    nota.innerText = exigidos.length > 0
+                        ? `Fluxo Master Ativo: exige aprovação de ${exigidos.length} usuário(s) (${exigidos.map(u => u.nome).join(', ')}) antes de lançar no sistema.`
+                        : 'Será enviado para validação e aprovação de Gestão/Supervisão.';
+                }
                 if (btn) btn.innerText = 'Enviar para Aprovação';
             }
         }
@@ -4966,6 +5499,8 @@ match /config/{document=**} {
                     return;
                 }
 
+                const exigidosFluxoAtivo = getAprovadoresFluxoAtivoDocs();
+
                 if (modo === 'novo') {
                     const masterPayload = {
                         schemaVersion: 1,
@@ -4990,6 +5525,8 @@ match /config/{document=**} {
                         revisaoVigenteLabel: `Pendente (${revLabel})`,
                         revisaoVigenteId: '',
                         temRevisaoPendente: true,
+                        aprovadoresExigidos: exigidosFluxoAtivo,
+                        aprovacoesRegistradas: [],
                         validadeEm,
                         periodicidadeRevalidacaoMeses,
                         arquivoProvider: provider,
@@ -5009,6 +5546,8 @@ match /config/{document=**} {
                 } else if (targetMasterId) {
                     await updateDoc(doc(db, 'docs_ativos', targetMasterId), sanitizarPayloadFirestore({
                         temRevisaoPendente: true,
+                        aprovadoresExigidos: exigidosFluxoAtivo,
+                        aprovacoesRegistradas: [],
                         atualizadoPor: autor,
                         atualizadoEm: agora
                     }));
@@ -5037,6 +5576,8 @@ match /config/{document=**} {
                     revisaoNum: revNum,
                     revisaoLabel: revLabel,
                     status: 'pendente_aprovacao',
+                    aprovadoresExigidos: exigidosFluxoAtivo,
+                    aprovacoesRegistradas: [],
                     motivoAlteracao,
                     arquivoProvider: provider,
                     ...arquivoMeta,
@@ -5108,8 +5649,8 @@ match /config/{document=**} {
 
             document.getElementById('detDocBadges').innerHTML = `
                 <span class="px-2.5 py-0.5 rounded-full text-[10px] font-extrabold ${cat.badgeCls}">${escapeHtml(cat.label)}</span>
-                <span class="px-2 py-0.5 rounded-full text-[10px] font-mono font-extrabold bg-slate-900 text-white">${escapeHtml(d.codigo)} • ${escapeHtml(d.revisaoVigenteLabel || 'REV 00')}</span>
-                <span class="px-2 py-0.5 rounded-full text-[10px] font-extrabold ${d.status === 'vigente' ? 'st-vigente' : 'st-pendente'}">${escapeHtml(String(d.status || '').toUpperCase())}</span>
+                <span class="px-2.5 py-0.5 rounded-full text-[10px] font-mono font-extrabold bg-slate-900 text-white">${escapeHtml(d.codigo)} • ${escapeHtml(d.revisaoVigenteLabel || 'REV 00')}</span>
+                <span class="px-2.5 py-0.5 rounded-full text-[10px] font-extrabold ${d.status === 'vigente' ? 'st-vigente' : 'st-pendente'}">${escapeHtml(String(d.status || '').toUpperCase())}</span>
                 ${visDet ? `<span class="px-2.5 py-0.5 rounded-full text-[10px] font-extrabold bg-slate-100 text-slate-700 border border-slate-300">${escapeHtml(visDet)}</span>` : ''}`;
             document.getElementById('detDocTitulo').innerText = d.titulo;
             document.getElementById('detDocAtivoPath').innerText = [d.area, d.maquina, d.equipamento, d.conjunto, d.subconjunto].filter(Boolean).join(' › ');
@@ -5363,6 +5904,7 @@ match /config/{document=**} {
                 if (den) { den.hidden = true; den.classList.add('hidden'); }
                 if (main) { main.hidden = false; main.classList.remove('hidden'); }
                 aplicarPerfilInterface();
+                if (isMasterDocsAtivo()) renderModalMasterFluxoAprovacaoDocs();
                 renderCurrentView();
                 tentarAplicarHandoffDocs();
             });
@@ -5388,6 +5930,22 @@ match /config/{document=**} {
                         disciplinasCustom: Array.isArray(data.disciplinasCustom) ? data.disciplinasCustom : []
                     };
                     atualizarUIAposMudancaTaxonomiaDocs();
+                }, () => {});
+            } catch (_) {}
+
+            try {
+                onSnapshot(refFluxoAprovacaoDocs, (snapDoc) => {
+                    const data = snapDoc && snapDoc.exists() ? (snapDoc.data() || {}) : {};
+                    fluxoAprovacaoDocsCfg = {
+                        usuariosExigidos: Array.isArray(data.usuariosExigidos) ? data.usuariosExigidos : [],
+                        atualizadoPor: data.atualizadoPor || '',
+                        atualizadoEm: Number(data.atualizadoEm || 0)
+                    };
+                    if (!masterAprovadoresDraftDirty) sincronizarDraftFluxoAprovacaoMaster();
+                    if (usuarioLogado) {
+                        aplicarPerfilInterface();
+                        renderCurrentView();
+                    }
                 }, () => {});
             } catch (_) {}
 
