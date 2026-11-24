@@ -906,29 +906,55 @@
         </div>
     </div>
 
-    <!-- ==================== MODAL CLONAR ESTRUTURA (LINHA OU EQUIPAMENTO) ==================== -->
+    <!-- ==================== MODAL CLONAR / COPIAR ESTRUTURA, CONJUNTO OU SUBCONJUNTO PARA OUTRO ATIVO ==================== -->
     <div id="modalClonar" role="dialog" aria-modal="true" hidden class="hidden fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-[65] flex items-end sm:items-center justify-center p-0 sm:p-4">
-        <div class="bg-white w-full max-w-lg rounded-t-3xl sm:rounded-3xl p-6 shadow-2xl border border-slate-200 space-y-4">
+        <div class="bg-white w-full max-w-2xl rounded-t-3xl sm:rounded-3xl p-6 shadow-2xl border border-slate-200 max-h-[92vh] overflow-y-auto space-y-4">
             <div class="flex items-center justify-between border-b border-slate-100 pb-3">
                 <div>
-                    <span class="text-[10px] font-extrabold uppercase tracking-widest text-indigo-600">Produtividade • Replicação de Árvore</span>
+                    <span class="text-[10px] font-extrabold uppercase tracking-widest text-indigo-600">Produtividade • Replicação entre Ativos</span>
                     <h2 id="clonarModalTitle" class="text-lg font-extrabold text-slate-900">Clonar Estrutura</h2>
                 </div>
                 <button type="button" onclick="fecharModal('modalClonar')" class="w-8 h-8 rounded-full bg-slate-100 text-slate-600 font-bold">✕</button>
             </div>
             <p id="clonarResumo" class="text-xs text-slate-600 bg-slate-50 p-3 rounded-2xl border border-slate-200"></p>
-            <form id="formClonar" class="space-y-3 text-xs">
-                <div>
-                    <label class="block text-[10px] font-extrabold uppercase text-slate-500 mb-1">Setor / Área Destino *</label>
-                    <input type="text" id="clArea" list="dlSetores" required class="input-clean py-2 text-xs font-bold">
+            <form id="formClonar" class="space-y-3.5 text-xs">
+                <!-- Seletor Rápido de Ativo(s) Existente(s) na Árvore (para Conjunto / Subconjunto) -->
+                <div id="clAtivosExistentesWrap" hidden class="hidden p-3.5 rounded-2xl bg-indigo-50/60 border border-indigo-200 space-y-2.5">
+                    <div class="flex flex-wrap items-center justify-between gap-2">
+                        <div>
+                            <div class="text-[10px] font-extrabold uppercase tracking-wider text-indigo-900">1. Escolher Ativo(s) Destino da Árvore (<span id="clDestSelCount">0</span> marcado(s))</div>
+                            <p class="text-[11px] font-semibold text-slate-600">Clique em um equipamento abaixo para preencher o destino (ou marque vários equipamentos para copiar em lote):</p>
+                        </div>
+                        <div class="flex items-center gap-1.5">
+                            <button type="button" onclick="selecionarEquipamentosParecidosCloneAtivo()" class="px-2.5 py-1 rounded-lg bg-indigo-600 hover:bg-indigo-700 text-white font-extrabold text-[10px]">★ Marcar Parecidos</button>
+                            <button type="button" onclick="limparSelecaoDestinosCloneAtivo()" class="px-2.5 py-1 rounded-lg bg-white hover:bg-rose-50 border border-slate-200 text-rose-700 font-extrabold text-[10px]">Limpar</button>
+                        </div>
+                    </div>
+                    <input type="text" id="clBuscaAtivoDestino" oninput="renderListaAtivosDestinoClone()" class="input-clean py-1.5 text-xs font-bold" placeholder="Filtrar ativo destino por equipamento, linha ou setor...">
+                    <div id="clListaAtivosExistentes" class="space-y-1.5 max-h-44 overflow-y-auto pr-1"></div>
                 </div>
-                <div>
-                    <label class="block text-[10px] font-extrabold uppercase text-slate-500 mb-1">Máquina / Linha Destino *</label>
-                    <input type="text" id="clMaquina" list="dlMaquinas" required class="input-clean py-2 text-xs font-bold">
+
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                    <div>
+                        <label class="block text-[10px] font-extrabold uppercase text-slate-500 mb-1">Setor / Área Destino *</label>
+                        <input type="text" id="clArea" list="dlSetores" required class="input-clean py-2 text-xs font-bold">
+                    </div>
+                    <div>
+                        <label class="block text-[10px] font-extrabold uppercase text-slate-500 mb-1">Máquina / Linha Destino *</label>
+                        <input type="text" id="clMaquina" list="dlMaquinas" required class="input-clean py-2 text-xs font-bold">
+                    </div>
                 </div>
                 <div id="clEquipWrap">
                     <label class="block text-[10px] font-extrabold uppercase text-slate-500 mb-1">Equipamento Destino *</label>
                     <input type="text" id="clEquipamento" list="dlEquipamentos" class="input-clean py-2 text-xs font-bold">
+                </div>
+                <div id="clConjuntoWrap" hidden class="hidden">
+                    <label class="block text-[10px] font-extrabold uppercase text-slate-500 mb-1">Conjunto no Ativo Destino *</label>
+                    <input type="text" id="clConjunto" list="dlConjuntos" class="input-clean py-2 text-xs font-bold" placeholder="Nome do Conjunto no equipamento destino">
+                </div>
+                <div id="clSubconjuntoWrap" hidden class="hidden">
+                    <label class="block text-[10px] font-extrabold uppercase text-sky-700 mb-1">Subconjunto no Ativo Destino</label>
+                    <input type="text" id="clSubconjunto" class="input-clean py-2 text-xs font-bold" placeholder="Nome do Subconjunto copiado">
                 </div>
                 <div class="flex justify-end gap-2 pt-3 border-t border-slate-100">
                     <button type="button" onclick="fecharModal('modalClonar')" class="btn-touch bg-slate-100 text-slate-700 text-xs">Cancelar</button>
@@ -3669,8 +3695,9 @@
                         </div>
                         <div class="flex flex-wrap items-center gap-1.5 shrink-0">
                             <button type="button" onclick="abrirModalAgendarConjunto(${JSON.stringify(node.area).replace(/"/g, '&quot;')}, ${JSON.stringify(node.maquina).replace(/"/g, '&quot;')}, ${JSON.stringify(node.equipamento).replace(/"/g, '&quot;')}, ${JSON.stringify(node.conjunto).replace(/"/g, '&quot;')}, ${JSON.stringify(node.nodeId).replace(/"/g, '&quot;')})" class="btn-touch bg-emerald-50 hover:bg-emerald-100 text-emerald-800 border border-emerald-200 text-[11px] py-2 px-3 inline-flex items-center gap-1.5"><svg class="w-3.5 h-3.5 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/></svg><span>Agendar</span></button>
-                            <button type="button" onclick="imprimirDossieAtivoA4('equipamento', ${JSON.stringify(node.area).replace(/"/g, '&quot;')}, ${JSON.stringify(node.maquina).replace(/"/g, '&quot;')}, ${JSON.stringify(node.equipamento).replace(/"/g, '&quot;')})" class="btn-touch bg-slate-900 hover:bg-slate-800 text-white text-[11px] py-2 px-3">Imprimir A4</button>
+                            <button type="button" onclick="abrirModalCopiarSubconjuntoParaAtivo('${escapeHtml(node.nodeId)}')" class="btn-touch bg-indigo-50 hover:bg-indigo-100 text-indigo-700 border border-indigo-200 text-[11px] py-2 px-3">Copiar p/ Outro Ativo</button>
                             <button type="button" onclick="duplicarSubconjunto('${escapeHtml(node.nodeId)}')" class="btn-touch bg-slate-100 hover:bg-slate-200 text-slate-700 text-[11px] py-2 px-3">Duplicar</button>
+                            <button type="button" onclick="imprimirDossieAtivoA4('equipamento', ${JSON.stringify(node.area).replace(/"/g, '&quot;')}, ${JSON.stringify(node.maquina).replace(/"/g, '&quot;')}, ${JSON.stringify(node.equipamento).replace(/"/g, '&quot;')})" class="btn-touch bg-slate-900 hover:bg-slate-800 text-white text-[11px] py-2 px-3">Imprimir A4</button>
                             <button type="button" onclick="solicitarExclusaoNode('${escapeHtml(node.nodeId)}')" class="btn-touch bg-rose-50 hover:bg-rose-100 text-rose-600 border border-rose-200 text-[11px] py-2 px-3">Excluir</button>
                         </div>
                     </div>
@@ -3862,7 +3889,8 @@
                 conjunto: selectedTarget.conjunto || ''
             };
 
-            const podeClonar = selectedTarget.level === 'maquina' || selectedTarget.level === 'equipamento';
+            const podeClonar = selectedTarget.level === 'maquina' || selectedTarget.level === 'equipamento' || selectedTarget.level === 'conjunto';
+            const labelBtnClonar = selectedTarget.level === 'conjunto' ? 'Copiar Conjunto p/ Outro Ativo' : 'Clonar Estrutura';
             const podeAgendarConj = selectedTarget.level === 'conjunto';
             const areaJson = JSON.stringify(selectedTarget.area || '').replace(/"/g, '&quot;');
             const maqJson = JSON.stringify(selectedTarget.maquina || '').replace(/"/g, '&quot;');
@@ -3952,7 +3980,7 @@
                         ${podeAgendarConj ? `<button type="button" onclick="abrirModalAgendarConjunto(${areaJson}, ${maqJson}, ${eqJson}, ${cjJson})" class="btn-touch bg-emerald-50 hover:bg-emerald-100 text-emerald-800 border border-emerald-200 text-[11px] py-2 px-3 inline-flex items-center gap-1.5"><svg class="w-3.5 h-3.5 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/></svg><span>Agendar Programada</span></button>` : ''}
                         <button type="button" onclick='abrirModalNovoAtivo(${JSON.stringify(prefill).replace(/'/g, "&#39;")})' class="btn-pill-dark text-[11px] py-2 px-3.5">+ Adicionar Filho</button>
                         <button type="button" onclick="abrirModalRenomearGalho()" class="btn-touch bg-amber-50 hover:bg-amber-100 text-amber-800 border border-amber-200 text-[11px] py-2 px-3">Renomear Galho</button>
-                        ${podeClonar ? `<button type="button" onclick="abrirModalClonarGalho()" class="btn-touch bg-indigo-50 hover:bg-indigo-100 text-indigo-700 border border-indigo-200 text-[11px] py-2 px-3">Clonar Estrutura</button>` : ''}
+                        ${podeClonar ? `<button type="button" onclick="abrirModalClonarGalho()" class="btn-touch bg-indigo-50 hover:bg-indigo-100 text-indigo-700 border border-indigo-200 text-[11px] py-2 px-3">${labelBtnClonar}</button>` : ''}
                         <button type="button" onclick="imprimirDossieAtivoA4('${selectedTarget.level}', ${areaJson}, ${maqJson}, ${eqJson})" class="btn-touch bg-slate-900 hover:bg-slate-800 text-white text-[11px] py-2 px-3">Dossiê A4</button>
                         ${masterAtivoPanel ? `<button type="button" onclick="solicitarExclusaoGalho('${selectedTarget.level}', ${areaJson}, ${maqJson}, ${eqJson}, ${cjJson})" class="btn-touch bg-rose-50 hover:bg-rose-600 text-rose-700 hover:text-white border border-rose-200 text-[11px] py-2 px-3 inline-flex items-center gap-1.5 transition-colors"><svg class="w-3.5 h-3.5 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/></svg><span>Excluir ${lvlShortDel[selectedTarget.level] || 'Galho'}</span></button>` : ''}
                     </div>
@@ -3998,6 +4026,7 @@
                                     <div class="text-[11px] text-slate-500 font-semibold">${escapeHtml(n.maquina)}${n.tag ? ' • TAG: ' + escapeHtml(n.tag) : ''}${n.disciplina ? ' • ' + escapeHtml(n.disciplina) : ''}</div>
                                 </div>
                                 <div class="flex items-center gap-1.5 shrink-0">
+                                    <button type="button" onclick="event.stopPropagation(); abrirModalCopiarSubconjuntoParaAtivo('${escapeHtml(n.nodeId)}')" class="px-2 py-0.5 rounded-lg bg-indigo-50 hover:bg-indigo-100 border border-indigo-200 text-indigo-700 text-[10px] font-extrabold" title="Copiar este subconjunto diretamente para outro ativo">Copiar p/ Ativo</button>
                                     ${n.periodicidade_preventiva ? `<span class="px-2 py-0.5 rounded-full text-[10px] font-extrabold bg-sky-50 text-sky-700 border border-sky-200">${escapeHtml(n.periodicidade_preventiva)}</span>` : ''}
                                     ${renderBadgeCrit(n.criticidade)}
                                 </div>
@@ -4474,86 +4503,336 @@
             }
         };
 
-        // ================= CLONAR ESTRUTURA & RENOMEAR EM CASCATA =================
+        // ================= CLONAR ESTRUTURA / COPIAR CONJUNTO OU SUBCONJUNTO PARA OUTRO ATIVO =================
+        let cloneAtivoDestinosSelecionados = new Set();
+
+        function extrairRadicalEquipamentoAtivos(nomeEquip) {
+            const clean = normKey(nomeEquip || '')
+                .replace(/\b(linha|maq|maquina|equip|equipamento|n|no|num|numero|unid|unidade)\b/g, ' ')
+                .replace(/[#0-9\-_/().]+/g, ' ')
+                .replace(/\s+/g, ' ')
+                .trim();
+            const tokens = clean.split(' ').filter(t => t.length >= 3);
+            return tokens[0] || clean;
+        }
+
+        function obterCatalogoEquipamentosDestinoClone(ctx = null) {
+            const map = new Map();
+            const radOrigem = extrairRadicalEquipamentoAtivos(ctx?.equipamento || '');
+            const keyOrigem = ctx ? `${normKey(ctx.area)}||${normKey(ctx.maquina)}||${normKey(ctx.equipamento)}` : '';
+
+            assetNodes.forEach(n => {
+                if (!n.area || !n.maquina || !n.equipamento) return;
+                const key = `${normKey(n.area)}||${normKey(n.maquina)}||${normKey(n.equipamento)}`;
+                let entry = map.get(key);
+                if (!entry) {
+                    entry = {
+                        key,
+                        area: n.area,
+                        maquina: n.maquina,
+                        equipamento: n.equipamento,
+                        conjuntos: new Set()
+                    };
+                    map.set(key, entry);
+                }
+                if (n.conjunto) entry.conjuntos.add(n.conjunto);
+            });
+
+            return [...map.values()].map(eq => {
+                const ehOrigem = (eq.key === keyOrigem);
+                const radEq = extrairRadicalEquipamentoAtivos(eq.equipamento);
+                const ehParecido = !ehOrigem && Boolean(radOrigem && radEq && (radEq === radOrigem || normKey(eq.equipamento).includes(radOrigem)));
+                return {
+                    ...eq,
+                    conjuntosArr: [...eq.conjuntos],
+                    ehOrigem,
+                    ehParecido
+                };
+            }).sort((a, b) => {
+                if (a.ehOrigem !== b.ehOrigem) return a.ehOrigem ? 1 : -1;
+                if (a.ehParecido !== b.ehParecido) return a.ehParecido ? -1 : 1;
+                return `${a.area} ${a.maquina} ${a.equipamento}`.localeCompare(`${b.area} ${b.maquina} ${b.equipamento}`, 'pt-BR');
+            });
+        }
+
+        window.renderListaAtivosDestinoClone = () => {
+            const listBox = document.getElementById('clListaAtivosExistentes');
+            const cntEl = document.getElementById('clDestSelCount');
+            if (cntEl) cntEl.innerText = String(cloneAtivoDestinosSelecionados.size);
+            if (!listBox || !pendingCloneCtx) return;
+
+            const catalogo = obterCatalogoEquipamentosDestinoClone(pendingCloneCtx);
+            const termo = normKey(document.getElementById('clBuscaAtivoDestino')?.value || '');
+            const filtrados = catalogo.filter(eq => {
+                if (!termo) return true;
+                return normKey(`${eq.area} ${eq.maquina} ${eq.equipamento} ${eq.conjuntosArr.join(' ')}`).includes(termo);
+            });
+
+            if (!filtrados.length) {
+                listBox.innerHTML = `<div class="p-3 rounded-xl bg-white border border-slate-200 text-center text-slate-400 font-bold">Nenhum ativo encontrado para este filtro.</div>`;
+                return;
+            }
+
+            listBox.innerHTML = filtrados.map(eq => {
+                const isSel = cloneAtivoDestinosSelecionados.has(eq.key);
+                const kJs = JSON.stringify(eq.key).replace(/"/g, '&quot;');
+                return `
+                <label class="flex items-center justify-between gap-2 p-2 rounded-xl border ${isSel ? 'bg-indigo-100/90 border-indigo-400' : 'bg-white border-slate-200 hover:border-indigo-300'} cursor-pointer transition-colors">
+                    <div class="flex items-center gap-2 min-w-0">
+                        <input type="checkbox" ${isSel ? 'checked' : ''} onchange="toggleAtivoDestinoClone(${kJs}, this.checked)" class="w-4 h-4 rounded accent-indigo-600 shrink-0">
+                        <div class="min-w-0">
+                            <div class="font-extrabold text-slate-900 truncate">${escapeHtml(eq.equipamento)}</div>
+                            <div class="text-[10px] font-bold text-slate-500">${escapeHtml(eq.area)} › ${escapeHtml(eq.maquina)} ${eq.conjuntosArr.length ? `• ${eq.conjuntosArr.length} conj.` : ''}</div>
+                        </div>
+                    </div>
+                    <div class="flex items-center gap-1 shrink-0">
+                        ${eq.ehOrigem ? `<span class="px-2 py-0.5 rounded-full bg-slate-800 text-white text-[9px] font-extrabold">Ativo Origem</span>` : ''}
+                        ${eq.ehParecido ? `<span class="px-2 py-0.5 rounded-full bg-indigo-100 text-indigo-800 border border-indigo-300 text-[9px] font-extrabold">★ Parecido</span>` : ''}
+                    </div>
+                </label>`;
+            }).join('');
+        };
+
+        window.toggleAtivoDestinoClone = (eqKey, checked) => {
+            if (!eqKey || !pendingCloneCtx) return;
+            const catalogo = obterCatalogoEquipamentosDestinoClone(pendingCloneCtx);
+            const eq = catalogo.find(x => x.key === eqKey);
+            const jaTem = cloneAtivoDestinosSelecionados.has(eqKey);
+            const marcar = checked === undefined ? !jaTem : Boolean(checked);
+            if (marcar) {
+                cloneAtivoDestinosSelecionados.add(eqKey);
+                if (eq) {
+                    document.getElementById('clArea').value = eq.area;
+                    document.getElementById('clMaquina').value = eq.maquina;
+                    document.getElementById('clEquipamento').value = eq.equipamento;
+                }
+            } else {
+                cloneAtivoDestinosSelecionados.delete(eqKey);
+                if (cloneAtivoDestinosSelecionados.size === 1) {
+                    const unicoKey = [...cloneAtivoDestinosSelecionados][0];
+                    const unicoEq = catalogo.find(x => x.key === unicoKey);
+                    if (unicoEq) {
+                        document.getElementById('clArea').value = unicoEq.area;
+                        document.getElementById('clMaquina').value = unicoEq.maquina;
+                        document.getElementById('clEquipamento').value = unicoEq.equipamento;
+                    }
+                }
+            }
+            renderListaAtivosDestinoClone();
+        };
+
+        window.selecionarEquipamentosParecidosCloneAtivo = () => {
+            if (!pendingCloneCtx) return;
+            const catalogo = obterCatalogoEquipamentosDestinoClone(pendingCloneCtx);
+            const parecidos = catalogo.filter(eq => eq.ehParecido);
+            parecidos.forEach(eq => cloneAtivoDestinosSelecionados.add(eq.key));
+            if (parecidos[0]) {
+                document.getElementById('clArea').value = parecidos[0].area;
+                document.getElementById('clMaquina').value = parecidos[0].maquina;
+                document.getElementById('clEquipamento').value = parecidos[0].equipamento;
+            }
+            renderListaAtivosDestinoClone();
+            if (!parecidos.length) {
+                showToast('Nenhum ativo com radical idêntico encontrado; marque manualmente o(s) equipamento(s) na lista.', 'info');
+            } else {
+                showToast(`${parecidos.length} ativo(s) parecido(s) marcado(s) como destino!`, 'info');
+            }
+        };
+
+        window.limparSelecaoDestinosCloneAtivo = () => {
+            cloneAtivoDestinosSelecionados.clear();
+            renderListaAtivosDestinoClone();
+        };
+
+        function configurarModalClonarComContexto(ctx) {
+            pendingCloneCtx = ctx;
+            cloneAtivoDestinosSelecionados.clear();
+            const buscaEl = document.getElementById('clBuscaAtivoDestino');
+            if (buscaEl) buscaEl.value = '';
+
+            const eqWrap = document.getElementById('clEquipWrap');
+            const eqInp = document.getElementById('clEquipamento');
+            const cjWrap = document.getElementById('clConjuntoWrap');
+            const cjInp = document.getElementById('clConjunto');
+            const subWrap = document.getElementById('clSubconjuntoWrap');
+            const subInp = document.getElementById('clSubconjunto');
+            const ativosWrap = document.getElementById('clAtivosExistentesWrap');
+            const btnSubmit = document.getElementById('btnConfirmarClone');
+
+            document.getElementById('clArea').value = ctx.area || '';
+            document.getElementById('clMaquina').value = ctx.level === 'maquina' ? `${ctx.maquina} (Cópia)` : (ctx.maquina || '');
+
+            const ehConjOuSub = (ctx.level === 'conjunto' || ctx.level === 'leaf');
+            if (ativosWrap) {
+                ativosWrap.hidden = !ehConjOuSub;
+                ativosWrap.classList.toggle('hidden', !ehConjOuSub);
+            }
+
+            if (ctx.level === 'maquina') {
+                document.getElementById('clonarModalTitle').innerText = 'Clonar Máquina / Linha Inteira';
+                document.getElementById('clonarResumo').innerText = `Serão replicados ${ctx.nodes.length} subconjunto(s) mantendo Conjuntos, Criticidades e Periodicidades Preventivas.`;
+                if (eqWrap) { eqWrap.hidden = true; eqWrap.classList.add('hidden'); }
+                if (eqInp) { eqInp.required = false; eqInp.value = ''; }
+                if (cjWrap) { cjWrap.hidden = true; cjWrap.classList.add('hidden'); }
+                if (cjInp) { cjInp.required = false; cjInp.value = ''; }
+                if (subWrap) { subWrap.hidden = true; subWrap.classList.add('hidden'); }
+                if (subInp) { subInp.value = ''; }
+                if (btnSubmit) btnSubmit.innerText = 'Clonar Estrutura';
+            } else if (ctx.level === 'equipamento') {
+                document.getElementById('clonarModalTitle').innerText = 'Clonar Equipamento & Subconjuntos';
+                document.getElementById('clonarResumo').innerText = `Serão replicados ${ctx.nodes.length} subconjunto(s) mantendo Conjuntos, Criticidades e Periodicidades Preventivas.`;
+                if (eqWrap) { eqWrap.hidden = false; eqWrap.classList.remove('hidden'); }
+                if (eqInp) { eqInp.required = true; eqInp.value = `${ctx.equipamento} (Cópia)`; }
+                if (cjWrap) { cjWrap.hidden = true; cjWrap.classList.add('hidden'); }
+                if (cjInp) { cjInp.required = false; cjInp.value = ''; }
+                if (subWrap) { subWrap.hidden = true; subWrap.classList.add('hidden'); }
+                if (subInp) { subInp.value = ''; }
+                if (btnSubmit) btnSubmit.innerText = 'Clonar Estrutura';
+            } else if (ctx.level === 'conjunto') {
+                document.getElementById('clonarModalTitle').innerText = `Copiar Conjunto "${ctx.conjunto}" para Outro Ativo`;
+                document.getElementById('clonarResumo').innerText = `Serão copiados ${ctx.nodes.length} subconjunto(s) do conjunto "${ctx.conjunto}" (de ${ctx.equipamento}) diretamente para o(s) ativo(s) destino selecionado(s).`;
+                if (eqWrap) { eqWrap.hidden = false; eqWrap.classList.remove('hidden'); }
+                if (eqInp) { eqInp.required = true; eqInp.value = ctx.equipamento || ''; }
+                if (cjWrap) { cjWrap.hidden = false; cjWrap.classList.remove('hidden'); }
+                if (cjInp) { cjInp.required = true; cjInp.value = ctx.conjunto || ''; }
+                if (subWrap) { subWrap.hidden = true; subWrap.classList.add('hidden'); }
+                if (subInp) { subInp.value = ''; }
+                if (btnSubmit) btnSubmit.innerText = 'Copiar Conjunto p/ Ativo(s)';
+                renderListaAtivosDestinoClone();
+            } else if (ctx.level === 'leaf') {
+                const n0 = ctx.nodes[0] || {};
+                const nomeSub = n0.subconjunto || ctx.conjunto || 'Subconjunto';
+                document.getElementById('clonarModalTitle').innerText = `Copiar Subconjunto "${nomeSub}" para Outro Ativo`;
+                document.getElementById('clonarResumo').innerText = `Copiando o subconjunto "${nomeSub}" (Conjunto: ${n0.conjunto || '-'} • ${n0.equipamento || '-'}) com sua Criticidade, Periodicidade e Dados Técnicos para outro(s) ativo(s).`;
+                if (eqWrap) { eqWrap.hidden = false; eqWrap.classList.remove('hidden'); }
+                if (eqInp) { eqInp.required = true; eqInp.value = n0.equipamento || ''; }
+                if (cjWrap) { cjWrap.hidden = false; cjWrap.classList.remove('hidden'); }
+                if (cjInp) { cjInp.required = true; cjInp.value = n0.conjunto || ''; }
+                if (subWrap) { subWrap.hidden = false; subWrap.classList.remove('hidden'); }
+                if (subInp) { subInp.value = n0.subconjunto || ''; }
+                if (btnSubmit) btnSubmit.innerText = 'Copiar Subconjunto p/ Ativo(s)';
+                renderListaAtivosDestinoClone();
+            }
+
+            abrirModal('modalClonar');
+        }
+
         window.abrirModalClonarGalho = () => {
-            if (!selectedTarget || (selectedTarget.level !== 'maquina' && selectedTarget.level !== 'equipamento')) return;
+            if (!selectedTarget) return;
+            if (selectedTarget.level === 'leaf') {
+                return window.abrirModalCopiarSubconjuntoParaAtivo(selectedTarget.nodeId);
+            }
+            if (selectedTarget.level !== 'maquina' && selectedTarget.level !== 'equipamento' && selectedTarget.level !== 'conjunto') return;
             const branchNodes = assetNodes.filter(n =>
                 n.area === selectedTarget.area &&
                 n.maquina === selectedTarget.maquina &&
-                (selectedTarget.level !== 'equipamento' || n.equipamento === selectedTarget.equipamento)
+                (selectedTarget.level === 'maquina' || n.equipamento === selectedTarget.equipamento) &&
+                (selectedTarget.level !== 'conjunto' || n.conjunto === selectedTarget.conjunto)
             );
-            pendingCloneCtx = { ...selectedTarget, nodes: branchNodes };
-            document.getElementById('clonarModalTitle').innerText = selectedTarget.level === 'maquina' ? 'Clonar Máquina / Linha Inteira' : 'Clonar Equipamento & Subconjuntos';
-            document.getElementById('clonarResumo').innerText = `Serão replicados ${branchNodes.length} subconjunto(s) mantendo Conjuntos, Criticidades e Periodicidades Preventivas.`;
-            document.getElementById('clArea').value = selectedTarget.area;
-            document.getElementById('clMaquina').value = selectedTarget.level === 'maquina' ? `${selectedTarget.maquina} (Cópia)` : selectedTarget.maquina;
-            const eqWrap = document.getElementById('clEquipWrap');
-            const eqInp = document.getElementById('clEquipamento');
-            if (selectedTarget.level === 'equipamento') {
-                eqWrap.hidden = false;
-                eqInp.required = true;
-                eqInp.value = `${selectedTarget.equipamento} (Cópia)`;
-            } else {
-                eqWrap.hidden = true;
-                eqInp.required = false;
-                eqInp.value = '';
-            }
-            abrirModal('modalClonar');
+            configurarModalClonarComContexto({ ...selectedTarget, nodes: branchNodes });
+        };
+
+        window.abrirModalCopiarSubconjuntoParaAtivo = (nodeId) => {
+            const node = assetNodes.find(n => n.nodeId === nodeId);
+            if (!node) return showToast('Subconjunto não encontrado.', 'error');
+            configurarModalClonarComContexto({
+                level: 'leaf',
+                area: node.area,
+                maquina: node.maquina,
+                equipamento: node.equipamento,
+                conjunto: node.conjunto,
+                subconjunto: node.subconjunto,
+                nodeId: node.nodeId,
+                nodes: [node]
+            });
         };
 
         document.getElementById('formClonar')?.addEventListener('submit', async (e) => {
             e.preventDefault();
             if (!pendingCloneCtx) return;
-            const destArea = document.getElementById('clArea').value.trim();
-            const destMaq = document.getElementById('clMaquina').value.trim();
-            const destEq = document.getElementById('clEquipamento').value.trim();
+            const destAreaInp = document.getElementById('clArea').value.trim();
+            const destMaqInp = document.getElementById('clMaquina').value.trim();
+            const destEqInp = document.getElementById('clEquipamento').value.trim();
+            const destConjInp = (document.getElementById('clConjunto')?.value || '').trim();
+            const destSubInp = (document.getElementById('clSubconjunto')?.value || '').trim();
+
+            // Constrói a lista de destinos (se o usuário marcou 1 ou mais ativos na lista rápida, usa todos os marcados; caso contrário, usa os campos digitados)
+            const catalogo = obterCatalogoEquipamentosDestinoClone(pendingCloneCtx);
+            let destinosAlvo = [];
+            if ((pendingCloneCtx.level === 'conjunto' || pendingCloneCtx.level === 'leaf') && cloneAtivoDestinosSelecionados.size > 0) {
+                destinosAlvo = [...cloneAtivoDestinosSelecionados]
+                    .map(k => catalogo.find(x => x.key === k))
+                    .filter(Boolean)
+                    .map(eq => ({ area: eq.area, maquina: eq.maquina, equipamento: eq.equipamento }));
+            }
+            if (!destinosAlvo.length) {
+                if (!destAreaInp || !destMaqInp || (pendingCloneCtx.level !== 'maquina' && !destEqInp)) {
+                    return showToast('Informe Setor, Linha e Equipamento de destino.', 'error');
+                }
+                destinosAlvo = [{ area: destAreaInp, maquina: destMaqInp, equipamento: destEqInp }];
+            }
+
             const btn = document.getElementById('btnConfirmarClone');
-            if (btn) { btn.disabled = true; btn.innerText = 'Clonando...'; }
+            if (btn) { btn.disabled = true; btn.innerText = 'Copiando...'; }
 
             const autor = (usuarioLogado && (usuarioLogado.nome || usuarioLogado.user)) || 'Admin';
             const agora = new Date().toISOString();
-            const critLinhaDest = (destArea === pendingCloneCtx.area && destMaq === pendingCloneCtx.maquina)
-                ? (getInfoCriticidadeLinha(pendingCloneCtx.area, pendingCloneCtx.maquina).explicitaClasse || '')
-                : (getInfoCriticidadeLinha(destArea, destMaq).explicitaClasse || '');
+            let totalCopiados = 0;
+
             try {
-                for (const n of pendingCloneCtx.nodes) {
-                    const novoEq = pendingCloneCtx.level === 'equipamento' ? destEq : n.equipamento;
-                    await addDoc(refLinhas, {
-                        setor: destArea,
-                        area: destArea,
-                        maquina: destMaq,
-                        equipamento: novoEq,
-                        conjunto: n.conjunto,
-                        subconjunto: n.subconjunto,
-                        tag: '',
-                        criticidade: n.criticidade,
-                        criticidade_linha: critLinhaDest || (destArea === pendingCloneCtx.area && destMaq === pendingCloneCtx.maquina ? (n.criticidade_linha || '') : ''),
-                        criticidade_criterios: n.criticidade_criterios || null,
-                        periodicidade_preventiva: n.periodicidade_preventiva,
-                        periodicidade_semanas: n.periodicidade_semanas,
-                        disciplina: n.disciplina,
-                        fabricante: n.fabricante,
-                        modelo: n.modelo,
-                        serie: '',
-                        numeroSerie: '',
-                        ano_fabricacao: n.ano_fabricacao,
-                        status_ativo: 'Ativo',
-                        inspecao_ativa: n.inspecao_ativa !== false,
-                        inspecao_conjunto_ativa: Boolean(n.inspecao_conjunto_ativa),
-                        padrinho_mec: n.padrinho_mec,
-                        padrinho_ele: n.padrinho_ele,
-                        observacoes_tecnicas: n.observacoes_tecnicas,
-                        origem_cadastro: 'gestao_ativos',
-                        criado_em: agora,
-                        atualizado_em: agora,
-                        atualizado_por: autor
-                    });
+                for (const dest of destinosAlvo) {
+                    const critLinhaDest = (dest.area === pendingCloneCtx.area && dest.maquina === pendingCloneCtx.maquina)
+                        ? (getInfoCriticidadeLinha(pendingCloneCtx.area, pendingCloneCtx.maquina).explicitaClasse || '')
+                        : (getInfoCriticidadeLinha(dest.area, dest.maquina).explicitaClasse || '');
+
+                    for (const n of pendingCloneCtx.nodes) {
+                        const novoEq = pendingCloneCtx.level === 'maquina' ? n.equipamento : dest.equipamento;
+                        const novoConj = (pendingCloneCtx.level === 'conjunto' || pendingCloneCtx.level === 'leaf')
+                            ? (destConjInp || n.conjunto)
+                            : n.conjunto;
+                        const novoSub = (pendingCloneCtx.level === 'leaf')
+                            ? (destSubInp || n.subconjunto)
+                            : n.subconjunto;
+
+                        await addDoc(refLinhas, {
+                            setor: dest.area,
+                            area: dest.area,
+                            maquina: dest.maquina,
+                            equipamento: novoEq,
+                            conjunto: novoConj,
+                            subconjunto: novoSub,
+                            tag: '',
+                            criticidade: n.criticidade,
+                            criticidade_linha: critLinhaDest || (dest.area === pendingCloneCtx.area && dest.maquina === pendingCloneCtx.maquina ? (n.criticidade_linha || '') : ''),
+                            criticidade_criterios: n.criticidade_criterios || null,
+                            periodicidade_preventiva: n.periodicidade_preventiva,
+                            periodicidade_semanas: n.periodicidade_semanas,
+                            disciplina: n.disciplina,
+                            fabricante: n.fabricante,
+                            modelo: n.modelo,
+                            serie: '',
+                            numeroSerie: '',
+                            ano_fabricacao: n.ano_fabricacao,
+                            status_ativo: 'Ativo',
+                            inspecao_ativa: n.inspecao_ativa !== false,
+                            inspecao_conjunto_ativa: Boolean(n.inspecao_conjunto_ativa),
+                            padrinho_mec: n.padrinho_mec,
+                            padrinho_ele: n.padrinho_ele,
+                            observacoes_tecnicas: n.observacoes_tecnicas,
+                            origem_cadastro: 'gestao_ativos',
+                            criado_em: agora,
+                            atualizado_em: agora,
+                            atualizado_por: autor
+                        });
+                        totalCopiados++;
+                    }
                 }
                 fecharModal('modalClonar');
-                showToast(`${pendingCloneCtx.nodes.length} registro(s) clonados com sucesso!`);
+                showToast(`${totalCopiados} registro(s) copiado(s) com sucesso para ${destinosAlvo.length} ativo(s)!`, 'success');
                 pendingCloneCtx = null;
+                cloneAtivoDestinosSelecionados.clear();
             } catch (_) {
-                showToast("Erro ao clonar estrutura.", "error");
+                showToast("Erro ao copiar estrutura para o ativo destino.", "error");
             }
             if (btn) { btn.disabled = false; btn.innerText = 'Clonar Estrutura'; }
         });
