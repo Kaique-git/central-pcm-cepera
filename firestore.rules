@@ -51,5 +51,25 @@ service cloud.firestore {
     match /docs_arquivos_partes/{document=**} {
       allow read, write: if true;
     }
+
+    // Governança Admin Master (Senha Oculta Master)
+    match /pcm_config/{document=**} {
+      allow read, write: if true;
+    }
+
+    // Módulo Agente de IA / Auditoria & Estudos AQF (MAESTRI-PCM)
+    // OMs armazenadas em blocos mensais compactados (maestri_oms_mensais) para ultra performance
+    match /maestri_oms_mensais/{document=**} {
+      allow read, write: if true;
+    }
+    match /maestri_estudos/{document=**} {
+      allow read, write: if true;
+    }
+    match /maestri_rodadas/{document=**} {
+      allow read, write: if true;
+    }
+    match /maestri_correcoes/{document=**} {
+      allow read, write: if true;
+    }
   }
 }
