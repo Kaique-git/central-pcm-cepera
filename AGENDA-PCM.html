@@ -420,7 +420,8 @@
                             <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/></svg>
                             <span>Recados</span>
                         </button>
-                        <button type="button" onclick="switchView('notifications')" id="rail-notifications" class="rail-btn">
+                        <button type="button" onclick="switchView('notifications')" id="rail-notifications" class="rail-btn relative">
+                            <span id="badgeAlertasRail" hidden class="hidden absolute -top-1 -right-1 min-w-[18px] h-[18px] px-1 rounded-full bg-rose-600 text-white text-[9px] font-extrabold flex items-center justify-center shadow">0</span>
                             <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9"/></svg>
                             <span>Alertas</span>
                         </button>
@@ -487,7 +488,7 @@
                 <div id="mobileTabNav" class="md:hidden flex items-center gap-2 overflow-x-auto px-4 py-2.5 bg-white/60 border-b border-slate-200/80 shrink-0">
                     <button type="button" onclick="switchView('calendar')" id="mob-calendar" class="mob-tab active">Calendário & Gestão</button>
                     <button type="button" onclick="switchView('notes')" id="mob-notes" class="mob-tab">Recados <span id="badgeRecadosMob" class="ml-1 px-1.5 py-0.5 rounded-full bg-amber-500 text-white text-[10px] font-extrabold hidden">0</span></button>
-                    <button type="button" onclick="switchView('notifications')" id="mob-notifications" class="mob-tab">Alertas & E-mail</button>
+                    <button type="button" onclick="switchView('notifications')" id="mob-notifications" class="mob-tab">Alertas & E-mail <span id="badgeAlertasMob" class="ml-1 px-1.5 py-0.5 rounded-full bg-rose-600 text-white text-[10px] font-extrabold hidden">0</span></button>
                     <button type="button" onclick="switchView('team')" id="mob-team" class="mob-tab">Central de Cadastros</button>
                 </div>
 
@@ -713,17 +714,80 @@
 
                     <!-- ==================== VIEW 3: CENTRAL DE NOTIFICAÇÕES ==================== -->
                     <section id="viewNotifications" hidden class="space-y-6 max-w-6xl mx-auto">
+                        <!-- PAINEL DE AUTOMAÇÃO DE E-MAIL (POWER AUTOMATE / OUTLOOK 365) -->
+                        <div class="glass-card p-6 sm:p-7 rounded-3xl space-y-4">
+                            <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+                                <div>
+                                    <p class="text-xs font-bold uppercase tracking-widest text-sky-600 mb-1">Automação Corporativa • Microsoft 365 / Outlook</p>
+                                    <h3 class="text-lg sm:text-xl font-extrabold text-slate-900">Disparo Automático de E-mail (Power Automate)</h3>
+                                    <p class="text-xs text-slate-500 mt-0.5">Quando ativo, a Agenda verifica automaticamente as atividades que entraram no prazo de <strong>Aviso Prévio</strong> e envia o e-mail em segundo plano sem precisar clicar (destinatários separados por <code>;</code>).</p>
+                                </div>
+                                <span id="emailAutoStatusBadge" class="px-3.5 py-1.5 rounded-full text-xs font-extrabold bg-slate-100 text-slate-600 border border-slate-200 shrink-0 self-start sm:self-center">Modo Manual (Outlook Local)</span>
+                            </div>
+
+                            <form id="formConfigEmailAuto" onsubmit="salvarConfigNotificacaoAgenda(event)" class="p-4 rounded-2xl bg-slate-50/90 border border-slate-200/90 space-y-3.5 text-xs">
+                                <div class="grid grid-cols-1 lg:grid-cols-3 gap-3">
+                                    <div class="lg:col-span-2">
+                                        <label class="block text-[10px] font-extrabold uppercase text-slate-500 mb-1">URL do Gatilho HTTP — Power Automate (Fluxo de E-mail)</label>
+                                        <input type="url" id="cfgWebhookEmailUrl" class="input-clean py-2 text-xs font-mono" placeholder="https://prod-xx.brazilsouth.logic.azure.com:443/workflows/...">
+                                    </div>
+                                    <div>
+                                        <label class="block text-[10px] font-extrabold uppercase text-slate-500 mb-1">E-mail Padrão (Fallback / Cópia)</label>
+                                        <input type="text" id="cfgFallbackEmail" class="input-clean py-2 text-xs font-bold" placeholder="pcm@cepera.com.br (use ; p/ vários)">
+                                    </div>
+                                </div>
+
+                                <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pt-1">
+                                    <label class="inline-flex items-center gap-2 cursor-pointer font-extrabold text-slate-700">
+                                        <input type="checkbox" id="cfgAutoDisparoAtivo" checked class="w-4 h-4 rounded accent-sky-600">
+                                        <span>Enviar automaticamente em segundo plano assim que entrar na janela do Aviso Prévio (1 envio por ordem)</span>
+                                    </label>
+                                    <div class="flex flex-wrap items-center gap-2 shrink-0">
+                                        <button type="button" id="btnTestarWebhookEmail" onclick="testarWebhookEmailAgenda()" class="btn-touch bg-white hover:bg-slate-100 text-slate-700 border border-slate-200 text-xs py-2 px-3.5">
+                                            <span>Enviar E-mail de Teste</span>
+                                        </button>
+                                        <button type="submit" id="btnSalvarCfgEmail" class="btn-pill-dark text-xs py-2 px-4">
+                                            <span>Salvar Automação</span>
+                                        </button>
+                                    </div>
+                                </div>
+                            </form>
+
+                            <details class="p-3.5 rounded-2xl bg-indigo-50/70 border border-indigo-200 text-xs text-slate-800">
+                                <summary class="cursor-pointer font-extrabold text-indigo-900 select-none">⚡ Como criar o fluxo no Power Automate em 1 minuto (copiar e colar)</summary>
+                                <div class="pt-3 space-y-2 text-[11px] leading-relaxed">
+                                    <ol class="list-decimal pl-5 space-y-1.5 font-medium">
+                                        <li>Acesse o <strong>Power Automate</strong> da sua conta Microsoft 365 Cepêra → <strong>Criar</strong> → <strong>Fluxo da nuvem instantâneo</strong> → Gatilho: <strong>"Quando uma solicitação HTTP for recebida"</strong> (Quem pode acionar: <em>Qualquer pessoa</em>).</li>
+                                        <li>Adicione a ação <strong>Office 365 Outlook → Enviar um email (V2)</strong> e preencha com expressões dinâmicas:
+                                            <div class="mt-1 p-2.5 rounded-xl bg-white border border-indigo-200 font-mono text-[10px] space-y-1 text-slate-800">
+                                                <div><strong>Para:</strong> <code>@{triggerBody()?['para']}</code> <span class="text-slate-400">(já vem separado por ponto e vírgula ";")</span></div>
+                                                <div><strong>Assunto:</strong> <code>@{triggerBody()?['assunto']}</code></div>
+                                                <div><strong>Corpo:</strong> <code>@{triggerBody()?['corpoHtml']}</code></div>
+                                            </div>
+                                        </li>
+                                        <li>Salve o fluxo, copie a <strong>URL HTTP POST</strong> gerada no primeiro bloco, cole no campo acima e clique em <strong>Salvar Automação</strong>. Pronto: os alertas passarão a sair 100% sozinhos!</li>
+                                    </ol>
+                                </div>
+                            </details>
+                        </div>
+
+                        <!-- TABELA DE ALERTAS E DISPAROS -->
                         <div class="glass-card p-6 sm:p-7 rounded-3xl space-y-5">
                             <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
                                 <div>
                                     <p class="text-xs font-bold uppercase tracking-widest text-amber-600 mb-1">Comunicação & Avisos Prévios</p>
                                     <h2 class="text-xl sm:text-2xl font-extrabold text-slate-900">Central de Alertas Preventivos</h2>
-                                    <p class="text-xs text-slate-500 mt-0.5">Acompanhe manutenções pendentes e envie lembretes por e-mail diretamente para o técnico ou equipe responsável.</p>
+                                    <p class="text-xs text-slate-500 mt-0.5">Acompanhe o status do disparo automático de cada atividade ou reenvie manualmente (via Webhook ou Outlook com separador <code>;</code>).</p>
                                 </div>
-                                <button type="button" class="btn-pill-dark text-xs" onclick="renderNotificationsTable()">
-                                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"/></svg>
-                                    <span>Atualizar Alertas</span>
-                                </button>
+                                <div class="flex flex-wrap items-center gap-2">
+                                    <button type="button" id="btnDispararPendentesAgora" onclick="dispararAlertasNoPrazoManual()" class="btn-touch bg-emerald-600 hover:bg-emerald-700 text-white text-xs py-2 px-4 shadow-sm">
+                                        <span>⚡ Disparar Alertas no Prazo (<span id="countAlertasNoPrazo">0</span>)</span>
+                                    </button>
+                                    <button type="button" class="btn-pill-dark text-xs" onclick="renderNotificationsTable()">
+                                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"/></svg>
+                                        <span>Atualizar Alertas</span>
+                                    </button>
+                                </div>
                             </div>
                             <div class="overflow-x-auto rounded-2xl border border-slate-200">
                                 <table class="w-full border-collapse text-left text-xs">
@@ -731,9 +795,10 @@
                                         <tr class="bg-slate-50 border-b border-slate-200 text-[10px] font-extrabold uppercase text-slate-500">
                                             <th class="py-3.5 px-4">Data Evento</th>
                                             <th class="py-3.5 px-4">Atividade / Título</th>
-                                            <th class="py-3.5 px-4">Equipe / Resp.</th>
+                                            <th class="py-3.5 px-4">Destinatários (;)</th>
                                             <th class="py-3.5 px-4">Aviso Prévio</th>
-                                            <th class="py-3.5 px-4 text-right">Disparar Notificação</th>
+                                            <th class="py-3.5 px-4">Status do Envio</th>
+                                            <th class="py-3.5 px-4 text-right">Ação</th>
                                         </tr>
                                     </thead>
                                     <tbody id="notifTableBody" class="divide-y divide-slate-100"></tbody>
@@ -1024,6 +1089,28 @@
                     <div><label class="block text-[10px] font-extrabold uppercase text-slate-500 mb-1">Responsável</label><select class="input-clean py-2 text-xs font-bold" id="eResp"></select></div>
                 </div>
                 <div><label class="block text-[10px] font-extrabold uppercase text-slate-500 mb-1">Descrição</label><textarea class="input-clean py-2 text-xs" rows="3" id="eDesc"></textarea></div>
+                <div class="p-3 bg-slate-50 border border-slate-200/80 rounded-2xl grid grid-cols-1 sm:grid-cols-2 gap-3">
+                    <div>
+                        <label class="block text-[10px] font-extrabold uppercase text-slate-500 mb-1">Aviso Prévio (E-mail)</label>
+                        <select class="input-clean py-1.5 text-xs font-bold" id="eAlertaPrazo">
+                            <option value="0">No dia do evento</option>
+                            <option value="1">1 dia antes</option>
+                            <option value="2">2 dias antes</option>
+                            <option value="7">1 semana antes</option>
+                            <option value="30">1 mês antes</option>
+                            <option value="90">3 meses antes</option>
+                            <option value="180">6 meses antes</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label class="block text-[10px] font-extrabold uppercase text-slate-500 mb-1">Destinatários</label>
+                        <select class="input-clean py-1.5 text-xs font-bold" id="eAlertaDest">
+                            <option value="responsavel">Apenas o Técnico Responsável</option>
+                            <option value="equipe">Toda a Equipe Setorial</option>
+                            <option value="todos">Todos os Cadastrados</option>
+                        </select>
+                    </div>
+                </div>
                 <div class="flex justify-end gap-2 pt-3 border-t border-slate-100">
                     <button type="button" onclick="fecharModal('editOverlay')" class="btn-touch bg-slate-100 text-slate-700 text-xs">Cancelar</button>
                     <button type="submit" class="btn-pill-dark text-xs">Atualizar Dados</button>
@@ -1174,7 +1261,7 @@
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
         import { getAuth, signInAnonymously } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
-        import { initializeFirestore, collection, addDoc, onSnapshot, doc, deleteDoc, updateDoc, getDocs, query, where } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
+        import { initializeFirestore, collection, addDoc, setDoc, onSnapshot, doc, deleteDoc, updateDoc, getDocs, query, where } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
 
         const memStore = {};
         const safeStorage = {
@@ -1202,6 +1289,7 @@
         const setColRef = collection(db, "ag_setores");
         const docsColRef = collection(db, "docs_ativos");
         const docsArquivosPartesRef = collection(db, "docs_arquivos_partes");
+        const refNotifCfg = doc(db, "config", "agenda_notificacoes");
         const blobCacheDocsAg = new Map();
 
         const TIPOS = {
@@ -1263,6 +1351,17 @@
         let pendingAgendaHandoffEquipe = null;
         let docsAtivosAgenda = [];
         let agendaDocsBusca = '';
+        let emailAutoCfg = {
+            webhookUrl: '',
+            fallbackEmail: 'pcm@cepera.com.br',
+            autoDisparoAtivo: true
+        };
+        let syncLoadedManut = false;
+        let syncLoadedTeam = false;
+        let syncLoadedNotifCfg = false;
+        let autoDispatchEmCurso = false;
+        let autoDispatchTimer = null;
+        const autoDispatchInFlightIds = new Set();
 
         function getLancamentosCalendario() {
             return lancamentos.filter(l => !isRecadoDoc(l) && !isPlanoPreventivaDoc(l) && Boolean(l.data));
@@ -1639,19 +1738,40 @@
                 onSnapshot(colRef, (snapshot) => {
                     lancamentos = [];
                     snapshot.forEach(docSnap => lancamentos.push({ id: docSnap.id, ...docSnap.data() }));
+                    syncLoadedManut = true;
                     document.getElementById("statusText").innerText = "Banco Sincronizado (Online)";
                     document.getElementById("statusDot").className = "w-2 h-2 rounded-full bg-emerald-500";
                     atualizarTudo();
+                    agendarVerificacaoAlertasAutomaticos();
                 }, () => { document.getElementById("errBanner").hidden = false; });
 
                 onSnapshot(teamColRef, (snapshot) => {
                     equipeCadastrada = [];
                     snapshot.forEach(docSnap => equipeCadastrada.push({ id: docSnap.id, ...docSnap.data() }));
+                    syncLoadedTeam = true;
                     renderTeamTable();
                     atualizarSelectRespAdd();
                     atualizarSelectRespEdit();
                     atualizarDatalistRecados();
                     reAplicarEquipeRespHandoff();
+                    renderNotificationsTable();
+                    agendarVerificacaoAlertasAutomaticos();
+                });
+
+                onSnapshot(refNotifCfg, (snapDoc) => {
+                    const d = (snapDoc && typeof snapDoc.exists === 'function' && snapDoc.exists()) ? snapDoc.data() : null;
+                    emailAutoCfg = {
+                        webhookUrl: String(d?.webhookUrl || '').trim(),
+                        fallbackEmail: normalizarListaEmailsSemicolon(d?.fallbackEmail || 'pcm@cepera.com.br') || 'pcm@cepera.com.br',
+                        autoDisparoAtivo: d ? d.autoDisparoAtivo !== false : true
+                    };
+                    syncLoadedNotifCfg = true;
+                    sincronizarFormConfigNotificacaoUI();
+                    renderNotificationsTable();
+                    agendarVerificacaoAlertasAutomaticos();
+                }, () => {
+                    syncLoadedNotifCfg = true;
+                    sincronizarFormConfigNotificacaoUI();
                 });
 
                 onSnapshot(eqColRef, snap => {
@@ -1809,64 +1929,489 @@
             return { week, isoYear };
         }
 
+        // ================= MOTOR DE DISPARO AUTOMÁTICO DE E-MAIL (POWER AUTOMATE + OUTLOOK ';') =================
+        function normalizarListaEmailsSemicolon(raw) {
+            const lista = Array.isArray(raw) ? raw : [raw];
+            const unicos = new Set();
+            const resultado = [];
+            lista.forEach(item => {
+                String(item || '')
+                    .split(/[;,\s]+/)
+                    .map(s => s.trim())
+                    .filter(s => s.includes('@'))
+                    .forEach(em => {
+                        const low = em.toLowerCase();
+                        if (!unicos.has(low)) {
+                            unicos.add(low);
+                            resultado.push(em);
+                        }
+                    });
+            });
+            return resultado.join(';');
+        }
+
+        function resolverDestinatariosLancamento(l) {
+            const coletados = [];
+            const dest = l?.alertaDest || 'responsavel';
+            const normNome = v => normDocKeyAg(v);
+
+            if (dest === 'responsavel') {
+                const respAlvo = normNome(l?.responsavel);
+                const r = respAlvo ? equipeCadastrada.find(e => normNome(e.nome) === respAlvo) : null;
+                if (r?.email) coletados.push(r.email);
+                else if (l?.equipe) {
+                    // Se não definiu técnico individual ou o técnico não tem e-mail, usa os e-mails da equipe vinculada
+                    equipeCadastrada.filter(e => normNome(e.equipe) === normNome(l.equipe)).forEach(e => { if (e.email) coletados.push(e.email); });
+                }
+            } else if (dest === 'equipe') {
+                equipeCadastrada.filter(e => normNome(e.equipe) === normNome(l?.equipe)).forEach(e => { if (e.email) coletados.push(e.email); });
+            } else {
+                equipeCadastrada.forEach(e => { if (e.email) coletados.push(e.email); });
+            }
+
+            const strFinal = normalizarListaEmailsSemicolon(coletados)
+                || normalizarListaEmailsSemicolon(emailAutoCfg.fallbackEmail)
+                || 'pcm@cepera.com.br';
+            const arrFinal = strFinal.split(';').map(s => s.trim()).filter(Boolean);
+            return { para: strFinal, lista: arrFinal };
+        }
+
+        function obterPrimeiroDiaLancamento(l) {
+            const dias = getDatasLancamento(l);
+            return dias[0] || (typeof l?.data === 'string' ? l.data.slice(0, 10) : '');
+        }
+
+        function calcularDiasRestantesAlerta(l) {
+            const dStr = obterPrimeiroDiaLancamento(l);
+            if (!/^\d{4}-\d{2}-\d{2}$/.test(dStr)) return null;
+            const agora = new Date();
+            const hojeUtc = Date.UTC(agora.getFullYear(), agora.getMonth(), agora.getDate());
+            const [yy, mm, dd] = dStr.split('-').map(Number);
+            const evUtc = Date.UTC(yy, mm - 1, dd);
+            return Math.round((evUtc - hojeUtc) / 86400000);
+        }
+
+        function gerarChaveDisparoAlerta(l) {
+            const dStr = obterPrimeiroDiaLancamento(l) || '';
+            const prazo = parseInt(l?.alertaPrazo ?? 0, 10) || 0;
+            const dest = l?.alertaDest || 'responsavel';
+            return `${dStr}|${prazo}|${dest}`;
+        }
+
+        function avaliarJanelaAlertaLancamento(l) {
+            const prazoDias = Math.max(0, parseInt(l?.alertaPrazo ?? 0, 10) || 0);
+            const diasRestantes = calcularDiasRestantesAlerta(l);
+            const chaveAtual = gerarChaveDisparoAlerta(l);
+            const jaEnviado = Boolean(l?.alertaEnviadoEm && l?.alertaEnviadoChave === chaveAtual);
+            const emJanela = diasRestantes !== null && diasRestantes >= -1 && diasRestantes <= prazoDias;
+            const aguardandoPrazo = diasRestantes !== null && diasRestantes > prazoDias;
+            const expiradoAntigo = diasRestantes !== null && diasRestantes < -1;
+            return { prazoDias, diasRestantes, chaveAtual, jaEnviado, emJanela, aguardandoPrazo, expiradoAntigo };
+        }
+
+        function montarConteudoEmailLancamento(l) {
+            const { para, lista } = resolverDestinatariosLancamento(l);
+            const periodoBR = formatPeriodoLancamentoBR(l);
+            const tipoNome = TIPOS[l.tipo]?.nome || 'Manutenção';
+            const assunto = `[Alerta PCM Cepêra] ${tipoNome}: ${l.titulo}`;
+            const corpoTexto = [
+                'Olá,',
+                '',
+                'Este é um aviso automático da Agenda de Manutenção PCM — Cepêra Alimentos:',
+                '',
+                `- Atividade: ${l.titulo}`,
+                `- Tipo: ${tipoNome}`,
+                `- Data(s): ${periodoBR}${l.hora ? ' às ' + l.hora : ''}`,
+                `- Equipe: ${l.equipe || 'Geral'}`,
+                `- Responsável: ${l.responsavel || 'Equipe / Geral'}`,
+                `- Escopo / Descrição: ${l.descricao || 'N/A'}`,
+                '',
+                'Por favor, garanta os preparativos necessários para a execução no prazo.',
+                'Central PCM — Cepêra Alimentos'
+            ].join('\n');
+
+            const corpoHtml = `
+                <div style="font-family:'Segoe UI',Arial,sans-serif;max-width:620px;color:#0f172a;border:1px solid #e2e8f0;border-radius:14px;overflow:hidden;">
+                    <div style="background:#0f172a;color:#ffffff;padding:16px 22px;">
+                        <div style="font-size:11px;font-weight:700;letter-spacing:1px;text-transform:uppercase;color:#38bdf8;">Central PCM • Cepêra Alimentos</div>
+                        <h2 style="margin:4px 0 0;font-size:18px;">Lembrete Automático de Manutenção Programada</h2>
+                    </div>
+                    <div style="padding:20px 22px;font-size:14px;line-height:1.55;">
+                        <p style="margin-top:0;">Olá, confira os detalhes da atividade que entrou no prazo de aviso prévio:</p>
+                        <table style="width:100%;border-collapse:collapse;background:#f8fafc;border:1px solid #e2e8f0;border-radius:10px;">
+                            <tr><td style="padding:8px 12px;font-weight:700;width:140px;border-bottom:1px solid #e2e8f0;">Atividade:</td><td style="padding:8px 12px;border-bottom:1px solid #e2e8f0;"><strong>${escapeHtml(l.titulo)}</strong></td></tr>
+                            <tr><td style="padding:8px 12px;font-weight:700;border-bottom:1px solid #e2e8f0;">Tipo:</td><td style="padding:8px 12px;border-bottom:1px solid #e2e8f0;">${escapeHtml(tipoNome)}</td></tr>
+                            <tr><td style="padding:8px 12px;font-weight:700;border-bottom:1px solid #e2e8f0;">Data / Hora:</td><td style="padding:8px 12px;border-bottom:1px solid #e2e8f0;"><strong>${escapeHtml(periodoBR)}</strong>${l.hora ? ' às ' + escapeHtml(l.hora) : ''}</td></tr>
+                            <tr><td style="padding:8px 12px;font-weight:700;border-bottom:1px solid #e2e8f0;">Equipe:</td><td style="padding:8px 12px;border-bottom:1px solid #e2e8f0;">${escapeHtml(l.equipe || 'Geral')}</td></tr>
+                            <tr><td style="padding:8px 12px;font-weight:700;border-bottom:1px solid #e2e8f0;">Responsável:</td><td style="padding:8px 12px;border-bottom:1px solid #e2e8f0;">${escapeHtml(l.responsavel || 'Equipe / Geral')}</td></tr>
+                            <tr><td style="padding:8px 12px;font-weight:700;">Descrição:</td><td style="padding:8px 12px;white-space:pre-wrap;">${escapeHtml(l.descricao || 'N/A')}</td></tr>
+                        </table>
+                        <p style="margin:16px 0 0;font-size:12px;color:#64748b;">E-mail disparado automaticamente pela Agenda de Manutenção PCM.</p>
+                    </div>
+                </div>`;
+
+            return { para, destinatariosLista: lista, assunto, corpoTexto, corpoHtml };
+        }
+
+        async function dispararWebhookPowerAutomateEmail(payload) {
+            const url = (emailAutoCfg.webhookUrl || '').trim();
+            if (!url) return { ok: false, motivo: 'sem_webhook' };
+            try {
+                const resp = await fetch(url, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(payload)
+                });
+                if (!resp.ok) {
+                    return { ok: false, motivo: `HTTP ${resp.status}` };
+                }
+                return { ok: true };
+            } catch (err) {
+                return { ok: false, motivo: err?.message || 'falha_rede' };
+            }
+        }
+
+        function sincronizarFormConfigNotificacaoUI() {
+            const inpUrl = document.getElementById('cfgWebhookEmailUrl');
+            const inpFb = document.getElementById('cfgFallbackEmail');
+            const chkAuto = document.getElementById('cfgAutoDisparoAtivo');
+            const badge = document.getElementById('emailAutoStatusBadge');
+
+            if (inpUrl && document.activeElement !== inpUrl) inpUrl.value = emailAutoCfg.webhookUrl || '';
+            if (inpFb && document.activeElement !== inpFb) inpFb.value = emailAutoCfg.fallbackEmail || 'pcm@cepera.com.br';
+            if (chkAuto) chkAuto.checked = emailAutoCfg.autoDisparoAtivo !== false;
+
+            if (badge) {
+                const ativo = Boolean(emailAutoCfg.webhookUrl && emailAutoCfg.autoDisparoAtivo !== false);
+                const soManualHook = Boolean(emailAutoCfg.webhookUrl && emailAutoCfg.autoDisparoAtivo === false);
+                if (ativo) {
+                    badge.className = 'px-3.5 py-1.5 rounded-full text-xs font-extrabold bg-emerald-100 text-emerald-800 border border-emerald-300 shrink-0 self-start sm:self-center';
+                    badge.innerText = '✓ Disparo 100% Automático Ativo';
+                } else if (soManualHook) {
+                    badge.className = 'px-3.5 py-1.5 rounded-full text-xs font-extrabold bg-amber-100 text-amber-800 border border-amber-300 shrink-0 self-start sm:self-center';
+                    badge.innerText = 'Webhook Salvo (Auto-disparo Pausado)';
+                } else {
+                    badge.className = 'px-3.5 py-1.5 rounded-full text-xs font-extrabold bg-slate-100 text-slate-600 border border-slate-200 shrink-0 self-start sm:self-center';
+                    badge.innerText = 'Modo Manual (Outlook c/ ";")';
+                }
+            }
+        }
+
+        window.salvarConfigNotificacaoAgenda = async (e) => {
+            if (e?.preventDefault) e.preventDefault();
+            const webhookUrl = (document.getElementById('cfgWebhookEmailUrl')?.value || '').trim();
+            const fallbackEmail = normalizarListaEmailsSemicolon(document.getElementById('cfgFallbackEmail')?.value || 'pcm@cepera.com.br') || 'pcm@cepera.com.br';
+            const autoDisparoAtivo = document.getElementById('cfgAutoDisparoAtivo')?.checked !== false;
+            const btn = document.getElementById('btnSalvarCfgEmail');
+            if (btn) { btn.disabled = true; btn.innerText = 'Salvando...'; }
+            try {
+                await setDoc(refNotifCfg, {
+                    webhookUrl,
+                    fallbackEmail,
+                    autoDisparoAtivo,
+                    atualizadoEm: new Date().toISOString(),
+                    atualizadoPor: usuarioLogado?.nome || 'PCM'
+                }, { merge: true });
+                showToast(webhookUrl
+                    ? 'Automação de e-mail salva! Alertas no prazo serão disparados automaticamente.'
+                    : 'Configuração salva (Modo Outlook manual com separador ";").');
+            } catch (err) {
+                showToast('Erro ao salvar configuração de automação.', 'error');
+            } finally {
+                if (btn) { btn.disabled = false; btn.innerText = 'Salvar Automação'; }
+            }
+        };
+
+        window.testarWebhookEmailAgenda = async () => {
+            const urlDigitada = (document.getElementById('cfgWebhookEmailUrl')?.value || emailAutoCfg.webhookUrl || '').trim();
+            const fallbackDigitado = normalizarListaEmailsSemicolon(document.getElementById('cfgFallbackEmail')?.value || emailAutoCfg.fallbackEmail || 'pcm@cepera.com.br') || 'pcm@cepera.com.br';
+            if (!urlDigitada) {
+                showToast('Cole primeiro a URL HTTP POST do fluxo Power Automate para testar o disparo automático.', 'error');
+                document.getElementById('cfgWebhookEmailUrl')?.focus();
+                return;
+            }
+            const btn = document.getElementById('btnTestarWebhookEmail');
+            if (btn) { btn.disabled = true; btn.innerText = 'Enviando teste...'; }
+            try {
+                const resp = await fetch(urlDigitada, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        para: fallbackDigitado,
+                        destinatarios: fallbackDigitado.split(';'),
+                        assunto: '[Teste Automático • Agenda PCM Cepêra] Conexão Power Automate OK',
+                        corpoTexto: `Olá!\n\nEste é um e-mail de teste disparado em segundo plano pela Agenda PCM Cepêra.\nDestinatários (separados por ";"): ${fallbackDigitado}`,
+                        corpoHtml: `<div style="font-family:'Segoe UI',Arial,sans-serif;padding:18px;border:1px solid #cbd5e1;border-radius:12px;"><h3 style="margin-top:0;color:#0284c7;">Conexão Power Automate Ativa!</h3><p>Os alertas preventivos da <strong>Agenda PCM Cepêra</strong> já estão prontos para envio 100% automático no prazo configurado.</p><p style="font-size:12px;color:#64748b;">Destinatário(s) de teste: <code>${escapeHtml(fallbackDigitado)}</code></p></div>`,
+                        origem: 'teste_agenda_pcm'
+                    })
+                });
+                if (resp.ok) {
+                    showToast(`E-mail de teste disparado com sucesso para ${fallbackDigitado}!`);
+                } else {
+                    showToast(`O Power Automate respondeu com HTTP ${resp.status}. Verifique o gatilho do fluxo.`, 'error');
+                }
+            } catch (_) {
+                showToast('Falha de rede ao chamar a URL do Power Automate. Verifique o link colado.', 'error');
+            } finally {
+                if (btn) { btn.disabled = false; btn.innerText = 'Enviar E-mail de Teste'; }
+            }
+        };
+
+        async function enviarNotificacaoLancamento(l, opcoes = {}) {
+            const { silencioso = false, forcar = false, apenasOutlook = false } = opcoes;
+            if (!l) return false;
+            const info = avaliarJanelaAlertaLancamento(l);
+            if (!forcar && info.jaEnviado) return false;
+
+            const emailData = montarConteudoEmailLancamento(l);
+
+            if (!apenasOutlook && emailAutoCfg.webhookUrl) {
+                if (autoDispatchInFlightIds.has(l.id)) return false;
+                autoDispatchInFlightIds.add(l.id);
+                try {
+                    const res = await dispararWebhookPowerAutomateEmail({
+                        lancamentoId: l.id,
+                        para: emailData.para,
+                        destinatarios: emailData.destinatariosLista,
+                        assunto: emailData.assunto,
+                        corpoTexto: emailData.corpoTexto,
+                        corpoHtml: emailData.corpoHtml,
+                        titulo: l.titulo || '',
+                        dataProgramada: formatPeriodoLancamentoBR(l),
+                        hora: l.hora || '',
+                        equipe: l.equipe || '',
+                        responsavel: l.responsavel || '',
+                        origem: silencioso ? 'auto_aviso_previo' : 'manual_agenda_pcm'
+                    });
+                    if (res.ok) {
+                        const agoraIso = new Date().toISOString();
+                        l.alertaEnviadoEm = agoraIso;
+                        l.alertaEnviadoChave = info.chaveAtual;
+                        l.alertaEnviadoPara = emailData.para;
+                        await updateDoc(doc(db, 'ag_manutencao', l.id), {
+                            alertaEnviadoEm: agoraIso,
+                            alertaEnviadoChave: info.chaveAtual,
+                            alertaEnviadoPara: emailData.para,
+                            alertaEnviadoVia: 'power_automate',
+                            alertaErroUltimo: ''
+                        });
+                        if (!silencioso) {
+                            showToast(`E-mail enviado automaticamente para: ${emailData.para}`);
+                        }
+                        return true;
+                    } else {
+                        try {
+                            await updateDoc(doc(db, 'ag_manutencao', l.id), {
+                                alertaErroUltimo: res.motivo || 'erro_webhook'
+                            });
+                        } catch (_) {}
+                        if (!silencioso) {
+                            showToast(`Falha no Webhook (${res.motivo}). Abrindo rascunho no Outlook com ";"...`, 'error');
+                        } else {
+                            return false;
+                        }
+                    }
+                } finally {
+                    autoDispatchInFlightIds.delete(l.id);
+                }
+            }
+
+            if (silencioso) return false;
+
+            const assuntoEnc = encodeURIComponent(emailData.assunto);
+            const corpoEnc = encodeURIComponent(emailData.corpoTexto);
+            window.open(`mailto:${emailData.para}?subject=${assuntoEnc}&body=${corpoEnc}`);
+            showToast(`Outlook aberto com destinatários separados por ";" (${emailData.para})`);
+            return true;
+        }
+
+        function agendarVerificacaoAlertasAutomaticos() {
+            if (autoDispatchTimer) clearTimeout(autoDispatchTimer);
+            autoDispatchTimer = setTimeout(() => {
+                processarDisparosAutomaticosAgenda();
+            }, 1400);
+        }
+
+        async function processarDisparosAutomaticosAgenda() {
+            atualizarBadgesAlertasNoPrazo();
+            if (!syncLoadedManut || !syncLoadedTeam || !syncLoadedNotifCfg) return;
+            if (autoDispatchEmCurso) return;
+            if (!emailAutoCfg.webhookUrl || emailAutoCfg.autoDisparoAtivo === false) return;
+
+            const elegiveis = getLancamentosCalendario().filter(l => {
+                if (l.status === 'concluido' || l.status === 'cancelado') return false;
+                if (autoDispatchInFlightIds.has(l.id)) return false;
+                const av = avaliarJanelaAlertaLancamento(l);
+                return av.emJanela && !av.jaEnviado;
+            });
+
+            if (!elegiveis.length) return;
+
+            autoDispatchEmCurso = true;
+            let enviados = 0;
+            try {
+                for (const item of elegiveis) {
+                    const ok = await enviarNotificacaoLancamento(item, { silencioso: true, forcar: false });
+                    if (ok) enviados++;
+                }
+                if (enviados > 0) {
+                    showToast(`⚡ ${enviados} alerta(s) de manutenção disparado(s) automaticamente por e-mail!`);
+                    renderNotificationsTable();
+                    atualizarBadgesAlertasNoPrazo();
+                }
+            } finally {
+                autoDispatchEmCurso = false;
+            }
+        }
+
+        window.dispararAlertasNoPrazoManual = async () => {
+            const pendentesNoPrazo = getLancamentosCalendario().filter(l => {
+                if (l.status === 'concluido' || l.status === 'cancelado') return false;
+                const av = avaliarJanelaAlertaLancamento(l);
+                return av.emJanela && !av.jaEnviado;
+            });
+
+            if (!pendentesNoPrazo.length) {
+                return showToast('Todos os alertas que estão na janela do prazo já foram enviados!');
+            }
+
+            if (!emailAutoCfg.webhookUrl) {
+                // Sem webhook configurado: consolida ou abre o primeiro e orienta configurar o Power Automate
+                if (pendentesNoPrazo.length === 1) {
+                    await enviarNotificacaoLancamento(pendentesNoPrazo[0], { silencioso: false, forcar: true, apenasOutlook: true });
+                } else {
+                    const todosDest = normalizarListaEmailsSemicolon(pendentesNoPrazo.map(l => resolverDestinatariosLancamento(l).para));
+                    const linhasResumo = pendentesNoPrazo.map(l => `• ${formatPeriodoLancamentoBR(l)} (${l.hora || '--:--'}) — ${l.titulo} [${l.equipe || 'Geral'} / ${l.responsavel || 'Geral'}]`).join('\n');
+                    const assunto = encodeURIComponent(`[Alerta PCM Cepêra] ${pendentesNoPrazo.length} Manutenções Programadas no Prazo`);
+                    const corpo = encodeURIComponent(`Olá,\n\nSeguem as atividades programadas na janela de aviso prévio:\n\n${linhasResumo}\n\nPor favor, garanta os preparativos.\nCentral PCM — Cepêra Alimentos`);
+                    window.open(`mailto:${todosDest}?subject=${assunto}&body=${corpo}`);
+                    showToast(`Resumo com ${pendentesNoPrazo.length} alertas aberto no Outlook (separados por ";")! Configure o Power Automate acima p/ envio 100% automático.`);
+                }
+                return;
+            }
+
+            const btn = document.getElementById('btnDispararPendentesAgora');
+            if (btn) { btn.disabled = true; btn.innerText = 'Disparando e-mails...'; }
+            let enviados = 0;
+            try {
+                for (const l of pendentesNoPrazo) {
+                    const ok = await enviarNotificacaoLancamento(l, { silencioso: true, forcar: true });
+                    if (ok) enviados++;
+                }
+                renderNotificationsTable();
+                atualizarBadgesAlertasNoPrazo();
+                showToast(`${enviados} de ${pendentesNoPrazo.length} alerta(s) enviado(s) automaticamente via Power Automate!`);
+            } finally {
+                if (btn) {
+                    btn.disabled = false;
+                    btn.innerHTML = `<span>⚡ Disparar Alertas no Prazo (<span id="countAlertasNoPrazo">0</span>)</span>`;
+                    atualizarBadgesAlertasNoPrazo();
+                }
+            }
+        };
+
+        function atualizarBadgesAlertasNoPrazo() {
+            const pendentesNoPrazo = getLancamentosCalendario().filter(l => {
+                if (l.status === 'concluido' || l.status === 'cancelado') return false;
+                const av = avaliarJanelaAlertaLancamento(l);
+                return av.emJanela && !av.jaEnviado;
+            }).length;
+
+            const cntBtn = document.getElementById('countAlertasNoPrazo');
+            if (cntBtn) cntBtn.innerText = String(pendentesNoPrazo);
+
+            const bRail = document.getElementById('badgeAlertasRail');
+            if (bRail) {
+                bRail.innerText = String(pendentesNoPrazo);
+                bRail.hidden = pendentesNoPrazo === 0;
+                bRail.classList.toggle('hidden', pendentesNoPrazo === 0);
+            }
+            const bMob = document.getElementById('badgeAlertasMob');
+            if (bMob) {
+                bMob.innerText = String(pendentesNoPrazo);
+                bMob.hidden = pendentesNoPrazo === 0;
+                bMob.classList.toggle('hidden', pendentesNoPrazo === 0);
+            }
+        }
+
         window.renderNotificationsTable = renderNotificationsTable;
         function renderNotificationsTable() {
+            atualizarBadgesAlertasNoPrazo();
+            sincronizarFormConfigNotificacaoUI();
             const tbody = document.getElementById('notifTableBody');
-            const pendentes = getLancamentosCalendario().filter(l => l.status !== 'concluido' && l.status !== 'cancelado').sort((a, b) => (a.data || '').localeCompare(b.data || ''));
+            if (!tbody) return;
+            const pendentes = getLancamentosCalendario()
+                .filter(l => l.status !== 'concluido' && l.status !== 'cancelado')
+                .sort((a, b) => (a.data || '').localeCompare(b.data || ''));
 
             if (!pendentes.length) {
-                tbody.innerHTML = `<tr><td colspan="5" class="text-center py-8 text-slate-400 font-bold">Nenhuma manutenção pendente para notificação.</td></tr>`;
+                tbody.innerHTML = `<tr><td colspan="6" class="text-center py-8 text-slate-400 font-bold">Nenhuma manutenção pendente para notificação.</td></tr>`;
                 return;
             }
 
             let html = '';
             pendentes.forEach(l => {
-                const prazoDias = parseInt(l.alertaPrazo || 0);
+                const av = avaliarJanelaAlertaLancamento(l);
+                const { para } = resolverDestinatariosLancamento(l);
                 let destTxt = "Resp. " + (l.responsavel || 'Geral');
-                if (l.alertaDest === 'equipe') destTxt = "Equipe " + l.equipe;
+                if (l.alertaDest === 'equipe') destTxt = "Equipe " + (l.equipe || 'Geral');
                 if (l.alertaDest === 'todos') destTxt = "Todos os Cadastrados";
 
-                let prazoTxt = `${prazoDias} dia(s) antes`;
-                if (prazoDias === 0) prazoTxt = 'No dia';
-                else if (prazoDias === 7) prazoTxt = '1 semana antes';
-                else if (prazoDias === 30) prazoTxt = '1 mês antes';
-                else if (prazoDias === 90) prazoTxt = '3 meses antes';
-                else if (prazoDias === 180) prazoTxt = '6 meses antes';
+                let prazoTxt = `${av.prazoDias} dia(s) antes`;
+                if (av.prazoDias === 0) prazoTxt = 'No dia';
+                else if (av.prazoDias === 7) prazoTxt = '1 semana antes';
+                else if (av.prazoDias === 30) prazoTxt = '1 mês antes';
+                else if (av.prazoDias === 90) prazoTxt = '3 meses antes';
+                else if (av.prazoDias === 180) prazoTxt = '6 meses antes';
+
+                let statusEnvioHtml = '';
+                if (av.jaEnviado) {
+                    const dtEnv = l.alertaEnviadoEm ? new Date(l.alertaEnviadoEm).toLocaleString('pt-BR', { day: '2-digit', month: '2-digit', hour: '2-digit', minute: '2-digit' }) : '';
+                    statusEnvioHtml = `<span class="st-badge st-concluido" title="Enviado para: ${escapeHtml(l.alertaEnviadoPara || para)}">✓ Enviado ${escapeHtml(dtEnv)}</span>`;
+                } else if (av.emJanela) {
+                    statusEnvioHtml = emailAutoCfg.webhookUrl
+                        ? `<span class="st-badge st-andamento">⚡ Na fila automática</span>`
+                        : `<span class="st-badge st-andamento" title="Configure o Power Automate acima p/ envio automático">No prazo (aguardando envio)</span>`;
+                } else if (av.aguardandoPrazo) {
+                    const faltamParaDisparo = av.diasRestantes - av.prazoDias;
+                    statusEnvioHtml = `<span class="st-badge bg-slate-100 text-slate-600 border-slate-200">Agendado (em ${faltamParaDisparo}d)</span>`;
+                } else {
+                    statusEnvioHtml = `<span class="st-badge bg-rose-50 text-rose-700 border-rose-200">Data passada</span>`;
+                }
+
+                const temWebhook = Boolean(emailAutoCfg.webhookUrl);
+                const lblBtn = av.jaEnviado ? 'Reenviar' : (temWebhook ? 'Enviar Agora' : 'E-mail');
 
                 html += `<tr class="hover:bg-slate-50/80 transition-colors">
-                    <td class="py-3.5 px-4 font-extrabold text-slate-900">${escapeHtml(formatPeriodoLancamentoBR(l))}</td>
+                    <td class="py-3.5 px-4 font-extrabold text-slate-900 whitespace-nowrap">${escapeHtml(formatPeriodoLancamentoBR(l))}</td>
                     <td class="py-3.5 px-4 font-bold text-slate-800">${escapeHtml(l.titulo)}</td>
-                    <td class="py-3.5 px-4 text-slate-500 font-semibold">${escapeHtml(destTxt)}</td>
-                    <td class="py-3.5 px-4"><span class="st-badge st-pendente">${escapeHtml(prazoTxt)}</span></td>
-                    <td class="py-3.5 px-4 text-right">
-                        <button type="button" class="btn-pill-dark !py-1.5 !px-3.5 text-[11px]" onclick="enviarAlertaEmail('${escapeHtml(l.id)}')">${ICONS.mail} <span>E-mail</span></button>
+                    <td class="py-3.5 px-4">
+                        <div class="text-slate-700 font-bold">${escapeHtml(destTxt)}</div>
+                        <div class="text-[10px] font-mono text-slate-400 truncate max-w-[230px]" title="${escapeHtml(para)}">${escapeHtml(para)}</div>
+                    </td>
+                    <td class="py-3.5 px-4 whitespace-nowrap"><span class="st-badge st-pendente">${escapeHtml(prazoTxt)}</span></td>
+                    <td class="py-3.5 px-4 whitespace-nowrap">${statusEnvioHtml}</td>
+                    <td class="py-3.5 px-4 text-right whitespace-nowrap">
+                        <div class="inline-flex items-center gap-1.5">
+                            <button type="button" class="btn-pill-dark !py-1.5 !px-3 text-[11px]" onclick="enviarAlertaEmail('${escapeHtml(l.id)}')">${ICONS.mail} <span>${lblBtn}</span></button>
+                            ${temWebhook ? `<button type="button" title="Abrir rascunho no Outlook local (separado por ;)" class="px-2.5 py-1.5 rounded-full bg-slate-100 hover:bg-slate-200 text-slate-700 font-extrabold text-[10px]" onclick="enviarAlertaEmail('${escapeHtml(l.id)}', true)">Outlook</button>` : ''}
+                        </div>
                     </td>
                 </tr>`;
             });
             tbody.innerHTML = html;
         }
 
-        window.enviarAlertaEmail = (id) => {
+        window.enviarAlertaEmail = async (id, forcarOutlook = false) => {
             const l = getLancamentosCalendario().find(x => x.id === id);
             if (!l) return;
-
-            let emails = [];
-            const dest = l.alertaDest || 'responsavel';
-            if (dest === 'responsavel') {
-                const r = equipeCadastrada.find(e => e.nome === l.responsavel);
-                if (r) emails.push(r.email);
-            } else if (dest === 'equipe') {
-                equipeCadastrada.filter(e => e.equipe === l.equipe).forEach(e => emails.push(e.email));
-            } else {
-                equipeCadastrada.forEach(e => emails.push(e.email));
-            }
-
-            const destinatarioFinal = emails.length ? emails.join(',') : 'pcm@cepera.com.br';
-            const assunto = encodeURIComponent(`[Alerta PCM Cepera] Manutenção Programada: ${l.titulo}`);
-            const corpo = encodeURIComponent(`Olá,\n\nEste é um lembrete automático de manutenção industrial:\n\n- Atividade: ${l.titulo}\n- Data(s): ${formatPeriodoLancamentoBR(l)} às ${l.hora || '--:--'}\n- Equipe: ${l.equipe}\n- Responsável: ${l.responsavel || 'Geral'}\n- Descrição: ${l.descricao || 'N/A'}\n\nPor favor, garanta os preparativos.\nPCM - Cepera Alimentos`);
-
-            window.open(`mailto:${destinatarioFinal}?subject=${assunto}&body=${corpo}`);
-            showToast("Cliente de e-mail aberto com mensagem pronta!");
+            await enviarNotificacaoLancamento(l, {
+                silencioso: false,
+                forcar: true,
+                apenasOutlook: Boolean(forcarOutlook)
+            });
+            renderNotificationsTable();
+            atualizarBadgesAlertasNoPrazo();
         };
 
         function filtrados(lista) {
@@ -2262,6 +2807,10 @@
             atualizarSelectRespEdit();
             document.getElementById('eResp').value = l.responsavel || '';
             document.getElementById('eDesc').value = l.descricao || '';
+            const ePrazo = document.getElementById('eAlertaPrazo');
+            if (ePrazo) ePrazo.value = String(l.alertaPrazo ?? '0');
+            const eDest = document.getElementById('eAlertaDest');
+            if (eDest) eDest.value = l.alertaDest || 'responsavel';
             const infoMulti = document.getElementById('eMultiDiaInfo');
             if (infoMulti) {
                 const diasOrd = getDatasLancamento(l);
@@ -2289,7 +2838,9 @@
                     status: document.getElementById('eStatus').value,
                     equipe: document.getElementById('eEquipe').value,
                     responsavel: document.getElementById('eResp').value,
-                    descricao: document.getElementById('eDesc').value
+                    descricao: document.getElementById('eDesc').value,
+                    alertaPrazo: document.getElementById('eAlertaPrazo')?.value ?? '0',
+                    alertaDest: document.getElementById('eAlertaDest')?.value || 'responsavel'
                 });
                 fecharModal('editOverlay');
                 showToast("Atualizado!");
@@ -2836,6 +3387,8 @@
             renderCalendario();
             renderCalendarNotesBanner();
             renderMuralRecados();
+            atualizarBadgesAlertasNoPrazo();
+            if (!document.getElementById('viewNotifications').hidden) renderNotificationsTable();
             if (!document.getElementById('dayOverlay').hidden) renderListaDia();
         }
 
@@ -2984,6 +3537,9 @@
             });
             initFirebase();
             aplicarHandoffAgendamentoAgenda();
+            setInterval(() => {
+                agendarVerificacaoAlertasAutomaticos();
+            }, 5 * 60 * 1000);
         });
     </script>
 </body>
