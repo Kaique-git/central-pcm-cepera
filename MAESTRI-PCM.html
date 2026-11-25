@@ -2018,22 +2018,43 @@
         const SNIPPET_REGRAS_FIRESTORE_MAESTRI = `rules_version = '2';
 service cloud.firestore {
   match /databases/{database}/documents {
-    match /ob_linhas/{document=**} { allow read, write: if true; }
-    match /ob_equipamentos/{document=**} { allow read, write: if true; }
-    match /ir_funcionarios/{document=**} { allow read, write: if true; }
-    match /ir_anomalias/{document=**} { allow read, write: if true; }
-    match /ir_checklists/{document=**} { allow read, write: if true; }
-    match /ir_agenda/{document=**} { allow read, write: if true; }
+    // 1. Base & Demandas (Central PCM)
+    match /pcm_data/{document=**} { allow read, write: if true; }
+    match /pcm_images/{document=**} { allow read, write: if true; }
+    match /dm_demandas/{document=**} { allow read, write: if true; }
+    match /dm_responsaveis/{document=**} { allow read, write: if true; }
+    match /dm_setores/{document=**} { allow read, write: if true; }
+    match /dm_opcoes/{document=**} { allow read, write: if true; }
+    match /mp_producao/{document=**} { allow read, write: if true; }
+
+    // 2. Agenda de Manutenção & Preventivas
     match /ag_manutencao/{document=**} { allow read, write: if true; }
     match /ag_responsaveis/{document=**} { allow read, write: if true; }
     match /ag_equipes/{document=**} { allow read, write: if true; }
     match /ag_setores/{document=**} { allow read, write: if true; }
-    match /mp_producao/{document=**} { allow read, write: if true; }
-    match /config/{document=**} { allow read, write: if true; }
-    match /pcm_config/{document=**} { allow read, write: if true; }
+
+    // 3. Obsolescência & Gestão de Ativos
+    match /ob_equipamentos/{document=**} { allow read, write: if true; }
+    match /ob_linhas/{document=**} { allow read, write: if true; }
+
+    // 4. Inspeção de Rotas (IR)
+    match /ir_funcionarios/{document=**} { allow read, write: if true; }
+    match /ir_checklists/{document=**} { allow read, write: if true; }
+    match /ir_agenda/{document=**} { allow read, write: if true; }
+    match /ir_anomalias/{document=**} { allow read, write: if true; }
+
+    // 5. Biblioteca e Documentos dos Ativos (DOCS-ATIVOS)
     match /docs_ativos/{document=**} { allow read, write: if true; }
     match /docs_revisoes/{document=**} { allow read, write: if true; }
     match /docs_arquivos_partes/{document=**} { allow read, write: if true; }
+
+    // 6. Configurações Gerais (Power Automate, SharePoint, De-Para)
+    match /config/{document=**} { allow read, write: if true; }
+
+    // 7. Governança Admin Master (Senha Oculta Master)
+    match /pcm_config/{document=**} { allow read, write: if true; }
+
+    // 8. Agente de IA / Estudos AQF & Banco Histórico Mensal
     match /maestri_oms_mensais/{document=**} { allow read, write: if true; }
     match /maestri_estudos/{document=**} { allow read, write: if true; }
     match /maestri_rodadas/{document=**} { allow read, write: if true; }
