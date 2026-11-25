@@ -1,25 +1,34 @@
 rules_version = '2';
 service cloud.firestore {
   match /databases/{database}/documents {
-    // Coleções operacionais do Central PCM Cepêra
-    match /ob_linhas/{document=**} {
+    // ==========================================
+    // 1. REGRAS BASE & DEMANDAS (Central PCM)
+    // ==========================================
+    match /pcm_data/{document=**} {
       allow read, write: if true;
     }
-    match /ob_equipamentos/{document=**} {
+    match /pcm_images/{document=**} {
       allow read, write: if true;
     }
-    match /ir_funcionarios/{document=**} {
+    match /dm_demandas/{document=**} {
       allow read, write: if true;
     }
-    match /ir_anomalias/{document=**} {
+    match /dm_responsaveis/{document=**} {
       allow read, write: if true;
     }
-    match /ir_checklists/{document=**} {
+    match /dm_setores/{document=**} {
       allow read, write: if true;
     }
-    match /ir_agenda/{document=**} {
+    match /dm_opcoes/{document=**} {
       allow read, write: if true;
     }
+    match /mp_producao/{document=**} {
+      allow read, write: if true;
+    }
+
+    // ==========================================
+    // 2. AGENDA DE MANUTENÇÃO & PREVENTIVAS
+    // ==========================================
     match /ag_manutencao/{document=**} {
       allow read, write: if true;
     }
@@ -32,16 +41,36 @@ service cloud.firestore {
     match /ag_setores/{document=**} {
       allow read, write: if true;
     }
-    match /mp_producao/{document=**} {
+
+    // ==========================================
+    // 3. OBSOLESCÊNCIA & GESTÃO DE ATIVOS
+    // ==========================================
+    match /ob_equipamentos/{document=**} {
+      allow read, write: if true;
+    }
+    match /ob_linhas/{document=**} {
       allow read, write: if true;
     }
 
-    // Configurações do sistema (SharePoint, preferências, etc.)
-    match /config/{document=**} {
+    // ==========================================
+    // 4. INSPEÇÃO DE ROTAS (IR)
+    // ==========================================
+    match /ir_funcionarios/{document=**} {
+      allow read, write: if true;
+    }
+    match /ir_checklists/{document=**} {
+      allow read, write: if true;
+    }
+    match /ir_agenda/{document=**} {
+      allow read, write: if true;
+    }
+    match /ir_anomalias/{document=**} {
       allow read, write: if true;
     }
 
-    // Biblioteca e Controle de Documentos dos Ativos (DOCS-ATIVOS)
+    // ==========================================
+    // 5. BIBLIOTECA & DOCUMENTOS DE ATIVOS (DOCS-ATIVOS)
+    // ==========================================
     match /docs_ativos/{document=**} {
       allow read, write: if true;
     }
@@ -49,6 +78,37 @@ service cloud.firestore {
       allow read, write: if true;
     }
     match /docs_arquivos_partes/{document=**} {
+      allow read, write: if true;
+    }
+
+    // ==========================================
+    // 6. CONFIGURAÇÕES GERAIS (Power Automate, SharePoint, De-Para, etc.)
+    // ==========================================
+    match /config/{document=**} {
+      allow read, write: if true;
+    }
+
+    // ==========================================
+    // 7. GOVERNANÇA ADMIN MASTER (Senha Oculta Master)
+    // ==========================================
+    match /pcm_config/{document=**} {
+      allow read, write: if true;
+    }
+
+    // ==========================================
+    // 8. MÓDULO AGENTE DE IA / AUDITORIA & ESTUDOS AQF (MAESTRI-PCM)
+    // OMs armazenadas em blocos mensais compactados (maestri_oms_mensais) para ultra performance
+    // ==========================================
+    match /maestri_oms_mensais/{document=**} {
+      allow read, write: if true;
+    }
+    match /maestri_estudos/{document=**} {
+      allow read, write: if true;
+    }
+    match /maestri_rodadas/{document=**} {
+      allow read, write: if true;
+    }
+    match /maestri_correcoes/{document=**} {
       allow read, write: if true;
     }
   }
