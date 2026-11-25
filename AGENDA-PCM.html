@@ -1287,8 +1287,10 @@
                 <div class="flex justify-between py-2"><span>Fechar qualquer modal</span><kbd class="px-2 py-0.5 bg-slate-100 border border-slate-300 rounded font-mono font-bold">Esc</kbd></div>
             </div>
         </div>
+    </div>
+
     <!-- MODAL PRÉVIA VISUAL DO E-MAIL DE ALERTA -->
-    <div id="modalPreviaEmail" role="dialog" aria-modal="true" class="fixed inset-0 bg-slate-900/60 z-50 hidden flex items-center justify-center p-3 sm:p-5">
+    <div id="modalPreviaEmail" role="dialog" aria-modal="true" onclick="if(event.target === this) fecharModalPreviaEmail()" class="fixed inset-0 bg-slate-900/75 z-[100] hidden items-center justify-center p-3 sm:p-5" style="display:none;">
         <div class="bg-white w-full max-w-3xl rounded-3xl max-h-[92vh] flex flex-col shadow-2xl overflow-hidden border border-slate-200">
             <div class="p-4 sm:px-6 border-b border-slate-200 bg-slate-50 flex items-center justify-between">
                 <div class="flex items-center gap-2.5">
@@ -1302,7 +1304,7 @@
                     <button type="button" onclick="fecharModalPreviaEmail()" class="w-8 h-8 rounded-full bg-slate-200 hover:bg-slate-300 text-slate-700 font-bold flex items-center justify-center text-sm transition-colors">✕</button>
                 </div>
             </div>
-            <div id="modalPreviaEmailContainer" class="p-3 sm:p-6 overflow-y-auto flex-1 bg-slate-200/60 flex justify-center">
+            <div id="modalPreviaEmailContainer" class="p-3 sm:p-6 overflow-y-auto flex-1 bg-slate-200/70 flex justify-center">
                 <!-- HTML do e-mail inserido aqui via JS -->
             </div>
             <div class="p-3.5 sm:px-6 border-t border-slate-200 bg-white flex flex-col sm:flex-row sm:items-center justify-between gap-2 text-xs">
@@ -1649,6 +1651,8 @@
             if (el) {
                 el.hidden = true;
                 el.classList.add('hidden');
+                el.classList.remove('flex');
+                if (el.style.display && el.style.display !== 'none') el.style.display = 'none';
             }
         };
 
@@ -2144,9 +2148,11 @@
                 <table style="width:100%;border-collapse:collapse;">
                     <tr>
                         <td style="vertical-align:middle;">
-                            <span style="display:inline-block;background:#dc2626;color:#ffffff;font-size:10px;font-weight:900;letter-spacing:1px;padding:3px 8px;border-radius:6px;text-transform:uppercase;">CEPÊRA</span>
-                            <span style="color:#475569;margin:0 6px;">•</span>
-                            <span style="color:#38bdf8;font-size:11px;font-weight:700;letter-spacing:1px;text-transform:uppercase;">CENTRAL PCM</span>
+                            <div style="background:#ffffff;padding:5px 12px;border-radius:10px;display:inline-block;vertical-align:middle;box-shadow:0 1px 4px rgba(0,0,0,0.18);">
+                                <img src="https://raw.githubusercontent.com/Kaique-git/central-pcm-cepera/main/CEPERA_LOGO.png" alt="Cepêra" height="34" style="height:34px;max-height:34px;width:auto;display:block;border:0;outline:none;text-decoration:none;">
+                            </div>
+                            <span style="color:#475569;margin:0 8px;vertical-align:middle;font-size:14px;">•</span>
+                            <span style="color:#38bdf8;font-size:12px;font-weight:800;letter-spacing:1px;text-transform:uppercase;vertical-align:middle;">CENTRAL PCM</span>
                         </td>
                         <td style="text-align:right;vertical-align:middle;">
                             <span style="display:inline-block;background:rgba(255,255,255,0.12);color:#e2e8f0;font-size:11px;font-weight:700;padding:4px 10px;border-radius:20px;border:1px solid rgba(255,255,255,0.18);">
@@ -2273,9 +2279,11 @@
                 <table style="width:100%;border-collapse:collapse;">
                     <tr>
                         <td style="vertical-align:middle;">
-                            <span style="display:inline-block;background:#dc2626;color:#ffffff;font-size:10px;font-weight:900;letter-spacing:1px;padding:3px 8px;border-radius:6px;text-transform:uppercase;">CEPÊRA</span>
-                            <span style="color:#475569;margin:0 6px;">•</span>
-                            <span style="color:#38bdf8;font-size:11px;font-weight:700;letter-spacing:1px;text-transform:uppercase;">CENTRAL PCM</span>
+                            <div style="background:#ffffff;padding:5px 12px;border-radius:10px;display:inline-block;vertical-align:middle;box-shadow:0 1px 4px rgba(0,0,0,0.18);">
+                                <img src="https://raw.githubusercontent.com/Kaique-git/central-pcm-cepera/main/CEPERA_LOGO.png" alt="Cepêra" height="34" style="height:34px;max-height:34px;width:auto;display:block;border:0;outline:none;text-decoration:none;">
+                            </div>
+                            <span style="color:#475569;margin:0 8px;vertical-align:middle;font-size:14px;">•</span>
+                            <span style="color:#38bdf8;font-size:12px;font-weight:800;letter-spacing:1px;text-transform:uppercase;vertical-align:middle;">CENTRAL PCM</span>
                         </td>
                         <td style="text-align:right;vertical-align:middle;">
                             <span style="display:inline-block;background:#10b981;color:#ffffff;font-size:10px;font-weight:800;padding:4px 10px;border-radius:20px;letter-spacing:0.5px;">
@@ -2398,15 +2406,27 @@
                     htmlEmail = gerarHtmlVisualEmailLancamento(demoItem, { diasRestantes: 7, prazoDias: 7 }, 'kaique.pereira@cepera.com.br; manutencao@cepera.com.br');
                 }
             }
+            const modal = document.getElementById('modalPreviaEmail');
             const container = document.getElementById('modalPreviaEmailContainer');
             if (container) {
                 container.innerHTML = htmlEmail;
             }
-            document.getElementById('modalPreviaEmail')?.classList.remove('hidden');
+            if (modal) {
+                modal.hidden = false;
+                modal.classList.remove('hidden');
+                modal.classList.add('flex');
+                modal.style.display = 'flex';
+            }
         };
 
         window.fecharModalPreviaEmail = () => {
-            document.getElementById('modalPreviaEmail')?.classList.add('hidden');
+            const modal = document.getElementById('modalPreviaEmail');
+            if (modal) {
+                modal.hidden = true;
+                modal.classList.add('hidden');
+                modal.classList.remove('flex');
+                modal.style.display = 'none';
+            }
         };
 
         function montarConteudoEmailLancamento(l) {
