@@ -1149,18 +1149,18 @@
                             <div class="space-y-1.5">
                                 <div class="flex flex-wrap items-center gap-2">
                                     <span class="px-2.5 py-0.5 rounded-full bg-slate-900 text-white text-[10px] font-extrabold uppercase tracking-wider">Nó 8 • Estudo AQF Profundo (IA + Manuais)</span>
-                                    <span class="px-2.5 py-0.5 rounded-full bg-amber-100 text-amber-900 border border-amber-300 text-[10px] font-extrabold">Aprovação Paralela: 2 PCM + Supervisor + Gerente</span>
+                                    <span id="aqfResumoAprovadoresAtivosPill" class="px-2.5 py-0.5 rounded-full bg-amber-100 text-amber-900 border border-amber-300 text-[10px] font-extrabold">Aprovação Paralela: 2 PCM + Supervisor + Gerente</span>
                                     <span id="aqfEmailWebhookStatusPill" class="px-2.5 py-0.5 rounded-full bg-slate-100 text-slate-600 border border-slate-200 text-[10px] font-extrabold">E-mail Power Automate: Verificando...</span>
                                 </div>
                                 <h3 class="text-base sm:text-xl font-extrabold text-slate-900">Central de Estudos Técnicos AQF &amp; Fluxo de Aprovação</h3>
-                                <p class="text-xs font-semibold text-slate-600 leading-relaxed">Gera o dossiê completo (RAE, Ishikawa 6M, 5 Porquês, Análise de MTTR + Top 5 Paradas, Plano de Ação editável c/ Part Numbers, Múltiplas Melhorias e Base Técnica de Referência), envia automaticamente para aprovação paralela com alerta por e-mail e <strong>libera os botões de ação no Portal PCM após 100% de aprovação</strong>.</p>
+                                <p class="text-xs font-semibold text-slate-600 leading-relaxed">Estudos direcionados por <strong>Quebras GRAVES</strong> e pela <strong>Condição Especial de Grande Volume de Leves/Moderadas</strong> (sempre sinalizada no relatório). Gera dossiê técnico completo (RAE, Ishikawa 6M, 5 Porquês, MTTR + Top 5, Plano 5W2H editável c/ Part Numbers, Melhorias e Base Técnica) e <strong>libera as ações no Portal após aprovação dos signatários ativos</strong>.</p>
                             </div>
                         </div>
 
                         <!-- BARRA DE SELEÇÃO & GERAÇÃO -->
                         <div class="grid grid-cols-1 md:grid-cols-12 gap-2.5 items-end pt-2 border-t border-sky-200/70">
                             <div class="md:col-span-4 space-y-1">
-                                <label for="cacadorSelectAtivo" class="block text-[10px] font-extrabold uppercase text-slate-600">Equipamento / Ativo Alvo</label>
+                                <label for="cacadorSelectAtivo" class="block text-[10px] font-extrabold uppercase text-slate-600">Equipamento / Ativo Alvo (Priorizado por Quebra Grave e Alto Volume)</label>
                                 <select id="cacadorSelectAtivo" onchange="atualizarPreviaFontesAtivoAqf()" class="input-clean py-2 text-xs font-extrabold w-full"></select>
                             </div>
                             <div class="md:col-span-3 space-y-1">
@@ -1174,13 +1174,14 @@
                             </div>
                             <div class="md:col-span-2 space-y-1">
                                 <label for="cacadorSelectBaseOms" class="block text-[10px] font-extrabold uppercase text-slate-600">Base de Ordens</label>
-                                <select id="cacadorSelectBaseOms" class="input-clean py-2 text-xs font-extrabold w-full">
+                                <select id="cacadorSelectBaseOms" onchange="renderCacadorView()" class="input-clean py-2 text-xs font-extrabold w-full">
                                     <option value="historico">Histórico Completo</option>
                                     <option value="visao_atual">Apenas Visão Atual</option>
                                 </select>
                             </div>
                             <div class="md:col-span-3 flex flex-wrap gap-2">
                                 <input type="file" id="inputAnexoManualAqf" accept=".pdf,.txt,.md,.csv" multiple onchange="adicionarAnexosManuaisAqf(event)" class="hidden">
+                                <input type="file" id="inputFallbackPastaManuaisAqf" webkitdirectory directory multiple onchange="onSelecionarPastaFallbackManuaisAqf(event)" class="hidden">
                                 <button type="button" onclick="document.getElementById('inputAnexoManualAqf').click()" class="btn-touch bg-white hover:bg-slate-50 border border-slate-300 text-slate-700 text-xs py-2 px-3" title="Anexar manual PDF ou TXT avulso para a IA ler neste estudo">
                                     <span>📎 Manual (<span id="aqfAnexosCount">0</span>)</span>
                                 </button>
@@ -1197,15 +1198,15 @@
                                 <div class="flex flex-wrap items-center gap-2">
                                     <span class="text-[10px] font-extrabold uppercase tracking-wider text-indigo-700">📚 Fontes Híbridas de Manuais para a IA:</span>
                                     <span id="aqfFonteDocsPill" class="px-2.5 py-0.5 rounded-full bg-sky-50 text-sky-800 border border-sky-200 text-[10px] font-extrabold">DOCS-ATIVOS: 0</span>
-                                    <span id="aqfFontePastaLocalPill" class="px-2.5 py-0.5 rounded-full bg-slate-100 text-slate-600 border border-slate-200 text-[10px] font-extrabold">Pasta J: / OneDrive: Não vinculada</span>
+                                    <span id="aqfFontePastaLocalPill" class="px-2.5 py-0.5 rounded-full bg-slate-100 text-slate-600 border border-slate-200 text-[10px] font-extrabold">Pasta J: / OneDrive: Não conectada</span>
                                     <span id="aqfFonteSpWebhookPill" class="px-2.5 py-0.5 rounded-full bg-slate-100 text-slate-600 border border-slate-200 text-[10px] font-extrabold">SharePoint (Automate): Não configurado</span>
                                 </div>
                                 <div class="flex flex-wrap items-center gap-1.5">
                                     <button type="button" onclick="conectarPastaManuaisLocalAqf()" class="px-3 py-1.5 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white text-[11px] font-extrabold shadow-xs transition-colors">
-                                        📁 Vincular Pasta J: / OneDrive
+                                        📁 Conectar Pasta J: / OneDrive
                                     </button>
                                     <button type="button" id="btnDesconectarPastaManuaisAqf" onclick="desconectarPastaManuaisLocalAqf()" hidden class="hidden px-2.5 py-1.5 rounded-xl bg-rose-50 hover:bg-rose-100 text-rose-700 border border-rose-200 text-[10px] font-extrabold">
-                                        Desvincular
+                                        Desconectar
                                     </button>
                                     <button type="button" onclick="toggleConfigPonteSharepointAqf()" class="px-3 py-1.5 rounded-xl bg-indigo-50 hover:bg-indigo-100 text-indigo-800 border border-indigo-200 text-[11px] font-extrabold transition-colors">
                                         ☁️ Ponte SharePoint
@@ -1323,50 +1324,153 @@
                         </div>
                     </div>
 
-                    <!-- GOVERNANÇA DO FLUXO PARALELO DE APROVAÇÃO AQF + NOTIFICAÇÕES EMAIL -->
+                    <!-- FONTES HÍBRIDAS DE MANUAIS (PASTA J: / ONEDRIVE + SHAREPOINT + DOCS-ATIVOS) -->
+                    <div class="glass-card p-5 rounded-3xl space-y-4 border border-emerald-200/90 bg-gradient-to-r from-emerald-50/50 via-white to-indigo-50/40">
+                        <div class="flex flex-col lg:flex-row lg:items-center justify-between gap-3">
+                            <div class="space-y-1">
+                                <span class="text-[10px] font-extrabold uppercase tracking-wider text-emerald-700">📚 Motor Híbrido de Manuais para a IA (DOCS-ATIVOS + Pasta J: + SharePoint)</span>
+                                <h4 class="text-sm font-extrabold text-slate-900">Conectar Pasta Local (`J:` / OneDrive) &amp; Ponte SharePoint</h4>
+                                <p class="text-[11px] font-semibold text-slate-600">Conecte sua pasta de manuais do computador/rede (ex.: <code>J:\Manuais</code> ou OneDrive sincronizado) e/ou a ponte do SharePoint para que a IA leia os PDFs automaticamente ao gerar estudos AQF.</p>
+                            </div>
+                            <div class="flex flex-wrap items-center gap-2 shrink-0">
+                                <button type="button" onclick="conectarPastaManuaisLocalAqf()" class="btn-touch bg-emerald-600 hover:bg-emerald-700 text-white text-xs py-2.5 px-4 shadow-sm">
+                                    📁 Conectar Pasta J: / OneDrive
+                                </button>
+                                <button type="button" id="btnDesconectarPastaManuaisMaster" onclick="desconectarPastaManuaisLocalAqf()" hidden class="hidden btn-touch bg-rose-50 hover:bg-rose-100 text-rose-700 border border-rose-200 text-xs py-2 px-3">
+                                    Desconectar Pasta
+                                </button>
+                            </div>
+                        </div>
+
+                        <div class="flex flex-wrap items-center gap-2">
+                            <span id="masterFonteDocsPill" class="px-2.5 py-1 rounded-full bg-sky-50 text-sky-800 border border-sky-200 text-[10px] font-extrabold">DOCS-ATIVOS: 0</span>
+                            <span id="masterFontePastaLocalPill" class="px-2.5 py-1 rounded-full bg-slate-100 text-slate-600 border border-slate-200 text-[10px] font-extrabold">Pasta J: / OneDrive: Não conectada</span>
+                            <span id="masterFonteSpWebhookPill" class="px-2.5 py-1 rounded-full bg-slate-100 text-slate-600 border border-slate-200 text-[10px] font-extrabold">SharePoint (Automate): Não configurado</span>
+                        </div>
+
+                        <div class="p-3.5 rounded-2xl bg-indigo-50/60 border border-indigo-200/80 space-y-2.5 text-xs">
+                            <div class="flex flex-wrap items-center justify-between gap-2">
+                                <div class="text-[10px] font-extrabold uppercase tracking-wider text-indigo-800">☁️ Ponte SharePoint via Power Automate (Opcional — Consulta em Nuvem)</div>
+                                <button type="button" onclick="copiarEsquemaSharepointManuaisAqf()" class="px-2.5 py-1 rounded-xl bg-white hover:bg-indigo-100 text-indigo-800 border border-indigo-300 text-[10px] font-extrabold">
+                                    📋 Copiar Esquema JSON
+                                </button>
+                            </div>
+                            <div class="grid grid-cols-1 md:grid-cols-12 gap-2.5 items-end">
+                                <div class="md:col-span-7">
+                                    <label class="block text-[10px] font-extrabold uppercase text-slate-600 mb-1">URL HTTP POST do Fluxo SharePoint</label>
+                                    <input type="url" id="masterInputWebhookManuaisSp" placeholder="https://prod-xx.brazilsouth.logic.azure.com/workflows/..." class="input-clean py-2 text-xs font-mono">
+                                </div>
+                                <div class="md:col-span-3">
+                                    <label class="block text-[10px] font-extrabold uppercase text-slate-600 mb-1">Pasta Base no SharePoint</label>
+                                    <input type="text" id="masterInputPastaBaseManuaisSp" placeholder="Manuais_Maquinas_PCM" class="input-clean py-2 text-xs font-bold">
+                                </div>
+                                <div class="md:col-span-2">
+                                    <button type="button" onclick="salvarConfigPonteSharepointAqf('master')" class="btn-pill-dark w-full justify-center py-2 text-xs">Salvar Ponte</button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- GOVERNANÇA DO FLUXO PARALELO DE APROVAÇÃO AQF + INTERRUPTORES ON/OFF + ADICIONAR PESSOAS -->
                     <div class="glass-card p-5 rounded-3xl space-y-4 border border-amber-200/80">
-                        <div class="flex flex-wrap items-center justify-between gap-2">
+                        <div class="flex flex-col lg:flex-row lg:items-center justify-between gap-3">
                             <div>
-                                <span class="text-[10px] font-extrabold uppercase tracking-wider text-amber-700">Governança de Estudos AQF • Aprovação Paralela + Power Automate</span>
-                                <h4 class="text-sm font-extrabold text-slate-900">Signatários Oficiais (2 PCM + Supervisor da Disciplina + Gerente)</h4>
-                                <p class="text-[11px] font-semibold text-slate-600">Informe o nome, usuário de login (se cadastrado) e e-mail corporativo para os alertas automáticos do Power Automate (herdado de <code>AGENDA-PCM</code>).</p>
+                                <div class="flex flex-wrap items-center gap-2">
+                                    <span class="text-[10px] font-extrabold uppercase tracking-wider text-amber-700">Governança de Estudos AQF • Aprovação Paralela + Interruptores Master</span>
+                                    <span id="masterResumoAprovAtivosPill" class="px-2.5 py-0.5 rounded-full bg-emerald-100 text-emerald-900 border border-emerald-300 text-[10px] font-extrabold">5 de 5 ativos</span>
+                                </div>
+                                <h4 class="text-sm font-extrabold text-slate-900 mt-0.5">Signatários Oficiais — Ligue/Desligue Quem Participa Agora ou Adicione Novas Pessoas</h4>
+                                <p class="text-[11px] font-semibold text-slate-600">Use o <strong>interruptor ON/OFF</strong> em cada cartão para decidir quem entra na aprovação dos estudos no momento (ex.: desligar Gerente/Supervisores para testes ou estudos somente PCM). Também adicione novos aprovadores quando a equipe mudar.</p>
                             </div>
-                            <button type="button" onclick="salvarConfigAprovadoresAqfMaster()" class="btn-touch bg-amber-600 hover:bg-amber-700 text-white text-xs py-2 px-4">
-                                💾 Salvar Aprovadores AQF
-                            </button>
-                        </div>
-                        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-3 text-xs">
-                            <div class="p-3 rounded-2xl bg-sky-50/70 border border-sky-200 space-y-1.5">
-                                <div class="text-[10px] font-extrabold uppercase text-sky-800">PCM 1 (Obrigatório)</div>
-                                <input type="text" id="cfgAqfPcm1Nome" placeholder="Nome (ex: Kaique Pereira)" class="input-clean py-1.5 text-xs font-bold">
-                                <input type="text" id="cfgAqfPcm1User" placeholder="Login (ex: kaique.pereira)" class="input-clean py-1.5 text-[11px] font-mono">
-                                <input type="email" id="cfgAqfPcm1Email" placeholder="kaique.pereira@cepera.com.br" class="input-clean py-1.5 text-[11px] font-mono">
-                            </div>
-                            <div class="p-3 rounded-2xl bg-sky-50/70 border border-sky-200 space-y-1.5">
-                                <div class="text-[10px] font-extrabold uppercase text-sky-800">PCM 2 (Obrigatório)</div>
-                                <input type="text" id="cfgAqfPcm2Nome" placeholder="Nome (ex: Jhonatan)" class="input-clean py-1.5 text-xs font-bold">
-                                <input type="text" id="cfgAqfPcm2User" placeholder="Login (ex: jhonatan)" class="input-clean py-1.5 text-[11px] font-mono">
-                                <input type="email" id="cfgAqfPcm2Email" placeholder="jhonatan@cepera.com.br" class="input-clean py-1.5 text-[11px] font-mono">
-                            </div>
-                            <div class="p-3 rounded-2xl bg-indigo-50/70 border border-indigo-200 space-y-1.5">
-                                <div class="text-[10px] font-extrabold uppercase text-indigo-800">Supervisor Mecânica</div>
-                                <input type="text" id="cfgAqfSupMecNome" placeholder="Nome / Cargo" class="input-clean py-1.5 text-xs font-bold">
-                                <input type="text" id="cfgAqfSupMecUser" placeholder="Login (ou vazio p/ cargo)" class="input-clean py-1.5 text-[11px] font-mono">
-                                <input type="email" id="cfgAqfSupMecEmail" placeholder="sup.mecanica@cepera.com.br" class="input-clean py-1.5 text-[11px] font-mono">
-                            </div>
-                            <div class="p-3 rounded-2xl bg-indigo-50/70 border border-indigo-200 space-y-1.5">
-                                <div class="text-[10px] font-extrabold uppercase text-indigo-800">Supervisor Elétrica</div>
-                                <input type="text" id="cfgAqfSupEleNome" placeholder="Nome / Cargo" class="input-clean py-1.5 text-xs font-bold">
-                                <input type="text" id="cfgAqfSupEleUser" placeholder="Login (ou vazio p/ cargo)" class="input-clean py-1.5 text-[11px] font-mono">
-                                <input type="email" id="cfgAqfSupEleEmail" placeholder="sup.eletrica@cepera.com.br" class="input-clean py-1.5 text-[11px] font-mono">
-                            </div>
-                            <div class="p-3 rounded-2xl bg-emerald-50/70 border border-emerald-200 space-y-1.5">
-                                <div class="text-[10px] font-extrabold uppercase text-emerald-800">Gerência (Obrigatório)</div>
-                                <input type="text" id="cfgAqfGerNome" placeholder="Nome (ex: Marcos Pierre)" class="input-clean py-1.5 text-xs font-bold">
-                                <input type="text" id="cfgAqfGerUser" placeholder="Login (ex: marcos.pierre)" class="input-clean py-1.5 text-[11px] font-mono">
-                                <input type="email" id="cfgAqfGerEmail" placeholder="marcos.pierre@cepera.com.br" class="input-clean py-1.5 text-[11px] font-mono">
+                            <div class="flex flex-wrap items-center gap-2 shrink-0">
+                                <button type="button" onclick="toggleFormNovoAprovadorAqfMaster()" class="btn-touch bg-indigo-600 hover:bg-indigo-700 text-white text-xs py-2 px-3.5">
+                                    ➕ Adicionar Pessoa
+                                </button>
+                                <button type="button" onclick="salvarConfigAprovadoresAqfMaster()" class="btn-touch bg-amber-600 hover:bg-amber-700 text-white text-xs py-2 px-4">
+                                    💾 Salvar Governança AQF
+                                </button>
                             </div>
                         </div>
+
+                        <!-- ATALHOS RÁPIDOS DE MODO DE APROVAÇÃO -->
+                        <div class="flex flex-wrap items-center gap-2 p-2.5 rounded-2xl bg-slate-50 border border-slate-200 text-[11px]">
+                            <span class="text-[10px] font-extrabold uppercase text-slate-500 px-1">Atalhos rápidos:</span>
+                            <button type="button" onclick="aplicarPresetAprovadoresAqfMaster('todos')" class="px-3 py-1 rounded-xl bg-emerald-50 hover:bg-emerald-100 text-emerald-900 border border-emerald-200 font-extrabold">👥 Fluxo Completo (Todos ON)</button>
+                            <button type="button" onclick="aplicarPresetAprovadoresAqfMaster('somente_pcm')" class="px-3 py-1 rounded-xl bg-sky-50 hover:bg-sky-100 text-sky-900 border border-sky-200 font-extrabold">🧪 Somente PCM (Interno)</button>
+                            <button type="button" onclick="aplicarPresetAprovadoresAqfMaster('somente_eu')" class="px-3 py-1 rounded-xl bg-amber-50 hover:bg-amber-100 text-amber-900 border border-amber-200 font-extrabold">⚡ Somente Eu (Teste Rápido)</button>
+                            <button type="button" onclick="aplicarPresetAprovadoresAqfMaster('nenhum')" class="px-3 py-1 rounded-xl bg-slate-200 hover:bg-slate-300 text-slate-800 font-extrabold" title="Desliga todos os aprovadores para testes sem trava">🔓 Modo Livre (Sem Trava)</button>
+                            <button type="button" onclick="restaurarAprovadoresPadraoAqfMaster()" class="ml-auto px-2.5 py-1 rounded-xl bg-white hover:bg-slate-100 text-slate-600 border border-slate-200 text-[10px] font-bold">↺ Restaurar Padrões</button>
+                        </div>
+
+                        <!-- FORMULÁRIO INLINE: ADICIONAR NOVA PESSOA APROVADORA -->
+                        <div id="boxFormNovoAprovadorAqf" hidden class="hidden p-4 rounded-2xl bg-indigo-50/80 border-2 border-indigo-200 space-y-3 text-xs">
+                            <div class="flex items-center justify-between">
+                                <span class="text-[11px] font-extrabold uppercase tracking-wider text-indigo-900">➕ Cadastrar Novo Participante na Aprovação AQF</span>
+                                <button type="button" onclick="toggleFormNovoAprovadorAqfMaster(false)" class="text-slate-500 hover:text-slate-800 font-extrabold text-xs">Fechar ✕</button>
+                            </div>
+                            <div class="grid grid-cols-1 md:grid-cols-12 gap-2.5">
+                                <div class="md:col-span-3">
+                                    <label class="block text-[10px] font-extrabold uppercase text-slate-600 mb-1">Nome Completo *</label>
+                                    <input type="text" id="novoAprovNome" placeholder="Ex: Carlos Silva" class="input-clean py-1.5 text-xs font-bold">
+                                </div>
+                                <div class="md:col-span-3">
+                                    <label class="block text-[10px] font-extrabold uppercase text-slate-600 mb-1">Cargo / Função *</label>
+                                    <input type="text" id="novoAprovCargo" placeholder="Ex: Eng. Confiabilidade" class="input-clean py-1.5 text-xs font-bold">
+                                </div>
+                                <div class="md:col-span-2">
+                                    <label class="block text-[10px] font-extrabold uppercase text-slate-600 mb-1">Login no Portal</label>
+                                    <input type="text" id="novoAprovUser" placeholder="carlos.silva" class="input-clean py-1.5 text-xs font-mono">
+                                </div>
+                                <div class="md:col-span-2">
+                                    <label class="block text-[10px] font-extrabold uppercase text-slate-600 mb-1">E-mail Corporativo</label>
+                                    <input type="email" id="novoAprovEmail" placeholder="carlos@cepera.com.br" class="input-clean py-1.5 text-xs font-mono">
+                                </div>
+                                <div class="md:col-span-2">
+                                    <label class="block text-[10px] font-extrabold uppercase text-slate-600 mb-1">Quando Participa</label>
+                                    <select id="novoAprovEscopo" class="input-clean py-1.5 text-xs font-extrabold">
+                                        <option value="SEMPRE">Todos os Estudos</option>
+                                        <option value="MECANICA">Só Mecânica / Multi</option>
+                                        <option value="ELETRICA">Só Elétrica / Multi</option>
+                                    </select>
+                                </div>
+                            </div>
+                            <div class="flex justify-end gap-2">
+                                <button type="button" onclick="toggleFormNovoAprovadorAqfMaster(false)" class="px-3 py-1.5 rounded-xl bg-white border border-slate-300 text-slate-700 font-extrabold text-xs">Cancelar</button>
+                                <button type="button" onclick="adicionarNovoAprovadorAqfMaster()" class="px-4 py-1.5 rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white font-extrabold text-xs">✅ Adicionar &amp; Ativar</button>
+                            </div>
+                        </div>
+
+                        <!-- GRADE DINÂMICA DOS APROVADORES (COM INTERRUPTOR ON/OFF) -->
+                        <div id="masterAprovadoresListaContainer" class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-3 text-xs"></div>
+
+                        <!-- CRITÉRIOS DE GATILHO AQF (QUEBRA GRAVE + CONDIÇÃO ESPECIAL ALTO VOLUME L/M) -->
+                        <div class="p-4 rounded-2xl bg-gradient-to-r from-rose-50/60 via-white to-amber-50/70 border border-rose-200/80 space-y-2.5 text-xs">
+                            <div class="flex flex-wrap items-center justify-between gap-2">
+                                <div>
+                                    <span class="text-[10px] font-extrabold uppercase tracking-wider text-rose-700">🎯 Critérios de Abertura de Estudo AQF (Quebras Graves + Condição Especial de Volume)</span>
+                                    <p class="text-[11px] font-semibold text-slate-600">Estudos são abertos prioritariamente por <strong>Quebras GRAVES</strong>, mas também pela <strong>Condição Especial de Grande Volume de Leves/Moderadas</strong> (sempre identificada em destaque no estudo).</p>
+                                </div>
+                            </div>
+                            <div class="grid grid-cols-2 lg:grid-cols-4 gap-2.5">
+                                <div class="p-2.5 rounded-xl bg-white border border-rose-200">
+                                    <label class="block text-[10px] font-extrabold uppercase text-rose-700 mb-1">🔴 Mín. Quebras GRAVES</label>
+                                    <input type="number" id="cfgGatilhoMinGraves" min="1" max="20" value="1" class="input-clean py-1.5 text-xs font-mono font-extrabold">
+                                </div>
+                                <div class="p-2.5 rounded-xl bg-white border border-amber-200">
+                                    <label class="block text-[10px] font-extrabold uppercase text-amber-800 mb-1">🟠 Esp.: Mín. MODERADAS</label>
+                                    <input type="number" id="cfgGatilhoMinModeradas" min="1" max="50" value="3" class="input-clean py-1.5 text-xs font-mono font-extrabold">
+                                </div>
+                                <div class="p-2.5 rounded-xl bg-white border border-amber-200">
+                                    <label class="block text-[10px] font-extrabold uppercase text-amber-800 mb-1">🟠 Esp.: Mín. LEVES+MOD.</label>
+                                    <input type="number" id="cfgGatilhoMinLMTotal" min="2" max="100" value="5" class="input-clean py-1.5 text-xs font-mono font-extrabold">
+                                </div>
+                                <div class="p-2.5 rounded-xl bg-white border border-amber-200">
+                                    <label class="block text-[10px] font-extrabold uppercase text-amber-800 mb-1">🟠 Esp.: Mín. Minutos L/M</label>
+                                    <input type="number" id="cfgGatilhoMinTempoLM" min="30" max="2000" step="10" value="120" class="input-clean py-1.5 text-xs font-mono font-extrabold">
+                                </div>
+                            </div>
+                        </div>
+
                         <div class="flex flex-wrap items-center justify-between gap-2 pt-2 border-t border-slate-100 text-[11px]">
                             <span id="masterBancoCloudStatsTxt" class="font-bold text-slate-600">Banco Nuvem: calculando...</span>
                             <div class="flex flex-wrap gap-2">
@@ -1998,22 +2102,78 @@
         let ultimoLoteAuditadasCache = [];
         let escopoVisualizacaoOms = "lote_atual"; // "lote_atual" | "historico_total" | "mes:YYYY-MM"
 
-        // Fontes Híbridas de Manuais + E-mail Power Automate + Aprovadores AQF
+        // Fontes Híbridas de Manuais + E-mail Power Automate + Aprovadores AQF Dinâmicos
         let notifAgendaCfg = { webhookUrl: "", fallbackEmail: "pcm@cepera.com.br" };
         let manuaisSpCfg = { webhookBuscaUrl: "", pastaBase: "Manuais_Maquinas_PCM" };
         let pastaManuaisLocalHandle = null;
+        let pastaManuaisFallbackFiles = []; // fallback universal via webkitdirectory (Chrome/Edge/Firefox/iframe)
+        let pastaManuaisFallbackNome = "";
         let anexosManuaisAvulsosAqf = []; // [{ nome, mimeType, base64, sizeBytes, origem }]
         let filtroEstudosAqfAtual = "todos";
         let estudoAqfGerandoAgora = false;
 
         const DEFAULT_APROVADORES_AQF_CFG = {
-            pcm1: { slot: "pcm1", cargoLabel: "PCM (Planejamento 1)", nome: "Kaique Pereira", user: "kaique.pereira", email: "kaique.pereira@cepera.com.br", matchRole: "admin" },
-            pcm2: { slot: "pcm2", cargoLabel: "PCM (Planejamento 2)", nome: "Jhonatan", user: "jhonatan", email: "jhonatan@cepera.com.br", matchRole: "admin" },
-            sup_mecanica: { slot: "sup_mecanica", cargoLabel: "Supervisor Mecânica", nome: "Supervisor Mecânica", user: "", email: "", matchRole: "supervisor mecanica" },
-            sup_eletrica: { slot: "sup_eletrica", cargoLabel: "Supervisor Elétrica", nome: "Supervisor Elétrica", user: "", email: "", matchRole: "supervisor eletrica" },
-            gerente: { slot: "gerente", cargoLabel: "Gerência de Manutenção", nome: "Marcos Pierre", user: "marcos.pierre", email: "marcos.pierre@cepera.com.br", matchRole: "gerente" }
+            pcm1: { id: "pcm1", slot: "pcm1", ativo: true, sistema: true, escopo: "SEMPRE", cargoLabel: "PCM (Planejamento 1)", nome: "Kaique Pereira", user: "kaique.pereira", email: "kaique.pereira@cepera.com.br", matchRole: "admin" },
+            pcm2: { id: "pcm2", slot: "pcm2", ativo: true, sistema: true, escopo: "SEMPRE", cargoLabel: "PCM (Planejamento 2)", nome: "Jhonatan", user: "jhonatan", email: "jhonatan@cepera.com.br", matchRole: "admin" },
+            sup_mecanica: { id: "sup_mecanica", slot: "sup_mecanica", ativo: true, sistema: true, escopo: "MECANICA", cargoLabel: "Supervisor Mecânica", nome: "Supervisor Mecânica", user: "", email: "", matchRole: "supervisor mecanica" },
+            sup_eletrica: { id: "sup_eletrica", slot: "sup_eletrica", ativo: true, sistema: true, escopo: "ELETRICA", cargoLabel: "Supervisor Elétrica", nome: "Supervisor Elétrica", user: "", email: "", matchRole: "supervisor eletrica" },
+            gerente: { id: "gerente", slot: "gerente", ativo: true, sistema: true, escopo: "SEMPRE", cargoLabel: "Gerência de Manutenção", nome: "Marcos Pierre", user: "marcos.pierre", email: "marcos.pierre@cepera.com.br", matchRole: "gerente" }
         };
-        let aprovadoresAqfCfg = JSON.parse(JSON.stringify(DEFAULT_APROVADORES_AQF_CFG));
+        const DEFAULT_APROVADORES_AQF_LISTA = Object.values(DEFAULT_APROVADORES_AQF_CFG).map(x => ({ ...x }));
+        const DEFAULT_GATILHOS_AQF_CFG = {
+            minGraves: 1,
+            minModeradas: 3,
+            minLevesModTotal: 5,
+            minTempoLMMin: 120
+        };
+        let aprovadoresAqfLista = DEFAULT_APROVADORES_AQF_LISTA.map(x => ({ ...x }));
+        let regrasGatilhoAqfCfg = { ...DEFAULT_GATILHOS_AQF_CFG };
+
+        function normalizarGovernancaAqf(raw) {
+            if (!raw || typeof raw !== "object") return;
+            if (Array.isArray(raw.lista) && raw.lista.length) {
+                aprovadoresAqfLista = raw.lista.map((item, idx) => {
+                    const slotId = String(item.slot || item.id || `custom_${idx + 1}`).trim();
+                    const def = DEFAULT_APROVADORES_AQF_CFG[slotId] || {};
+                    return {
+                        id: slotId,
+                        slot: slotId,
+                        ativo: item.ativo !== false,
+                        sistema: Boolean(item.sistema ?? def.sistema),
+                        escopo: ["SEMPRE", "MECANICA", "ELETRICA"].includes(String(item.escopo || "").toUpperCase())
+                            ? String(item.escopo).toUpperCase()
+                            : (def.escopo || "SEMPRE"),
+                        cargoLabel: String(item.cargoLabel || def.cargoLabel || "Aprovador").trim(),
+                        nome: String(item.nome || def.nome || item.cargoLabel || "Aprovador").trim(),
+                        user: String(item.user ?? def.user ?? "").trim(),
+                        email: String(item.email ?? def.email ?? "").trim(),
+                        matchRole: String(item.matchRole ?? def.matchRole ?? "").trim()
+                    };
+                });
+            } else {
+                // Migração automática do formato legado de 5 slots fixos
+                const keysLegado = Object.keys(DEFAULT_APROVADORES_AQF_CFG);
+                if (keysLegado.some(k => raw[k] && typeof raw[k] === "object")) {
+                    aprovadoresAqfLista = keysLegado.map(k => ({
+                        ...DEFAULT_APROVADORES_AQF_CFG[k],
+                        ...(raw[k] && typeof raw[k] === "object" ? raw[k] : {}),
+                        id: k,
+                        slot: k,
+                        ativo: raw[k]?.ativo !== false,
+                        sistema: true,
+                        escopo: raw[k]?.escopo || DEFAULT_APROVADORES_AQF_CFG[k].escopo
+                    }));
+                }
+            }
+            if (raw.gatilhos_aqf && typeof raw.gatilhos_aqf === "object") {
+                regrasGatilhoAqfCfg = {
+                    minGraves: Math.max(1, Number(raw.gatilhos_aqf.minGraves ?? DEFAULT_GATILHOS_AQF_CFG.minGraves)),
+                    minModeradas: Math.max(1, Number(raw.gatilhos_aqf.minModeradas ?? DEFAULT_GATILHOS_AQF_CFG.minModeradas)),
+                    minLevesModTotal: Math.max(2, Number(raw.gatilhos_aqf.minLevesModTotal ?? DEFAULT_GATILHOS_AQF_CFG.minLevesModTotal)),
+                    minTempoLMMin: Math.max(30, Number(raw.gatilhos_aqf.minTempoLMMin ?? DEFAULT_GATILHOS_AQF_CFG.minTempoLMMin))
+                };
+            }
+        }
 
         const SNIPPET_REGRAS_FIRESTORE_MAESTRI = `rules_version = '2';
 service cloud.firestore {
@@ -3349,49 +3509,86 @@ service cloud.firestore {
             return btoa(bin);
         }
 
-        function atualizarBadgesFontesManuaisAqf() {
-            const pDocs = document.getElementById("aqfFonteDocsPill");
-            const pLoc = document.getElementById("aqfFontePastaLocalPill");
-            const pSp = document.getElementById("aqfFonteSpWebhookPill");
-            const btnDes = document.getElementById("btnDesconectarPastaManuaisAqf");
-            const pMail = document.getElementById("aqfEmailWebhookStatusPill");
+        function getStatusPastaLocalConectada() {
+            if (pastaManuaisLocalHandle) {
+                return { conectada: true, nome: pastaManuaisLocalHandle.name, modo: "handle", qtdArquivos: null };
+            }
+            if (pastaManuaisFallbackFiles.length) {
+                return { conectada: true, nome: pastaManuaisFallbackNome || "Pasta Selecionada", modo: "fallback", qtdArquivos: pastaManuaisFallbackFiles.length };
+            }
+            return { conectada: false, nome: "", modo: "", qtdArquivos: 0 };
+        }
 
-            if (pDocs) {
-                const vig = docsAtivosList.filter(d => !d.status || d.status === "vigente").length;
-                pDocs.innerText = `DOCS-ATIVOS: ${vig} doc(s)`;
-            }
-            if (pLoc) {
-                if (pastaManuaisLocalHandle) {
-                    pLoc.className = "px-2.5 py-0.5 rounded-full bg-emerald-100 text-emerald-900 border border-emerald-300 text-[10px] font-extrabold";
-                    pLoc.innerText = `✓ Pasta J: / Local: ${pastaManuaisLocalHandle.name}`;
+        function atualizarBadgesFontesManuaisAqf() {
+            const vig = docsAtivosList.filter(d => !d.status || d.status === "vigente").length;
+            const stPasta = getStatusPastaLocalConectada();
+            const okSp = Boolean((manuaisSpCfg.webhookBuscaUrl || "").trim());
+            const okMail = Boolean((notifAgendaCfg.webhookUrl || "").trim());
+
+            // Sincroniza pills na aba AQF e no Menu Master simultaneamente
+            ["aqfFonteDocsPill", "masterFonteDocsPill"].forEach(id => {
+                const el = document.getElementById(id);
+                if (el) el.innerText = `DOCS-ATIVOS: ${vig} doc(s)`;
+            });
+
+            ["aqfFontePastaLocalPill", "masterFontePastaLocalPill"].forEach(id => {
+                const el = document.getElementById(id);
+                if (!el) return;
+                if (stPasta.conectada) {
+                    el.className = "px-2.5 py-0.5 rounded-full bg-emerald-100 text-emerald-900 border border-emerald-300 text-[10px] font-extrabold";
+                    const extra = stPasta.qtdArquivos ? ` (${stPasta.qtdArquivos} arquivo(s))` : "";
+                    el.innerText = `✓ Pasta J: / Local: ${stPasta.nome}${extra}`;
                 } else {
-                    pLoc.className = "px-2.5 py-0.5 rounded-full bg-slate-100 text-slate-600 border border-slate-200 text-[10px] font-extrabold";
-                    pLoc.innerText = "Pasta J: / OneDrive: Não vinculada";
+                    el.className = "px-2.5 py-0.5 rounded-full bg-slate-100 text-slate-600 border border-slate-200 text-[10px] font-extrabold";
+                    el.innerText = "Pasta J: / OneDrive: Não conectada";
                 }
-            }
-            if (btnDes) {
-                btnDes.hidden = !pastaManuaisLocalHandle;
-                btnDes.classList.toggle("hidden", !pastaManuaisLocalHandle);
-            }
-            if (pSp) {
-                const okSp = Boolean((manuaisSpCfg.webhookBuscaUrl || "").trim());
-                pSp.className = okSp
+            });
+
+            ["btnDesconectarPastaManuaisAqf", "btnDesconectarPastaManuaisMaster"].forEach(id => {
+                const btn = document.getElementById(id);
+                if (btn) {
+                    btn.hidden = !stPasta.conectada;
+                    btn.classList.toggle("hidden", !stPasta.conectada);
+                }
+            });
+
+            ["aqfFonteSpWebhookPill", "masterFonteSpWebhookPill"].forEach(id => {
+                const el = document.getElementById(id);
+                if (!el) return;
+                el.className = okSp
                     ? "px-2.5 py-0.5 rounded-full bg-indigo-100 text-indigo-900 border border-indigo-300 text-[10px] font-extrabold"
                     : "px-2.5 py-0.5 rounded-full bg-slate-100 text-slate-600 border border-slate-200 text-[10px] font-extrabold";
-                pSp.innerText = okSp ? `✓ SharePoint Nuvem (${manuaisSpCfg.pastaBase || "Ativo"})` : "SharePoint (Automate): Não configurado";
-            }
+                el.innerText = okSp ? `✓ SharePoint Nuvem (${manuaisSpCfg.pastaBase || "Ativo"})` : "SharePoint (Automate): Não configurado";
+            });
+
+            const pMail = document.getElementById("aqfEmailWebhookStatusPill");
             if (pMail) {
-                const okMail = Boolean((notifAgendaCfg.webhookUrl || "").trim());
                 pMail.className = okMail
                     ? "px-2.5 py-0.5 rounded-full bg-emerald-100 text-emerald-900 border border-emerald-300 text-[10px] font-extrabold"
                     : "px-2.5 py-0.5 rounded-full bg-amber-50 text-amber-800 border border-amber-200 text-[10px] font-extrabold";
                 pMail.innerText = okMail ? "✓ E-mail Power Automate Conectado (AGENDA-PCM)" : "⚠️ Configure o Webhook de E-mail na AGENDA-PCM";
             }
 
-            const inpUrl = document.getElementById("inputWebhookManuaisSp");
-            const inpPasta = document.getElementById("inputPastaBaseManuaisSp");
-            if (inpUrl && document.activeElement !== inpUrl) inpUrl.value = manuaisSpCfg.webhookBuscaUrl || "";
-            if (inpPasta && document.activeElement !== inpPasta) inpPasta.value = manuaisSpCfg.pastaBase || "Manuais_Maquinas_PCM";
+            // Atualiza pill dinâmica de aprovadores ativos no topo do AQF
+            const pAprov = document.getElementById("aqfResumoAprovadoresAtivosPill");
+            if (pAprov) {
+                const ativos = aprovadoresAqfLista.filter(a => a.ativo !== false);
+                if (!ativos.length) {
+                    pAprov.className = "px-2.5 py-0.5 rounded-full bg-slate-200 text-slate-800 border border-slate-300 text-[10px] font-extrabold";
+                    pAprov.innerText = "🔓 Modo Livre (Sem Trava — 0 aprovadores ativos no Master)";
+                } else {
+                    const nomesCurtos = ativos.map(a => a.nome.split(" ")[0] || a.cargoLabel).slice(0, 4).join(" + ") + (ativos.length > 4 ? ` +${ativos.length - 4}` : "");
+                    pAprov.className = "px-2.5 py-0.5 rounded-full bg-amber-100 text-amber-900 border border-amber-300 text-[10px] font-extrabold";
+                    pAprov.innerText = `Aprovação Ativa (${ativos.length}/${aprovadoresAqfLista.length}): ${nomesCurtos}`;
+                }
+            }
+
+            [["inputWebhookManuaisSp", "inputPastaBaseManuaisSp"], ["masterInputWebhookManuaisSp", "masterInputPastaBaseManuaisSp"]].forEach(([uId, pId]) => {
+                const inpUrl = document.getElementById(uId);
+                const inpPasta = document.getElementById(pId);
+                if (inpUrl && document.activeElement !== inpUrl) inpUrl.value = manuaisSpCfg.webhookBuscaUrl || "";
+                if (inpPasta && document.activeElement !== inpPasta) inpPasta.value = manuaisSpCfg.pastaBase || "Manuais_Maquinas_PCM";
+            });
 
             const cntEl = document.getElementById("aqfAnexosCount");
             if (cntEl) cntEl.innerText = String(anexosManuaisAvulsosAqf.length);
@@ -3416,9 +3613,11 @@ service cloud.firestore {
             atualizarBadgesFontesManuaisAqf();
         };
 
-        window.salvarConfigPonteSharepointAqf = async () => {
-            const webhookBuscaUrl = (document.getElementById("inputWebhookManuaisSp")?.value || "").trim();
-            const pastaBase = (document.getElementById("inputPastaBaseManuaisSp")?.value || "Manuais_Maquinas_PCM").trim();
+        window.salvarConfigPonteSharepointAqf = async (origem = "cacador") => {
+            const uId = origem === "master" ? "masterInputWebhookManuaisSp" : "inputWebhookManuaisSp";
+            const pId = origem === "master" ? "masterInputPastaBaseManuaisSp" : "inputPastaBaseManuaisSp";
+            const webhookBuscaUrl = (document.getElementById(uId)?.value || "").trim();
+            const pastaBase = (document.getElementById(pId)?.value || "Manuais_Maquinas_PCM").trim();
             manuaisSpCfg = { webhookBuscaUrl, pastaBase };
             safeStorage.set("cepera_maestri_manuais_sp", JSON.stringify(manuaisSpCfg));
             try {
@@ -3449,29 +3648,61 @@ service cloud.firestore {
         };
 
         window.conectarPastaManuaisLocalAqf = async () => {
+            const abrirFallbackWebkitDir = () => {
+                const inp = document.getElementById("inputFallbackPastaManuaisAqf");
+                if (inp) {
+                    inp.value = "";
+                    inp.click();
+                } else {
+                    showToast("Use Chrome/Edge no PC ou configure a Ponte SharePoint / botão 📎 Manual.", "info");
+                }
+            };
+
             if (typeof window.showDirectoryPicker !== "function") {
-                showToast("Seu navegador não suporta vínculo direto de pasta local. Use Chrome/Edge no PC ou a Ponte SharePoint / botão 📎 Manual.", "info");
+                abrirFallbackWebkitDir();
                 return;
             }
             try {
                 const handle = await window.showDirectoryPicker({ mode: "read" });
                 pastaManuaisLocalHandle = handle;
+                pastaManuaisFallbackFiles = [];
+                pastaManuaisFallbackNome = "";
                 await idbMaestriSet("dir_handle_manuais", handle);
                 atualizarBadgesFontesManuaisAqf();
                 atualizarPreviaFontesAtivoAqf();
-                showToast(`Pasta "${handle.name}" vinculada! A IA buscará os manuais dela automaticamente ao gerar estudos AQF.`, "success");
+                showToast(`Pasta "${handle.name}" conectada! A IA buscará os manuais dela automaticamente ao gerar estudos AQF.`, "success");
             } catch (err) {
-                if (err?.name !== "AbortError") {
-                    showToast("Não foi possível vincular a pasta selecionada.", "error");
-                }
+                if (err?.name === "AbortError") return;
+                // Fallback transparente se o navegador/iframe bloquear showDirectoryPicker (SecurityError)
+                abrirFallbackWebkitDir();
             }
+        };
+
+        window.onSelecionarPastaFallbackManuaisAqf = (event) => {
+            const todos = Array.from(event?.target?.files || []);
+            const validos = todos.filter(f => /\.(pdf|txt|md)$/i.test(f.name) && f.size <= 15 * 1024 * 1024);
+            if (!validos.length) {
+                if (todos.length) showToast("Nenhum PDF, TXT ou MD (até 15 MB) encontrado na pasta selecionada.", "info");
+                return;
+            }
+            const firstRel = String(validos[0].webkitRelativePath || validos[0].name);
+            const rootName = firstRel.includes("/") ? firstRel.split("/")[0] : "Pasta Local";
+            pastaManuaisLocalHandle = null;
+            pastaManuaisFallbackFiles = validos;
+            pastaManuaisFallbackNome = rootName;
+            atualizarBadgesFontesManuaisAqf();
+            atualizarPreviaFontesAtivoAqf();
+            showToast(`Pasta "${rootName}" conectada (${validos.length} manual(is) indexado(s) para a IA)!`, "success");
         };
 
         window.desconectarPastaManuaisLocalAqf = async () => {
             pastaManuaisLocalHandle = null;
+            pastaManuaisFallbackFiles = [];
+            pastaManuaisFallbackNome = "";
             await idbMaestriSet("dir_handle_manuais", null);
             atualizarBadgesFontesManuaisAqf();
-            showToast("Pasta local de manuais desvinculada.", "info");
+            atualizarPreviaFontesAtivoAqf();
+            showToast("Pasta local de manuais desconectada.", "info");
         };
 
         window.adicionarAnexosManuaisAqf = async (event) => {
@@ -3548,6 +3779,43 @@ service cloud.firestore {
         }
 
         async function buscarManuaisPastaLocalPorAtivo(ativoNome) {
+            const tokens = extrairTokensBuscaAtivo(ativoNome);
+            const naFull = normKey(ativoNome);
+            if (!tokens.length) return [];
+
+            // Modo Fallback Universal (webkitdirectory)
+            if (!pastaManuaisLocalHandle && pastaManuaisFallbackFiles.length) {
+                const hits = [];
+                pastaManuaisFallbackFiles.forEach(file => {
+                    const rel = String(file.webkitRelativePath || file.name);
+                    const hay = normKey(rel);
+                    let score = 0;
+                    tokens.forEach(t => { if (hay.includes(t)) score += (t.length >= 5 ? 3 : 2); });
+                    if (hay.includes(naFull.split(" ")[0] || "")) score += 2;
+                    if (score >= 2) hits.push({ file, nome: file.name, caminho: rel, score });
+                });
+                hits.sort((a, b) => b.score - a.score);
+                const saidaFb = [];
+                let bytesAcumFb = 0;
+                for (const item of hits.slice(0, 3)) {
+                    try {
+                        if (item.file.size > 10 * 1024 * 1024 || (bytesAcumFb + item.file.size) > 15 * 1024 * 1024) continue;
+                        const buf = await item.file.arrayBuffer();
+                        const isTxt = /\.(txt|md)$/i.test(item.nome);
+                        bytesAcumFb += item.file.size;
+                        saidaFb.push({
+                            nome: item.nome,
+                            caminho: item.caminho,
+                            origem: "Pasta J: / Local",
+                            mimeType: isTxt ? "text/plain" : "application/pdf",
+                            base64: isTxt ? null : arrayBufferParaBase64(buf),
+                            textoExtraido: isTxt ? new TextDecoder("utf-8").decode(buf).slice(0, 50000) : ""
+                        });
+                    } catch (_) {}
+                }
+                return saidaFb;
+            }
+
             if (!pastaManuaisLocalHandle) return [];
             try {
                 if (typeof pastaManuaisLocalHandle.queryPermission === "function") {
@@ -3561,9 +3829,6 @@ service cloud.firestore {
                 return [];
             }
 
-            const tokens = extrairTokensBuscaAtivo(ativoNome);
-            const naFull = normKey(ativoNome);
-            if (!tokens.length) return [];
             const encontrados = [];
 
             async function varrerDir(dirHandle, caminhoAtual = "", profundidade = 0) {
@@ -3572,7 +3837,6 @@ service cloud.firestore {
                     const rel = caminhoAtual ? `${caminhoAtual}/${nome}` : nome;
                     if (entry.kind === "directory") {
                         const nDir = normKey(nome);
-                        // Entra se a pasta combinar com algum token ou nos níveis rasos (0..2)
                         if (profundidade <= 2 || tokens.some(t => nDir.includes(t))) {
                             await varrerDir(entry, rel, profundidade + 1);
                         }
@@ -3661,8 +3925,9 @@ service cloud.firestore {
             if (onStatus) onStatus("1/3 Consultando DOCS-ATIVOS interno...");
             addUnique(await buscarManuaisDocsAtivosPorAtivo(ativoNome));
 
-            if (pastaManuaisLocalHandle) {
-                if (onStatus) onStatus(`2/3 Varrendo pasta local "${pastaManuaisLocalHandle.name}"...`);
+            const stPasta = getStatusPastaLocalConectada();
+            if (stPasta.conectada) {
+                if (onStatus) onStatus(`2/3 Varrendo pasta local "${stPasta.nome}"...`);
                 addUnique(await buscarManuaisPastaLocalPorAtivo(ativoNome));
             }
 
@@ -3683,25 +3948,126 @@ service cloud.firestore {
             const el = document.getElementById("aqfPreviaFontesAtivoTxt");
             if (!el) return;
             if (!ativo) {
-                el.innerHTML = "Suba uma planilha ou selecione um ativo para consultar as fontes de manuais disponíveis.";
+                el.innerHTML = "Suba uma planilha ou selecione um ativo para consultar o critério de abertura AQF e as fontes de manuais disponíveis.";
                 return;
             }
+            const baseSel = document.getElementById("cacadorSelectBaseOms")?.value || "historico";
+            const pool = (baseSel !== "visao_atual" && bancoHistoricoOmsMap.size > 0) ? [...bancoHistoricoOmsMap.values()] : omsAuditadas;
+            const omsAt = pool.filter(o => normKey(o.ativo) === normKey(ativo));
+            const crit = avaliarCriterioEstudoAqf(omsAt.length ? omsAt : omsAuditadas.filter(o => normKey(o.ativo) === normKey(ativo)));
+
             const tokens = extrairTokensBuscaAtivo(ativo);
             const docsHit = docsAtivosList.filter(d => (!d.status || d.status === "vigente") && tokens.some(t => normKey(`${d.maquina || ""} ${d.equipamento || ""} ${d.titulo || ""}`).includes(t)));
-            const omsHist = [...bancoHistoricoOmsMap.values()].filter(o => o.ativo === ativo);
-            const omsAtual = omsAuditadas.filter(o => o.ativo === ativo);
-            const totOms = Math.max(omsHist.length, omsAtual.length);
+            const stPasta = getStatusPastaLocalConectada();
             const fontesAtivas = [
                 `DOCS-ATIVOS (${docsHit.length} match)`,
-                pastaManuaisLocalHandle ? `Pasta Local "${pastaManuaisLocalHandle.name}" (ativa)` : null,
+                stPasta.conectada ? `Pasta Local "${stPasta.nome}" (ativa)` : null,
                 (manuaisSpCfg.webhookBuscaUrl || "").trim() ? "SharePoint Nuvem (ativo)" : null,
                 anexosManuaisAvulsosAqf.length ? `${anexosManuaisAvulsosAqf.length} anexo(s) avulso(s)` : null
             ].filter(Boolean).join(" • ");
-            el.innerHTML = `<strong>${escapeHtml(ativo)}</strong>: <strong>${totOms} OM(s)</strong> no histórico • Fontes de manuais prontas: <span class="text-indigo-700 font-extrabold">${escapeHtml(fontesAtivas)}</span>.`;
+
+            const pillCls = crit.codigo === "ALTO_VOLUME_LEVE_MODERADA"
+                ? "bg-amber-100 text-amber-950 border-amber-300"
+                : (crit.elegivel ? "bg-rose-100 text-rose-900 border-rose-300" : "bg-slate-100 text-slate-700 border-slate-300");
+
+            el.innerHTML = `<div class="flex flex-wrap items-center gap-2">
+                <span class="px-2 py-0.5 rounded-full border text-[10px] font-extrabold ${pillCls}">${escapeHtml(crit.badgeCurto)}</span>
+                <span><strong>${escapeHtml(ativo)}</strong> (${omsAt.length} OM(s) • G:${crit.graves} / M:${crit.moderadas} / L:${crit.leves})</span>
+                <span class="text-slate-400">•</span>
+                <span>Manuais: <strong class="text-indigo-700">${escapeHtml(fontesAtivas)}</strong></span>
+            </div>
+            <div class="text-[11px] font-semibold ${crit.codigo === "ALTO_VOLUME_LEVE_MODERADA" ? "text-amber-900" : "text-slate-600"} mt-1">${escapeHtml(crit.justificativa)}</div>`;
         };
 
         // =========================================================================
-        // FLUXO PARALELO DE APROVAÇÃO (2 PCM + SUPERVISOR + GERENTE) + E-MAIL POWER AUTOMATE
+        // MOTOR DE GATILHO AQF (QUEBRAS GRAVES + CONDIÇÃO ESPECIAL ALTO VOLUME L/M)
+        // =========================================================================
+        function avaliarCriterioEstudoAqf(omsDoAtivo = [], cfgOverride = null) {
+            const cfg = { ...DEFAULT_GATILHOS_AQF_CFG, ...(cfgOverride || regrasGatilhoAqfCfg || {}) };
+            const falhas = (omsDoAtivo || []).filter(o => o && (o.categoria === "QUEBRA" || o.categoria === "FALHA OPERACIONAL"));
+            let graves = 0, moderadas = 0, leves = 0, tempoGravesMin = 0, tempoLMMin = 0, tempoTotalMin = 0;
+
+            falhas.forEach(o => {
+                const sv = String(o.severidade || "").toUpperCase();
+                const t = Number(o.tempo_min || 0);
+                tempoTotalMin += t;
+                if (sv === "GRAVE") {
+                    graves++;
+                    tempoGravesMin += t;
+                } else if (sv === "MODERADA") {
+                    moderadas++;
+                    tempoLMMin += t;
+                } else {
+                    leves++;
+                    tempoLMMin += t;
+                }
+            });
+
+            const lmTotal = leves + moderadas;
+            const bateGrave = graves >= cfg.minGraves;
+            const motivosVol = [];
+            if (moderadas >= cfg.minModeradas) motivosVol.push(`${moderadas} quebra(s) MODERADA(s) (limiar ≥ ${cfg.minModeradas})`);
+            if (lmTotal >= cfg.minLevesModTotal) motivosVol.push(`${lmTotal} quebra(s) LEVES/MODERADAS somadas (limiar ≥ ${cfg.minLevesModTotal})`);
+            if (tempoLMMin >= cfg.minTempoLMMin && lmTotal >= 2) motivosVol.push(`${tempoLMMin} min acumulados em LEVES/MODERADAS (limiar ≥ ${cfg.minTempoLMMin} min)`);
+            const bateAltoVolumeLM = motivosVol.length > 0;
+
+            if (bateGrave && bateAltoVolumeLM) {
+                return {
+                    codigo: "GRAVE_E_ALTO_VOLUME",
+                    elegivel: true,
+                    prioridade: 1,
+                    graves, moderadas, leves, lmTotal, tempoGravesMin, tempoLMMin, tempoTotalMin,
+                    badgeCurto: `🔴 QUEBRA GRAVE (${graves}) + ALTO VOLUME L/M (${lmTotal})`,
+                    tituloBanner: `Gatilho Duplo: ${graves} Quebra(s) GRAVE(s) + Grande Volume de Leves/Moderadas (${moderadas} Mod. + ${leves} Leve(s))`,
+                    justificativa: `Critério principal atingido por ${graves} quebra(s) GRAVE(s) (${tempoGravesMin} min) somado ao grande volume recorrente de leves/moderadas (${motivosVol.join("; ")}).`
+                };
+            }
+            if (bateGrave) {
+                return {
+                    codigo: "QUEBRA_GRAVE",
+                    elegivel: true,
+                    prioridade: 1,
+                    graves, moderadas, leves, lmTotal, tempoGravesMin, tempoLMMin, tempoTotalMin,
+                    badgeCurto: `🔴 QUEBRA GRAVE (${graves})`,
+                    tituloBanner: `Gatilho Principal: Estudo Aberto por Quebra(s) GRAVE(s) (${graves} grave(s) • ${tempoGravesMin} min)`,
+                    justificativa: `Critério principal atingido: ${graves} quebra(s) classificada(s) como GRAVE (${tempoGravesMin} min de parada severa). O estudo prioriza a causa raiz das quebras graves.`
+                };
+            }
+            if (bateAltoVolumeLM) {
+                return {
+                    codigo: "ALTO_VOLUME_LEVE_MODERADA",
+                    elegivel: true,
+                    prioridade: 2,
+                    graves, moderadas, leves, lmTotal, tempoGravesMin, tempoLMMin, tempoTotalMin,
+                    badgeCurto: `🟠 ALTO VOLUME: ${lmTotal} LEVES/MODERADAS`,
+                    tituloBanner: `CONDIÇÃO ESPECIAL — ESTUDO ABERTO POR GRANDE VOLUME DE QUEBRAS LEVES/MODERADAS (0 Graves • ${moderadas} Moderada(s) + ${leves} Leve(s) • ${tempoLMMin} min)`,
+                    justificativa: `CONDIÇÃO ESPECIAL DE GRANDE VOLUME: não houve quebra GRAVE isolada (0 graves), porém o equipamento acumulou volume crítico de falhas leves/moderadas (${motivosVol.join("; ")}), justificando Estudo AQF preventivo antes que evoluam para quebra grave.`
+                };
+            }
+            return {
+                codigo: "SOB_DEMANDA",
+                elegivel: false,
+                prioridade: 3,
+                graves, moderadas, leves, lmTotal, tempoGravesMin, tempoLMMin, tempoTotalMin,
+                badgeCurto: `⚪ ABAIXO DO GATILHO (SOB DEMANDA)`,
+                tituloBanner: `Estudo Sob Demanda (0 Graves • ${moderadas} Mod. • ${leves} Leve(s) — abaixo do critério automático)`,
+                justificativa: `Ativo sem quebra GRAVE e abaixo do limiar de grande volume (limiares: ≥ ${cfg.minGraves} Grave, ou ≥ ${cfg.minModeradas} Moderadas, ou ≥ ${cfg.minLevesModTotal} L/M, ou ≥ ${cfg.minTempoLMMin} min L/M). Estudo disponível sob demanda do PCM.`
+            };
+        }
+
+        function construirCriterioAberturaDeSeveridades(sev = {}, tempoTotalMin = 0) {
+            const graves = Number(sev.GRAVE || 0);
+            const moderadas = Number(sev.MODERADA || 0);
+            const leves = Number(sev.LEVE || 0);
+            const fakeOms = [];
+            for (let i = 0; i < graves; i++) fakeOms.push({ categoria: "QUEBRA", severidade: "GRAVE", tempo_min: graves ? Math.round(tempoTotalMin / Math.max(1, graves + moderadas + leves)) : 0 });
+            for (let i = 0; i < moderadas; i++) fakeOms.push({ categoria: "QUEBRA", severidade: "MODERADA", tempo_min: Math.round(tempoTotalMin / Math.max(1, graves + moderadas + leves)) });
+            for (let i = 0; i < leves; i++) fakeOms.push({ categoria: "QUEBRA", severidade: "LEVE", tempo_min: Math.round(tempoTotalMin / Math.max(1, graves + moderadas + leves)) });
+            return avaliarCriterioEstudoAqf(fakeOms);
+        }
+
+        // =========================================================================
+        // FLUXO PARALELO DE APROVAÇÃO DINÂMICO (INTERRUPTORES MASTER) + E-MAIL POWER AUTOMATE
         // =========================================================================
         function resolverEmailAprovadorFallback(slotObj) {
             const emailCfg = String(slotObj?.email || "").trim();
@@ -3728,34 +4094,25 @@ service cloud.firestore {
         function obterAprovadoresExigidosPorDisciplina(disciplina = "MECANICA") {
             const disc = String(disciplina || "MECANICA").toUpperCase();
             const slots = [];
-            const pushSlot = (key) => {
-                const base = aprovadoresAqfCfg[key] || DEFAULT_APROVADORES_AQF_CFG[key];
-                if (!base) return;
+            (aprovadoresAqfLista || []).forEach(base => {
+                if (!base || base.ativo === false) return; // Respeita o interruptor ON/OFF do Menu Master!
+                const esc = String(base.escopo || "SEMPRE").toUpperCase();
+                if (esc === "MECANICA" && disc === "ELETRICA") return;
+                if (esc === "ELETRICA" && disc === "MECANICA") return;
                 slots.push({
-                    slot: base.slot || key,
-                    cargoLabel: base.cargoLabel || key,
-                    nome: base.nome || base.cargoLabel,
+                    slot: base.slot || base.id,
+                    cargoLabel: base.cargoLabel || base.nome || "Aprovador",
+                    nome: base.nome || base.cargoLabel || "Aprovador",
                     user: base.user || "",
                     email: resolverEmailAprovadorFallback(base),
                     matchRole: base.matchRole || "",
+                    escopo: esc,
                     status: "PENDENTE", // PENDENTE | APROVADO | AJUSTE
                     assinado_por: "",
                     assinado_em: "",
                     parecer: ""
                 });
-            };
-            // Sempre exige os 2 PCMs + Supervisor(es) conforme demanda + Gerente Marcos Pierre
-            pushSlot("pcm1");
-            pushSlot("pcm2");
-            if (disc === "ELETRICA") {
-                pushSlot("sup_eletrica");
-            } else if (disc === "MULTIDISCIPLINAR") {
-                pushSlot("sup_mecanica");
-                pushSlot("sup_eletrica");
-            } else {
-                pushSlot("sup_mecanica");
-            }
-            pushSlot("gerente");
+            });
             return slots;
         }
 
@@ -3764,13 +4121,17 @@ service cloud.firestore {
             if (isAdminMasterAtivo()) return true;
             const uUser = normKey(user.user || "");
             const uNome = normKey(user.nome || "");
+            const uEmail = normKey(user.email || "");
             const uRole = normKey(user.role || "");
             const sUser = normKey(slotObj.user || "");
             const sNome = normKey(slotObj.nome || "");
+            const sEmail = normKey(slotObj.email || "");
             const sRole = normKey(slotObj.matchRole || "");
 
             if (sUser && uUser && uUser === sUser) return true;
+            if (sEmail && uEmail && uEmail === sEmail) return true;
             if (sNome && uNome) {
+                if (uNome === sNome) return true;
                 const firstSlot = sNome.split(" ")[0];
                 if (firstSlot && firstSlot.length >= 4 && uNome.includes(firstSlot)) return true;
             }
@@ -3778,7 +4139,6 @@ service cloud.firestore {
             if (slotObj.slot === "sup_eletrica" && uRole.includes("supervisor") && uRole.includes("eletr")) return true;
             if (slotObj.slot === "gerente" && uRole === "gerente") return true;
             if ((slotObj.slot === "pcm1" || slotObj.slot === "pcm2") && (uRole === "admin" || uRole.includes("pcm"))) {
-                // Evita que o mesmo login assine os dois slots PCM se o nome específico do outro slot não bater
                 if (!sUser && !sNome) return true;
                 const firstS = sNome.split(" ")[0];
                 if (!firstS || uNome.includes(firstS)) return true;
@@ -3789,30 +4149,40 @@ service cloud.firestore {
 
         function calcularStatusAprovacaoEstudo(est) {
             const lista = Array.isArray(est?.aprovadores) ? est.aprovadores : [];
-            if (!lista.length) return { status: "EM_ANALISE_APROVACAO", aprovados: 0, total: 4, pendentes: [], ajustes: [], liberado: false };
+            if (!lista.length) {
+                if (est?.modo_livre_aprovacao) {
+                    return { status: "APROVADO", aprovados: 0, total: 0, pendentes: [], ajustes: [], liberado: true, modoLivre: true };
+                }
+                return { status: "EM_ANALISE_APROVACAO", aprovados: 0, total: 0, pendentes: [], ajustes: [], liberado: false, modoLivre: false };
+            }
             const aprovados = lista.filter(a => a.status === "APROVADO").length;
             const ajustes = lista.filter(a => a.status === "AJUSTE");
             const pendentes = lista.filter(a => a.status !== "APROVADO");
             let status = "EM_ANALISE_APROVACAO";
             if (ajustes.length > 0) status = "AJUSTE_SOLICITADO";
             else if (aprovados === lista.length && lista.length > 0) status = "APROVADO";
-            return { status, aprovados, total: lista.length, pendentes, ajustes, liberado: status === "APROVADO" };
+            return { status, aprovados, total: lista.length, pendentes, ajustes, liberado: status === "APROVADO", modoLivre: false };
         }
 
         function gerarHtmlEmailNotificacaoAqf(est, eventoTipo = "novo_estudo", infoExtra = {}) {
             const st = calcularStatusAprovacaoEstudo(est);
             const rae = est.rae || {};
+            const crit = est.criterio_abertura || construirCriterioAberturaDeSeveridades(rae.severidades, rae.tempo_total_parado_min);
             const acoes = Array.isArray(est.plano_acao) ? est.plano_acao : [];
             const melhorias = Array.isArray(est.sugestoes_melhorias) ? est.sugestoes_melhorias : [];
             const agoraStr = new Date().toLocaleString("pt-BR", { day: "2-digit", month: "2-digit", year: "numeric", hour: "2-digit", minute: "2-digit" });
 
             const tema = eventoTipo === "aprovado"
-                ? { borda: "#10b981", badgeBg: "#10b981", badgeTxt: "✓ 100% APROVADO", bannerBg: "#ecfdf5", bannerBorder: "#a7f3d0", bannerColor: "#065f46", icone: "🚀", titulo: "Estudo AQF Aprovado — Plano de Ação Liberado!", sub: "Todas as assinaturas paralelas (2 PCM + Supervisão + Gerência) foram concluídas. Os botões de envio para Preventivas, Rotas e Agenda estão liberados." }
+                ? { borda: "#10b981", badgeBg: "#10b981", badgeTxt: "✓ 100% APROVADO", bannerBg: "#ecfdf5", bannerBorder: "#a7f3d0", bannerColor: "#065f46", icone: "🚀", titulo: "Estudo AQF Aprovado — Plano de Ação Liberado!", sub: "Todas as assinaturas paralelas configuradas foram concluídas. Os botões de envio para Preventivas, Rotas e Agenda estão liberados." }
                 : eventoTipo === "ajuste"
                     ? { borda: "#e11d48", badgeBg: "#e11d48", badgeTxt: "↩️ AJUSTE SOLICITADO", bannerBg: "#fef2f2", bannerBorder: "#fecaca", bannerColor: "#991b1b", icone: "⚠️", titulo: "Ajuste Solicitado no Estudo AQF", sub: `${infoExtra.autor || "Aprovador"} solicitou revisão: "${infoExtra.parecer || "Verificar plano de ação e detalhes técnicos"}"` }
                     : eventoTipo === "lembrete"
                         ? { borda: "#f59e0b", badgeBg: "#f59e0b", badgeTxt: "🔔 LEMBRETE DE APROVAÇÃO", bannerBg: "#fffbeb", bannerBorder: "#fde68a", bannerColor: "#92400e", icone: "⏰", titulo: "Assinatura Pendente em Estudo AQF", sub: `O estudo técnico aguarda sua revisão e assinatura paralela (${st.aprovados}/${st.total} concluídas).` }
                         : { borda: "#0284c7", badgeBg: "#0284c7", badgeTxt: "📋 NOVO ESTUDO EM ANÁLISE", bannerBg: "#f0f9ff", bannerBorder: "#bae6fd", bannerColor: "#0369a1", icone: "🔬", titulo: "Novo Estudo AQF Gerado — Aguardando Aprovação", sub: "Um estudo completo de Análise de Quebra e Falha foi gerado pela IA + Manuais e aguarda validação paralela para liberação das ações." };
+
+            const critBg = crit.codigo === "ALTO_VOLUME_LEVE_MODERADA" ? "#fff7ed" : (crit.elegivel ? "#fef2f2" : "#f8fafc");
+            const critBorder = crit.codigo === "ALTO_VOLUME_LEVE_MODERADA" ? "#fdba74" : (crit.elegivel ? "#fca5a5" : "#cbd5e1");
+            const critColor = crit.codigo === "ALTO_VOLUME_LEVE_MODERADA" ? "#9a3412" : (crit.elegivel ? "#991b1b" : "#334155");
 
             const linhasAprov = (est.aprovadores || []).map(ap => {
                 const ic = ap.status === "APROVADO" ? "✅" : (ap.status === "AJUSTE" ? "❌" : "⏳");
@@ -3848,6 +4218,12 @@ service cloud.firestore {
                     <td style="width:28px;vertical-align:middle;font-size:18px;">${tema.icone}</td>
                     <td style="vertical-align:middle;font-size:12px;font-weight:700;color:${tema.bannerColor};line-height:1.45;">${escapeHtml(tema.sub)}</td>
                 </tr></table>
+            </div>
+
+            <div style="background:${critBg};border:1px solid ${critBorder};border-radius:12px;padding:10px 14px;margin:12px 24px 0 24px;">
+                <div style="font-size:10px;font-weight:800;color:${critColor};text-transform:uppercase;">Motivo / Critério de Abertura do Estudo</div>
+                <div style="font-size:12px;font-weight:800;color:${critColor};margin-top:2px;">${escapeHtml(crit.tituloBanner)}</div>
+                <div style="font-size:11px;color:#334155;margin-top:3px;line-height:1.4;">${escapeHtml(crit.justificativa)}</div>
             </div>
 
             <div style="margin:16px 24px 0 24px;">
@@ -3892,11 +4268,15 @@ service cloud.firestore {
         async function enviarEmailNotificacaoEstudoAqf(est, eventoTipo = "novo_estudo", infoExtra = {}) {
             const url = (notifAgendaCfg.webhookUrl || "").trim();
             const listaSlots = est.aprovadores || [];
+            if (!listaSlots.length && est.modo_livre_aprovacao) {
+                return { ok: false, motivo: "modo_livre_sem_aprovadores" };
+            }
             let alvos = [];
             if (eventoTipo === "lembrete") {
                 alvos = listaSlots.filter(a => a.status !== "APROVADO");
             } else if (eventoTipo === "ajuste") {
-                alvos = listaSlots.filter(a => a.slot === "pcm1" || a.slot === "pcm2");
+                const pcms = listaSlots.filter(a => a.slot === "pcm1" || a.slot === "pcm2" || normKey(a.cargoLabel || "").includes("pcm"));
+                alvos = pcms.length ? pcms : listaSlots;
             } else {
                 alvos = listaSlots;
             }
@@ -3910,7 +4290,8 @@ service cloud.firestore {
             const prefixo = eventoTipo === "aprovado" ? "[APROVADO • AQF]" : (eventoTipo === "ajuste" ? "[AJUSTE SOLICITADO • AQF]" : (eventoTipo === "lembrete" ? "[LEMBRETE APROVAÇÃO • AQF]" : "[APROVAÇÃO PENDENTE • AQF]"));
             const assunto = `${prefixo} Estudo AQF — ${est.ativo} (${est.disciplina || "MECANICA"})`;
             const corpoHtml = gerarHtmlEmailNotificacaoAqf(est, eventoTipo, infoExtra);
-            const corpoTexto = `${assunto}\nAtivo: ${est.ativo}\nCausa Raiz: ${est.cinco_porques?.causa_raiz || est.causa_raiz || ""}\nAcesse o Portal Central PCM → Estudos AQF & Aprovações para revisar e assinar.`;
+            const crit = est.criterio_abertura || construirCriterioAberturaDeSeveridades(est.rae?.severidades, est.rae?.tempo_total_parado_min);
+            const corpoTexto = `${assunto}\nAtivo: ${est.ativo}\nMotivo de Abertura: ${crit.tituloBanner}\nCausa Raiz: ${est.cinco_porques?.causa_raiz || est.causa_raiz || ""}\nAcesse o Portal Central PCM → Estudos AQF & Aprovações para revisar e assinar.`;
 
             if (!url || typeof fetch !== "function") {
                 return { ok: false, motivo: "sem_webhook", para, assunto };
@@ -3955,6 +4336,9 @@ service cloud.firestore {
                     resumo_executivo: est.rae_resumo || ""
                 };
             }
+            if (!est.criterio_abertura) {
+                est.criterio_abertura = construirCriterioAberturaDeSeveridades(est.rae?.severidades, est.rae?.tempo_total_parado_min);
+            }
             if (!Array.isArray(est.plano_acao) && Array.isArray(est.propostas)) {
                 est.plano_acao = est.propostas.map((p, i) => ({
                     id: p.id || `acao_${i + 1}`,
@@ -3975,8 +4359,12 @@ service cloud.firestore {
             }
             if (!Array.isArray(est.plano_acao)) est.plano_acao = [];
             if (!Array.isArray(est.sugestoes_melhorias)) est.sugestoes_melhorias = [];
-            if (!Array.isArray(est.aprovadores) || !est.aprovadores.length) {
-                est.aprovadores = obterAprovadoresExigidosPorDisciplina(est.disciplina || est.equipe || "MECANICA");
+            if (!Array.isArray(est.aprovadores)) {
+                est.aprovadores = est.modo_livre_aprovacao ? [] : obterAprovadoresExigidosPorDisciplina(est.disciplina || est.equipe || "MECANICA");
+            } else if (!est.aprovadores.length && !est.modo_livre_aprovacao) {
+                const exig = obterAprovadoresExigidosPorDisciplina(est.disciplina || est.equipe || "MECANICA");
+                if (exig.length) est.aprovadores = exig;
+                else est.modo_livre_aprovacao = true;
             }
             return est;
         }
@@ -3990,10 +4378,20 @@ service cloud.firestore {
             const falhas = omsFallback.filter(o => o.categoria === "QUEBRA" || o.categoria === "FALHA OPERACIONAL");
             const baseFalhas = falhas.length ? falhas : omsFallback;
 
+            const criterioAbertura = avaliarCriterioEstudoAqf(omsFallback);
+            const falhasGraves = falhas.filter(o => String(o.severidade || "").toUpperCase() === "GRAVE");
+
             const tempoTotalMin = baseFalhas.reduce((s, o) => s + Number(o.tempo_min || 0), 0);
             const mttrMin = baseFalhas.length ? Math.round((tempoTotalMin / baseFalhas.length) * 10) / 10 : 0;
-            const ordenadasTempo = [...baseFalhas].sort((a, b) => Number(b.tempo_min || 0) - Number(a.tempo_min || 0));
-            const maiorParadaMin = ordenadasTempo.length ? Number(ordenadasTempo[0].tempo_min || 0) : 0;
+            const ordenadasTempo = [...baseFalhas].sort((a, b) => {
+                // Prioriza GRAVES no topo quando o critério principal for Quebra Grave, depois maior tempo
+                const pA = String(a.severidade || "").toUpperCase() === "GRAVE" ? 1 : 0;
+                const pB = String(b.severidade || "").toUpperCase() === "GRAVE" ? 1 : 0;
+                if (criterioAbertura.graves > 0 && pB !== pA) return pB - pA;
+                return Number(b.tempo_min || 0) - Number(a.tempo_min || 0);
+            });
+            const ordenadasPorDuracao = [...baseFalhas].sort((a, b) => Number(b.tempo_min || 0) - Number(a.tempo_min || 0));
+            const maiorParadaMin = ordenadasPorDuracao.length ? Number(ordenadasPorDuracao[0].tempo_min || 0) : 0;
 
             const sev = { LEVE: 0, MODERADA: 0, GRAVE: 0 };
             baseFalhas.forEach(o => {
@@ -4002,12 +4400,13 @@ service cloud.firestore {
             });
 
             const eqCont = { MECANICA: 0, ELETRICA: 0 };
-            baseFalhas.forEach(o => {
+            const baseDisc = falhasGraves.length ? falhasGraves : baseFalhas;
+            baseDisc.forEach(o => {
                 const eq = String(o.equipe || "").toUpperCase();
                 if (eq.includes("ELETR")) eqCont.ELETRICA++;
                 else eqCont.MECANICA++;
             });
-            const disciplinaAuto = (eqCont.MECANICA > 0 && eqCont.ELETRICA > 0 && Math.min(eqCont.MECANICA, eqCont.ELETRICA) / Math.max(1, baseFalhas.length) >= 0.25)
+            const disciplinaAuto = (eqCont.MECANICA > 0 && eqCont.ELETRICA > 0 && Math.min(eqCont.MECANICA, eqCont.ELETRICA) / Math.max(1, baseDisc.length) >= 0.25)
                 ? "MULTIDISCIPLINAR"
                 : (eqCont.ELETRICA > eqCont.MECANICA ? "ELETRICA" : "MECANICA");
 
@@ -4018,13 +4417,15 @@ service cloud.firestore {
             return {
                 omsAtivo: omsFallback,
                 falhas: ordenadasTempo,
+                falhasGraves,
+                criterioAbertura,
                 tempoTotalMin,
                 mttrMin,
                 mtbfH,
                 maiorParadaMin,
                 sev,
                 disciplinaAuto,
-                top5: ordenadasTempo.slice(0, 5).map(o => ({
+                top5: ordenadasPorDuracao.slice(0, 5).map(o => ({
                     om: String(o.om),
                     tempo_min: Number(o.tempo_min || 0),
                     severidade: o.severidade || "NA",
@@ -4052,18 +4453,25 @@ service cloud.firestore {
         }
 
         function construirEstudoAqfFallbackRico(ativoNome, stats, manuaisEncontrados, disciplinaFinal) {
-            const textoConcat = normKey(stats.falhas.map(o => `${o.problema} ${o.servico}`).join(" "));
+            const crit = stats.criterioAbertura || avaliarCriterioEstudoAqf(stats.omsAtivo);
+            const falhasFoco = crit.graves > 0 && stats.falhasGraves?.length ? stats.falhasGraves : stats.falhas;
+            const textoConcat = normKey(falhasFoco.map(o => `${o.problema} ${o.servico}`).join(" "));
             const comps = ["faca", "mordente", "bico", "pistao", "rolamento", "correia", "selo", "estator", "pedra", "motor", "inversor", "rele", "resistencia", "sensor", "fotocelula", "valvula", "impressora", "esteira", "cilindro", "redutor"];
             const compsEncontrados = comps.filter(c => textoConcat.includes(c)).slice(0, 3);
             const compDom = (compsEncontrados[0] || "conjunto principal").toUpperCase();
-            const top1 = stats.top5[0] || { om: "—", problema: "Falha recorrente", servico: "Intervenção corretiva", tempo_min: 0 };
+            const top1 = (crit.graves > 0 && stats.falhasGraves?.length ? stats.falhasGraves[0] : stats.top5[0]) || { om: "—", problema: "Falha recorrente", servico: "Intervenção corretiva", tempo_min: 0 };
             const somaTop5 = stats.top5.reduce((s, x) => s + Number(x.tempo_min || 0), 0);
             const pctTop5 = stats.tempoTotalMin > 0 ? Math.round((somaTop5 / stats.tempoTotalMin) * 100) : 0;
             const idEst = `aqf_${normKey(ativoNome).replace(/[^a-z0-9]+/g, "_").slice(0, 26)}_${Date.now().toString(36).slice(-4)}`;
             const perSug = stats.mtbfH < 140 ? "Semanal" : (stats.mtbfH < 300 ? "Quinzenal" : "Mensal");
 
-            const causaRaiz = `Desgaste acelerado e perda de regulagem no subconjunto ${compDom} de ${ativoNome} (Classe ${stats.criticidade_linha}), sem bloqueio preventivo/preditivo calibrado para o MTBF observado de ${stats.mtbfH}h.`;
+            const isAltoVolumeLM = crit.codigo === "ALTO_VOLUME_LEVE_MODERADA";
+            const causaRaiz = isAltoVolumeLM
+                ? `[CONDIÇÃO ESPECIAL — ALTO VOLUME DE QUEBRAS LEVES/MODERADAS] Acúmulo repetitivo de ${crit.lmTotal} falha(s) leves/moderadas (${crit.tempoLMMin} min sem quebra grave isolada) no subconjunto ${compDom} de ${ativoNome} (Classe ${stats.criticidade_linha}), indicando degradação crônica e ausência de bloqueio preventivo para o MTBF de ${stats.mtbfH}h.`
+                : `Desgaste acelerado e perda funcional severa (${crit.graves} quebra(s) GRAVE(s)) no subconjunto ${compDom} de ${ativoNome} (Classe ${stats.criticidade_linha}), sem bloqueio preventivo/preditivo calibrado para o MTBF observado de ${stats.mtbfH}h.`;
             const eqPadrao = disciplinaFinal === "ELETRICA" ? "ELETRICA" : "MECANICA";
+            const aprovIniciais = obterAprovadoresExigidosPorDisciplina(disciplinaFinal);
+            const modoLivre = aprovIniciais.length === 0;
 
             return {
                 id: idEst,
@@ -4075,6 +4483,7 @@ service cloud.firestore {
                 componente_foco: compDom,
                 disciplina: disciplinaFinal,
                 equipe: eqPadrao,
+                criterio_abertura: crit,
                 gerado_por_modelo: "Motor Técnico Local PCM (Configure a chave Gemini no Admin Master para leitura profunda dos manuais PDF)",
                 gerado_em: new Date().toISOString(),
                 criado_por: usuarioLogado?.nome || "Engenharia PCM",
@@ -4096,7 +4505,9 @@ service cloud.firestore {
                     mtbf_h: stats.mtbfH,
                     maior_parada_min: stats.maiorParadaMin,
                     severidades: stats.sev,
-                    resumo_executivo: `Ativo Classe ${stats.criticidade_linha} (${ativoNome}) acumulou ${stats.omsAtivo.length} OM(s) totais e ${stats.falhas.length} falha(s) (QUEBRA/FALHA OPERACIONAL), somando ${stats.tempoTotalMin} min de parada (MTTR = ${stats.mttrMin} min • Maior parada = ${stats.maiorParadaMin} min).`
+                    resumo_executivo: isAltoVolumeLM
+                        ? `⚠️ ESTUDO ABERTO POR CONDIÇÃO ESPECIAL DE GRANDE VOLUME (0 quebras GRAVES): o ativo Classe ${stats.criticidade_linha} (${ativoNome}) acumulou ${crit.moderadas} quebra(s) MODERADA(s) e ${crit.leves} LEVE(s) (${crit.tempoLMMin} min acumulados; MTTR = ${stats.mttrMin} min), exigindo ação estruturada para cortar reincidência antes que evolua para parada grave.`
+                        : `🔴 ESTUDO PRIORITÁRIO POR QUEBRA GRAVE: o ativo Classe ${stats.criticidade_linha} (${ativoNome}) registrou ${crit.graves} quebra(s) GRAVE(s) em ${stats.falhas.length} falha(s) totais (${stats.omsAtivo.length} OMs), somando ${stats.tempoTotalMin} min de parada (MTTR = ${stats.mttrMin} min • Maior parada = ${stats.maiorParadaMin} min).`
                 },
                 ishikawa_6m: {
                     MAQUINA: `Falhas recorrentes concentradas em ${compsEncontrados.length ? compsEncontrados.join(", ").toUpperCase() : compDom}, com maior parada na OM #${top1.om} (${top1.tempo_min} min: ${top1.problema}).`,
@@ -4239,8 +4650,10 @@ service cloud.firestore {
                     ]
                 },
                 anexo_falhas: stats.anexoFalhas,
-                aprovadores: obterAprovadoresExigidosPorDisciplina(disciplinaFinal),
-                status_aprovacao: "EM_ANALISE_APROVACAO",
+                aprovadores: aprovIniciais,
+                modo_livre_aprovacao: modoLivre,
+                status_aprovacao: modoLivre ? "APROVADO" : "EM_ANALISE_APROVACAO",
+                aprovado_em: modoLivre ? new Date().toISOString() : "",
                 causa_raiz: causaRaiz
             };
         }
@@ -4248,6 +4661,7 @@ service cloud.firestore {
         async function gerarEstudoAqfCompletoComIA(ativoNome, opcoes = {}) {
             const usarHist = opcoes.usarHistoricoCompleto !== false;
             const stats = computarEstatisticasExatasAtivoAqf(ativoNome, usarHist);
+            const crit = stats.criterioAbertura || avaliarCriterioEstudoAqf(stats.omsAtivo);
             const discSolic = String(opcoes.disciplina || "AUTO").toUpperCase();
             const disciplinaFinal = discSolic === "AUTO" ? stats.disciplinaAuto : discSolic;
 
@@ -4284,27 +4698,39 @@ service cloud.firestore {
                         }
                     }
 
+                    const diretrizCriterio = crit.codigo === "ALTO_VOLUME_LEVE_MODERADA"
+                        ? `⚠️ ATENÇÃO CRÍTICA — CONDIÇÃO ESPECIAL DE ABERTURA (GRANDE VOLUME DE QUEBRAS LEVES/MODERADAS):
+Este estudo NÃO foi aberto por uma quebra GRAVE isolada (há 0 quebras GRAVES), mas sim pela CONDIÇÃO ESPECIAL DE GRANDE VOLUME / RECORRÊNCIA (${crit.moderadas} moderadas + ${crit.leves} leves = ${crit.lmTotal} falhas, ${crit.tempoLMMin} min acumulados).
+DEIXE ISSO EXPLÍCITO LOGO NO INÍCIO DO RESUMO EXECUTIVO DO RAE, NOS 5 PORQUÊS E NA INTERPRETAÇÃO DO MTTR: explique claramente que o gatilho foi o GRANDE VOLUME/RECORRÊNCIA de quebras leves e moderadas e foque o plano de ação em eliminar a causa crônica dessas falhas repetitivas antes que escalem para uma quebra grave.`
+                        : crit.graves > 0
+                            ? `🔴 FOCO PRINCIPAL — QUEBRAS GRAVES (${crit.graves} GRAVE(s) • ${crit.tempoGravesMin} min):
+Os estudos AQF da Cepêra são feitos prioritariamente em cima das QUEBRAS GRAVES. Concentre os 5 Porquês, Ishikawa e as ações principais do Plano 5W2H nas falhas classificadas como GRAVE (usando as leves/moderadas como sinais precursores/recorrências de apoio).`
+                            : `ℹ️ ESTUDO SOB DEMANDA: Não há quebra GRAVE e o volume de leves/moderadas está abaixo do limiar automático; faça a análise técnica honesta baseada nas ordens disponíveis e deixe claro esse contexto no resumo executivo.`;
+
                     const promptAqf = `Você é Engenheiro Sênior de Confiabilidade e PCM Industrial da Cepêra Alimentos (Norma EN 13306 / RCM / AQF).
 Gere um ESTUDO AQF EXTREMAMENTE COMPLETO, TÉCNICO E PROFUNDO para o ativo "${ativoNome}" (${stats.setor}, Linha Classe ${stats.criticidade_linha}), no padrão ouro executivo de engenharia de manutenção.
 
+${diretrizCriterio}
+
 DADOS REAIS CONSOLIDADOS DO ERP (NÃO INVENTE NÚMEROS — USE ESTES VALORES EXATOS):
 - Alvo: ${ativoNome}
+- Critério de Abertura: ${crit.tituloBanner}
 - OMs citando o alvo: ${stats.omsAtivo.length}
 - Falhas (QUEBRA / FALHA OPERACIONAL): ${stats.falhas.length}
 - Tempo total parado: ${stats.tempoTotalMin} minutos
 - MTTR: ${stats.mttrMin} minutos | MTBF estimado: ${stats.mtbfH} horas | Maior parada: ${stats.maiorParadaMin} minutos
-- Severidades: LEVE=${stats.sev.LEVE}, MODERADA=${stats.sev.MODERADA}, GRAVE=${stats.sev.GRAVE}
+- Severidades: GRAVE=${stats.sev.GRAVE} (${crit.tempoGravesMin} min), MODERADA=${stats.sev.MODERADA}, LEVE=${stats.sev.LEVE} (L+M=${crit.tempoLMMin} min)
 - Status Rota / Obsolescência: ${stats.status_rota} | Risco obsolescência: ${stats.risco_obsolescencia ? "SIM" : "NÃO"}
 - Manuais anexados/encontrados (${manuais.length}): ${manuais.map(m => `${m.nome} (${m.origem})`).join("; ") || "Nenhum manual PDF anexado — use conhecimento técnico de especialista marcando 'CONHECIMENTO DE REFERÊNCIA — validar antes de aplicar'"}
 
-LISTA DE ORDENS DE FALHA DO ATIVO:
+LISTA DE ORDENS DE FALHA DO ATIVO (GRAVES PRIMEIRO):
 ${resumoFalhasPrompt || "(Sem falhas classificadas — analisar as OMs gerais do ativo)"}
 
 ${textosManuais ? `TRECHOS TEXTUAIS DOS MANUAIS:\n${textosManuais}` : ""}
 
 REGRAS RIGOROSAS DE ENGENHARIA:
 1. ISHIKAWA 6M (MAQUINA, MAO_DE_OBRA, MATERIAL, METODO, MEDICAO, MEIO_AMBIENTE): Baseie-se estritamente nas evidências das OMs. Se um M não tiver evidência real nas ordens, escreva "Sem evidências nas ordens." (honestidade técnica!).
-2. 5 PORQUÊS: Identifique a FALHA DOMINANTE real. Só avance nos porquês onde há evidência factual; se faltar evidência, finalize com "[EVIDÊNCIA INSUFICIENTE]" e sintetize a CAUSA RAIZ técnica.
+2. 5 PORQUÊS: Identifique a FALHA DOMINANTE real (priorizando quebras GRAVES; ou o padrão recorrente se aberto por Grande Volume de Leves/Moderadas). Só avance nos porquês onde há evidência factual; se faltar evidência, finalize com "[EVIDÊNCIA INSUFICIENTE]" e sintetize a CAUSA RAIZ técnica.
 3. INTERPRETAÇÃO DO MTTR: Calcule o peso Pareto das Top 5 paradas, identifique os subconjuntos que consomem mais tempo, aponte inconsistências de classificação (ex: OM classificada LEVE com parada > 100 min se houver) e vulnerabilidades secundárias (elétrica, umidade, sensores).
 4. PLANO DE AÇÃO COMPLETO (ENTRE 6 E 10 AÇÕES CONCRETAS E DIVERSAS): Inclua ações CORRETIVAS imediatas, PREVENTIVAS periódicas, INSPECAO_ROTA cirúrgica, MELHORIA estrutural e COMPRAS (estoque mínimo). SE houver PDFs de manuais anexados, EXTRAIA E CITE OS PART NUMBERS REAIS, ROLAMENTOS (ex: SKF...), VEDAÇÕES/O-RINGS E CÓDIGOS OEM encontrados nos manuais!
 5. SUGESTÕES E MELHORIAS (ENTRE 5 E 8 MELHORIAS RICAS): Cobrindo Curto, Médio e Longo Prazo (padronização, proteções físicas, lubrificação, preditiva, retrofit/poka-yoke).
@@ -4319,7 +4745,7 @@ RETORNE EXCLUSIVAMENTE UM OBJETO JSON VÁLIDO (sem texto fora do JSON) COM A SEG
 {
   "componente_foco": "SUBCONJUNTO PRINCIPAL",
   "disciplina_recomendada": "MECANICA | ELETRICA | MULTIDISCIPLINAR",
-  "resumo_executivo": "Texto executivo conciso do cenário do ativo",
+  "resumo_executivo": "Texto executivo conciso do cenário do ativo (deixando claro o motivo de abertura: Quebra Grave ou Condição Especial de Grande Volume)",
   "ishikawa_6m": {
     "MAQUINA": "...",
     "MAO_DE_OBRA": "...",
@@ -4418,9 +4844,12 @@ RETORNE EXCLUSIVAMENTE UM OBJETO JSON VÁLIDO (sem texto fora do JSON) COM A SEG
                             enviada_em: null
                         }));
 
+                        const aprovIa = obterAprovadoresExigidosPorDisciplina(discFinalIa);
+                        const modoLivreIa = aprovIa.length === 0;
                         estudoFinal = {
                             ...baseFall,
                             disciplina: discFinalIa,
+                            criterio_abertura: crit,
                             componente_foco: String(parsed.componente_foco || baseFall.componente_foco).toUpperCase(),
                             gerado_por_modelo: `${respIa.model} (${pdfParts.length} PDF(s) lido(s) + ${manuais.length} fonte(s))`,
                             rae: {
@@ -4439,7 +4868,10 @@ RETORNE EXCLUSIVAMENTE UM OBJETO JSON VÁLIDO (sem texto fora do JSON) COM A SEG
                                 ? parsed.sugestoes_melhorias
                                 : baseFall.sugestoes_melhorias,
                             base_tecnica: parsed.base_tecnica || baseFall.base_tecnica,
-                            aprovadores: obterAprovadoresExigidosPorDisciplina(discFinalIa)
+                            aprovadores: aprovIa,
+                            modo_livre_aprovacao: modoLivreIa,
+                            status_aprovacao: modoLivreIa ? "APROVADO" : "EM_ANALISE_APROVACAO",
+                            aprovado_em: modoLivreIa ? new Date().toISOString() : ""
                         };
                     }
                 } catch (errIa) {
@@ -4451,18 +4883,22 @@ RETORNE EXCLUSIVAMENTE UM OBJETO JSON VÁLIDO (sem texto fora do JSON) COM A SEG
                 estudoFinal = construirEstudoAqfFallbackRico(ativoNome, stats, manuais, disciplinaFinal);
             }
 
-            setStatusLive("💾 Salvando Estudo AQF no banco e disparando e-mail de aprovação...");
+            setStatusLive("💾 Salvando Estudo AQF no banco e processando notificações...");
             await salvarEstudoAqfPersistente(estudoFinal);
 
-            // Dispara notificação automática por e-mail via Power Automate (AGENDA-PCM)
-            const mailRes = await enviarEmailNotificacaoEstudoAqf(estudoFinal, "novo_estudo");
-            setStatusLive("");
-            if (mailRes.ok) {
-                showToast(`Estudo AQF "${ativoNome}" salvo em Análise e e-mail disparado para: ${mailRes.para}`, "success");
-            } else if (mailRes.motivo === "sem_webhook") {
-                showToast(`Estudo AQF "${ativoNome}" salvo em Análise! (Configure o Webhook Power Automate na AGENDA-PCM para alertas automáticos por e-mail.)`, "success");
+            if (estudoFinal.modo_livre_aprovacao) {
+                setStatusLive("");
+                showToast(`Estudo AQF "${ativoNome}" salvo em Modo Livre (sem aprovadores ativos no Master — botões liberados!).`, "success");
             } else {
-                showToast(`Estudo AQF "${ativoNome}" salvo em Análise! (Aviso e-mail: ${mailRes.motivo || "verificar destinatários no Master"})`, "info");
+                const mailRes = await enviarEmailNotificacaoEstudoAqf(estudoFinal, "novo_estudo");
+                setStatusLive("");
+                if (mailRes.ok) {
+                    showToast(`Estudo AQF "${ativoNome}" salvo em Análise e e-mail disparado para: ${mailRes.para}`, "success");
+                } else if (mailRes.motivo === "sem_webhook") {
+                    showToast(`Estudo AQF "${ativoNome}" salvo em Análise! (Configure o Webhook Power Automate na AGENDA-PCM para alertas automáticos por e-mail.)`, "success");
+                } else {
+                    showToast(`Estudo AQF "${ativoNome}" salvo em Análise! (Aviso e-mail: ${mailRes.motivo || "verificar destinatários no Master"})`, "info");
+                }
             }
 
             return estudoFinal;
@@ -8265,18 +8701,29 @@ Responda SOMENTE JSON Array: [{"ativo_erp":"...","catalogo_label":string|null,"n
                 { k: "Ativos c/ Alerta Obsolescência", v: top.filter(x => x.risco_obsolescencia).length, sub: "Cruzado com ob_equipamentos", vc: "text-sky-700" }
             ].map(c => `<div class="glass-card p-4 rounded-3xl"><div class="text-[10px] font-extrabold uppercase text-slate-500">${c.k}</div><div class="text-2xl font-extrabold mt-1 ${c.vc}">${c.v}</div><div class="text-[11px] font-semibold text-slate-500 mt-0.5">${c.sub}</div></div>`).join("");
 
-            document.getElementById("confiabilidadeTopTableBody").innerHTML = top.slice(0, 12).map((r, i) => `
+            document.getElementById("confiabilidadeTopTableBody").innerHTML = top.slice(0, 12).map((r, i) => {
+                const omsAt = omsAuditadas.filter(o => normKey(o.ativo) === normKey(r.ativo));
+                const crit = avaliarCriterioEstudoAqf(omsAt);
+                const critPillCls = crit.codigo === "ALTO_VOLUME_LEVE_MODERADA"
+                    ? "bg-amber-100 text-amber-950 border-amber-300"
+                    : (crit.elegivel ? "bg-rose-100 text-rose-900 border-rose-300" : "bg-slate-100 text-slate-600 border-slate-200");
+                const btnCls = crit.codigo === "ALTO_VOLUME_LEVE_MODERADA"
+                    ? "bg-amber-600 hover:bg-amber-700 text-white"
+                    : (crit.elegivel ? "bg-rose-600 hover:bg-rose-700 text-white" : "bg-sky-600 hover:bg-sky-700 text-white");
+                return `
                 <tr class="hover:bg-slate-50/80">
                     <td class="py-3 px-3">
                         <div class="font-extrabold text-slate-900">#${i + 1} ${escapeHtml(r.ativo)}</div>
                         <div class="text-[10px] font-bold text-slate-500">${escapeHtml(r.setor)} • ${r.total_oms} OM(s) na rodada</div>
+                        <div class="mt-1"><span class="inline-block px-2 py-0.5 rounded-full border text-[9px] font-extrabold ${critPillCls}">${escapeHtml(crit.badgeCurto)}</span></div>
                         ${r.ativo_erp && normKey(r.ativo_erp) !== normKey(r.ativo) ? `<div class="inline-block mt-0.5 px-1.5 py-0.5 rounded bg-slate-100 border border-slate-200 font-mono text-[9px] font-bold text-slate-500">ERP: ${escapeHtml(r.ativo_erp)}</div>` : ""}
                     </td>
                     <td class="py-3 px-3 text-center">
                         <span class="px-2.5 py-0.5 rounded-full text-[10px] font-extrabold ${r.criticidade_linha === "A" ? "bg-rose-100 text-rose-800" : "bg-amber-100 text-amber-800"}">Classe ${escapeHtml(r.criticidade_linha)}</span>
                     </td>
                     <td class="py-3 px-3 text-center font-mono font-extrabold">
-                        <span class="text-rose-700">${r.quebras} QB</span> / <span class="px-1.5 py-0.5 rounded bg-rose-600 text-white text-[10px]">${r.quebras_graves} GRAVE</span>
+                        <span class="text-rose-700">${r.quebras} QB</span> / <span class="px-1.5 py-0.5 rounded ${r.quebras_graves > 0 ? "bg-rose-600 text-white" : "bg-amber-100 text-amber-900"} text-[10px]">${r.quebras_graves} GRAVE</span>
+                        <div class="text-[9px] font-bold text-slate-500 mt-0.5">M:${crit.moderadas} • L:${crit.leves}</div>
                     </td>
                     <td class="py-3 px-3 text-center font-mono">
                         <div class="font-extrabold text-slate-900">MTBF: ${r.mtbf_h}h</div>
@@ -8290,9 +8737,10 @@ Responda SOMENTE JSON Array: [{"ativo_erp":"...","catalogo_label":string|null,"n
                         <span class="px-2 py-0.5 rounded-full text-[10px] font-extrabold ${r.risco_obsolescencia ? "bg-amber-100 text-amber-900 border border-amber-300" : "bg-slate-100 text-slate-500"}">${r.risco_obsolescencia ? "Risco Crítico Obsol." : "Normal"}</span>
                     </td>
                     <td class="py-3 px-3 text-right">
-                        <button type="button" onclick="abrirAtivoNoCacador('${escapeHtml(r.ativo)}')" class="inline-flex items-center gap-1 px-3 py-1.5 rounded-xl bg-sky-600 hover:bg-sky-700 text-white text-[11px] font-extrabold">${SVG_ICO.target} Gerar AQF</button>
+                        <button type="button" onclick="abrirAtivoNoCacador('${escapeHtml(r.ativo)}')" class="inline-flex items-center gap-1 px-3 py-1.5 rounded-xl ${btnCls} text-[11px] font-extrabold">${SVG_ICO.target} Gerar AQF</button>
                     </td>
-                </tr>`).join("");
+                </tr>`;
+            }).join("");
         };
 
         window.abrirAtivoNoCacador = (ativoNome) => {
@@ -8474,11 +8922,33 @@ Responda SOMENTE JSON Array: [{"ativo_erp":"...","catalogo_label":string|null,"n
             }
             const copia = JSON.parse(JSON.stringify(est));
             const antigosMap = new Map((copia.aprovadores || []).map(a => [a.slot, a]));
-            const novos = obterAprovadoresExigidosPorDisciplina(novaDisc).map(sl => antigosMap.get(sl.slot) || sl);
+            const novos = obterAprovadoresExigidosPorDisciplina(novaDisc).map(sl => {
+                const prev = antigosMap.get(sl.slot);
+                return prev ? { ...sl, status: prev.status, assinado_por: prev.assinado_por, assinado_em: prev.assinado_em, parecer: prev.parecer } : sl;
+            });
             copia.disciplina = novaDisc;
             copia.aprovadores = novos;
+            copia.modo_livre_aprovacao = novos.length === 0;
             await salvarEstudoAqfPersistente(copia);
             showToast(`Disciplina alterada para ${novaDisc} e quadro de aprovadores atualizado!`, "success");
+        };
+
+        window.sincronizarAprovadoresEstudoComMaster = async (estudoId) => {
+            if (!isAdminMasterAtivo()) return showToast("Desbloqueie o modo Admin Master para sincronizar aprovadores.", "error");
+            const est = estudosAqf.find(e => e.id === estudoId);
+            if (!est) return;
+            const copia = JSON.parse(JSON.stringify(est));
+            const antigosMap = new Map((copia.aprovadores || []).map(a => [a.slot, a]));
+            const novos = obterAprovadoresExigidosPorDisciplina(copia.disciplina || "MECANICA").map(sl => {
+                const prev = antigosMap.get(sl.slot);
+                return prev ? { ...sl, status: prev.status, assinado_por: prev.assinado_por, assinado_em: prev.assinado_em, parecer: prev.parecer } : sl;
+            });
+            copia.aprovadores = novos;
+            copia.modo_livre_aprovacao = novos.length === 0;
+            await salvarEstudoAqfPersistente(copia);
+            showToast(novos.length
+                ? `Aprovadores do estudo sincronizados com o Menu Master (${novos.length} participante(s) ativo(s))!`
+                : "Estudo sincronizado em Modo Livre (0 aprovadores ativos — botões liberados)!", "success");
         };
 
         window.excluirEstudoAqfPersistido = (estudoId) => {
@@ -8573,27 +9043,53 @@ Responda SOMENTE JSON Array: [{"ativo_erp":"...","catalogo_label":string|null,"n
         window.renderCacadorView = () => {
             atualizarBadgesFontesManuaisAqf();
 
-            // Preenche seletor de ativos juntando Banco Histórico Completo + OMs da tela atual (ordenado por falhas)
+            // Preenche seletor de ativos priorizado por Critério: 1) Quebras GRAVES, 2) Condição Especial Grande Volume L/M, 3) Demais (Sob Demanda)
             const sel = document.getElementById("cacadorSelectAtivo");
-            const poolOms = bancoHistoricoOmsMap.size > 0 ? [...bancoHistoricoOmsMap.values()] : omsAuditadas;
-            const mapaAtivosCnt = new Map();
-            [...poolOms, ...omsAuditadas].forEach(o => {
+            const baseSel = document.getElementById("cacadorSelectBaseOms")?.value || "historico";
+            const poolOms = (baseSel !== "visao_atual" && bancoHistoricoOmsMap.size > 0)
+                ? [...bancoHistoricoOmsMap.values()]
+                : omsAuditadas;
+            const mapaOmsPorAtivo = new Map();
+            poolOms.forEach(o => {
                 if (!o?.ativo) return;
-                const cur = mapaAtivosCnt.get(o.ativo) || { total: 0, falhas: 0 };
-                cur.total++;
-                if (o.categoria === "QUEBRA" || o.categoria === "FALHA OPERACIONAL") cur.falhas++;
-                mapaAtivosCnt.set(o.ativo, cur);
+                if (!mapaOmsPorAtivo.has(o.ativo)) mapaOmsPorAtivo.set(o.ativo, []);
+                mapaOmsPorAtivo.get(o.ativo).push(o);
             });
-            const ativosOrd = [...mapaAtivosCnt.entries()]
-                .sort((a, b) => (b[1].falhas - a[1].falhas) || (b[1].total - a[1].total))
-                .map(([nome, st]) => ({ nome, ...st }));
+            const ativosEval = [...mapaOmsPorAtivo.entries()].map(([nome, lista]) => {
+                const crit = avaliarCriterioEstudoAqf(lista);
+                return { nome, total: lista.length, falhas: crit.graves + crit.lmTotal, crit };
+            }).sort((a, b) =>
+                (a.crit.prioridade - b.crit.prioridade)
+                || (b.crit.graves - a.crit.graves)
+                || (b.crit.lmTotal - a.crit.lmTotal)
+                || (b.crit.tempoTotalMin - a.crit.tempoTotalMin)
+                || (b.total - a.total)
+            );
 
             if (sel) {
                 const prev = sel.value;
-                sel.innerHTML = ativosOrd.length
-                    ? ativosOrd.map(a => `<option value="${escapeHtml(a.nome)}">${escapeHtml(a.nome)} (${a.falhas} falhas / ${a.total} OMs)</option>`).join("")
-                    : `<option value="">Carregue uma planilha ERP para listar ativos</option>`;
-                if (prev && ativosOrd.some(a => a.nome === prev)) sel.value = prev;
+                if (!ativosEval.length) {
+                    sel.innerHTML = `<option value="">Carregue uma planilha ERP para listar ativos</option>`;
+                } else {
+                    const g1 = ativosEval.filter(a => a.crit.prioridade === 1);
+                    const g2 = ativosEval.filter(a => a.crit.prioridade === 2);
+                    const g3 = ativosEval.filter(a => a.crit.prioridade === 3);
+                    const optHtml = (arr) => arr.map(a => {
+                        const tag = a.crit.prioridade === 1
+                            ? `[GRAVE:${a.crit.graves} | M:${a.crit.moderadas} | L:${a.crit.leves}]`
+                            : a.crit.prioridade === 2
+                                ? `[ALTO VOLUME • 0G | M:${a.crit.moderadas} | L:${a.crit.leves} • ${a.crit.tempoLMMin}m]`
+                                : `[Sob Demanda • ${a.falhas} falha(s) / ${a.total} OMs]`;
+                        return `<option value="${escapeHtml(a.nome)}">${escapeHtml(a.nome)} ${tag}</option>`;
+                    }).join("");
+
+                    let htmlSel = "";
+                    if (g1.length) htmlSel += `<optgroup label="🔴 PRIORIDADE 1 — Quebras GRAVES (Critério Principal AQF • ${g1.length})">${optHtml(g1)}</optgroup>`;
+                    if (g2.length) htmlSel += `<optgroup label="🟠 PRIORIDADE 2 — Condição Especial: GRANDE VOLUME de Leves/Moderadas (${g2.length})">${optHtml(g2)}</optgroup>`;
+                    if (g3.length) htmlSel += `<optgroup label="⚪ DEMAIS ATIVOS — Abaixo do Gatilho (Estudo Sob Demanda • ${g3.length})">${optHtml(g3)}</optgroup>`;
+                    sel.innerHTML = htmlSel;
+                    if (prev && ativosEval.some(a => a.nome === prev)) sel.value = prev;
+                }
             }
             atualizarPreviaFontesAtivoAqf();
 
@@ -8635,7 +9131,7 @@ Responda SOMENTE JSON Array: [{"ativo_erp":"...","catalogo_label":string|null,"n
             if (!filtrados.length) {
                 box.innerHTML = `<div class="glass-card p-10 rounded-3xl text-center space-y-2">
                     <div class="text-sm font-extrabold text-slate-800">Nenhum Estudo AQF encontrado neste filtro.</div>
-                    <p class="text-xs font-semibold text-slate-500">Selecione um equipamento acima (ex: BOATOPACK 2), vincule sua pasta de manuais <code>J:</code> ou SharePoint se desejar, e clique em <strong>"Gerar Estudo Completo (IA)"</strong>.</p>
+                    <p class="text-xs font-semibold text-slate-500">Selecione um equipamento acima (priorizados por <strong>Quebras GRAVES</strong> e <strong>Grande Volume de Leves/Moderadas</strong>), conecte sua pasta de manuais <code>J:</code> se desejar, e clique em <strong>"Gerar Estudo Completo (IA)"</strong>.</p>
                 </div>`;
                 return;
             }
@@ -8661,6 +9157,7 @@ Responda SOMENTE JSON Array: [{"ativo_erp":"...","catalogo_label":string|null,"n
                 const st = calcularStatusAprovacaoEstudo(est);
                 const rae = est.rae || {};
                 const sev = rae.severidades || { LEVE: 0, MODERADA: 0, GRAVE: 0 };
+                const crit = est.criterio_abertura || construirCriterioAberturaDeSeveridades(sev, rae.tempo_total_parado_min);
                 const ish = est.ishikawa_6m || {};
                 const pqs = est.cinco_porques || { falha_dominante: "", passos: [], causa_raiz: est.causa_raiz || "" };
                 const mttrObj = est.analise_mttr || { top5_paradas: [], interpretacao: "" };
@@ -8671,13 +9168,26 @@ Responda SOMENTE JSON Array: [{"ativo_erp":"...","catalogo_label":string|null,"n
                 const manuais = est.manuais_utilizados || [];
                 const dataFmt = est.gerado_em ? new Date(est.gerado_em).toLocaleString("pt-BR", { day: "2-digit", month: "2-digit", year: "numeric", hour: "2-digit", minute: "2-digit" }) : "";
 
-                const stPill = st.status === "APROVADO"
-                    ? `<span class="px-3 py-1 rounded-full bg-emerald-600 text-white text-[10px] font-extrabold uppercase tracking-wider">✅ APROVADO &amp; LIBERADO (${st.aprovados}/${st.total})</span>`
-                    : st.status === "AJUSTE_SOLICITADO"
-                        ? `<span class="px-3 py-1 rounded-full bg-rose-600 text-white text-[10px] font-extrabold uppercase tracking-wider">↩️ AJUSTE SOLICITADO (${st.aprovados}/${st.total})</span>`
-                        : `<span class="px-3 py-1 rounded-full bg-amber-500 text-white text-[10px] font-extrabold uppercase tracking-wider">⏳ EM ANÁLISE &amp; APROVAÇÃO (${st.aprovados}/${st.total})</span>`;
+                const stPill = st.modoLivre
+                    ? `<span class="px-3 py-1 rounded-full bg-slate-800 text-white text-[10px] font-extrabold uppercase tracking-wider">🔓 MODO LIVRE (LIBERADO)</span>`
+                    : st.status === "APROVADO"
+                        ? `<span class="px-3 py-1 rounded-full bg-emerald-600 text-white text-[10px] font-extrabold uppercase tracking-wider">✅ APROVADO &amp; LIBERADO (${st.aprovados}/${st.total})</span>`
+                        : st.status === "AJUSTE_SOLICITADO"
+                            ? `<span class="px-3 py-1 rounded-full bg-rose-600 text-white text-[10px] font-extrabold uppercase tracking-wider">↩️ AJUSTE SOLICITADO (${st.aprovados}/${st.total})</span>`
+                            : `<span class="px-3 py-1 rounded-full bg-amber-500 text-white text-[10px] font-extrabold uppercase tracking-wider">⏳ EM ANÁLISE &amp; APROVAÇÃO (${st.aprovados}/${st.total})</span>`;
 
-                const faltantesNomes = st.pendentes.map(p => p.cargoLabel).join(", ");
+                const critBannerCls = crit.codigo === "ALTO_VOLUME_LEVE_MODERADA"
+                    ? "bg-amber-50 border-2 border-amber-400 text-amber-950"
+                    : crit.elegivel
+                        ? "bg-rose-50/90 border-2 border-rose-300 text-rose-950"
+                        : "bg-slate-50 border border-slate-300 text-slate-800";
+                const critBadgeCls = crit.codigo === "ALTO_VOLUME_LEVE_MODERADA"
+                    ? "bg-amber-500 text-white"
+                    : crit.elegivel
+                        ? "bg-rose-600 text-white"
+                        : "bg-slate-600 text-white";
+
+                const faltantesNomes = st.pendentes.map(p => `${p.cargoLabel} (${p.nome})`).join(", ");
                 const passosHtml = Array.isArray(pqs.passos)
                     ? pqs.passos.map(p => `
                         <div class="p-2.5 rounded-xl bg-white border border-slate-200 space-y-0.5">
@@ -8694,6 +9204,7 @@ Responda SOMENTE JSON Array: [{"ativo_erp":"...","catalogo_label":string|null,"n
                             <div class="flex flex-wrap items-center gap-2">
                                 <span class="px-2.5 py-0.5 rounded-full bg-slate-900 text-white font-mono text-[10px] font-extrabold">ESTUDO AQF #${idx + 1}</span>
                                 ${stPill}
+                                <span class="px-2.5 py-0.5 rounded-full ${critBadgeCls} text-[10px] font-extrabold uppercase">${escapeHtml(crit.badgeCurto)}</span>
                                 <span class="px-2.5 py-0.5 rounded-full bg-rose-100 text-rose-800 text-[10px] font-extrabold">Classe ${escapeHtml(est.criticidade_linha || "A")} • ${escapeHtml(est.componente_foco || "GERAL")}</span>
                                 <select onchange="alterarDisciplinaEstudoAqf('${est.id}', this.value)" class="px-2 py-0.5 rounded-full bg-indigo-50 text-indigo-900 border border-indigo-200 text-[10px] font-extrabold cursor-pointer" title="Disciplina que define qual Supervisor precisa aprovar">
                                     <option value="MECANICA" ${(est.disciplina || "MECANICA") === "MECANICA" ? "selected" : ""}>Disciplina: Mecânica</option>
@@ -8720,14 +9231,23 @@ Responda SOMENTE JSON Array: [{"ativo_erp":"...","catalogo_label":string|null,"n
                         </div>
                     </div>
 
-                    <!-- PAINEL DE APROVAÇÃO PARALELA (2 PCM + SUPERVISOR + GERENTE MARCOS PIERRE) -->
+                    <!-- BANNER DE CRITÉRIO / MOTIVO DE ABERTURA (QUEBRA GRAVE vs CONDIÇÃO ESPECIAL GRANDE VOLUME) -->
+                    <div class="p-3.5 rounded-2xl ${critBannerCls} space-y-1">
+                        <div class="text-[10px] font-extrabold uppercase tracking-wider opacity-80">🎯 Motivo / Critério de Abertura deste Estudo AQF</div>
+                        <div class="text-xs sm:text-sm font-extrabold leading-snug">${escapeHtml(crit.tituloBanner)}</div>
+                        <div class="text-[11px] font-semibold opacity-90 leading-relaxed">${escapeHtml(crit.justificativa)}</div>
+                    </div>
+
+                    <!-- PAINEL DE APROVAÇÃO PARALELA DINÂMICA -->
                     <div class="p-4 rounded-2xl ${st.liberado ? "bg-emerald-50/70 border border-emerald-200" : "bg-amber-50/60 border border-amber-200"} space-y-3">
                         <div class="flex flex-wrap items-center justify-between gap-2">
                             <div>
-                                <div class="text-[10px] font-extrabold uppercase tracking-wider ${st.liberado ? "text-emerald-800" : "text-amber-900"}">Fluxo de Aprovação Paralela (${st.aprovados}/${st.total} Assinaturas)</div>
-                                <p class="text-[11px] font-semibold text-slate-700">${st.liberado ? "✅ Aprovação completa! Todos os botões de disparo do Plano de Ação estão desbloqueados." : `🔒 Aguardando assinatura paralela de: <strong>${escapeHtml(faltantesNomes)}</strong>. Os botões de ação serão liberados após 100% de aprovação.`}</p>
+                                <div class="text-[10px] font-extrabold uppercase tracking-wider ${st.liberado ? "text-emerald-800" : "text-amber-900"}">${st.modoLivre ? "🔓 Modo Livre (Sem Trava de Aprovação)" : `Fluxo de Aprovação Paralela (${st.aprovados}/${st.total} Assinaturas)`}</div>
+                                <p class="text-[11px] font-semibold text-slate-700">${st.modoLivre ? "Estudo gerado sem aprovadores ativos no Menu Master (teste livre / interno). Os botões de ação estão liberados." : (st.liberado ? "✅ Aprovação completa! Todos os botões de disparo do Plano de Ação estão desbloqueados." : `🔒 Aguardando assinatura paralela de: <strong>${escapeHtml(faltantesNomes)}</strong>. Os botões de ação serão liberados após 100% de aprovação.`)}</p>
                             </div>
+                            ${isAdminMasterAtivo() ? `<button type="button" onclick="sincronizarAprovadoresEstudoComMaster('${est.id}')" class="px-3 py-1.5 rounded-xl bg-white hover:bg-slate-100 text-slate-800 border border-slate-300 text-[10px] font-extrabold shadow-2xs" title="Atualiza a lista de aprovadores deste estudo conforme os interruptores ON/OFF do Menu Master, preservando assinaturas já feitas">🔄 Sincronizar Aprovadores c/ Master</button>` : ""}
                         </div>
+                        ${(est.aprovadores || []).length ? `
                         <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-2.5">
                             ${(est.aprovadores || []).map(ap => {
                                 const podeAssinar = usuarioPodeAssinarSlotAqf(ap) && ap.status !== "APROVADO";
@@ -8756,7 +9276,7 @@ Responda SOMENTE JSON Array: [{"ativo_erp":"...","catalogo_label":string|null,"n
                                         </div>` : ""}
                                 </div>`;
                             }).join("")}
-                        </div>
+                        </div>` : ""}
                     </div>
 
                     <!-- SEÇÃO 1: RAE (REGISTRO DE ANÁLISE DE EVENTO) -->
@@ -9074,6 +9594,7 @@ Responda SOMENTE JSON Array: [{"ativo_erp":"...","catalogo_label":string|null,"n
             if (!est) return;
             const rae = est.rae || {};
             const sev = rae.severidades || {};
+            const crit = est.criterio_abertura || construirCriterioAberturaDeSeveridades(sev, rae.tempo_total_parado_min);
             const ish = est.ishikawa_6m || {};
             const pqs = est.cinco_porques || {};
             const mttrObj = est.analise_mttr || {};
@@ -9083,15 +9604,18 @@ Responda SOMENTE JSON Array: [{"ativo_erp":"...","catalogo_label":string|null,"n
             const linhas = [
                 `# ESTUDO AQF — ${est.ativo}`,
                 ``,
-                `## 0. Ficha Técnica & Aprovação`,
+                `## 0. Ficha Técnica, Critério de Abertura & Aprovação`,
                 `- Setor / Máquina: ${est.setor || "Produção"} › ${est.maquina || est.ativo} (Classe ${est.criticidade_linha || "A"})`,
                 `- Disciplina: ${est.disciplina || "MECANICA"}`,
-                `- Status Aprovação: ${st.status} (${st.aprovados}/${st.total})`,
+                `- **Motivo / Critério de Abertura:** ${crit.tituloBanner}`,
+                `- **Justificativa do Gatilho:** ${crit.justificativa}`,
+                `- Status Aprovação: ${st.modoLivre ? "MODO LIVRE (SEM TRAVA)" : `${st.status} (${st.aprovados}/${st.total})`}`,
                 ...(est.aprovadores || []).map(a => `  - ${a.cargoLabel} (${a.nome}): ${a.status}${a.assinado_em ? ` em ${new Date(a.assinado_em).toLocaleString("pt-BR")}` : ""}${a.parecer ? ` — "${a.parecer}"` : ""}`),
                 `- Manuais Consultados: ${(est.manuais_utilizados || []).map(m => `${m.nome} [${m.origem}]`).join("; ") || "Nenhum manual PDF anexado"}`,
                 ``,
                 `## 1. RAE (Registro de Análise de Evento)`,
                 `ALVO ANALISADO: ${est.ativo}`,
+                `CRITÉRIO DE ABERTURA: ${crit.badgeCurto}`,
                 `DATA DA ANÁLISE: ${est.gerado_em ? new Date(est.gerado_em).toLocaleString("pt-BR") : ""}`,
                 `GERADO POR: ${est.gerado_por_modelo || "IA PCM"}`,
                 `OMs CITANDO O ALVO: ${rae.total_oms_alvo || 0}`,
@@ -9099,7 +9623,7 @@ Responda SOMENTE JSON Array: [{"ativo_erp":"...","catalogo_label":string|null,"n
                 `TEMPO TOTAL PARADO: ${rae.tempo_total_parado_min || 0} minutos`,
                 `MTTR (média de reparo): ${rae.mttr_min || 0} minutos`,
                 `MAIOR PARADA: ${rae.maior_parada_min || 0} minutos`,
-                `SEVERIDADES: LEVE: ${sev.LEVE || 0}, GRAVE: ${sev.GRAVE || 0}, MODERADA: ${sev.MODERADA || 0}`,
+                `SEVERIDADES: GRAVE: ${sev.GRAVE || 0}, MODERADA: ${sev.MODERADA || 0}, LEVE: ${sev.LEVE || 0}`,
                 ``,
                 `## 2. Diagrama de Ishikawa`,
                 `MÁQUINA: ${ish.MAQUINA || "Sem evidências nas ordens."}`,
@@ -9173,19 +9697,26 @@ Responda SOMENTE JSON Array: [{"ativo_erp":"...","catalogo_label":string|null,"n
             const st = calcularStatusAprovacaoEstudo(est);
             const rae = est.rae || {};
             const sev = rae.severidades || {};
+            const crit = est.criterio_abertura || construirCriterioAberturaDeSeveridades(sev, rae.tempo_total_parado_min);
             const ish = est.ishikawa_6m || {};
             const pqs = est.cinco_porques || {};
             const mttrObj = est.analise_mttr || {};
             const bt = est.base_tecnica || {};
+
+            const critBg = crit.codigo === "ALTO_VOLUME_LEVE_MODERADA" ? "#fff7ed" : (crit.elegivel ? "#fef2f2" : "#f8fafc");
+            const critBd = crit.codigo === "ALTO_VOLUME_LEVE_MODERADA" ? "#f59e0b" : (crit.elegivel ? "#e11d48" : "#94a3b8");
+            const critTxt = crit.codigo === "ALTO_VOLUME_LEVE_MODERADA" ? "#9a3412" : (crit.elegivel ? "#991b1b" : "#334155");
+            const sigCols = Math.max(1, Math.min(4, (est.aprovadores || []).length || 1));
 
             const w = window.open("", "_blank");
             if (!w) { showToast("Permita pop-ups para imprimir o Estudo AQF A4.", "error"); return; }
             w.document.write(`<!DOCTYPE html><html lang="pt-BR"><head><meta charset="UTF-8"><title>Estudo AQF — ${escapeHtml(est.ativo)}</title><style>
                 @page{size:A4;margin:10mm}
                 body{font-family:'Segoe UI',Arial,sans-serif;color:#0f172a;font-size:10.5px;margin:0;line-height:1.45}
-                .hdr{display:flex;justify-content:space-between;align-items:center;border-bottom:3px solid #0f172a;padding-bottom:10px;margin-bottom:12px}
+                .hdr{display:flex;justify-content:space-between;align-items:center;border-bottom:3px solid #0f172a;padding-bottom:10px;margin-bottom:10px}
                 .hdr-left{display:flex;align-items:center;gap:12px}
                 .logo{height:38px;width:auto}
+                .crit-box{border:2px solid ${critBd};border-radius:6px;padding:8px 11px;margin-bottom:9px;background:${critBg};color:${critTxt};page-break-inside:avoid}
                 .box{border:1px solid #cbd5e1;border-radius:6px;padding:9px 11px;margin-bottom:9px;background:#f8fafc;page-break-inside:avoid}
                 .sec-title{font-size:11px;font-weight:800;text-transform:uppercase;color:#0f172a;border-bottom:1px solid #cbd5e1;padding-bottom:3px;margin-bottom:6px}
                 .kpi-row{display:flex;gap:8px;margin-bottom:6px}
@@ -9196,7 +9727,7 @@ Responda SOMENTE JSON Array: [{"ativo_erp":"...","catalogo_label":string|null,"n
                 th{background:#f1f5f9;font-size:9.5px;text-transform:uppercase}
                 ul,ol{margin:4px 0;padding-left:18px}
                 li{margin-bottom:3px}
-                .sig-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin-top:6px}
+                .sig-grid{display:grid;grid-template-columns:repeat(${sigCols},1fr);gap:8px;margin-top:6px}
                 .sig-card{border:1px solid #94a3b8;border-radius:5px;padding:7px;background:#fff;text-align:center}
                 .sig-ok{color:#047857;font-weight:800}
                 .sig-pend{color:#b45309;font-weight:800}
@@ -9211,9 +9742,15 @@ Responda SOMENTE JSON Array: [{"ativo_erp":"...","catalogo_label":string|null,"n
                         </div>
                     </div>
                     <div style="text-align:right">
-                        <div style="font-weight:800;font-size:11px;color:${st.liberado ? "#047857" : "#b45309"}">${st.liberado ? "✓ APROVADO OFICIAL" : `EM APROVAÇÃO (${st.aprovados}/${st.total})`}</div>
+                        <div style="font-weight:800;font-size:11px;color:${st.liberado ? "#047857" : "#b45309"}">${st.modoLivre ? "🔓 MODO LIVRE" : (st.liberado ? "✓ APROVADO OFICIAL" : `EM APROVAÇÃO (${st.aprovados}/${st.total})`)}</div>
                         <div style="font-size:9.5px;color:#475569">Emissão: ${est.gerado_em ? new Date(est.gerado_em).toLocaleDateString("pt-BR") : ""}</div>
                     </div>
+                </div>
+
+                <div class="crit-box">
+                    <div style="font-size:9px;text-transform:uppercase;font-weight:800">Motivo / Critério de Abertura do Estudo</div>
+                    <div style="font-size:11.5px;font-weight:800;margin-top:2px">${escapeHtml(crit.tituloBanner)}</div>
+                    <div style="font-size:9.5px;margin-top:2px;color:#334155">${escapeHtml(crit.justificativa)}</div>
                 </div>
 
                 <div class="box">
@@ -9269,7 +9806,8 @@ Responda SOMENTE JSON Array: [{"ativo_erp":"...","catalogo_label":string|null,"n
                 </div>
 
                 <div class="box">
-                    <div class="sec-title">Quadro Oficial de Aprovação Paralela (2 PCM + Supervisão + Gerência)</div>
+                    <div class="sec-title">Quadro Oficial de Aprovação Paralela</div>
+                    ${(est.aprovadores || []).length ? `
                     <div class="sig-grid">
                         ${(est.aprovadores || []).map(ap => `
                             <div class="sig-card">
@@ -9278,63 +9816,245 @@ Responda SOMENTE JSON Array: [{"ativo_erp":"...","catalogo_label":string|null,"n
                                 <div class="${ap.status === "APROVADO" ? "sig-ok" : "sig-pend"}">${ap.status === "APROVADO" ? `✓ APROVADO` : (ap.status === "AJUSTE" ? "✗ AJUSTE" : "⏳ PENDENTE")}</div>
                                 <div style="font-size:8.5px;color:#475569;margin-top:2px">${ap.assinado_em ? `${escapeHtml(ap.assinado_por)} • ${new Date(ap.assinado_em).toLocaleDateString("pt-BR")}` : "Aguardando assinatura"}</div>
                             </div>`).join("")}
-                    </div>
+                    </div>` : `<div style="font-weight:700;color:#475569">Estudo emitido em Modo Livre (sem aprovadores obrigatórios ativos).</div>`}
                 </div>
                 <script>window.onload=()=>setTimeout(()=>window.print(), 250);<\/script>
             </body></html>`);
             w.document.close();
         };
 
-        // VIEW 7: ADMIN MASTER & COFRE DE IA + GOVERNANÇA DE APROVADORES AQF
-        function sincronizarFormAprovadoresAqfMasterUI() {
-            const mapFields = [
-                ["pcm1", "Pcm1"], ["pcm2", "Pcm2"],
-                ["sup_mecanica", "SupMec"], ["sup_eletrica", "SupEle"],
-                ["gerente", "Ger"]
-            ];
-            mapFields.forEach(([key, suf]) => {
-                const c = aprovadoresAqfCfg[key] || DEFAULT_APROVADORES_AQF_CFG[key];
-                const elN = document.getElementById(`cfgAqf${suf}Nome`);
-                const elU = document.getElementById(`cfgAqf${suf}User`);
-                const elE = document.getElementById(`cfgAqf${suf}Email`);
-                if (elN && document.activeElement !== elN) elN.value = c.nome || "";
-                if (elU && document.activeElement !== elU) elU.value = c.user || "";
-                if (elE && document.activeElement !== elE) elE.value = c.email || "";
-            });
+        // VIEW 7: ADMIN MASTER & COFRE DE IA + GOVERNANÇA DINÂMICA DE APROVADORES & GATILHOS AQF
+        async function persistirGovernancaAqfMaster(silencioso = false) {
+            const payload = {
+                lista: aprovadoresAqfLista,
+                gatilhos_aqf: regrasGatilhoAqfCfg,
+                atualizadoEm: new Date().toISOString(),
+                atualizadoPor: usuarioLogado?.nome || "Master"
+            };
+            safeStorage.set("cepera_maestri_aprovadores_aqf", JSON.stringify(payload));
+            atualizarBadgesFontesManuaisAqf();
+            sincronizarFormAprovadoresAqfMasterUI();
+            if (currentView === "cacador") renderCacadorView();
+            if (currentView === "confiabilidade") renderConfiabilidadeView();
+            try {
+                await setDoc(refAprovacaoAqfCfg, payload, { merge: true });
+                if (!silencioso) showToast("Governança de Aprovadores e Gatilhos AQF salva na nuvem!", "success");
+            } catch (_) {
+                if (!silencioso) showToast("Governança salva localmente (verifique as Regras do Firestore para sincronizar na nuvem).", "info");
+            }
         }
 
-        window.salvarConfigAprovadoresAqfMaster = async () => {
-            if (!isAdminMasterAtivo()) return showToast("Desbloqueie o modo Admin Master para salvar aprovadores.", "error");
-            const ler = (key, suf) => ({
-                ...(DEFAULT_APROVADORES_AQF_CFG[key] || {}),
-                ...(aprovadoresAqfCfg[key] || {}),
-                nome: (document.getElementById(`cfgAqf${suf}Nome`)?.value || "").trim() || DEFAULT_APROVADORES_AQF_CFG[key].nome,
-                user: (document.getElementById(`cfgAqf${suf}User`)?.value || "").trim(),
-                email: (document.getElementById(`cfgAqf${suf}Email`)?.value || "").trim()
-            });
-            aprovadoresAqfCfg = {
-                pcm1: ler("pcm1", "Pcm1"),
-                pcm2: ler("pcm2", "Pcm2"),
-                sup_mecanica: ler("sup_mecanica", "SupMec"),
-                sup_eletrica: ler("sup_eletrica", "SupEle"),
-                gerente: ler("gerente", "Ger")
-            };
-            safeStorage.set("cepera_maestri_aprovadores_aqf", JSON.stringify(aprovadoresAqfCfg));
-            try {
-                await setDoc(refAprovacaoAqfCfg, {
-                    ...aprovadoresAqfCfg,
-                    atualizadoEm: new Date().toISOString(),
-                    atualizadoPor: usuarioLogado?.nome || "Master"
-                }, { merge: true });
-                showToast("Quadro oficial de aprovadores AQF salvo na nuvem!", "success");
-            } catch (_) {
-                showToast("Aprovadores salvos localmente (verifique as regras do Firestore para sincronizar na nuvem).", "info");
+        function sincronizarFormAprovadoresAqfMasterUI() {
+            const ativosCnt = aprovadoresAqfLista.filter(a => a.ativo !== false).length;
+            const resPill = document.getElementById("masterResumoAprovAtivosPill");
+            if (resPill) {
+                resPill.className = ativosCnt === 0
+                    ? "px-2.5 py-0.5 rounded-full bg-slate-200 text-slate-800 border border-slate-300 text-[10px] font-extrabold"
+                    : "px-2.5 py-0.5 rounded-full bg-emerald-100 text-emerald-900 border border-emerald-300 text-[10px] font-extrabold";
+                resPill.innerText = ativosCnt === 0
+                    ? `🔓 0 de ${aprovadoresAqfLista.length} ativos (Modo Livre)`
+                    : `${ativosCnt} de ${aprovadoresAqfLista.length} ativo(s) agora`;
             }
+
+            const elG = document.getElementById("cfgGatilhoMinGraves");
+            const elM = document.getElementById("cfgGatilhoMinModeradas");
+            const elLM = document.getElementById("cfgGatilhoMinLMTotal");
+            const elT = document.getElementById("cfgGatilhoMinTempoLM");
+            if (elG && document.activeElement !== elG) elG.value = String(regrasGatilhoAqfCfg.minGraves ?? 1);
+            if (elM && document.activeElement !== elM) elM.value = String(regrasGatilhoAqfCfg.minModeradas ?? 3);
+            if (elLM && document.activeElement !== elLM) elLM.value = String(regrasGatilhoAqfCfg.minLevesModTotal ?? 5);
+            if (elT && document.activeElement !== elT) elT.value = String(regrasGatilhoAqfCfg.minTempoLMMin ?? 120);
+
+            const cont = document.getElementById("masterAprovadoresListaContainer");
+            if (!cont) return;
+            // Evita reconstruir DOM se o usuário estiver digitando dentro de um input de aprovador
+            if (document.activeElement && cont.contains(document.activeElement)) return;
+
+            cont.innerHTML = aprovadoresAqfLista.map((ap, idx) => {
+                const on = ap.ativo !== false;
+                const esc = String(ap.escopo || "SEMPRE").toUpperCase();
+                const cardTone = !on
+                    ? "bg-slate-100/80 border-slate-300 opacity-65"
+                    : (ap.slot === "gerente"
+                        ? "bg-emerald-50/70 border-emerald-200"
+                        : (esc === "MECANICA" || esc === "ELETRICA"
+                            ? "bg-indigo-50/70 border-indigo-200"
+                            : "bg-sky-50/70 border-sky-200"));
+                const sid = escapeHtml(ap.slot || ap.id || `ap_${idx}`);
+                return `
+                    <div class="p-3.5 rounded-2xl border-2 ${cardTone} space-y-2 transition-all">
+                        <div class="flex items-center justify-between gap-2 pb-1.5 border-b border-slate-200/70">
+                            <div class="flex items-center gap-1.5 min-w-0">
+                                <span class="px-2 py-0.5 rounded-full text-[9px] font-extrabold uppercase ${on ? "bg-emerald-600 text-white" : "bg-slate-400 text-white"}">${on ? "ON • ATIVO" : "OFF • PAUSADO"}</span>
+                                ${!ap.sistema ? `<span class="px-1.5 py-0.5 rounded bg-indigo-100 text-indigo-800 text-[9px] font-extrabold">EXTRA</span>` : ""}
+                            </div>
+                            <div class="flex items-center gap-2 shrink-0">
+                                <label class="inline-flex items-center gap-1.5 cursor-pointer select-none" title="Ligar ou desligar a participação desta pessoa nas aprovações">
+                                    <span class="text-[10px] font-extrabold ${on ? "text-emerald-800" : "text-slate-500"}">${on ? "Participa" : "Desligado"}</span>
+                                    <input type="checkbox" ${on ? "checked" : ""} onchange="toggleAprovadorAqfAtivoMaster('${sid}', this.checked)" class="sr-only peer">
+                                    <div class="w-9 h-5 rounded-full transition-colors ${on ? "bg-emerald-600" : "bg-slate-300"} relative">
+                                        <span class="absolute top-0.5 ${on ? "left-4" : "left-0.5"} w-4 h-4 rounded-full bg-white shadow transition-all"></span>
+                                    </div>
+                                </label>
+                                ${!ap.sistema ? `<button type="button" onclick="removerAprovadorAqfMaster('${sid}')" class="w-6 h-6 rounded-lg bg-rose-50 hover:bg-rose-100 text-rose-700 border border-rose-200 text-[11px] font-extrabold flex items-center justify-center" title="Remover esta pessoa da lista">🗑️</button>` : ""}
+                            </div>
+                        </div>
+
+                        <div class="grid grid-cols-1 gap-1.5">
+                            <div>
+                                <label class="block text-[9px] font-extrabold uppercase text-slate-500">Cargo / Função</label>
+                                <input type="text" value="${escapeHtml(ap.cargoLabel || "")}" onchange="atualizarCampoAprovadorAqfMaster('${sid}', 'cargoLabel', this.value)" placeholder="Cargo / Função" class="input-clean py-1 text-[11px] font-extrabold">
+                            </div>
+                            <div>
+                                <label class="block text-[9px] font-extrabold uppercase text-slate-500">Nome Completo</label>
+                                <input type="text" value="${escapeHtml(ap.nome || "")}" onchange="atualizarCampoAprovadorAqfMaster('${sid}', 'nome', this.value)" placeholder="Nome do aprovador" class="input-clean py-1 text-xs font-bold">
+                            </div>
+                            <div class="grid grid-cols-2 gap-1.5">
+                                <div>
+                                    <label class="block text-[9px] font-extrabold uppercase text-slate-500">Login Portal</label>
+                                    <input type="text" value="${escapeHtml(ap.user || "")}" onchange="atualizarCampoAprovadorAqfMaster('${sid}', 'user', this.value)" placeholder="login.portal" class="input-clean py-1 text-[11px] font-mono">
+                                </div>
+                                <div>
+                                    <label class="block text-[9px] font-extrabold uppercase text-slate-500">Participa em</label>
+                                    <select onchange="atualizarCampoAprovadorAqfMaster('${sid}', 'escopo', this.value)" class="input-clean py-1 text-[10px] font-extrabold">
+                                        <option value="SEMPRE" ${esc === "SEMPRE" ? "selected" : ""}>Todos os Estudos</option>
+                                        <option value="MECANICA" ${esc === "MECANICA" ? "selected" : ""}>Só Mecânica/Multi</option>
+                                        <option value="ELETRICA" ${esc === "ELETRICA" ? "selected" : ""}>Só Elétrica/Multi</option>
+                                    </select>
+                                </div>
+                            </div>
+                            <div>
+                                <label class="block text-[9px] font-extrabold uppercase text-slate-500">E-mail Corporativo (Power Automate)</label>
+                                <input type="email" value="${escapeHtml(ap.email || "")}" onchange="atualizarCampoAprovadorAqfMaster('${sid}', 'email', this.value)" placeholder="nome@cepera.com.br" class="input-clean py-1 text-[11px] font-mono">
+                            </div>
+                        </div>
+                    </div>`;
+            }).join("");
+        }
+
+        window.toggleAprovadorAqfAtivoMaster = async (slotId, ativo) => {
+            if (!isAdminMasterAtivo()) return showToast("Desbloqueie o modo Admin Master para alterar aprovadores.", "error");
+            const item = aprovadoresAqfLista.find(a => (a.slot || a.id) === slotId);
+            if (!item) return;
+            item.ativo = Boolean(ativo);
+            await persistirGovernancaAqfMaster(true);
+            showToast(`${item.nome} (${item.cargoLabel}): ${item.ativo ? "ATIVADO nas aprovações ✅" : "DESLIGADO das aprovações ⏸️"}`, "info");
+        };
+
+        window.atualizarCampoAprovadorAqfMaster = (slotId, campo, valor) => {
+            const item = aprovadoresAqfLista.find(a => (a.slot || a.id) === slotId);
+            if (!item) return;
+            item[campo] = String(valor || "").trim();
+            safeStorage.set("cepera_maestri_aprovadores_aqf", JSON.stringify({ lista: aprovadoresAqfLista, gatilhos_aqf: regrasGatilhoAqfCfg }));
+            atualizarBadgesFontesManuaisAqf();
+        };
+
+        window.toggleFormNovoAprovadorAqfMaster = (forcarEstado) => {
+            const box = document.getElementById("boxFormNovoAprovadorAqf");
+            if (!box) return;
+            const abrir = typeof forcarEstado === "boolean" ? forcarEstado : (box.hidden || box.classList.contains("hidden"));
+            box.hidden = !abrir;
+            box.classList.toggle("hidden", !abrir);
+            if (abrir) document.getElementById("novoAprovNome")?.focus();
+        };
+
+        window.adicionarNovoAprovadorAqfMaster = async () => {
+            if (!isAdminMasterAtivo()) return showToast("Desbloqueie o modo Admin Master para adicionar aprovadores.", "error");
+            const nome = (document.getElementById("novoAprovNome")?.value || "").trim();
+            const cargoLabel = (document.getElementById("novoAprovCargo")?.value || "").trim();
+            const user = (document.getElementById("novoAprovUser")?.value || "").trim();
+            const email = (document.getElementById("novoAprovEmail")?.value || "").trim();
+            const escopo = (document.getElementById("novoAprovEscopo")?.value || "SEMPRE").toUpperCase();
+
+            if (!nome || !cargoLabel) {
+                return showToast("Preencha pelo menos o Nome Completo e o Cargo/Função do novo aprovador.", "error");
+            }
+            const idUnico = `custom_${normKey(nome).replace(/[^a-z0-9]+/g, "_").slice(0, 14)}_${Date.now().toString(36).slice(-4)}`;
+            aprovadoresAqfLista.push({
+                id: idUnico,
+                slot: idUnico,
+                ativo: true,
+                sistema: false,
+                escopo,
+                cargoLabel,
+                nome,
+                user,
+                email,
+                matchRole: ""
+            });
+            ["novoAprovNome", "novoAprovCargo", "novoAprovUser", "novoAprovEmail"].forEach(id => {
+                const el = document.getElementById(id);
+                if (el) el.value = "";
+            });
+            toggleFormNovoAprovadorAqfMaster(false);
+            await persistirGovernancaAqfMaster(true);
+            showToast(`Novo aprovador "${nome} (${cargoLabel})" adicionado e ativado na nuvem!`, "success");
+        };
+
+        window.removerAprovadorAqfMaster = async (slotId) => {
+            if (!isAdminMasterAtivo()) return showToast("Desbloqueie o modo Admin Master para remover aprovadores.", "error");
+            const item = aprovadoresAqfLista.find(a => (a.slot || a.id) === slotId);
+            if (!item || item.sistema) return;
+            aprovadoresAqfLista = aprovadoresAqfLista.filter(a => (a.slot || a.id) !== slotId);
+            await persistirGovernancaAqfMaster(true);
+            showToast(`Aprovador "${item.nome}" removido da lista.`, "info");
+        };
+
+        window.aplicarPresetAprovadoresAqfMaster = async (modo) => {
+            if (!isAdminMasterAtivo()) return showToast("Desbloqueie o modo Admin Master para alterar o modo de aprovação.", "error");
+            const uUser = normKey(usuarioLogado?.user || "");
+            const uNome = normKey(usuarioLogado?.nome || "");
+            aprovadoresAqfLista.forEach((ap, idx) => {
+                const sid = ap.slot || ap.id;
+                if (modo === "todos") {
+                    ap.ativo = true;
+                } else if (modo === "somente_pcm") {
+                    ap.ativo = sid === "pcm1" || sid === "pcm2" || normKey(ap.cargoLabel || "").includes("pcm");
+                } else if (modo === "somente_eu") {
+                    const bateLogin = uUser && normKey(ap.user) === uUser;
+                    const bateNome = uNome && ap.nome && uNome.includes(normKey(ap.nome).split(" ")[0]);
+                    ap.ativo = Boolean(bateLogin || bateNome || (!uUser && idx === 0));
+                } else if (modo === "nenhum") {
+                    ap.ativo = false;
+                }
+            });
+            if (modo === "somente_eu" && !aprovadoresAqfLista.some(a => a.ativo) && aprovadoresAqfLista.length) {
+                aprovadoresAqfLista[0].ativo = true;
+            }
+            await persistirGovernancaAqfMaster(true);
+            const msg = modo === "todos"
+                ? "Fluxo Completo ativado (todos os aprovadores ON)!"
+                : modo === "somente_pcm"
+                    ? "Modo Somente PCM ativado (Supervisores e Gerente pausados)!"
+                    : modo === "somente_eu"
+                        ? "Modo Teste Rápido ativado (somente você na aprovação)!"
+                        : "Modo Livre ativado (0 aprovadores — novos estudos sem trava)!";
+            showToast(msg, "success");
+        };
+
+        window.restaurarAprovadoresPadraoAqfMaster = async () => {
+            if (!isAdminMasterAtivo()) return;
+            aprovadoresAqfLista = DEFAULT_APROVADORES_AQF_LISTA.map(x => ({ ...x }));
+            regrasGatilhoAqfCfg = { ...DEFAULT_GATILHOS_AQF_CFG };
+            await persistirGovernancaAqfMaster(true);
+            showToast("Lista padrão de aprovadores e critérios de gatilho restaurados!", "info");
+        };
+
+        window.salvarConfigAprovadoresAqfMaster = async () => {
+            if (!isAdminMasterAtivo()) return showToast("Desbloqueie o modo Admin Master para salvar governança AQF.", "error");
+            regrasGatilhoAqfCfg = {
+                minGraves: Math.max(1, Number(document.getElementById("cfgGatilhoMinGraves")?.value || 1)),
+                minModeradas: Math.max(1, Number(document.getElementById("cfgGatilhoMinModeradas")?.value || 3)),
+                minLevesModTotal: Math.max(2, Number(document.getElementById("cfgGatilhoMinLMTotal")?.value || 5)),
+                minTempoLMMin: Math.max(30, Number(document.getElementById("cfgGatilhoMinTempoLM")?.value || 120))
+            };
+            await persistirGovernancaAqfMaster(false);
         };
 
         window.renderMasterMaestriView = () => {
             if (!isAdminMasterAtivo()) return;
             carregarCofreIaLocal();
+            atualizarBadgesFontesManuaisAqf();
             sincronizarFormAprovadoresAqfMasterUI();
             atualizarUIBancoHistoricoOms();
             const busca = normKey(document.getElementById("masterOmBusca")?.value || "");
@@ -9618,18 +10338,11 @@ Responda SOMENTE JSON Array: [{"ativo_erp":"...","catalogo_label":string|null,"n
             main.hidden = false; main.classList.remove("hidden");
             aplicarPerfilNaInterface();
 
-            // Restaura configurações locais (Aprovadores AQF, SharePoint Manuais e Cache de Estudos)
+            // Restaura configurações locais (Aprovadores AQF Dinâmicos, Gatilhos, SharePoint Manuais e Cache de Estudos)
             try {
                 const rawAprov = safeStorage.get("cepera_maestri_aprovadores_aqf");
                 if (rawAprov) {
-                    const parsed = JSON.parse(rawAprov);
-                    if (parsed && typeof parsed === "object") {
-                        Object.keys(DEFAULT_APROVADORES_AQF_CFG).forEach(k => {
-                            if (parsed[k] && typeof parsed[k] === "object") {
-                                aprovadoresAqfCfg[k] = { ...DEFAULT_APROVADORES_AQF_CFG[k], ...parsed[k] };
-                            }
-                        });
-                    }
+                    normalizarGovernancaAqf(JSON.parse(rawAprov));
                 }
             } catch (_) {}
 
@@ -9759,20 +10472,21 @@ Responda SOMENTE JSON Array: [{"ativo_erp":"...","catalogo_label":string|null,"n
                 }, () => {});
             } catch (_) {}
 
-            // Sincroniza Quadro Oficial de Aprovadores AQF (2 PCM + Supervisores + Gerente Marcos Pierre)
+            // Sincroniza Quadro Oficial Dinâmico de Aprovadores & Gatilhos AQF
             try {
                 onSnapshot(refAprovacaoAqfCfg, snapDoc => {
                     const data = (snapDoc && typeof snapDoc.exists === "function" && snapDoc.exists()) ? snapDoc.data() : null;
                     if (data && typeof data === "object") {
-                        Object.keys(DEFAULT_APROVADORES_AQF_CFG).forEach(k => {
-                            if (data[k] && typeof data[k] === "object") {
-                                aprovadoresAqfCfg[k] = { ...DEFAULT_APROVADORES_AQF_CFG[k], ...data[k] };
-                            }
-                        });
-                        safeStorage.set("cepera_maestri_aprovadores_aqf", JSON.stringify(aprovadoresAqfCfg));
+                        normalizarGovernancaAqf(data);
+                        safeStorage.set("cepera_maestri_aprovadores_aqf", JSON.stringify({
+                            lista: aprovadoresAqfLista,
+                            gatilhos_aqf: regrasGatilhoAqfCfg
+                        }));
+                        atualizarBadgesFontesManuaisAqf();
                         sincronizarFormAprovadoresAqfMasterUI();
                         atualizarBadgesSidebarMaestri();
                         if (currentView === "cacador") renderCacadorView();
+                        if (currentView === "confiabilidade") renderConfiabilidadeView();
                     }
                 }, () => {});
             } catch (_) {}
