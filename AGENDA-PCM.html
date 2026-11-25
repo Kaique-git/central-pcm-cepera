@@ -753,19 +753,49 @@
                                 </div>
                             </form>
 
-                            <details class="p-3.5 rounded-2xl bg-indigo-50/70 border border-indigo-200 text-xs text-slate-800">
-                                <summary class="cursor-pointer font-extrabold text-indigo-900 select-none">⚡ Como criar o fluxo no Power Automate em 1 minuto (copiar e colar)</summary>
-                                <div class="pt-3 space-y-2 text-[11px] leading-relaxed">
-                                    <ol class="list-decimal pl-5 space-y-1.5 font-medium">
-                                        <li>Acesse o <strong>Power Automate</strong> da sua conta Microsoft 365 Cepêra → <strong>Criar</strong> → <strong>Fluxo da nuvem instantâneo</strong> → Gatilho: <strong>"Quando uma solicitação HTTP for recebida"</strong> (Quem pode acionar: <em>Qualquer pessoa</em>).</li>
-                                        <li>Adicione a ação <strong>Office 365 Outlook → Enviar um email (V2)</strong> e preencha com expressões dinâmicas:
-                                            <div class="mt-1 p-2.5 rounded-xl bg-white border border-indigo-200 font-mono text-[10px] space-y-1 text-slate-800">
-                                                <div><strong>Para:</strong> <code>@{triggerBody()?['para']}</code> <span class="text-slate-400">(já vem separado por ponto e vírgula ";")</span></div>
-                                                <div><strong>Assunto:</strong> <code>@{triggerBody()?['assunto']}</code></div>
-                                                <div><strong>Corpo:</strong> <code>@{triggerBody()?['corpoHtml']}</code></div>
+                            <details class="p-4 rounded-2xl bg-indigo-50/80 border border-indigo-200 text-xs text-slate-800">
+                                <summary class="cursor-pointer font-extrabold text-indigo-900 select-none flex items-center justify-between">
+                                    <span class="flex items-center gap-2">
+                                        <svg class="w-4 h-4 text-indigo-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"/></svg>
+                                        <span>⚡ Como configurar o fluxo no Power Automate (passo a passo para evitar erro de tipo)</span>
+                                    </span>
+                                    <span class="text-[10px] uppercase font-bold text-indigo-600 tracking-wider">Clique para ver</span>
+                                </summary>
+                                <div class="pt-3.5 space-y-3 text-[11px] leading-relaxed">
+                                    <div class="p-3 bg-rose-50 border border-rose-200 rounded-xl text-rose-900 space-y-1">
+                                        <p class="font-bold flex items-center gap-1.5 text-rose-700">
+                                            <svg class="w-4 h-4 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"/></svg>
+                                            <span>Atenção ao erro comum: <em>"Input parameter 'emailMessage/To' is required to be of type 'String/email'. The source type is 'Object'"</em></span>
+                                        </p>
+                                        <p>Esse erro ocorre quando você seleciona o bloco cinza <strong>"Corpo" (Body)</strong> inteiro dentro do campo <strong>Para (To)</strong> do e-mail. Para corrigir, siga os 2 passos abaixo:</p>
+                                    </div>
+
+                                    <ol class="list-decimal pl-5 space-y-2.5 font-medium">
+                                        <li>
+                                            <strong>Passo 1 — No bloco de Gatilho <em>"Quando uma solicitação HTTP for recebida"</em>:</strong><br>
+                                            No campo <em>"Esquema JSON do corpo da solicitação"</em>, clique em <strong>"Usar payload de amostra para gerar o esquema"</strong> e cole o modelo abaixo (ou use os botões rápidos):
+                                            <div class="mt-2 flex flex-wrap gap-2">
+                                                <button type="button" onclick="copiarPayloadAmostraPowerAutomate()" class="btn-touch bg-white hover:bg-slate-100 text-indigo-700 border border-indigo-200 text-[10px] font-bold py-1.5 px-3">
+                                                    📋 Copiar Payload de Amostra
+                                                </button>
+                                                <button type="button" onclick="copiarEsquemaPowerAutomate()" class="btn-touch bg-white hover:bg-slate-100 text-indigo-700 border border-indigo-200 text-[10px] font-bold py-1.5 px-3">
+                                                    📋 Copiar Esquema JSON Completo
+                                                </button>
                                             </div>
                                         </li>
-                                        <li>Salve o fluxo, copie a <strong>URL HTTP POST</strong> gerada no primeiro bloco, cole no campo acima e clique em <strong>Salvar Automação</strong>. Pronto: os alertas passarão a sair 100% sozinhos!</li>
+                                        <li>
+                                            <strong>Passo 2 — No bloco de Ação <em>"Enviar um email (V2)"</em> (Office 365 Outlook):</strong><br>
+                                            Apague o que estiver no campo <strong>Para</strong> e preencha exatamente com as tags dinâmicas ou expressões:
+                                            <div class="mt-1.5 p-3 rounded-xl bg-white border border-indigo-200 font-mono text-[10px] space-y-1.5 text-slate-800">
+                                                <div>• <strong>Para (To):</strong> selecione a tag dinâmica <span class="bg-indigo-100 text-indigo-800 px-1 py-0.5 rounded font-bold">para</span> <span class="text-slate-500 font-sans">(ou digite a expressão <code>triggerBody()?['para']</code>)</span></div>
+                                                <div>• <strong>Assunto (Subject):</strong> selecione a tag dinâmica <span class="bg-indigo-100 text-indigo-800 px-1 py-0.5 rounded font-bold">assunto</span> <span class="text-slate-500 font-sans">(ou expressão <code>triggerBody()?['assunto']</code>)</span></div>
+                                                <div>• <strong>Corpo (Body):</strong> selecione a tag dinâmica <span class="bg-indigo-100 text-indigo-800 px-1 py-0.5 rounded font-bold">corpoHtml</span> <span class="text-slate-500 font-sans">(ou expressão <code>triggerBody()?['corpoHtml']</code>)</span></div>
+                                            </div>
+                                        </li>
+                                        <li>
+                                            <strong>Passo 3 — Salvar e Vincular:</strong><br>
+                                            Salve o fluxo no Power Automate, copie a <strong>URL HTTP POST</strong> gerada no Bloco 1, cole no campo acima e clique em <strong>Salvar Automação</strong>. Depois clique em <strong>"Enviar E-mail de Teste"</strong> para confirmar o recebimento na sua caixa postal!
+                                        </li>
                                     </ol>
                                 </div>
                             </details>
@@ -2155,6 +2185,46 @@
             } finally {
                 if (btn) { btn.disabled = false; btn.innerText = 'Enviar E-mail de Teste'; }
             }
+        };
+
+        window.copiarPayloadAmostraPowerAutomate = () => {
+            const amostra = {
+                para: "kaique.pereira@cepera.com.br",
+                destinatarios: ["kaique.pereira@cepera.com.br"],
+                assunto: "[Alerta PCM Cepêra] Manutenção Preventiva no Prazo",
+                corpoTexto: "Olá!\nSeguem os detalhes da manutenção preventiva agendada.",
+                corpoHtml: "<div style=\"font-family:sans-serif;\"><h3>Alerta Preventivo</h3><p>Atividade programada.</p></div>",
+                origem: "agenda_pcm"
+            };
+            const json = JSON.stringify(amostra, null, 2);
+            navigator.clipboard.writeText(json).then(() => {
+                showToast('Payload copiado! No Bloco 1, clique em "Usar payload de amostra para gerar o esquema" e cole.');
+            }).catch(() => {
+                prompt('Copie o payload abaixo:', json);
+            });
+        };
+
+        window.copiarEsquemaPowerAutomate = () => {
+            const schema = {
+                type: "object",
+                properties: {
+                    para: { type: "string" },
+                    destinatarios: {
+                        type: "array",
+                        items: { type: "string" }
+                    },
+                    assunto: { type: "string" },
+                    corpoTexto: { type: "string" },
+                    corpoHtml: { type: "string" },
+                    origem: { type: "string" }
+                }
+            };
+            const json = JSON.stringify(schema, null, 2);
+            navigator.clipboard.writeText(json).then(() => {
+                showToast('Esquema JSON copiado! Cole diretamente no campo de Esquema JSON do gatilho no Power Automate.');
+            }).catch(() => {
+                prompt('Copie o esquema JSON abaixo:', json);
+            });
         };
 
         async function enviarNotificacaoLancamento(l, opcoes = {}) {
