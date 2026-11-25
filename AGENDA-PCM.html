@@ -743,6 +743,9 @@
                                         <span>Enviar automaticamente em segundo plano assim que entrar na janela do Aviso Prévio (1 envio por ordem)</span>
                                     </label>
                                     <div class="flex flex-wrap items-center gap-2 shrink-0">
+                                        <button type="button" onclick="abrirPreviaEmailAlerta('exemplo_teste')" class="btn-touch bg-indigo-50 hover:bg-indigo-100 text-indigo-700 border border-indigo-200 text-xs py-2 px-3.5 flex items-center gap-1.5 font-bold">
+                                            <span>👁️ Ver Modelo Visual</span>
+                                        </button>
                                         <button type="button" id="btnTestarWebhookEmail" onclick="testarWebhookEmailAgenda()" class="btn-touch bg-white hover:bg-slate-100 text-slate-700 border border-slate-200 text-xs py-2 px-3.5">
                                             <span>Enviar E-mail de Teste</span>
                                         </button>
@@ -1282,6 +1285,29 @@
                 <div class="flex justify-between py-2 border-b border-slate-100"><span>Ir para Hoje / Novo Lançamento / Recado Rápido</span><kbd class="px-2 py-0.5 bg-slate-100 border border-slate-300 rounded font-mono font-bold">T / N / R</kbd></div>
                 <div class="flex justify-between py-2 border-b border-slate-100"><span>Alternar entre Abas do Menu</span><kbd class="px-2 py-0.5 bg-slate-100 border border-slate-300 rounded font-mono font-bold">Alt + 1 até Alt + 4</kbd></div>
                 <div class="flex justify-between py-2"><span>Fechar qualquer modal</span><kbd class="px-2 py-0.5 bg-slate-100 border border-slate-300 rounded font-mono font-bold">Esc</kbd></div>
+            </div>
+        </div>
+    <!-- MODAL PRÉVIA VISUAL DO E-MAIL DE ALERTA -->
+    <div id="modalPreviaEmail" role="dialog" aria-modal="true" class="fixed inset-0 bg-slate-900/60 z-50 hidden flex items-center justify-center p-3 sm:p-5">
+        <div class="bg-white w-full max-w-3xl rounded-3xl max-h-[92vh] flex flex-col shadow-2xl overflow-hidden border border-slate-200">
+            <div class="p-4 sm:px-6 border-b border-slate-200 bg-slate-50 flex items-center justify-between">
+                <div class="flex items-center gap-2.5">
+                    <span class="w-2.5 h-2.5 rounded-full bg-emerald-500 animate-pulse"></span>
+                    <div>
+                        <span class="text-[10px] font-extrabold uppercase tracking-widest text-indigo-600">Visualização de E-mail (HTML)</span>
+                        <h2 class="text-base sm:text-lg font-extrabold text-slate-900">Prévia do Layout de Notificação</h2>
+                    </div>
+                </div>
+                <div class="flex items-center gap-2">
+                    <button type="button" onclick="fecharModalPreviaEmail()" class="w-8 h-8 rounded-full bg-slate-200 hover:bg-slate-300 text-slate-700 font-bold flex items-center justify-center text-sm transition-colors">✕</button>
+                </div>
+            </div>
+            <div id="modalPreviaEmailContainer" class="p-3 sm:p-6 overflow-y-auto flex-1 bg-slate-200/60 flex justify-center">
+                <!-- HTML do e-mail inserido aqui via JS -->
+            </div>
+            <div class="p-3.5 sm:px-6 border-t border-slate-200 bg-white flex flex-col sm:flex-row sm:items-center justify-between gap-2 text-xs">
+                <span class="text-slate-500 font-medium">✨ Design responsivo e compatível com Outlook (Desktop & Web), celulares e webmail.</span>
+                <button type="button" onclick="fecharModalPreviaEmail()" class="btn-pill-dark text-xs py-1.5 px-5 self-end sm:self-auto">Fechar Prévia</button>
             </div>
         </div>
     </div>
@@ -2039,11 +2065,356 @@
             return { prazoDias, diasRestantes, chaveAtual, jaEnviado, emJanela, aguardandoPrazo, expiradoAntigo };
         }
 
+        const MAPA_CORES_TIPOS_EMAIL = {
+            preventiva: { bg: '#e0f2fe', texto: '#0369a1', borda: '#0284c7', nome: 'Preventiva', icone: '🛡️' },
+            preditiva: { bg: '#e0e7ff', texto: '#4338ca', borda: '#6366f1', nome: 'Preditiva', icone: '📊' },
+            corretiva: { bg: '#ffe4e6', texto: '#be123c', borda: '#e11d48', nome: 'Corretiva Programada', icone: '⚡' },
+            parada: { bg: '#fef3c7', texto: '#b45309', borda: '#d97706', nome: 'Parada de Linha', icone: '🛑' },
+            melhoria: { bg: '#d1fae5', texto: '#047857', borda: '#10b981', nome: 'Melhoria Técnica', icone: '✨' },
+            outros: { bg: '#f1f5f9', texto: '#334155', borda: '#64748b', nome: 'Outros', icone: '📌' }
+        };
+
+        function gerarHtmlVisualEmailLancamento(l, infoAlerta, para) {
+            const tipoKey = (l?.tipo || 'preventiva').toLowerCase();
+            const tipoMeta = MAPA_CORES_TIPOS_EMAIL[tipoKey] || { bg: '#e0f2fe', texto: '#0369a1', borda: '#0284c7', nome: 'Manutenção', icone: '⚙️' };
+            const periodoBR = formatPeriodoLancamentoBR(l);
+            const diasRest = infoAlerta?.diasRestantes ?? calcularDiasRestantesAlerta(l);
+            const prazoDias = infoAlerta?.prazoDias ?? (parseInt(l?.alertaPrazo ?? 0, 10) || 0);
+
+            let statusBannerHtml = '';
+            if (diasRest !== null) {
+                if (diasRest <= 0) {
+                    statusBannerHtml = `
+                    <div style="background:#fef2f2;border:1px solid #fecaca;border-radius:12px;padding:12px 16px;margin:18px 24px 0 24px;">
+                        <table style="width:100%;border-collapse:collapse;"><tr>
+                            <td style="width:28px;vertical-align:middle;font-size:18px;">🔴</td>
+                            <td style="vertical-align:middle;font-size:13px;font-weight:700;color:#991b1b;">
+                                PROGRAMADO PARA HOJE: Mobilização Imediata
+                                <div style="font-size:11px;font-weight:500;color:#b91c1c;margin-top:2px;">A atividade agendada entrou na data de execução. Verifique a liberação de equipe e insumos.</div>
+                            </td>
+                        </tr></table>
+                    </div>`;
+                } else if (diasRest === 1) {
+                    statusBannerHtml = `
+                    <div style="background:#fffbeb;border:1px solid #fde68a;border-radius:12px;padding:12px 16px;margin:18px 24px 0 24px;">
+                        <table style="width:100%;border-collapse:collapse;"><tr>
+                            <td style="width:28px;vertical-align:middle;font-size:18px;">⏰</td>
+                            <td style="vertical-align:middle;font-size:13px;font-weight:700;color:#92400e;">
+                                PROGRAMADO PARA AMANHÃ: Aviso Prévio Ativo
+                                <div style="font-size:11px;font-weight:500;color:#b45309;margin-top:2px;">Falta apenas 1 dia para a execução (${escapeHtml(periodoBR)}). Confirme ferramentas e peças sobressalentes.</div>
+                            </td>
+                        </tr></table>
+                    </div>`;
+                } else {
+                    statusBannerHtml = `
+                    <div style="background:#f0f9ff;border:1px solid #bae6fd;border-radius:12px;padding:12px 16px;margin:18px 24px 0 24px;">
+                        <table style="width:100%;border-collapse:collapse;"><tr>
+                            <td style="width:28px;vertical-align:middle;font-size:18px;">📅</td>
+                            <td style="vertical-align:middle;font-size:13px;font-weight:700;color:#0369a1;">
+                                Faltam ${diasRest} dias para a execução (${escapeHtml(periodoBR)})
+                                <div style="font-size:11px;font-weight:500;color:#0284c7;margin-top:2px;">Aviso prévio configurado para ${prazoDias} dias de antecedência.</div>
+                            </td>
+                        </tr></table>
+                    </div>`;
+                }
+            }
+
+            const partesAtivo = [];
+            if (l?.setor) partesAtivo.push(l.setor);
+            if (l?.maquina || l?.equipamento) partesAtivo.push(l.maquina || l.equipamento);
+            if (l?.conjunto) partesAtivo.push(l.conjunto);
+            if (l?.subconjunto) partesAtivo.push(l.subconjunto);
+            const ativoStr = partesAtivo.length ? partesAtivo.join(' › ') : '';
+            const tagStr = l?.tag ? ` [TAG: ${l.tag}]` : '';
+
+            const assetBadgeHtml = ativoStr ? `
+            <div style="margin-top:10px;background:#f8fafc;border:1px solid #e2e8f0;border-radius:8px;padding:8px 12px;font-size:12px;color:#334155;">
+                <strong style="color:#0f172a;">🏭 Ativo Fabril:</strong> ${escapeHtml(ativoStr)}${escapeHtml(tagStr)}
+            </div>` : '';
+
+            const descHtml = l?.descricao ? escapeHtml(l.descricao).replace(/\n/g, '<br>') : 'Atividade de manutenção programada no cronograma de rotinas da fábrica. Executar conforme procedimentos padrão de engenharia.';
+            const agoraStr = new Date().toLocaleString('pt-BR', { day: '2-digit', month: '2-digit', year: 'numeric', hour: '2-digit', minute: '2-digit' });
+
+            return `
+    <div style="background-color:#f1f5f9;padding:28px 12px;font-family:'Segoe UI',-apple-system,BlinkMacSystemFont,Roboto,Helvetica,Arial,sans-serif;color:#0f172a;width:100%;box-sizing:border-box;">
+        <div style="max-width:620px;margin:0 auto;background:#ffffff;border-radius:18px;overflow:hidden;box-shadow:0 12px 30px rgba(15,23,42,0.08);border:1px solid #e2e8f0;">
+            
+            <!-- HEADER INDUSTRIAL CEPÊRA -->
+            <div style="background:#0f172a;background:linear-gradient(135deg, #0f172a 0%, #1e293b 100%);padding:26px 28px 22px 28px;border-bottom:4px solid ${tipoMeta.borda};">
+                <table style="width:100%;border-collapse:collapse;">
+                    <tr>
+                        <td style="vertical-align:middle;">
+                            <span style="display:inline-block;background:#dc2626;color:#ffffff;font-size:10px;font-weight:900;letter-spacing:1px;padding:3px 8px;border-radius:6px;text-transform:uppercase;">CEPÊRA</span>
+                            <span style="color:#475569;margin:0 6px;">•</span>
+                            <span style="color:#38bdf8;font-size:11px;font-weight:700;letter-spacing:1px;text-transform:uppercase;">CENTRAL PCM</span>
+                        </td>
+                        <td style="text-align:right;vertical-align:middle;">
+                            <span style="display:inline-block;background:rgba(255,255,255,0.12);color:#e2e8f0;font-size:11px;font-weight:700;padding:4px 10px;border-radius:20px;border:1px solid rgba(255,255,255,0.18);">
+                                🔔 AVISO PRÉVIO
+                            </span>
+                        </td>
+                    </tr>
+                </table>
+                <h1 style="margin:16px 0 4px 0;font-size:21px;font-weight:800;color:#ffffff;line-height:1.25;letter-spacing:-0.4px;">
+                    Lembrete de Manutenção Programada
+                </h1>
+                <p style="margin:0;font-size:12px;color:#94a3b8;line-height:1.4;">
+                    Notificação automática emitida pela Agenda PCM Cepêra para preparação e alinhamento operacional.
+                </p>
+            </div>
+
+            <!-- STATUS URGÊNCIA -->
+            ${statusBannerHtml}
+
+            <!-- HERO CARD DA ATIVIDADE -->
+            <div style="margin:18px 24px 0 24px;background:#ffffff;border:1px solid #e2e8f0;border-left:5px solid ${tipoMeta.borda};border-radius:14px;padding:16px 18px;box-shadow:0 4px 8px rgba(15,23,42,0.02);">
+                <table style="width:100%;border-collapse:collapse;">
+                    <tr>
+                        <td>
+                            <span style="display:inline-block;background:${tipoMeta.bg};color:${tipoMeta.texto};font-size:11px;font-weight:800;padding:3px 9px;border-radius:14px;text-transform:uppercase;letter-spacing:0.5px;">
+                                ${tipoMeta.icone} ${escapeHtml(tipoMeta.nome)}
+                            </span>
+                        </td>
+                        <td style="text-align:right;">
+                            <span style="font-size:11px;font-weight:700;color:#64748b;">Ordem / Atividade</span>
+                        </td>
+                    </tr>
+                </table>
+                <div style="font-size:18px;font-weight:800;color:#0f172a;margin-top:10px;line-height:1.35;">
+                    ${escapeHtml(l?.titulo || 'Atividade de Manutenção')}
+                </div>
+                ${assetBadgeHtml}
+            </div>
+
+            <!-- GRID DE METADADOS (2X2 TABLE OUTLOOK COMPLIANT) -->
+            <div style="margin:14px 24px 0 24px;">
+                <table style="width:100%;border-collapse:separate;border-spacing:8px;">
+                    <tr>
+                        <td style="width:50%;background:#f8fafc;border:1px solid #e2e8f0;border-radius:12px;padding:12px 14px;vertical-align:top;">
+                            <div style="font-size:10px;font-weight:800;color:#64748b;text-transform:uppercase;letter-spacing:0.6px;">📅 Data Programada</div>
+                            <div style="font-size:14px;font-weight:800;color:#0f172a;margin-top:4px;">${escapeHtml(periodoBR)}</div>
+                            <div style="font-size:11px;color:#475569;margin-top:2px;">⏰ Horário: <strong>${escapeHtml(l?.hora || 'Conforme turno')}</strong></div>
+                        </td>
+                        <td style="width:50%;background:#f8fafc;border:1px solid #e2e8f0;border-radius:12px;padding:12px 14px;vertical-align:top;">
+                            <div style="font-size:10px;font-weight:800;color:#64748b;text-transform:uppercase;letter-spacing:0.6px;">👥 Equipe Técnica</div>
+                            <div style="font-size:14px;font-weight:800;color:#0f172a;margin-top:4px;">${escapeHtml(l?.equipe || 'Geral')}</div>
+                            <div style="font-size:11px;color:#475569;margin-top:2px;">🛠️ Disciplina de Atuação</div>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td style="width:50%;background:#f8fafc;border:1px solid #e2e8f0;border-radius:12px;padding:12px 14px;vertical-align:top;">
+                            <div style="font-size:10px;font-weight:800;color:#64748b;text-transform:uppercase;letter-spacing:0.6px;">👤 Responsável</div>
+                            <div style="font-size:14px;font-weight:800;color:#0f172a;margin-top:4px;">${escapeHtml(l?.responsavel || 'Equipe / Geral')}</div>
+                            <div style="font-size:11px;color:#475569;margin-top:2px;word-break:break-all;">✉️ ${escapeHtml(para)}</div>
+                        </td>
+                        <td style="width:50%;background:#f8fafc;border:1px solid #e2e8f0;border-radius:12px;padding:12px 14px;vertical-align:top;">
+                            <div style="font-size:10px;font-weight:800;color:#64748b;text-transform:uppercase;letter-spacing:0.6px;">🎯 Criticidade / Status</div>
+                            <div style="font-size:14px;font-weight:800;color:#0f172a;margin-top:4px;">${escapeHtml(l?.criticidade || l?.prioridade || 'Normal')}</div>
+                            <div style="font-size:11px;color:#475569;margin-top:2px;">Status: <strong>${escapeHtml((l?.status || 'Programado').toUpperCase())}</strong></div>
+                        </td>
+                    </tr>
+                </table>
+            </div>
+
+            <!-- ESCOPO & DESCRIÇÃO -->
+            <div style="margin:12px 24px 0 24px;">
+                <div style="font-size:11px;font-weight:800;color:#475569;text-transform:uppercase;letter-spacing:0.8px;margin-bottom:6px;">
+                    📋 Escopo & Detalhes Técnicos:
+                </div>
+                <div style="background:#f8fafc;border:1px solid #e2e8f0;border-radius:12px;padding:14px 16px;font-size:13px;line-height:1.6;color:#334155;">
+                    ${descHtml}
+                </div>
+            </div>
+
+            <!-- PROTOCOLO DE PREPARAÇÃO PRÉVIA -->
+            <div style="margin:16px 24px 0 24px;background:#f8fafc;border:1px solid #cbd5e1;border-radius:14px;padding:14px 18px;">
+                <div style="font-size:11px;font-weight:800;color:#0f172a;text-transform:uppercase;letter-spacing:0.8px;margin-bottom:8px;">
+                    ⚡ Protocolo de Preparação Prévia PCM:
+                </div>
+                <table style="width:100%;border-collapse:collapse;font-size:12px;line-height:1.55;color:#334155;">
+                    <tr>
+                        <td style="padding:4px 0;width:24px;vertical-align:top;">🧰</td>
+                        <td style="padding:4px 0;"><strong>Sobressalentes:</strong> Verificar disponibilidade de peças e materiais no almoxarifado antes da liberação.</td>
+                    </tr>
+                    <tr>
+                        <td style="padding:4px 0;vertical-align:top;">⚙️</td>
+                        <td style="padding:4px 0;"><strong>Ferramental & EPIs:</strong> Separar ferramentas calibradas e dispositivos de segurança necessários.</td>
+                    </tr>
+                    <tr>
+                        <td style="padding:4px 0;vertical-align:top;">🔒</td>
+                        <td style="padding:4px 0;"><strong>Alinhamento Fabril:</strong> Validar liberação da linha com a Operação e plano de bloqueio LOTO.</td>
+                    </tr>
+                </table>
+            </div>
+
+            <!-- RODAPÉ EXECUTIVO -->
+            <div style="background:#f8fafc;border-top:1px solid #e2e8f0;padding:20px 24px;margin-top:22px;text-align:center;font-size:11px;line-height:1.55;color:#64748b;">
+                <div style="font-weight:700;color:#0f172a;font-size:12px;margin-bottom:2px;">
+                    Cepêra Alimentos S/A • Central de Engenharia & Gestão de Manutenção (PCM)
+                </div>
+                <div>Este é um aviso automático gerado pelo Sistema Central PCM para garantir o cumprimento preventivo no prazo.</div>
+                <div style="margin-top:6px;font-size:10px;color:#94a3b8;">
+                    Disparado automaticamente em: ${escapeHtml(agoraStr)}
+                </div>
+            </div>
+
+        </div>
+    </div>`;
+        }
+
+        function gerarHtmlVisualEmailTeste(fallbackDigitado) {
+            const agoraStr = new Date().toLocaleString('pt-BR', { day: '2-digit', month: '2-digit', year: 'numeric', hour: '2-digit', minute: '2-digit' });
+            return `
+    <div style="background-color:#f1f5f9;padding:28px 12px;font-family:'Segoe UI',-apple-system,BlinkMacSystemFont,Roboto,Helvetica,Arial,sans-serif;color:#0f172a;width:100%;box-sizing:border-box;">
+        <div style="max-width:620px;margin:0 auto;background:#ffffff;border-radius:18px;overflow:hidden;box-shadow:0 12px 30px rgba(15,23,42,0.08);border:1px solid #e2e8f0;">
+            
+            <!-- HEADER -->
+            <div style="background:#0f172a;background:linear-gradient(135deg, #0f172a 0%, #1e293b 100%);padding:26px 28px 22px 28px;border-bottom:4px solid #10b981;">
+                <table style="width:100%;border-collapse:collapse;">
+                    <tr>
+                        <td style="vertical-align:middle;">
+                            <span style="display:inline-block;background:#dc2626;color:#ffffff;font-size:10px;font-weight:900;letter-spacing:1px;padding:3px 8px;border-radius:6px;text-transform:uppercase;">CEPÊRA</span>
+                            <span style="color:#475569;margin:0 6px;">•</span>
+                            <span style="color:#38bdf8;font-size:11px;font-weight:700;letter-spacing:1px;text-transform:uppercase;">CENTRAL PCM</span>
+                        </td>
+                        <td style="text-align:right;vertical-align:middle;">
+                            <span style="display:inline-block;background:#10b981;color:#ffffff;font-size:10px;font-weight:800;padding:4px 10px;border-radius:20px;letter-spacing:0.5px;">
+                                ✓ CONEXÃO ATIVA
+                            </span>
+                        </td>
+                    </tr>
+                </table>
+                <h1 style="margin:16px 0 4px 0;font-size:21px;font-weight:800;color:#ffffff;line-height:1.25;letter-spacing:-0.4px;">
+                    Conexão Power Automate Ativa & Pronta!
+                </h1>
+                <p style="margin:0;font-size:12px;color:#94a3b8;line-height:1.4;">
+                    E-mail executivo de confirmação disparado em segundo plano pela Central PCM Cepêra.
+                </p>
+            </div>
+
+            <!-- STATUS BANNER SUCESSO -->
+            <div style="background:#ecfdf5;border:1px solid #a7f3d0;border-radius:12px;padding:14px 18px;margin:18px 24px 0 24px;">
+                <table style="width:100%;border-collapse:collapse;"><tr>
+                    <td style="width:28px;vertical-align:middle;font-size:20px;">🚀</td>
+                    <td style="vertical-align:middle;font-size:13px;font-weight:700;color:#065f46;">
+                        Automação 100% Configurada com Sucesso!
+                        <div style="font-size:11px;font-weight:500;color:#047857;margin-top:2px;">O webhook recebeu a requisição, interpretou o esquema JSON e despachou este e-mail formatado pelo Outlook.</div>
+                    </td>
+                </tr></table>
+            </div>
+
+            <!-- DEMONSTRAÇÃO DO LAYOUT DE ALERTA -->
+            <div style="margin:18px 24px 0 24px;background:#ffffff;border:1px solid #e2e8f0;border-left:5px solid #0284c7;border-radius:14px;padding:16px 18px;box-shadow:0 4px 8px rgba(15,23,42,0.02);">
+                <table style="width:100%;border-collapse:collapse;">
+                    <tr>
+                        <td>
+                            <span style="display:inline-block;background:#e0f2fe;color:#0369a1;font-size:11px;font-weight:800;padding:3px 9px;border-radius:14px;text-transform:uppercase;">
+                                🛡️ DEMONSTRAÇÃO • PREVENTIVA
+                            </span>
+                        </td>
+                        <td style="text-align:right;">
+                            <span style="font-size:11px;font-weight:700;color:#10b981;">● Webhook Operacional</span>
+                        </td>
+                    </tr>
+                </table>
+                <div style="font-size:17px;font-weight:800;color:#0f172a;margin-top:10px;line-height:1.35;">
+                    [Demonstração] Todos os Alertas Preventivos Chegarão Neste Formato Visual
+                </div>
+                <div style="margin-top:8px;font-size:12px;color:#475569;background:#f8fafc;padding:6px 12px;border-radius:8px;border:1px solid #e2e8f0;">
+                    🏭 <strong>Linha / Máquina:</strong> Central Fabril Cepêra › Linhas de Envase & Utilidades
+                </div>
+            </div>
+
+            <!-- GRID DEMONSTRATIVO -->
+            <div style="margin:14px 24px 0 24px;">
+                <table style="width:100%;border-collapse:separate;border-spacing:8px;">
+                    <tr>
+                        <td style="width:50%;background:#f8fafc;border:1px solid #e2e8f0;border-radius:12px;padding:12px 14px;vertical-align:top;">
+                            <div style="font-size:10px;font-weight:800;color:#64748b;text-transform:uppercase;">Destinatário(s) de Teste</div>
+                            <div style="font-size:12px;font-weight:800;color:#0f172a;margin-top:4px;word-break:break-all;">${escapeHtml(fallbackDigitado)}</div>
+                        </td>
+                        <td style="width:50%;background:#f8fafc;border:1px solid #e2e8f0;border-radius:12px;padding:12px 14px;vertical-align:top;">
+                            <div style="font-size:10px;font-weight:800;color:#64748b;text-transform:uppercase;">Mecanismo Integrado</div>
+                            <div style="font-size:12px;font-weight:800;color:#0f172a;margin-top:4px;">Power Automate + Outlook V2</div>
+                        </td>
+                    </tr>
+                </table>
+            </div>
+
+            <!-- O QUE ACONTECE AGORA -->
+            <div style="margin:14px 24px 0 24px;background:#f8fafc;border:1px solid #cbd5e1;border-radius:14px;padding:14px 18px;">
+                <div style="font-size:11px;font-weight:800;color:#0f172a;text-transform:uppercase;letter-spacing:0.8px;margin-bottom:6px;">
+                    ⚡ O que acontece a partir de agora?
+                </div>
+                <div style="font-size:12px;line-height:1.6;color:#334155;">
+                    Assim que qualquer manutenção preventiva entrar na janela configurada (ex: 7 dias antes, 15 dias antes ou no dia da atividade), a <strong>Agenda PCM</strong> disparará o e-mail automaticamente em segundo plano com este visual moderno e profissional para todos os responsáveis cadastrados!
+                </div>
+            </div>
+
+            <!-- FOOTER -->
+            <div style="background:#f8fafc;border-top:1px solid #e2e8f0;padding:20px 24px;margin-top:22px;text-align:center;font-size:11px;line-height:1.55;color:#64748b;">
+                <div style="font-weight:700;color:#0f172a;font-size:12px;margin-bottom:2px;">
+                    Cepêra Alimentos S/A • Engenharia & Gestão da Manutenção PCM
+                </div>
+                <div>Teste executivo de disparo automatizado via Microsoft Power Automate.</div>
+                <div style="margin-top:6px;font-size:10px;color:#94a3b8;">
+                    Hora do disparo: ${escapeHtml(agoraStr)}
+                </div>
+            </div>
+
+        </div>
+    </div>`;
+        }
+
+        window.abrirPreviaEmailAlerta = (idOuExemplo) => {
+            let htmlEmail = '';
+            if (idOuExemplo === 'exemplo_teste') {
+                const fallback = document.getElementById('cfgFallbackEmail')?.value || emailAutoCfg.fallbackEmail || 'pcm@cepera.com.br';
+                htmlEmail = gerarHtmlVisualEmailTeste(fallback);
+            } else {
+                const l = getLancamentosCalendario().find(x => x.id === idOuExemplo);
+                if (l) {
+                    const info = avaliarJanelaAlertaLancamento(l);
+                    const { para } = resolverDestinatariosLancamento(l);
+                    htmlEmail = gerarHtmlVisualEmailLancamento(l, info, para);
+                } else {
+                    const demoItem = {
+                        titulo: 'Revisão Preventiva Quinzenal e Lubrificação de Válvulas',
+                        tipo: 'preventiva',
+                        status: 'pendente',
+                        hora: '08:30',
+                        equipe: 'Mecânica Fabril',
+                        responsavel: 'Kaique Pereira',
+                        setor: 'Envase',
+                        maquina: 'Multipet 1',
+                        conjunto: 'Ar Comprimido',
+                        subconjunto: 'Válvulas Direcionais',
+                        tag: 'VALV-102',
+                        criticidade: 'P1 (Alta)',
+                        descricao: '1. Inspecionar vazamentos no circuito pneumático.\n2. Efetuar limpeza técnica e lubrificação das guias.\n3. Realizar teste funcional de estanqueidade e abertura/fechamento das válvulas sob pressão nominal.',
+                        data: new Date().toISOString().slice(0, 10),
+                        alertaPrazo: '7'
+                    };
+                    htmlEmail = gerarHtmlVisualEmailLancamento(demoItem, { diasRestantes: 7, prazoDias: 7 }, 'kaique.pereira@cepera.com.br; manutencao@cepera.com.br');
+                }
+            }
+            const container = document.getElementById('modalPreviaEmailContainer');
+            if (container) {
+                container.innerHTML = htmlEmail;
+            }
+            document.getElementById('modalPreviaEmail')?.classList.remove('hidden');
+        };
+
+        window.fecharModalPreviaEmail = () => {
+            document.getElementById('modalPreviaEmail')?.classList.add('hidden');
+        };
+
         function montarConteudoEmailLancamento(l) {
             const { para, lista } = resolverDestinatariosLancamento(l);
             const periodoBR = formatPeriodoLancamentoBR(l);
             const tipoNome = TIPOS[l.tipo]?.nome || 'Manutenção';
             const assunto = `[Alerta PCM Cepêra] ${tipoNome}: ${l.titulo}`;
+            const infoAlerta = avaliarJanelaAlertaLancamento(l);
             const corpoTexto = [
                 'Olá,',
                 '',
@@ -2060,25 +2431,7 @@
                 'Central PCM — Cepêra Alimentos'
             ].join('\n');
 
-            const corpoHtml = `
-                <div style="font-family:'Segoe UI',Arial,sans-serif;max-width:620px;color:#0f172a;border:1px solid #e2e8f0;border-radius:14px;overflow:hidden;">
-                    <div style="background:#0f172a;color:#ffffff;padding:16px 22px;">
-                        <div style="font-size:11px;font-weight:700;letter-spacing:1px;text-transform:uppercase;color:#38bdf8;">Central PCM • Cepêra Alimentos</div>
-                        <h2 style="margin:4px 0 0;font-size:18px;">Lembrete Automático de Manutenção Programada</h2>
-                    </div>
-                    <div style="padding:20px 22px;font-size:14px;line-height:1.55;">
-                        <p style="margin-top:0;">Olá, confira os detalhes da atividade que entrou no prazo de aviso prévio:</p>
-                        <table style="width:100%;border-collapse:collapse;background:#f8fafc;border:1px solid #e2e8f0;border-radius:10px;">
-                            <tr><td style="padding:8px 12px;font-weight:700;width:140px;border-bottom:1px solid #e2e8f0;">Atividade:</td><td style="padding:8px 12px;border-bottom:1px solid #e2e8f0;"><strong>${escapeHtml(l.titulo)}</strong></td></tr>
-                            <tr><td style="padding:8px 12px;font-weight:700;border-bottom:1px solid #e2e8f0;">Tipo:</td><td style="padding:8px 12px;border-bottom:1px solid #e2e8f0;">${escapeHtml(tipoNome)}</td></tr>
-                            <tr><td style="padding:8px 12px;font-weight:700;border-bottom:1px solid #e2e8f0;">Data / Hora:</td><td style="padding:8px 12px;border-bottom:1px solid #e2e8f0;"><strong>${escapeHtml(periodoBR)}</strong>${l.hora ? ' às ' + escapeHtml(l.hora) : ''}</td></tr>
-                            <tr><td style="padding:8px 12px;font-weight:700;border-bottom:1px solid #e2e8f0;">Equipe:</td><td style="padding:8px 12px;border-bottom:1px solid #e2e8f0;">${escapeHtml(l.equipe || 'Geral')}</td></tr>
-                            <tr><td style="padding:8px 12px;font-weight:700;border-bottom:1px solid #e2e8f0;">Responsável:</td><td style="padding:8px 12px;border-bottom:1px solid #e2e8f0;">${escapeHtml(l.responsavel || 'Equipe / Geral')}</td></tr>
-                            <tr><td style="padding:8px 12px;font-weight:700;">Descrição:</td><td style="padding:8px 12px;white-space:pre-wrap;">${escapeHtml(l.descricao || 'N/A')}</td></tr>
-                        </table>
-                        <p style="margin:16px 0 0;font-size:12px;color:#64748b;">E-mail disparado automaticamente pela Agenda de Manutenção PCM.</p>
-                    </div>
-                </div>`;
+            const corpoHtml = gerarHtmlVisualEmailLancamento(l, infoAlerta, para);
 
             return { para, destinatariosLista: lista, assunto, corpoTexto, corpoHtml };
         }
@@ -2171,7 +2524,7 @@
                         destinatarios: fallbackDigitado.split(';'),
                         assunto: '[Teste Automático • Agenda PCM Cepêra] Conexão Power Automate OK',
                         corpoTexto: `Olá!\n\nEste é um e-mail de teste disparado em segundo plano pela Agenda PCM Cepêra.\nDestinatários (separados por ";"): ${fallbackDigitado}`,
-                        corpoHtml: `<div style="font-family:'Segoe UI',Arial,sans-serif;padding:18px;border:1px solid #cbd5e1;border-radius:12px;"><h3 style="margin-top:0;color:#0284c7;">Conexão Power Automate Ativa!</h3><p>Os alertas preventivos da <strong>Agenda PCM Cepêra</strong> já estão prontos para envio 100% automático no prazo configurado.</p><p style="font-size:12px;color:#64748b;">Destinatário(s) de teste: <code>${escapeHtml(fallbackDigitado)}</code></p></div>`,
+                        corpoHtml: gerarHtmlVisualEmailTeste(fallbackDigitado),
                         origem: 'teste_agenda_pcm'
                     })
                 });
@@ -2464,6 +2817,7 @@
                     <td class="py-3.5 px-4 text-right whitespace-nowrap">
                         <div class="inline-flex items-center gap-1.5">
                             <button type="button" class="btn-pill-dark !py-1.5 !px-3 text-[11px]" onclick="enviarAlertaEmail('${escapeHtml(l.id)}')">${ICONS.mail} <span>${lblBtn}</span></button>
+                            <button type="button" title="Pré-visualizar e-mail formatado (HTML)" class="px-2.5 py-1.5 rounded-full bg-indigo-50 hover:bg-indigo-100 text-indigo-700 font-extrabold text-[10px] flex items-center gap-1 transition-colors" onclick="abrirPreviaEmailAlerta('${escapeHtml(l.id)}')"><span>👁️ Prévia</span></button>
                             ${temWebhook ? `<button type="button" title="Abrir rascunho no Outlook local (separado por ;)" class="px-2.5 py-1.5 rounded-full bg-slate-100 hover:bg-slate-200 text-slate-700 font-extrabold text-[10px]" onclick="enviarAlertaEmail('${escapeHtml(l.id)}', true)">Outlook</button>` : ''}
                         </div>
                     </td>
@@ -3415,7 +3769,7 @@
                     const el = document.getElementById(id);
                     if (el && !el.hidden) fecharModal(id);
                 });
-                ['modalEspacoUsuario', 'modalAtalhos'].forEach(fecharModalA11y);
+                ['modalEspacoUsuario', 'modalAtalhos', 'modalPreviaEmail'].forEach(fecharModalA11y);
                 return;
             }
             if ((e.ctrlKey || e.metaKey) && (e.key === '?' || e.key === '/')) {
