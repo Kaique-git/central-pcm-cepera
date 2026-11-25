@@ -971,13 +971,55 @@
                             <select id="plAtivoEquipamento" required onchange="onPlEquipChange()" class="input-clean py-2 text-xs font-bold"></select>
                         </div>
                         <div>
-                            <label class="block text-[10px] font-extrabold uppercase text-slate-500 mb-1">Conjunto</label>
+                            <div class="flex items-center justify-between gap-1 mb-1">
+                                <label class="block text-[10px] font-extrabold uppercase text-slate-500">Conjunto</label>
+                                <button type="button" onclick="abrirCriadorSubconjuntoInlinePlano('conjunto')" class="text-[10px] font-extrabold text-sky-600 hover:text-sky-800 hover:underline" title="Cadastrar novo Conjunto na Árvore de Ativos sem sair deste modal">+ Novo</button>
+                            </div>
                             <select id="plAtivoConjunto" onchange="onPlConjuntoChange()" class="input-clean py-2 text-xs font-bold"></select>
                         </div>
                         <div>
-                            <label class="block text-[10px] font-extrabold uppercase text-slate-500 mb-1">Subconjunto</label>
+                            <div class="flex items-center justify-between gap-1 mb-1">
+                                <label class="block text-[10px] font-extrabold uppercase text-slate-500">Subconjunto</label>
+                                <button type="button" onclick="abrirCriadorSubconjuntoInlinePlano('subconjunto')" class="text-[10px] font-extrabold text-emerald-700 hover:text-emerald-900 hover:underline" title="Cadastrar novo Subconjunto diretamente na Árvore de Ativos">+ Criar</button>
+                            </div>
                             <select id="plAtivoSubconjunto" onchange="onPlSubconjuntoChange()" class="input-clean py-2 text-xs font-bold"></select>
                         </div>
+                    </div>
+
+                    <!-- Gaveta Inline: Criar Conjunto / Subconjunto direto na Árvore (ob_linhas) -->
+                    <div id="boxCriarSubconjuntoNoPlano" hidden class="hidden p-3.5 rounded-2xl bg-emerald-50/85 border border-emerald-300 space-y-2.5">
+                        <div class="flex flex-wrap items-center justify-between gap-2">
+                            <div class="text-[11px] font-extrabold text-emerald-900 flex items-center gap-1.5">
+                                <span>🌱 Cadastrar Novo Conjunto / Subconjunto na Árvore de Ativos</span>
+                                <span class="px-2 py-0.5 rounded-full bg-white border border-emerald-200 text-emerald-700 text-[9px] font-extrabold">Grava em ob_linhas e vincula ao plano</span>
+                            </div>
+                            <button type="button" onclick="fecharCriadorSubconjuntoInlinePlano()" class="text-[11px] font-extrabold text-slate-500 hover:text-rose-600">✕ Fechar</button>
+                        </div>
+                        <div class="grid grid-cols-1 sm:grid-cols-12 gap-2.5 items-end">
+                            <div class="sm:col-span-4">
+                                <label class="block text-[10px] font-extrabold uppercase text-emerald-900/80 mb-1">Conjunto *</label>
+                                <input type="text" id="plNovoConjuntoInp" list="plNovoConjuntoDatalist" class="input-clean py-1.5 text-xs font-bold bg-white" placeholder="Ex: Ar Comprimido, Redutor...">
+                                <datalist id="plNovoConjuntoDatalist"></datalist>
+                            </div>
+                            <div class="sm:col-span-4">
+                                <label class="block text-[10px] font-extrabold uppercase text-emerald-900/80 mb-1">Novo Subconjunto</label>
+                                <input type="text" id="plNovoSubconjuntoInp" class="input-clean py-1.5 text-xs font-bold bg-white" placeholder="Ex: Válvulas, Rolamentos... (vazio = só Conjunto)">
+                            </div>
+                            <div class="sm:col-span-2">
+                                <label class="block text-[10px] font-extrabold uppercase text-emerald-900/80 mb-1">Criticidade ABC</label>
+                                <select id="plNovoAtivoCritInp" class="input-clean py-1.5 text-xs font-extrabold bg-white">
+                                    <option value="A">Classe A</option>
+                                    <option value="B" selected>Classe B</option>
+                                    <option value="C">Classe C</option>
+                                </select>
+                            </div>
+                            <div class="sm:col-span-2 flex gap-1.5">
+                                <button type="button" id="btnSalvarSubconjuntoInlinePlano" onclick="salvarNovoSubconjuntoDiretoNoPlano()" class="btn-touch bg-emerald-600 hover:bg-emerald-700 text-white text-[11px] py-1.5 px-3 w-full justify-center shadow-sm">
+                                    <span>Criar &amp; Vincular</span>
+                                </button>
+                            </div>
+                        </div>
+                        <p class="text-[10px] font-semibold text-emerald-800/80">Dica: Você pode clicar em <strong>Criar &amp; Vincular</strong> agora ou apenas deixar preenchido — ao clicar em <strong>Salvar Plano Preventivo</strong> ele também será criado automaticamente na Árvore!</p>
                     </div>
                 </div>
 
@@ -4723,27 +4765,47 @@
             }).join('');
         };
 
+        const VAL_CRIAR_NOVO_CONJUNTO_PL = '__CRIAR_NOVO_CONJUNTO_PL__';
+        const VAL_CRIAR_NOVO_SUBCONJUNTO_PL = '__CRIAR_NOVO_SUBCONJUNTO_PL__';
+
         // Cascata de Ativos no Modal de Plano
-        function preencherOpcoesSelect(id, vals, placeholder, selected = '') {
+        function preencherOpcoesSelect(id, vals, placeholder, selected = '', createOption = null) {
             const el = document.getElementById(id);
             if (!el) return;
             const uniq = [...new Set(vals.filter(Boolean))].sort((a, b) => a.localeCompare(b, 'pt-BR'));
-            if (selected && !uniq.includes(selected)) uniq.unshift(selected);
-            el.innerHTML = `<option value="">${placeholder}</option>` + uniq.map(v => `<option value="${escapeHtml(v)}">${escapeHtml(v)}</option>`).join('');
-            if (selected) el.value = selected;
+            if (selected && selected !== createOption?.value && !uniq.includes(selected)) uniq.unshift(selected);
+            const createOptHtml = createOption
+                ? `<option value="${escapeHtml(createOption.value)}" class="font-extrabold text-emerald-700">${escapeHtml(createOption.label)}</option>`
+                : '';
+            el.innerHTML = `<option value="">${placeholder}</option>`
+                + uniq.map(v => `<option value="${escapeHtml(v)}">${escapeHtml(v)}</option>`).join('')
+                + createOptHtml;
+            if (selected && selected !== createOption?.value) el.value = selected;
         }
 
         function atualizarInfoAtivoSelecionado(autoFillCampos = false) {
             const s = document.getElementById('plAtivoSetor').value;
             const m = document.getElementById('plAtivoMaquina').value;
             const e = document.getElementById('plAtivoEquipamento').value;
-            const c = document.getElementById('plAtivoConjunto').value;
-            const sub = document.getElementById('plAtivoSubconjunto').value;
+            const cRaw = document.getElementById('plAtivoConjunto').value;
+            const subRaw = document.getElementById('plAtivoSubconjunto').value;
+            const c = cRaw === VAL_CRIAR_NOVO_CONJUNTO_PL ? '' : cRaw;
+            const sub = subRaw === VAL_CRIAR_NOVO_SUBCONJUNTO_PL ? '' : subRaw;
             const infoLinha = getClasseLinhaAtivo(s, m);
-            const match = assetNodes.find(n =>
-                n.area === s && n.maquina === m && n.equipamento === e &&
-                (!c || n.conjunto === c) && (!sub || n.subconjunto === sub)
-            );
+
+            let match = null;
+            if (s && m && e) {
+                if (c && sub) {
+                    match = assetNodes.find(n => n.area === s && n.maquina === m && n.equipamento === e && n.conjunto === c && n.subconjunto === sub) || null;
+                } else if (c) {
+                    match = assetNodes.find(n => n.area === s && n.maquina === m && n.equipamento === e && n.conjunto === c && !String(n.subconjunto || '').trim())
+                        || assetNodes.find(n => n.area === s && n.maquina === m && n.equipamento === e && n.conjunto === c)
+                        || null;
+                } else {
+                    match = assetNodes.find(n => n.area === s && n.maquina === m && n.equipamento === e) || null;
+                }
+            }
+
             const badge = document.getElementById('plAtivoInfoBadge');
             if (!match) {
                 badge.innerText = infoLinha.classe
@@ -4762,13 +4824,226 @@
                 if (classeRef) document.getElementById('plCriticidade').value = sugerirPrioridadeDeClasse(classeRef);
                 if (PERIODICIDADES[match.periodicidade_preventiva]) document.getElementById('plPeriodicidade').value = match.periodicidade_preventiva;
                 if (match.disciplina) document.getElementById('plDisciplina').value = match.disciplina;
+                const alvoSug = match.subconjunto || (c ? match.conjunto : '');
                 if (!document.getElementById('plTitulo').value) {
-                    document.getElementById('plTitulo').value = `Preventiva ${match.periodicidade_preventiva || ''} — ${match.equipamento}${match.subconjunto ? ' (' + match.subconjunto + ')' : ''}`.trim();
+                    document.getElementById('plTitulo').value = `Preventiva ${match.periodicidade_preventiva || ''} — ${match.equipamento}${alvoSug ? ' (' + alvoSug + ')' : ''}`.trim();
                 }
             }
             if (typeof renderPlanoDocsPicker === 'function') renderPlanoDocsPicker();
             return match;
         }
+
+        function atualizarDatalistConjuntosInlinePlano() {
+            const dl = document.getElementById('plNovoConjuntoDatalist');
+            if (!dl) return;
+            const s = document.getElementById('plAtivoSetor')?.value || '';
+            const m = document.getElementById('plAtivoMaquina')?.value || '';
+            const e = document.getElementById('plAtivoEquipamento')?.value || '';
+            const conjs = [...new Set(assetNodes
+                .filter(n => (!s || n.area === s) && (!m || n.maquina === m) && (!e || n.equipamento === e))
+                .map(n => n.conjunto)
+                .filter(Boolean))].sort((a, b) => a.localeCompare(b, 'pt-BR'));
+            dl.innerHTML = conjs.map(cj => `<option value="${escapeHtml(cj)}"></option>`).join('');
+        }
+
+        window.abrirCriadorSubconjuntoInlinePlano = (foco = 'subconjunto') => {
+            const s = document.getElementById('plAtivoSetor')?.value || '';
+            const m = document.getElementById('plAtivoMaquina')?.value || '';
+            const e = document.getElementById('plAtivoEquipamento')?.value || '';
+            if (!s || !m || !e) {
+                showToast('Selecione primeiro o Setor, a Máquina/Linha e o Equipamento acima.', 'error');
+                return;
+            }
+            atualizarDatalistConjuntosInlinePlano();
+            const box = document.getElementById('boxCriarSubconjuntoNoPlano');
+            const inpCj = document.getElementById('plNovoConjuntoInp');
+            const inpSub = document.getElementById('plNovoSubconjuntoInp');
+            const selCrit = document.getElementById('plNovoAtivoCritInp');
+            const cjAtual = document.getElementById('plAtivoConjunto')?.value || '';
+
+            if (inpCj) {
+                if (foco === 'conjunto') {
+                    inpCj.value = '';
+                } else if (cjAtual && cjAtual !== VAL_CRIAR_NOVO_CONJUNTO_PL) {
+                    inpCj.value = cjAtual;
+                }
+            }
+            if (inpSub && foco === 'conjunto') inpSub.value = '';
+
+            if (selCrit) {
+                const prioPl = normalizarPrioridadePlano(document.getElementById('plCriticidade')?.value || 'P3');
+                selCrit.value = prioPl === 'P1' ? 'A' : (prioPl === 'P4' ? 'C' : 'B');
+            }
+
+            if (box) {
+                box.hidden = false;
+                box.classList.remove('hidden');
+            }
+            setTimeout(() => {
+                if (foco === 'conjunto' || !(inpCj?.value || '').trim()) inpCj?.focus();
+                else inpSub?.focus();
+            }, 40);
+        };
+
+        window.fecharCriadorSubconjuntoInlinePlano = () => {
+            const box = document.getElementById('boxCriarSubconjuntoNoPlano');
+            if (box) {
+                box.hidden = true;
+                box.classList.add('hidden');
+            }
+            const inpCj = document.getElementById('plNovoConjuntoInp');
+            const inpSub = document.getElementById('plNovoSubconjuntoInp');
+            if (inpCj) inpCj.value = '';
+            if (inpSub) inpSub.value = '';
+        };
+
+        async function gravarOuObterSubconjuntoNaArvorePlano({ silencioso = false } = {}) {
+            const s = (document.getElementById('plAtivoSetor')?.value || '').trim();
+            const m = (document.getElementById('plAtivoMaquina')?.value || '').trim();
+            const e = (document.getElementById('plAtivoEquipamento')?.value || '').trim();
+            let cjNovo = (document.getElementById('plNovoConjuntoInp')?.value || '').trim();
+            let subNovo = (document.getElementById('plNovoSubconjuntoInp')?.value || '').trim();
+
+            if (!subNovo && cjNovo && /[>›]/.test(cjNovo)) {
+                const partes = cjNovo.split(/[>›]/).map(x => x.trim()).filter(Boolean);
+                if (partes.length >= 2) {
+                    cjNovo = partes[0];
+                    subNovo = partes.slice(1).join(' › ');
+                }
+            }
+
+            if (!cjNovo && subNovo) {
+                const cjSel = (document.getElementById('plAtivoConjunto')?.value || '').trim();
+                if (cjSel && cjSel !== VAL_CRIAR_NOVO_CONJUNTO_PL) cjNovo = cjSel;
+            }
+
+            if (!s || !m || !e) {
+                if (!silencioso) showToast('Selecione Setor, Máquina/Linha e Equipamento antes de criar na Árvore.', 'error');
+                return null;
+            }
+            if (!cjNovo) {
+                if (!silencioso) {
+                    showToast('Informe o nome do Conjunto para criar o registro na Árvore de Ativos.', 'error');
+                    document.getElementById('plNovoConjuntoInp')?.focus();
+                }
+                return null;
+            }
+
+            // Reaproveita capitalização oficial do conjunto se já existir no equipamento
+            const conjExistenteNome = assetNodes.find(n =>
+                normKey(n.area) === normKey(s) &&
+                normKey(n.maquina) === normKey(m) &&
+                normKey(n.equipamento) === normKey(e) &&
+                normKey(n.conjunto) === normKey(cjNovo)
+            )?.conjunto || cjNovo;
+
+            // Verifica se já existe exatamente este Conjunto + Subconjunto na Árvore
+            const jaExiste = assetNodes.find(n =>
+                normKey(n.area) === normKey(s) &&
+                normKey(n.maquina) === normKey(m) &&
+                normKey(n.equipamento) === normKey(e) &&
+                normKey(n.conjunto) === normKey(conjExistenteNome) &&
+                normKey(n.subconjunto || '') === normKey(subNovo)
+            ) || null;
+
+            if (jaExiste) {
+                onPlEquipChange({ conjunto: jaExiste.conjunto, subconjunto: jaExiste.subconjunto || '', skipAuto: false });
+                fecharCriadorSubconjuntoInlinePlano();
+                if (!silencioso) showToast(`"${jaExiste.conjunto}${jaExiste.subconjunto ? ' › ' + jaExiste.subconjunto : ''}" já existia na Árvore e foi selecionado!`, 'info');
+                return jaExiste;
+            }
+
+            const critAbc = normalizarCriticidade(document.getElementById('plNovoAtivoCritInp')?.value || 'B') || 'B';
+            const critLinha = getClasseLinhaAtivo(s, m).classe || '';
+            const perPrev = document.getElementById('plPeriodicidade')?.value || 'Mensal';
+            const perSem = PERIODICIDADES[perPrev]?.semanas ?? 4;
+            const disc = document.getElementById('plDisciplina')?.value || 'Mecânica';
+            const rawConjExist = rawLinhasDocs.find(d =>
+                normKey(pickField(d, ['setor', 'area', 'área'])) === normKey(s) &&
+                normKey(pickField(d, ['maquina', 'máquina', 'linha'])) === normKey(m) &&
+                normKey(pickField(d, ['equipamento'])) === normKey(e) &&
+                normKey(pickField(d, ['conjunto'])) === normKey(conjExistenteNome)
+            ) || null;
+
+            const agora = new Date().toISOString();
+            const autor = usuarioLogado?.nome || 'PCM';
+
+            const docPayload = {
+                setor: s,
+                area: s,
+                maquina: m,
+                equipamento: e,
+                conjunto: conjExistenteNome,
+                subconjunto: subNovo,
+                tag: '',
+                criticidade: critAbc,
+                criticidade_linha: critLinha,
+                periodicidade_preventiva: perPrev,
+                periodicidade_semanas: perSem,
+                disciplina: disc,
+                fabricante: rawConjExist?.fabricante || '',
+                modelo: rawConjExist?.modelo || '',
+                serie: '',
+                numeroSerie: '',
+                status_ativo: 'Ativo',
+                inspecao_ativa: !Boolean(subNovo),
+                inspecao_conjunto_ativa: rawConjExist ? Boolean(rawConjExist.inspecao_conjunto_ativa) : true,
+                padrinho_mec: rawConjExist?.padrinho_mec || '',
+                padrinho_ele: rawConjExist?.padrinho_ele || '',
+                origem_cadastro: 'preventivas_novo_plano',
+                criado_em: agora,
+                atualizado_em: agora,
+                atualizado_por: autor
+            };
+
+            const novoRef = await addDoc(colLinhas, docPayload);
+            const novoNode = {
+                nodeId: novoRef.id,
+                docId: novoRef.id,
+                area: s,
+                maquina: m,
+                equipamento: e,
+                conjunto: conjExistenteNome,
+                subconjunto: subNovo,
+                tag: '',
+                criticidade: critAbc,
+                criticidade_linha: critLinha,
+                periodicidade_preventiva: perPrev,
+                disciplina: disc,
+                status_ativo: 'Ativo'
+            };
+
+            if (!assetNodes.some(n => n.nodeId === novoRef.id)) {
+                assetNodes.push(novoNode);
+            }
+            if (!rawLinhasDocs.some(d => d.id === novoRef.id)) {
+                rawLinhasDocs.push({ id: novoRef.id, ...docPayload });
+            }
+
+            onPlEquipChange({ conjunto: conjExistenteNome, subconjunto: subNovo, skipAuto: false });
+            const titEl = document.getElementById('plTitulo');
+            if (titEl && !titEl.value.trim()) {
+                const alvoLbl = subNovo || conjExistenteNome;
+                titEl.value = `Preventiva ${perPrev} — ${e}${alvoLbl ? ' (' + alvoLbl + ')' : ''}`.trim();
+            }
+            fecharCriadorSubconjuntoInlinePlano();
+            if (!silencioso) {
+                showToast(`Criado na Árvore de Ativos e vinculado ao plano: ${conjExistenteNome}${subNovo ? ' › ' + subNovo : ''}!`, 'success');
+            }
+            return novoNode;
+        }
+
+        window.salvarNovoSubconjuntoDiretoNoPlano = async () => {
+            const btn = document.getElementById('btnSalvarSubconjuntoInlinePlano');
+            if (btn) { btn.disabled = true; btn.innerText = 'Criando...'; }
+            try {
+                await gravarOuObterSubconjuntoNaArvorePlano({ silencioso: false });
+            } catch (_) {
+                showToast('Erro ao criar Conjunto/Subconjunto na Árvore de Ativos.', 'error');
+            } finally {
+                if (btn) { btn.disabled = false; btn.innerHTML = '<span>Criar &amp; Vincular</span>'; }
+            }
+        };
 
         window.onPlSetorChange = (preset = {}) => {
             const s = document.getElementById('plAtivoSetor').value;
@@ -4785,18 +5060,37 @@
             const s = document.getElementById('plAtivoSetor').value;
             const m = document.getElementById('plAtivoMaquina').value;
             const e = document.getElementById('plAtivoEquipamento').value;
-            preencherOpcoesSelect('plAtivoConjunto', assetNodes.filter(n => (!s || n.area === s) && (!m || n.maquina === m) && (!e || n.equipamento === e)).map(n => n.conjunto), 'Conjunto (Opcional)', preset.conjunto || '');
+            const optCriarConj = e ? { value: VAL_CRIAR_NOVO_CONJUNTO_PL, label: '➕ Criar novo Conjunto na Árvore...' } : null;
+            preencherOpcoesSelect('plAtivoConjunto', assetNodes.filter(n => (!s || n.area === s) && (!m || n.maquina === m) && (!e || n.equipamento === e)).map(n => n.conjunto), 'Conjunto (Opcional)', preset.conjunto || '', optCriarConj);
+            atualizarDatalistConjuntosInlinePlano();
             onPlConjuntoChange(preset);
         };
         window.onPlConjuntoChange = (preset = {}) => {
+            const selCj = document.getElementById('plAtivoConjunto');
+            if (selCj && selCj.value === VAL_CRIAR_NOVO_CONJUNTO_PL) {
+                selCj.value = '';
+                abrirCriadorSubconjuntoInlinePlano('conjunto');
+            }
             const s = document.getElementById('plAtivoSetor').value;
             const m = document.getElementById('plAtivoMaquina').value;
             const e = document.getElementById('plAtivoEquipamento').value;
             const c = document.getElementById('plAtivoConjunto').value;
-            preencherOpcoesSelect('plAtivoSubconjunto', assetNodes.filter(n => (!s || n.area === s) && (!m || n.maquina === m) && (!e || n.equipamento === e) && (!c || n.conjunto === c)).map(n => n.subconjunto), 'Subconjunto (Opcional)', preset.subconjunto || '');
+            const optCriarSub = e ? { value: VAL_CRIAR_NOVO_SUBCONJUNTO_PL, label: '➕ Criar novo Subconjunto na Árvore...' } : null;
+            preencherOpcoesSelect('plAtivoSubconjunto', assetNodes.filter(n => (!s || n.area === s) && (!m || n.maquina === m) && (!e || n.equipamento === e) && (!c || n.conjunto === c)).map(n => n.subconjunto), 'Subconjunto (Opcional)', preset.subconjunto || '', optCriarSub);
+            const boxInline = document.getElementById('boxCriarSubconjuntoNoPlano');
+            const inpCjInline = document.getElementById('plNovoConjuntoInp');
+            if (boxInline && !boxInline.hidden && c && inpCjInline) inpCjInline.value = c;
             atualizarInfoAtivoSelecionado(!preset.skipAuto);
         };
-        window.onPlSubconjuntoChange = () => atualizarInfoAtivoSelecionado(true);
+        window.onPlSubconjuntoChange = () => {
+            const selSub = document.getElementById('plAtivoSubconjunto');
+            if (selSub && selSub.value === VAL_CRIAR_NOVO_SUBCONJUNTO_PL) {
+                selSub.value = '';
+                abrirCriadorSubconjuntoInlinePlano('subconjunto');
+                return;
+            }
+            atualizarInfoAtivoSelecionado(true);
+        };
 
         function normalizarCodigoPlanoKey(cod) {
             return String(cod || '')
@@ -4898,6 +5192,7 @@
             document.getElementById('planoEditId').value = plano?.id || '';
             document.getElementById('modalPlanoTitulo').innerText = plano ? `Editar Plano ${plano.codigo || ''}` : 'Novo Plano de Preventiva';
             document.getElementById('planoExcelPaste').value = '';
+            fecharCriadorSubconjuntoInlinePlano();
 
             const setores = assetNodes.length ? assetNodes.map(n => n.area) : getSetoresUnicos();
             const initSetor = plano?.setor || ativoPre?.area || '';
@@ -5066,47 +5361,70 @@
                 showToast('Inclua ao menos 1 item no checklist (cole do Excel ou adicione manualmente).', 'error');
                 return;
             }
-            const matchAtivo = atualizarInfoAtivoSelecionado(false);
-            const setorPl = document.getElementById('plAtivoSetor').value;
-            const maquinaPl = document.getElementById('plAtivoMaquina').value;
-            const prioPlano = normalizarPrioridadePlano(document.getElementById('plCriticidade').value) || 'P3';
-            const critLinhaPl = getClasseLinhaAtivo(setorPl, maquinaPl).classe || normalizarCriticidade(matchAtivo?.criticidade_linha);
-            const planoAnterior = editId ? getPlanosPreventiva().find(p => p.id === editId) : null;
-            const payload = {
-                kind: 'plano_preventiva',
-                codigo: codigoLimpo,
-                revisao: document.getElementById('plRevisao').value.trim() || 'Rev. 01',
-                titulo: document.getElementById('plTitulo').value.trim(),
-                ativoId: matchAtivo?.nodeId || '',
-                tag: matchAtivo?.tag || '',
-                setor: setorPl,
-                maquina: maquinaPl,
-                equipamento: document.getElementById('plAtivoEquipamento').value,
-                conjunto: document.getElementById('plAtivoConjunto').value,
-                subconjunto: document.getElementById('plAtivoSubconjunto').value,
-                modoAgendamento: document.getElementById('plModoAgendamento').value,
-                periodicidade: document.getElementById('plPeriodicidade').value,
-                prioridade: prioPlano,
-                criticidade: prioPlano,
-                criticidadeLinha: critLinhaPl,
-                disciplina: document.getElementById('plDisciplina').value,
-                duracaoEstimadaMin: Math.max(5, Number(document.getElementById('plDuracaoMin').value) || 60),
-                paradaNecessaria: document.getElementById('plParadaNecessaria').value,
-                epis: document.getElementById('plEpis').value.trim(),
-                pecas: document.getElementById('plPecas').value.trim(),
-                observacoes: document.getElementById('plObservacoes').value.trim(),
-                checklist: checklistLimpo,
-                anexoReferencia: planoAnexoDraft || null,
-                documentosVinculados: planoDocsVinculadosDraft.map(x => typeof x === 'string'
-                    ? { docId: x, codigo: '', titulo: '', categoria: '' }
-                    : { docId: x.docId || '', codigo: x.codigo || '', titulo: x.titulo || '', categoria: x.categoria || '' }).filter(x => x.docId || x.codigo),
-                atualizadoPor: usuarioLogado?.nome || 'PCM',
-                atualizadoEm: new Date().toISOString()
-            };
 
             const btn = document.getElementById('btnSalvarPlano');
             btn.disabled = true; btn.innerText = 'Salvando...';
+
             try {
+                // Se a gaveta de criação inline estiver aberta com Conjunto / Subconjunto preenchido, cria na Árvore (ob_linhas) automaticamente antes de salvar o plano
+                const boxInline = document.getElementById('boxCriarSubconjuntoNoPlano');
+                const temInlinePendente = boxInline && !boxInline.hidden && (
+                    Boolean((document.getElementById('plNovoConjuntoInp')?.value || '').trim()) ||
+                    Boolean((document.getElementById('plNovoSubconjuntoInp')?.value || '').trim())
+                );
+                let criouSubInline = false;
+                if (temInlinePendente) {
+                    const novoOuExist = await gravarOuObterSubconjuntoNaArvorePlano({ silencioso: true });
+                    if (!novoOuExist) {
+                        showToast('Informe o Conjunto na gaveta verde para criar o Subconjunto na Árvore (ou feche a gaveta).', 'error');
+                        document.getElementById('plNovoConjuntoInp')?.focus();
+                        return;
+                    }
+                    criouSubInline = true;
+                }
+
+                const matchAtivo = atualizarInfoAtivoSelecionado(false);
+                const setorPl = document.getElementById('plAtivoSetor').value;
+                const maquinaPl = document.getElementById('plAtivoMaquina').value;
+                const conjPlRaw = document.getElementById('plAtivoConjunto').value;
+                const subPlRaw = document.getElementById('plAtivoSubconjunto').value;
+                const conjPl = conjPlRaw === VAL_CRIAR_NOVO_CONJUNTO_PL ? '' : conjPlRaw;
+                const subPl = subPlRaw === VAL_CRIAR_NOVO_SUBCONJUNTO_PL ? '' : subPlRaw;
+                const prioPlano = normalizarPrioridadePlano(document.getElementById('plCriticidade').value) || 'P3';
+                const critLinhaPl = getClasseLinhaAtivo(setorPl, maquinaPl).classe || normalizarCriticidade(matchAtivo?.criticidade_linha);
+                const planoAnterior = editId ? getPlanosPreventiva().find(p => p.id === editId) : null;
+                const payload = {
+                    kind: 'plano_preventiva',
+                    codigo: codigoLimpo,
+                    revisao: document.getElementById('plRevisao').value.trim() || 'Rev. 01',
+                    titulo: document.getElementById('plTitulo').value.trim(),
+                    ativoId: matchAtivo?.nodeId || '',
+                    tag: matchAtivo?.tag || '',
+                    setor: setorPl,
+                    maquina: maquinaPl,
+                    equipamento: document.getElementById('plAtivoEquipamento').value,
+                    conjunto: conjPl,
+                    subconjunto: subPl,
+                    modoAgendamento: document.getElementById('plModoAgendamento').value,
+                    periodicidade: document.getElementById('plPeriodicidade').value,
+                    prioridade: prioPlano,
+                    criticidade: prioPlano,
+                    criticidadeLinha: critLinhaPl,
+                    disciplina: document.getElementById('plDisciplina').value,
+                    duracaoEstimadaMin: Math.max(5, Number(document.getElementById('plDuracaoMin').value) || 60),
+                    paradaNecessaria: document.getElementById('plParadaNecessaria').value,
+                    epis: document.getElementById('plEpis').value.trim(),
+                    pecas: document.getElementById('plPecas').value.trim(),
+                    observacoes: document.getElementById('plObservacoes').value.trim(),
+                    checklist: checklistLimpo,
+                    anexoReferencia: planoAnexoDraft || null,
+                    documentosVinculados: planoDocsVinculadosDraft.map(x => typeof x === 'string'
+                        ? { docId: x, codigo: '', titulo: '', categoria: '' }
+                        : { docId: x.docId || '', codigo: x.codigo || '', titulo: x.titulo || '', categoria: x.categoria || '' }).filter(x => x.docId || x.codigo),
+                    atualizadoPor: usuarioLogado?.nome || 'PCM',
+                    atualizadoEm: new Date().toISOString()
+                };
+
                 if (editId) {
                     await updateDoc(doc(db, 'ag_manutencao', editId), payload);
                     if (planoAnterior && normalizarCodigoPlanoKey(planoAnterior.codigo) !== normalizarCodigoPlanoKey(codigoLimpo)) {
@@ -5115,12 +5433,12 @@
                             await updateDoc(doc(db, 'ag_manutencao', o.id), { planoCodigo: codigoLimpo });
                         }
                     }
-                    showToast(`Plano ${payload.codigo} atualizado com sucesso!`, 'success');
+                    showToast(`Plano ${payload.codigo} atualizado com sucesso${criouSubInline ? ' (subconjunto gravado na Árvore)' : ''}!`, 'success');
                 } else {
                     payload.criadoPor = usuarioLogado?.nome || 'PCM';
                     payload.criadoEm = new Date().toISOString();
                     await addDoc(colManutencao, payload);
-                    showToast(`Plano ${payload.codigo} criado e pronto para programação!`, 'success');
+                    showToast(`Plano ${payload.codigo} criado${criouSubInline ? ' com o novo subconjunto já cadastrado na Árvore' : ''} e pronto para programação!`, 'success');
                 }
                 fecharModal('modalEditorPlano');
             } catch (err) {
