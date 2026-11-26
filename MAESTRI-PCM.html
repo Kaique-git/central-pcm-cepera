@@ -356,7 +356,8 @@
         }
         body.theme-dark #maestriLoadingCard,
         body.theme-dark #pipelineLiveProgressBanner,
-        body.theme-dark #corrSavingStatusBox {
+        body.theme-dark #corrSavingStatusBox,
+        body.theme-dark #confRevisarManualBanner {
             background: #0f172a !important;
             border-color: #334155 !important;
             color: #f8fafc !important;
@@ -377,6 +378,8 @@
         #pipelineLiveProgressBanner.hidden,
         #corrSavingStatusBox[hidden],
         #corrSavingStatusBox.hidden,
+        #confRevisarManualBanner[hidden],
+        #confRevisarManualBanner.hidden,
         #icoSalvarCorrSpin[hidden],
         #icoSalvarCorrSpin.hidden,
         #icoSalvarCorrCheck[hidden],
@@ -1151,6 +1154,7 @@
                             </select>
                             <select id="confFiltroFila" onchange="renderConferenteView()" class="input-clean py-2 text-xs font-bold w-auto">
                                 <option value="PENDENTES">Pendentes (Conferir + Revisão)</option>
+                                <option value="REVISAR_MANUAL">Apenas REVISAR_MANUAL (Sem Serviço)</option>
                                 <option value="CONFERIR">Apenas Fila CONFERIR</option>
                                 <option value="REVISAO">Apenas Bloqueio REVISÃO</option>
                                 <option value="REVISADAS">Já Conferidas por Supervisor</option>
@@ -1163,6 +1167,7 @@
                     </div>
 
                     <div id="confKpiStrip" class="grid grid-cols-2 sm:grid-cols-4 gap-3"></div>
+                    <div id="confRevisarManualBanner" hidden class="hidden"></div>
                     <div id="confCardsLista" class="grid grid-cols-1 lg:grid-cols-2 gap-4"></div>
                 </section>
 
@@ -1681,7 +1686,7 @@
 
     <!-- ==================== MODAL 1: CORRIGIR OM (CONFERENTE NÓ 5 → BIBLIOTECÁRIO NÓ 6) ==================== -->
     <div id="modalCorrigirOmSupervisor" role="dialog" aria-modal="true" hidden class="hidden fixed inset-0 bg-slate-900/65 backdrop-blur-sm z-50 flex items-end sm:items-center justify-center p-0 sm:p-4">
-        <div class="bg-white w-full max-w-lg rounded-t-3xl sm:rounded-3xl p-6 shadow-2xl border border-slate-200 space-y-4">
+        <div class="bg-white w-full max-w-lg max-h-[92vh] overflow-y-auto rounded-t-3xl sm:rounded-3xl p-6 shadow-2xl border border-slate-200 space-y-4">
             <div class="flex items-center justify-between border-b border-slate-100 pb-3">
                 <div>
                     <span class="text-[10px] font-extrabold uppercase tracking-widest text-amber-600">Nó 5 (Conferente) → Nó 6 (Bibliotecário)</span>
@@ -1692,6 +1697,17 @@
             <form onsubmit="salvarCorrecaoSupervisor(event)" class="space-y-3.5 text-xs">
                 <input type="hidden" id="corrOmId" value="">
                 <div id="corrOmResumo" class="p-3 rounded-2xl bg-slate-50 border border-slate-200 space-y-1"></div>
+                <div id="corrServicoBox" class="p-3 rounded-2xl bg-indigo-50/50 border border-indigo-200 space-y-1.5">
+                    <div class="flex flex-wrap items-center justify-between gap-1.5">
+                        <label for="corrServicoExecutado" id="corrServicoLabel" class="text-[10px] font-extrabold uppercase text-indigo-900">Serviço Executado Real (p/ completar se veio em branco)</label>
+                        <button type="button" id="btnSugerirGeminiModal" onclick="sugerirClassificacaoGeminiNoModal(this)" class="inline-flex items-center gap-1 px-2.5 py-1 rounded-lg bg-indigo-600 hover:bg-indigo-700 text-white text-[10px] font-extrabold shadow-xs transition-colors">
+                            <svg class="w-3 h-3 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 3v4M3 5h4M6 17v4m-2-2h4m5-16l2.286 6.857L21 12l-5.714 2.143L13 21l-2.286-6.857L5 12l5.714-2.143L13 3z"/></svg>
+                            <span>Analisar c/ Gemini</span>
+                        </button>
+                    </div>
+                    <textarea id="corrServicoExecutado" rows="2" class="input-clean py-2 font-semibold bg-white" placeholder="Ex: Trocada correia dentada do tracionador e ajustado sensor óptico..."></textarea>
+                    <div id="corrServicoHint" class="text-[10px] font-semibold text-slate-500">Se o ERP veio em branco por erro de lançamento, digite o serviço real acima e use o Gemini ou escolha a categoria abaixo.</div>
+                </div>
                 <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
                     <div>
                         <label class="block text-[10px] font-extrabold uppercase text-slate-500 mb-1">Nova Categoria Oficial *</label>
@@ -2486,6 +2502,8 @@ service cloud.firestore {
         let historicoRodadas = [{ ...BASELINE_SET_OUT_2026 }];
         let lotesAuditadosMap = {};
         let revisoesPorOm = {};
+        let servicosManuaisPorOm = {};
+        let cardsComEdicaoServicoAberta = new Set();
         let lotePendenteConfirmacao = null;
         let rodadaVigenteInfo = {
             periodo: "Nov/2026",
@@ -2524,7 +2542,8 @@ service cloud.firestore {
             bolt: '<svg class="w-3.5 h-3.5 inline-block shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"/></svg>',
             print: '<svg class="w-3.5 h-3.5 inline-block shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z"/></svg>',
             arrowR: '<svg class="w-3 h-3 inline-block shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 5l7 7m0 0l-7 7m7-7H3"/></svg>',
-            cpu: '<svg class="w-3.5 h-3.5 inline-block shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 3v2m6-2v2M9 19v2m6-2v2M5 9H3m2 6H3m18-6h-2m2 6h-2M7 19h10a2 2 0 002-2V7a2 2 0 00-2-2H7a2 2 0 00-2 2v10a2 2 0 002 2zM9 9h6v6H9V9z"/></svg>'
+            cpu: '<svg class="w-3.5 h-3.5 inline-block shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 3v2m6-2v2M9 19v2m6-2v2M5 9H3m2 6H3m18-6h-2m2 6h-2M7 19h10a2 2 0 002-2V7a2 2 0 00-2-2H7a2 2 0 00-2 2v10a2 2 0 002 2zM9 9h6v6H9V9z"/></svg>',
+            sparkle: '<svg class="w-3.5 h-3.5 inline-block shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 3v4M3 5h4M6 17v4m-2-2h4m5-16l2.286 6.857L21 12l-5.714 2.143L13 21l-2.286-6.857L5 12l5.714-2.143L13 3z"/></svg>'
         };
 
         // ================= HELPERS PUROS & SHA-256 =================
@@ -3258,6 +3277,27 @@ service cloud.firestore {
             return { sev: mapNv[nv], regra: `B=${b} C=${c} (${tempoMin || 0}min) -> ${mapNv[nv]}` };
         }
 
+        function isServicoInsuficiente(servicoRaw) {
+            const sn = normKey(String(servicoRaw || "").trim());
+            return !sn || sn.length < 4 || /^(?:ok|verificado|feito|feito servico|realizado|sem servico|n a)$/.test(sn);
+        }
+        window.isServicoInsuficiente = isServicoInsuficiente;
+
+        function normalizarCategoriaGemini(rawCat) {
+            const limpo = String(rawCat || "")
+                .normalize("NFD")
+                .replace(/[\u0300-\u036f]/g, "")
+                .toUpperCase()
+                .replace(/[^A-Z0-9\s]/g, " ")
+                .replace(/\s+/g, " ")
+                .trim();
+            if (CATEGORIAS_OFICIAIS.includes(limpo)) return limpo;
+            if (limpo === "INSPECAO DE ROTA") return "INSPECAO DE ROTAS";
+            if (limpo === "SETUP") return "SETUP PROGRAMADO";
+            if (limpo === "MELHORIA") return "MELHORIAS";
+            return "";
+        }
+
         function classificarOmNoMotorMaestri(om, cacheDedup) {
             const p = String(om.problema || "").trim();
             const s = String(om.servico || "").trim();
@@ -3272,7 +3312,7 @@ service cloud.firestore {
             }
 
             // 1. Serviço insuficiente / vazio
-            if (!sn || sn.length < 4 || /^(?:ok|verificado|feito|feito servico|realizado|sem servico|n a)$/.test(sn)) {
+            if (isServicoInsuficiente(s)) {
                 if (/\b(?:inspec\w* de rota|ronda|conforme roteiro|checklist de rota)\b/.test(pn)) {
                     return { categoria: "INSPECAO DE ROTAS", b: null, c: null, confianca: 4, origem: "FAST_PATH_R0", justificativa: "Rota declarada na descrição do problema." };
                 }
@@ -3456,6 +3496,7 @@ service cloud.firestore {
                 tempo_min: tempo,
                 problema: omRaw.problema || "",
                 servico: omRaw.servico || "",
+                servico_manual: Boolean(omRaw.servico_manual || servicosManuaisPorOm[String(omRaw.om)]?.servico),
                 categoria: cat,
                 severidade: sev,
                 b,
@@ -3757,6 +3798,7 @@ service cloud.firestore {
                 tempo_min: Number(o.tempo_min || 0),
                 problema: String(o.problema || "").slice(0, 320),
                 servico: String(o.servico || "").slice(0, 420),
+                servico_manual: Boolean(o.servico_manual),
                 categoria: String(o.categoria || "AJUSTE"),
                 severidade: String(o.severidade || "NA"),
                 b: o.b != null ? Number(o.b) : null,
@@ -5493,8 +5535,25 @@ RETORNE EXCLUSIVAMENTE UM OBJETO JSON VÁLIDO (sem texto fora do JSON) COM A SEG
         function aplicarRevisoesSalvasNaAuditoria(lista = []) {
             return (Array.isArray(lista) ? lista : []).map(item => {
                 const o = { ...item };
-                const rev = revisoesPorOm[String(o.om)];
+                const key = String(o.om);
+                const servMan = servicosManuaisPorOm[key];
+                if (servMan && servMan.servico) {
+                    o.servico = servMan.servico;
+                    o.servico_manual = true;
+                    const qual = calcularScoreQualidadeOM(o.problema, o.servico);
+                    o.qualidade_score = qual.score;
+                    o.qualidade_nivel = qual.nivel;
+                    o.qualidade_motivo = qual.motivo;
+                }
+                const rev = revisoesPorOm[key];
                 if (rev) {
+                    if (rev.servico) {
+                        o.servico = rev.servico;
+                        const qual = calcularScoreQualidadeOM(o.problema, o.servico);
+                        o.qualidade_score = qual.score;
+                        o.qualidade_nivel = qual.nivel;
+                        o.qualidade_motivo = qual.motivo;
+                    }
                     o.categoria = rev.categoria || o.categoria;
                     o.b = rev.b ?? (o.categoria === "QUEBRA" ? (o.b || 2) : null);
                     o.c = rev.c ?? (o.categoria === "QUEBRA" ? (o.c || 2) : null);
@@ -5504,6 +5563,17 @@ RETORNE EXCLUSIVAMENTE UM OBJETO JSON VÁLIDO (sem texto fora do JSON) COM A SEG
                     o.origem = "SUPERVISOR";
                     o.fila = "AUTOMATICO";
                     o.confianca = 5;
+                } else if (servMan && servMan.analise_ia && servMan.analise_ia.categoria) {
+                    const ia = servMan.analise_ia;
+                    o.categoria = ia.categoria;
+                    o.b = ia.b ?? null;
+                    o.c = ia.c ?? null;
+                    o.severidade = ia.severidade || "NA";
+                    o.regra_severidade = ia.regra_severidade || "";
+                    o.justificativa = ia.justificativa || o.justificativa;
+                    o.origem = ia.origem || "IA_LOTE20";
+                    o.fila = ia.fila || "CONFERIR";
+                    o.confianca = Number(ia.confianca || 4);
                 }
                 return o;
             });
@@ -5653,6 +5723,7 @@ RETORNE EXCLUSIVAMENTE UM OBJETO JSON VÁLIDO (sem texto fora do JSON) COM A SEG
                 }
                 safeStorage.set("cepera_maestri_historico_rodadas", JSON.stringify(historicoRodadas));
                 safeStorage.set("cepera_maestri_om_revisoes", JSON.stringify(revisoesPorOm));
+                safeStorage.set("cepera_maestri_servicos_manuais", JSON.stringify(servicosManuaisPorOm));
                 safeStorage.set("cepera_maestri_biblioteca", JSON.stringify(bibliotecaCorrecoes.slice(0, 400)));
 
                 // Mantém últimos 5 lotes auditados com snapshot compacto para evitar reauditoria acidental
@@ -5696,6 +5767,14 @@ RETORNE EXCLUSIVAMENTE UM OBJETO JSON VÁLIDO (sem texto fora do JSON) COM A SEG
                 if (rawRev) {
                     const parsedRev = JSON.parse(rawRev);
                     if (parsedRev && typeof parsedRev === "object") revisoesPorOm = parsedRev;
+                }
+            } catch (_) {}
+
+            try {
+                const rawServMan = safeStorage.get("cepera_maestri_servicos_manuais");
+                if (rawServMan) {
+                    const parsedServ = JSON.parse(rawServMan);
+                    if (parsedServ && typeof parsedServ === "object") servicosManuaisPorOm = parsedServ;
                 }
             } catch (_) {}
 
@@ -6067,9 +6146,9 @@ RETORNE EXCLUSIVAMENTE UM OBJETO JSON VÁLIDO (sem texto fora do JSON) COM A SEG
             }));
 
             const promptText = `Você é o Auditor IA PCM Cepêra (Norma EN 13306). Classifique EXATAMENTE cada OM na lista abaixo em uma das 11 categorias: ACOMPANHAMENTO, AJUSTE, AJUSTE POS SETUP, FALHA OPERACIONAL, INSPECAO DE ROTAS, MANUTENCAO PROGRAMADA, MELHORIAS, PREDIAL, PREVENTIVA, QUEBRA, SETUP PROGRAMADO.
-Para QUEBRA informe b (1..3) e c (1..3).
+Para QUEBRA informe b (1..3) e c (1..3). Informe confianca de 1 a 5 (5 = evidência técnica clara no problema/serviço; 4 = caso limítrofe para conferência rápida).
 Regras aprendidas do Bibliotecário da planta:\n${exemplosBib || "- Sem correções extras"}\n
-Responda SOMENTE um JSON Array no formato [{"om":"...","categoria":"...","b":null,"c":null,"confianca":4,"justificativa":"..."}].
+Responda SOMENTE um JSON Array no formato [{"om":"...","categoria":"...","b":null,"c":null,"confianca":5,"justificativa":"..."}].
 OMs:\n${JSON.stringify(listaPrompt)}`;
 
             const { text } = await chamarGeminiApiComFallback(apiKey, promptText);
@@ -6388,14 +6467,18 @@ OMs:\n${JSON.stringify(listaPrompt)}`;
                 let reaproveitadasHistCnt = 0;
                 const pendentesIa = [];
 
-                const preliminares = omsBrutasCarregadas.map(om => {
-                    const omKey = String(om.om || "").trim();
+                const preliminares = omsBrutasCarregadas.map(omOrig => {
+                    const omKey = String(omOrig.om || "").trim();
+                    const servMan = !opts.ignorarRevisoesHumanas ? servicosManuaisPorOm[omKey] : null;
+                    const om = (servMan && servMan.servico)
+                        ? { ...omOrig, servico: servMan.servico, servico_manual: true }
+                        : omOrig;
                     const revSalva = !opts.ignorarRevisoesHumanas ? revisoesPorOm[omKey] : null;
                     if (revSalva) {
                         preservadasSupCnt++;
                         fastCnt++;
                         return {
-                            om,
+                            om: revSalva.servico ? { ...om, servico: revSalva.servico } : om,
                             dec: {
                                 categoria: revSalva.categoria,
                                 b: revSalva.b || null,
@@ -6544,9 +6627,10 @@ OMs:\n${JSON.stringify(listaPrompt)}`;
                         };
                     }
                     const overrideIa = iaMap.get(String(om.om));
-                    const finalDec = overrideIa && CATEGORIAS_OFICIAIS.includes(String(overrideIa.categoria).toUpperCase())
+                    const catIaNorm = overrideIa ? normalizarCategoriaGemini(overrideIa.categoria) : "";
+                    const finalDec = overrideIa && catIaNorm
                         ? {
-                            categoria: String(overrideIa.categoria).toUpperCase(),
+                            categoria: catIaNorm,
                             b: overrideIa.b ? Number(overrideIa.b) : dec.b,
                             c: overrideIa.c ? Number(overrideIa.c) : dec.c,
                             confianca: Number(overrideIa.confianca || 4),
@@ -9411,11 +9495,16 @@ Responda SOMENTE JSON Array: [{"ativo_erp":"...","tipo_ativo":"ATIVO_ARVORE"|"FE
                 return true;
             });
 
+            const revManTotal = omsAuditadas.filter(x => x.categoria === "REVISAR_MANUAL").length;
+            const revManProntas = omsAuditadas.filter(x => x.categoria === "REVISAR_MANUAL" && !isServicoInsuficiente(x.servico)).length;
+
             document.getElementById("audResumoContadores").innerHTML = `
                 <span class="px-2.5 py-1 rounded-full bg-slate-100 text-slate-800">${filtradas.length} exibida(s)</span>
                 <span class="px-2.5 py-1 rounded-full bg-emerald-50 text-emerald-800 border border-emerald-200">${filtradas.filter(x => x.origem === "FAST_PATH_R0" || x.origem === "BIBLIOTECA_MEMORIA").length} Fast-Path / Memória R$ 0</span>
                 <span class="px-2.5 py-1 rounded-full bg-rose-50 text-rose-800 border border-rose-200">${filtradas.filter(x => x.categoria === "QUEBRA").length} Quebra(s)</span>
-                <span class="px-2.5 py-1 rounded-full bg-amber-50 text-amber-800 border border-amber-200">${filtradas.filter(x => x.categoria === "FALHA OPERACIONAL").length} Falha(s) Operacional(is)</span>`;
+                <span class="px-2.5 py-1 rounded-full bg-amber-50 text-amber-800 border border-amber-200">${filtradas.filter(x => x.categoria === "FALHA OPERACIONAL").length} Falha(s) Operacional(is)</span>
+                ${revManTotal > 0 ? `<button type="button" onclick="irParaRevisarManualConferente()" class="inline-flex items-center gap-1 px-2.5 py-1 rounded-full bg-slate-900 hover:bg-slate-800 text-white transition-colors">${SVG_ICO.edit} ${revManTotal} REVISAR_MANUAL → Digitar Serviço na Mesa</button>` : ""}
+                ${revManProntas > 0 ? `<button type="button" onclick="analisarRevisarManualPreenchidasComGemini()" class="inline-flex items-center gap-1 px-2.5 py-1 rounded-full bg-indigo-600 hover:bg-indigo-700 text-white transition-colors">${SVG_ICO.sparkle} Analisar ${revManProntas} Preenchida(s) c/ Gemini</button>` : ""}`;
 
             document.getElementById("audQualidadeEquipesGrid").innerHTML = EQUIPES_OFICIAIS.map(eq => {
                 const q = qualidadeEquipes[eq] || { equipe: eq, total_oms: 0, score_medio: 100, apontamentos_vagos: 0, pct_vagos: 0 };
@@ -9443,6 +9532,7 @@ Responda SOMENTE JSON Array: [{"ativo_erp":"...","tipo_ativo":"ATIVO_ARVORE"|"FE
                 const origCls = ["FAST_PATH_R0", "BIBLIOTECA_MEMORIA", "DEDUP_RODADA"].includes(o.origem)
                     ? "bg-emerald-50 text-emerald-800 border-emerald-200"
                     : "bg-indigo-50 text-indigo-800 border-indigo-200";
+                const servInsuf = isServicoInsuficiente(o.servico);
                 return `
                     <tr class="hover:bg-slate-50/80">
                         <td class="py-3 px-3 whitespace-nowrap">
@@ -9456,7 +9546,10 @@ Responda SOMENTE JSON Array: [{"ativo_erp":"...","tipo_ativo":"ATIVO_ARVORE"|"FE
                         </td>
                         <td class="py-3 px-3 max-w-md">
                             <div class="font-bold text-slate-800">Prob: ${escapeHtml(o.problema)}</div>
-                            <div class="text-[11px] text-slate-600">Serv: ${escapeHtml(o.servico || "(vazio)")}</div>
+                            <div class="text-[11px] ${servInsuf ? "text-rose-600 font-bold" : "text-slate-600"}">
+                                Serv: ${escapeHtml(o.servico || "(EM BRANCO — erro de lançamento ERP)")}
+                                ${o.servico_manual ? `<span class="ml-1 px-1.5 py-0.5 rounded bg-indigo-50 border border-indigo-200 text-indigo-800 text-[9px] font-extrabold">Preenchido manual</span>` : ""}
+                            </div>
                             <div class="text-[10px] font-semibold text-slate-400 mt-0.5">Parecer: ${escapeHtml(o.justificativa)}</div>
                         </td>
                         <td class="py-3 px-3 text-center whitespace-nowrap">
@@ -9472,8 +9565,10 @@ Responda SOMENTE JSON Array: [{"ativo_erp":"...","tipo_ativo":"ATIVO_ARVORE"|"FE
                             <div class="text-[10px] font-bold text-slate-500 mt-0.5">Fila: ${escapeHtml(o.fila)}</div>
                         </td>
                         <td class="py-3 px-3 text-right whitespace-nowrap space-x-1">
-                            <button type="button" onclick="confirmarOmSupervisorDireto('${o.om}', this)" class="inline-flex items-center px-2.5 py-1 rounded-lg bg-emerald-50 hover:bg-emerald-100 text-emerald-800 border border-emerald-200 text-[11px] font-extrabold" title="Confirmar classificação">${SVG_ICO.check}</button>
-                            <button type="button" onclick="abrirModalCorrigirOm('${o.om}')" class="inline-flex items-center gap-1 px-2.5 py-1 rounded-lg bg-amber-50 hover:bg-amber-100 text-amber-900 border border-amber-200 text-[11px] font-extrabold">${SVG_ICO.edit} Corrigir</button>
+                            ${o.categoria === "REVISAR_MANUAL"
+                                ? `<button type="button" onclick="abrirModalCorrigirOm('${o.om}', true)" class="inline-flex items-center gap-1 px-2.5 py-1 rounded-lg bg-indigo-600 hover:bg-indigo-700 text-white text-[11px] font-extrabold shadow-xs">${SVG_ICO.sparkle} Digitar Serviço / Gemini</button>`
+                                : `<button type="button" onclick="confirmarOmSupervisorDireto('${o.om}', this)" class="inline-flex items-center px-2.5 py-1 rounded-lg bg-emerald-50 hover:bg-emerald-100 text-emerald-800 border border-emerald-200 text-[11px] font-extrabold" title="Confirmar classificação">${SVG_ICO.check}</button>
+                                   <button type="button" onclick="abrirModalCorrigirOm('${o.om}')" class="inline-flex items-center gap-1 px-2.5 py-1 rounded-lg bg-amber-50 hover:bg-amber-100 text-amber-900 border border-amber-200 text-[11px] font-extrabold">${SVG_ICO.edit} Corrigir</button>`}
                         </td>
                     </tr>`;
             }).join("");
@@ -9481,6 +9576,7 @@ Responda SOMENTE JSON Array: [{"ativo_erp":"...","tipo_ativo":"ATIVO_ARVORE"|"FE
 
         // VIEW 3: NÓ 5 — MESA DO CONFERENTE (SUPERVISORES)
         window.renderConferenteView = () => {
+            sincronizarInputsServicoVisiveisNaMesa();
             const fEq = document.getElementById("confFiltroEquipe")?.value || "";
             const fFila = document.getElementById("confFiltroFila")?.value || "PENDENTES";
             const badgeEq = document.getElementById("confPerfilEquipeBadge");
@@ -9499,8 +9595,11 @@ Responda SOMENTE JSON Array: [{"ativo_erp":"...","tipo_ativo":"ATIVO_ARVORE"|"FE
                 { k: "Automáticas (Alta Confiança)", v: cntAuto, vc: "text-sky-700" }
             ].map(c => `<div class="glass-card p-4 rounded-3xl"><div class="text-[10px] font-extrabold uppercase text-slate-500">${c.k}</div><div class="text-2xl font-extrabold ${c.vc}">${c.v}</div></div>`).join("");
 
+            atualizarBannerRevisarManualConferente();
+
             const lista = baseEq.filter(o => {
                 if (fFila === "PENDENTES") return o.fila === "CONFERIR" || o.fila === "REVISAO";
+                if (fFila === "REVISAR_MANUAL") return o.categoria === "REVISAR_MANUAL";
                 if (fFila === "CONFERIR") return o.fila === "CONFERIR";
                 if (fFila === "REVISAO") return o.fila === "REVISAO";
                 if (fFila === "REVISADAS") return o.origem === "SUPERVISOR";
@@ -9513,13 +9612,19 @@ Responda SOMENTE JSON Array: [{"ativo_erp":"...","tipo_ativo":"ATIVO_ARVORE"|"FE
                 return;
             }
 
-            box.innerHTML = lista.map(o => `
+            box.innerHTML = lista.map(o => {
+                const isRevManual = o.categoria === "REVISAR_MANUAL";
+                const servInsuf = isServicoInsuficiente(o.servico);
+                const mostrarEditorServico = isRevManual || servInsuf || Boolean(o.servico_manual) || cardsComEdicaoServicoAberta.has(String(o.om));
+
+                return `
                 <div class="glass-card p-5 rounded-3xl flex flex-col justify-between gap-3 border-l-4 ${o.fila === "REVISAO" ? "border-l-rose-600" : "border-l-amber-500"}">
                     <div class="space-y-2">
                         <div class="flex flex-wrap items-center justify-between gap-2">
                             <div class="flex items-center gap-1.5">
                                 <span class="px-2 py-0.5 rounded bg-slate-900 text-white font-mono text-[10px] font-extrabold">OM #${escapeHtml(o.om)}</span>
                                 <span class="px-2 py-0.5 rounded-full bg-amber-100 text-amber-900 text-[10px] font-extrabold">${escapeHtml(o.equipe)} • ${escapeHtml(o.fila)}</span>
+                                ${isRevManual ? `<span class="px-2 py-0.5 rounded-full bg-rose-100 text-rose-800 border border-rose-200 text-[10px] font-extrabold">SEM SERVIÇO ERP</span>` : ""}
                             </div>
                             <span class="text-[11px] font-mono font-bold text-slate-500">${escapeHtml(o.data)} • ${o.tempo_min} min</span>
                         </div>
@@ -9528,24 +9633,69 @@ Responda SOMENTE JSON Array: [{"ativo_erp":"...","tipo_ativo":"ATIVO_ARVORE"|"FE
                             <span class="text-xs font-bold text-slate-500">(${escapeHtml(o.setor)} • Linha ${escapeHtml(o.criticidade_linha)})</span>
                             ${o.ativo_erp && normKey(o.ativo_erp) !== normKey(o.ativo) ? `<div class="inline-block ml-1 px-1.5 py-0.5 rounded bg-slate-100 border border-slate-200 font-mono text-[9px] font-bold text-slate-500">ERP: ${escapeHtml(o.ativo_erp)}</div>` : ""}
                         </div>
-                        <div class="p-3 rounded-2xl bg-slate-50 border border-slate-200 text-xs space-y-1">
+                        <div class="p-3 rounded-2xl bg-slate-50 border border-slate-200 text-xs space-y-1.5">
                             <div><strong class="text-slate-700">Problema:</strong> ${escapeHtml(o.problema)}</div>
-                            <div><strong class="text-slate-700">Serviço Executado:</strong> ${escapeHtml(o.servico || "(EM BRANCO / INSUFICIENTE)")}</div>
+                            ${mostrarEditorServico ? `
+                                <div class="pt-1.5 border-t border-slate-200/80 space-y-1.5">
+                                    <div class="flex flex-wrap items-center justify-between gap-1">
+                                        <label for="confInputServico_${escapeHtml(o.om)}" class="text-[10px] font-extrabold uppercase ${servInsuf ? "text-rose-700" : "text-indigo-800"}">
+                                            ${servInsuf ? "⚠️ Serviço Executado em Branco — Digite Manualmente:" : "✏️ Serviço Executado Informado Manualmente:"}
+                                        </label>
+                                        <span id="confServStatus_${escapeHtml(o.om)}" class="text-[10px] font-extrabold ${servInsuf ? "text-amber-700" : "text-emerald-700"}">
+                                            ${servInsuf ? "Aguardando preenchimento" : "✓ Pronto p/ analisar"}
+                                        </span>
+                                    </div>
+                                    <textarea
+                                        id="confInputServico_${escapeHtml(o.om)}"
+                                        data-om-id="${escapeHtml(o.om)}"
+                                        rows="2"
+                                        oninput="onDigitarServicoManualCard('${escapeHtml(o.om)}', this)"
+                                        placeholder="Digite o serviço executado real (ex: Foi trocada a correia sincronizadora e regulado tensor)..."
+                                        class="input-clean py-2 px-3 text-xs font-semibold bg-white ${servInsuf ? "border-amber-300 focus:border-indigo-500" : "border-emerald-300 focus:border-indigo-500"}"
+                                    >${escapeHtml(o.servico || "")}</textarea>
+                                    <div class="flex flex-wrap items-center justify-between gap-1.5">
+                                        <span class="text-[10px] font-semibold text-slate-500">Salva na OM e libera análise automática pelo Gemini.</span>
+                                        <div class="flex flex-wrap items-center gap-1.5">
+                                            <button type="button" onclick="salvarServicoManualCard('${escapeHtml(o.om)}', this)" class="inline-flex items-center gap-1 px-2.5 py-1 rounded-xl bg-slate-800 hover:bg-slate-900 text-white text-[10px] font-extrabold transition-colors">
+                                                ${SVG_ICO.check} <span>Salvar Serviço</span>
+                                            </button>
+                                            <button type="button" onclick="analisarOmUnicaComGemini('${escapeHtml(o.om)}', this)" class="inline-flex items-center gap-1 px-2.5 py-1 rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white text-[10px] font-extrabold shadow-xs transition-colors">
+                                                ${SVG_ICO.sparkle} <span>Analisar c/ Gemini</span>
+                                            </button>
+                                        </div>
+                                    </div>
+                                </div>
+                            ` : `
+                                <div class="flex items-start justify-between gap-2">
+                                    <div><strong class="text-slate-700">Serviço Executado:</strong> ${escapeHtml(o.servico)}</div>
+                                    <button type="button" onclick="abrirEdicaoServicoNoCard('${escapeHtml(o.om)}')" class="shrink-0 text-[10px] font-extrabold text-indigo-700 hover:text-indigo-900 underline">Editar serviço</button>
+                                </div>
+                            `}
                         </div>
                         <div class="flex flex-wrap items-center justify-between gap-2 text-xs">
-                            <span>Sugestão IA: <strong class="px-2 py-0.5 rounded-full bg-sky-100 text-sky-900">${escapeHtml(o.categoria)}${o.categoria === "QUEBRA" ? ` (${o.severidade} B=${o.b} C=${o.c})` : ""}</strong></span>
+                            <span>Sugestão IA: <strong class="px-2 py-0.5 rounded-full ${isRevManual ? "bg-slate-900 text-white" : "bg-sky-100 text-sky-900"}">${escapeHtml(o.categoria)}${o.categoria === "QUEBRA" ? ` (${o.severidade} B=${o.b} C=${o.c})` : ""}</strong></span>
                             <span class="text-[11px] font-semibold text-slate-500">${escapeHtml(o.justificativa)}</span>
                         </div>
                     </div>
                     <div class="flex items-center gap-2 pt-3 border-t border-slate-100">
-                        <button type="button" onclick="confirmarOmSupervisorDireto('${o.om}', this)" class="btn-touch bg-emerald-600 hover:bg-emerald-700 text-white flex-1 text-xs py-2.5">
-                            ${SVG_ICO.check} 1. Confirmar (${escapeHtml(o.categoria)})
-                        </button>
-                        <button type="button" onclick="abrirModalCorrigirOm('${o.om}')" class="btn-touch bg-amber-100 hover:bg-amber-200 text-amber-950 border border-amber-300 flex-1 text-xs py-2.5">
-                            ${SVG_ICO.edit} 2. Corrigir & Ensinar IA
-                        </button>
+                        ${isRevManual ? `
+                            <button type="button" onclick="analisarOmUnicaComGemini('${escapeHtml(o.om)}', this)" class="btn-touch bg-indigo-600 hover:bg-indigo-700 text-white flex-1 text-xs py-2.5">
+                                ${SVG_ICO.sparkle} <span>1. Analisar c/ Gemini</span>
+                            </button>
+                            <button type="button" onclick="abrirModalCorrigirOm('${escapeHtml(o.om)}', true)" class="btn-touch bg-amber-100 hover:bg-amber-200 text-amber-950 border border-amber-300 flex-1 text-xs py-2.5">
+                                ${SVG_ICO.edit} <span>2. Classificar Manual &amp; Ensinar</span>
+                            </button>
+                        ` : `
+                            <button type="button" onclick="confirmarOmSupervisorDireto('${escapeHtml(o.om)}', this)" class="btn-touch bg-emerald-600 hover:bg-emerald-700 text-white flex-1 text-xs py-2.5">
+                                ${SVG_ICO.check} <span>1. Confirmar (${escapeHtml(o.categoria)})</span>
+                            </button>
+                            <button type="button" onclick="abrirModalCorrigirOm('${escapeHtml(o.om)}')" class="btn-touch bg-amber-100 hover:bg-amber-200 text-amber-950 border border-amber-300 flex-1 text-xs py-2.5">
+                                ${SVG_ICO.edit} <span>2. Corrigir &amp; Ensinar IA</span>
+                            </button>
+                        `}
                     </div>
-                </div>`).join("");
+                </div>`;
+            }).join("");
         };
 
         let corrSupervisorSalvando = false;
@@ -9613,7 +9763,7 @@ Responda SOMENTE JSON Array: [{"ativo_erp":"...","tipo_ativo":"ATIVO_ARVORE"|"FE
             const btnCancel = document.getElementById("btnCancelarCorrSupervisor");
             const btnClose = document.getElementById("btnFecharCorrSupervisor");
 
-            const fieldIds = ["corrNovaCategoria", "corrSinalTecnico", "corrFatorB", "corrFatorC", "corrJustificativa"];
+            const fieldIds = ["corrServicoExecutado", "btnSugerirGeminiModal", "corrNovaCategoria", "corrSinalTecnico", "corrFatorB", "corrFatorC", "corrJustificativa"];
             fieldIds.forEach(fid => {
                 const el = document.getElementById(fid);
                 if (el) {
@@ -9703,6 +9853,7 @@ Responda SOMENTE JSON Array: [{"ativo_erp":"...","tipo_ativo":"ATIVO_ARVORE"|"FE
             const prev = revisoesPorOm[o.om] || {};
             revisoesPorOm[o.om] = {
                 om: o.om,
+                servico: o.servico || prev.servico || "",
                 categoria: o.categoria,
                 b: o.b || null,
                 c: o.c || null,
@@ -9721,12 +9872,555 @@ Responda SOMENTE JSON Array: [{"ativo_erp":"...","tipo_ativo":"ATIVO_ARVORE"|"FE
             }
         }
 
+        let debounceSalvarServicoTimer = null;
+
+        function aplicarServicoManualNaOm(omId, textoServico, opts = {}) {
+            const key = String(omId || "").trim();
+            if (!key) return null;
+            const txt = String(textoServico ?? "").trim();
+            const o = omsAuditadas.find(x => String(x.om) === key);
+            if (o) {
+                o.servico = txt;
+                o.servico_manual = Boolean(txt);
+                const qual = calcularScoreQualidadeOM(o.problema, txt);
+                o.qualidade_score = qual.score;
+                o.qualidade_nivel = qual.nivel;
+                o.qualidade_motivo = qual.motivo;
+            }
+            const bItem = omsBrutasCarregadas.find(x => String(x.om) === key);
+            if (bItem) {
+                bItem.servico = txt;
+                bItem.servico_manual = Boolean(txt);
+            }
+            const cItem = ultimoLoteAuditadasCache.find(x => String(x.om) === key);
+            if (cItem) {
+                cItem.servico = txt;
+                cItem.servico_manual = Boolean(txt);
+            }
+            const nItem = neuralOrdensLive.find(x => String(x.om) === key);
+            if (nItem) {
+                nItem.servico = txt;
+                nItem.servico_manual = Boolean(txt);
+            }
+            const domInp = document.getElementById(`confInputServico_${key}`);
+            if (domInp && document.activeElement !== domInp) {
+                domInp.value = txt;
+            }
+            if (txt) {
+                const prevMan = servicosManuaisPorOm[key] || {};
+                servicosManuaisPorOm[key] = {
+                    ...prevMan,
+                    servico: txt,
+                    por: usuarioLogado?.nome || "Supervisor PCM",
+                    em: new Date().toISOString()
+                };
+            } else {
+                delete servicosManuaisPorOm[key];
+            }
+            if (o && bancoHistoricoOmsMap.has(key)) {
+                bancoHistoricoOmsMap.set(key, compactarOmParaBancoNuvem(o));
+            }
+            if (rodadaVigenteInfo.hashLote && lotesAuditadosMap[rodadaVigenteInfo.hashLote]) {
+                lotesAuditadosMap[rodadaVigenteInfo.hashLote].auditadas = omsAuditadas.slice(0, 2500);
+            }
+            if (opts.salvarLocal !== false) {
+                salvarEstadoPersistidoMaestri();
+            }
+            if (opts.persistirNuvem && o) {
+                Promise.race([
+                    persistirOmsNoBancoHistorico([o], true),
+                    new Promise(resolve => setTimeout(resolve, 2000))
+                ]).catch(() => {});
+            }
+            return o;
+        }
+
+        function sincronizarInputsServicoVisiveisNaMesa() {
+            const inputs = document.querySelectorAll("textarea[id^='confInputServico_']");
+            if (!inputs.length) return;
+            let alterou = false;
+            inputs.forEach(inp => {
+                const omId = inp.getAttribute("data-om-id") || inp.id.replace("confInputServico_", "");
+                const o = omsAuditadas.find(x => String(x.om) === String(omId));
+                if (!o) return;
+                const val = String(inp.value || "").trim();
+                if (val !== String(o.servico || "").trim()) {
+                    aplicarServicoManualNaOm(omId, val, { salvarLocal: false });
+                    alterou = true;
+                }
+            });
+            if (alterou) salvarEstadoPersistidoMaestri();
+        }
+
+        function atualizarBannerRevisarManualConferente() {
+            const banner = document.getElementById("confRevisarManualBanner");
+            if (!banner) return;
+            const fEq = document.getElementById("confFiltroEquipe")?.value || "";
+            const fFila = document.getElementById("confFiltroFila")?.value || "PENDENTES";
+            const baseEq = omsAuditadas.filter(o => !fEq || o.equipe === fEq);
+            const revManList = baseEq.filter(o => o.categoria === "REVISAR_MANUAL");
+            if (!revManList.length) {
+                banner.hidden = true;
+                banner.classList.add("hidden");
+                banner.innerHTML = "";
+                return;
+            }
+            const prontasCnt = revManList.filter(o => !isServicoInsuficiente(o.servico)).length;
+            const faltamCnt = revManList.length - prontasCnt;
+            const cfg = carregarCofreIaLocal();
+            const labelMotor = cfg.key ? "Gemini Flash" : "Gemini / Motor EN 13306";
+
+            banner.hidden = false;
+            banner.classList.remove("hidden");
+            banner.className = "glass-card p-4 sm:p-5 rounded-3xl border-2 border-indigo-200 bg-gradient-to-r from-indigo-50/80 via-white to-amber-50/50 flex flex-col lg:flex-row lg:items-center justify-between gap-3.5";
+            banner.innerHTML = `
+                <div class="space-y-1">
+                    <div class="flex flex-wrap items-center gap-2">
+                        <span class="px-2.5 py-0.5 rounded-full bg-indigo-600 text-white text-[10px] font-extrabold uppercase">REVISAR_MANUAL • Serviço em Branco no ERP</span>
+                        <span class="px-2.5 py-0.5 rounded-full ${prontasCnt > 0 ? "bg-emerald-100 text-emerald-900 border border-emerald-300" : "bg-amber-100 text-amber-900 border border-amber-300"} text-[10px] font-extrabold">
+                            ${prontasCnt} pronta(s) p/ analisar • ${faltamCnt} aguardando digitação
+                        </span>
+                    </div>
+                    <div class="text-sm font-extrabold text-slate-900">
+                        Complete o Serviço Executado abaixo e analise apenas essas ordens com o Gemini
+                    </div>
+                    <p class="text-xs font-semibold text-slate-600">
+                        Quando o ERP vem com serviço em branco por erro de lançamento, digite o serviço real nos cartões abaixo e clique em <strong>Analisar Preenchidas c/ Gemini</strong> para classificar somente elas (sem reprocessar o restante do lote).
+                    </p>
+                </div>
+                <div class="flex flex-wrap items-center gap-2 shrink-0">
+                    ${fFila !== "REVISAR_MANUAL" ? `
+                        <button type="button" onclick="document.getElementById('confFiltroFila').value='REVISAR_MANUAL'; renderConferenteView();" class="btn-touch bg-white hover:bg-slate-50 text-slate-800 border border-slate-300 text-xs py-2 px-3">
+                            <span>Filtrar só REVISAR_MANUAL (${revManList.length})</span>
+                        </button>
+                    ` : `
+                        <button type="button" onclick="document.getElementById('confFiltroFila').value='PENDENTES'; renderConferenteView();" class="btn-touch bg-white hover:bg-slate-50 text-slate-800 border border-slate-300 text-xs py-2 px-3">
+                            <span>Voltar p/ Todas Pendentes</span>
+                        </button>
+                    `}
+                    <button type="button" id="btnAnalisarRevManualGeminiLote" onclick="analisarRevisarManualPreenchidasComGemini()" class="btn-touch ${prontasCnt > 0 ? "bg-indigo-600 hover:bg-indigo-700 text-white shadow-sm" : "bg-indigo-100 text-indigo-900 border border-indigo-200"} text-xs py-2.5 px-4">
+                        ${SVG_ICO.sparkle}
+                        <span>Analisar Preenchidas c/ ${escapeHtml(labelMotor)} (${prontasCnt})</span>
+                    </button>
+                </div>`;
+        }
+
+        window.onDigitarServicoManualCard = (omId, el) => {
+            if (!el) return;
+            const txt = String(el.value || "");
+            aplicarServicoManualNaOm(omId, txt, { salvarLocal: false });
+            const insuf = isServicoInsuficiente(txt);
+            const stEl = document.getElementById(`confServStatus_${omId}`);
+            if (stEl) {
+                stEl.innerText = insuf ? "Aguardando preenchimento" : "✓ Pronto p/ analisar";
+                stEl.className = `text-[10px] font-extrabold ${insuf ? "text-amber-700" : "text-emerald-700"}`;
+            }
+            el.classList.toggle("border-amber-300", insuf);
+            el.classList.toggle("border-emerald-300", !insuf);
+            atualizarBannerRevisarManualConferente();
+
+            if (debounceSalvarServicoTimer) clearTimeout(debounceSalvarServicoTimer);
+            debounceSalvarServicoTimer = setTimeout(() => {
+                salvarEstadoPersistidoMaestri();
+            }, 280);
+        };
+
+        window.abrirEdicaoServicoNoCard = (omId) => {
+            cardsComEdicaoServicoAberta.add(String(omId));
+            renderConferenteView();
+            setTimeout(() => {
+                const inp = document.getElementById(`confInputServico_${omId}`);
+                if (inp) inp.focus();
+            }, 40);
+        };
+
+        window.irParaRevisarManualConferente = () => {
+            const selFila = document.getElementById("confFiltroFila");
+            const selEq = document.getElementById("confFiltroEquipe");
+            if (selFila) selFila.value = "REVISAR_MANUAL";
+            if (selEq) selEq.value = "";
+            switchView("conferente");
+            setTimeout(() => {
+                const firstBlank = [...document.querySelectorAll("textarea[id^='confInputServico_']")].find(el => isServicoInsuficiente(el.value));
+                if (firstBlank) firstBlank.focus();
+            }, 80);
+        };
+
+        window.salvarServicoManualCard = async (omId, btnEl = null) => {
+            const inp = document.getElementById(`confInputServico_${omId}`);
+            const txt = String(inp ? inp.value : "").trim();
+            if (isServicoInsuficiente(txt)) {
+                showToast("Digite um Serviço Executado válido (mínimo 4 caracteres, não genérico) para salvar.", "error");
+                if (inp) inp.focus();
+                return;
+            }
+            const origHtml = btnEl ? btnEl.innerHTML : "";
+            if (btnEl) {
+                btnEl.disabled = true;
+                btnEl.innerHTML = `<svg class="w-3.5 h-3.5 animate-spin text-white shrink-0" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-90" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"></path></svg><span>Salvando...</span>`;
+            }
+            await cederFrameUI(120);
+            aplicarServicoManualNaOm(omId, txt, { salvarLocal: true, persistirNuvem: true });
+            recalcularNosPosAuditoria();
+            atualizarBannerRevisarManualConferente();
+            if (btnEl) {
+                btnEl.classList.remove("bg-slate-800", "hover:bg-slate-900");
+                btnEl.classList.add("bg-emerald-600");
+                btnEl.innerHTML = `${SVG_ICO.check} <span>Salvo!</span>`;
+                await cederFrameUI(350);
+                if (btnEl.isConnected) {
+                    btnEl.disabled = false;
+                    btnEl.classList.remove("bg-emerald-600");
+                    btnEl.classList.add("bg-slate-800", "hover:bg-slate-900");
+                    btnEl.innerHTML = origHtml;
+                }
+            }
+            showToast(`Serviço executado salvo na OM #${omId}! Clique em "Analisar c/ Gemini" para classificar.`, "success");
+        };
+
+        async function executarAnaliseGeminiParaListaOms(alvos = [], onProgressoLote = null) {
+            const cfg = carregarCofreIaLocal();
+            const iaMap = new Map();
+            let usouGeminiReal = false;
+            let erroGeminiMsg = "";
+
+            if (cfg.key && typeof fetch === "function") {
+                const loteSz = Math.max(5, Math.min(25, Number(cfg.lote || 20)));
+                const totalLotes = Math.ceil(alvos.length / loteSz);
+                for (let i = 0; i < alvos.length; i += loteSz) {
+                    const chunk = alvos.slice(i, i + loteSz);
+                    const loteIdx = Math.floor(i / loteSz) + 1;
+                    if (typeof onProgressoLote === "function") {
+                        await onProgressoLote(loteIdx, totalLotes, Math.min(i + chunk.length, alvos.length), alvos.length);
+                    }
+                    try {
+                        const resMap = await chamarGeminiLote20NoNavegador(chunk, cfg.key);
+                        if (resMap && resMap.size > 0) {
+                            usouGeminiReal = true;
+                            resMap.forEach((val, k) => iaMap.set(String(k), val));
+                        }
+                    } catch (err) {
+                        if (!erroGeminiMsg) erroGeminiMsg = err?.message || "Falha na API Gemini";
+                    }
+                }
+            }
+
+            let autoCnt = 0;
+            let conferirCnt = 0;
+
+            alvos.forEach(o => {
+                const key = String(o.om);
+                const itemIa = iaMap.get(key);
+                const catIaNorm = itemIa ? normalizarCategoriaGemini(itemIa.categoria) : "";
+                let decFinal = null;
+
+                if (itemIa && catIaNorm) {
+                    decFinal = {
+                        categoria: catIaNorm,
+                        b: itemIa.b ? Number(itemIa.b) : null,
+                        c: itemIa.c ? Number(itemIa.c) : null,
+                        confianca: Math.max(4, Math.min(5, Number(itemIa.confianca || 5))),
+                        origem: "IA_LOTE20",
+                        justificativa: `[Gemini Flash • Serviço Manual] ${itemIa.justificativa || "Classificada após preenchimento manual do serviço executado."}`
+                    };
+                } else {
+                    const decLocal = classificarOmNoMotorMaestri({ ...o, _pre_auditada: null }, null);
+                    decFinal = {
+                        ...decLocal,
+                        justificativa: `[Motor EN 13306 • Serviço Manual] ${decLocal.justificativa || "Classificada após preenchimento manual do serviço executado."}`
+                    };
+                }
+
+                const reconstruida = construirItemAuditadoCompleto(o, decFinal);
+                o.categoria = reconstruida.categoria;
+                o.b = reconstruida.b;
+                o.c = reconstruida.c;
+                o.severidade = reconstruida.severidade;
+                o.regra_severidade = reconstruida.regra_severidade;
+                o.confianca = reconstruida.confianca;
+                o.origem = reconstruida.origem;
+                o.fila = reconstruida.fila;
+                o.justificativa = reconstruida.justificativa;
+                o.qualidade_score = reconstruida.qualidade_score;
+                o.qualidade_nivel = reconstruida.qualidade_nivel;
+                o.qualidade_motivo = reconstruida.qualidade_motivo;
+                o.servico_manual = true;
+                cardsComEdicaoServicoAberta.delete(key);
+
+                if (o.fila === "AUTOMATICO") autoCnt++;
+                else conferirCnt++;
+
+                servicosManuaisPorOm[key] = {
+                    ...(servicosManuaisPorOm[key] || {}),
+                    servico: o.servico,
+                    por: usuarioLogado?.nome || "Supervisor PCM",
+                    em: new Date().toISOString(),
+                    analise_ia: {
+                        categoria: o.categoria,
+                        b: o.b,
+                        c: o.c,
+                        severidade: o.severidade,
+                        regra_severidade: o.regra_severidade,
+                        justificativa: o.justificativa,
+                        origem: o.origem,
+                        fila: o.fila,
+                        confianca: o.confianca
+                    }
+                };
+
+                const idxCache = ultimoLoteAuditadasCache.findIndex(x => String(x.om) === key);
+                if (idxCache >= 0) ultimoLoteAuditadasCache[idxCache] = { ...o };
+                const idxNeural = neuralOrdensLive.findIndex(x => String(x.om) === key);
+                if (idxNeural >= 0) neuralOrdensLive[idxNeural] = { ...o };
+                bancoHistoricoOmsMap.set(key, compactarOmParaBancoNuvem(o));
+            });
+
+            if (rodadaVigenteInfo.hashLote && lotesAuditadosMap[rodadaVigenteInfo.hashLote]) {
+                lotesAuditadosMap[rodadaVigenteInfo.hashLote].auditadas = omsAuditadas.slice(0, 2500);
+            }
+
+            return { total: alvos.length, usouGeminiReal, erroGeminiMsg, autoCnt, conferirCnt, tinhaChave: Boolean(cfg.key) };
+        }
+
+        window.analisarOmUnicaComGemini = async (omId, btnEl = null) => {
+            if (confConfirmacaoEmAndamento || corrSupervisorSalvando) return;
+            sincronizarInputsServicoVisiveisNaMesa();
+            const o = omsAuditadas.find(x => String(x.om) === String(omId));
+            if (!o) return;
+
+            if (isServicoInsuficiente(o.servico)) {
+                showToast("Digite o Serviço Executado real no campo da OM antes de analisar com o Gemini!", "error");
+                const inp = document.getElementById(`confInputServico_${omId}`);
+                if (inp) inp.focus();
+                else abrirModalCorrigirOm(omId, true);
+                return;
+            }
+
+            confConfirmacaoEmAndamento = true;
+            const origHtml = btnEl ? btnEl.innerHTML : "";
+            if (btnEl) {
+                btnEl.disabled = true;
+                btnEl.classList.add("opacity-90", "cursor-wait");
+                btnEl.innerHTML = `<svg class="w-4 h-4 animate-spin text-white shrink-0" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-90" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path></svg><span>Analisando...</span>`;
+            }
+
+            try {
+                await cederFrameUI(80);
+                const res = await executarAnaliseGeminiParaListaOms([o]);
+                recalcularNosPosAuditoria();
+                salvarEstadoPersistidoMaestri();
+
+                if (btnEl) {
+                    btnEl.classList.remove("bg-indigo-600", "hover:bg-indigo-700");
+                    btnEl.classList.add("bg-emerald-600");
+                    btnEl.innerHTML = `${SVG_ICO.check} <span>✓ ${escapeHtml(o.categoria)}</span>`;
+                    await cederFrameUI(260);
+                }
+
+                Promise.race([
+                    persistirOmsNoBancoHistorico([o], true),
+                    new Promise(resolve => setTimeout(resolve, 2200))
+                ]).catch(() => {});
+
+                // Se estava filtrado apenas em REVISAR_MANUAL e não sobraram outras, volta para PENDENTES para exibir caso caia em CONFERIR
+                const selFila = document.getElementById("confFiltroFila");
+                if (selFila && selFila.value === "REVISAR_MANUAL" && !omsAuditadas.some(x => x.categoria === "REVISAR_MANUAL")) {
+                    selFila.value = "PENDENTES";
+                }
+
+                renderCurrentView();
+                atualizarBannerLoteAuditado();
+                const viaLabel = res.usouGeminiReal
+                    ? "Gemini Flash"
+                    : (res.tinhaChave && res.erroGeminiMsg ? `Motor EN 13306 (aviso API: ${res.erroGeminiMsg})` : "Motor Local EN 13306 (cadastre chave no Admin Master p/ Gemini Flash)");
+                showToast(`OM #${o.om} classificada como ${o.categoria} via ${viaLabel} (${o.fila === "AUTOMATICO" ? "aprovada direto" : "pronta p/ confirmar"})!`, "success");
+            } finally {
+                confConfirmacaoEmAndamento = false;
+                if (btnEl && btnEl.isConnected) {
+                    btnEl.disabled = false;
+                    btnEl.classList.remove("opacity-90", "cursor-wait", "bg-emerald-600");
+                    btnEl.classList.add("bg-indigo-600", "hover:bg-indigo-700");
+                    btnEl.innerHTML = origHtml;
+                }
+            }
+        };
+
+        window.analisarRevisarManualPreenchidasComGemini = async () => {
+            if (confConfirmacaoEmAndamento || corrSupervisorSalvando) return;
+            sincronizarInputsServicoVisiveisNaMesa();
+            const fEq = currentView === "conferente" ? (document.getElementById("confFiltroEquipe")?.value || "") : "";
+            const alvos = omsAuditadas.filter(o => (!fEq || o.equipe === fEq) && o.categoria === "REVISAR_MANUAL" && !isServicoInsuficiente(o.servico));
+
+            if (!alvos.length) {
+                const pendentesVazias = omsAuditadas.filter(o => (!fEq || o.equipe === fEq) && o.categoria === "REVISAR_MANUAL");
+                if (pendentesVazias.length) {
+                    showToast(`Digite primeiro o Serviço Executado em pelo menos 1 das ${pendentesVazias.length} ordem(ns) REVISAR_MANUAL!`, "error");
+                    const firstBlank = [...document.querySelectorAll("textarea[id^='confInputServico_']")].find(el => isServicoInsuficiente(el.value));
+                    if (firstBlank) firstBlank.focus();
+                } else {
+                    showToast("Não há ordens REVISAR_MANUAL pendentes para analisar!", "info");
+                }
+                return;
+            }
+
+            const cfg = carregarCofreIaLocal();
+            confConfirmacaoEmAndamento = true;
+            iniciarProgressoVisualMaestri({
+                badge: cfg.key ? "IA GEMINI FLASH • APENAS PREENCHIDAS" : "MOTOR EN 13306 • APENAS PREENCHIDAS",
+                titulo: `Analisando ${alvos.length} OM(s) preenchida(s) manualmente...`,
+                subtitulo: "Processando exclusivamente as ordens REVISAR_MANUAL que receberam Serviço Executado.",
+                detalhe: `Preparando ${alvos.length} OM(s) com serviço informado manualmente...`,
+                pct: 18,
+                etapas: [
+                    { label: "Registrar serviços preenchidos manualmente", status: "ativo", info: `${alvos.length} OM(s)` },
+                    { label: cfg.key ? "Classificar apenas estas OMs no Gemini Flash" : "Classificar no Motor EN 13306 + Bibliotecário", status: "pendente", info: "" },
+                    { label: "Sincronizar nuvem e recalcular Nós 6–9", status: "pendente", info: "" }
+                ]
+            });
+
+            try {
+                await cederFrameUI(40);
+                atualizarProgressoVisualMaestri({
+                    pct: 42,
+                    etapaAtivaIdx: 1,
+                    etapaInfo: `0/${alvos.length} OMs`,
+                    detalhe: cfg.key
+                        ? `Consultando Gemini Flash apenas para as ${alvos.length} OM(s) preenchidas...`
+                        : `Aplicando regras EN 13306 e memória do Bibliotecário nas ${alvos.length} OM(s)...`
+                });
+                await cederFrameUI(35);
+
+                const res = await executarAnaliseGeminiParaListaOms(alvos, async (loteIdx, totalLotes, ateAgora, tot) => {
+                    atualizarProgressoVisualMaestri({
+                        pct: 42 + Math.round((loteIdx / Math.max(1, totalLotes)) * 34),
+                        etapaAtivaIdx: 1,
+                        etapaInfo: `${ateAgora}/${tot} OMs`,
+                        detalhe: `Gemini Flash analisando lote ${loteIdx}/${totalLotes} (${ateAgora}/${tot} OMs)...`
+                    });
+                    await cederFrameUI(20);
+                });
+
+                atualizarProgressoVisualMaestri({
+                    pct: 84,
+                    etapaAtivaIdx: 2,
+                    etapaInfo: "Salvando...",
+                    detalhe: "Gravando serviços e classificações no Banco Histórico Mensal e recalculando indicadores..."
+                });
+                await cederFrameUI(30);
+
+                try {
+                    await Promise.race([
+                        persistirOmsNoBancoHistorico(alvos, true),
+                        new Promise(resolve => setTimeout(resolve, 700))
+                    ]);
+                } catch (_) {}
+
+                recalcularNosPosAuditoria();
+                salvarEstadoPersistidoMaestri();
+
+                const selFila = document.getElementById("confFiltroFila");
+                if (selFila && selFila.value === "REVISAR_MANUAL" && !omsAuditadas.some(x => (!fEq || x.equipe === fEq) && x.categoria === "REVISAR_MANUAL")) {
+                    selFila.value = "PENDENTES";
+                }
+
+                renderCurrentView();
+                atualizarBannerLoteAuditado();
+                atualizarProgressoVisualMaestri({
+                    pct: 100,
+                    concluirTodas: true,
+                    detalhe: `${res.total} OM(s) analisadas com sucesso! (${res.autoCnt} automáticas • ${res.conferirCnt} na fila Conferir)`
+                });
+                await cederFrameUI(220);
+
+                const origemTxt = res.usouGeminiReal
+                    ? "Gemini Flash"
+                    : (res.tinhaChave && res.erroGeminiMsg ? `Motor Local (aviso Gemini: ${res.erroGeminiMsg})` : "Motor Local EN 13306 (cadastre chave Gemini no Admin Master p/ usar IA nuvem)");
+                showToast(`✨ ${res.total} OM(s) analisadas via ${origemTxt}: ${res.autoCnt} resolvida(s) automaticamente e ${res.conferirCnt} pronta(s) p/ confirmação!`, "success");
+            } finally {
+                confConfirmacaoEmAndamento = false;
+                finalizarProgressoVisualMaestri();
+            }
+        };
+
+        window.sugerirClassificacaoGeminiNoModal = async (btnEl = null) => {
+            if (corrSupervisorSalvando) return;
+            const omId = document.getElementById("corrOmId")?.value || "";
+            const o = omsAuditadas.find(x => String(x.om) === String(omId));
+            if (!o) return;
+            const inpServ = document.getElementById("corrServicoExecutado");
+            const txtServ = String(inpServ ? inpServ.value : o.servico || "").trim();
+
+            if (isServicoInsuficiente(txtServ)) {
+                showToast("Digite o Serviço Executado real acima antes de pedir sugestão ao Gemini!", "error");
+                if (inpServ) inpServ.focus();
+                return;
+            }
+
+            const origHtml = btnEl ? btnEl.innerHTML : "";
+            if (btnEl) {
+                btnEl.disabled = true;
+                btnEl.innerHTML = `<svg class="w-3.5 h-3.5 animate-spin text-white shrink-0" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-90" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"></path></svg><span>Consultando IA...</span>`;
+            }
+
+            try {
+                aplicarServicoManualNaOm(o.om, txtServ, { salvarLocal: true });
+                const cfg = carregarCofreIaLocal();
+                let catSug = "";
+                let bSug = null;
+                let cSug = null;
+                let justSug = "";
+                let viaGemini = false;
+
+                if (cfg.key && typeof fetch === "function") {
+                    try {
+                        const resMap = await chamarGeminiLote20NoNavegador([{ ...o, servico: txtServ }], cfg.key);
+                        const item = resMap ? resMap.get(String(o.om)) : null;
+                        const norm = item ? normalizarCategoriaGemini(item.categoria) : "";
+                        if (item && norm) {
+                            catSug = norm;
+                            bSug = item.b ? Number(item.b) : 2;
+                            cSug = item.c ? Number(item.c) : 2;
+                            justSug = item.justificativa || "";
+                            viaGemini = true;
+                        }
+                    } catch (_) {}
+                }
+
+                if (!catSug) {
+                    const decLocal = classificarOmNoMotorMaestri({ ...o, servico: txtServ, _pre_auditada: null }, null);
+                    catSug = CATEGORIAS_OFICIAIS.includes(decLocal.categoria) ? decLocal.categoria : "AJUSTE";
+                    bSug = decLocal.b || 2;
+                    cSug = decLocal.c || 2;
+                    justSug = decLocal.justificativa || "";
+                }
+
+                const selCat = document.getElementById("corrNovaCategoria");
+                if (selCat && CATEGORIAS_OFICIAIS.includes(catSug)) selCat.value = catSug;
+                onCorrCategoriaChange();
+                if (catSug === "QUEBRA") {
+                    const selB = document.getElementById("corrFatorB");
+                    const selC = document.getElementById("corrFatorC");
+                    if (selB && [1, 2, 3].includes(bSug)) selB.value = String(bSug);
+                    if (selC && [1, 2, 3].includes(cSug)) selC.value = String(cSug);
+                }
+                const inpJust = document.getElementById("corrJustificativa");
+                if (inpJust && justSug) inpJust.value = justSug;
+
+                showToast(`Sugestão preenchida (${catSug}) via ${viaGemini ? "Gemini Flash" : "Motor EN 13306"}! Revise e clique em Salvar.`, "success");
+            } finally {
+                if (btnEl && btnEl.isConnected) {
+                    btnEl.disabled = false;
+                    btnEl.innerHTML = origHtml;
+                }
+            }
+        };
+
         window.confirmarOmSupervisorDireto = async (omId, btnEl = null) => {
             if (confConfirmacaoEmAndamento || corrSupervisorSalvando) return;
             const o = omsAuditadas.find(x => x.om === String(omId));
             if (!o) return;
             if (o.categoria === "REVISAR_MANUAL") {
-                abrirModalCorrigirOm(omId);
+                abrirModalCorrigirOm(omId, true);
                 return;
             }
             confConfirmacaoEmAndamento = true;
@@ -9825,22 +10519,49 @@ Responda SOMENTE JSON Array: [{"ativo_erp":"...","tipo_ativo":"ATIVO_ARVORE"|"FE
             }
         };
 
-        window.abrirModalCorrigirOm = (omId) => {
+        window.abrirModalCorrigirOm = (omId, focarServico = false) => {
             if (corrSupervisorSalvando) return;
+            sincronizarInputsServicoVisiveisNaMesa();
             const o = omsAuditadas.find(x => x.om === String(omId));
             if (!o) return;
             setEstadoSalvandoCorrecaoSupervisor(false);
+            const servInsuf = isServicoInsuficiente(o.servico);
             document.getElementById("corrOmId").value = o.om;
             document.getElementById("corrOmResumo").innerHTML = `
                 <div class="font-extrabold text-slate-900">OM #${escapeHtml(o.om)} — ${escapeHtml(o.ativo)} (${escapeHtml(o.equipe)})</div>
                 <div class="text-slate-600"><strong>Problema:</strong> ${escapeHtml(o.problema)}</div>
-                <div class="text-slate-600"><strong>Serviço:</strong> ${escapeHtml(o.servico || "(vazio)")}</div>
                 <div class="text-sky-700 font-bold">Classificação Atual: ${escapeHtml(o.categoria)}</div>`;
+            const inpServ = document.getElementById("corrServicoExecutado");
+            const boxServ = document.getElementById("corrServicoBox");
+            const lblServ = document.getElementById("corrServicoLabel");
+            const hintServ = document.getElementById("corrServicoHint");
+            if (inpServ) inpServ.value = o.servico || "";
+            if (boxServ) {
+                boxServ.className = servInsuf
+                    ? "p-3 rounded-2xl bg-amber-50/80 border-2 border-amber-300 space-y-1.5"
+                    : "p-3 rounded-2xl bg-indigo-50/50 border border-indigo-200 space-y-1.5";
+            }
+            if (lblServ) {
+                lblServ.innerText = servInsuf
+                    ? "⚠️ Serviço Executado em Branco no ERP — Digite Aqui:"
+                    : "Serviço Executado Real (editável se incompleto no ERP)";
+                lblServ.className = servInsuf
+                    ? "text-[10px] font-extrabold uppercase text-amber-900"
+                    : "text-[10px] font-extrabold uppercase text-indigo-900";
+            }
+            if (hintServ) {
+                hintServ.innerText = servInsuf
+                    ? "Digite o serviço executado real e clique em 'Analisar c/ Gemini' para sugerir a categoria automaticamente, ou selecione abaixo."
+                    : "Se necessário, complemente o serviço executado para enriquecer a regra do Bibliotecário (Nó 6).";
+            }
             const selCat = document.getElementById("corrNovaCategoria");
             selCat.innerHTML = CATEGORIAS_OFICIAIS.map(c => `<option value="${c}" ${c === o.categoria ? "selected" : ""}>${c}</option>`).join("");
             document.getElementById("corrJustificativa").value = "";
             onCorrCategoriaChange();
             abrirModal("modalCorrigirOmSupervisor");
+            if ((focarServico || servInsuf) && inpServ) {
+                setTimeout(() => inpServ.focus(), 60);
+            }
         };
 
         window.onCorrCategoriaChange = () => {
@@ -9859,6 +10580,7 @@ Responda SOMENTE JSON Array: [{"ativo_erp":"...","tipo_ativo":"ATIVO_ARVORE"|"FE
             const o = omsAuditadas.find(x => x.om === String(omId));
             if (!o) return;
 
+            const servicoDigitado = (document.getElementById("corrServicoExecutado")?.value ?? o.servico ?? "").trim();
             const novaCat = document.getElementById("corrNovaCategoria").value;
             const sinal = document.getElementById("corrSinalTecnico").value;
             const just = document.getElementById("corrJustificativa").value.trim();
@@ -9876,6 +10598,11 @@ Responda SOMENTE JSON Array: [{"ativo_erp":"...","tipo_ativo":"ATIVO_ARVORE"|"FE
 
             try {
                 await cederFrameUI(40);
+
+                if (servicoDigitado !== String(o.servico || "").trim()) {
+                    aplicarServicoManualNaOm(o.om, servicoDigitado, { salvarLocal: false });
+                }
+                cardsComEdicaoServicoAberta.delete(String(o.om));
 
                 o.categoria = novaCat;
                 o.fila = "AUTOMATICO";
