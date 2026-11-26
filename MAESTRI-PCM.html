@@ -319,6 +319,61 @@
             border-color: #0284c7 !important;
             background: linear-gradient(135deg, #e0f2fe 0%, #eff6ff 100%) !important;
         }
+        @keyframes maestriSpin {
+            from { transform: rotate(0deg); }
+            to { transform: rotate(360deg); }
+        }
+        @keyframes maestriStripeMove {
+            0% { background-position: 0 0; }
+            100% { background-position: 40px 0; }
+        }
+        @keyframes maestriPulseSoft {
+            0%, 100% { box-shadow: 0 0 0 0 rgba(2, 132, 199, 0.28); }
+            50% { box-shadow: 0 0 0 10px rgba(2, 132, 199, 0); }
+        }
+        .maestri-spin {
+            animation: maestriSpin 0.85s linear infinite;
+        }
+        .maestri-pulse-ring {
+            animation: maestriPulseSoft 1.8s ease-in-out infinite;
+        }
+        .maestri-progress-fill {
+            background-image: linear-gradient(
+                135deg,
+                rgba(255, 255, 255, 0.22) 25%,
+                transparent 25%,
+                transparent 50%,
+                rgba(255, 255, 255, 0.22) 50%,
+                rgba(255, 255, 255, 0.22) 75%,
+                transparent 75%,
+                transparent
+            );
+            background-size: 40px 40px;
+            animation: maestriStripeMove 0.9s linear infinite;
+            transition: width 0.35s cubic-bezier(0.22, 1, 0.36, 1);
+        }
+        body.theme-dark #maestriLoadingCard,
+        body.theme-dark #pipelineLiveProgressBanner {
+            background: #0f172a !important;
+            border-color: #334155 !important;
+            color: #f8fafc !important;
+        }
+        #maestriLoadingOverlay {
+            position: fixed;
+            inset: 0;
+            z-index: 88;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: rgba(15, 23, 42, 0.55);
+            padding: 1rem;
+        }
+        #maestriLoadingOverlay[hidden],
+        #maestriLoadingOverlay.hidden,
+        #pipelineLiveProgressBanner[hidden],
+        #pipelineLiveProgressBanner.hidden {
+            display: none !important;
+        }
     </style>
 </head>
 <body class="selection:bg-sky-600 selection:text-white">
@@ -452,9 +507,9 @@
                         <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12"/></svg>
                         <span>Importar OMs do ERP</span>
                     </button>
-                    <button type="button" onclick="executarPipelineCompletoUI({ animar: true })" class="btn-pill-dark text-xs py-2 px-4">
+                    <button type="button" id="btnHeaderExecutarOrq" onclick="executarPipelineCompletoUI({ animar: true })" class="btn-pill-dark text-xs py-2 px-4">
                         <svg class="w-3.5 h-3.5" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM9.555 7.168A1 1 0 008 8v4a1 1 0 001.555.832l3-2a1 1 0 000-1.664l-3-2z" clip-rule="evenodd"/></svg>
-                        <span>Executar Orquestração</span>
+                        <span id="lblBtnHeaderExecutarOrq">Executar Orquestração</span>
                     </button>
                 </div>
             </header>
@@ -510,6 +565,34 @@
                                 <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"/></svg>
                                 <span>Exportar</span>
                             </button>
+                        </div>
+                    </div>
+
+                    <!-- BANNER INLINE DE PROGRESSO AO VIVO (VISÍVEL SEMPRE QUE A AUDITORIA/IA ESTIVER CARREGANDO) -->
+                    <div id="pipelineLiveProgressBanner" hidden role="status" aria-live="polite" class="hidden rounded-3xl border-2 border-sky-300 bg-gradient-to-r from-sky-50 via-white to-indigo-50/90 p-4 sm:p-5 shadow-md space-y-3">
+                        <div class="flex flex-wrap items-center justify-between gap-3">
+                            <div class="flex items-center gap-3 min-w-0">
+                                <div class="w-10 h-10 rounded-2xl bg-sky-600 text-white flex items-center justify-center shrink-0 maestri-pulse-ring shadow-sm">
+                                    <svg class="w-5 h-5 maestri-spin" fill="none" viewBox="0 0 24 24">
+                                        <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="3"></circle>
+                                        <path class="opacity-90" fill="currentColor" d="M4 12a8 8 0 018-8v4a4 4 0 00-4 4H4z"></path>
+                                    </svg>
+                                </div>
+                                <div class="min-w-0">
+                                    <div class="flex flex-wrap items-center gap-2">
+                                        <span id="pipelineLiveProgBadge" class="px-2 py-0.5 rounded-full bg-sky-600 text-white text-[9px] font-extrabold uppercase tracking-wider">EM PROCESSAMENTO</span>
+                                        <span id="pipelineLiveProgMeta" class="font-mono text-[11px] font-extrabold text-sky-800">0% • 00:00s</span>
+                                    </div>
+                                    <div id="pipelineLiveProgTitle" class="text-sm font-extrabold text-slate-900 truncate mt-0.5">Preparando auditoria...</div>
+                                    <div id="pipelineLiveProgDesc" class="text-[11px] font-semibold text-slate-600 truncate">Aguarde enquanto os agentes analisam e preparam a orquestração.</div>
+                                </div>
+                            </div>
+                            <button type="button" onclick="reabrirProgressoOverlayMaestri()" class="px-3 py-1.5 rounded-xl bg-white hover:bg-sky-50 border border-sky-200 text-sky-800 text-[11px] font-extrabold shadow-2xs shrink-0">
+                                Ver Detalhes das Etapas
+                            </button>
+                        </div>
+                        <div class="w-full h-2.5 rounded-full bg-slate-200/90 overflow-hidden">
+                            <div id="pipelineLiveProgBar" class="h-full rounded-full bg-gradient-to-r from-sky-500 via-indigo-500 to-emerald-500 maestri-progress-fill" style="width: 8%"></div>
                         </div>
                     </div>
 
@@ -2032,6 +2115,55 @@
             <div class="flex gap-2 pt-2 border-t border-slate-100">
                 <button type="button" onclick="fecharModal('deleteOverlay')" class="btn-touch bg-slate-100 text-slate-700 flex-1 text-xs">Cancelar</button>
                 <button type="button" id="btnConfirmarExclusao" onclick="executarExclusaoConfirmada()" class="btn-touch bg-rose-600 hover:bg-rose-700 text-white flex-1 text-xs">Confirmar</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- ==================== OVERLAY DE CARREGAMENTO & PROGRESSO AO VIVO (USABILIDADE) ==================== -->
+    <div id="maestriLoadingOverlay" role="status" aria-live="assertive" aria-busy="true" hidden class="hidden fixed inset-0 bg-slate-900/55 backdrop-blur-sm z-[88] flex items-center justify-center p-4">
+        <div id="maestriLoadingCard" class="bg-white w-full max-w-lg rounded-3xl p-6 shadow-2xl border border-slate-200/95 space-y-5">
+            <div class="flex items-start justify-between gap-3">
+                <div class="flex items-center gap-3.5 min-w-0">
+                    <div id="maestriLoadIconWrap" class="w-12 h-12 rounded-2xl bg-sky-600 text-white flex items-center justify-center shrink-0 shadow-md maestri-pulse-ring relative">
+                        <svg id="maestriLoadSpinnerSvg" class="w-6 h-6 maestri-spin" fill="none" viewBox="0 0 24 24">
+                            <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="3"></circle>
+                            <path class="opacity-95" fill="currentColor" d="M4 12a8 8 0 018-8v4a4 4 0 00-4 4H4z"></path>
+                        </svg>
+                        <svg id="maestriLoadCheckSvg" hidden class="hidden w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M5 13l4 4L19 7"/>
+                        </svg>
+                    </div>
+                    <div class="min-w-0">
+                        <div class="flex flex-wrap items-center gap-2">
+                            <span id="maestriLoadBadge" class="px-2.5 py-0.5 rounded-full bg-sky-100 text-sky-900 border border-sky-200 text-[10px] font-extrabold uppercase tracking-wider">PROCESSANDO</span>
+                            <span id="maestriLoadTimer" class="font-mono text-[11px] font-extrabold text-slate-500">00:00s</span>
+                        </div>
+                        <h3 id="maestriLoadTitle" class="text-base sm:text-lg font-extrabold text-slate-900 leading-tight mt-1">Preparando Orquestração...</h3>
+                    </div>
+                </div>
+                <button type="button" id="btnMinimizarProgressoOverlay" onclick="minimizarProgressoOverlayMaestri()" class="px-2.5 py-1 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-700 text-[10px] font-extrabold shrink-0" title="Minimizar para acompanhar no topo do painel">
+                    Minimizar
+                </button>
+            </div>
+
+            <p id="maestriLoadSubtitle" class="text-xs font-semibold text-slate-600 leading-relaxed">Aguarde enquanto preparamos os dados e acionamos os agentes de auditoria PCM.</p>
+
+            <!-- Barra de progresso principal -->
+            <div class="space-y-1.5">
+                <div class="flex items-center justify-between gap-2 text-[11px]">
+                    <span id="maestriLoadDetail" class="font-bold text-slate-700 truncate">Inicializando etapas...</span>
+                    <span id="maestriLoadPct" class="font-mono font-extrabold text-sky-700 shrink-0">0%</span>
+                </div>
+                <div class="w-full h-3 rounded-full bg-slate-200/90 overflow-hidden shadow-inner">
+                    <div id="maestriLoadBar" class="h-full rounded-full bg-gradient-to-r from-sky-500 via-indigo-500 to-emerald-500 maestri-progress-fill" style="width: 6%"></div>
+                </div>
+            </div>
+
+            <!-- Checklist visual de etapas em tempo real -->
+            <div id="maestriLoadSteps" class="space-y-2 pt-1"></div>
+
+            <div class="pt-2 border-t border-slate-100 flex items-center justify-between gap-2 text-[10px] font-bold text-slate-500">
+                <span>💡 Você não precisa recarregar a página — o fluxo avança automaticamente.</span>
             </div>
         </div>
     </div>
@@ -4932,13 +5064,32 @@ service cloud.firestore {
             const setStatusLive = (msg) => {
                 const el = document.getElementById("aqfStatusGeracaoLive");
                 if (el) el.innerText = msg;
+                atualizarProgressoVisualMaestri({ detalhe: msg });
             };
 
+            atualizarProgressoVisualMaestri({
+                badge: "ETAPA 1/3 • MANUAIS HÍBRIDOS",
+                detalhe: "🔍 Buscando manuais nas fontes híbridas (DOCS-ATIVOS + Pasta J: + SharePoint)...",
+                pct: 18,
+                etapaAtivaIdx: 0,
+                etapaInfo: "Buscando..."
+            });
             setStatusLive("🔍 Buscando manuais nas fontes híbridas (DOCS-ATIVOS + Pasta J: + SharePoint)...");
             const manuais = await coletarManuaisHibridosParaAtivo(ativoNome, setStatusLive);
 
             const cfg = carregarCofreIaLocal();
             let estudoFinal = null;
+
+            atualizarProgressoVisualMaestri({
+                badge: "ETAPA 2/3 • ENGENHARIA & IA",
+                detalhe: cfg.key
+                    ? `🧠 Gemini analisando ${stats.omsAtivo.length} OM(s) + ${manuais.length} manual(is) técnico(s)...`
+                    : `⚙️ Montando dossiê técnico completo com ${stats.omsAtivo.length} OM(s) + ${manuais.length} manual(is)...`,
+                pct: 48,
+                etapaAtivaIdx: 1,
+                etapaInfos: { 0: `${manuais.length} manual(is)`, 1: `${stats.omsAtivo.length} OMs` }
+            });
+            await cederFrameUI(20);
 
             if (cfg.key && typeof fetch === "function") {
                 try {
@@ -5147,15 +5298,24 @@ RETORNE EXCLUSIVAMENTE UM OBJETO JSON VÁLIDO (sem texto fora do JSON) COM A SEG
                 estudoFinal = construirEstudoAqfFallbackRico(ativoNome, stats, manuais, disciplinaFinal);
             }
 
+            atualizarProgressoVisualMaestri({
+                badge: "ETAPA 3/3 • NUVEM & NOTIFICAÇÕES",
+                detalhe: "💾 Salvando Estudo AQF no banco e notificando aprovadores...",
+                pct: 86,
+                etapaAtivaIdx: 2,
+                etapaInfo: "Salvando..."
+            });
             setStatusLive("💾 Salvando Estudo AQF no banco e processando notificações...");
             await salvarEstudoAqfPersistente(estudoFinal);
 
             if (estudoFinal.modo_livre_aprovacao) {
                 setStatusLive("");
+                atualizarProgressoVisualMaestri({ badge: "CONCLUÍDO", titulo: "✅ Estudo AQF Gerado!", detalhe: "Estudo salvo em Modo Livre com ações liberadas.", pct: 100, concluirTodas: true });
                 showToast(`Estudo AQF "${ativoNome}" salvo em Modo Livre (sem aprovadores ativos no Master — botões liberados!).`, "success");
             } else {
                 const mailRes = await enviarEmailNotificacaoEstudoAqf(estudoFinal, "novo_estudo");
                 setStatusLive("");
+                atualizarProgressoVisualMaestri({ badge: "CONCLUÍDO", titulo: "✅ Estudo AQF Gerado!", detalhe: "Estudo salvo em Análise e encaminhado para aprovação.", pct: 100, concluirTodas: true });
                 if (mailRes.ok) {
                     showToast(`Estudo AQF "${ativoNome}" salvo em Análise e e-mail disparado para: ${mailRes.para}`, "success");
                 } else if (mailRes.motivo === "sem_webhook") {
@@ -5164,6 +5324,7 @@ RETORNE EXCLUSIVAMENTE UM OBJETO JSON VÁLIDO (sem texto fora do JSON) COM A SEG
                     showToast(`Estudo AQF "${ativoNome}" salvo em Análise! (Aviso e-mail: ${mailRes.motivo || "verificar destinatários no Master"})`, "info");
                 }
             }
+            await cederFrameUI(280);
 
             return estudoFinal;
         }
@@ -5878,8 +6039,236 @@ OMs:\n${JSON.stringify(listaPrompt)}`;
             return mapRes;
         }
 
+        // =========================================================================
+        // MOTOR VISUAL DE CARREGAMENTO & PROGRESSO AO VIVO (USABILIDADE PCM)
+        // =========================================================================
+        let progressoVisualEstado = {
+            ativo: false,
+            minimizado: false,
+            iniciadoEm: 0,
+            timerId: null,
+            pct: 0,
+            badge: "PROCESSANDO",
+            titulo: "",
+            subtitulo: "",
+            detalhe: "",
+            etapas: [],
+            mostrarBannerPipeline: false
+        };
+
+        function cederFrameUI(ms = 24) {
+            return new Promise(resolve => {
+                if (typeof requestAnimationFrame === "function") {
+                    requestAnimationFrame(() => setTimeout(resolve, ms));
+                } else {
+                    setTimeout(resolve, ms);
+                }
+            });
+        }
+
+        function formatarTempoDecorridoProgresso(ms) {
+            const totalSeg = Math.max(0, Math.floor(ms / 1000));
+            const min = String(Math.floor(totalSeg / 60)).padStart(2, "0");
+            const seg = String(totalSeg % 60).padStart(2, "0");
+            return `${min}:${seg}s`;
+        }
+
+        function renderizarProgressoVisualMaestri() {
+            const st = progressoVisualEstado;
+            const elapsedStr = formatarTempoDecorridoProgresso(Date.now() - (st.iniciadoEm || Date.now()));
+            const pctClamped = Math.max(0, Math.min(100, Math.round(st.pct || 0)));
+            const concluido = pctClamped >= 100;
+
+            const ov = document.getElementById("maestriLoadingOverlay");
+            if (ov) {
+                const abrirOv = st.ativo && !st.minimizado;
+                ov.hidden = !abrirOv;
+                ov.classList.toggle("hidden", !abrirOv);
+                ov.setAttribute("aria-busy", st.ativo && !concluido ? "true" : "false");
+            }
+
+            const setTxt = (id, v) => { const el = document.getElementById(id); if (el) el.innerText = String(v ?? ""); };
+            setTxt("maestriLoadBadge", st.badge || "PROCESSANDO");
+            setTxt("maestriLoadTimer", elapsedStr);
+            setTxt("maestriLoadTitle", st.titulo || "Processando...");
+            setTxt("maestriLoadSubtitle", st.subtitulo || "");
+            setTxt("maestriLoadDetail", st.detalhe || "");
+            setTxt("maestriLoadPct", `${pctClamped}%`);
+
+            const bar = document.getElementById("maestriLoadBar");
+            if (bar) bar.style.width = `${Math.max(4, pctClamped)}%`;
+
+            const iconWrap = document.getElementById("maestriLoadIconWrap");
+            const spinSvg = document.getElementById("maestriLoadSpinnerSvg");
+            const chkSvg = document.getElementById("maestriLoadCheckSvg");
+            if (iconWrap) {
+                iconWrap.classList.toggle("bg-emerald-600", concluido);
+                iconWrap.classList.toggle("bg-sky-600", !concluido);
+            }
+            if (spinSvg) { spinSvg.hidden = concluido; spinSvg.classList.toggle("hidden", concluido); }
+            if (chkSvg) { chkSvg.hidden = !concluido; chkSvg.classList.toggle("hidden", !concluido); }
+
+            const stepsBox = document.getElementById("maestriLoadSteps");
+            if (stepsBox) {
+                if (Array.isArray(st.etapas) && st.etapas.length) {
+                    stepsBox.innerHTML = st.etapas.map((et, idx) => {
+                        const s = et.status || "pendente";
+                        const clsRow = s === "ativo"
+                            ? "border-sky-300 bg-sky-50/85 text-sky-950"
+                            : (s === "concluido" ? "border-emerald-200 bg-emerald-50/75 text-emerald-950" : "border-slate-200/80 bg-slate-50/60 text-slate-500");
+                        const ico = s === "ativo"
+                            ? `<span class="w-4 h-4 rounded-full border-2 border-sky-600 border-t-transparent maestri-spin shrink-0"></span>`
+                            : (s === "concluido"
+                                ? `<span class="w-4 h-4 rounded-full bg-emerald-600 text-white text-[9px] font-extrabold flex items-center justify-center shrink-0">✓</span>`
+                                : `<span class="w-4 h-4 rounded-full bg-slate-200 text-slate-500 text-[9px] font-extrabold flex items-center justify-center shrink-0">${idx + 1}</span>`);
+                        const subInfo = et.info ? `<span class="text-[10px] font-mono font-bold opacity-80 truncate">${escapeHtml(et.info)}</span>` : "";
+                        return `
+                            <div class="flex items-center justify-between gap-2 px-3 py-2 rounded-2xl border ${clsRow} text-[11px] transition-all">
+                                <div class="flex items-center gap-2 min-w-0">
+                                    ${ico}
+                                    <span class="font-extrabold truncate">${escapeHtml(et.label || "")}</span>
+                                </div>
+                                ${subInfo}
+                            </div>`;
+                    }).join("");
+                } else {
+                    stepsBox.innerHTML = "";
+                }
+            }
+
+            const banner = document.getElementById("pipelineLiveProgressBanner");
+            if (banner) {
+                const showBanner = st.ativo && st.mostrarBannerPipeline;
+                banner.hidden = !showBanner;
+                banner.classList.toggle("hidden", !showBanner);
+                if (showBanner) {
+                    setTxt("pipelineLiveProgBadge", st.badge || "EM PROCESSAMENTO");
+                    setTxt("pipelineLiveProgMeta", `${pctClamped}% • ${elapsedStr}`);
+                    setTxt("pipelineLiveProgTitle", st.titulo || "Processando...");
+                    setTxt("pipelineLiveProgDesc", st.detalhe || st.subtitulo || "");
+                    const bBar = document.getElementById("pipelineLiveProgBar");
+                    if (bBar) bBar.style.width = `${Math.max(4, pctClamped)}%`;
+                }
+            }
+        }
+
+        function atualizarRelogioProgressoVisualMaestri() {
+            const st = progressoVisualEstado;
+            if (!st.ativo) return;
+            const elapsedStr = formatarTempoDecorridoProgresso(Date.now() - (st.iniciadoEm || Date.now()));
+            const pctClamped = Math.max(0, Math.min(100, Math.round(st.pct || 0)));
+            const elT = document.getElementById("maestriLoadTimer");
+            if (elT) elT.innerText = elapsedStr;
+            const elM = document.getElementById("pipelineLiveProgMeta");
+            if (elM) elM.innerText = `${pctClamped}% • ${elapsedStr}`;
+        }
+
+        function iniciarProgressoVisualMaestri(cfg = {}) {
+            if (progressoVisualEstado.timerId) {
+                clearInterval(progressoVisualEstado.timerId);
+                progressoVisualEstado.timerId = null;
+            }
+            progressoVisualEstado = {
+                ativo: true,
+                minimizado: Boolean(cfg.minimizado),
+                iniciadoEm: Date.now(),
+                timerId: null,
+                pct: Number(cfg.pct ?? 6),
+                badge: cfg.badge || "PROCESSANDO",
+                titulo: cfg.titulo || "Iniciando operação...",
+                subtitulo: cfg.subtitulo || "Aguarde enquanto os dados são processados.",
+                detalhe: cfg.detalhe || "Preparando...",
+                etapas: Array.isArray(cfg.etapas) ? cfg.etapas.map(e => ({ ...e })) : [],
+                mostrarBannerPipeline: Boolean(cfg.mostrarBannerPipeline)
+            };
+            progressoVisualEstado.timerId = setInterval(() => {
+                atualizarRelogioProgressoVisualMaestri();
+            }, 500);
+            renderizarProgressoVisualMaestri();
+        }
+
+        function atualizarProgressoVisualMaestri(patch = {}) {
+            if (!progressoVisualEstado.ativo) return;
+            if (patch.pct !== undefined) progressoVisualEstado.pct = Number(patch.pct);
+            if (patch.badge !== undefined) progressoVisualEstado.badge = patch.badge;
+            if (patch.titulo !== undefined) progressoVisualEstado.titulo = patch.titulo;
+            if (patch.subtitulo !== undefined) progressoVisualEstado.subtitulo = patch.subtitulo;
+            if (patch.detalhe !== undefined) progressoVisualEstado.detalhe = patch.detalhe;
+            if (patch.mostrarBannerPipeline !== undefined) progressoVisualEstado.mostrarBannerPipeline = Boolean(patch.mostrarBannerPipeline);
+            if (typeof patch.etapaAtivaIdx === "number" && Array.isArray(progressoVisualEstado.etapas)) {
+                progressoVisualEstado.etapas.forEach((et, idx) => {
+                    if (idx < patch.etapaAtivaIdx) et.status = "concluido";
+                    else if (idx === patch.etapaAtivaIdx) {
+                        et.status = patch.concluirTodas ? "concluido" : "ativo";
+                        if (patch.etapaInfo !== undefined) et.info = patch.etapaInfo;
+                    } else {
+                        et.status = patch.concluirTodas ? "concluido" : "pendente";
+                    }
+                });
+            } else if (patch.concluirTodas && Array.isArray(progressoVisualEstado.etapas)) {
+                progressoVisualEstado.etapas.forEach(et => { et.status = "concluido"; });
+            }
+            if (patch.etapaInfos && typeof patch.etapaInfos === "object") {
+                Object.entries(patch.etapaInfos).forEach(([idxStr, txt]) => {
+                    const idx = Number(idxStr);
+                    if (progressoVisualEstado.etapas[idx]) progressoVisualEstado.etapas[idx].info = String(txt);
+                });
+            }
+            renderizarProgressoVisualMaestri();
+        }
+
+        window.minimizarProgressoOverlayMaestri = () => {
+            if (!progressoVisualEstado.ativo) return;
+            progressoVisualEstado.minimizado = true;
+            progressoVisualEstado.mostrarBannerPipeline = true;
+            renderizarProgressoVisualMaestri();
+            showToast("Processamento continua em andamento no topo do painel!", "info");
+        };
+
+        window.reabrirProgressoOverlayMaestri = () => {
+            if (!progressoVisualEstado.ativo) return;
+            progressoVisualEstado.minimizado = false;
+            renderizarProgressoVisualMaestri();
+        };
+
+        function finalizarProgressoVisualMaestri() {
+            if (progressoVisualEstado.timerId) {
+                clearInterval(progressoVisualEstado.timerId);
+                progressoVisualEstado.timerId = null;
+            }
+            progressoVisualEstado.ativo = false;
+            progressoVisualEstado.minimizado = false;
+            progressoVisualEstado.mostrarBannerPipeline = false;
+            renderizarProgressoVisualMaestri();
+        }
+
+        function definirEstadoCarregamentoPipelineHud(ativo, badgeTxt = "", msgTxt = "") {
+            const btnHdr = document.getElementById("btnHeaderExecutarOrq");
+            const lblHdr = document.getElementById("lblBtnHeaderExecutarOrq");
+            if (btnHdr) {
+                btnHdr.disabled = Boolean(ativo);
+                btnHdr.classList.toggle("opacity-70", Boolean(ativo));
+            }
+            if (lblHdr) lblHdr.innerText = ativo ? "Processando..." : "Executar Orquestração";
+            if (ativo) {
+                const stBadge = document.getElementById("neuralStatusBadge");
+                if (stBadge && badgeTxt) {
+                    stBadge.innerText = badgeTxt;
+                    stBadge.className = "px-2.5 py-0.5 rounded-full bg-sky-100 text-sky-900 border border-sky-300 text-[10px] font-extrabold";
+                }
+                const ph = document.getElementById("maestroPhasePill");
+                if (ph) {
+                    ph.innerText = "INICIANDO";
+                    ph.className = "px-2 py-0.5 rounded-md bg-sky-100 border border-sky-300 text-sky-800 font-mono text-[9px] font-extrabold";
+                }
+                const del = document.getElementById("maestroDelegacaoMsg");
+                if (del && msgTxt) del.innerText = msgTxt;
+            }
+        }
+
         window.executarPipelineCompletoUI = async (opts = {}) => {
             if (!omsBrutasCarregadas.length) {
+                finalizarProgressoVisualMaestri();
                 showToast("Nenhuma planilha carregada! Selecione seu CSV/XLSX de Novembro ou clique em 'Simular Lote Teste'.", "info");
                 registrarInteracaoNeural({
                     origem: "MAESTRO", destino: "N1", status: "pronto",
@@ -5895,6 +6284,7 @@ OMs:\n${JSON.stringify(listaPrompt)}`;
             const jaAtivaMesmaBase = Boolean(omsAuditadas.length && rodadaVigenteInfo.hashLote === hashAtual);
 
             if (!emModoReavaliacao && (jaAtivaMesmaBase || regExistente)) {
+                finalizarProgressoVisualMaestri();
                 return await restaurarOuAlertarLoteJaAuditado({
                     brutas: omsBrutasCarregadas,
                     nomeArquivo: rodadaVigenteInfo.arquivoNome || regExistente?.arquivoNome || "Lote ERP",
@@ -5907,230 +6297,337 @@ OMs:\n${JSON.stringify(listaPrompt)}`;
                 });
             }
 
-            const cfg = carregarCofreIaLocal();
-            const cacheDedup = new Map();
-            let fastCnt = 0;
-            let loteCnt = 0;
-            let preservadasSupCnt = 0;
-            let reaproveitadasHistCnt = 0;
-            const pendentesIa = [];
+            const mostrarFeedbackVisual = opts.animar !== false && !opts.silenciosoSeJaAuditado;
+            const totalBrutas = omsBrutasCarregadas.length;
+            const nomeLoteExib = rodadaVigenteInfo.arquivoNome || rodadaVigenteInfo.periodo || "Lote ERP";
 
-            const preliminares = omsBrutasCarregadas.map(om => {
-                const omKey = String(om.om || "").trim();
-                const revSalva = !opts.ignorarRevisoesHumanas ? revisoesPorOm[omKey] : null;
-                if (revSalva) {
-                    preservadasSupCnt++;
-                    fastCnt++;
-                    return {
-                        om,
-                        dec: {
-                            categoria: revSalva.categoria,
-                            b: revSalva.b || null,
-                            c: revSalva.c || null,
-                            confianca: 5,
-                            origem: "SUPERVISOR",
-                            justificativa: revSalva.justificativa || "Decisão confirmada pelo supervisor no Nó 5 (preservada)."
-                        },
-                        revSalva,
-                        histPrev: null
-                    };
+            try {
+                if (mostrarFeedbackVisual) {
+                    definirEstadoCarregamentoPipelineHud(
+                        true,
+                        "Preparando Orquestração...",
+                        `Iniciando auditoria de ${totalBrutas} OM(s) (${nomeLoteExib}) — aguarde a conclusão das etapas...`
+                    );
+                    if (!opts._progressoJaIniciado || !progressoVisualEstado.ativo) {
+                        iniciarProgressoVisualMaestri({
+                            badge: "ORQUESTRAÇÃO EM INÍCIO",
+                            titulo: `Auditando ${totalBrutas} Ordem(ns) de Manutenção`,
+                            subtitulo: `Lote "${nomeLoteExib}" — o sistema está preparando, classificando e gravando os dados antes de iniciar o fluxo visual.`,
+                            detalhe: "Etapa 1/4: Triagem e deduplicação contra o Banco Histórico em Nuvem...",
+                            pct: 10,
+                            mostrarBannerPipeline: true,
+                            etapas: [
+                                { label: "1. Triagem & Deduplicação Histórica (Nó 1)", status: "ativo", info: `${totalBrutas} OMs` },
+                                { label: "2. Motor Fast-Path & Memória R$ 0,00 (Nó 2)", status: "pendente", info: "" },
+                                { label: "3. Auditoria IA Gemini Flash em Lotes (Nó 3)", status: "pendente", info: "" },
+                                { label: "4. Banco Mensal Nuvem & Confiabilidade (Nós 4→9)", status: "pendente", info: "" }
+                            ]
+                        });
+                    } else {
+                        atualizarProgressoVisualMaestri({
+                            badge: "ETAPA 1/4 • TRIAGEM",
+                            titulo: `Auditando ${totalBrutas} Ordem(ns) de Manutenção`,
+                            detalhe: "Verificando revisões de supervisores e histórico já registrado na nuvem...",
+                            pct: 14,
+                            etapaAtivaIdx: 0,
+                            etapaInfo: `${totalBrutas} OMs`
+                        });
+                    }
+                    await cederFrameUI(30);
                 }
 
-                // Deduplicação OM a OM contra o Banco Histórico Permanente na Nuvem!
-                const histPrev = (!opts.ignorarRevisoesHumanas && !opts.forcarReavaliacao && !opts.usarBenchmarkSetOut)
-                    ? bancoHistoricoOmsMap.get(omKey)
-                    : null;
-                if (histPrev) {
-                    const servAntes = String(histPrev.servico || "").trim();
-                    const servNovo = String(om.servico || "").trim();
-                    const tempoAntes = Number(histPrev.tempo_min || 0);
-                    const tempoNovo = Number(om.tempo_min || 0);
-                    const ganhouDetalhes = histPrev.origem !== "SUPERVISOR" && ((servAntes.length < 4 && servNovo.length >= 4) || (tempoAntes === 0 && tempoNovo > 0));
-                    if (!ganhouDetalhes) {
-                        reaproveitadasHistCnt++;
+                const cfg = carregarCofreIaLocal();
+                const cacheDedup = new Map();
+                let fastCnt = 0;
+                let loteCnt = 0;
+                let preservadasSupCnt = 0;
+                let reaproveitadasHistCnt = 0;
+                const pendentesIa = [];
+
+                const preliminares = omsBrutasCarregadas.map(om => {
+                    const omKey = String(om.om || "").trim();
+                    const revSalva = !opts.ignorarRevisoesHumanas ? revisoesPorOm[omKey] : null;
+                    if (revSalva) {
+                        preservadasSupCnt++;
                         fastCnt++;
                         return {
                             om,
                             dec: {
-                                categoria: histPrev.categoria,
-                                b: histPrev.b ?? null,
-                                c: histPrev.c ?? null,
-                                confianca: Number(histPrev.confianca || 5),
-                                origem: histPrev.origem === "SUPERVISOR" ? "SUPERVISOR" : "HISTORICO_EXISTENTE",
-                                justificativa: histPrev.justificativa || "OM já registrada e auditada em lote anterior (preservada sem duplicar)."
+                                categoria: revSalva.categoria,
+                                b: revSalva.b || null,
+                                c: revSalva.c || null,
+                                confianca: 5,
+                                origem: "SUPERVISOR",
+                                justificativa: revSalva.justificativa || "Decisão confirmada pelo supervisor no Nó 5 (preservada)."
                             },
-                            revSalva: null,
-                            histPrev
+                            revSalva,
+                            histPrev: null
                         };
                     }
-                }
 
-                const dec = classificarOmNoMotorMaestri(om, cacheDedup);
-                const forcarGeminiTotal = cfg.modo === "gemini" && Boolean(cfg.key);
-                const isBloqOuPre = ["BLOQUEIO_APONTAMENTO", "PRE_AUDITADA", "SUPERVISOR"].includes(dec.origem);
-                if (isBloqOuPre || (!forcarGeminiTotal && ["FAST_PATH_R0", "BIBLIOTECA_MEMORIA", "DEDUP_RODADA"].includes(dec.origem))) {
-                    fastCnt++;
-                } else {
-                    loteCnt++;
-                    pendentesIa.push(om);
-                }
-                return { om, dec, revSalva: null, histPrev: null };
-            });
-
-            // Chamada real em lotes de 20 OMs se chave Gemini estiver configurada no Cofre Master e modo !== deterministico
-            const iaMap = new Map();
-            let chamadasReais = 0;
-            let erroIaN3Aviso = "";
-            if (cfg.key && cfg.modo !== "deterministico" && pendentesIa.length > 0 && typeof fetch === "function" && !opts.usarBenchmarkSetOut) {
-                const loteSz = Math.max(5, Math.min(30, Number(cfg.lote || 20)));
-                for (let i = 0; i < pendentesIa.length; i += loteSz) {
-                    const chunk = pendentesIa.slice(i, i + loteSz);
-                    chamadasReais++;
-                    try {
-                        const resMap = await chamarGeminiLote20NoNavegador(chunk, cfg.key);
-                        if (resMap) resMap.forEach((val, k) => iaMap.set(k, val));
-                    } catch (errIa) {
-                        if (!erroIaN3Aviso) erroIaN3Aviso = errIa?.message || "Erro na API Gemini";
+                    // Deduplicação OM a OM contra o Banco Histórico Permanente na Nuvem!
+                    const histPrev = (!opts.ignorarRevisoesHumanas && !opts.forcarReavaliacao && !opts.usarBenchmarkSetOut)
+                        ? bancoHistoricoOmsMap.get(omKey)
+                        : null;
+                    if (histPrev) {
+                        const servAntes = String(histPrev.servico || "").trim();
+                        const servNovo = String(om.servico || "").trim();
+                        const tempoAntes = Number(histPrev.tempo_min || 0);
+                        const tempoNovo = Number(om.tempo_min || 0);
+                        const ganhouDetalhes = histPrev.origem !== "SUPERVISOR" && ((servAntes.length < 4 && servNovo.length >= 4) || (tempoAntes === 0 && tempoNovo > 0));
+                        if (!ganhouDetalhes) {
+                            reaproveitadasHistCnt++;
+                            fastCnt++;
+                            return {
+                                om,
+                                dec: {
+                                    categoria: histPrev.categoria,
+                                    b: histPrev.b ?? null,
+                                    c: histPrev.c ?? null,
+                                    confianca: Number(histPrev.confianca || 5),
+                                    origem: histPrev.origem === "SUPERVISOR" ? "SUPERVISOR" : "HISTORICO_EXISTENTE",
+                                    justificativa: histPrev.justificativa || "OM já registrada e auditada em lote anterior (preservada sem duplicar)."
+                                },
+                                revSalva: null,
+                                histPrev
+                            };
+                        }
                     }
-                }
-                if (erroIaN3Aviso) {
-                    showToast(`Nó 3 Gemini (${erroIaN3Aviso}) — aplicado motor determinístico local neste lote.`, "error");
-                }
-            }
 
-            const loteAuditadoAtual = preliminares.map(({ om, dec, revSalva, histPrev }) => {
-                if (revSalva) {
-                    const baseItem = construirItemAuditadoCompleto(om, dec);
-                    return {
-                        ...baseItem,
-                        b: revSalva.b || baseItem.b || null,
-                        c: revSalva.c || baseItem.c || null,
-                        severidade: revSalva.severidade || baseItem.severidade,
-                        regra_severidade: revSalva.regra_severidade || baseItem.regra_severidade || "",
-                        origem: "SUPERVISOR",
-                        fila: "AUTOMATICO",
-                        confianca: 5
-                    };
-                }
-                if (histPrev) {
-                    return {
-                        ...histPrev,
-                        ativo: histPrev.ativo || om.ativo,
-                        origem: histPrev.origem === "SUPERVISOR" ? "SUPERVISOR" : "HISTORICO_EXISTENTE"
-                    };
-                }
-                const overrideIa = iaMap.get(String(om.om));
-                const finalDec = overrideIa && CATEGORIAS_OFICIAIS.includes(String(overrideIa.categoria).toUpperCase())
-                    ? {
-                        categoria: String(overrideIa.categoria).toUpperCase(),
-                        b: overrideIa.b ? Number(overrideIa.b) : dec.b,
-                        c: overrideIa.c ? Number(overrideIa.c) : dec.c,
-                        confianca: Number(overrideIa.confianca || 4),
-                        origem: "IA_LOTE20",
-                        justificativa: `[Gemini Flash Lote ${cfg.lote}] ${overrideIa.justificativa || dec.justificativa}`
-                    }
-                    : dec;
-                return construirItemAuditadoCompleto(om, finalDec);
-            });
-
-            ultimoLoteAuditadasCache = [...loteAuditadoAtual];
-            omsAuditadas = [...loteAuditadoAtual];
-
-            if (opts.usarBenchmarkSetOut) {
-                custoRodada = {
-                    oms_total: 1234,
-                    oms_fast_path_r0: 780,
-                    oms_ia_lote: 454,
-                    chamadas_ia: 23,
-                    lote_size: cfg.lote,
-                    custo_brl: 1.48,
-                    custo_sem_otimizacao_brl: 30.60,
-                    economia_brl: 29.12,
-                    economia_pct: 95.2
-                };
-            } else {
-                const total = omsAuditadas.length;
-                const chamadas = cfg.modo === "deterministico" || !cfg.key ? 0 : (chamadasReais || Math.ceil(loteCnt / cfg.lote));
-                const custoV40 = Math.round(total * (30.60 / 1234) * 100) / 100;
-                const custoNovo = chamadas === 0 ? 0.0 : Math.round(chamadas * 0.064 * 100) / 100;
-                const econBrl = Math.max(0, Math.round((custoV40 - custoNovo) * 100) / 100);
-                const econPct = custoV40 > 0 ? Math.round((econBrl / custoV40) * 1000) / 10 : 100;
-
-                custoRodada = {
-                    oms_total: total,
-                    oms_fast_path_r0: fastCnt,
-                    oms_ia_lote: loteCnt,
-                    chamadas_ia: chamadas,
-                    lote_size: cfg.lote,
-                    custo_brl: custoNovo,
-                    custo_sem_otimizacao_brl: custoV40,
-                    economia_brl: econBrl,
-                    economia_pct: econPct
-                };
-
-                // Persiste incrementalmente no Banco Histórico Mensal na Nuvem (sem duplicar OMs!)
-                if (rodadaVigenteInfo.tipo !== "INSPECAO_HISTORICA" && !opts.isSimulado) {
-                    await persistirOmsNoBancoHistorico(loteAuditadoAtual, true);
-                    if (opts.mesclarHistoricoVisao && bancoHistoricoOmsMap.size > loteAuditadoAtual.length) {
-                        escopoVisualizacaoOms = "historico_total";
-                        omsAuditadas = [...bancoHistoricoOmsMap.values()].sort((a, b) => String(b.data || "").localeCompare(String(a.data || "")));
+                    const dec = classificarOmNoMotorMaestri(om, cacheDedup);
+                    const forcarGeminiTotal = cfg.modo === "gemini" && Boolean(cfg.key);
+                    const isBloqOuPre = ["BLOQUEIO_APONTAMENTO", "PRE_AUDITADA", "SUPERVISOR"].includes(dec.origem);
+                    if (isBloqOuPre || (!forcarGeminiTotal && ["FAST_PATH_R0", "BIBLIOTECA_MEMORIA", "DEDUP_RODADA"].includes(dec.origem))) {
+                        fastCnt++;
                     } else {
-                        escopoVisualizacaoOms = "lote_atual";
+                        loteCnt++;
+                        pendentesIa.push(om);
                     }
-                    atualizarUIBancoHistoricoOms();
+                    return { om, dec, revSalva: null, histPrev: null };
+                });
+
+                const vaiChamarGemini = Boolean(cfg.key && cfg.modo !== "deterministico" && pendentesIa.length > 0 && typeof fetch === "function" && !opts.usarBenchmarkSetOut);
+                if (mostrarFeedbackVisual) {
+                    const infoN1 = reaproveitadasHistCnt > 0 ? `${reaproveitadasHistCnt} do histórico` : `${totalBrutas} OMs`;
+                    const infoN2 = `${fastCnt} OMs a R$ 0,00`;
+                    atualizarProgressoVisualMaestri({
+                        badge: vaiChamarGemini ? "ETAPA 3/4 • AUDITORIA IA GEMINI" : "ETAPA 2/4 • MOTOR LOCAL R$ 0,00",
+                        detalhe: vaiChamarGemini
+                            ? `${fastCnt} OM(s) já decididas a R$ 0,00 • Enviando ${pendentesIa.length} OM(s) à IA Gemini Flash...`
+                            : `⚡ 100% das ${totalBrutas} OMs classificadas localmente a R$ 0,00 — avançando para gravação...`,
+                        pct: vaiChamarGemini ? 32 : 68,
+                        etapaAtivaIdx: vaiChamarGemini ? 2 : 1,
+                        etapaInfos: { 0: infoN1, 1: infoN2, 2: vaiChamarGemini ? `0/${pendentesIa.length} OMs` : "R$ 0,00 (Dispensa API)" }
+                    });
+                    await cederFrameUI(vaiChamarGemini ? 30 : 120);
                 }
-            }
 
-            rodadaVigenteInfo = {
-                ...rodadaVigenteInfo,
-                hashLote: hashAtual,
-                status: emModoReavaliacao ? "reavaliado" : "auditado",
-                auditadoEm: new Date().toISOString()
-            };
-
-            recalcularNosPosAuditoria();
-            if (rodadaVigenteInfo.tipo !== "INSPECAO_HISTORICA" && !opts.naoArquivarAuto) {
-                const periodoSnap = (document.getElementById("inputPeriodoRodada")?.value || rodadaVigenteInfo.periodo || getPeriodoAtualPadrao()).trim();
-                const snap = gerarResumoMetricasRodada(periodoSnap, loteAuditadoAtual, "VIGENTE");
-                if (snap.id !== BASELINE_SET_OUT_2026.id) {
-                    historicoRodadas = [
-                        BASELINE_SET_OUT_2026,
-                        ...historicoRodadas.filter(h => h.id !== BASELINE_SET_OUT_2026.id && h.id !== snap.id),
-                        snap
-                    ];
+                // Chamada real em lotes de 20 OMs se chave Gemini estiver configurada no Cofre Master e modo !== deterministico
+                const iaMap = new Map();
+                let chamadasReais = 0;
+                let erroIaN3Aviso = "";
+                if (vaiChamarGemini) {
+                    const loteSz = Math.max(5, Math.min(30, Number(cfg.lote || 20)));
+                    const totalLotesIa = Math.ceil(pendentesIa.length / loteSz);
+                    for (let i = 0; i < pendentesIa.length; i += loteSz) {
+                        const chunk = pendentesIa.slice(i, i + loteSz);
+                        chamadasReais++;
+                        const omsAteAgora = Math.min(i + chunk.length, pendentesIa.length);
+                        if (mostrarFeedbackVisual) {
+                            const pctIniLote = 34 + Math.round(((chamadasReais - 1) / totalLotesIa) * 46);
+                            const msgLote = `Nó 3 (Gemini Flash): auditando lote ${chamadasReais} de ${totalLotesIa} (${omsAteAgora}/${pendentesIa.length} OMs)...`;
+                            definirEstadoCarregamentoPipelineHud(true, `Nó 3 IA • Lote ${chamadasReais}/${totalLotesIa}`, msgLote);
+                            atualizarProgressoVisualMaestri({
+                                badge: `IA GEMINI • LOTE ${chamadasReais}/${totalLotesIa}`,
+                                detalhe: msgLote,
+                                pct: pctIniLote,
+                                etapaAtivaIdx: 2,
+                                etapaInfo: `Lote ${chamadasReais}/${totalLotesIa} (${omsAteAgora}/${pendentesIa.length})`
+                            });
+                            await cederFrameUI(20);
+                        }
+                        try {
+                            const resMap = await chamarGeminiLote20NoNavegador(chunk, cfg.key);
+                            if (resMap) resMap.forEach((val, k) => iaMap.set(k, val));
+                        } catch (errIa) {
+                            if (!erroIaN3Aviso) erroIaN3Aviso = errIa?.message || "Erro na API Gemini";
+                        }
+                        if (mostrarFeedbackVisual) {
+                            const pctFimLote = 34 + Math.round((chamadasReais / totalLotesIa) * 46);
+                            atualizarProgressoVisualMaestri({
+                                pct: pctFimLote,
+                                etapaAtivaIdx: 2,
+                                etapaInfo: `${omsAteAgora}/${pendentesIa.length} OMs`
+                            });
+                        }
+                    }
+                    if (erroIaN3Aviso) {
+                        showToast(`Nó 3 Gemini (${erroIaN3Aviso}) — aplicado motor determinístico local neste lote.`, "error");
+                    }
                 }
+
+                if (mostrarFeedbackVisual) {
+                    definirEstadoCarregamentoPipelineHud(true, "Gravando na Nuvem...", "Consolidando Banco Histórico Mensal e calculando Confiabilidade (Nós 4→9)...");
+                    atualizarProgressoVisualMaestri({
+                        badge: "ETAPA 4/4 • CONSOLIDAÇÃO",
+                        detalhe: `Gravando ${totalBrutas} OM(s) no Banco Histórico Mensal e recalculando MTBF/MTTR e Estudos AQF...`,
+                        pct: 86,
+                        etapaAtivaIdx: 3,
+                        etapaInfo: "Salvando..."
+                    });
+                    await cederFrameUI(25);
+                }
+
+                const loteAuditadoAtual = preliminares.map(({ om, dec, revSalva, histPrev }) => {
+                    if (revSalva) {
+                        const baseItem = construirItemAuditadoCompleto(om, dec);
+                        return {
+                            ...baseItem,
+                            b: revSalva.b || baseItem.b || null,
+                            c: revSalva.c || baseItem.c || null,
+                            severidade: revSalva.severidade || baseItem.severidade,
+                            regra_severidade: revSalva.regra_severidade || baseItem.regra_severidade || "",
+                            origem: "SUPERVISOR",
+                            fila: "AUTOMATICO",
+                            confianca: 5
+                        };
+                    }
+                    if (histPrev) {
+                        return {
+                            ...histPrev,
+                            ativo: histPrev.ativo || om.ativo,
+                            origem: histPrev.origem === "SUPERVISOR" ? "SUPERVISOR" : "HISTORICO_EXISTENTE"
+                        };
+                    }
+                    const overrideIa = iaMap.get(String(om.om));
+                    const finalDec = overrideIa && CATEGORIAS_OFICIAIS.includes(String(overrideIa.categoria).toUpperCase())
+                        ? {
+                            categoria: String(overrideIa.categoria).toUpperCase(),
+                            b: overrideIa.b ? Number(overrideIa.b) : dec.b,
+                            c: overrideIa.c ? Number(overrideIa.c) : dec.c,
+                            confianca: Number(overrideIa.confianca || 4),
+                            origem: "IA_LOTE20",
+                            justificativa: `[Gemini Flash Lote ${cfg.lote}] ${overrideIa.justificativa || dec.justificativa}`
+                        }
+                        : dec;
+                    return construirItemAuditadoCompleto(om, finalDec);
+                });
+
+                ultimoLoteAuditadasCache = [...loteAuditadoAtual];
+                omsAuditadas = [...loteAuditadoAtual];
+
+                if (opts.usarBenchmarkSetOut) {
+                    custoRodada = {
+                        oms_total: 1234,
+                        oms_fast_path_r0: 780,
+                        oms_ia_lote: 454,
+                        chamadas_ia: 23,
+                        lote_size: cfg.lote,
+                        custo_brl: 1.48,
+                        custo_sem_otimizacao_brl: 30.60,
+                        economia_brl: 29.12,
+                        economia_pct: 95.2
+                    };
+                } else {
+                    const total = omsAuditadas.length;
+                    const chamadas = cfg.modo === "deterministico" || !cfg.key ? 0 : (chamadasReais || Math.ceil(loteCnt / cfg.lote));
+                    const custoV40 = Math.round(total * (30.60 / 1234) * 100) / 100;
+                    const custoNovo = chamadas === 0 ? 0.0 : Math.round(chamadas * 0.064 * 100) / 100;
+                    const econBrl = Math.max(0, Math.round((custoV40 - custoNovo) * 100) / 100);
+                    const econPct = custoV40 > 0 ? Math.round((econBrl / custoV40) * 1000) / 10 : 100;
+
+                    custoRodada = {
+                        oms_total: total,
+                        oms_fast_path_r0: fastCnt,
+                        oms_ia_lote: loteCnt,
+                        chamadas_ia: chamadas,
+                        lote_size: cfg.lote,
+                        custo_brl: custoNovo,
+                        custo_sem_otimizacao_brl: custoV40,
+                        economia_brl: econBrl,
+                        economia_pct: econPct
+                    };
+
+                    // Persiste incrementalmente no Banco Histórico Mensal na Nuvem (sem duplicar OMs!)
+                    if (rodadaVigenteInfo.tipo !== "INSPECAO_HISTORICA" && !opts.isSimulado) {
+                        await persistirOmsNoBancoHistorico(loteAuditadoAtual, true);
+                        if (opts.mesclarHistoricoVisao && bancoHistoricoOmsMap.size > loteAuditadoAtual.length) {
+                            escopoVisualizacaoOms = "historico_total";
+                            omsAuditadas = [...bancoHistoricoOmsMap.values()].sort((a, b) => String(b.data || "").localeCompare(String(a.data || "")));
+                        } else {
+                            escopoVisualizacaoOms = "lote_atual";
+                        }
+                        atualizarUIBancoHistoricoOms();
+                    }
+                }
+
+                rodadaVigenteInfo = {
+                    ...rodadaVigenteInfo,
+                    hashLote: hashAtual,
+                    status: emModoReavaliacao ? "reavaliado" : "auditado",
+                    auditadoEm: new Date().toISOString()
+                };
+
+                recalcularNosPosAuditoria();
+                if (rodadaVigenteInfo.tipo !== "INSPECAO_HISTORICA" && !opts.naoArquivarAuto) {
+                    const periodoSnap = (document.getElementById("inputPeriodoRodada")?.value || rodadaVigenteInfo.periodo || getPeriodoAtualPadrao()).trim();
+                    const snap = gerarResumoMetricasRodada(periodoSnap, loteAuditadoAtual, "VIGENTE");
+                    if (snap.id !== BASELINE_SET_OUT_2026.id) {
+                        historicoRodadas = [
+                            BASELINE_SET_OUT_2026,
+                            ...historicoRodadas.filter(h => h.id !== BASELINE_SET_OUT_2026.id && h.id !== snap.id),
+                            snap
+                        ];
+                    }
+                }
+
+                lotesAuditadosMap[hashAtual] = {
+                    hash: hashAtual,
+                    arquivoNome: rodadaVigenteInfo.arquivoNome || rodadaVigenteInfo.periodo,
+                    periodo: rodadaVigenteInfo.periodo,
+                    tipo: rodadaVigenteInfo.tipo,
+                    total_oms: loteAuditadoAtual.length,
+                    revisadas_qtd: preservadasSupCnt,
+                    reaproveitadas_hist: reaproveitadasHistCnt,
+                    auditado_em: regExistente?.auditado_em || rodadaVigenteInfo.auditadoEm,
+                    ultima_reavaliacao: emModoReavaliacao ? new Date().toISOString() : null,
+                    custo: { ...custoRodada },
+                    auditadas: loteAuditadoAtual.slice(0, 2500)
+                };
+
+                salvarEstadoPersistidoMaestri();
+                renderCurrentView();
+                atualizarBannerLoteAuditado();
+
+                if (mostrarFeedbackVisual) {
+                    atualizarProgressoVisualMaestri({
+                        badge: "PRONTO • INICIANDO FLUXO",
+                        titulo: "✅ Auditoria Concluída — Iniciando Orquestração Visual!",
+                        detalhe: `${loteAuditadoAtual.length} OM(s) auditadas • Iniciando acompanhamento ao vivo nas 9 etapas...`,
+                        pct: 100,
+                        concluirTodas: true,
+                        etapaInfos: { 3: "Concluído!" }
+                    });
+                    await cederFrameUI(420);
+                    finalizarProgressoVisualMaestri();
+                }
+
+                if (opts.animar !== false && neuralAnimacaoModo !== "instantanea" && typeof window.setTimeout === "function") {
+                    executarAnimacaoRedeNeural({ total: omsAuditadas.length, fastCnt, loteCnt, chamadas: custoRodada.chamadas_ia, isReavaliacao: emModoReavaliacao, preservadasSupCnt });
+                } else {
+                    aplicarEstadoFinalRedeNeural({ total: omsAuditadas.length, fastCnt, loteCnt, chamadas: custoRodada.chamadas_ia, forcarSyncStream: true, isReavaliacao: emModoReavaliacao, preservadasSupCnt });
+                }
+
+                const dedupInfo = reaproveitadasHistCnt > 0 ? ` • ${reaproveitadasHistCnt} já estavam no histórico (R$ 0,00)` : "";
+                const verb = emModoReavaliacao
+                    ? `Reavaliação concluída (${omsAuditadas.length} OMs • ${preservadasSupCnt} revisões preservadas)`
+                    : `Auditoria concluída (${loteAuditadoAtual.length} OMs no lote${dedupInfo} • Banco Nuvem: ${bancoHistoricoOmsMap.size} OMs únicas)`;
+                showToast(`${verb}!`, "success");
+                return { reexecucaoBloqueada: false, hash: hashAtual, total: omsAuditadas.length, reavaliacao: emModoReavaliacao, preservadasSupCnt, reaproveitadasHistCnt };
+            } finally {
+                definirEstadoCarregamentoPipelineHud(false);
+                if (progressoVisualEstado.ativo) finalizarProgressoVisualMaestri();
             }
-
-            lotesAuditadosMap[hashAtual] = {
-                hash: hashAtual,
-                arquivoNome: rodadaVigenteInfo.arquivoNome || rodadaVigenteInfo.periodo,
-                periodo: rodadaVigenteInfo.periodo,
-                tipo: rodadaVigenteInfo.tipo,
-                total_oms: loteAuditadoAtual.length,
-                revisadas_qtd: preservadasSupCnt,
-                reaproveitadas_hist: reaproveitadasHistCnt,
-                auditado_em: regExistente?.auditado_em || rodadaVigenteInfo.auditadoEm,
-                ultima_reavaliacao: emModoReavaliacao ? new Date().toISOString() : null,
-                custo: { ...custoRodada },
-                auditadas: loteAuditadoAtual.slice(0, 2500)
-            };
-
-            salvarEstadoPersistidoMaestri();
-            renderCurrentView();
-            atualizarBannerLoteAuditado();
-
-            if (opts.animar !== false && neuralAnimacaoModo !== "instantanea" && typeof window.setTimeout === "function") {
-                executarAnimacaoRedeNeural({ total: omsAuditadas.length, fastCnt, loteCnt, chamadas: custoRodada.chamadas_ia, isReavaliacao: emModoReavaliacao, preservadasSupCnt });
-            } else {
-                aplicarEstadoFinalRedeNeural({ total: omsAuditadas.length, fastCnt, loteCnt, chamadas: custoRodada.chamadas_ia, forcarSyncStream: true, isReavaliacao: emModoReavaliacao, preservadasSupCnt });
-            }
-
-            const dedupInfo = reaproveitadasHistCnt > 0 ? ` • ${reaproveitadasHistCnt} já estavam no histórico (R$ 0,00)` : "";
-            const verb = emModoReavaliacao
-                ? `Reavaliação concluída (${omsAuditadas.length} OMs • ${preservadasSupCnt} revisões preservadas)`
-                : `Auditoria concluída (${loteAuditadoAtual.length} OMs no lote${dedupInfo} • Banco Nuvem: ${bancoHistoricoOmsMap.size} OMs únicas)`;
-            showToast(`${verb}!`, "success");
-            return { reexecucaoBloqueada: false, hash: hashAtual, total: omsAuditadas.length, reavaliacao: emModoReavaliacao, preservadasSupCnt, reaproveitadasHistCnt };
         };
 
         window.reexecutarNosPosConferencia = () => {
@@ -8008,6 +8505,20 @@ OMs:\n${JSON.stringify(listaPrompt)}`;
             }
             const btn = document.getElementById("btnPreVooGeminiAtivos");
             if (btn) btn.disabled = true;
+            const totalBlocos = Math.ceil(pendentes.length / 25);
+            iniciarProgressoVisualMaestri({
+                badge: "GEMINI IA • CONCILIAÇÃO",
+                titulo: `Mapeando ${pendentes.length} Ativo(s) com Gemini IA`,
+                subtitulo: "Comparando os nomes do ERP com sua árvore ob_linhas e as 3 categorias especiais (Ferramental, Não-Ativo, Compartilhado).",
+                detalhe: `Preparando bloco 1 de ${totalBlocos}...`,
+                pct: 10,
+                mostrarBannerPipeline: false,
+                etapas: [
+                    { label: `1. Análise IA em ${totalBlocos} bloco(s) de até 25 ativos`, status: "ativo", info: `0/${pendentes.length}` },
+                    { label: "2. Salvar De-Para Definitivo na Nuvem", status: "pendente", info: "" }
+                ]
+            });
+            await cederFrameUI(25);
             try {
                 const listaCatTexto = catalogo.slice(0, 220).map(c => `${c.label} (${c.area})`);
                 let mappedCnt = 0;
@@ -8017,6 +8528,16 @@ OMs:\n${JSON.stringify(listaPrompt)}`;
 
                 for (let i = 0; i < pendentes.length; i += 25) {
                     const bloco = pendentes.slice(i, i + 25);
+                    const blocoNum = Math.floor(i / 25) + 1;
+                    const ateAgora = Math.min(i + bloco.length, pendentes.length);
+                    atualizarProgressoVisualMaestri({
+                        badge: `GEMINI IA • BLOCO ${blocoNum}/${totalBlocos}`,
+                        detalhe: `Analisando bloco ${blocoNum} de ${totalBlocos} (${ateAgora}/${pendentes.length} ativos)...`,
+                        pct: 12 + Math.round(((blocoNum - 1) / totalBlocos) * 74),
+                        etapaAtivaIdx: 0,
+                        etapaInfo: `${ateAgora}/${pendentes.length}`
+                    });
+                    await cederFrameUI(20);
                     const promptAtivos = `Você é especialista em Gestão de Ativos industriais (PCM Cepêra).
 Classifique cada nome de ativo vindo do ERP em 1 das 4 categorias oficiais:
 - "ATIVO_ARVORE": equipamento/linha industrial presente na árvore ob_linhas (mesmo invertido, ex: "RESFRIADOR - TETRAPACK 2" -> "TETRAPACK 2 › RESFRIADOR" ou "Linha › (Linha Geral)"). Retorne "catalogo_label" EXATO da lista ou "nao_cadastrado": true se for máquina real ainda ausente.
@@ -8064,9 +8585,12 @@ Responda SOMENTE JSON Array: [{"ativo_erp":"...","tipo_ativo":"ATIVO_ARVORE"|"FE
                     }
                 }
                 if (mappedCnt > 0 || especCnt > 0) {
+                    atualizarProgressoVisualMaestri({ badge: "SALVANDO NA NUVEM", detalhe: "Gravando novos mapeamentos no Mapa Master...", pct: 92, etapaAtivaIdx: 1 });
                     await salvarDeParaAtivosPersistente();
                     if (typeof atualizarKpisMapaMasterCloud === "function") atualizarKpisMapaMasterCloud();
                 }
+                atualizarProgressoVisualMaestri({ badge: "CONCLUÍDO", detalhe: "Mapeamento IA concluído!", pct: 100, concluirTodas: true });
+                await cederFrameUI(200);
                 renderPreVooAtivos();
                 showToast(`Gemini (${modeloUsado}): ${mappedCnt} na Árvore, ${especCnt} em Categorias Especiais e ${sugCadCnt} sugestão(ões) de cadastro!`, "success");
             } catch (err) {
@@ -8075,6 +8599,7 @@ Responda SOMENTE JSON Array: [{"ativo_erp":"...","tipo_ativo":"ATIVO_ARVORE"|"FE
                 if (st) st.innerText = `Erro Gemini: ${msg}`;
                 showToast(`Falha Gemini Flash: ${msg}`, "error");
             } finally {
+                finalizarProgressoVisualMaestri();
                 if (btn) btn.disabled = false;
             }
         };
@@ -8111,62 +8636,117 @@ Responda SOMENTE JSON Array: [{"ativo_erp":"...","tipo_ativo":"ATIVO_ARVORE"|"FE
             renderPreVooChecklist();
             atualizarModoIaPreVoo();
             renderPreVooAtivos();
+            finalizarProgressoVisualMaestri();
             abrirModal("modalPreProcessamentoErp");
         }
 
         window.confirmarPreVooEIniciarOrquestracao = async () => {
             if (!preVooEstado) return;
             const estado = preVooEstado;
-            // Salva edições manuais e persiste auto-classificações especiais (Ferramental / Não-Ativo / Compartilhado)
-            let alterouDePara = false;
-            estado.analiseAtivos.forEach(row => {
-                if (row.editadoNoModal) {
-                    gravarEscolhaDePara(row.ativoErp, row.selecionado, "MANUAL", "ATIVO_ARVORE");
-                    alterouDePara = true;
-                } else if (!deParaAtivosMap[normKey(row.ativoErp)] && (row.status === "FERRAMENTAL" || row.status === "NAO_ATIVO" || row.status === "COMPARTILHADO")) {
-                    gravarEscolhaDePara(row.ativoErp, row.sugestao, "AUTO_REGRA", row.status);
-                    alterouDePara = true;
+            const btnConf = document.getElementById("btnConfirmarPreVoo");
+            if (btnConf) btnConf.disabled = true;
+
+            const totalOrdens = estado.novasBrutas?.length || 0;
+            const nomeArq = estado.nomeArquivo || "Planilha_ERP";
+
+            // Retorno visual IMEDIATO antes de fechar o modal / salvar na nuvem / chamar Gemini
+            iniciarProgressoVisualMaestri({
+                badge: "INICIANDO CICLO • PRÉ-VOO APROVADO",
+                titulo: `Iniciando Auditoria de ${totalOrdens} OM(s)`,
+                subtitulo: `Arquivo "${nomeArq}" aprovado! Aguarde enquanto preparamos os dados, acionamos a IA e iniciamos o fluxo visual.`,
+                detalhe: "Salvando conciliação de ativos e preparando o painel de orquestração...",
+                pct: 8,
+                mostrarBannerPipeline: true,
+                etapas: [
+                    { label: "1. Triagem & Deduplicação Histórica (Nó 1)", status: "ativo", info: `${totalOrdens} OMs` },
+                    { label: "2. Motor Fast-Path & Memória R$ 0,00 (Nó 2)", status: "pendente", info: "" },
+                    { label: "3. Auditoria IA Gemini Flash em Lotes (Nó 3)", status: "pendente", info: "" },
+                    { label: "4. Banco Mensal Nuvem & Confiabilidade (Nós 4→9)", status: "pendente", info: "" }
+                ]
+            });
+
+            if (currentView !== "pipeline") {
+                switchView("pipeline");
+            }
+            definirEstadoCarregamentoPipelineHud(
+                true,
+                "Iniciando Orquestração...",
+                `Pré-conferência aprovada (${totalOrdens} OMs) — iniciando auditoria inteligente agora...`
+            );
+            await cederFrameUI(30);
+
+            try {
+                // Salva edições manuais e persiste auto-classificações especiais (Ferramental / Não-Ativo / Compartilhado)
+                let alterouDePara = false;
+                estado.analiseAtivos.forEach(row => {
+                    if (row.editadoNoModal) {
+                        gravarEscolhaDePara(row.ativoErp, row.selecionado, "MANUAL", "ATIVO_ARVORE");
+                        alterouDePara = true;
+                    } else if (!deParaAtivosMap[normKey(row.ativoErp)] && (row.status === "FERRAMENTAL" || row.status === "NAO_ATIVO" || row.status === "COMPARTILHADO")) {
+                        gravarEscolhaDePara(row.ativoErp, row.sugestao, "AUTO_REGRA", row.status);
+                        alterouDePara = true;
+                    }
+                });
+                if (alterouDePara) {
+                    atualizarProgressoVisualMaestri({ detalhe: "Salvando conciliação de ativos no Mapa Master da nuvem...", pct: 11 });
+                    await salvarDeParaAtivosPersistente();
+                    if (typeof atualizarKpisMapaMasterCloud === "function") atualizarKpisMapaMasterCloud();
                 }
-            });
-            if (alterouDePara) {
-                await salvarDeParaAtivosPersistente();
-                if (typeof atualizarKpisMapaMasterCloud === "function") atualizarKpisMapaMasterCloud();
+
+                const periodoEscolhido = (document.getElementById("preVooInputPeriodo")?.value || estado.periodoDetectado || getPeriodoAtualPadrao()).trim();
+                const inpMainP = document.getElementById("inputPeriodoRodada");
+                if (inpMainP) inpMainP.value = periodoEscolhido;
+                const mesclarHistoricoVisao = document.getElementById("preVooChkMesclarHistorico")?.checked !== false;
+
+                const modoSel = document.getElementById("preVooSelectModoIa")?.value;
+                if (modoSel) {
+                    safeStorage.set("cepera_maestri_modo_ia", modoSel);
+                    carregarCofreIaLocal();
+                }
+
+                fecharModal("modalPreProcessamentoErp");
+                preVooEstado = null;
+
+                const stageEl = document.getElementById("pipelineLiveProgressBanner") || document.getElementById("neuralPipelineStage");
+                if (stageEl && typeof stageEl.scrollIntoView === "function") {
+                    try { stageEl.scrollIntoView({ behavior: "smooth", block: "start" }); } catch (_) {}
+                }
+
+                rodadaVigenteInfo = {
+                    periodo: periodoEscolhido,
+                    status: "ativo",
+                    arquivoNome: nomeArq,
+                    tipo: "VIGENTE",
+                    hashLote: ""
+                };
+                omsBrutasCarregadas = estado.novasBrutas;
+                return await executarPipelineCompletoUI({
+                    animar: true,
+                    mesclarHistoricoVisao,
+                    _progressoJaIniciado: true,
+                    ...(estado.jaAuditado ? { forcarReavaliacao: true } : {}),
+                    ...(estado.opts || {})
+                });
+            } finally {
+                if (btnConf) btnConf.disabled = false;
             }
-
-            const periodoEscolhido = (document.getElementById("preVooInputPeriodo")?.value || estado.periodoDetectado || getPeriodoAtualPadrao()).trim();
-            const inpMainP = document.getElementById("inputPeriodoRodada");
-            if (inpMainP) inpMainP.value = periodoEscolhido;
-            const mesclarHistoricoVisao = document.getElementById("preVooChkMesclarHistorico")?.checked !== false;
-
-            const modoSel = document.getElementById("preVooSelectModoIa")?.value;
-            if (modoSel) {
-                safeStorage.set("cepera_maestri_modo_ia", modoSel);
-                carregarCofreIaLocal();
-            }
-
-            fecharModal("modalPreProcessamentoErp");
-            preVooEstado = null;
-
-            rodadaVigenteInfo = {
-                periodo: periodoEscolhido,
-                status: "ativo",
-                arquivoNome: estado.nomeArquivo || "Planilha_ERP",
-                tipo: "VIGENTE",
-                hashLote: ""
-            };
-            omsBrutasCarregadas = estado.novasBrutas;
-            return await executarPipelineCompletoUI({
-                animar: true,
-                mesclarHistoricoVisao,
-                ...(estado.jaAuditado ? { forcarReavaliacao: true } : {}),
-                ...(estado.opts || {})
-            });
         };
 
         window.carregarDadosPlanilhaBrutaOuAuditada = async (rows, nomeArquivo = "", opts = {}) => {
             if (!Array.isArray(rows) || !rows.length) {
+                finalizarProgressoVisualMaestri();
                 showToast("Nenhum registro válido encontrado no arquivo.", "error");
                 return;
+            }
+            if (progressoVisualEstado.ativo) {
+                atualizarProgressoVisualMaestri({
+                    badge: "ETAPA 2/3 • FILTRO NÓ 1",
+                    detalhe: `Filtrando ${rows.length} linha(s) do ERP (removendo Solicitadas/Canceladas/Abertas)...`,
+                    pct: 52,
+                    etapaAtivaIdx: 1,
+                    etapaInfos: { 0: `${rows.length} linhas`, 1: "Filtrando..." }
+                });
+                await cederFrameUI(20);
             }
             let listaRows = rows;
             const keysPrimeira = Object.keys(listaRows[0] || {});
@@ -8254,6 +8834,7 @@ Responda SOMENTE JSON Array: [{"ativo_erp":"...","tipo_ativo":"ATIVO_ARVORE"|"FE
             });
 
             if (!novasBrutas.length) {
+                finalizarProgressoVisualMaestri();
                 showToast("Nenhuma OM concluída válida restou após o filtro do Nó 1.", "error");
                 return;
             }
@@ -8265,6 +8846,16 @@ Responda SOMENTE JSON Array: [{"ativo_erp":"...","tipo_ativo":"ATIVO_ARVORE"|"FE
             const jaAud = Boolean((omsAuditadas.length && rodadaVigenteInfo.hashLote === hashNovo) || lotesAuditadosMap[hashNovo]);
 
             if (opts?.abrirPreVoo && !isPreAudited) {
+                if (progressoVisualEstado.ativo) {
+                    atualizarProgressoVisualMaestri({
+                        badge: "ETAPA 3/3 • CONCILIAÇÃO DE ATIVOS",
+                        detalhe: `Cruzando ${novasBrutas.length} OM(s) concluída(s) com a árvore ob_linhas e abrindo Pré-Conferência...`,
+                        pct: 84,
+                        etapaAtivaIdx: 2,
+                        etapaInfos: { 1: `${novasBrutas.length} válidas`, 2: "Conciliando..." }
+                    });
+                    await cederFrameUI(20);
+                }
                 const datasValidas = novasBrutas.map(x => x.data).filter(d => /^\d{4}-\d{2}-\d{2}/.test(d)).sort();
                 const servPreenchido = novasBrutas.filter(x => x.servico && x.servico.trim().length >= 4).length;
                 const semTempo = novasBrutas.filter(x => Number(x.tempo_min || 0) <= 0).length;
@@ -8301,6 +8892,7 @@ Responda SOMENTE JSON Array: [{"ativo_erp":"...","tipo_ativo":"ATIVO_ARVORE"|"FE
             }
 
             if (jaAud && !opts?.forcarReavaliacao) {
+                finalizarProgressoVisualMaestri();
                 return await restaurarOuAlertarLoteJaAuditado({
                     brutas: novasBrutas,
                     nomeArquivo: nomeArquivo || "Planilha_ERP",
@@ -8325,6 +8917,24 @@ Responda SOMENTE JSON Array: [{"ativo_erp":"...","tipo_ativo":"ATIVO_ARVORE"|"FE
         async function processarArquivoFileObjErp(file, opts = {}) {
             if (!file) return;
             const lname = file.name.toLowerCase();
+            const btnUp = document.getElementById("btnHeaderUploadErp");
+            if (btnUp) btnUp.disabled = true;
+
+            iniciarProgressoVisualMaestri({
+                badge: "LENDO PLANILHA ERP",
+                titulo: `Carregando "${file.name}"`,
+                subtitulo: "Lendo o arquivo exportado do ERP, aplicando filtros do Nó 1 e preparando a Pré-Conferência.",
+                detalhe: "Etapa 1/3: Decodificando colunas e linhas da planilha...",
+                pct: 18,
+                mostrarBannerPipeline: true,
+                etapas: [
+                    { label: "1. Leitura e Decodificação do Arquivo (.XLSX / .CSV)", status: "ativo", info: file.name },
+                    { label: "2. Filtro de OMs Concluídas & Deduplicação Histórica", status: "pendente", info: "" },
+                    { label: "3. Conciliação de Ativos (ob_linhas + 4 Categorias)", status: "pendente", info: "" }
+                ]
+            });
+            await cederFrameUI(25);
+
             if (lname.endsWith(".xlsx") || lname.endsWith(".xls")) {
                 try {
                     const buf = await file.arrayBuffer();
@@ -8351,45 +8961,48 @@ Responda SOMENTE JSON Array: [{"ativo_erp":"...","tipo_ativo":"ATIVO_ARVORE"|"FE
                     const rows = extrairLinhasDeMatrizPlanilha(matriz);
                     return await carregarDadosPlanilhaBrutaOuAuditada(rows, file.name, { _hdrMeta: extrairLinhasDeMatrizPlanilha.lastMeta, ...opts });
                 } catch (_) {
+                    finalizarProgressoVisualMaestri();
                     showToast("Não foi possível ler o .xlsx offline. Exporte em .CSV no ERP ou conecte à internet.", "error");
+                } finally {
+                    if (btnUp) btnUp.disabled = false;
                 }
                 return;
             }
 
-            const reader = new FileReader();
-            reader.onload = async (e) => {
-                try {
-                    const txt = String(e.target?.result || "");
-                    if (lname.endsWith(".json")) {
-                        const parsed = JSON.parse(txt);
-                        if (Array.isArray(parsed.ordens)) {
-                            await carregarDadosPlanilhaBrutaOuAuditada(parsed.ordens, file.name, opts);
-                            return;
-                        }
-                        if (Array.isArray(parsed)) {
-                            await carregarDadosPlanilhaBrutaOuAuditada(parsed, file.name, opts);
-                            return;
-                        }
-                    }
-                    if (lname.endsWith(".jsonl")) {
-                        const lines = txt.split(/\r?\n/).filter(Boolean).map(l => JSON.parse(l));
-                        if (lines.length && lines[0].categoria_supervisor) {
-                            bibliotecaCorrecoes = lines;
-                            recalcularNosPosAuditoria();
-                            renderCurrentView();
-                            showToast(`${lines.length} regras carregadas no Bibliotecário (Nó 6)!`, "success");
-                            return;
-                        }
-                        await carregarDadosPlanilhaBrutaOuAuditada(lines, file.name, opts);
+            try {
+                const txt = await file.text();
+                if (lname.endsWith(".json")) {
+                    const parsed = JSON.parse(txt);
+                    if (Array.isArray(parsed.ordens)) {
+                        await carregarDadosPlanilhaBrutaOuAuditada(parsed.ordens, file.name, opts);
                         return;
                     }
-                    const rows = parseCsvTexto(txt);
-                    await carregarDadosPlanilhaBrutaOuAuditada(rows, file.name, { _hdrMeta: extrairLinhasDeMatrizPlanilha.lastMeta, ...opts });
-                } catch (_) {
-                    showToast("Erro ao processar planilha. Verifique o formato (.CSV, .XLSX ou .JSON).", "error");
+                    if (Array.isArray(parsed)) {
+                        await carregarDadosPlanilhaBrutaOuAuditada(parsed, file.name, opts);
+                        return;
+                    }
                 }
-            };
-            reader.readAsText(file, "UTF-8");
+                if (lname.endsWith(".jsonl")) {
+                    const lines = txt.split(/\r?\n/).filter(Boolean).map(l => JSON.parse(l));
+                    if (lines.length && lines[0].categoria_supervisor) {
+                        bibliotecaCorrecoes = lines;
+                        recalcularNosPosAuditoria();
+                        renderCurrentView();
+                        finalizarProgressoVisualMaestri();
+                        showToast(`${lines.length} regras carregadas no Bibliotecário (Nó 6)!`, "success");
+                        return;
+                    }
+                    await carregarDadosPlanilhaBrutaOuAuditada(lines, file.name, opts);
+                    return;
+                }
+                const rows = parseCsvTexto(txt);
+                await carregarDadosPlanilhaBrutaOuAuditada(rows, file.name, { _hdrMeta: extrairLinhasDeMatrizPlanilha.lastMeta, ...opts });
+            } catch (_) {
+                finalizarProgressoVisualMaestri();
+                showToast("Erro ao processar planilha. Verifique o formato (.CSV, .XLSX ou .JSON).", "error");
+            } finally {
+                if (btnUp) btnUp.disabled = false;
+            }
         }
         window.processarArquivoFileObjErp = processarArquivoFileObjErp;
 
@@ -9193,6 +9806,20 @@ Responda SOMENTE JSON Array: [{"ativo_erp":"...","tipo_ativo":"ATIVO_ARVORE"|"FE
             estudoAqfGerandoAgora = true;
             if (btn) btn.disabled = true;
             if (lbl) lbl.innerText = "Gerando Estudo IA...";
+            iniciarProgressoVisualMaestri({
+                badge: "ESTUDO AQF • IA",
+                titulo: `Gerando Estudo AQF — ${ativo}`,
+                subtitulo: "Consultando manuais técnicos, histórico de quebras, Ishikawa 6M, 5 Porquês e Plano de Ação 5W2H.",
+                detalhe: "Inicializando busca híbrida de manuais...",
+                pct: 8,
+                mostrarBannerPipeline: false,
+                etapas: [
+                    { label: "1. Manuais Híbridos (DOCS-ATIVOS + Pasta J: + SharePoint)", status: "ativo", info: "" },
+                    { label: "2. Análise Técnica de Engenharia & IA Gemini", status: "pendente", info: "" },
+                    { label: "3. Salvar na Nuvem & Disparar Aprovações", status: "pendente", info: "" }
+                ]
+            });
+            await cederFrameUI(25);
             try {
                 await gerarEstudoAqfCompletoComIA(ativo, {
                     disciplina,
@@ -9201,6 +9828,7 @@ Responda SOMENTE JSON Array: [{"ativo_erp":"...","tipo_ativo":"ATIVO_ARVORE"|"FE
                 filtroEstudosAqfAtual = "todos";
                 renderCacadorView();
             } finally {
+                finalizarProgressoVisualMaestri();
                 estudoAqfGerandoAgora = false;
                 if (btn) btn.disabled = false;
                 if (lbl) lbl.innerText = "Gerar Estudo Completo (IA)";
@@ -10560,8 +11188,22 @@ Responda SOMENTE JSON Array: [{"ativo_erp":"...","tipo_ativo":"ATIVO_ARVORE"|"FE
         window.importarPlanilhaAtivosErpMaster = async (event) => {
             const file = event?.target?.files?.[0];
             if (!file) return;
+            const nome = String(file.name || "Ativos.xlsx");
+            iniciarProgressoVisualMaestri({
+                badge: "CENTRAL MASTER • ATIVOS ERP",
+                titulo: `Importando "${nome}"`,
+                subtitulo: "Lendo todos os ativos do ERP Sankhya e classificando automaticamente nas 4 categorias definitivas.",
+                detalhe: "Etapa 1/3: Lendo e decodificando planilha...",
+                pct: 18,
+                mostrarBannerPipeline: false,
+                etapas: [
+                    { label: "1. Leitura e Decodificação do Arquivo (.XLSX / .CSV)", status: "ativo", info: nome },
+                    { label: "2. Agrupamento de Descrições Únicas & Metadados", status: "pendente", info: "" },
+                    { label: "3. Classificação Automática (Árvore / Ferram. / Não-Ativo / Compart.)", status: "pendente", info: "" }
+                ]
+            });
+            await cederFrameUI(25);
             try {
-                const nome = String(file.name || "");
                 let matriz = [];
                 if (/\.csv$/i.test(nome)) {
                     const txt = await file.text();
@@ -10582,6 +11224,15 @@ Responda SOMENTE JSON Array: [{"ativo_erp":"...","tipo_ativo":"ATIVO_ARVORE"|"FE
                     showToast("Planilha vazia ou formato não reconhecido.", "error");
                     return;
                 }
+
+                atualizarProgressoVisualMaestri({
+                    badge: "ETAPA 2/3 • AGRUPAMENTO",
+                    detalhe: `Identificando colunas Sankhya e consolidando ${matriz.length} linhas...`,
+                    pct: 48,
+                    etapaAtivaIdx: 1,
+                    etapaInfos: { 0: `${matriz.length} linhas`, 1: "Agrupando..." }
+                });
+                await cederFrameUI(20);
 
                 // Detecta automaticamente a linha de cabeçalho Sankhya (geralmente linha 3)
                 let hdrIdx = 0;
@@ -10646,6 +11297,15 @@ Responda SOMENTE JSON Array: [{"ativo_erp":"...","tipo_ativo":"ATIVO_ARVORE"|"FE
                     return;
                 }
 
+                atualizarProgressoVisualMaestri({
+                    badge: "ETAPA 3/3 • CLASSIFICAÇÃO",
+                    detalhe: `Cruzando ${agrupados.size} descrições únicas com ob_linhas e detectando Ferramentais, Não-Ativos e Compartilhados...`,
+                    pct: 80,
+                    etapaAtivaIdx: 2,
+                    etapaInfos: { 1: `${agrupados.size} únicos`, 2: "Classificando..." }
+                });
+                await cederFrameUI(20);
+
                 const catalogo = extrairCatalogoAtivosOficiais();
                 masterMapaLinhas = [...agrupados.values()]
                     .map(meta => construirLinhaMapaMaster(meta, catalogo))
@@ -10665,6 +11325,14 @@ Responda SOMENTE JSON Array: [{"ativo_erp":"...","tipo_ativo":"ATIVO_ARVORE"|"FE
 
                 masterMapaFiltroAtual = pendCnt > 0 ? "pendentes" : "todos";
                 renderCentralMapaMaster();
+                atualizarProgressoVisualMaestri({
+                    badge: "CONCLUÍDO",
+                    titulo: `✅ ${masterMapaLinhas.length} Ativos Únicos Classificados!`,
+                    detalhe: `${arvCnt} Árvore • ${ferrCnt} Ferramentais • ${naoCnt} Não-Ativos • ${compCnt} Compartilhados • ${pendCnt} Pendentes`,
+                    pct: 100,
+                    concluirTodas: true
+                });
+                await cederFrameUI(220);
                 showToast(
                     `${nome}: ${totalLinhasLidas} linhas → ${masterMapaLinhas.length} ativos únicos (${arvCnt} Árvore • ${ferrCnt} Ferram. • ${naoCnt} Não-Ativos • ${compCnt} Compart. • ${pendCnt} Pendentes)!`,
                     "success"
@@ -10673,6 +11341,7 @@ Responda SOMENTE JSON Array: [{"ativo_erp":"...","tipo_ativo":"ATIVO_ARVORE"|"FE
                 console.error("Erro ao importar Ativos.xlsx:", err);
                 showToast(`Erro ao ler planilha de ativos: ${err?.message || err}`, "error");
             } finally {
+                finalizarProgressoVisualMaestri();
                 if (event?.target) event.target.value = "";
             }
         };
@@ -10974,6 +11643,20 @@ Responda SOMENTE JSON Array: [{"ativo_erp":"...","tipo_ativo":"ATIVO_ARVORE"|"FE
             }
             const btn = document.getElementById("btnAutoMapearGeminiMaster");
             if (btn) btn.disabled = true;
+            const totalBlocos = Math.ceil(pendentes.length / 30);
+            iniciarProgressoVisualMaestri({
+                badge: "GEMINI IA • MAPA MASTER",
+                titulo: `Classificando ${pendentes.length} Ativo(s) Pendente(s)`,
+                subtitulo: "O Gemini está comparando os ativos restantes com sua árvore ob_linhas e sugerindo o destino definitivo de cada um.",
+                detalhe: `Preparando bloco 1 de ${totalBlocos}...`,
+                pct: 8,
+                mostrarBannerPipeline: false,
+                etapas: [
+                    { label: `1. Classificação Gemini em ${totalBlocos} bloco(s) de até 30 ativos`, status: "ativo", info: `0/${pendentes.length}` },
+                    { label: "2. Salvar Mapa Master Definitivo na Nuvem", status: "pendente", info: "" }
+                ]
+            });
+            await cederFrameUI(25);
             try {
                 const catalogo = extrairCatalogoAtivosOficiais();
                 const listaCatTexto = catalogo.slice(0, 260).map(c => `${c.label} (${c.area})`);
@@ -10982,6 +11665,16 @@ Responda SOMENTE JSON Array: [{"ativo_erp":"...","tipo_ativo":"ATIVO_ARVORE"|"FE
 
                 for (let i = 0; i < pendentes.length; i += 30) {
                     const bloco = pendentes.slice(i, i + 30);
+                    const blocoNum = Math.floor(i / 30) + 1;
+                    const ateAgora = Math.min(i + bloco.length, pendentes.length);
+                    atualizarProgressoVisualMaestri({
+                        badge: `GEMINI IA • BLOCO ${blocoNum}/${totalBlocos}`,
+                        detalhe: `Analisando bloco ${blocoNum} de ${totalBlocos} (${ateAgora}/${pendentes.length} ativos)...`,
+                        pct: 10 + Math.round(((blocoNum - 1) / totalBlocos) * 76),
+                        etapaAtivaIdx: 0,
+                        etapaInfo: `${ateAgora}/${pendentes.length}`
+                    });
+                    await cederFrameUI(20);
                     const prompt = `Você é especialista em Gestão de Ativos industriais (PCM Cepêra).
 Classifique cada ativo exportado do ERP Sankhya em 1 das 4 categorias definitivas:
 - "ATIVO_ARVORE": equipamento industrial que pertence a uma linha/equipamento em ob_linhas (pode mapear tanto para "Linha › Equipamento" quanto para "Linha › (Linha Geral)" da lista abaixo; respeite nomes invertidos como "RESFRIADOR - TETRAPACK 2").
@@ -11027,15 +11720,19 @@ Responda SOMENTE JSON Array: [{"ativo_erp":"...","tipo_ativo":"ATIVO_ARVORE"|"FE
                     }
                 }
                 if (arvCnt > 0 || espCnt > 0) {
+                    atualizarProgressoVisualMaestri({ badge: "SALVANDO NA NUVEM", detalhe: "Gravando mapa atualizado no Firestore...", pct: 92, etapaAtivaIdx: 1 });
                     await salvarDeParaAtivosPersistente();
                     reEnriquecerAtivosOmsAuditadas();
                     recalcularNosPosAuditoria();
                 }
+                atualizarProgressoVisualMaestri({ badge: "CONCLUÍDO", detalhe: `${arvCnt} Árvore + ${espCnt} Categorias Especiais salvos!`, pct: 100, concluirTodas: true });
+                await cederFrameUI(200);
                 renderCentralMapaMaster();
                 showToast(`🧠 Gemini (${modeloUsado}): ${arvCnt} vinculado(s) na Árvore + ${espCnt} em Categorias Especiais e salvos na nuvem!`, "success");
             } catch (err) {
                 showToast(`Falha Gemini no Mapa Master: ${err?.message || err}`, "error");
             } finally {
+                finalizarProgressoVisualMaestri();
                 if (btn) btn.disabled = false;
             }
         };
