@@ -328,29 +328,31 @@
             100% { background-position: 40px 0; }
         }
         @keyframes maestriPulseSoft {
-            0%, 100% { box-shadow: 0 0 0 0 rgba(2, 132, 199, 0.28); }
-            50% { box-shadow: 0 0 0 10px rgba(2, 132, 199, 0); }
+            0%, 100% { box-shadow: 0 0 0 0 rgba(2, 132, 199, 0.35); transform: scale(1); }
+            50% { box-shadow: 0 0 0 10px rgba(2, 132, 199, 0); transform: scale(1.02); }
         }
-        .maestri-spin {
-            animation: maestriSpin 0.85s linear infinite;
+        .maestri-spin, .animate-spin {
+            display: inline-block !important;
+            transform-origin: center center !important;
+            animation: maestriSpin 0.75s linear infinite !important;
         }
         .maestri-pulse-ring {
-            animation: maestriPulseSoft 1.8s ease-in-out infinite;
+            animation: maestriPulseSoft 1.6s ease-in-out infinite !important;
         }
         .maestri-progress-fill {
             background-image: linear-gradient(
                 135deg,
-                rgba(255, 255, 255, 0.22) 25%,
+                rgba(255, 255, 255, 0.32) 25%,
                 transparent 25%,
                 transparent 50%,
-                rgba(255, 255, 255, 0.22) 50%,
-                rgba(255, 255, 255, 0.22) 75%,
+                rgba(255, 255, 255, 0.32) 50%,
+                rgba(255, 255, 255, 0.32) 75%,
                 transparent 75%,
                 transparent
             );
-            background-size: 40px 40px;
-            animation: maestriStripeMove 0.9s linear infinite;
-            transition: width 0.35s cubic-bezier(0.22, 1, 0.36, 1);
+            background-size: 32px 32px;
+            animation: maestriStripeMove 0.85s linear infinite !important;
+            transition: width 0.28s cubic-bezier(0.22, 1, 0.36, 1);
         }
         body.theme-dark #maestriLoadingCard,
         body.theme-dark #pipelineLiveProgressBanner,
@@ -378,7 +380,11 @@
         #icoSalvarCorrSpin[hidden],
         #icoSalvarCorrSpin.hidden,
         #icoSalvarCorrCheck[hidden],
-        #icoSalvarCorrCheck.hidden {
+        #icoSalvarCorrCheck.hidden,
+        #corrSavingCheckIcon[hidden],
+        #corrSavingCheckIcon.hidden,
+        #corrSavingSpinnerIcon[hidden],
+        #corrSavingSpinnerIcon.hidden {
             display: none !important;
         }
     </style>
@@ -1728,18 +1734,26 @@
                     <label class="block text-[10px] font-extrabold uppercase text-slate-500 mb-1">Justificativa Técnica do Supervisor *</label>
                     <textarea id="corrJustificativa" rows="2" required class="input-clean py-2 font-semibold" placeholder="Explique em 1 frase por que esta categoria é a correta nesta planta..."></textarea>
                 </div>
-                <div id="corrSavingStatusBox" role="status" aria-live="polite" hidden class="hidden p-3.5 rounded-2xl bg-sky-50/90 border border-sky-200 space-y-2">
+                <div id="corrSavingStatusBox" role="status" aria-live="polite" hidden class="hidden p-3.5 rounded-2xl bg-sky-50/95 border border-sky-300 space-y-2.5 shadow-sm">
                     <div class="flex items-center justify-between gap-2">
-                        <div class="flex items-center gap-2 min-w-0">
-                            <span id="corrSavingSpinnerIcon" class="w-4 h-4 rounded-full border-2 border-sky-600 border-t-transparent maestri-spin shrink-0"></span>
+                        <div class="flex items-center gap-2.5 min-w-0">
+                            <div id="corrSavingIconWrap" class="w-6 h-6 rounded-lg bg-sky-600 text-white flex items-center justify-center shrink-0 shadow-xs">
+                                <svg id="corrSavingSpinnerIcon" class="w-3.5 h-3.5 animate-spin text-white" fill="none" viewBox="0 0 24 24">
+                                    <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                                    <path class="opacity-90" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                                </svg>
+                                <svg id="corrSavingCheckIcon" hidden class="hidden w-4 h-4 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M5 13l4 4L19 7"/>
+                                </svg>
+                            </div>
                             <span id="corrSavingStepTitle" class="text-xs font-extrabold text-sky-950 truncate">Gravando alteração no banco de dados...</span>
                         </div>
                         <span id="corrSavingPct" class="px-2 py-0.5 rounded-full bg-sky-100 text-sky-900 font-mono text-[10px] font-extrabold shrink-0">15%</span>
                     </div>
-                    <div class="w-full h-2 rounded-full bg-sky-100 overflow-hidden">
+                    <div class="w-full h-2 rounded-full bg-sky-200/80 overflow-hidden">
                         <div id="corrSavingProgressBar" class="h-full rounded-full bg-sky-600 maestri-progress-fill" style="width: 15%"></div>
                     </div>
-                    <div class="flex items-center justify-between gap-2 text-[10px] font-semibold text-sky-900/85">
+                    <div class="flex items-center justify-between gap-2 text-[10px] font-semibold text-sky-900">
                         <span id="corrSavingStepDetail" class="truncate">Sincronizando nova categoria e ensinando o Bibliotecário (Nó 6)...</span>
                     </div>
                     <div class="text-[10px] font-bold text-slate-500">Aguarde concluir — o fechamento será automático assim que o banco finalizar a gravação.</div>
@@ -1748,7 +1762,10 @@
                     <button type="button" id="btnCancelarCorrSupervisor" onclick="fecharModal('modalCorrigirOmSupervisor')" class="btn-touch bg-slate-100 text-slate-700 flex-1 text-xs">Cancelar</button>
                     <button type="submit" id="btnSalvarCorrSupervisor" class="btn-pill-dark inline-flex items-center justify-center gap-1.5 flex-1 text-xs">
                         <svg id="icoSalvarCorrCheck" class="w-4 h-4 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg>
-                        <span id="icoSalvarCorrSpin" hidden class="hidden w-4 h-4 rounded-full border-2 border-white border-t-transparent maestri-spin shrink-0"></span>
+                        <svg id="icoSalvarCorrSpin" hidden class="hidden w-4 h-4 animate-spin text-white shrink-0" fill="none" viewBox="0 0 24 24">
+                            <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                            <path class="opacity-90" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                        </svg>
                         <span id="lblSalvarCorrSupervisor">Salvar &amp; Ensinar Bibliotecário</span>
                     </button>
                 </div>
@@ -6144,7 +6161,7 @@ OMs:\n${JSON.stringify(listaPrompt)}`;
                             ? "border-sky-300 bg-sky-50/85 text-sky-950"
                             : (s === "concluido" ? "border-emerald-200 bg-emerald-50/75 text-emerald-950" : "border-slate-200/80 bg-slate-50/60 text-slate-500");
                         const ico = s === "ativo"
-                            ? `<span class="w-4 h-4 rounded-full border-2 border-sky-600 border-t-transparent maestri-spin shrink-0"></span>`
+                            ? `<svg class="w-4 h-4 animate-spin text-sky-600 shrink-0" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-90" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path></svg>`
                             : (s === "concluido"
                                 ? `<span class="w-4 h-4 rounded-full bg-emerald-600 text-white text-[9px] font-extrabold flex items-center justify-center shrink-0">✓</span>`
                                 : `<span class="w-4 h-4 rounded-full bg-slate-200 text-slate-500 text-[9px] font-extrabold flex items-center justify-center shrink-0">${idx + 1}</span>`);
@@ -9533,14 +9550,61 @@ Responda SOMENTE JSON Array: [{"ativo_erp":"...","tipo_ativo":"ATIVO_ARVORE"|"FE
 
         let corrSupervisorSalvando = false;
         let confConfirmacaoEmAndamento = false;
+        let corrProgressoTimer = null;
+        let corrProgressoPct = 0;
+
+        function iniciarProgressoContinuoModal(pctInicial = 16, pctAlvoMax = 46) {
+            if (corrProgressoTimer) clearInterval(corrProgressoTimer);
+            corrProgressoPct = pctInicial;
+            atualizarBarraProgressoModal(corrProgressoPct);
+            corrProgressoTimer = setInterval(() => {
+                if (corrProgressoPct < pctAlvoMax) {
+                    corrProgressoPct += Math.random() > 0.4 ? 2 : 1;
+                    atualizarBarraProgressoModal(corrProgressoPct);
+                }
+            }, 75);
+        }
+
+        function avancarProgressoModal(pctMinimo, pctAlvoMax) {
+            corrProgressoPct = Math.max(corrProgressoPct, pctMinimo);
+            atualizarBarraProgressoModal(corrProgressoPct);
+            if (corrProgressoTimer) clearInterval(corrProgressoTimer);
+            corrProgressoTimer = setInterval(() => {
+                if (corrProgressoPct < pctAlvoMax) {
+                    corrProgressoPct += Math.random() > 0.4 ? 2 : 1;
+                    atualizarBarraProgressoModal(corrProgressoPct);
+                }
+            }, 75);
+        }
+
+        function finalizarProgressoModal() {
+            if (corrProgressoTimer) {
+                clearInterval(corrProgressoTimer);
+                corrProgressoTimer = null;
+            }
+            corrProgressoPct = 100;
+            atualizarBarraProgressoModal(100);
+        }
+
+        function atualizarBarraProgressoModal(pct) {
+            const pctClamped = Math.max(0, Math.min(100, Math.round(pct)));
+            const pctEl = document.getElementById("corrSavingPct");
+            const barEl = document.getElementById("corrSavingProgressBar");
+            if (pctEl) pctEl.innerText = `${pctClamped}%`;
+            if (barEl) {
+                barEl.style.width = `${Math.max(6, pctClamped)}%`;
+                barEl.classList.toggle("bg-emerald-600", pctClamped >= 100);
+                barEl.classList.toggle("bg-sky-600", pctClamped < 100);
+            }
+        }
 
         function setEstadoSalvandoCorrecaoSupervisor(ativo, opts = {}) {
             const box = document.getElementById("corrSavingStatusBox");
             const titleEl = document.getElementById("corrSavingStepTitle");
             const detEl = document.getElementById("corrSavingStepDetail");
-            const pctEl = document.getElementById("corrSavingPct");
-            const barEl = document.getElementById("corrSavingProgressBar");
-            const spinBoxIco = document.getElementById("corrSavingSpinnerIcon");
+            const spinSvg = document.getElementById("corrSavingSpinnerIcon");
+            const chkSvg = document.getElementById("corrSavingCheckIcon");
+            const iconWrap = document.getElementById("corrSavingIconWrap");
 
             const btnSave = document.getElementById("btnSalvarCorrSupervisor");
             const icoChk = document.getElementById("icoSalvarCorrCheck");
@@ -9591,19 +9655,45 @@ Responda SOMENTE JSON Array: [{"ativo_erp":"...","tipo_ativo":"ATIVO_ARVORE"|"FE
                 box.hidden = !ativo;
                 box.classList.toggle("hidden", !ativo);
             }
-            if (ativo) {
-                const pct = Math.max(5, Math.min(100, Math.round(Number(opts.pct ?? 18))));
-                if (titleEl && opts.titulo) titleEl.innerText = opts.titulo;
-                if (detEl && opts.detalhe !== undefined) detEl.innerText = opts.detalhe;
-                if (pctEl) pctEl.innerText = `${pct}%`;
-                if (barEl) {
-                    barEl.style.width = `${pct}%`;
-                    barEl.classList.toggle("bg-emerald-600", pct >= 100);
-                    barEl.classList.toggle("bg-sky-600", pct < 100);
+
+            if (!ativo) {
+                if (corrProgressoTimer) {
+                    clearInterval(corrProgressoTimer);
+                    corrProgressoTimer = null;
                 }
-                if (spinBoxIco) {
-                    spinBoxIco.classList.toggle("border-emerald-600", pct >= 100);
-                    spinBoxIco.classList.toggle("border-sky-600", pct < 100);
+                atualizarBarraProgressoModal(0);
+                if (spinSvg) { spinSvg.hidden = false; spinSvg.classList.remove("hidden"); }
+                if (chkSvg) { chkSvg.hidden = true; chkSvg.classList.add("hidden"); }
+                if (iconWrap) {
+                    iconWrap.classList.remove("bg-emerald-600");
+                    iconWrap.classList.add("bg-sky-600");
+                }
+                return;
+            }
+
+            const concluido = Boolean(opts.concluido);
+            if (titleEl && opts.titulo) titleEl.innerText = opts.titulo;
+            if (detEl && opts.detalhe !== undefined) detEl.innerText = opts.detalhe;
+
+            if (concluido) {
+                finalizarProgressoModal();
+                if (spinSvg) { spinSvg.hidden = true; spinSvg.classList.add("hidden"); }
+                if (chkSvg) { chkSvg.hidden = false; chkSvg.classList.remove("hidden"); }
+                if (iconWrap) {
+                    iconWrap.classList.remove("bg-sky-600");
+                    iconWrap.classList.add("bg-emerald-600");
+                }
+            } else {
+                if (spinSvg) { spinSvg.hidden = false; spinSvg.classList.remove("hidden"); }
+                if (chkSvg) { chkSvg.hidden = true; chkSvg.classList.add("hidden"); }
+                if (iconWrap) {
+                    iconWrap.classList.remove("bg-emerald-600");
+                    iconWrap.classList.add("bg-sky-600");
+                }
+                if (opts.iniciarProgresso) {
+                    iniciarProgressoContinuoModal(opts.pct || 16, opts.pctMax || 46);
+                } else if (opts.pct) {
+                    avancarProgressoModal(opts.pct, opts.pctMax || (opts.pct + 25));
                 }
             }
         }
@@ -9643,30 +9733,36 @@ Responda SOMENTE JSON Array: [{"ativo_erp":"...","tipo_ativo":"ATIVO_ARVORE"|"FE
             const origHtml = btnEl ? btnEl.innerHTML : "";
             if (btnEl) {
                 btnEl.disabled = true;
-                btnEl.classList.add("opacity-80", "cursor-wait");
-                btnEl.innerHTML = `<span class="w-3.5 h-3.5 rounded-full border-2 border-current border-t-transparent maestri-spin shrink-0"></span><span>Confirmando...</span>`;
+                btnEl.classList.add("opacity-90", "cursor-wait");
+                btnEl.innerHTML = `<svg class="w-4 h-4 animate-spin text-white shrink-0" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-90" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path></svg><span>Confirmando...</span>`;
             }
             try {
-                await cederFrameUI(25);
+                await cederFrameUI(180);
                 o.fila = "AUTOMATICO";
                 o.confianca = 5;
                 o.origem = "SUPERVISOR";
                 registrarRevisaoSupervisorOm(o, o.justificativa);
-                try {
-                    await persistirOmsNoBancoHistorico([o], true);
-                } catch (_) {}
                 recalcularNosPosAuditoria();
                 salvarEstadoPersistidoMaestri();
+
+                if (btnEl) {
+                    btnEl.classList.remove("bg-emerald-600", "hover:bg-emerald-700");
+                    btnEl.classList.add("bg-emerald-700");
+                    btnEl.innerHTML = `<svg class="w-4 h-4 text-white shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M5 13l4 4L19 7"/></svg><span>✓ Confirmado!</span>`;
+                    await cederFrameUI(240);
+                }
+
+                // Sincroniza em background na nuvem sem travar a interface da Mesa
+                Promise.race([
+                    persistirOmsNoBancoHistorico([o], true),
+                    new Promise(resolve => setTimeout(resolve, 2000))
+                ]).catch(() => {});
+
                 renderCurrentView();
                 atualizarBannerLoteAuditado();
-                showToast(`OM #${o.om} confirmada como ${o.categoria} e sincronizada no banco!`, "success");
+                showToast(`OM #${o.om} confirmada como ${o.categoria}!`, "success");
             } finally {
                 confConfirmacaoEmAndamento = false;
-                if (btnEl && btnEl.isConnected) {
-                    btnEl.disabled = false;
-                    btnEl.classList.remove("opacity-80", "cursor-wait");
-                    btnEl.innerHTML = origHtml;
-                }
             }
         };
 
@@ -9770,15 +9866,16 @@ Responda SOMENTE JSON Array: [{"ativo_erp":"...","tipo_ativo":"ATIVO_ARVORE"|"FE
 
             corrSupervisorSalvando = true;
             setEstadoSalvandoCorrecaoSupervisor(true, {
-                pct: 18,
-                btnLabel: "Salvando no banco...",
+                iniciarProgresso: true,
+                pct: 16,
+                pctMax: 46,
+                btnLabel: "Gravando regra...",
                 titulo: "1/4 • Gravando nova regra no Bibliotecário (Nó 6)...",
                 detalhe: `Ensinando a IA: OM #${o.om} → ${novaCat} (Sinal: ${sinal})`
             });
 
             try {
-                // Cede um frame para o navegador pintar imediatamente o carregamento e travar o botão Cancelar
-                await cederFrameUI(35);
+                await cederFrameUI(40);
 
                 o.categoria = novaCat;
                 o.fila = "AUTOMATICO";
@@ -9819,41 +9916,53 @@ Responda SOMENTE JSON Array: [{"ativo_erp":"...","tipo_ativo":"ATIVO_ARVORE"|"FE
                 };
                 bibliotecaCorrecoes.unshift(regBib);
 
+                // Grava no Firestore com limite de tempo seguro (não trava o modal se a rede oscilar)
                 try {
-                    await addDoc(colMaestriCorr, regBib);
+                    await Promise.race([
+                        addDoc(colMaestriCorr, regBib),
+                        new Promise(resolve => setTimeout(resolve, 2500))
+                    ]);
                 } catch (_) {}
 
+                // Etapa 2: Nuvem
                 setEstadoSalvandoCorrecaoSupervisor(true, {
-                    pct: 52,
+                    pct: 50,
+                    pctMax: 78,
                     btnLabel: "Sincronizando nuvem...",
                     titulo: "2/4 • Atualizando categoria no Banco Histórico na nuvem...",
                     detalhe: `Gravando OM #${o.om} (${novaCat}) nos blocos mensais do Firestore...`
                 });
-                await cederFrameUI(25);
+                await cederFrameUI(200);
 
-                // Atualiza também a OM revisada diretamente no Banco Histórico Mensal na Nuvem
                 try {
-                    await persistirOmsNoBancoHistorico([o], true);
+                    await Promise.race([
+                        persistirOmsNoBancoHistorico([o], true),
+                        new Promise(resolve => setTimeout(resolve, 2500))
+                    ]);
                 } catch (_) {}
 
+                // Etapa 3: Recálculo dos indicadores e nós 6 a 9
                 setEstadoSalvandoCorrecaoSupervisor(true, {
-                    pct: 84,
+                    pct: 82,
+                    pctMax: 95,
                     btnLabel: "Recalculando painéis...",
                     titulo: "3/4 • Recalculando indicadores, Confiabilidade e Estudos AQF...",
                     detalhe: "Aplicando nova categoria nos Nós 6, 7, 8 e 9 e salvando sessão..."
                 });
-                await cederFrameUI(30);
+                await cederFrameUI(200);
 
                 recalcularNosPosAuditoria();
                 salvarEstadoPersistidoMaestri();
 
+                // Etapa 4: Concluído com checkmark verde
                 setEstadoSalvandoCorrecaoSupervisor(true, {
+                    concluido: true,
                     pct: 100,
-                    btnLabel: "Concluído!",
+                    btnLabel: "✓ Concluído!",
                     titulo: "4/4 • Alteração salva e aprendida com sucesso!",
                     detalhe: "Atualizando a Mesa de Conferência e fechando esta janela..."
                 });
-                await cederFrameUI(160);
+                await cederFrameUI(350);
 
                 corrSupervisorSalvando = false;
                 setEstadoSalvandoCorrecaoSupervisor(false);
