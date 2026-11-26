@@ -1608,8 +1608,8 @@
                         <select id="dirAnomEquipamento" required onchange="onDirAnomEquipChange()" class="input-clean py-2 text-xs font-bold"></select>
                     </div>
                     <div>
-                        <label class="block text-[10px] font-extrabold uppercase text-slate-500 mb-1">4. Conjunto *</label>
-                        <select id="dirAnomConjunto" required onchange="verificarDuplicidadeAnomaliaDireta()" class="input-clean py-2 text-xs font-bold"></select>
+                        <label class="block text-[10px] font-extrabold uppercase text-slate-500 mb-1">4. Conjunto <span class="text-slate-400 font-bold normal-case">(Opcional)</span></label>
+                        <select id="dirAnomConjunto" onchange="verificarDuplicidadeAnomaliaDireta()" class="input-clean py-2 text-xs font-bold"></select>
                     </div>
                 </div>
 
@@ -2237,7 +2237,7 @@
             if (!a) return;
             pedirExclusaoMaster({
                 title: 'Excluir Anomalia (Master)',
-                subtitle: `${a.equipamento || ''} • ${a.conjunto || 'Geral'}`,
+                subtitle: `${a.equipamento || ''} • ${a.conjunto || 'Geral do Equipamento'}`,
                 desc: `Confirma a exclusão permanente da anomalia <strong>"${escapeHtml(a.componente || a.descricao?.slice(0, 60) || idAnom)}"</strong> (Status: ${escapeHtml(a.status || '-')}) do banco <code>ir_anomalias</code>?`,
                 onConfirm: async () => {
                     await deleteDoc(doc(db, "ir_anomalias", idAnom));
@@ -2389,7 +2389,7 @@
                                         <span class="text-[10px] font-extrabold uppercase px-2 py-0.5 rounded-full ${a.status_aprovacao === 'Rejeitada' ? 'bg-rose-100 text-rose-700' : a.status_aprovacao === 'Pendente Aprovação' ? 'bg-amber-100 text-amber-800' : 'bg-sky-100 text-sky-800'}">${escapeHtml(a.status_aprovacao || a.status || 'Oficial')}</span>
                                         <span class="text-[10px] font-bold px-2 py-0.5 rounded-full bg-white border border-slate-200 text-slate-600">${escapeHtml(a.equipe_responsavel || a.especialidade || '-')}</span>
                                     </div>
-                                    <div class="text-xs font-extrabold text-slate-900 truncate">${escapeHtml(a.area)} › ${escapeHtml(a.maquina)} › ${escapeHtml(a.equipamento)} (${escapeHtml(a.conjunto || 'Geral')})</div>
+                                    <div class="text-xs font-extrabold text-slate-900 truncate">${escapeHtml(a.area)} › ${escapeHtml(a.maquina)} › ${escapeHtml(a.equipamento)} (${escapeHtml(a.conjunto || 'Geral do Equipamento')})</div>
                                     <div class="text-[11px] text-slate-600 line-clamp-1">${escapeHtml(a.componente || '-')} — ${escapeHtml(a.descricao || '')}</div>
                                     <div class="text-[10px] text-slate-400 font-bold">Solicitante: ${escapeHtml(a.relator || '-')} • Status: ${escapeHtml(a.status || '-')}</div>
                                 </div>
@@ -4182,7 +4182,7 @@
                 recentEl.innerHTML = `<div class="p-6 text-center text-xs font-semibold text-slate-400 border border-dashed border-slate-200 rounded-2xl">Nenhuma anomalia registrada até o momento.</div>`;
             } else {
                 recentEl.innerHTML = recentes.map(a => {
-                    const conj = a.conjunto || 'Conjunto Geral';
+                    const conj = a.conjunto || 'Geral do Equipamento';
                     const stBadge = a.status === 'Concluída' ? 'bg-emerald-100 text-emerald-700' : 'bg-rose-100 text-rose-700';
                     return `
                     <div class="p-3.5 rounded-2xl bg-slate-50/90 border border-slate-200/70 flex items-center justify-between gap-3">
@@ -7479,12 +7479,17 @@
                                     <span>Atenção — Possível Duplicidade:</span>
                                     <span class="px-2 py-0.5 rounded-full bg-amber-200/80 text-[10px] font-extrabold">${semelhantes.length} anomalia(s) aberta(s) neste equipamento</span>
                                 </div>
-                                ${semelhantes.slice(0, 3).map(s => `<div class="text-[11px]">• <strong>${escapeHtml(s.conjunto || 'Geral')} / ${escapeHtml(s.componente || '-')}</strong> (${escapeHtml(s.status)} • ${escapeHtml(s.urgencia || 'Média')}): ${escapeHtml(s.descricao)}</div>`).join('')}
+                                ${semelhantes.slice(0, 3).map(s => `<div class="text-[11px]">• <strong>${escapeHtml(s.conjunto ? `${s.conjunto} / ${s.componente || '-'}` : (s.componente || 'Geral do Equipamento'))}</strong> (${escapeHtml(s.status)} • ${escapeHtml(s.urgencia || 'Média')}): ${escapeHtml(s.descricao)}</div>`).join('')}
                             </div>` : '';
 
                         const tAtual = a.tempo_estimado || '01:00';
                         const temposSelect = tempoOpcoes.includes(tAtual) ? tempoOpcoes : [tAtual, ...tempoOpcoes];
                         const isDiretaOri = a.origem === 'Anomalia Direta' || a.id_agenda === 'DIRETA';
+                        const conjAtual = (a.conjunto || '').trim();
+                        const conjsEquipSup = [...new Set(
+                            arvLinhas.filter(x => x.area === a.area && x.maquina === a.maquina && x.equipamento === a.equipamento).map(x => getNomeConjunto(x))
+                        )].filter(c => c && normTextoReligacao(c) !== 'conjunto geral').sort((x, y) => x.localeCompare(y));
+                        if (conjAtual && !conjsEquipSup.includes(conjAtual)) conjsEquipSup.unshift(conjAtual);
 
                         return `
                         <article class="glass-card p-5 sm:p-6 rounded-3xl space-y-4 border-2 ${a.risco_parada ? 'border-rose-300' : 'border-amber-200/90'}">
@@ -7493,12 +7498,13 @@
                                     <div class="flex flex-wrap items-center gap-2 mb-1">
                                         <span class="text-[10px] font-extrabold uppercase px-2.5 py-0.5 rounded-full bg-purple-100 text-purple-800 border border-purple-200">${isDiretaOri ? 'Anomalia Direta (Campo Livre)' : escapeHtml(a.origem || 'Via Rota')}</span>
                                         <span class="text-[10px] font-extrabold uppercase px-2.5 py-0.5 rounded-full bg-amber-100 text-amber-800">Aguardando Aprovação</span>
+                                        ${!conjAtual ? `<span class="text-[10px] font-extrabold uppercase px-2.5 py-0.5 rounded-full bg-slate-100 text-slate-600 border border-slate-200">Geral do Equipamento</span>` : ''}
                                         ${a.risco_parada ? `<span class="text-[10px] font-extrabold uppercase px-2.5 py-0.5 rounded-full bg-rose-600 text-white">Risco Segurança / Parada</span>` : ''}
                                         ${Number(a.reenvio_count || 0) > 0 ? `<span class="text-[10px] font-extrabold uppercase px-2.5 py-0.5 rounded-full bg-sky-100 text-sky-800">Reenviada (#${a.reenvio_count})</span>` : ''}
                                         ${a.reenviado_por_admin ? `<span class="text-[10px] font-extrabold uppercase px-2.5 py-0.5 rounded-full bg-indigo-100 text-indigo-800">Reenviada p/ Aprovação pelo Admin</span>` : ''}
                                     </div>
                                     <p class="text-[11px] font-extrabold uppercase text-slate-400">${escapeHtml(a.area)} • ${escapeHtml(a.maquina)} • ${escapeHtml(a.equipamento)}</p>
-                                    <h3 class="text-lg font-extrabold text-slate-900">${escapeHtml(a.conjunto || 'Conjunto Geral')}</h3>
+                                    <h3 class="text-lg font-extrabold text-slate-900">${escapeHtml(conjAtual || 'Geral do Equipamento')}</h3>
                                     <div class="text-xs font-bold text-slate-500 mt-0.5">
                                         Solicitante: <strong class="text-slate-800">${escapeHtml(a.relator || '-')}</strong>
                                         ${a.relator_role ? `<span class="text-[10px] font-bold text-slate-400">(${escapeHtml(a.relator_role)})</span>` : ''}
@@ -7513,7 +7519,14 @@
                             ${alertaDup}
 
                             <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-3 text-xs">
-                                <div class="lg:col-span-2">
+                                <div>
+                                    <label class="block text-[10px] font-extrabold uppercase text-slate-500 mb-1">Conjunto <span class="text-slate-400 font-bold normal-case">(Opcional)</span></label>
+                                    <select id="sup_dir_conj_${a.id}" class="input-clean py-2 text-xs font-bold">
+                                        <option value="" ${!conjAtual ? 'selected' : ''}>-- Nenhum (Geral do Equip.) --</option>
+                                        ${conjsEquipSup.map(op => `<option value="${escapeHtml(op)}" ${conjAtual === op ? 'selected' : ''}>${escapeHtml(op)}</option>`).join('')}
+                                    </select>
+                                </div>
+                                <div>
                                     <label class="block text-[10px] font-extrabold uppercase text-slate-500 mb-1">Ponto / Componente *</label>
                                     <input type="text" id="sup_dir_comp_${a.id}" value="${escapeHtml(a.componente || '')}" maxlength="90" class="input-clean py-2 text-xs font-bold">
                                 </div>
@@ -7598,7 +7611,7 @@
                                     <div>
                                         <span class="text-[10px] font-extrabold uppercase text-slate-400 block">${escapeHtml(a.area)} • ${escapeHtml(a.maquina)}</span>
                                         <span class="text-xs font-extrabold text-sky-700 block">${escapeHtml(a.equipamento)}</span>
-                                        <h3 class="font-extrabold text-slate-900 text-base">${escapeHtml(a.conjunto || 'Conjunto Geral')}</h3>
+                                        <h3 class="font-extrabold text-slate-900 text-base">${escapeHtml(a.conjunto || 'Geral do Equipamento')}</h3>
                                     </div>
                                     <span class="text-[10px] font-extrabold uppercase px-2.5 py-1 rounded-full bg-sky-100 text-sky-800">Aguardando OK</span>
                                 </div>
@@ -7629,6 +7642,8 @@
             const a = listaAnomalias.find(x => x.id === idAnom);
             if (!a) return;
 
+            const conjEl = document.getElementById(`sup_dir_conj_${idAnom}`);
+            const conjunto = conjEl ? (conjEl.value || '').trim() : (a.conjunto || '').trim();
             const componente = (document.getElementById(`sup_dir_comp_${idAnom}`)?.value || a.componente || '').trim();
             const equipe_responsavel = document.getElementById(`sup_dir_eq_${idAnom}`)?.value || a.equipe_responsavel || 'Mecânica';
             const classificacao_os = document.getElementById(`sup_dir_classif_${idAnom}`)?.value || a.classificacao_os || 'QUEBRA';
@@ -7646,6 +7661,7 @@
 
             try {
                 await updateDoc(doc(db, "ir_anomalias", idAnom), {
+                    conjunto,
                     componente,
                     equipe_responsavel,
                     especialidade: equipe_responsavel,
@@ -7675,7 +7691,7 @@
             document.getElementById('rejAnomId').value = a.id;
             document.getElementById('rejAnomMotivo').value = '';
             document.getElementById('rejAnomResumo').innerHTML = `
-                <div class="font-extrabold text-slate-900">${escapeHtml(a.area)} › ${escapeHtml(a.maquina)} › ${escapeHtml(a.equipamento)} (${escapeHtml(a.conjunto || 'Geral')})</div>
+                <div class="font-extrabold text-slate-900">${escapeHtml(a.area)} › ${escapeHtml(a.maquina)} › ${escapeHtml(a.equipamento)}${a.conjunto ? ` (${escapeHtml(a.conjunto)})` : ''}</div>
                 <div class="text-slate-600"><strong>Ponto:</strong> ${escapeHtml(a.componente || '-')} • <strong>Solicitante:</strong> ${escapeHtml(a.relator || '-')}</div>
                 <div class="text-slate-500 mt-1 line-clamp-2">${escapeHtml(a.descricao || '')}</div>
             `;
@@ -7847,7 +7863,7 @@
             document.getElementById('delObsSupervisor').value = a.obs_supervisor || '';
 
             document.getElementById('delAnomResumo').innerHTML = `
-                <div class="font-extrabold text-slate-900">${escapeHtml(a.area)} › ${escapeHtml(a.maquina)} › ${escapeHtml(a.equipamento)} (${escapeHtml(a.conjunto || 'Geral')})</div>
+                <div class="font-extrabold text-slate-900">${escapeHtml(a.area)} › ${escapeHtml(a.maquina)} › ${escapeHtml(a.equipamento)}${a.conjunto ? ` (${escapeHtml(a.conjunto)})` : ''}</div>
                 <div class="text-slate-600"><strong>Ponto:</strong> ${escapeHtml(a.componente || '-')} • <strong>Equipe:</strong> ${escapeHtml(a.equipe_responsavel || a.especialidade)}</div>
                 <div class="text-sky-700 font-extrabold">Necessário escalar: ${qtdReq} técnico(s) • Tempo Estimado: ${escapeHtml(a.tempo_estimado || '01:00')}</div>
             `;
@@ -7991,7 +8007,7 @@
                             <div>
                                 <span class="text-[10px] font-extrabold uppercase text-slate-400 block">${escapeHtml(a.area)} • ${escapeHtml(a.maquina)}</span>
                                 <span class="text-xs font-extrabold text-sky-700 block">${escapeHtml(a.equipamento)}</span>
-                                <h3 class="font-extrabold text-slate-900 text-base">${escapeHtml(a.conjunto || 'Conjunto Geral')}</h3>
+                                <h3 class="font-extrabold text-slate-900 text-base">${escapeHtml(a.conjunto || 'Geral do Equipamento')}</h3>
                             </div>
                             <span class="text-[10px] font-extrabold uppercase px-2.5 py-1 rounded-full bg-amber-100 text-amber-800">${escapeHtml(a.urgencia || 'Média')}</span>
                         </div>
@@ -8042,7 +8058,7 @@
             calcularTempoRealBaixa();
 
             document.getElementById('baixaPendResumo').innerHTML = `
-                <div class="font-extrabold text-slate-900">${escapeHtml(a.maquina)} › ${escapeHtml(a.equipamento)} › ${escapeHtml(a.conjunto || 'Geral')}</div>
+                <div class="font-extrabold text-slate-900">${escapeHtml(a.maquina)} › ${escapeHtml(a.equipamento)}${a.conjunto ? ` › ${escapeHtml(a.conjunto)}` : ''}</div>
                 <div class="text-slate-600"><strong>Defeito:</strong> ${escapeHtml(a.descricao)}</div>
             `;
             document.getElementById('modalBaixaPendencia').classList.remove('hidden');
@@ -8202,8 +8218,8 @@
             }
 
             candidatas.sort((a, b) => {
-                const aMesmoConj = (a.conjunto || '') === conjunto ? 1 : 0;
-                const bMesmoConj = (b.conjunto || '') === conjunto ? 1 : 0;
+                const aMesmoConj = conjunto && (a.conjunto || '') === conjunto ? 1 : 0;
+                const bMesmoConj = conjunto && (b.conjunto || '') === conjunto ? 1 : 0;
                 const aCompMatch = comp && normTextoControle(a.componente).includes(comp) ? 1 : 0;
                 const bCompMatch = comp && normTextoControle(b.componente).includes(comp) ? 1 : 0;
                 return (bMesmoConj + bCompMatch) - (aMesmoConj + aCompMatch) || (b.timestamp || 0) - (a.timestamp || 0);
@@ -8217,7 +8233,8 @@
                         <div class="font-extrabold">Controle Anti-Duplicidade: já existe(m) ${candidatas.length} anomalia(s) aberta(s) ou em aprovação neste equipamento:</div>
                         ${candidatas.slice(0, 3).map(c => {
                             const stLbl = c.status_aprovacao === 'Pendente Aprovação' ? 'Aguardando Supervisor' : c.status;
-                            return `<div class="text-[11px] bg-white/70 px-2.5 py-1.5 rounded-xl border border-amber-200/80"><strong>${escapeHtml(c.conjunto || 'Geral')} › ${escapeHtml(c.componente || '-')}</strong> <span class="font-bold text-amber-800">(${escapeHtml(stLbl)})</span> — ${escapeHtml(c.descricao)}</div>`;
+                            const locLbl = c.conjunto ? `${c.conjunto} › ${c.componente || '-'}` : `${c.componente || 'Geral do Equipamento'}`;
+                            return `<div class="text-[11px] bg-white/70 px-2.5 py-1.5 rounded-xl border border-amber-200/80"><strong>${escapeHtml(locLbl)}</strong> <span class="font-bold text-amber-800">(${escapeHtml(stLbl)})</span> — ${escapeHtml(c.descricao)}</div>`;
                         }).join('')}
                         <div class="text-[10px] font-bold text-amber-800">Se for o mesmo defeito, evite duplicar; se for outro ponto/falha, descreva com clareza para o Supervisor validar.</div>
                     </div>
@@ -8251,7 +8268,7 @@
 
             document.getElementById('dirAnomMaquina').innerHTML = '<option value="">-- Selecione --</option>';
             document.getElementById('dirAnomEquipamento').innerHTML = '<option value="">-- Selecione --</option>';
-            document.getElementById('dirAnomConjunto').innerHTML = '<option value="">-- Selecione --</option>';
+            document.getElementById('dirAnomConjunto').innerHTML = '<option value="">-- Nenhum (Geral do Equip.) --</option>';
             document.getElementById('dirAnomReenvioId').value = '';
             document.getElementById('dirAnomModalTitulo').innerText = 'Registrar Anomalia Direta';
             document.getElementById('dirAnomComponente').value = '';
@@ -8275,8 +8292,13 @@
                         if (prefill.equipamento) {
                             document.getElementById('dirAnomEquipamento').value = prefill.equipamento;
                             onDirAnomEquipChange();
-                            if (prefill.conjunto) {
-                                document.getElementById('dirAnomConjunto').value = prefill.conjunto;
+                            const conjPref = (prefill.conjunto || '').trim();
+                            if (conjPref) {
+                                const selConj = document.getElementById('dirAnomConjunto');
+                                if (selConj && ![...selConj.options].some(o => o.value === conjPref)) {
+                                    selConj.insertAdjacentHTML('beforeend', `<option value="${escapeHtml(conjPref)}">${escapeHtml(conjPref)}</option>`);
+                                }
+                                if (selConj) selConj.value = conjPref;
                             }
                         }
                     }
@@ -8337,7 +8359,7 @@
             const maqs = [...new Set(arvLinhas.filter(x => x.area === area).map(x => x.maquina))].filter(Boolean).sort((a, b) => a.localeCompare(b));
             document.getElementById('dirAnomMaquina').innerHTML = '<option value="">-- Selecione --</option>' + maqs.map(m => `<option value="${escapeHtml(m)}">${escapeHtml(m)}</option>`).join('');
             document.getElementById('dirAnomEquipamento').innerHTML = '<option value="">-- Selecione --</option>';
-            document.getElementById('dirAnomConjunto').innerHTML = '<option value="">-- Selecione --</option>';
+            document.getElementById('dirAnomConjunto').innerHTML = '<option value="">-- Nenhum (Geral do Equip.) --</option>';
             verificarDuplicidadeAnomaliaDireta();
         };
 
@@ -8346,7 +8368,7 @@
             const maq = document.getElementById('dirAnomMaquina').value;
             const equips = [...new Set(arvLinhas.filter(x => x.area === area && x.maquina === maq).map(x => x.equipamento))].filter(Boolean).sort((a, b) => a.localeCompare(b));
             document.getElementById('dirAnomEquipamento').innerHTML = '<option value="">-- Selecione --</option>' + equips.map(eq => `<option value="${escapeHtml(eq)}">${escapeHtml(eq)}</option>`).join('');
-            document.getElementById('dirAnomConjunto').innerHTML = '<option value="">-- Selecione --</option>';
+            document.getElementById('dirAnomConjunto').innerHTML = '<option value="">-- Nenhum (Geral do Equip.) --</option>';
             verificarDuplicidadeAnomaliaDireta();
         };
 
@@ -8354,8 +8376,8 @@
             const area = document.getElementById('dirAnomArea').value;
             const maq = document.getElementById('dirAnomMaquina').value;
             const eq = document.getElementById('dirAnomEquipamento').value;
-            const conjs = [...new Set(arvLinhas.filter(x => x.area === area && x.maquina === maq && x.equipamento === eq).map(x => getNomeConjunto(x)))].filter(Boolean).sort((a, b) => a.localeCompare(b));
-            document.getElementById('dirAnomConjunto').innerHTML = conjs.map(c => `<option value="${escapeHtml(c)}">${escapeHtml(c)}</option>`).join('') || '<option value="Conjunto Geral">Conjunto Geral</option>';
+            const conjs = [...new Set(arvLinhas.filter(x => x.area === area && x.maquina === maq && x.equipamento === eq).map(x => getNomeConjunto(x)))].filter(c => c && normTextoReligacao(c) !== 'conjunto geral').sort((a, b) => a.localeCompare(b));
+            document.getElementById('dirAnomConjunto').innerHTML = '<option value="">-- Nenhum (Geral do Equip.) --</option>' + conjs.map(c => `<option value="${escapeHtml(c)}">${escapeHtml(c)}</option>`).join('');
             verificarDuplicidadeAnomaliaDireta();
         };
 
@@ -8391,7 +8413,7 @@
             const area = document.getElementById('dirAnomArea').value;
             const maquina = document.getElementById('dirAnomMaquina').value;
             const equipamento = document.getElementById('dirAnomEquipamento').value;
-            const conjunto = document.getElementById('dirAnomConjunto').value || 'Conjunto Geral';
+            const conjunto = (document.getElementById('dirAnomConjunto').value || '').trim();
             const componente = document.getElementById('dirAnomComponente').value.trim();
             const urgencia = document.getElementById('dirAnomUrgencia').value;
             const equipe_responsavel = document.getElementById('dirAnomEquipe').value;
@@ -8401,8 +8423,8 @@
             const risco_parada = Boolean(document.getElementById('dirAnomRiscoParada')?.checked);
             const fotoB64 = document.getElementById('dirAnomFotoB64').value;
 
-            if (!area || !maquina || !equipamento || !conjunto) {
-                showToast("Selecione Setor, Máquina, Equipamento e Conjunto na árvore oficial de ativos.", "error");
+            if (!area || !maquina || !equipamento) {
+                showToast("Selecione Setor, Máquina e Equipamento na árvore oficial de ativos.", "error");
                 return;
             }
             if (!validarTextoTecnico(componente, 3, 1)) {
@@ -8540,7 +8562,7 @@
                                         <span class="text-[10px] font-extrabold uppercase text-slate-500 truncate">${escapeHtml(a.maquina)} • ${escapeHtml(a.equipamento)}</span>
                                         <span class="text-[10px] font-extrabold uppercase px-2 py-0.5 rounded-full ${rej ? 'bg-rose-600 text-white' : 'bg-amber-200 text-amber-900'}">${rej ? 'Recusada' : 'Aguardando Supervisor'}</span>
                                     </div>
-                                    <div class="font-extrabold text-slate-900">${escapeHtml(a.conjunto || 'Geral')} › ${escapeHtml(a.componente || '-')}</div>
+                                    <div class="font-extrabold text-slate-900">${a.conjunto ? `${escapeHtml(a.conjunto)} › ` : ''}${escapeHtml(a.componente || 'Geral do Equipamento')}</div>
                                     <p class="text-[11px] text-slate-700 mt-0.5 line-clamp-2">${escapeHtml(a.descricao)}</p>
                                     ${rej ? `<div class="mt-2 p-2 rounded-xl bg-white/80 border border-rose-200 text-[11px] text-rose-900"><strong>Motivo (${escapeHtml(a.rejeitado_por || 'Supervisão')}):</strong> ${escapeHtml(a.motivo_rejeicao || 'Necessita correção.')}</div>` : ''}
                                 </div>
@@ -8658,7 +8680,7 @@
                             <div class="min-w-0">
                                 <span class="text-[10px] font-extrabold uppercase text-slate-400 block truncate">${escapeHtml(a.area)} • ${escapeHtml(a.maquina)}</span>
                                 <span class="text-xs font-extrabold text-sky-700 block truncate">${escapeHtml(a.equipamento)}</span>
-                                <h3 class="font-extrabold text-slate-900 text-base leading-snug">${escapeHtml(a.conjunto || 'Conjunto Geral')}</h3>
+                                <h3 class="font-extrabold text-slate-900 text-base leading-snug">${escapeHtml(a.conjunto || 'Geral do Equipamento')}</h3>
                             </div>
                             <span class="text-[10px] font-extrabold uppercase px-2.5 py-1 rounded-full bg-rose-600 text-white shrink-0">Reprovada</span>
                         </div>
@@ -8819,7 +8841,7 @@
                             <div class="min-w-0">
                                 <span class="text-[10px] font-extrabold uppercase text-slate-400 block truncate">${escapeHtml(a.area)} • ${escapeHtml(a.maquina)}</span>
                                 <span class="text-xs font-extrabold text-sky-700 block truncate">${escapeHtml(a.equipamento)}</span>
-                                <h3 class="font-extrabold text-slate-900 text-base leading-snug">${escapeHtml(a.conjunto || 'Conjunto Geral')}</h3>
+                                <h3 class="font-extrabold text-slate-900 text-base leading-snug">${escapeHtml(a.conjunto || 'Geral do Equipamento')}</h3>
                             </div>
                             <span class="text-[10px] font-extrabold uppercase px-2.5 py-1 rounded-full shrink-0 ${stClass}">${escapeHtml(a.status)}</span>
                         </div>
@@ -8876,7 +8898,7 @@
     [...oficiais].sort((a, b) => (b.timestamp || 0) - (a.timestamp || 0)).forEach(i => {
         const s = i.status === 'Concluída' ? 'color:#059669;' : i.status === 'Em Andamento' ? 'color:#d97706;' : 'color:#e11d48;';
         tbody += `<tr>
-            <td><strong>${escapeHtml(i.area)} > ${escapeHtml(i.maquina)}</strong><br>${escapeHtml(i.equipamento)}<br><span style="color:#0284c7; font-weight:bold;">Conjunto: ${escapeHtml(i.conjunto || 'Geral')}</span></td>
+            <td><strong>${escapeHtml(i.area)} > ${escapeHtml(i.maquina)}</strong><br>${escapeHtml(i.equipamento)}<br><span style="color:#0284c7; font-weight:bold;">${i.conjunto ? `Conjunto: ${escapeHtml(i.conjunto)}` : 'Geral do Equipamento'}</span></td>
             <td><strong>${escapeHtml(i.componente || '-')}</strong><br>${escapeHtml(i.descricao)}</td>
             <td><strong>${escapeHtml(i.equipe_responsavel || i.especialidade || '-')}</strong><br>Técnicos: <strong>${escapeHtml(i.qtd_tecnicos || 1)}</strong><br>Tempo Est.: <strong>${escapeHtml(i.tempo_estimado || '-')}</strong></td>
             <td style="text-align:center; font-weight:bold;">${escapeHtml(i.urgencia || 'Média')}</td>
