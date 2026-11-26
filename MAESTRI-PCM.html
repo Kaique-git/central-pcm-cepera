@@ -353,7 +353,8 @@
             transition: width 0.35s cubic-bezier(0.22, 1, 0.36, 1);
         }
         body.theme-dark #maestriLoadingCard,
-        body.theme-dark #pipelineLiveProgressBanner {
+        body.theme-dark #pipelineLiveProgressBanner,
+        body.theme-dark #corrSavingStatusBox {
             background: #0f172a !important;
             border-color: #334155 !important;
             color: #f8fafc !important;
@@ -371,7 +372,13 @@
         #maestriLoadingOverlay[hidden],
         #maestriLoadingOverlay.hidden,
         #pipelineLiveProgressBanner[hidden],
-        #pipelineLiveProgressBanner.hidden {
+        #pipelineLiveProgressBanner.hidden,
+        #corrSavingStatusBox[hidden],
+        #corrSavingStatusBox.hidden,
+        #icoSalvarCorrSpin[hidden],
+        #icoSalvarCorrSpin.hidden,
+        #icoSalvarCorrCheck[hidden],
+        #icoSalvarCorrCheck.hidden {
             display: none !important;
         }
     </style>
@@ -1674,7 +1681,7 @@
                     <span class="text-[10px] font-extrabold uppercase tracking-widest text-amber-600">Nó 5 (Conferente) → Nó 6 (Bibliotecário)</span>
                     <h2 id="corrModalTitulo" class="text-lg font-extrabold text-slate-900">Corrigir Classificação & Ensinar IA</h2>
                 </div>
-                <button type="button" onclick="fecharModal('modalCorrigirOmSupervisor')" aria-label="Fechar" class="w-8 h-8 rounded-full bg-slate-100 text-slate-600 flex items-center justify-center"><svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg></button>
+                <button type="button" id="btnFecharCorrSupervisor" onclick="fecharModal('modalCorrigirOmSupervisor')" aria-label="Fechar" class="w-8 h-8 rounded-full bg-slate-100 text-slate-600 flex items-center justify-center"><svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg></button>
             </div>
             <form onsubmit="salvarCorrecaoSupervisor(event)" class="space-y-3.5 text-xs">
                 <input type="hidden" id="corrOmId" value="">
@@ -1721,9 +1728,29 @@
                     <label class="block text-[10px] font-extrabold uppercase text-slate-500 mb-1">Justificativa Técnica do Supervisor *</label>
                     <textarea id="corrJustificativa" rows="2" required class="input-clean py-2 font-semibold" placeholder="Explique em 1 frase por que esta categoria é a correta nesta planta..."></textarea>
                 </div>
+                <div id="corrSavingStatusBox" role="status" aria-live="polite" hidden class="hidden p-3.5 rounded-2xl bg-sky-50/90 border border-sky-200 space-y-2">
+                    <div class="flex items-center justify-between gap-2">
+                        <div class="flex items-center gap-2 min-w-0">
+                            <span id="corrSavingSpinnerIcon" class="w-4 h-4 rounded-full border-2 border-sky-600 border-t-transparent maestri-spin shrink-0"></span>
+                            <span id="corrSavingStepTitle" class="text-xs font-extrabold text-sky-950 truncate">Gravando alteração no banco de dados...</span>
+                        </div>
+                        <span id="corrSavingPct" class="px-2 py-0.5 rounded-full bg-sky-100 text-sky-900 font-mono text-[10px] font-extrabold shrink-0">15%</span>
+                    </div>
+                    <div class="w-full h-2 rounded-full bg-sky-100 overflow-hidden">
+                        <div id="corrSavingProgressBar" class="h-full rounded-full bg-sky-600 maestri-progress-fill" style="width: 15%"></div>
+                    </div>
+                    <div class="flex items-center justify-between gap-2 text-[10px] font-semibold text-sky-900/85">
+                        <span id="corrSavingStepDetail" class="truncate">Sincronizando nova categoria e ensinando o Bibliotecário (Nó 6)...</span>
+                    </div>
+                    <div class="text-[10px] font-bold text-slate-500">Aguarde concluir — o fechamento será automático assim que o banco finalizar a gravação.</div>
+                </div>
                 <div class="flex gap-2 pt-2 border-t border-slate-100">
-                    <button type="button" onclick="fecharModal('modalCorrigirOmSupervisor')" class="btn-touch bg-slate-100 text-slate-700 flex-1 text-xs">Cancelar</button>
-                    <button type="submit" class="btn-pill-dark inline-flex items-center justify-center gap-1.5 flex-1 text-xs"><svg class="w-4 h-4 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg><span>Salvar &amp; Ensinar Bibliotecário</span></button>
+                    <button type="button" id="btnCancelarCorrSupervisor" onclick="fecharModal('modalCorrigirOmSupervisor')" class="btn-touch bg-slate-100 text-slate-700 flex-1 text-xs">Cancelar</button>
+                    <button type="submit" id="btnSalvarCorrSupervisor" class="btn-pill-dark inline-flex items-center justify-center gap-1.5 flex-1 text-xs">
+                        <svg id="icoSalvarCorrCheck" class="w-4 h-4 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg>
+                        <span id="icoSalvarCorrSpin" hidden class="hidden w-4 h-4 rounded-full border-2 border-white border-t-transparent maestri-spin shrink-0"></span>
+                        <span id="lblSalvarCorrSupervisor">Salvar &amp; Ensinar Bibliotecário</span>
+                    </button>
                 </div>
             </form>
         </div>
@@ -6630,12 +6657,32 @@ OMs:\n${JSON.stringify(listaPrompt)}`;
             }
         };
 
-        window.reexecutarNosPosConferencia = () => {
-            recalcularNosPosAuditoria();
-            salvarEstadoPersistidoMaestri();
-            renderCurrentView();
-            aplicarEstadoFinalRedeNeural({ total: omsAuditadas.length, fastCnt: custoRodada.oms_fast_path_r0, loteCnt: custoRodada.oms_ia_lote, chamadas: custoRodada.chamadas_ia, forcarSyncStream: true });
-            showToast("Nós 6, 7, 8 e 9 reprocessados a R$ 0,00 com as correções dos supervisores!", "success");
+        window.reexecutarNosPosConferencia = async () => {
+            iniciarProgressoVisualMaestri({
+                badge: "REPROCESSAMENTO • R$ 0,00",
+                titulo: "Reprocessando Nós 6, 7, 8 e 9...",
+                subtitulo: "Aplicando as validações e correções dos supervisores nos painéis.",
+                detalhe: "Recalculando Bibliotecário, Confiabilidade, MTBF e Estudos AQF...",
+                pct: 35,
+                etapas: [
+                    { label: "Recalcular Bibliotecário & Confiabilidade (Nós 6–9)", status: "ativo", info: `${omsAuditadas.length} OM(s)` },
+                    { label: "Persistir sessão e atualizar painéis", status: "pendente", info: "" }
+                ]
+            });
+            try {
+                await cederFrameUI(30);
+                recalcularNosPosAuditoria();
+                atualizarProgressoVisualMaestri({ pct: 80, etapaAtivaIdx: 1, detalhe: "Salvando estado e atualizando gráficos e cards..." });
+                await cederFrameUI(25);
+                salvarEstadoPersistidoMaestri();
+                renderCurrentView();
+                aplicarEstadoFinalRedeNeural({ total: omsAuditadas.length, fastCnt: custoRodada.oms_fast_path_r0, loteCnt: custoRodada.oms_ia_lote, chamadas: custoRodada.chamadas_ia, forcarSyncStream: true });
+                atualizarProgressoVisualMaestri({ pct: 100, concluirTodas: true, detalhe: "Painéis atualizados com sucesso!" });
+                await cederFrameUI(140);
+                showToast("Nós 6, 7, 8 e 9 reprocessados a R$ 0,00 com as correções dos supervisores!", "success");
+            } finally {
+                finalizarProgressoVisualMaestri();
+            }
         };
 
         // ================= MOTOR VISUAL DA REDE NEURAL (MAESTRO + PERCEPTRONS + SVG SINAPSES EDGE-TO-EDGE) =================
@@ -9408,7 +9455,7 @@ Responda SOMENTE JSON Array: [{"ativo_erp":"...","tipo_ativo":"ATIVO_ARVORE"|"FE
                             <div class="text-[10px] font-bold text-slate-500 mt-0.5">Fila: ${escapeHtml(o.fila)}</div>
                         </td>
                         <td class="py-3 px-3 text-right whitespace-nowrap space-x-1">
-                            <button type="button" onclick="confirmarOmSupervisorDireto('${o.om}')" class="inline-flex items-center px-2.5 py-1 rounded-lg bg-emerald-50 hover:bg-emerald-100 text-emerald-800 border border-emerald-200 text-[11px] font-extrabold" title="Confirmar classificação">${SVG_ICO.check}</button>
+                            <button type="button" onclick="confirmarOmSupervisorDireto('${o.om}', this)" class="inline-flex items-center px-2.5 py-1 rounded-lg bg-emerald-50 hover:bg-emerald-100 text-emerald-800 border border-emerald-200 text-[11px] font-extrabold" title="Confirmar classificação">${SVG_ICO.check}</button>
                             <button type="button" onclick="abrirModalCorrigirOm('${o.om}')" class="inline-flex items-center gap-1 px-2.5 py-1 rounded-lg bg-amber-50 hover:bg-amber-100 text-amber-900 border border-amber-200 text-[11px] font-extrabold">${SVG_ICO.edit} Corrigir</button>
                         </td>
                     </tr>`;
@@ -9474,7 +9521,7 @@ Responda SOMENTE JSON Array: [{"ativo_erp":"...","tipo_ativo":"ATIVO_ARVORE"|"FE
                         </div>
                     </div>
                     <div class="flex items-center gap-2 pt-3 border-t border-slate-100">
-                        <button type="button" onclick="confirmarOmSupervisorDireto('${o.om}')" class="btn-touch bg-emerald-600 hover:bg-emerald-700 text-white flex-1 text-xs py-2.5">
+                        <button type="button" onclick="confirmarOmSupervisorDireto('${o.om}', this)" class="btn-touch bg-emerald-600 hover:bg-emerald-700 text-white flex-1 text-xs py-2.5">
                             ${SVG_ICO.check} 1. Confirmar (${escapeHtml(o.categoria)})
                         </button>
                         <button type="button" onclick="abrirModalCorrigirOm('${o.om}')" class="btn-touch bg-amber-100 hover:bg-amber-200 text-amber-950 border border-amber-300 flex-1 text-xs py-2.5">
@@ -9483,6 +9530,83 @@ Responda SOMENTE JSON Array: [{"ativo_erp":"...","tipo_ativo":"ATIVO_ARVORE"|"FE
                     </div>
                 </div>`).join("");
         };
+
+        let corrSupervisorSalvando = false;
+        let confConfirmacaoEmAndamento = false;
+
+        function setEstadoSalvandoCorrecaoSupervisor(ativo, opts = {}) {
+            const box = document.getElementById("corrSavingStatusBox");
+            const titleEl = document.getElementById("corrSavingStepTitle");
+            const detEl = document.getElementById("corrSavingStepDetail");
+            const pctEl = document.getElementById("corrSavingPct");
+            const barEl = document.getElementById("corrSavingProgressBar");
+            const spinBoxIco = document.getElementById("corrSavingSpinnerIcon");
+
+            const btnSave = document.getElementById("btnSalvarCorrSupervisor");
+            const icoChk = document.getElementById("icoSalvarCorrCheck");
+            const icoSpin = document.getElementById("icoSalvarCorrSpin");
+            const lblSave = document.getElementById("lblSalvarCorrSupervisor");
+            const btnCancel = document.getElementById("btnCancelarCorrSupervisor");
+            const btnClose = document.getElementById("btnFecharCorrSupervisor");
+
+            const fieldIds = ["corrNovaCategoria", "corrSinalTecnico", "corrFatorB", "corrFatorC", "corrJustificativa"];
+            fieldIds.forEach(fid => {
+                const el = document.getElementById(fid);
+                if (el) {
+                    el.disabled = Boolean(ativo);
+                    el.classList.toggle("opacity-60", Boolean(ativo));
+                }
+            });
+
+            if (btnCancel) {
+                btnCancel.disabled = Boolean(ativo);
+                btnCancel.classList.toggle("opacity-50", Boolean(ativo));
+                btnCancel.classList.toggle("cursor-not-allowed", Boolean(ativo));
+                btnCancel.title = ativo ? "Aguarde a gravação no banco finalizar..." : "";
+            }
+            if (btnClose) {
+                btnClose.disabled = Boolean(ativo);
+                btnClose.classList.toggle("opacity-40", Boolean(ativo));
+                btnClose.classList.toggle("cursor-not-allowed", Boolean(ativo));
+                btnClose.title = ativo ? "Aguarde a gravação no banco finalizar..." : "Fechar";
+            }
+            if (btnSave) {
+                btnSave.disabled = Boolean(ativo);
+                btnSave.classList.toggle("opacity-90", Boolean(ativo));
+                btnSave.classList.toggle("cursor-wait", Boolean(ativo));
+            }
+            if (icoChk) {
+                icoChk.hidden = Boolean(ativo);
+                icoChk.classList.toggle("hidden", Boolean(ativo));
+            }
+            if (icoSpin) {
+                icoSpin.hidden = !ativo;
+                icoSpin.classList.toggle("hidden", !ativo);
+            }
+            if (lblSave) {
+                lblSave.innerText = ativo ? (opts.btnLabel || "Salvando no banco...") : "Salvar & Ensinar Bibliotecário";
+            }
+
+            if (box) {
+                box.hidden = !ativo;
+                box.classList.toggle("hidden", !ativo);
+            }
+            if (ativo) {
+                const pct = Math.max(5, Math.min(100, Math.round(Number(opts.pct ?? 18))));
+                if (titleEl && opts.titulo) titleEl.innerText = opts.titulo;
+                if (detEl && opts.detalhe !== undefined) detEl.innerText = opts.detalhe;
+                if (pctEl) pctEl.innerText = `${pct}%`;
+                if (barEl) {
+                    barEl.style.width = `${pct}%`;
+                    barEl.classList.toggle("bg-emerald-600", pct >= 100);
+                    barEl.classList.toggle("bg-sky-600", pct < 100);
+                }
+                if (spinBoxIco) {
+                    spinBoxIco.classList.toggle("border-emerald-600", pct >= 100);
+                    spinBoxIco.classList.toggle("border-sky-600", pct < 100);
+                }
+            }
+        }
 
         function registrarRevisaoSupervisorOm(o, justOverride = "") {
             if (!o) return;
@@ -9507,47 +9631,109 @@ Responda SOMENTE JSON Array: [{"ativo_erp":"...","tipo_ativo":"ATIVO_ARVORE"|"FE
             }
         }
 
-        window.confirmarOmSupervisorDireto = (omId) => {
+        window.confirmarOmSupervisorDireto = async (omId, btnEl = null) => {
+            if (confConfirmacaoEmAndamento || corrSupervisorSalvando) return;
             const o = omsAuditadas.find(x => x.om === String(omId));
             if (!o) return;
             if (o.categoria === "REVISAR_MANUAL") {
                 abrirModalCorrigirOm(omId);
                 return;
             }
-            o.fila = "AUTOMATICO";
-            o.confianca = 5;
-            o.origem = "SUPERVISOR";
-            registrarRevisaoSupervisorOm(o, o.justificativa);
-            recalcularNosPosAuditoria();
-            salvarEstadoPersistidoMaestri();
-            renderCurrentView();
-            atualizarBannerLoteAuditado();
-            showToast(`OM #${o.om} confirmada como ${o.categoria}!`, "success");
+            confConfirmacaoEmAndamento = true;
+            const origHtml = btnEl ? btnEl.innerHTML : "";
+            if (btnEl) {
+                btnEl.disabled = true;
+                btnEl.classList.add("opacity-80", "cursor-wait");
+                btnEl.innerHTML = `<span class="w-3.5 h-3.5 rounded-full border-2 border-current border-t-transparent maestri-spin shrink-0"></span><span>Confirmando...</span>`;
+            }
+            try {
+                await cederFrameUI(25);
+                o.fila = "AUTOMATICO";
+                o.confianca = 5;
+                o.origem = "SUPERVISOR";
+                registrarRevisaoSupervisorOm(o, o.justificativa);
+                try {
+                    await persistirOmsNoBancoHistorico([o], true);
+                } catch (_) {}
+                recalcularNosPosAuditoria();
+                salvarEstadoPersistidoMaestri();
+                renderCurrentView();
+                atualizarBannerLoteAuditado();
+                showToast(`OM #${o.om} confirmada como ${o.categoria} e sincronizada no banco!`, "success");
+            } finally {
+                confConfirmacaoEmAndamento = false;
+                if (btnEl && btnEl.isConnected) {
+                    btnEl.disabled = false;
+                    btnEl.classList.remove("opacity-80", "cursor-wait");
+                    btnEl.innerHTML = origHtml;
+                }
+            }
         };
 
-        window.confirmarLoteConferenteVisiveis = () => {
+        window.confirmarLoteConferenteVisiveis = async () => {
+            if (confConfirmacaoEmAndamento || corrSupervisorSalvando) return;
             const fEq = document.getElementById("confFiltroEquipe")?.value || "";
             const alvos = omsAuditadas.filter(o => (!fEq || o.equipe === fEq) && o.fila === "CONFERIR" && o.categoria !== "REVISAR_MANUAL");
             if (!alvos.length) {
                 showToast("Nenhuma OM da fila CONFERIR para confirmar em lote.", "error");
                 return;
             }
-            alvos.forEach(o => {
-                o.fila = "AUTOMATICO";
-                o.confianca = 5;
-                o.origem = "SUPERVISOR";
-                registrarRevisaoSupervisorOm(o, o.justificativa);
+            confConfirmacaoEmAndamento = true;
+            iniciarProgressoVisualMaestri({
+                badge: "MESA DE CONFERÊNCIA • LOTE",
+                titulo: `Confirmando ${alvos.length} OM(s) na fila...`,
+                subtitulo: "Validando classificações em lote e sincronizando no Banco Histórico.",
+                detalhe: `Aplicando validação do supervisor em ${alvos.length} ordem(ns)...`,
+                pct: 20,
+                etapas: [
+                    { label: "Validar OMs selecionadas no Nó 5", status: "ativo", info: `${alvos.length} OM(s)` },
+                    { label: "Sincronizar no Banco Histórico na nuvem", status: "pendente", info: "" },
+                    { label: "Recalcular indicadores e atualizar fila", status: "pendente", info: "" }
+                ]
             });
-            recalcularNosPosAuditoria();
-            salvarEstadoPersistidoMaestri();
-            renderCurrentView();
-            atualizarBannerLoteAuditado();
-            showToast(`${alvos.length} OM(s) confirmadas em lote e protegidas contra reexecução!`, "success");
+            try {
+                await cederFrameUI(30);
+                alvos.forEach(o => {
+                    o.fila = "AUTOMATICO";
+                    o.confianca = 5;
+                    o.origem = "SUPERVISOR";
+                    registrarRevisaoSupervisorOm(o, o.justificativa);
+                });
+                atualizarProgressoVisualMaestri({
+                    pct: 52,
+                    etapaAtivaIdx: 1,
+                    etapaInfo: "Gravando Firestore...",
+                    detalhe: "Gravando confirmações no Banco Histórico Mensal na nuvem..."
+                });
+                await cederFrameUI(25);
+                try {
+                    await persistirOmsNoBancoHistorico(alvos, true);
+                } catch (_) {}
+                atualizarProgressoVisualMaestri({
+                    pct: 84,
+                    etapaAtivaIdx: 2,
+                    etapaInfo: "Nós 6–9",
+                    detalhe: "Recalculando Confiabilidade, MTBF e atualizando Mesa de Conferência..."
+                });
+                await cederFrameUI(25);
+                recalcularNosPosAuditoria();
+                salvarEstadoPersistidoMaestri();
+                renderCurrentView();
+                atualizarBannerLoteAuditado();
+                atualizarProgressoVisualMaestri({ pct: 100, concluirTodas: true, detalhe: `${alvos.length} OM(s) confirmadas com sucesso!` });
+                await cederFrameUI(150);
+                showToast(`${alvos.length} OM(s) confirmadas em lote, salvas na nuvem e protegidas contra reexecução!`, "success");
+            } finally {
+                confConfirmacaoEmAndamento = false;
+                finalizarProgressoVisualMaestri();
+            }
         };
 
         window.abrirModalCorrigirOm = (omId) => {
+            if (corrSupervisorSalvando) return;
             const o = omsAuditadas.find(x => x.om === String(omId));
             if (!o) return;
+            setEstadoSalvandoCorrecaoSupervisor(false);
             document.getElementById("corrOmId").value = o.om;
             document.getElementById("corrOmResumo").innerHTML = `
                 <div class="font-extrabold text-slate-900">OM #${escapeHtml(o.om)} — ${escapeHtml(o.ativo)} (${escapeHtml(o.equipe)})</div>
@@ -9572,6 +9758,7 @@ Responda SOMENTE JSON Array: [{"ativo_erp":"...","tipo_ativo":"ATIVO_ARVORE"|"FE
 
         window.salvarCorrecaoSupervisor = async (e) => {
             e.preventDefault();
+            if (corrSupervisorSalvando) return;
             const omId = document.getElementById("corrOmId").value;
             const o = omsAuditadas.find(x => x.om === String(omId));
             if (!o) return;
@@ -9581,60 +9768,108 @@ Responda SOMENTE JSON Array: [{"ativo_erp":"...","tipo_ativo":"ATIVO_ARVORE"|"FE
             const just = document.getElementById("corrJustificativa").value.trim();
             const catAntiga = o.categoria;
 
-            o.categoria = novaCat;
-            o.fila = "AUTOMATICO";
-            o.confianca = 5;
-            o.origem = "SUPERVISOR";
-            o.justificativa = `[Supervisor: ${sinal}] ${just}`;
+            corrSupervisorSalvando = true;
+            setEstadoSalvandoCorrecaoSupervisor(true, {
+                pct: 18,
+                btnLabel: "Salvando no banco...",
+                titulo: "1/4 • Gravando nova regra no Bibliotecário (Nó 6)...",
+                detalhe: `Ensinando a IA: OM #${o.om} → ${novaCat} (Sinal: ${sinal})`
+            });
 
-            if (novaCat === "QUEBRA") {
-                o.b = Number(document.getElementById("corrFatorB").value || 2);
-                o.c = Number(document.getElementById("corrFatorC").value || 2);
-                const calc = calcularSeveridadeBxC(o.b, o.c, o.tempo_min);
-                o.severidade = calc.sev;
-                o.regra_severidade = calc.regra;
-            } else {
-                o.b = null;
-                o.c = null;
-                o.severidade = "NA";
-                o.regra_severidade = "";
+            try {
+                // Cede um frame para o navegador pintar imediatamente o carregamento e travar o botão Cancelar
+                await cederFrameUI(35);
+
+                o.categoria = novaCat;
+                o.fila = "AUTOMATICO";
+                o.confianca = 5;
+                o.origem = "SUPERVISOR";
+                o.justificativa = `[Supervisor: ${sinal}] ${just}`;
+
+                if (novaCat === "QUEBRA") {
+                    o.b = Number(document.getElementById("corrFatorB").value || 2);
+                    o.c = Number(document.getElementById("corrFatorC").value || 2);
+                    const calc = calcularSeveridadeBxC(o.b, o.c, o.tempo_min);
+                    o.severidade = calc.sev;
+                    o.regra_severidade = calc.regra;
+                } else {
+                    o.b = null;
+                    o.c = null;
+                    o.severidade = "NA";
+                    o.regra_severidade = "";
+                }
+
+                registrarRevisaoSupervisorOm(o, o.justificativa);
+
+                const regBib = {
+                    om: o.om,
+                    problema: o.problema,
+                    servico: o.servico,
+                    ativo: o.ativo,
+                    categoria_ia: catAntiga,
+                    confianca_ia: 4,
+                    categoria_supervisor: novaCat,
+                    divergiu: novaCat !== catAntiga,
+                    sinal,
+                    justificativa_supervisor: just,
+                    supervisor: usuarioLogado?.nome || "Supervisor PCM",
+                    data_revisao: new Date().toISOString().slice(0, 10),
+                    versao_auditor: "v41",
+                    status: "CONFIRMADO"
+                };
+                bibliotecaCorrecoes.unshift(regBib);
+
+                try {
+                    await addDoc(colMaestriCorr, regBib);
+                } catch (_) {}
+
+                setEstadoSalvandoCorrecaoSupervisor(true, {
+                    pct: 52,
+                    btnLabel: "Sincronizando nuvem...",
+                    titulo: "2/4 • Atualizando categoria no Banco Histórico na nuvem...",
+                    detalhe: `Gravando OM #${o.om} (${novaCat}) nos blocos mensais do Firestore...`
+                });
+                await cederFrameUI(25);
+
+                // Atualiza também a OM revisada diretamente no Banco Histórico Mensal na Nuvem
+                try {
+                    await persistirOmsNoBancoHistorico([o], true);
+                } catch (_) {}
+
+                setEstadoSalvandoCorrecaoSupervisor(true, {
+                    pct: 84,
+                    btnLabel: "Recalculando painéis...",
+                    titulo: "3/4 • Recalculando indicadores, Confiabilidade e Estudos AQF...",
+                    detalhe: "Aplicando nova categoria nos Nós 6, 7, 8 e 9 e salvando sessão..."
+                });
+                await cederFrameUI(30);
+
+                recalcularNosPosAuditoria();
+                salvarEstadoPersistidoMaestri();
+
+                setEstadoSalvandoCorrecaoSupervisor(true, {
+                    pct: 100,
+                    btnLabel: "Concluído!",
+                    titulo: "4/4 • Alteração salva e aprendida com sucesso!",
+                    detalhe: "Atualizando a Mesa de Conferência e fechando esta janela..."
+                });
+                await cederFrameUI(160);
+
+                corrSupervisorSalvando = false;
+                setEstadoSalvandoCorrecaoSupervisor(false);
+                fecharModal("modalCorrigirOmSupervisor");
+                renderCurrentView();
+                atualizarBannerLoteAuditado();
+                showToast(`OM #${o.om} corrigida para ${novaCat}, salva na nuvem e aprendida pelo Bibliotecário (Nó 6)!`, "success");
+            } catch (err) {
+                console.error("Erro ao salvar correção do supervisor:", err);
+                showToast("Erro ao gravar a correção no banco. Tente novamente.", "error");
+            } finally {
+                if (corrSupervisorSalvando) {
+                    corrSupervisorSalvando = false;
+                    setEstadoSalvandoCorrecaoSupervisor(false);
+                }
             }
-
-            registrarRevisaoSupervisorOm(o, o.justificativa);
-
-            const regBib = {
-                om: o.om,
-                problema: o.problema,
-                servico: o.servico,
-                ativo: o.ativo,
-                categoria_ia: catAntiga,
-                confianca_ia: 4,
-                categoria_supervisor: novaCat,
-                divergiu: novaCat !== catAntiga,
-                sinal,
-                justificativa_supervisor: just,
-                supervisor: usuarioLogado?.nome || "Supervisor PCM",
-                data_revisao: new Date().toISOString().slice(0, 10),
-                versao_auditor: "v41",
-                status: "CONFIRMADO"
-            };
-            bibliotecaCorrecoes.unshift(regBib);
-
-            try {
-                await addDoc(colMaestriCorr, regBib);
-            } catch (_) {}
-
-            // Atualiza também a OM revisada diretamente no Banco Histórico Mensal na Nuvem
-            try {
-                await persistirOmsNoBancoHistorico([o], true);
-            } catch (_) {}
-
-            fecharModal("modalCorrigirOmSupervisor");
-            recalcularNosPosAuditoria();
-            salvarEstadoPersistidoMaestri();
-            renderCurrentView();
-            atualizarBannerLoteAuditado();
-            showToast(`OM #${o.om} corrigida para ${novaCat}, salva na nuvem e aprendida pelo Bibliotecário (Nó 6)!`, "success");
         };
 
         // VIEW 4: NÓ 6 — BIBLIOTECÁRIO & DETECTOR DE DIVERGÊNCIA
@@ -11891,6 +12126,10 @@ Responda SOMENTE JSON Array: [{"ativo_erp":"...","tipo_ativo":"ATIVO_ARVORE"|"FE
             if (el) { el.hidden = false; el.classList.remove("hidden"); }
         };
         window.fecharModal = (id) => {
+            if (id === "modalCorrigirOmSupervisor" && corrSupervisorSalvando) {
+                showToast("Aguarde finalizar a gravação da alteração no banco de dados...", "info");
+                return;
+            }
             const el = document.getElementById(id);
             if (el) { el.hidden = true; el.classList.add("hidden"); }
         };
