@@ -1480,6 +1480,79 @@
                         </div>
                     </div>
 
+                    <!-- CENTRAL DE MAPEAMENTO MASTER DE ATIVOS (ERP Ativos.xlsx <-> ÁRVORE ob_linhas) -->
+                    <div class="glass-card p-5 rounded-3xl space-y-4 border-2 border-sky-200/90 bg-gradient-to-r from-sky-50/70 via-white to-indigo-50/40">
+                        <div class="flex flex-col xl:flex-row xl:items-center justify-between gap-3">
+                            <div class="space-y-1">
+                                <div class="flex flex-wrap items-center gap-2">
+                                    <span class="px-2.5 py-0.5 rounded-full bg-sky-700 text-white text-[10px] font-extrabold uppercase tracking-wider">🗺️ Central Master De-Para • Fim do Cruzamento Repetitivo</span>
+                                    <span id="masterMapaCloudBadge" class="px-2.5 py-0.5 rounded-full bg-emerald-100 text-emerald-900 border border-emerald-300 text-[10px] font-extrabold">0 mapeamentos salvos na nuvem</span>
+                                </div>
+                                <h4 class="text-sm sm:text-base font-extrabold text-slate-900">Mapeamento Definitivo de Ativos ERP (`Ativos.xlsx`) ↔ Árvore `ob_linhas`</h4>
+                                <p class="text-[11px] font-semibold text-slate-600 leading-relaxed">Importe a planilha completa de ativos do ERP uma única vez, classifique cada item em 1 dos 4 destinos definitivos (<strong>✅ Árvore `Linha › Equipamento`</strong>, <strong>🔧 Ferramental/Molde</strong>, <strong>🏢 Não-Ativo [fora dos estudos]</strong> ou <strong>🔁 Compartilhado/Genérico [1 só, sem ir à árvore]</strong>) e salve na nuvem. Nos próximos lotes, o saneamento cruza tudo automaticamente!</p>
+                            </div>
+                            <div class="flex flex-wrap items-center gap-2 shrink-0">
+                                <input type="file" id="inputImportarAtivosErpMaster" accept=".xlsx,.xls,.csv" onchange="importarPlanilhaAtivosErpMaster(event)" class="hidden">
+                                <button type="button" onclick="document.getElementById('inputImportarAtivosErpMaster').click()" class="btn-touch bg-sky-600 hover:bg-sky-700 text-white text-xs py-2.5 px-4 shadow-sm">
+                                    📥 Importar Ativos.xlsx (ERP)
+                                </button>
+                                <button type="button" onclick="carregarMapaSalvoNaCentralMaster()" class="btn-touch bg-white hover:bg-slate-50 border border-slate-300 text-slate-800 text-xs py-2 px-3">
+                                    👁️ Ver Mapa Salvo
+                                </button>
+                            </div>
+                        </div>
+
+                        <!-- BARRA DE KPIs E AÇÕES EM MASSA DO MAPA MASTER -->
+                        <div id="masterMapaResumoKpis" class="flex flex-wrap items-center gap-1.5"></div>
+
+                        <div id="masterMapaWorkspace" hidden class="hidden space-y-3 pt-2 border-t border-sky-200/70">
+                            <div class="flex flex-wrap items-center justify-between gap-2 p-2.5 rounded-2xl bg-slate-50 border border-slate-200">
+                                <div class="flex flex-wrap items-center gap-1.5">
+                                    <button type="button" onclick="definirFiltroMapaMaster('pendentes')" id="mMapFil_pendentes" class="px-2.5 py-1 rounded-xl text-[10px] font-extrabold bg-rose-100 text-rose-900 border border-rose-200">⚠️ Pendentes (<span id="mMapCntPend">0</span>)</button>
+                                    <button type="button" onclick="definirFiltroMapaMaster('arvore')" id="mMapFil_arvore" class="px-2.5 py-1 rounded-xl text-[10px] font-extrabold bg-white text-emerald-900 border border-emerald-200">✅ Árvore (<span id="mMapCntArv">0</span>)</button>
+                                    <button type="button" onclick="definirFiltroMapaMaster('ferramental')" id="mMapFil_ferramental" class="px-2.5 py-1 rounded-xl text-[10px] font-extrabold bg-white text-violet-900 border border-violet-200">🔧 Ferramentais (<span id="mMapCntFerr">0</span>)</button>
+                                    <button type="button" onclick="definirFiltroMapaMaster('nao_ativo')" id="mMapFil_nao_ativo" class="px-2.5 py-1 rounded-xl text-[10px] font-extrabold bg-white text-slate-700 border border-slate-300">🏢 Não-Ativos (<span id="mMapCntNaoAtv">0</span>)</button>
+                                    <button type="button" onclick="definirFiltroMapaMaster('compartilhado')" id="mMapFil_compartilhado" class="px-2.5 py-1 rounded-xl text-[10px] font-extrabold bg-white text-amber-900 border border-amber-300">🔁 Compartilhados (<span id="mMapCntComp">0</span>)</button>
+                                    <button type="button" onclick="definirFiltroMapaMaster('todos')" id="mMapFil_todos" class="px-2.5 py-1 rounded-xl text-[10px] font-extrabold bg-white text-slate-700 border border-slate-200">📋 Todos (<span id="mMapCntTodos">0</span>)</button>
+                                </div>
+                                <input type="text" id="masterMapaBuscaInput" oninput="renderCentralMapaMaster()" placeholder="Buscar ativo ERP, família, destino..." class="input-clean py-1 px-2.5 text-xs font-bold w-56">
+                            </div>
+
+                            <!-- AÇÕES EM MASSA (1 CLIQUE) -->
+                            <div class="flex flex-wrap items-center gap-2 text-[11px]">
+                                <button type="button" onclick="aprovarTodosAutomaticosMapaMaster()" class="px-3 py-1.5 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white font-extrabold shadow-xs">
+                                    ⚡ Aprovar Todos os Automáticos &amp; Salvar na Nuvem
+                                </button>
+                                <button type="button" id="btnAutoMapearGeminiMaster" onclick="autoMapearPendentesGeminiMapaMaster()" class="px-3 py-1.5 rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white font-extrabold shadow-xs">
+                                    🧠 Sugerir Pendentes c/ Gemini IA
+                                </button>
+                                <button type="button" onclick="marcarTodosPendentesComoCompartilhadoMaster()" class="px-3 py-1.5 rounded-xl bg-amber-100 hover:bg-amber-200 text-amber-950 border border-amber-300 font-extrabold" title="Converte os pendentes restantes em 1 agrupador compartilhado cada sem enviar para Gestão de Ativos">
+                                    🔁 Agrupar Pendentes Filtrados como Compartilhado
+                                </button>
+                                <button type="button" onclick="salvarTodoMapaMasterNaNuvem()" class="ml-auto px-3.5 py-1.5 rounded-xl bg-slate-900 hover:bg-slate-800 text-white font-extrabold">
+                                    💾 Salvar Mapa Master na Nuvem
+                                </button>
+                            </div>
+
+                            <div class="rounded-2xl border border-slate-200 overflow-hidden bg-white">
+                                <div class="max-h-[46vh] overflow-y-auto overflow-x-auto">
+                                    <table class="w-full text-left border-collapse">
+                                        <thead class="bg-slate-50 text-[10px] font-extrabold uppercase text-slate-500 border-b border-slate-200 sticky top-0 z-10">
+                                            <tr>
+                                                <th class="py-2 px-3">Ativo no ERP (`Descrição` / Família / CR)</th>
+                                                <th class="py-2 px-2 text-center">Classificação</th>
+                                                <th class="py-2 px-2">Destino Oficial / Agrupador</th>
+                                                <th class="py-2 px-2 text-right">Definir em 1 Clique</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody id="masterMapaTabelaBody" class="text-xs"></tbody>
+                                    </table>
+                                </div>
+                            </div>
+                            <div id="masterMapaRodapeTxt" class="text-[11px] font-bold text-slate-600"></div>
+                        </div>
+                    </div>
+
                     <!-- GESTÃO MASTER EM LOTE DE ORDENS AUDITADAS -->
                     <div class="glass-card p-5 rounded-3xl space-y-3">
                         <div class="flex flex-wrap items-center justify-between gap-2">
@@ -1772,21 +1845,24 @@
                 <div class="space-y-3">
                     <div class="flex flex-wrap items-center justify-between gap-2">
                         <div>
-                            <div class="text-[11px] font-extrabold uppercase tracking-wider text-slate-700">2. Conciliação De-Para de Ativos (ERP ↔ Gestão de Ativos ob_linhas)</div>
-                            <p class="text-[11px] font-semibold text-slate-500">O nome oficial do Gestão de Ativos aparecerá em destaque nos cards, MTBF e Caçador AQF; o nome ERP fica guardado em legenda.</p>
+                            <div class="text-[11px] font-extrabold uppercase tracking-wider text-slate-700">2. Conciliação Definitiva de Ativos (ERP ↔ Árvore `ob_linhas` + 3 Categorias Especiais)</div>
+                            <p class="text-[11px] font-semibold text-slate-500"><strong>Ferramentais</strong>, <strong>Não-Ativos (Predial/Infra)</strong> e <strong>Compartilhados/Genéricos</strong> são auto-classificados sem ir à Gestão de Ativos — Não-Ativos e Ferramentais ficam fora dos Estudos AQF.</p>
                         </div>
                         <div class="flex flex-wrap items-center gap-2">
                             <select id="preVooFiltroAtivos" onchange="atualizarFiltroPreVooAtivos(this.value)" class="input-clean py-1.5 text-xs font-extrabold w-auto">
-                                <option value="pendentes">Exibir Pendentes &amp; Sugestões</option>
+                                <option value="pendentes">Exibir Somente Pendentes &amp; Sugestões</option>
                                 <option value="todos">Exibir Todos os Ativos do Lote</option>
                             </select>
+                            <button type="button" onclick="aprovarTodosAutomaticosPreVoo()" class="btn-touch bg-sky-600 hover:bg-sky-700 text-white text-xs py-1.5 px-3" title="Salva definitivamente no Mapa Master todos os Auto-Exatos, Ferramentais, Não-Ativos e Compartilhados detectados">
+                                ⚡ Salvar Automáticos
+                            </button>
                             <button type="button" id="btnPreVooCadastrarTodos" hidden onclick="cadastrarTodosPendentesPreVoo()" class="hidden btn-touch bg-emerald-600 hover:bg-emerald-700 text-white text-xs py-1.5 px-3">
                                 <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/></svg>
                                 <span id="lblBtnCadastrarTodosPreVoo">Cadastrar Faltantes em ob_linhas</span>
                             </button>
                             <button type="button" id="btnPreVooGeminiAtivos" onclick="autoMapearAtivosComGeminiPreVoo()" class="btn-touch bg-indigo-600 hover:bg-indigo-700 text-white text-xs py-1.5 px-3">
                                 <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"/></svg>
-                                <span>Auto-Mapear Ambíguos c/ Gemini IA</span>
+                                <span>Auto-Mapear c/ Gemini IA</span>
                             </button>
                         </div>
                     </div>
@@ -2664,6 +2740,7 @@ service cloud.firestore {
         function extrairCatalogoAtivosOficiais(linhasOverride = null) {
             const docs = Array.isArray(linhasOverride) ? linhasOverride : rawLinhasDocs;
             const mapa = new Map();
+            const linhasVistas = new Map();
             (docs || []).forEach(docLinha => {
                 if (!docLinha || typeof docLinha !== "object") return;
                 const st = normKey(docLinha.status_ativo || docLinha.status || "");
@@ -2671,6 +2748,7 @@ service cloud.firestore {
                 const area = String(docLinha.area || docLinha.setor || "Produção").trim();
                 const maq = String(docLinha.maquina || docLinha.linha || "").trim();
                 const eq = String(docLinha.equipamento || "").trim();
+                const tag = String(docLinha.tag || docLinha.prefixo || "").trim();
                 if (!maq && !eq) return;
                 const critRaw = String(docLinha.criticidade_linha || docLinha.criticidade || "A").toUpperCase().trim();
                 const crit = ["A", "B", "C"].includes(critRaw) ? critRaw : "A";
@@ -2681,8 +2759,32 @@ service cloud.firestore {
                         area,
                         maquina: maq || eq,
                         equipamento: eq || maq,
+                        tag,
+                        nivel_linha: false,
                         criticidade_linha: crit,
                         label: formatarNomeAtivoOficial(maq, eq)
+                    });
+                }
+                if (maq) {
+                    const lmKey = normKey(maq);
+                    if (!linhasVistas.has(lmKey)) {
+                        linhasVistas.set(lmKey, { area, maquina: maq, criticidade_linha: crit });
+                    }
+                }
+            });
+            // Nível 1 (Linha Geral): permite cruzar OMs que citam apenas a Linha sem equipamento específico
+            linhasVistas.forEach((info, lmKey) => {
+                const kLinha = `${normKey(info.area)}||${lmKey}||__linha_geral__`;
+                if (!mapa.has(kLinha)) {
+                    mapa.set(kLinha, {
+                        key: kLinha,
+                        area: info.area,
+                        maquina: info.maquina,
+                        equipamento: "(Linha Geral)",
+                        tag: "",
+                        nivel_linha: true,
+                        criticidade_linha: info.criticidade_linha,
+                        label: `${info.maquina} › (Linha Geral)`
                     });
                 }
             });
@@ -2691,12 +2793,17 @@ service cloud.firestore {
         window.extrairCatalogoAtivosOficiais = extrairCatalogoAtivosOficiais;
 
         function normalizarTextoAtivoFlex(str) {
-            return normKey(str)
+            return normKey(String(str || "").replace(/[\r\n]+/g, " "))
                 .replace(/\bboaotopack\b/g, "boatopack")
+                .replace(/\bvolpak\b/g, "volpack")
+                .replace(/\btetra\s+pack\b/g, "tetrapack")
+                .replace(/\bfrymakoruma\b/g, "fryma koruma")
                 .replace(/\bdmon\b/g, "dmom")
                 .replace(/\bmultipets\b/g, "multipet")
                 .replace(/\bbullers\b/g, "buller")
-                .replace(/\b0+(\d+)\b/g, "$1");
+                .replace(/\bconservas\b/g, "conserva")
+                .replace(/\bcozinhas\b/g, "cozinha")
+                .replace(/\b0+(\d{1,2})\b/g, "$1");
         }
 
         function contemFrasePalavra(textoNorm, fraseNorm) {
@@ -2707,115 +2814,236 @@ service cloud.firestore {
 
         const TERMOS_EQ_GENERICOS = new Set([
             "envasadora", "tampadora", "seladora", "rotuladora", "posicionador",
-            "encaixotadora", "bomba", "esteira", "tanque", "painel", "linha", "embaladora"
+            "encaixotadora", "bomba", "esteira", "tanque", "painel", "linha", "embaladora",
+            "impressora", "transportador", "tacho", "trocador", "resfriador", "agitador"
         ]);
 
-        function cruzarAtivoComArvore(ativoErp, catalogoOverride = null) {
-            const bruto = String(ativoErp || "").trim();
-            const keyErp = normKey(bruto);
-            const partes = bruto.split(/[-–—]/).map(s => s.trim()).filter(Boolean);
-            const maqGuess = partes[0] || bruto || "LINHA GERAL";
-            const eqGuess = partes[1] || maqGuess;
-            const nb = normalizarTextoAtivoFlex(bruto);
+        const REGEX_FERRAMENTAL_ERP = /(?:\bferramental\b|\bmoldes?\b|\benv\d+[gm]l?\s+\d|\bsop\d+[gm]l?\s+\d)/i;
+        const REGEX_NAO_ATIVO_ERP = /(?:\bpredial\b|\bbanheir[oa]\b|\bvestiari[oa]\b|\brefeitori[oa]\b|\bportaria\b|\btorniquetes?\b|\bsala\s+(?:de|administrativa|concentradores|reprocesos|reprocesso|baterias|treinamento|convivencia|pesagem|unidades)\b|\bsetor\s+[abc]\b|\bsesmt\b|\bsodexo\b|\bestacionamento\b|\bpredio\b|\bpiso\b|\bgalpao\b|\bbarracao\b|\balmoxarifado\b|\blaboratorio\s+qualidade\b|^r\s+d\b|\bbarreira\s+sanitaria\b|\blogistica\s+expedicao\b|\blogistica\s+(?:rampa|conjunto)\b|\brecebimento\s+(?:rampa|conjunto)\b|\bexportacao\s+maquina\b|\bpiscina\b|\bfuradeira\b|\btorno\b|\bmanutencao\s+(?:predio|prensa|rosqueadora|aquecedor)\b|\bmaq\s+de\s+lavar\s+b70\b|^(?:des)?envase\s+moagem$|^moagem$)/i;
+        const REGEX_COMPARTILHADO_ERP = /^(?:envasadoras|cozinhas|multipets|fabril|boatopack\s+1\s+2|boatopack\s+3\s+4|linear\s+1\s+2|multipet\s+2\s+5|linhas\s+de\s+vapor|bomba\s+movel)\b|(?:boatopack\s+tirelli|serac\s+1\s+3)/i;
 
-            // 1. Dicionário De-Para aprendido (Exato)
-            const aprendido = deParaAtivosMap[keyErp] || deParaAtivosMap[bruto];
-            if (aprendido && (aprendido.maquina || aprendido.label)) {
+        function formatarAgrupadorCompartilhado(bruto) {
+            const limpo = String(bruto || "").replace(/[\r\n]+/g, " ").replace(/\s+/g, " ").trim();
+            return `COMPARTILHADOS / GENÉRICOS › ${limpo}`;
+        }
+
+        function classificarAutomaticoEspecialErp(ativoErp, metaErp = null) {
+            const bruto = String(ativoErp || "").replace(/[\r\n]+/g, " ").replace(/\s+/g, " ").trim();
+            if (!bruto) return null;
+            const nb = normKey(bruto);
+            const famN = normKey(metaErp?.familia || "");
+            const crN = normKey(metaErp?.cr || "");
+            const itemAtivoN = normKey(metaErp?.itemAtivo || "");
+
+            // 1. FERRAMENTAL / MOLDE (categoria própria, fora da árvore ob_linhas e fora dos estudos AQF)
+            if (REGEX_FERRAMENTAL_ERP.test(nb) || famN === "ferramental") {
+                const nomeCurto = bruto.replace(/^FERRAMENTAL\s*[-–—]\s*/i, "").trim() || bruto;
                 return {
-                    setor: aprendido.area || "Produção",
-                    maquina: aprendido.maquina || maqGuess,
-                    equipamento: aprendido.equipamento || eqGuess,
-                    criticidade_linha: ["A", "B", "C"].includes(String(aprendido.criticidade_linha).toUpperCase()) ? String(aprendido.criticidade_linha).toUpperCase() : "A",
-                    ativo_oficial: aprendido.label || formatarNomeAtivoOficial(aprendido.maquina, aprendido.equipamento),
-                    vinculado_ob_linhas: true,
-                    status_vinculo: "DEPARA",
+                    tipo_ativo: "FERRAMENTAL",
+                    status_vinculo: "FERRAMENTAL",
+                    setor: "Ferramentais & Moldes",
+                    maquina: "FERRAMENTAL / MOLDE",
+                    equipamento: nomeCurto,
+                    criticidade_linha: "C",
+                    ativo_oficial: `FERRAMENTAL / MOLDE › ${nomeCurto}`,
+                    vinculado_ob_linhas: false,
+                    fora_estudos_aqf: true,
+                    motivo_auto: "Detectado automaticamente como Ferramental/Molde (fora da árvore e fora de Estudos AQF).",
                     candidatos: []
                 };
             }
 
-            // 2. Pontuação inteligente contra catálogo oficial ob_linhas
+            // 2. NÃO-ATIVO (Predial / Infra / Apoio / Logística / RH / Inativos — fora da árvore e fora dos estudos AQF)
+            const ehInativoErp = itemAtivoN === "nao" || itemAtivoN === "n";
+            const ehCrApoio = crN === "rh" || crN === "logistica operacional" || crN === "logistica transportes" || crN === "manutencao";
+            const ehFamPredial = famN === "predial" || famN === "portaria" || famN === "bombeiro" || famN === "torno" || famN === "furadeira" || famN === "piscina";
+            if (ehInativoErp || ehCrApoio || ehFamPredial || REGEX_NAO_ATIVO_ERP.test(nb)) {
+                const motivo = ehInativoErp
+                    ? "Marcado como Inativo no ERP (Item Ativo = Não)."
+                    : "Detectado automaticamente como Não-Ativo (Predial / Infraestrutura / Apoio — fora de Estudos AQF).";
+                return {
+                    tipo_ativo: "NAO_ATIVO",
+                    status_vinculo: "NAO_ATIVO",
+                    setor: "Predial & Apoio (Não-Ativo)",
+                    maquina: "NÃO-ATIVO / PREDIAL",
+                    equipamento: bruto,
+                    criticidade_linha: "C",
+                    ativo_oficial: `NÃO-ATIVO › ${bruto}`,
+                    vinculado_ob_linhas: false,
+                    fora_estudos_aqf: true,
+                    motivo_auto: motivo,
+                    candidatos: []
+                };
+            }
+
+            // 3. COMPARTILHADO / GENÉRICO DE LINHA (1 agrupador único, NÃO vai para Gestão de Ativos ob_linhas)
+            const ehRepetidoGenerico = Boolean(
+                metaErp && Number(metaErp.qtdRepeticoes || 0) >= 2 &&
+                /\b(?:impressora|bomba|tanque|seladora|painel|esteira|transportador|torre|transformador|tacho|trocador|chiller|reservatorio|peneira)\b/.test(nb)
+            );
+            if (REGEX_COMPARTILHADO_ERP.test(nb) || ehRepetidoGenerico) {
+                return {
+                    tipo_ativo: "COMPARTILHADO",
+                    status_vinculo: "COMPARTILHADO",
+                    setor: "Compartilhados / Genéricos",
+                    maquina: "COMPARTILHADOS / GENÉRICOS",
+                    equipamento: bruto,
+                    criticidade_linha: "B",
+                    ativo_oficial: formatarAgrupadorCompartilhado(bruto),
+                    vinculado_ob_linhas: false,
+                    fora_estudos_aqf: false,
+                    motivo_auto: ehRepetidoGenerico
+                        ? `Genérico repetido ${metaErp.qtdRepeticoes}× no ERP — agrupado em 1 registro compartilhado (fora de ob_linhas).`
+                        : "Ativo genérico/compartilhado entre linhas — agrupado em 1 registro compartilhado (fora de ob_linhas).",
+                    candidatos: []
+                };
+            }
+
+            return null;
+        }
+
+        function cruzarAtivoComArvore(ativoErp, catalogoOverride = null, metaErp = null) {
+            const bruto = String(ativoErp || "").replace(/[\r\n]+/g, " ").replace(/\s+/g, " ").trim();
+            const keyErp = normKey(bruto);
+            const partes = bruto.split(/[-–—]/).map(s => s.trim()).filter(Boolean);
+            const maqGuess = partes[0] || bruto || "LINHA GERAL";
+            const eqGuess = partes.slice(1).join(" - ").trim() || maqGuess;
+            const nb = normalizarTextoAtivoFlex(bruto);
+
+            // 1. Dicionário De-Para Master salvo pelo usuário (Prioridade Absoluta — respeita os 4 destinos)
+            const aprendido = deParaAtivosMap[keyErp] || deParaAtivosMap[bruto] || deParaAtivosMap[String(ativoErp || "").trim()];
+            if (aprendido && (aprendido.maquina || aprendido.label || aprendido.tipo_ativo)) {
+                const tipoAp = String(aprendido.tipo_ativo || "ATIVO_ARVORE").toUpperCase();
+                const isForaAqf = tipoAp === "NAO_ATIVO" || tipoAp === "FERRAMENTAL" || Boolean(aprendido.fora_estudos_aqf);
+                const isArvore = tipoAp === "ATIVO_ARVORE";
+                const stMap = tipoAp === "FERRAMENTAL" ? "FERRAMENTAL"
+                    : (tipoAp === "NAO_ATIVO" ? "NAO_ATIVO"
+                        : (tipoAp === "COMPARTILHADO" ? "COMPARTILHADO" : "DEPARA"));
+                return {
+                    tipo_ativo: tipoAp,
+                    setor: aprendido.area || (tipoAp === "NAO_ATIVO" ? "Predial & Apoio (Não-Ativo)" : (tipoAp === "FERRAMENTAL" ? "Ferramentais & Moldes" : "Produção")),
+                    maquina: aprendido.maquina || maqGuess,
+                    equipamento: aprendido.equipamento || eqGuess,
+                    criticidade_linha: ["A", "B", "C"].includes(String(aprendido.criticidade_linha).toUpperCase()) ? String(aprendido.criticidade_linha).toUpperCase() : (isForaAqf ? "C" : "A"),
+                    ativo_oficial: aprendido.label || formatarNomeAtivoOficial(aprendido.maquina, aprendido.equipamento),
+                    vinculado_ob_linhas: isArvore,
+                    fora_estudos_aqf: isForaAqf,
+                    status_vinculo: stMap,
+                    salvo_depara: true,
+                    candidatos: []
+                };
+            }
+
+            // 2. Auto-classificação determinística das 3 categorias especiais (Ferramental / Não-Ativo / Compartilhado)
+            const especial = classificarAutomaticoEspecialErp(bruto, metaErp);
+            if (especial) return especial;
+
+            // 3. Pontuação inteligente em 2 níveis (Linha › Equipamento + Linha Geral) contra ob_linhas
             const catalogo = Array.isArray(catalogoOverride) ? catalogoOverride : extrairCatalogoAtivosOficiais();
-            const nbExp = nb.replace(/\b([a-z][a-z0-9]*)\s+(\d+)\s+(\d+)\b/g, "$& $1 $2 $1 $3");
+            // Também suporta formatos invertidos ("RESFRIADOR DE PLACAS 4 - TETRAPACK 2", "EMPURRADOR - VOLPACK", "SAÍDA RAIO X (VOLPACK)")
+            const nbLimpoPar = nb.replace(/[()]/g, " ").replace(/\s+/g, " ").trim();
+            const nbExp = nbLimpoPar.replace(/\b([a-z][a-z0-9]*)\s+(\d+)\s+(\d+)\b/g, "$& $1 $2 $1 $3");
+            const famNorm = metaErp?.familia ? normalizarTextoAtivoFlex(metaErp.familia) : "";
+            const nbComFam = famNorm && !nbExp.includes(famNorm) ? `${nbExp} ${famNorm}`.trim() : nbExp;
+            const prefNorm = metaErp?.prefixo ? normKey(metaErp.prefixo) : "";
             const temBarraOuDual = /\//.test(bruto);
+            const soLinhaSemHifen = partes.length === 1;
             const pontuados = [];
 
             for (const c of catalogo) {
                 const maqN = normalizarTextoAtivoFlex(c.maquina);
-                const eqN = normalizarTextoAtivoFlex(c.equipamento);
+                const eqN = c.nivel_linha ? "" : normalizarTextoAtivoFlex(c.equipamento);
                 const areaN = normalizarTextoAtivoFlex(c.area);
+                const tagN = c.tag ? normKey(c.tag) : "";
+
+                // Match exato por TAG/Prefixo
+                if (prefNorm && tagN && prefNorm === tagN) {
+                    pontuados.push({ ...c, score: 105 });
+                    continue;
+                }
 
                 const numsMaq = maqN.split(" ").filter(t => /^\d+$/.test(t));
-                const numeroDivergente = numsMaq.length > 0 && !numsMaq.every(n => contemFrasePalavra(nbExp, n));
+                const numeroDivergente = numsMaq.length > 0 && !numsMaq.every(n => contemFrasePalavra(nbComFam, n));
 
                 let ptsMaq = 0;
                 if (maqN && !numeroDivergente) {
-                    if (contemFrasePalavra(nb, maqN)) ptsMaq = 65;
-                    else if (contemFrasePalavra(nbExp, maqN)) ptsMaq = 50;
+                    if (contemFrasePalavra(nbLimpoPar, maqN)) ptsMaq = 68;
+                    else if (contemFrasePalavra(nbComFam, maqN)) ptsMaq = 58;
                     else {
                         const toksM = maqN.split(" ").filter(t => t.length >= 2 || /^\d+$/.test(t));
-                        const hitsM = toksM.filter(t => contemFrasePalavra(nbExp, t)).length;
-                        if (toksM.length >= 2 && hitsM === toksM.length) ptsMaq = 45;
+                        const hitsM = toksM.filter(t => contemFrasePalavra(nbComFam, t)).length;
+                        if (toksM.length >= 2 && hitsM === toksM.length) ptsMaq = 50;
+                        else if (toksM.length === 1 && toksM[0].length >= 4 && hitsM === 1) ptsMaq = 55;
                     }
                 }
 
                 let ptsEq = 0;
-                if (eqN) {
-                    if (contemFrasePalavra(nb, eqN)) ptsEq = 30;
+                if (c.nivel_linha) {
+                    // Entrada Nível Linha ganha bônus forte se o ERP cita só a Linha (ex: "COZINHA 3") ou como fallback seguro da Linha
+                    if (ptsMaq >= 55) {
+                        ptsEq = soLinhaSemHifen || normKey(eqGuess) === "linha" ? 28 : 16;
+                    }
+                } else if (eqN) {
+                    if (contemFrasePalavra(nbLimpoPar, eqN)) ptsEq = 32;
                     else {
                         const toksE = eqN.split(" ").filter(t => t.length >= 3);
-                        const hitsE = toksE.filter(t => contemFrasePalavra(nb, t)).length;
-                        if (toksE.length && hitsE === toksE.length) ptsEq = 22;
-                        else if (toksE.length && hitsE > 0) ptsEq = 10;
+                        const hitsE = toksE.filter(t => contemFrasePalavra(nbLimpoPar, t)).length;
+                        if (toksE.length && hitsE === toksE.length) ptsEq = 24;
+                        else if (toksE.length && hitsE > 0) ptsEq = 12;
                     }
                 }
 
                 if (ptsMaq === 0) {
                     const primeiroTokEq = eqN.split(" ")[0] || "";
-                    if (TERMOS_EQ_GENERICOS.has(eqN) || TERMOS_EQ_GENERICOS.has(primeiroTokEq) || ptsEq < 30) {
+                    if (!eqN || TERMOS_EQ_GENERICOS.has(eqN) || TERMOS_EQ_GENERICOS.has(primeiroTokEq) || ptsEq < 32) {
                         continue;
                     }
                 }
 
-                const bonusArea = areaN && contemFrasePalavra(nb, areaN) ? 6 : 0;
+                const bonusArea = areaN && contemFrasePalavra(nbComFam, areaN) ? 5 : 0;
                 const score = ptsMaq + ptsEq + bonusArea;
-                if (score >= 45) {
+                if (score >= 48) {
                     pontuados.push({ ...c, score });
                 }
             }
 
-            pontuados.sort((a, b) => b.score - a.score || a.label.localeCompare(b.label, "pt-BR"));
+            pontuados.sort((a, b) => b.score - a.score || (a.nivel_linha ? 1 : 0) - (b.nivel_linha ? 1 : 0) || a.label.localeCompare(b.label, "pt-BR"));
             const candidatosTop = pontuados.slice(0, 4);
             if (pontuados.length) {
                 const best = pontuados[0];
                 const second = pontuados[1];
-                const empateProximo = Boolean(second && (best.score - second.score) <= 12 && normKey(best.maquina) !== normKey(second.maquina));
-                const ehAutoExato = best.score >= 85 && !empateProximo && !(temBarraOuDual && second && second.score >= 50);
+                const empateProximo = Boolean(second && (best.score - second.score) <= 10 && normKey(best.maquina) !== normKey(second.maquina));
+                const ehAutoExato = (best.score >= 82 && !empateProximo && !(temBarraOuDual && second && second.score >= 55));
                 return {
+                    tipo_ativo: "ATIVO_ARVORE",
                     setor: best.area || "Produção",
                     maquina: best.maquina,
                     equipamento: best.equipamento,
                     criticidade_linha: best.criticidade_linha,
                     ativo_oficial: best.label,
                     vinculado_ob_linhas: true,
+                    fora_estudos_aqf: false,
                     status_vinculo: ehAutoExato ? "AUTO_EXATO" : "SUGESTAO",
                     candidatos: candidatosTop
                 };
             }
 
-            // 3. Fallback Flexível (Mantém ERP quando ativo não consta ou genérico/setor sem vínculo)
+            // 4. Fallback Flexível (Ativo industrial ainda não mapeado na árvore)
             const critDefault = /(?:boatopack|serac|multipet|fryma|systempack|cozinha|caldeira)/.test(nb) ? "A" : "B";
             const setorDefault = /(?:boatopack|systempack|volpack|solupack|flowpack)/.test(nb) ? "Envase Sachet"
-                : /(?:serac|posimec|multipet|dmon|dmom|linear)/.test(nb) ? "Envase Frascos"
-                : /(?:cozinha|fryma|moinho|moagem|buller|tanque)/.test(nb) ? "Cozinha & Moagem"
-                : /(?:conserva|lata|cft|tetra|dende)/.test(nb) ? "Conservas & Latas"
+                : /(?:serac|posimec|multipet|dmon|dmom|linear|tirelli)/.test(nb) ? "Envase Frascos"
+                : /(?:cozinha|fryma|moinho|moagem|buller|tanque|concentrador|desenvase|refoga)/.test(nb) ? "Cozinha & Moagem"
+                : /(?:conserva|lata|cft|tetra|dende|asseptico|casquinha)/.test(nb) ? "Conservas & Latas"
                 : "Utilidades & Predial";
             return {
+                tipo_ativo: "ATIVO_ARVORE",
                 setor: setorDefault,
                 maquina: maqGuess,
                 equipamento: eqGuess,
                 criticidade_linha: critDefault,
                 ativo_oficial: bruto || maqGuess,
                 vinculado_ob_linhas: false,
+                fora_estudos_aqf: false,
                 status_vinculo: "PENDENTE",
                 candidatos: []
             };
@@ -2995,6 +3223,14 @@ service cloud.firestore {
             { om: "31995", data: "2026-09-23 08:00", ativo: "SERAC 3 - POSICIONADOR POSIMEC", equipe: "MECANICA", tempo_min: 120, problema: "Manutenção preventiva mensal PM-014", servico: "Realizada preventiva mensal conforme plano preventivo com lubrificação e reaperto geral." }
         ];
 
+        function isOmForaEstudosAqf(o) {
+            if (!o) return true;
+            if (o.fora_estudos_aqf || o.tipo_ativo === "NAO_ATIVO" || o.tipo_ativo === "FERRAMENTAL") return true;
+            const nome = String(o.ativo || "");
+            return /^(?:NÃO-ATIVO|NAO-ATIVO|FERRAMENTAL \/ MOLDE)\s*›/i.test(nome);
+        }
+        window.isOmForaEstudosAqf = isOmForaEstudosAqf;
+
         // ================= EXECUÇÃO DOS 9 NÓS NO NAVEGADOR =================
         function construirItemAuditadoCompleto(omRaw, decisao) {
             const ativoErp = String(omRaw.ativo_erp || omRaw.ativo || "ATIVO GERAL").trim();
@@ -3032,6 +3268,8 @@ service cloud.firestore {
                 data: omRaw.data || "2026-09-01",
                 ativo: ativoPrincipal,
                 ativo_erp: ativoErp,
+                tipo_ativo: infoArvore.tipo_ativo || "ATIVO_ARVORE",
+                fora_estudos_aqf: Boolean(infoArvore.fora_estudos_aqf),
                 ativo_vinculo_status: infoArvore.status_vinculo || "PENDENTE",
                 setor: infoArvore.setor,
                 maquina: infoArvore.maquina,
@@ -3058,27 +3296,37 @@ service cloud.firestore {
         }
 
         function reEnriquecerAtivosOmsAuditadas() {
-            if (!Array.isArray(omsAuditadas) || !omsAuditadas.length) return;
             const catalogo = extrairCatalogoAtivosOficiais();
-            omsAuditadas.forEach(o => {
+            const aplicarEnriquecimento = (o) => {
+                if (!o) return;
                 const ativoErp = String(o.ativo_erp || o.ativo || "ATIVO GERAL").trim();
                 const info = cruzarAtivoComArvore(ativoErp, catalogo);
                 o.ativo_erp = ativoErp;
                 o.ativo = info.ativo_oficial || ativoErp;
+                o.tipo_ativo = info.tipo_ativo || "ATIVO_ARVORE";
+                o.fora_estudos_aqf = Boolean(info.fora_estudos_aqf);
                 o.ativo_vinculo_status = info.status_vinculo || "PENDENTE";
                 o.setor = info.setor;
                 o.maquina = info.maquina;
                 o.equipamento = info.equipamento;
                 o.criticidade_linha = info.criticidade_linha;
                 o.vinculado_ob_linhas = info.vinculado_ob_linhas;
-            });
-            if (Array.isArray(neuralOrdensLive) && neuralOrdensLive.length) {
+            };
+            if (Array.isArray(omsAuditadas) && omsAuditadas.length) {
+                omsAuditadas.forEach(aplicarEnriquecimento);
+            }
+            if (bancoHistoricoOmsMap && bancoHistoricoOmsMap.size) {
+                bancoHistoricoOmsMap.forEach(aplicarEnriquecimento);
+            }
+            if (Array.isArray(neuralOrdensLive) && neuralOrdensLive.length && Array.isArray(omsAuditadas)) {
                 const mapByOm = new Map(omsAuditadas.map(x => [String(x.om), x]));
                 neuralOrdensLive.forEach(lo => {
                     const ref = mapByOm.get(String(lo.om));
                     if (ref) {
                         lo.ativo = ref.ativo;
                         lo.ativo_erp = ref.ativo_erp;
+                        lo.tipo_ativo = ref.tipo_ativo;
+                        lo.fora_estudos_aqf = ref.fora_estudos_aqf;
                         lo.setor = ref.setor;
                         lo.criticidade_linha = ref.criticidade_linha;
                     }
@@ -3138,14 +3386,24 @@ service cloud.firestore {
             divergenciasSupervisores = divs;
 
             // Nó 7: Confiabilidade, MTBF/MTTR, Quebra Evitável & Obsolescência
+            // Não-Ativos (Predial/Infra/Apoio) e Ferramentais/Moldes ficam fora do ranking de máquinas e Estudos AQF
             const catCount = {};
             CATEGORIAS_OFICIAIS.concat(["REVISAR_MANUAL"]).forEach(c => { catCount[c] = 0; });
             const sevCount = { LEVE: 0, MODERADA: 0, GRAVE: 0 };
             const bcCount = {};
             const porAtivo = {};
+            let naoAtivosOms = 0;
+            let ferramentaisOms = 0;
+            let compartilhadosOms = 0;
 
             omsAuditadas.forEach(o => {
                 catCount[o.categoria] = (catCount[o.categoria] || 0) + 1;
+                if (o.tipo_ativo === "NAO_ATIVO") naoAtivosOms++;
+                else if (o.tipo_ativo === "FERRAMENTAL") ferramentaisOms++;
+                else if (o.tipo_ativo === "COMPARTILHADO") compartilhadosOms++;
+
+                if (isOmForaEstudosAqf(o)) return;
+
                 if (!porAtivo[o.ativo]) porAtivo[o.ativo] = [];
                 porAtivo[o.ativo].push(o);
                 if (o.categoria === "QUEBRA") {
@@ -3187,6 +3445,7 @@ service cloud.firestore {
                 return {
                     ativo,
                     ativo_erp: ref.ativo_erp || "",
+                    tipo_ativo: ref.tipo_ativo || "ATIVO_ARVORE",
                     setor: ref.setor,
                     maquina: ref.maquina,
                     equipamento: ref.equipamento,
@@ -3208,6 +3467,9 @@ service cloud.firestore {
             confiabilidadeData = {
                 total_oms: omsAuditadas.length,
                 total_quebras: sevCount.LEVE + sevCount.MODERADA + sevCount.GRAVE,
+                nao_ativos_oms: naoAtivosOms,
+                ferramentais_oms: ferramentaisOms,
+                compartilhados_oms: compartilhadosOms,
                 categorias: catCount,
                 severidades: sevCount,
                 matriz_bc: bcCount,
@@ -3308,6 +3570,8 @@ service cloud.firestore {
                 data: String(o.data || "").slice(0, 16),
                 ativo: String(o.ativo || "").slice(0, 140),
                 ativo_erp: String(o.ativo_erp || o.ativo || "").slice(0, 140),
+                tipo_ativo: String(o.tipo_ativo || "ATIVO_ARVORE").slice(0, 20),
+                fora_estudos_aqf: Boolean(o.fora_estudos_aqf),
                 setor: String(o.setor || "Produção").slice(0, 60),
                 maquina: String(o.maquina || "").slice(0, 80),
                 equipamento: String(o.equipamento || "").slice(0, 80),
@@ -7125,6 +7389,7 @@ OMs:\n${JSON.stringify(listaPrompt)}`;
 
         let preVooEstado = null;
         let preVooFiltroModo = "pendentes";
+        const STATUS_CONCILIADOS_PRE_VOO = new Set(["DEPARA", "AUTO_EXATO", "FERRAMENTAL", "NAO_ATIVO", "COMPARTILHADO"]);
 
         function analisarAtivosLotePreVoo(brutasList = []) {
             const contagem = new Map();
@@ -7138,11 +7403,15 @@ OMs:\n${JSON.stringify(listaPrompt)}`;
                 .sort((a, b) => b[1] - a[1])
                 .map(([ativoErp, qtdOms]) => {
                     const res = cruzarAtivoComArvore(ativoErp, catalogo);
-                    const selecionado = res.vinculado_ob_linhas ? res.ativo_oficial : "";
+                    const st = res.status_vinculo || "PENDENTE";
+                    const selecionado = (res.vinculado_ob_linhas || STATUS_CONCILIADOS_PRE_VOO.has(st)) ? (res.ativo_oficial || "") : "";
                     return {
                         ativoErp,
                         qtdOms,
-                        status: res.status_vinculo || "PENDENTE",
+                        tipo_ativo: res.tipo_ativo || "ATIVO_ARVORE",
+                        fora_estudos_aqf: Boolean(res.fora_estudos_aqf),
+                        salvo_depara: Boolean(res.salvo_depara),
+                        status: st,
                         sugestao: res.ativo_oficial || "",
                         setor: res.setor,
                         criticidade: res.criticidade_linha,
@@ -7281,18 +7550,25 @@ OMs:\n${JSON.stringify(listaPrompt)}`;
                     const res = cruzarAtivoComArvore(item.ativoErp, catalogo);
                     if (item.confirmadoNaoCadastrado && res.status_vinculo === "SUGESTAO") {
                         item.status = "PENDENTE";
+                        item.tipo_ativo = "ATIVO_ARVORE";
+                        item.fora_estudos_aqf = false;
+                        item.salvo_depara = false;
                         item.sugestao = item.ativoErp;
                         item.setor = res.setor;
                         item.criticidade = res.criticidade_linha;
                         item.candidatos = res.candidatos || [];
                         item.selecionado = "";
                     } else {
-                        item.status = res.status_vinculo || "PENDENTE";
+                        const st = res.status_vinculo || "PENDENTE";
+                        item.status = st;
+                        item.tipo_ativo = res.tipo_ativo || "ATIVO_ARVORE";
+                        item.fora_estudos_aqf = Boolean(res.fora_estudos_aqf);
+                        item.salvo_depara = Boolean(res.salvo_depara);
                         item.sugestao = res.ativo_oficial || "";
                         item.setor = res.setor;
                         item.criticidade = res.criticidade_linha;
                         item.candidatos = res.candidatos || [];
-                        item.selecionado = res.vinculado_ob_linhas ? res.ativo_oficial : "";
+                        item.selecionado = (res.vinculado_ob_linhas || STATUS_CONCILIADOS_PRE_VOO.has(st)) ? (res.ativo_oficial || "") : "";
                     }
                 }
                 if (!item.sugestaoCadastro) {
@@ -7302,19 +7578,26 @@ OMs:\n${JSON.stringify(listaPrompt)}`;
 
             const lista = preVooEstado.analiseAtivos;
             const totAtivos = lista.length;
-            const verdCnt = lista.filter(x => x.status === "DEPARA" || x.status === "AUTO_EXATO").length;
+            const arvCnt = lista.filter(x => x.status === "DEPARA" || x.status === "AUTO_EXATO").length;
+            const ferrCnt = lista.filter(x => x.status === "FERRAMENTAL").length;
+            const naoAtvCnt = lista.filter(x => x.status === "NAO_ATIVO").length;
+            const compCnt = lista.filter(x => x.status === "COMPARTILHADO").length;
             const sugCnt = lista.filter(x => x.status === "SUGESTAO").length;
             const pendCnt = lista.filter(x => x.status === "PENDENTE").length;
             const pendentesProcesso = lista.filter(x => x.status === "PENDENTE" && !x.sugestaoCadastro?.pareceGenerico);
-            const omsVinculadas = lista.filter(x => x.status !== "PENDENTE").reduce((s, x) => s + x.qtdOms, 0);
+            const omsConciliadas = lista.filter(x => STATUS_CONCILIADOS_PRE_VOO.has(x.status)).reduce((s, x) => s + x.qtdOms, 0);
 
             const kpiEl = document.getElementById("preVooAtivosKpis");
             if (kpiEl) {
                 kpiEl.innerHTML = [
-                    `<span class="px-2.5 py-1 rounded-full bg-emerald-100 text-emerald-900 text-[10px] font-extrabold">${verdCnt} Exato(s) / De-Para</span>`,
-                    `<span class="px-2.5 py-1 rounded-full bg-amber-100 text-amber-900 text-[10px] font-extrabold">${sugCnt} Sugestão / Barra (1/2)</span>`,
-                    `<span class="px-2.5 py-1 rounded-full bg-rose-100 text-rose-900 text-[10px] font-extrabold">${pendCnt} Não Cadastrado(s) / Sem Vínculo</span>`,
-                    `<span class="px-2.5 py-1 rounded-full bg-sky-100 text-sky-900 text-[10px] font-extrabold">${omsVinculadas}/${preVooEstado.diag.aprovadas} OMs mapeadas</span>`
+                    `<span class="px-2.5 py-1 rounded-full bg-emerald-100 text-emerald-900 text-[10px] font-extrabold">✅ ${arvCnt} Árvore ob_linhas</span>`,
+                    `<span class="px-2.5 py-1 rounded-full bg-violet-100 text-violet-900 text-[10px] font-extrabold">🔧 ${ferrCnt} Ferramental/Molde</span>`,
+                    `<span class="px-2.5 py-1 rounded-full bg-slate-200 text-slate-800 text-[10px] font-extrabold">🏢 ${naoAtvCnt} Não-Ativo (Fora AQF)</span>`,
+                    `<span class="px-2.5 py-1 rounded-full bg-amber-100 text-amber-950 text-[10px] font-extrabold">🔁 ${compCnt} Compartilhado</span>`,
+                    (sugCnt + pendCnt) > 0
+                        ? `<span class="px-2.5 py-1 rounded-full bg-rose-100 text-rose-900 text-[10px] font-extrabold">⚠️ ${sugCnt + pendCnt} Pendente(s) / Sugestão</span>`
+                        : `<span class="px-2.5 py-1 rounded-full bg-emerald-600 text-white text-[10px] font-extrabold">🎉 0 Pendências</span>`,
+                    `<span class="px-2.5 py-1 rounded-full bg-sky-100 text-sky-900 text-[10px] font-extrabold">${omsConciliadas}/${preVooEstado.diag.aprovadas} OMs conciliadas</span>`
                 ].join("");
             }
 
@@ -7333,13 +7616,16 @@ OMs:\n${JSON.stringify(listaPrompt)}`;
                 .filter(x => preVooFiltroModo === "todos" || x.status === "SUGESTAO" || x.status === "PENDENTE");
 
             if (!exibidos.length) {
-                tbody.innerHTML = `<tr><td colspan="4" class="py-6 text-center text-xs font-extrabold text-emerald-700">100% dos ${totAtivos} ativos deste lote já estão vinculados à árvore oficial ob_linhas!</td></tr>`;
+                tbody.innerHTML = `<tr><td colspan="4" class="py-6 text-center text-xs font-extrabold text-emerald-700">✅ 100% dos ${totAtivos} ativos deste lote estão conciliados (${arvCnt} Árvore • ${ferrCnt} Ferramentais • ${naoAtvCnt} Não-Ativos • ${compCnt} Compartilhados)!</td></tr>`;
             } else {
                 const stBadge = {
-                    DEPARA: '<span class="px-2 py-0.5 rounded-full bg-indigo-100 text-indigo-800 text-[10px] font-extrabold">De-Para Salvo</span>',
-                    AUTO_EXATO: '<span class="px-2 py-0.5 rounded-full bg-emerald-100 text-emerald-800 text-[10px] font-extrabold">Auto Exato</span>',
-                    SUGESTAO: '<span class="px-2 py-0.5 rounded-full bg-amber-100 text-amber-900 text-[10px] font-extrabold">Sugestão / Barra</span>',
-                    PENDENTE: '<span class="px-2 py-0.5 rounded-full bg-rose-100 text-rose-800 text-[10px] font-extrabold">Não Cadastrado</span>'
+                    DEPARA: '<span class="px-2 py-0.5 rounded-full bg-indigo-100 text-indigo-800 text-[10px] font-extrabold">✅ Árvore (Salvo)</span>',
+                    AUTO_EXATO: '<span class="px-2 py-0.5 rounded-full bg-emerald-100 text-emerald-800 text-[10px] font-extrabold">✅ Auto Árvore</span>',
+                    FERRAMENTAL: '<span class="px-2 py-0.5 rounded-full bg-violet-100 text-violet-900 text-[10px] font-extrabold">🔧 Ferramental</span>',
+                    NAO_ATIVO: '<span class="px-2 py-0.5 rounded-full bg-slate-200 text-slate-800 text-[10px] font-extrabold">🏢 Não-Ativo (Fora AQF)</span>',
+                    COMPARTILHADO: '<span class="px-2 py-0.5 rounded-full bg-amber-100 text-amber-950 text-[10px] font-extrabold">🔁 Compartilhado</span>',
+                    SUGESTAO: '<span class="px-2 py-0.5 rounded-full bg-amber-100 text-amber-900 text-[10px] font-extrabold">💡 Sugestão</span>',
+                    PENDENTE: '<span class="px-2 py-0.5 rounded-full bg-rose-100 text-rose-800 text-[10px] font-extrabold">⚠️ Pendente</span>'
                 };
                 tbody.innerHTML = exibidos.map(row => {
                     const chips = (row.candidatos || []).slice(0, 3).map(c =>
@@ -7349,7 +7635,7 @@ OMs:\n${JSON.stringify(listaPrompt)}`;
                     const boxSugCadastro = row.status === "PENDENTE" ? `
                         <div class="mt-1.5 p-2 rounded-xl bg-emerald-50/80 border border-emerald-200 text-[10px] space-y-1.5">
                             <div class="flex flex-wrap items-center justify-between gap-1">
-                                <span class="font-extrabold text-emerald-900">Sugestão para Árvore: ${escapeHtml(sug.area)} › ${escapeHtml(sug.maquina)} › ${escapeHtml(sug.equipamento)} (Cl. ${escapeHtml(sug.criticidade)})</span>
+                                <span class="font-extrabold text-emerald-900">Sugestão p/ Árvore: ${escapeHtml(sug.area)} › ${escapeHtml(sug.maquina)} › ${escapeHtml(sug.equipamento)} (Cl. ${escapeHtml(sug.criticidade)})</span>
                                 <button type="button" onclick="toggleEditarCadastroPreVoo(${row.idx})" class="text-[9px] font-extrabold text-sky-700 hover:underline">${row.editandoCadastro ? "Fechar Edição" : "Ajustar Campos"}</button>
                             </div>
                             ${row.editandoCadastro ? `
@@ -7368,18 +7654,25 @@ OMs:\n${JSON.stringify(listaPrompt)}`;
                         <tr class="hover:bg-slate-50/80 border-b border-slate-100">
                             <td class="py-2.5 px-3 align-top">
                                 <div class="font-extrabold text-slate-900 text-xs">${escapeHtml(row.ativoErp)}</div>
-                                <div class="text-[10px] font-mono font-bold text-slate-500">${row.qtdOms} OM(s) • Fallback: ${escapeHtml(row.setor)} (Cl. ${escapeHtml(row.criticidade)})</div>
+                                <div class="text-[10px] font-mono font-bold text-slate-500">${row.qtdOms} OM(s) • ${escapeHtml(row.setor)} (Cl. ${escapeHtml(row.criticidade)})</div>
                                 ${boxSugCadastro}
                             </td>
                             <td class="py-2.5 px-2 text-center whitespace-nowrap align-top">${stBadge[row.status] || stBadge.PENDENTE}</td>
                             <td class="py-2.5 px-2 align-top">
-                                <input type="text" list="preVooCatalogoDatalist" value="${escapeHtml(row.selecionado)}" onchange="atualizarSelecaoDeParaPreVoo(${row.idx}, this.value)" oninput="atualizarSelecaoDeParaPreVoo(${row.idx}, this.value)" placeholder="Vincular a ativo existente em ob_linhas..." class="input-clean py-1.5 px-2.5 text-xs font-bold w-full">
+                                <input type="text" list="preVooCatalogoDatalist" value="${escapeHtml(row.selecionado)}" onchange="atualizarSelecaoDeParaPreVoo(${row.idx}, this.value)" oninput="atualizarSelecaoDeParaPreVoo(${row.idx}, this.value)" placeholder="Vincular a Linha › Equipamento em ob_linhas..." class="input-clean py-1.5 px-2.5 text-xs font-bold w-full">
                                 ${chips ? `<div class="flex flex-wrap gap-1 mt-1">${chips}</div>` : ""}
                             </td>
                             <td class="py-2.5 px-2 text-right whitespace-nowrap align-top">
                                 <div class="flex flex-col gap-1 items-end">
-                                    ${row.status === "PENDENTE" ? `<button type="button" onclick="cadastrarAtivoNaArvorePreVoo(${row.idx})" class="px-2.5 py-1.5 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white text-[10px] font-extrabold shadow-sm">+ Cadastrar em ob_linhas</button>` : ""}
-                                    <button type="button" onclick="salvarLinhaDeParaPreVoo(${row.idx})" class="px-2.5 py-1 rounded-xl bg-slate-900 hover:bg-slate-800 text-white text-[10px] font-extrabold">Salvar De-Para</button>
+                                    <div class="flex flex-wrap gap-1 justify-end">
+                                        <button type="button" onclick="marcarTipoEspecialPreVoo(${row.idx}, 'FERRAMENTAL')" class="px-2 py-1 rounded-lg bg-violet-50 hover:bg-violet-100 text-violet-900 border border-violet-200 text-[9px] font-extrabold" title="Classificar como Ferramental/Molde (fora da árvore e dos Estudos AQF)">🔧 Ferram.</button>
+                                        <button type="button" onclick="marcarTipoEspecialPreVoo(${row.idx}, 'NAO_ATIVO')" class="px-2 py-1 rounded-lg bg-slate-100 hover:bg-slate-200 text-slate-800 border border-slate-300 text-[9px] font-extrabold" title="Marcar como Não-Ativo (Predial/Infra — fora dos Estudos AQF)">🏢 Não-Ativo</button>
+                                        <button type="button" onclick="marcarTipoEspecialPreVoo(${row.idx}, 'COMPARTILHADO')" class="px-2 py-1 rounded-lg bg-amber-50 hover:bg-amber-100 text-amber-950 border border-amber-300 text-[9px] font-extrabold" title="1 agrupador Compartilhado/Genérico sem enviar à Gestão de Ativos">🔁 Compart.</button>
+                                    </div>
+                                    <div class="flex flex-wrap gap-1 justify-end">
+                                        ${row.status === "PENDENTE" ? `<button type="button" onclick="cadastrarAtivoNaArvorePreVoo(${row.idx})" class="px-2.5 py-1 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white text-[10px] font-extrabold shadow-sm">+ ob_linhas</button>` : ""}
+                                        <button type="button" onclick="salvarLinhaDeParaPreVoo(${row.idx})" class="px-2.5 py-1 rounded-xl bg-slate-900 hover:bg-slate-800 text-white text-[10px] font-extrabold">Salvar Árvore</button>
+                                    </div>
                                 </div>
                             </td>
                         </tr>`;
@@ -7388,9 +7681,10 @@ OMs:\n${JSON.stringify(listaPrompt)}`;
 
             const rodape = document.getElementById("preVooRodapeResumo");
             if (rodape) {
-                rodape.innerText = pendCnt > 0
-                    ? `${pendCnt} ativo(s) do ERP ainda não constam na árvore — clique em '+ Cadastrar em ob_linhas' ou vincule a um existente (ou siga no modo flexível).`
-                    : "100% dos ativos estão conciliados com a árvore Gestão de Ativos (ob_linhas).";
+                const pendTotal = sugCnt + pendCnt;
+                rodape.innerText = pendTotal > 0
+                    ? `${pendTotal} item(ns) para revisar — vincule à árvore, marque em 1 clique (Ferramental / Não-Ativo / Compartilhado) ou siga no modo flexível.`
+                    : `100% conciliado (${arvCnt} Árvore • ${ferrCnt} Ferramentais • ${naoAtvCnt} Não-Ativos • ${compCnt} Compartilhados).`;
             }
         };
 
@@ -7465,6 +7759,8 @@ OMs:\n${JSON.stringify(listaPrompt)}`;
             }
 
             deParaAtivosMap[normKey(row.ativoErp)] = {
+                tipo_ativo: "ATIVO_ARVORE",
+                fora_estudos_aqf: false,
                 area: existente?.area || area,
                 maquina: existente?.maquina || maquina,
                 equipamento: existente?.equipamento || equipamento,
@@ -7538,10 +7834,57 @@ OMs:\n${JSON.stringify(listaPrompt)}`;
             salvarLinhaDeParaPreVoo(idx);
         };
 
-        function gravarEscolhaDePara(ativoErp, selecionadoLabel, origemTag = "MANUAL") {
+        function gravarEscolhaDePara(ativoErp, selecionadoLabel, origemTag = "MANUAL", tipoAtivoOverride = null) {
+            const bruto = String(ativoErp || "").replace(/[\r\n]+/g, " ").replace(/\s+/g, " ").trim();
             const labelLimpo = String(selecionadoLabel || "").trim();
-            const keyErp = normKey(ativoErp);
+            const keyErp = normKey(bruto);
             if (!keyErp) return false;
+
+            const tipoFinal = String(tipoAtivoOverride || "").toUpperCase();
+            if (tipoFinal === "FERRAMENTAL") {
+                const nomeCurto = bruto.replace(/^FERRAMENTAL\s*[-–—]\s*/i, "").trim() || bruto;
+                deParaAtivosMap[keyErp] = {
+                    tipo_ativo: "FERRAMENTAL",
+                    fora_estudos_aqf: true,
+                    area: "Ferramentais & Moldes",
+                    maquina: "FERRAMENTAL / MOLDE",
+                    equipamento: nomeCurto,
+                    criticidade_linha: "C",
+                    label: labelLimpo || `FERRAMENTAL / MOLDE › ${nomeCurto}`,
+                    origem: origemTag,
+                    ativo_erp: bruto
+                };
+                return true;
+            }
+            if (tipoFinal === "NAO_ATIVO") {
+                deParaAtivosMap[keyErp] = {
+                    tipo_ativo: "NAO_ATIVO",
+                    fora_estudos_aqf: true,
+                    area: "Predial & Apoio (Não-Ativo)",
+                    maquina: "NÃO-ATIVO / PREDIAL",
+                    equipamento: bruto,
+                    criticidade_linha: "C",
+                    label: labelLimpo || `NÃO-ATIVO › ${bruto}`,
+                    origem: origemTag,
+                    ativo_erp: bruto
+                };
+                return true;
+            }
+            if (tipoFinal === "COMPARTILHADO") {
+                deParaAtivosMap[keyErp] = {
+                    tipo_ativo: "COMPARTILHADO",
+                    fora_estudos_aqf: false,
+                    area: "Compartilhados / Genéricos",
+                    maquina: "COMPARTILHADOS / GENÉRICOS",
+                    equipamento: bruto,
+                    criticidade_linha: "B",
+                    label: labelLimpo || formatarAgrupadorCompartilhado(bruto),
+                    origem: origemTag,
+                    ativo_erp: bruto
+                };
+                return true;
+            }
+
             if (!labelLimpo) {
                 delete deParaAtivosMap[keyErp];
                 return false;
@@ -7551,35 +7894,83 @@ OMs:\n${JSON.stringify(listaPrompt)}`;
                 || catalogo.find(c => normKey(c.maquina) === normKey(labelLimpo));
             if (matchCat) {
                 deParaAtivosMap[keyErp] = {
+                    tipo_ativo: "ATIVO_ARVORE",
+                    fora_estudos_aqf: false,
                     area: matchCat.area,
                     maquina: matchCat.maquina,
                     equipamento: matchCat.equipamento,
                     criticidade_linha: matchCat.criticidade_linha,
                     label: matchCat.label,
                     origem: origemTag,
-                    ativo_erp: ativoErp
+                    ativo_erp: bruto
                 };
             } else {
                 const partes = labelLimpo.split(/[›>-]/).map(s => s.trim()).filter(Boolean);
                 deParaAtivosMap[keyErp] = {
+                    tipo_ativo: "ATIVO_ARVORE",
+                    fora_estudos_aqf: false,
                     area: "Produção",
                     maquina: partes[0] || labelLimpo,
                     equipamento: partes[1] || partes[0] || labelLimpo,
                     criticidade_linha: "A",
                     label: labelLimpo,
                     origem: origemTag,
-                    ativo_erp: ativoErp
+                    ativo_erp: bruto
                 };
             }
             return true;
         }
 
+        window.marcarTipoEspecialPreVoo = async (idx, tipo) => {
+            const row = preVooEstado?.analiseAtivos?.[idx];
+            if (!row) return;
+            gravarEscolhaDePara(row.ativoErp, "", "MANUAL", tipo);
+            row.editadoNoModal = false;
+            row.confirmadoNaoCadastrado = false;
+            await salvarDeParaAtivosPersistente();
+            if (typeof atualizarKpisMapaMasterCloud === "function") atualizarKpisMapaMasterCloud();
+            renderPreVooAtivos();
+            const nomes = {
+                FERRAMENTAL: "🔧 Ferramental/Molde (fora da árvore e de Estudos AQF)",
+                NAO_ATIVO: "🏢 Não-Ativo (fora da árvore e de Estudos AQF)",
+                COMPARTILHADO: "🔁 Compartilhado/Genérico (1 agrupador sem ir à árvore)"
+            };
+            showToast(`"${row.ativoErp}" salvo como ${nomes[tipo] || tipo}!`, "success");
+        };
+
+        window.aprovarTodosAutomaticosPreVoo = async () => {
+            if (!preVooEstado?.analiseAtivos?.length) return;
+            let salvos = 0;
+            preVooEstado.analiseAtivos.forEach(row => {
+                const k = normKey(row.ativoErp);
+                if (deParaAtivosMap[k]) return;
+                if (row.status === "AUTO_EXATO" && row.sugestao) {
+                    gravarEscolhaDePara(row.ativoErp, row.sugestao, "AUTO_EXATO", "ATIVO_ARVORE");
+                    row.editadoNoModal = false;
+                    salvos++;
+                } else if (row.status === "FERRAMENTAL" || row.status === "NAO_ATIVO" || row.status === "COMPARTILHADO") {
+                    gravarEscolhaDePara(row.ativoErp, row.sugestao, "AUTO_REGRA", row.status);
+                    row.editadoNoModal = false;
+                    salvos++;
+                }
+            });
+            if (salvos > 0) {
+                await salvarDeParaAtivosPersistente();
+                if (typeof atualizarKpisMapaMasterCloud === "function") atualizarKpisMapaMasterCloud();
+                renderPreVooAtivos();
+                showToast(`⚡ ${salvos} ativo(s) classificado(s) automaticamente foram gravados no Mapa Master da nuvem!`, "success");
+            } else {
+                showToast("Todos os itens automáticos deste lote já estão salvos no Mapa Master!", "info");
+            }
+        };
+
         window.salvarLinhaDeParaPreVoo = async (idx) => {
             const row = preVooEstado?.analiseAtivos?.[idx];
             if (!row) return;
-            const gravou = gravarEscolhaDePara(row.ativoErp, row.selecionado, "MANUAL");
+            const gravou = gravarEscolhaDePara(row.ativoErp, row.selecionado, "MANUAL", "ATIVO_ARVORE");
             row.editadoNoModal = false;
             await salvarDeParaAtivosPersistente();
+            if (typeof atualizarKpisMapaMasterCloud === "function") atualizarKpisMapaMasterCloud();
             renderPreVooAtivos();
             showToast(gravou ? `De-Para salvo: "${row.ativoErp}" → "${row.selecionado}"` : `Vínculo manual removido de "${row.ativoErp}".`, "success");
         };
@@ -7618,21 +8009,23 @@ OMs:\n${JSON.stringify(listaPrompt)}`;
             const btn = document.getElementById("btnPreVooGeminiAtivos");
             if (btn) btn.disabled = true;
             try {
-                const listaCatTexto = catalogo.slice(0, 180).map(c => `${c.label} (${c.area})`);
+                const listaCatTexto = catalogo.slice(0, 220).map(c => `${c.label} (${c.area})`);
                 let mappedCnt = 0;
+                let especCnt = 0;
                 let sugCadCnt = 0;
                 let modeloUsado = "";
 
                 for (let i = 0; i < pendentes.length; i += 25) {
                     const bloco = pendentes.slice(i, i + 25);
                     const promptAtivos = `Você é especialista em Gestão de Ativos industriais (PCM Cepêra).
-Compare cada nome de ativo vindo do ERP com os ativos oficiais já cadastrados em ob_linhas abaixo.
-Regras:
-1. Se existir na lista oficial (mesmo com ordem invertida, sem zeros ou grafia parecida), retorne "catalogo_label" EXATO da lista e "nao_cadastrado": false.
-2. Se NÃO existir na lista oficial, retorne "catalogo_label": null, "nao_cadastrado": true, e sugira os campos limpos para cadastrar na árvore ("area_sugerida", "maquina_sugerida", "equipamento_sugerido", "criticidade_sugerida": "A"|"B"|"C").
+Classifique cada nome de ativo vindo do ERP em 1 das 4 categorias oficiais:
+- "ATIVO_ARVORE": equipamento/linha industrial presente na árvore ob_linhas (mesmo invertido, ex: "RESFRIADOR - TETRAPACK 2" -> "TETRAPACK 2 › RESFRIADOR" ou "Linha › (Linha Geral)"). Retorne "catalogo_label" EXATO da lista ou "nao_cadastrado": true se for máquina real ainda ausente.
+- "FERRAMENTAL": moldes, ferramentais, matrizes removíveis.
+- "NAO_ATIVO": predial, salas, banheiros, portaria, estacionamento, piso, ferramentas manuais/oficina (torno/furadeira), logística/RH.
+- "COMPARTILHADO": ativo genérico/compartilhado entre linhas (ex: "ENVASADORAS - IMPRESSORA", "BOATOPACK 1/2 - ...", "BOMBA MOVEL") que não deve ir para Gestão de Ativos.
 Ativos oficiais ob_linhas:\n${JSON.stringify(listaCatTexto)}
 Ativos do ERP neste lote:\n${JSON.stringify(bloco.map(p => p.ativoErp))}
-Responda SOMENTE JSON Array: [{"ativo_erp":"...","catalogo_label":string|null,"nao_cadastrado":boolean,"area_sugerida":string,"maquina_sugerida":string,"equipamento_sugerido":string,"criticidade_sugerida":"A"}]`;
+Responda SOMENTE JSON Array: [{"ativo_erp":"...","tipo_ativo":"ATIVO_ARVORE"|"FERRAMENTAL"|"NAO_ATIVO"|"COMPARTILHADO","catalogo_label":string|null,"nao_cadastrado":boolean,"area_sugerida":string,"maquina_sugerida":string,"equipamento_sugerido":string,"criticidade_sugerida":"A"}]`;
 
                     const { text, model } = await chamarGeminiApiComFallback(cfg.key, promptAtivos);
                     modeloUsado = model;
@@ -7642,11 +8035,16 @@ Responda SOMENTE JSON Array: [{"ativo_erp":"...","catalogo_label":string|null,"n
                             if (!item?.ativo_erp) return;
                             const row = preVooEstado.analiseAtivos.find(x => normKey(x.ativoErp) === normKey(item.ativo_erp));
                             if (!row) return;
-                            if (item.catalogo_label) {
+                            const tipo = String(item.tipo_ativo || "ATIVO_ARVORE").toUpperCase();
+                            if (tipo === "FERRAMENTAL" || tipo === "NAO_ATIVO" || tipo === "COMPARTILHADO") {
+                                gravarEscolhaDePara(row.ativoErp, "", "IA_GEMINI", tipo);
+                                row.editadoNoModal = false;
+                                especCnt++;
+                            } else if (item.catalogo_label) {
                                 const lblLimpo = String(item.catalogo_label).replace(/\s*\([^)]+\)\s*$/, "").trim();
                                 const matchOficial = catalogo.find(c => normKey(c.label) === normKey(lblLimpo)) || catalogo.find(c => normKey(lblLimpo).includes(normKey(c.label)));
                                 row.selecionado = matchOficial ? matchOficial.label : lblLimpo;
-                                gravarEscolhaDePara(row.ativoErp, row.selecionado, "IA_GEMINI");
+                                gravarEscolhaDePara(row.ativoErp, row.selecionado, "IA_GEMINI", "ATIVO_ARVORE");
                                 row.editadoNoModal = false;
                                 mappedCnt++;
                             } else if (item.nao_cadastrado && (item.maquina_sugerida || item.equipamento_sugerido)) {
@@ -7665,9 +8063,12 @@ Responda SOMENTE JSON Array: [{"ativo_erp":"...","catalogo_label":string|null,"n
                         });
                     }
                 }
-                if (mappedCnt > 0) await salvarDeParaAtivosPersistente();
+                if (mappedCnt > 0 || especCnt > 0) {
+                    await salvarDeParaAtivosPersistente();
+                    if (typeof atualizarKpisMapaMasterCloud === "function") atualizarKpisMapaMasterCloud();
+                }
                 renderPreVooAtivos();
-                showToast(`Gemini (${modeloUsado}): ${mappedCnt} vinculado(s) em ob_linhas e ${sugCadCnt} sugestão(ões) de novo cadastro!`, "success");
+                showToast(`Gemini (${modeloUsado}): ${mappedCnt} na Árvore, ${especCnt} em Categorias Especiais e ${sugCadCnt} sugestão(ões) de cadastro!`, "success");
             } catch (err) {
                 const msg = err?.message || "Erro ao conectar com Google Gemini API.";
                 const st = document.getElementById("preVooStatusIaTxt");
@@ -7716,15 +8117,21 @@ Responda SOMENTE JSON Array: [{"ativo_erp":"...","catalogo_label":string|null,"n
         window.confirmarPreVooEIniciarOrquestracao = async () => {
             if (!preVooEstado) return;
             const estado = preVooEstado;
-            // Salva eventuais edições manuais ainda não salvas na tabela De-Para
+            // Salva edições manuais e persiste auto-classificações especiais (Ferramental / Não-Ativo / Compartilhado)
             let alterouDePara = false;
             estado.analiseAtivos.forEach(row => {
                 if (row.editadoNoModal) {
-                    gravarEscolhaDePara(row.ativoErp, row.selecionado, "MANUAL");
+                    gravarEscolhaDePara(row.ativoErp, row.selecionado, "MANUAL", "ATIVO_ARVORE");
+                    alterouDePara = true;
+                } else if (!deParaAtivosMap[normKey(row.ativoErp)] && (row.status === "FERRAMENTAL" || row.status === "NAO_ATIVO" || row.status === "COMPARTILHADO")) {
+                    gravarEscolhaDePara(row.ativoErp, row.sugestao, "AUTO_REGRA", row.status);
                     alterouDePara = true;
                 }
             });
-            if (alterouDePara) await salvarDeParaAtivosPersistente();
+            if (alterouDePara) {
+                await salvarDeParaAtivosPersistente();
+                if (typeof atualizarKpisMapaMasterCloud === "function") atualizarKpisMapaMasterCloud();
+            }
 
             const periodoEscolhido = (document.getElementById("preVooInputPeriodo")?.value || estado.periodoDetectado || getPeriodoAtualPadrao()).trim();
             const inpMainP = document.getElementById("inputPeriodoRodada");
@@ -8687,14 +9094,19 @@ Responda SOMENTE JSON Array: [{"ativo_erp":"...","catalogo_label":string|null,"n
         // VIEW 5: NÓ 7 — CONFIABILIDADE, MTBF/MTTR, QUEBRA EVITÁVEL & OBSOLESCÊNCIA
         window.renderConfiabilidadeView = () => {
             const top = confiabilidadeData.top_ofensores || [];
-            const quebrasAll = omsAuditadas.filter(o => o.categoria === "QUEBRA");
+            const omsIndustriais = omsAuditadas.filter(o => !isOmForaEstudosAqf(o));
+            const quebrasAll = omsIndustriais.filter(o => o.categoria === "QUEBRA");
             const gravesAll = quebrasAll.filter(o => o.severidade === "GRAVE");
             const minParada = quebrasAll.reduce((a, x) => a + Number(x.tempo_min || 0), 0);
             const mttrGlobal = quebrasAll.length ? Math.round(minParada / quebrasAll.length) : 0;
             const evitaveis = top.filter(x => x.quebras > 0 && x.status_rota.includes("sem ponto")).length;
+            const ocultasCnt = Number(confiabilidadeData.nao_ativos_oms || 0) + Number(confiabilidadeData.ferramentais_oms || 0);
+            const subFora = ocultasCnt > 0
+                ? `${gravesAll.length} GRAVE • ${ocultasCnt} OM(s) Não-Ativo/Ferram. ocultas`
+                : `${gravesAll.length} Quebra(s) GRAVE`;
 
             document.getElementById("confiabilidadeKpiGrid").innerHTML = [
-                { k: "Total de Quebras (EN 13306)", v: quebrasAll.length, sub: `${gravesAll.length} Quebra(s) GRAVE`, vc: "text-rose-600" },
+                { k: "Total de Quebras (EN 13306)", v: quebrasAll.length, sub: subFora, vc: "text-rose-600" },
                 { k: "Tempo Total Parada Corretiva", v: `${minParada} min`, sub: `${(minParada / 60).toFixed(1)} horas acumuladas`, vc: "text-amber-600" },
                 { k: "MTTR Médio da Planta", v: `${mttrGlobal} min`, sub: "Tempo médio para reparo", vc: "text-indigo-700" },
                 { k: "Quebras Sem Rota Ativa", v: evitaveis, sub: "Oportunidade de Ponto Cirúrgico", vc: "text-rose-700" },
@@ -8702,7 +9114,7 @@ Responda SOMENTE JSON Array: [{"ativo_erp":"...","catalogo_label":string|null,"n
             ].map(c => `<div class="glass-card p-4 rounded-3xl"><div class="text-[10px] font-extrabold uppercase text-slate-500">${c.k}</div><div class="text-2xl font-extrabold mt-1 ${c.vc}">${c.v}</div><div class="text-[11px] font-semibold text-slate-500 mt-0.5">${c.sub}</div></div>`).join("");
 
             document.getElementById("confiabilidadeTopTableBody").innerHTML = top.slice(0, 12).map((r, i) => {
-                const omsAt = omsAuditadas.filter(o => normKey(o.ativo) === normKey(r.ativo));
+                const omsAt = omsIndustriais.filter(o => normKey(o.ativo) === normKey(r.ativo));
                 const crit = avaliarCriterioEstudoAqf(omsAt);
                 const critPillCls = crit.codigo === "ALTO_VOLUME_LEVE_MODERADA"
                     ? "bg-amber-100 text-amber-950 border-amber-300"
@@ -8710,10 +9122,13 @@ Responda SOMENTE JSON Array: [{"ativo_erp":"...","catalogo_label":string|null,"n
                 const btnCls = crit.codigo === "ALTO_VOLUME_LEVE_MODERADA"
                     ? "bg-amber-600 hover:bg-amber-700 text-white"
                     : (crit.elegivel ? "bg-rose-600 hover:bg-rose-700 text-white" : "bg-sky-600 hover:bg-sky-700 text-white");
+                const badgeTipo = r.tipo_ativo === "COMPARTILHADO"
+                    ? `<span class="inline-block ml-1 px-1.5 py-0.5 rounded-full bg-amber-100 text-amber-900 border border-amber-300 text-[9px] font-extrabold">🔁 Compartilhado</span>`
+                    : "";
                 return `
                 <tr class="hover:bg-slate-50/80">
                     <td class="py-3 px-3">
-                        <div class="font-extrabold text-slate-900">#${i + 1} ${escapeHtml(r.ativo)}</div>
+                        <div class="font-extrabold text-slate-900">#${i + 1} ${escapeHtml(r.ativo)}${badgeTipo}</div>
                         <div class="text-[10px] font-bold text-slate-500">${escapeHtml(r.setor)} • ${r.total_oms} OM(s) na rodada</div>
                         <div class="mt-1"><span class="inline-block px-2 py-0.5 rounded-full border text-[9px] font-extrabold ${critPillCls}">${escapeHtml(crit.badgeCurto)}</span></div>
                         ${r.ativo_erp && normKey(r.ativo_erp) !== normKey(r.ativo) ? `<div class="inline-block mt-0.5 px-1.5 py-0.5 rounded bg-slate-100 border border-slate-200 font-mono text-[9px] font-bold text-slate-500">ERP: ${escapeHtml(r.ativo_erp)}</div>` : ""}
@@ -9052,6 +9467,7 @@ Responda SOMENTE JSON Array: [{"ativo_erp":"...","catalogo_label":string|null,"n
             const mapaOmsPorAtivo = new Map();
             poolOms.forEach(o => {
                 if (!o?.ativo) return;
+                if (isOmForaEstudosAqf(o)) return;
                 if (!mapaOmsPorAtivo.has(o.ativo)) mapaOmsPorAtivo.set(o.ativo, []);
                 mapaOmsPorAtivo.get(o.ativo).push(o);
             });
@@ -10051,12 +10467,609 @@ Responda SOMENTE JSON Array: [{"ativo_erp":"...","catalogo_label":string|null,"n
             await persistirGovernancaAqfMaster(false);
         };
 
+        // =========================================================================
+        // CENTRAL DE MAPEAMENTO MASTER DE ATIVOS (ERP Ativos.xlsx <-> ob_linhas)
+        // =========================================================================
+        let masterMapaLinhas = [];
+        let masterMapaFiltroAtual = "pendentes";
+
+        function atualizarKpisMapaMasterCloud() {
+            const vals = Object.values(deParaAtivosMap || {});
+            const total = vals.length;
+            let cArv = 0, cFerr = 0, cNaoAtv = 0, cComp = 0;
+            vals.forEach(v => {
+                const t = String(v?.tipo_ativo || "ATIVO_ARVORE").toUpperCase();
+                if (t === "FERRAMENTAL") cFerr++;
+                else if (t === "NAO_ATIVO") cNaoAtv++;
+                else if (t === "COMPARTILHADO") cComp++;
+                else cArv++;
+            });
+
+            const badge = document.getElementById("masterMapaCloudBadge");
+            if (badge) {
+                badge.innerText = total > 0
+                    ? `${total} mapeamento(s) salvo(s) na nuvem`
+                    : "Nenhum mapeamento salvo ainda — importe Ativos.xlsx";
+            }
+
+            const kpiBox = document.getElementById("masterMapaResumoKpis");
+            if (kpiBox) {
+                const catSize = extrairCatalogoAtivosOficiais().length;
+                kpiBox.innerHTML = [
+                    `<span class="px-2.5 py-1 rounded-full bg-emerald-100 text-emerald-900 text-[10px] font-extrabold">✅ ${cArv} Árvore ob_linhas</span>`,
+                    `<span class="px-2.5 py-1 rounded-full bg-violet-100 text-violet-900 text-[10px] font-extrabold">🔧 ${cFerr} Ferramentais/Moldes</span>`,
+                    `<span class="px-2.5 py-1 rounded-full bg-slate-200 text-slate-800 text-[10px] font-extrabold">🏢 ${cNaoAtv} Não-Ativos (Fora AQF)</span>`,
+                    `<span class="px-2.5 py-1 rounded-full bg-amber-100 text-amber-950 text-[10px] font-extrabold">🔁 ${cComp} Compartilhados/Genéricos</span>`,
+                    `<span class="px-2.5 py-1 rounded-full bg-sky-100 text-sky-900 text-[10px] font-extrabold">🌳 ${catSize} destino(s) oficiais em ob_linhas (2 níveis)</span>`
+                ].join("");
+            }
+        }
+        window.atualizarKpisMapaMasterCloud = atualizarKpisMapaMasterCloud;
+
+        function parseCsvMatrizSimplesMapa(texto) {
+            const linhas = String(texto || "").split(/\r?\n/).filter(l => l.trim());
+            if (!linhas.length) return [];
+            const sep = (linhas[0].match(/;/g) || []).length >= (linhas[0].match(/,/g) || []).length ? ";" : ",";
+            return linhas.map(linha => {
+                const out = [];
+                let cur = "";
+                let inQ = false;
+                for (let i = 0; i < linha.length; i++) {
+                    const ch = linha[i];
+                    if (ch === '"') {
+                        if (inQ && linha[i + 1] === '"') { cur += '"'; i++; }
+                        else inQ = !inQ;
+                    } else if (ch === sep && !inQ) {
+                        out.push(cur.trim());
+                        cur = "";
+                    } else {
+                        cur += ch;
+                    }
+                }
+                out.push(cur.trim());
+                return out;
+            });
+        }
+
+        function construirLinhaMapaMaster(itemMeta, catalogo) {
+            const res = cruzarAtivoComArvore(itemMeta.ativoErp, catalogo, itemMeta);
+            const st = res.status_vinculo || "PENDENTE";
+            const destinoInicial = (res.vinculado_ob_linhas || STATUS_CONCILIADOS_PRE_VOO.has(st))
+                ? (res.ativo_oficial || "")
+                : (st === "SUGESTAO" ? (res.ativo_oficial || "") : "");
+            return {
+                ativoErp: itemMeta.ativoErp,
+                qtdRepeticoes: Number(itemMeta.qtdRepeticoes || 1),
+                familia: itemMeta.familia || "",
+                cr: itemMeta.cr || "",
+                itemAtivo: itemMeta.itemAtivo || "Sim",
+                prefixo: itemMeta.prefixo || "",
+                titulo: itemMeta.titulo || "",
+                tipo_ativo: res.tipo_ativo || "ATIVO_ARVORE",
+                status: st,
+                destino: destinoInicial,
+                salvoNuvem: Boolean(res.salvo_depara),
+                motivoAuto: res.motivo_auto || "",
+                setor: res.setor || "Produção",
+                criticidade: res.criticidade_linha || "B",
+                candidatos: res.candidatos || [],
+                editado: false
+            };
+        }
+
+        window.importarPlanilhaAtivosErpMaster = async (event) => {
+            const file = event?.target?.files?.[0];
+            if (!file) return;
+            try {
+                const nome = String(file.name || "");
+                let matriz = [];
+                if (/\.csv$/i.test(nome)) {
+                    const txt = await file.text();
+                    matriz = parseCsvMatrizSimplesMapa(txt);
+                } else {
+                    const buf = await file.arrayBuffer();
+                    try {
+                        matriz = await _lerXlsxNativoBrowser(buf);
+                    } catch (_) {
+                        const XLSXLib = await carregarSheetJsSeNecessario();
+                        const wb = XLSXLib.read(buf, { type: "array" });
+                        const firstSheet = wb.Sheets[wb.SheetNames[0]];
+                        matriz = XLSXLib.utils.sheet_to_json(firstSheet, { header: 1, defval: "" });
+                    }
+                }
+
+                if (!Array.isArray(matriz) || matriz.length < 2) {
+                    showToast("Planilha vazia ou formato não reconhecido.", "error");
+                    return;
+                }
+
+                // Detecta automaticamente a linha de cabeçalho Sankhya (geralmente linha 3)
+                let hdrIdx = 0;
+                for (let r = 0; r < Math.min(12, matriz.length); r++) {
+                    const rowNorm = (matriz[r] || []).map(c => normKey(c));
+                    const temDesc = rowNorm.some(h => h === "descricao" || h === "descricao (ativo)" || h === "ativo");
+                    const temAux = rowNorm.some(h => h === "familia" || h === "item ativo" || h === "cod. ativo" || h === "prefixo" || h.includes("centro de resultado"));
+                    if (temDesc && temAux) { hdrIdx = r; break; }
+                    if (temDesc && r <= 4) hdrIdx = r;
+                }
+
+                const hdrRow = (matriz[hdrIdx] || []).map(c => normKey(c));
+                const acharCol = (fn, fallback = -1) => {
+                    const idx = hdrRow.findIndex(fn);
+                    return idx >= 0 ? idx : fallback;
+                };
+                const idxDesc = acharCol(h => h === "descricao" || h === "descricao (ativo)" || h === "ativo", 0);
+                const idxTitulo = acharCol(h => h === "titulo", -1);
+                const idxItemAtivo = acharCol(h => h === "item ativo", -1);
+                const idxCr = acharCol(h => h === "descricao (centro de resultado)" || (h.includes("centro de resultado") && h.includes("descricao") && !h.includes("final")), -1);
+                const idxFam = acharCol(h => h === "familia", -1);
+                const idxPref = acharCol(h => h === "prefixo" || h === "tag", -1);
+
+                const agrupados = new Map();
+                let totalLinhasLidas = 0;
+                for (let r = hdrIdx + 1; r < matriz.length; r++) {
+                    const linha = matriz[r] || [];
+                    const descLimpa = String(linha[idxDesc] ?? "").replace(/[\r\n]+/g, " ").replace(/\s+/g, " ").trim();
+                    if (!descLimpa) continue;
+                    const descN = normKey(descLimpa);
+                    if (!descN || descN.startsWith("total de registros") || descN.startsWith("emissao:")) continue;
+                    totalLinhasLidas++;
+
+                    const fam = idxFam >= 0 ? String(linha[idxFam] ?? "").trim() : "";
+                    const cr = idxCr >= 0 ? String(linha[idxCr] ?? "").trim() : "";
+                    const itemAtivo = idxItemAtivo >= 0 ? String(linha[idxItemAtivo] ?? "").trim() : "Sim";
+                    const pref = idxPref >= 0 ? String(linha[idxPref] ?? "").trim() : "";
+                    const titulo = idxTitulo >= 0 ? String(linha[idxTitulo] ?? "").trim() : "";
+
+                    if (!agrupados.has(descN)) {
+                        agrupados.set(descN, {
+                            ativoErp: descLimpa,
+                            qtdRepeticoes: 1,
+                            familia: fam,
+                            cr,
+                            itemAtivo: itemAtivo || "Sim",
+                            prefixo: pref,
+                            titulo
+                        });
+                    } else {
+                        const prev = agrupados.get(descN);
+                        prev.qtdRepeticoes++;
+                        if (!prev.familia && fam) prev.familia = fam;
+                        if (!prev.cr && cr) prev.cr = cr;
+                        if (!prev.prefixo && pref) prev.prefixo = pref;
+                        if (normKey(itemAtivo) === "nao") prev.itemAtivo = "Não";
+                    }
+                }
+
+                if (!agrupados.size) {
+                    showToast("Nenhum ativo encontrado na coluna Descrição da planilha.", "error");
+                    return;
+                }
+
+                const catalogo = extrairCatalogoAtivosOficiais();
+                masterMapaLinhas = [...agrupados.values()]
+                    .map(meta => construirLinhaMapaMaster(meta, catalogo))
+                    .sort((a, b) => {
+                        const ord = { PENDENTE: 0, SUGESTAO: 1, AUTO_EXATO: 2, COMPARTILHADO: 3, FERRAMENTAL: 4, NAO_ATIVO: 5, DEPARA: 6 };
+                        return (ord[a.status] ?? 9) - (ord[b.status] ?? 9) || b.qtdRepeticoes - a.qtdRepeticoes || a.ativoErp.localeCompare(b.ativoErp, "pt-BR");
+                    });
+
+                const ws = document.getElementById("masterMapaWorkspace");
+                if (ws) { ws.hidden = false; ws.classList.remove("hidden"); }
+
+                const pendCnt = masterMapaLinhas.filter(x => x.status === "PENDENTE" || x.status === "SUGESTAO").length;
+                const arvCnt = masterMapaLinhas.filter(x => x.tipo_ativo === "ATIVO_ARVORE" && (x.status === "DEPARA" || x.status === "AUTO_EXATO")).length;
+                const ferrCnt = masterMapaLinhas.filter(x => x.tipo_ativo === "FERRAMENTAL").length;
+                const naoCnt = masterMapaLinhas.filter(x => x.tipo_ativo === "NAO_ATIVO").length;
+                const compCnt = masterMapaLinhas.filter(x => x.tipo_ativo === "COMPARTILHADO").length;
+
+                masterMapaFiltroAtual = pendCnt > 0 ? "pendentes" : "todos";
+                renderCentralMapaMaster();
+                showToast(
+                    `${nome}: ${totalLinhasLidas} linhas → ${masterMapaLinhas.length} ativos únicos (${arvCnt} Árvore • ${ferrCnt} Ferram. • ${naoCnt} Não-Ativos • ${compCnt} Compart. • ${pendCnt} Pendentes)!`,
+                    "success"
+                );
+            } catch (err) {
+                console.error("Erro ao importar Ativos.xlsx:", err);
+                showToast(`Erro ao ler planilha de ativos: ${err?.message || err}`, "error");
+            } finally {
+                if (event?.target) event.target.value = "";
+            }
+        };
+
+        window.carregarMapaSalvoNaCentralMaster = () => {
+            const entries = Object.values(deParaAtivosMap || {});
+            if (!entries.length) {
+                showToast("Nenhum mapeamento salvo na nuvem ainda. Clique em 'Importar Ativos.xlsx (ERP)' para começar!", "info");
+                return;
+            }
+            const catalogo = extrairCatalogoAtivosOficiais();
+            masterMapaLinhas = entries
+                .map(e => construirLinhaMapaMaster({
+                    ativoErp: e.ativo_erp || e.label || "",
+                    qtdRepeticoes: 1,
+                    familia: e.area || "",
+                    cr: e.origem || "SALVO",
+                    itemAtivo: "Sim",
+                    prefixo: "",
+                    titulo: ""
+                }, catalogo))
+                .filter(x => x.ativoErp)
+                .sort((a, b) => a.tipo_ativo.localeCompare(b.tipo_ativo) || a.ativoErp.localeCompare(b.ativoErp, "pt-BR"));
+
+            const ws = document.getElementById("masterMapaWorkspace");
+            if (ws) { ws.hidden = false; ws.classList.remove("hidden"); }
+            masterMapaFiltroAtual = "todos";
+            renderCentralMapaMaster();
+            showToast(`${masterMapaLinhas.length} mapeamento(s) salvo(s) carregado(s) para visualização/edição!`, "info");
+        };
+
+        window.definirFiltroMapaMaster = (filtro) => {
+            masterMapaFiltroAtual = filtro || "pendentes";
+            renderCentralMapaMaster();
+        };
+
+        function obterLinhasFiltradasMapaMaster() {
+            const busca = normKey(document.getElementById("masterMapaBuscaInput")?.value || "");
+            return masterMapaLinhas
+                .map((row, idx) => ({ ...row, _idx: idx }))
+                .filter(r => {
+                    if (masterMapaFiltroAtual === "pendentes" && r.status !== "PENDENTE" && r.status !== "SUGESTAO") return false;
+                    if (masterMapaFiltroAtual === "arvore" && !(r.tipo_ativo === "ATIVO_ARVORE" && (r.status === "DEPARA" || r.status === "AUTO_EXATO"))) return false;
+                    if (masterMapaFiltroAtual === "ferramental" && r.tipo_ativo !== "FERRAMENTAL") return false;
+                    if (masterMapaFiltroAtual === "nao_ativo" && r.tipo_ativo !== "NAO_ATIVO") return false;
+                    if (masterMapaFiltroAtual === "compartilhado" && r.tipo_ativo !== "COMPARTILHADO") return false;
+                    if (busca) {
+                        const hay = normKey(`${r.ativoErp} ${r.familia} ${r.cr} ${r.prefixo} ${r.destino} ${r.tipo_ativo}`);
+                        if (!hay.includes(busca)) return false;
+                    }
+                    return true;
+                });
+        }
+
+        window.renderCentralMapaMaster = () => {
+            atualizarDatalistCatalogoPreVoo();
+            atualizarKpisMapaMasterCloud();
+
+            const cntPend = masterMapaLinhas.filter(x => x.status === "PENDENTE" || x.status === "SUGESTAO").length;
+            const cntArv = masterMapaLinhas.filter(x => x.tipo_ativo === "ATIVO_ARVORE" && (x.status === "DEPARA" || x.status === "AUTO_EXATO")).length;
+            const cntFerr = masterMapaLinhas.filter(x => x.tipo_ativo === "FERRAMENTAL").length;
+            const cntNao = masterMapaLinhas.filter(x => x.tipo_ativo === "NAO_ATIVO").length;
+            const cntComp = masterMapaLinhas.filter(x => x.tipo_ativo === "COMPARTILHADO").length;
+            const cntTodos = masterMapaLinhas.length;
+
+            const setT = (id, v) => { const el = document.getElementById(id); if (el) el.innerText = String(v); };
+            setT("mMapCntPend", cntPend);
+            setT("mMapCntArv", cntArv);
+            setT("mMapCntFerr", cntFerr);
+            setT("mMapCntNaoAtv", cntNao);
+            setT("mMapCntComp", cntComp);
+            setT("mMapCntTodos", cntTodos);
+
+            ["pendentes", "arvore", "ferramental", "nao_ativo", "compartilhado", "todos"].forEach(k => {
+                const btn = document.getElementById(`mMapFil_${k}`);
+                if (!btn) return;
+                btn.classList.toggle("ring-2", masterMapaFiltroAtual === k);
+                btn.classList.toggle("ring-sky-500", masterMapaFiltroAtual === k);
+            });
+
+            const tbody = document.getElementById("masterMapaTabelaBody");
+            if (!tbody) return;
+            const filtrados = obterLinhasFiltradasMapaMaster();
+            const MAX_VISIVEIS = 200;
+            const exibidos = filtrados.slice(0, MAX_VISIVEIS);
+
+            if (!exibidos.length) {
+                tbody.innerHTML = `<tr><td colspan="4" class="py-6 text-center text-xs font-extrabold text-emerald-700">${
+                    masterMapaLinhas.length
+                        ? "✅ Nenhum item neste filtro! Todos os ativos filtrados já estão classificados."
+                        : "Importe o arquivo Ativos.xlsx do ERP ou clique em 'Ver Mapa Salvo' acima."
+                }</td></tr>`;
+            } else {
+                const stBadge = {
+                    DEPARA: '<span class="px-2 py-0.5 rounded-full bg-indigo-100 text-indigo-800 text-[10px] font-extrabold">✅ Árvore (Salvo)</span>',
+                    AUTO_EXATO: '<span class="px-2 py-0.5 rounded-full bg-emerald-100 text-emerald-800 text-[10px] font-extrabold">✅ Auto Árvore</span>',
+                    FERRAMENTAL: '<span class="px-2 py-0.5 rounded-full bg-violet-100 text-violet-900 text-[10px] font-extrabold">🔧 Ferramental</span>',
+                    NAO_ATIVO: '<span class="px-2 py-0.5 rounded-full bg-slate-200 text-slate-800 text-[10px] font-extrabold">🏢 Não-Ativo (Fora AQF)</span>',
+                    COMPARTILHADO: '<span class="px-2 py-0.5 rounded-full bg-amber-100 text-amber-950 text-[10px] font-extrabold">🔁 Compartilhado</span>',
+                    SUGESTAO: '<span class="px-2 py-0.5 rounded-full bg-amber-100 text-amber-900 text-[10px] font-extrabold">💡 Sugestão</span>',
+                    PENDENTE: '<span class="px-2 py-0.5 rounded-full bg-rose-100 text-rose-800 text-[10px] font-extrabold">⚠️ Pendente</span>'
+                };
+                tbody.innerHTML = exibidos.map(row => {
+                    const chips = (row.candidatos || []).slice(0, 3).map(c =>
+                        `<button type="button" onclick="aplicarChipMapaMaster(${row._idx}, '${escapeHtml(c.label).replace(/'/g, "\\'")}')" class="px-2 py-0.5 rounded bg-sky-50 hover:bg-sky-100 text-sky-800 border border-sky-200 text-[9px] font-bold" title="${escapeHtml(c.area)} • ${c.score} pts">${escapeHtml(c.label)}</button>`
+                    ).join("");
+                    const metaTags = [
+                        row.qtdRepeticoes > 1 ? `<span class="px-1.5 py-0.5 rounded bg-amber-100 text-amber-900 font-mono text-[9px] font-extrabold">×${row.qtdRepeticoes} no ERP</span>` : "",
+                        row.familia ? `<span class="px-1.5 py-0.5 rounded bg-slate-100 text-slate-600 text-[9px] font-bold">Fam: ${escapeHtml(row.familia)}</span>` : "",
+                        row.cr ? `<span class="px-1.5 py-0.5 rounded bg-slate-100 text-slate-600 text-[9px] font-bold">CR: ${escapeHtml(row.cr)}</span>` : "",
+                        row.prefixo ? `<span class="px-1.5 py-0.5 rounded bg-sky-50 text-sky-800 font-mono text-[9px] font-bold">${escapeHtml(row.prefixo)}</span>` : "",
+                        normKey(row.itemAtivo) === "nao" ? `<span class="px-1.5 py-0.5 rounded bg-rose-100 text-rose-800 text-[9px] font-extrabold">INATIVO ERP</span>` : ""
+                    ].filter(Boolean).join(" ");
+                    const salvoPill = row.salvoNuvem
+                        ? `<span class="block mt-1 text-[9px] font-extrabold text-emerald-700">☁️ Salvo</span>`
+                        : `<span class="block mt-1 text-[9px] font-bold text-slate-400">Não salvo</span>`;
+                    return `
+                        <tr class="hover:bg-slate-50/80 border-b border-slate-100">
+                            <td class="py-2 px-3 align-top">
+                                <div class="font-extrabold text-slate-900 text-xs">${escapeHtml(row.ativoErp)}</div>
+                                ${metaTags ? `<div class="flex flex-wrap gap-1 mt-1">${metaTags}</div>` : ""}
+                                ${row.motivoAuto ? `<div class="text-[10px] font-semibold text-slate-500 mt-0.5">${escapeHtml(row.motivoAuto)}</div>` : ""}
+                            </td>
+                            <td class="py-2 px-2 text-center whitespace-nowrap align-top">
+                                ${stBadge[row.status] || stBadge.PENDENTE}
+                                ${salvoPill}
+                            </td>
+                            <td class="py-2 px-2 align-top min-w-[230px]">
+                                <input type="text" id="mMapDest_${row._idx}" list="preVooCatalogoDatalist" value="${escapeHtml(row.destino)}" onchange="atualizarDestinoMapaMaster(${row._idx}, this.value)" placeholder="Escolha Linha › Equipamento em ob_linhas..." class="input-clean py-1 px-2 text-[11px] font-bold w-full">
+                                ${chips ? `<div class="flex flex-wrap gap-1 mt-1">${chips}</div>` : ""}
+                            </td>
+                            <td class="py-2 px-2 text-right whitespace-nowrap align-top">
+                                <div class="flex flex-wrap gap-1 justify-end">
+                                    <button type="button" onclick="definirTipoLinhaMapaMaster(${row._idx}, 'ATIVO_ARVORE')" class="px-2 py-1 rounded-lg bg-emerald-50 hover:bg-emerald-100 text-emerald-900 border border-emerald-200 text-[9px] font-extrabold" title="Vincular definitivamente à Árvore ob_linhas">✅ Árvore</button>
+                                    <button type="button" onclick="definirTipoLinhaMapaMaster(${row._idx}, 'FERRAMENTAL')" class="px-2 py-1 rounded-lg bg-violet-50 hover:bg-violet-100 text-violet-900 border border-violet-200 text-[9px] font-extrabold" title="Categoria Ferramental/Molde (fora da árvore e fora AQF)">🔧 Ferram.</button>
+                                    <button type="button" onclick="definirTipoLinhaMapaMaster(${row._idx}, 'NAO_ATIVO')" class="px-2 py-1 rounded-lg bg-slate-100 hover:bg-slate-200 text-slate-800 border border-slate-300 text-[9px] font-extrabold" title="Não-Ativo / Predial / Apoio (fora dos Estudos AQF)">🏢 Não-Ativo</button>
+                                    <button type="button" onclick="definirTipoLinhaMapaMaster(${row._idx}, 'COMPARTILHADO')" class="px-2 py-1 rounded-lg bg-amber-50 hover:bg-amber-100 text-amber-950 border border-amber-300 text-[9px] font-extrabold" title="1 agrupador Compartilhado/Genérico sem ir à Gestão de Ativos">🔁 Compart.</button>
+                                    ${row.salvoNuvem ? `<button type="button" onclick="removerEntradaMapaMaster(${row._idx})" class="px-1.5 py-1 rounded-lg bg-rose-50 hover:bg-rose-100 text-rose-700 border border-rose-200 text-[9px] font-extrabold" title="Remover este mapeamento da nuvem">🗑️</button>` : ""}
+                                </div>
+                            </td>
+                        </tr>`;
+                }).join("");
+            }
+
+            const rod = document.getElementById("masterMapaRodapeTxt");
+            if (rod) {
+                const naoSalvos = masterMapaLinhas.filter(x => !x.salvoNuvem && STATUS_CONCILIADOS_PRE_VOO.has(x.status)).length;
+                const avisoCap = filtrados.length > MAX_VISIVEIS ? ` (exibindo ${MAX_VISIVEIS} de ${filtrados.length} — use a busca para filtrar)` : "";
+                rod.innerText = `Total na grade: ${cntTodos} ativo(s) únicos • ${cntArv} Árvore • ${cntFerr} Ferramentais • ${cntNao} Não-Ativos • ${cntComp} Compartilhados • ${cntPend} Pendentes${avisoCap}${naoSalvos > 0 ? ` • ${naoSalvos} automático(s) prontos para salvar na nuvem!` : ""}`;
+            }
+        };
+
+        window.atualizarDestinoMapaMaster = (idx, val) => {
+            const row = masterMapaLinhas[idx];
+            if (!row) return;
+            row.destino = String(val || "").trim();
+            if (row.destino) {
+                row.tipo_ativo = "ATIVO_ARVORE";
+                row.status = "DEPARA";
+                row.editado = true;
+            }
+        };
+
+        window.aplicarChipMapaMaster = async (idx, label) => {
+            const row = masterMapaLinhas[idx];
+            if (!row) return;
+            row.destino = String(label || "").trim();
+            row.tipo_ativo = "ATIVO_ARVORE";
+            row.status = "DEPARA";
+            row.salvoNuvem = true;
+            row.editado = false;
+            gravarEscolhaDePara(row.ativoErp, row.destino, "MASTER", "ATIVO_ARVORE");
+            await salvarDeParaAtivosPersistente();
+            reEnriquecerAtivosOmsAuditadas();
+            recalcularNosPosAuditoria();
+            renderCentralMapaMaster();
+            showToast(`✅ "${row.ativoErp}" vinculado a "${row.destino}" na nuvem!`, "success");
+        };
+
+        window.definirTipoLinhaMapaMaster = async (idx, tipo) => {
+            const row = masterMapaLinhas[idx];
+            if (!row) return;
+            if (tipo === "ATIVO_ARVORE") {
+                const inpVal = (document.getElementById(`mMapDest_${idx}`)?.value || row.destino || "").trim();
+                const destFinal = inpVal || row.candidatos?.[0]?.label || "";
+                if (!destFinal || /^(?:FERRAMENTAL \/ MOLDE|NÃO-ATIVO|COMPARTILHADOS \/ GENÉRICOS)\s*›/i.test(destFinal)) {
+                    showToast("Digite ou selecione o destino 'Linha › Equipamento' na caixa antes de clicar em ✅ Árvore.", "info");
+                    document.getElementById(`mMapDest_${idx}`)?.focus();
+                    return;
+                }
+                gravarEscolhaDePara(row.ativoErp, destFinal, "MASTER", "ATIVO_ARVORE");
+                row.tipo_ativo = "ATIVO_ARVORE";
+                row.status = "DEPARA";
+                row.destino = destFinal;
+            } else {
+                gravarEscolhaDePara(row.ativoErp, "", "MASTER", tipo);
+                const salvo = deParaAtivosMap[normKey(row.ativoErp)];
+                row.tipo_ativo = tipo;
+                row.status = tipo;
+                row.destino = salvo?.label || row.ativoErp;
+            }
+            row.salvoNuvem = true;
+            row.editado = false;
+            await salvarDeParaAtivosPersistente();
+            reEnriquecerAtivosOmsAuditadas();
+            recalcularNosPosAuditoria();
+            renderCentralMapaMaster();
+            showToast(`Salvo na nuvem: "${row.ativoErp}" → ${row.destino}`, "success");
+        };
+
+        window.removerEntradaMapaMaster = async (idx) => {
+            const row = masterMapaLinhas[idx];
+            if (!row) return;
+            delete deParaAtivosMap[normKey(row.ativoErp)];
+            await salvarDeParaAtivosPersistente();
+            const catalogo = extrairCatalogoAtivosOficiais();
+            masterMapaLinhas[idx] = construirLinhaMapaMaster(row, catalogo);
+            reEnriquecerAtivosOmsAuditadas();
+            recalcularNosPosAuditoria();
+            renderCentralMapaMaster();
+            showToast(`Mapeamento salvo removido de "${row.ativoErp}".`, "info");
+        };
+
+        window.aprovarTodosAutomaticosMapaMaster = async () => {
+            if (!masterMapaLinhas.length) {
+                showToast("Importe Ativos.xlsx primeiro para aprovar os automáticos.", "info");
+                return;
+            }
+            let cArv = 0, cFerr = 0, cNao = 0, cComp = 0;
+            masterMapaLinhas.forEach(row => {
+                if (row.status === "AUTO_EXATO" || (row.editado && row.destino && row.tipo_ativo === "ATIVO_ARVORE")) {
+                    if (row.destino) {
+                        gravarEscolhaDePara(row.ativoErp, row.destino, row.editado ? "MASTER" : "AUTO_EXATO", "ATIVO_ARVORE");
+                        row.status = "DEPARA";
+                        row.salvoNuvem = true;
+                        row.editado = false;
+                        cArv++;
+                    }
+                } else if (row.status === "FERRAMENTAL") {
+                    gravarEscolhaDePara(row.ativoErp, row.destino, "AUTO_REGRA", "FERRAMENTAL");
+                    row.salvoNuvem = true;
+                    cFerr++;
+                } else if (row.status === "NAO_ATIVO") {
+                    gravarEscolhaDePara(row.ativoErp, row.destino, "AUTO_REGRA", "NAO_ATIVO");
+                    row.salvoNuvem = true;
+                    cNao++;
+                } else if (row.status === "COMPARTILHADO") {
+                    gravarEscolhaDePara(row.ativoErp, row.destino, "AUTO_REGRA", "COMPARTILHADO");
+                    row.salvoNuvem = true;
+                    cComp++;
+                }
+            });
+            const total = cArv + cFerr + cNao + cComp;
+            if (!total) {
+                showToast("Nenhum item automático novo para aprovar.", "info");
+                return;
+            }
+            await salvarDeParaAtivosPersistente();
+            reEnriquecerAtivosOmsAuditadas();
+            recalcularNosPosAuditoria();
+            renderCentralMapaMaster();
+            showToast(`⚡ ${total} mapeamento(s) salvos na nuvem (${cArv} Árvore • ${cFerr} Ferram. • ${cNao} Não-Ativos • ${cComp} Compart.)!`, "success");
+        };
+
+        window.marcarTodosPendentesComoCompartilhadoMaster = async () => {
+            const alvos = obterLinhasFiltradasMapaMaster().filter(r => r.status === "PENDENTE" || r.status === "SUGESTAO");
+            if (!alvos.length) {
+                showToast("Nenhum item pendente/sugestão no filtro atual.", "info");
+                return;
+            }
+            alvos.forEach(item => {
+                const row = masterMapaLinhas[item._idx];
+                if (!row) return;
+                gravarEscolhaDePara(row.ativoErp, "", "MASTER_LOTE", "COMPARTILHADO");
+                const salvo = deParaAtivosMap[normKey(row.ativoErp)];
+                row.tipo_ativo = "COMPARTILHADO";
+                row.status = "COMPARTILHADO";
+                row.destino = salvo?.label || formatarAgrupadorCompartilhado(row.ativoErp);
+                row.salvoNuvem = true;
+                row.editado = false;
+            });
+            await salvarDeParaAtivosPersistente();
+            reEnriquecerAtivosOmsAuditadas();
+            recalcularNosPosAuditoria();
+            renderCentralMapaMaster();
+            showToast(`🔁 ${alvos.length} ativo(s) agrupado(s) como Compartilhado/Genérico (sem ir para Gestão de Ativos) e salvos na nuvem!`, "success");
+        };
+
+        window.autoMapearPendentesGeminiMapaMaster = async () => {
+            const pendentes = obterLinhasFiltradasMapaMaster().filter(r => r.status === "PENDENTE" || r.status === "SUGESTAO");
+            if (!pendentes.length) {
+                showToast("Nenhum ativo pendente no filtro atual para o Gemini analisar!", "info");
+                return;
+            }
+            const cfg = carregarCofreIaLocal();
+            if (!cfg.key || typeof fetch !== "function") {
+                showToast("Cadastre sua chave Gemini API no Cofre acima para usar a sugestão em lote com IA.", "error");
+                return;
+            }
+            const btn = document.getElementById("btnAutoMapearGeminiMaster");
+            if (btn) btn.disabled = true;
+            try {
+                const catalogo = extrairCatalogoAtivosOficiais();
+                const listaCatTexto = catalogo.slice(0, 260).map(c => `${c.label} (${c.area})`);
+                let arvCnt = 0, espCnt = 0;
+                let modeloUsado = "";
+
+                for (let i = 0; i < pendentes.length; i += 30) {
+                    const bloco = pendentes.slice(i, i + 30);
+                    const prompt = `Você é especialista em Gestão de Ativos industriais (PCM Cepêra).
+Classifique cada ativo exportado do ERP Sankhya em 1 das 4 categorias definitivas:
+- "ATIVO_ARVORE": equipamento industrial que pertence a uma linha/equipamento em ob_linhas (pode mapear tanto para "Linha › Equipamento" quanto para "Linha › (Linha Geral)" da lista abaixo; respeite nomes invertidos como "RESFRIADOR - TETRAPACK 2").
+- "FERRAMENTAL": moldes, ferramentais, matrizes removíveis.
+- "NAO_ATIVO": predial, infraestrutura, salas, banheiros, portaria, oficina, logística/RH (ficará fora dos Estudos AQF).
+- "COMPARTILHADO": ativo genérico/compartilhado entre linhas ou sem cadastro individual na árvore (1 agrupador único sem ir para Gestão de Ativos).
+Catálogo oficial ob_linhas:\n${JSON.stringify(listaCatTexto)}
+Ativos do ERP:\n${JSON.stringify(bloco.map(b => ({ ativo_erp: b.ativoErp, familia: b.familia, cr: b.cr, repeticoes: b.qtdRepeticoes })))}
+Responda SOMENTE JSON Array: [{"ativo_erp":"...","tipo_ativo":"ATIVO_ARVORE"|"FERRAMENTAL"|"NAO_ATIVO"|"COMPARTILHADO","catalogo_label":string|null}]`;
+
+                    const { text, model } = await chamarGeminiApiComFallback(cfg.key, prompt);
+                    modeloUsado = model;
+                    const parsed = extrairJsonArrayGemini(text);
+                    if (Array.isArray(parsed)) {
+                        parsed.forEach(item => {
+                            if (!item?.ativo_erp) return;
+                            const row = masterMapaLinhas.find(x => normKey(x.ativoErp) === normKey(item.ativo_erp));
+                            if (!row) return;
+                            const tipo = String(item.tipo_ativo || "ATIVO_ARVORE").toUpperCase();
+                            if (tipo === "FERRAMENTAL" || tipo === "NAO_ATIVO" || tipo === "COMPARTILHADO") {
+                                gravarEscolhaDePara(row.ativoErp, "", "IA_GEMINI_MASTER", tipo);
+                                const salvo = deParaAtivosMap[normKey(row.ativoErp)];
+                                row.tipo_ativo = tipo;
+                                row.status = tipo;
+                                row.destino = salvo?.label || row.ativoErp;
+                                row.salvoNuvem = true;
+                                row.editado = false;
+                                espCnt++;
+                            } else if (item.catalogo_label) {
+                                const lblLimpo = String(item.catalogo_label).replace(/\s*\([^)]+\)\s*$/, "").trim();
+                                const matchOf = catalogo.find(c => normKey(c.label) === normKey(lblLimpo))
+                                    || catalogo.find(c => normKey(lblLimpo).includes(normKey(c.label)));
+                                const destFinal = matchOf ? matchOf.label : lblLimpo;
+                                gravarEscolhaDePara(row.ativoErp, destFinal, "IA_GEMINI_MASTER", "ATIVO_ARVORE");
+                                row.tipo_ativo = "ATIVO_ARVORE";
+                                row.status = "DEPARA";
+                                row.destino = destFinal;
+                                row.salvoNuvem = true;
+                                row.editado = false;
+                                arvCnt++;
+                            }
+                        });
+                    }
+                }
+                if (arvCnt > 0 || espCnt > 0) {
+                    await salvarDeParaAtivosPersistente();
+                    reEnriquecerAtivosOmsAuditadas();
+                    recalcularNosPosAuditoria();
+                }
+                renderCentralMapaMaster();
+                showToast(`🧠 Gemini (${modeloUsado}): ${arvCnt} vinculado(s) na Árvore + ${espCnt} em Categorias Especiais e salvos na nuvem!`, "success");
+            } catch (err) {
+                showToast(`Falha Gemini no Mapa Master: ${err?.message || err}`, "error");
+            } finally {
+                if (btn) btn.disabled = false;
+            }
+        };
+
+        window.salvarTodoMapaMasterNaNuvem = async () => {
+            let salvos = 0;
+            masterMapaLinhas.forEach(row => {
+                if (row.tipo_ativo === "FERRAMENTAL" || row.tipo_ativo === "NAO_ATIVO" || row.tipo_ativo === "COMPARTILHADO") {
+                    gravarEscolhaDePara(row.ativoErp, row.destino, row.salvoNuvem ? "MASTER" : "AUTO_REGRA", row.tipo_ativo);
+                    row.salvoNuvem = true;
+                    row.editado = false;
+                    salvos++;
+                } else if ((row.status === "DEPARA" || row.status === "AUTO_EXATO" || row.editado) && row.destino) {
+                    gravarEscolhaDePara(row.ativoErp, row.destino, row.editado ? "MASTER" : "AUTO_EXATO", "ATIVO_ARVORE");
+                    row.status = "DEPARA";
+                    row.salvoNuvem = true;
+                    row.editado = false;
+                    salvos++;
+                }
+            });
+            await salvarDeParaAtivosPersistente();
+            reEnriquecerAtivosOmsAuditadas();
+            recalcularNosPosAuditoria();
+            renderCentralMapaMaster();
+            showToast(`💾 Mapa Master salvo na nuvem (${Object.keys(deParaAtivosMap).length} ativo(s) mapeados permanentemente)!`, "success");
+        };
+
         window.renderMasterMaestriView = () => {
             if (!isAdminMasterAtivo()) return;
             carregarCofreIaLocal();
             atualizarBadgesFontesManuaisAqf();
             sincronizarFormAprovadoresAqfMasterUI();
             atualizarUIBancoHistoricoOms();
+            atualizarKpisMapaMasterCloud();
             const busca = normKey(document.getElementById("masterOmBusca")?.value || "");
             const list = omsAuditadas.filter(o => !busca || normKey(`${o.om} ${o.ativo} ${o.categoria} ${o.problema}`).includes(busca));
             const cntEl = document.getElementById("masterOmSelCount");
@@ -10421,6 +11434,7 @@ Responda SOMENTE JSON Array: [{"ativo_erp":"...","catalogo_label":string|null,"n
             atualizarBadgesFontesManuaisAqf();
             atualizarUIBancoHistoricoOms();
             sincronizarFormAprovadoresAqfMasterUI();
+            atualizarKpisMapaMasterCloud();
 
             try {
                 await Promise.race([
@@ -10446,7 +11460,8 @@ Responda SOMENTE JSON Array: [{"ativo_erp":"...","catalogo_label":string|null,"n
                     if (data && data.mappings && typeof data.mappings === "object") {
                         deParaAtivosMap = { ...data.mappings, ...deParaAtivosMap };
                         safeStorage.set("cepera_maestri_ativos_depara", JSON.stringify(deParaAtivosMap));
-                        if (omsAuditadas.length) {
+                        atualizarKpisMapaMasterCloud();
+                        if (omsAuditadas.length || bancoHistoricoOmsMap.size) {
                             reEnriquecerAtivosOmsAuditadas();
                             recalcularNosPosAuditoria();
                             renderCurrentView();
@@ -10598,9 +11613,10 @@ Responda SOMENTE JSON Array: [{"ativo_erp":"...","catalogo_label":string|null,"n
 
             onSnapshot(colLinhas, snap => {
                 rawLinhasDocs = snap.docs.map(d => ({ id: d.id, ...d.data() }));
-                if (omsAuditadas.length) {
+                if (omsAuditadas.length || bancoHistoricoOmsMap.size) {
                     reEnriquecerAtivosOmsAuditadas();
                 }
+                atualizarKpisMapaMasterCloud();
                 recalcularNosPosAuditoria();
                 renderCurrentView();
                 if (!document.getElementById("modalPreProcessamentoErp")?.hidden) {
