@@ -8058,7 +8058,7 @@
                 agendarRenderPreventivas();
                 tentarAplicarHandoffPreventiva();
                 marcarSyncPortal('manutencao', 'Ordens e Planos', snap);
-            }, () => { setSyncStatus(false, 'Erro de conexão Firestore'); marcarSyncPortal('manutencao', 'Ordens e Planos', snap); });
+            }, () => { setSyncStatus(false, 'Erro de conexão Firestore'); marcarSyncPortal('manutencao', 'Ordens e Planos'); });
 
             onSnapshot(colLinhas, snap => {
                 rawLinhasDocs = snap.docs.map(d => ({ id: d.id, ...d.data() }));
