@@ -34,8 +34,7 @@
             border: 1px solid #e2e8f0;
             box-shadow: 0 8px 24px -10px rgba(15, 23, 42, 0.06);
         }
-        @keyframes ceperaWsSpin { to { transform: rotate(360deg); } }
-        .ws-spinner { animation: ceperaWsSpin 0.85s linear infinite !important; }
+
 
         .glass-card {
             background: #ffffff;
@@ -193,6 +192,16 @@
             transition: none !important;
             animation: none !important;
             box-shadow: none !important;
+        }
+        @keyframes ceperaWsSpin { to { transform: rotate(360deg); } }
+        .ws-spinner,
+        body.tablet-mode .ws-spinner,
+        body.tablet-mode #workspaceLoadingOverlay .ws-spinner {
+            animation: ceperaWsSpin 0.85s linear infinite !important;
+        }
+        #workspaceLoadingBar,
+        body.tablet-mode #workspaceLoadingBar {
+            transition: width 0.25s ease-out !important;
         }
         body.tablet-mode .glass-card-hover:hover,
         body.tablet-mode .btn-pill-dark:hover,
@@ -479,7 +488,12 @@
         <!-- CONTAINER DO SPA SELECIONADO COM OVERLAY DE CARREGAMENTO -->
         <div class="relative flex-1 w-full bg-slate-100 overflow-hidden flex flex-col">
             <div id="workspaceLoadingOverlay" class="hidden absolute inset-0 z-20 bg-slate-900/95 flex flex-col items-center justify-center gap-4 text-white p-6 select-none">
-                <div class="w-12 h-12 rounded-full border-4 border-sky-400/25 border-t-sky-400 ws-spinner"></div>
+                <svg class="w-12 h-12 text-sky-400 ws-spinner" viewBox="0 0 50 50" fill="none" aria-hidden="true">
+                    <circle cx="25" cy="25" r="20" stroke="currentColor" stroke-opacity="0.22" stroke-width="5"></circle>
+                    <path d="M25 5 a20 20 0 0 1 18.5 12.3" stroke="currentColor" stroke-width="5" stroke-linecap="round">
+                        <animateTransform attributeName="transform" type="rotate" from="0 25 25" to="360 25 25" dur="0.8s" repeatCount="indefinite" />
+                    </path>
+                </svg>
                 <div class="text-center space-y-1.5 max-w-md w-full">
                     <div id="workspaceLoadingTitle" class="text-base font-extrabold tracking-tight">Carregando módulo...</div>
                     <div id="workspaceLoadingSub" class="text-xs text-slate-300 font-semibold">Baixando interface e aguardando sincronização do banco de dados...</div>
@@ -1626,9 +1640,11 @@
         // ================= WORKSPACE INTEGRADO (SSO + IFRAME) =================
         // Versão estável permite cache HTTP do navegador nos SPAs (450KB-880KB), acelerando trocas de módulo.
         // Só altera ao clicar explicitamente em "↻ Atualizar".
-        let CENTRAL_RUNTIME_VER = '2026.11.27-v4';
+        let CENTRAL_RUNTIME_VER = '2026.11.27-v5';
         let _wsLoadSafetyTimer = null;
         let _wsForceBtnTimer = null;
+        let _wsTickInterval = null;
+        let _wsCurrentPct = 12;
         let _wsAguardandoSync = false;
         let _prefetchExecutado = false;
 
@@ -1644,6 +1660,7 @@
             const sb = document.getElementById('workspaceLoadingSub');
             const tt = document.getElementById('workspaceLoadingTitle');
             const p = Math.max(0, Math.min(100, Math.round(Number(pct) || 0)));
+            _wsCurrentPct = p;
             if (bar) bar.style.width = `${p}%`;
             if (lbl) lbl.innerText = `${p}%`;
             if (subText && sb) sb.innerText = subText;
@@ -1652,6 +1669,7 @@
 
         function mostrarOverlayWorkspace(titulo) {
             _wsAguardandoSync = true;
+            _wsCurrentPct = 12;
             const ov = document.getElementById('workspaceLoadingOverlay');
             const btnForce = document.getElementById('btnWorkspaceForceOpen');
             if (btnForce) btnForce.classList.add('hidden');
@@ -1663,8 +1681,16 @@
                 titulo ? `Carregando ${titulo}...` : 'Carregando módulo...'
             );
             if (ov) ov.classList.remove('hidden');
+            clearInterval(_wsTickInterval);
             clearTimeout(_wsForceBtnTimer);
             clearTimeout(_wsLoadSafetyTimer);
+            // Avanço contínuo suave entre marcos de rede para nunca parecer congelado
+            _wsTickInterval = setInterval(() => {
+                if (!_wsAguardandoSync) { clearInterval(_wsTickInterval); return; }
+                if (_wsCurrentPct < 92) {
+                    atualizarProgressoOverlayWorkspace(_wsCurrentPct + 1);
+                }
+            }, 350);
             // Após 12s, oferece botão discreto caso a rede esteja offline/bloqueada
             _wsForceBtnTimer = setTimeout(() => {
                 if (_wsAguardandoSync) {
@@ -1678,6 +1704,7 @@
 
         window.ocultarOverlayWorkspace = () => {
             _wsAguardandoSync = false;
+            clearInterval(_wsTickInterval);
             clearTimeout(_wsForceBtnTimer);
             clearTimeout(_wsLoadSafetyTimer);
             const ov = document.getElementById('workspaceLoadingOverlay');
@@ -1731,7 +1758,7 @@
                 propagarPrefsParaIframe();
                 if (_wsAguardandoSync) {
                     atualizarProgressoOverlayWorkspace(
-                        24,
+                        Math.max(_wsCurrentPct, 28),
                         'Interface carregada • Sincronizando dados com o banco Firestore...',
                         appAtualWorkspace ? `Sincronizando ${appAtualWorkspace.shortTitle || appAtualWorkspace.title}...` : 'Sincronizando módulo...'
                     );
@@ -2259,7 +2286,7 @@
                 if (frame && frame.contentWindow === ev.source && _wsAguardandoSync) {
                     const loaded = Number(ev.data.loaded || 0);
                     const total = Math.max(1, Number(ev.data.total || 1));
-                    const pct = 24 + Math.round((loaded / total) * 72);
+                    const pct = Math.max(_wsCurrentPct, 28 + Math.round((loaded / total) * 68));
                     atualizarProgressoOverlayWorkspace(pct, ev.data.text || `Sincronizando banco de dados (${loaded}/${total})...`);
                 }
             } else if (ev.data.type === 'CEPERA_APP_READY') {
