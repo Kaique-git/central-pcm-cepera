@@ -866,6 +866,10 @@
                                 <button type="button" id="btnMasterPrevTabPlanos" onclick="setMasterPrevTab('planos')" class="px-4 py-1.5 rounded-full text-xs font-extrabold text-slate-600">
                                     Planos Preventivos (<span id="masterPrevCntPlanos">0</span>)
                                 </button>
+                                <button type="button" id="btnMasterPrevTabSaneamento" onclick="setMasterPrevTab('saneamento_planos')" class="px-4 py-1.5 rounded-full text-xs font-extrabold text-amber-800 bg-amber-100/80 hover:bg-amber-200/80 inline-flex items-center gap-1.5">
+                                    <span>🔍 Saneamento de Planos</span>
+                                    <span id="masterPrevCntSaneamento" class="px-1.5 py-0.2 rounded-full bg-amber-600 text-white text-[10px]">0</span>
+                                </button>
                             </div>
                             <div class="flex flex-wrap items-center gap-2">
                                 <input type="text" id="masterPrevBusca" oninput="renderMasterPrevView()" class="input-clean py-2 text-xs font-bold w-full sm:w-64" placeholder="Buscar por código, título, ativo, semana S10...">
@@ -876,6 +880,11 @@
                                     <option value="andamento">Em Andamento</option>
                                     <option value="concluido">Concluídas</option>
                                     <option value="cancelado">Canceladas</option>
+                                </select>
+                                <select id="masterPrevFiltroSimNivel" onchange="renderMasterPrevView()" hidden class="hidden input-clean py-2 text-xs font-bold w-auto">
+                                    <option value="">Similaridade: Todas (≥ 65%)</option>
+                                    <option value="alta">Alta + Exata (≥ 75%)</option>
+                                    <option value="exata">Apenas Duplicidade Exata (≥ 88%)</option>
                                 </select>
                                 <button type="button" onclick="selecionarTodosVisiveisMasterPrev()" class="px-3 py-2 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-700 text-[11px] font-extrabold">Selecionar Visíveis</button>
                                 <button type="button" onclick="limparSelecaoMasterPrev()" class="px-3 py-2 rounded-xl bg-white hover:bg-slate-50 border border-slate-200 text-slate-600 text-[11px] font-extrabold">Limpar</button>
@@ -7362,13 +7371,476 @@
             return true;
         }
 
+        // ================= SANEAMENTO DE PLANOS DUPLICADOS / PARECIDOS (ADMIN MASTER) =================
+        function getChaveIgnoradosSaneamentoPlanos() {
+            return 'cepera_prev_saneamento_ignorados_v1';
+        }
+        function lerParesIgnoradosSaneamentoPlanos() {
+            try {
+                const arr = JSON.parse(safeStorage.get(getChaveIgnoradosSaneamentoPlanos()) || '[]');
+                return new Set(Array.isArray(arr) ? arr : []);
+            } catch (_) { return new Set(); }
+        }
+        function salvarParesIgnoradosSaneamentoPlanos(setObj) {
+            safeStorage.set(getChaveIgnoradosSaneamentoPlanos(), JSON.stringify([...setObj]));
+        }
+        function makePairKeySaneamentoPlanos(idA, idB) {
+            return [String(idA || ''), String(idB || '')].sort().join('__');
+        }
+
+        function tokenizarTextoSaneamentoPlano(str, extrasRemover = []) {
+            const stop = new Set([
+                'de', 'da', 'do', 'das', 'dos', 'em', 'na', 'no', 'nas', 'nos', 'para', 'por', 'com', 'sem', 'ao', 'aos',
+                'preventiva', 'plano', 'manutencao', 'inspecao', 'verificacao', 'geral', 'periodica', 'rotina',
+                'diaria', 'semanal', 'quinzenal', 'mensal', 'bimestral', 'trimestral', 'quadrimestral', 'semestral', 'anual', 'bienal',
+                'mecanica', 'eletrica', 'automacao', 'lubrificacao', 'utilidades', 'instrumentacao', 'preditiva',
+                ...extrasRemover.flatMap(x => normKey(x).split(/\s+/))
+            ]);
+            return normKey(str || '')
+                .replace(/[^a-z0-9\s]/g, ' ')
+                .split(/\s+/)
+                .filter(t => t.length >= 2 && !stop.has(t));
+        }
+
+        function calcJaccardTokensPlano(arrA, arrB) {
+            const setA = new Set(arrA);
+            const setB = new Set(arrB);
+            if (!setA.size && !setB.size) return 1;
+            if (!setA.size || !setB.size) return 0;
+            let inter = 0;
+            setA.forEach(t => { if (setB.has(t)) inter++; });
+            const union = setA.size + setB.size - inter;
+            return union > 0 ? inter / union : 0;
+        }
+
+        function calcSimilaridadeParPlanosMesmoEquip(pA, pB) {
+            const ctxExtras = [pA.setor, pA.maquina, pA.equipamento, pB.setor, pB.maquina, pB.equipamento];
+            const conjA = normKey(pA.conjunto || '');
+            const conjB = normKey(pB.conjunto || '');
+            const subA = normKey(pA.subconjunto || '');
+            const subB = normKey(pB.subconjunto || '');
+            const perA = normKey(pA.periodicidade || 'Mensal');
+            const perB = normKey(pB.periodicidade || 'Mensal');
+            const discA = normKey(pA.disciplina || 'Mecânica');
+            const discB = normKey(pB.disciplina || 'Mecânica');
+
+            const mesmoConjunto = (conjA === conjB);
+            const mesmoSubconjunto = (subA === subB);
+            const mesmaPeriodicidade = (perA === perB);
+            const mesmaDisciplina = (discA === discB);
+
+            const titCleanA = tokenizarTextoSaneamentoPlano(pA.titulo, ctxExtras);
+            const titCleanB = tokenizarTextoSaneamentoPlano(pB.titulo, ctxExtras);
+            const titStrA = titCleanA.join(' ');
+            const titStrB = titCleanB.join(' ');
+            const tituloExato = Boolean(
+                normKey(pA.titulo) === normKey(pB.titulo) ||
+                (titStrA && titStrA === titStrB)
+            );
+            const simTitulo = tituloExato
+                ? 1
+                : Math.max(
+                    calcJaccardTokensPlano(titCleanA, titCleanB),
+                    (titStrA && titStrB && (titStrA.includes(titStrB) || titStrB.includes(titStrA))) ? 0.85 : 0
+                );
+
+            const chkTasksA = (Array.isArray(pA.checklist) ? pA.checklist : []).map(i => normKey(i?.tarefa || '')).filter(Boolean);
+            const chkTasksB = (Array.isArray(pB.checklist) ? pB.checklist : []).map(i => normKey(i?.tarefa || '')).filter(Boolean);
+            const chkTokA = chkTasksA.flatMap(t => tokenizarTextoSaneamentoPlano(t));
+            const chkTokB = chkTasksB.flatMap(t => tokenizarTextoSaneamentoPlano(t));
+            const simTasksExatas = (chkTasksA.length && chkTasksB.length) ? calcJaccardTokensPlano(chkTasksA, chkTasksB) : 0;
+            const simTasksTokens = (chkTokA.length && chkTokB.length) ? calcJaccardTokensPlano(chkTokA, chkTokB) : 0;
+            const simChecklist = Math.max(simTasksExatas, simTasksTokens * 0.9);
+
+            const motivos = [];
+            let score = 0;
+
+            if (mesmoConjunto && mesmoSubconjunto && mesmaPeriodicidade && mesmaDisciplina) {
+                score = Math.max(score, 86 + Math.round(Math.max(simTitulo, simChecklist) * 14));
+                motivos.push('Mesmo Conjunto/Subconjunto + mesma Periodicidade e Disciplina');
+            }
+            if (tituloExato && mesmoConjunto && mesmoSubconjunto) {
+                score = Math.max(score, 96);
+                motivos.push('Título idêntico no mesmo Conjunto/Subconjunto');
+            } else if (tituloExato) {
+                score = Math.max(score, 85);
+                motivos.push('Título idêntico dentro do mesmo equipamento');
+            }
+            if (simChecklist >= 0.75) {
+                score = Math.max(score, Math.round(74 + simChecklist * 25));
+                motivos.push(`Checklist ${Math.round(simChecklist * 100)}% semelhante`);
+            } else if (simChecklist >= 0.5 && mesmoConjunto) {
+                score = Math.max(score, Math.round(68 + simChecklist * 24));
+                motivos.push(`Checklist ${Math.round(simChecklist * 100)}% semelhante no mesmo conjunto`);
+            }
+            if (simTitulo >= 0.65 && mesmoConjunto && mesmaDisciplina) {
+                score = Math.max(score, Math.round(66 + simTitulo * 26));
+                motivos.push(`Título muito parecido (${Math.round(simTitulo * 100)}%) no mesmo conjunto`);
+            }
+            if (mesmoConjunto && mesmoSubconjunto && mesmaDisciplina && !mesmaPeriodicidade && (simTitulo >= 0.55 || simChecklist >= 0.5)) {
+                score = Math.max(score, 72);
+                motivos.push('Mesmo alvo e disciplina (periodicidades diferentes)');
+            }
+
+            const nivel = score >= 88 ? 'exata' : (score >= 75 ? 'alta' : 'moderada');
+            return {
+                score: Math.min(100, score),
+                nivel,
+                motivos: [...new Set(motivos)],
+                simTitulo: Math.round(simTitulo * 100),
+                simChecklist: Math.round(simChecklist * 100)
+            };
+        }
+
+        function detectarGruposPlanosSimilares(opts = {}) {
+            const mostrarIgnorados = Boolean(opts.mostrarIgnorados);
+            const nivelMin = opts.nivelMin || '';
+            const busca = normKey(opts.busca || '');
+            const ignorados = lerParesIgnoradosSaneamentoPlanos();
+            const planos = getPlanosPreventiva();
+
+            // Agrupa estritamente por Setor + Máquina/Linha + Equipamento
+            // (planos idênticos em linhas/máquinas diferentes são normais e NÃO entram como duplicidade!)
+            const porEquipamento = new Map();
+            planos.forEach(p => {
+                const eqName = normKey(p.equipamento || '');
+                const maqName = normKey(p.maquina || '');
+                if (!eqName && !maqName) return;
+                const key = `${normKey(p.setor || '')}||${maqName}||${eqName}`;
+                if (!porEquipamento.has(key)) porEquipamento.set(key, []);
+                porEquipamento.get(key).push(p);
+            });
+
+            const grupos = [];
+            let totalIgnorados = 0;
+
+            porEquipamento.forEach((lista) => {
+                if (lista.length < 2) return;
+                const paresValidos = [];
+                for (let i = 0; i < lista.length; i++) {
+                    for (let j = i + 1; j < lista.length; j++) {
+                        const a = lista[i], b = lista[j];
+                        const info = calcSimilaridadeParPlanosMesmoEquip(a, b);
+                        if (info.score < 65) continue;
+                        const pk = makePairKeySaneamentoPlanos(a.id, b.id);
+                        const ehIgn = ignorados.has(pk);
+                        if (ehIgn) totalIgnorados++;
+                        if (ehIgn !== mostrarIgnorados) continue;
+                        if (nivelMin === 'exata' && info.nivel !== 'exata') continue;
+                        if (nivelMin === 'alta' && info.nivel !== 'exata' && info.nivel !== 'alta') continue;
+                        paresValidos.push({ a, b, pk, ehIgn, info });
+                    }
+                }
+                if (!paresValidos.length) return;
+
+                // Componentes conectados dentro do mesmo equipamento
+                const adj = new Map();
+                const mapPl = new Map();
+                paresValidos.forEach(({ a, b }) => {
+                    mapPl.set(a.id, a);
+                    mapPl.set(b.id, b);
+                    if (!adj.has(a.id)) adj.set(a.id, new Set());
+                    if (!adj.has(b.id)) adj.set(b.id, new Set());
+                    adj.get(a.id).add(b.id);
+                    adj.get(b.id).add(a.id);
+                });
+
+                const visitados = new Set();
+                mapPl.forEach((_, startId) => {
+                    if (visitados.has(startId)) return;
+                    const compIds = [];
+                    const fila = [startId];
+                    visitados.add(startId);
+                    while (fila.length) {
+                        const cur = fila.shift();
+                        compIds.push(cur);
+                        (adj.get(cur) || []).forEach(nb => {
+                            if (!visitados.has(nb)) {
+                                visitados.add(nb);
+                                fila.push(nb);
+                            }
+                        });
+                    }
+                    const compPlanos = compIds.map(id => mapPl.get(id)).filter(Boolean);
+                    const compPares = paresValidos.filter(pr => compIds.includes(pr.a.id) && compIds.includes(pr.b.id));
+                    const maxScore = Math.max(...compPares.map(pr => pr.info.score));
+                    const motivos = [...new Set(compPares.flatMap(pr => pr.info.motivos))];
+                    const rep = compPlanos[0];
+
+                    // Ordena: plano com mais ordens/itens ou mais antigo primeiro (sugerido como principal)
+                    const todasOrdens = getOrdensPreventiva();
+                    compPlanos.sort((x, y) => {
+                        const ox = todasOrdens.filter(o => o.planoId === x.id).length;
+                        const oy = todasOrdens.filter(o => o.planoId === y.id).length;
+                        const cx = Array.isArray(x.checklist) ? x.checklist.length : 0;
+                        const cy = Array.isArray(y.checklist) ? y.checklist.length : 0;
+                        return (oy - ox) || (cy - cx) || String(x.codigo || '').localeCompare(String(y.codigo || ''));
+                    });
+
+                    const grpObj = {
+                        groupKey: compPlanos.map(p => p.id).sort().join('__'),
+                        setor: rep.setor || '—',
+                        maquina: rep.maquina || '—',
+                        equipamento: rep.equipamento || '—',
+                        planos: compPlanos,
+                        pairKeys: compPares.map(pr => pr.pk),
+                        maxScore,
+                        nivel: maxScore >= 88 ? 'exata' : (maxScore >= 75 ? 'alta' : 'moderada'),
+                        motivos,
+                        ignorado: mostrarIgnorados
+                    };
+
+                    if (busca) {
+                        const hay = normKey([
+                            grpObj.setor, grpObj.maquina, grpObj.equipamento,
+                            ...compPlanos.map(p => `${p.codigo} ${p.titulo} ${p.conjunto} ${p.subconjunto} ${p.periodicidade} ${p.disciplina}`)
+                        ].join(' '));
+                        if (!hay.includes(busca)) return;
+                    }
+                    grupos.push(grpObj);
+                });
+            });
+
+            grupos.sort((a, b) => (b.maxScore - a.maxScore) || a.maquina.localeCompare(b.maquina) || a.equipamento.localeCompare(b.equipamento));
+            return { grupos, totalIgnorados };
+        }
+
+        window.ignorarGrupoDuplicidadePlanoMaster = (pairKeysEncoded, restaurar = false) => {
+            if (!exigirAdminMasterPrev()) return;
+            const keys = String(pairKeysEncoded || '').split(',').map(s => s.trim()).filter(Boolean);
+            if (!keys.length) return;
+            const setIgn = lerParesIgnoradosSaneamentoPlanos();
+            keys.forEach(k => { if (restaurar) setIgn.delete(k); else setIgn.add(k); });
+            salvarParesIgnoradosSaneamentoPlanos(setIgn);
+            renderMasterPrevView();
+            showToast(restaurar ? 'Grupo restaurado para revisão de saneamento.' : 'Grupo marcado como revisado (não é duplicidade).', 'success');
+        };
+
+        window.unificarPlanosDuplicadosMaster = (manterId, duplicadoId) => {
+            if (!exigirAdminMasterPrev()) return;
+            const planos = getPlanosPreventiva();
+            const pManter = planos.find(p => p.id === manterId);
+            const pDup = planos.find(p => p.id === duplicadoId);
+            if (!pManter || !pDup || pManter.id === pDup.id) {
+                showToast('Selecione dois planos válidos para unificar.', 'error');
+                return;
+            }
+            const todasOrdens = getOrdensPreventiva();
+            const ordsDup = todasOrdens.filter(o => o.planoId === pDup.id);
+            const ordsDupConcl = ordsDup.filter(o => o.status === 'concluido');
+            const ordsDupPend = ordsDup.filter(o => o.status !== 'concluido');
+            const ordsManterPendDatas = new Set(
+                todasOrdens.filter(o => o.planoId === pManter.id && o.status !== 'concluido').map(o => o.data)
+            );
+
+            // Mescla itens de checklist inéditos do plano duplicado para o plano principal
+            const chkBase = Array.isArray(pManter.checklist) ? [...pManter.checklist] : [];
+            const tasksExist = new Set(chkBase.map(i => normKey(i?.tarefa || '')).filter(Boolean));
+            const novosItens = [];
+            (Array.isArray(pDup.checklist) ? pDup.checklist : []).forEach(it => {
+                const tk = normKey(it?.tarefa || '');
+                if (tk && !tasksExist.has(tk)) {
+                    tasksExist.add(tk);
+                    novosItens.push({
+                        id: it.id || uid(),
+                        tarefa: String(it.tarefa || '').trim(),
+                        criterio: String(it.criterio || '').trim(),
+                        peca: String(it.peca || '').trim()
+                    });
+                }
+            });
+
+            const msg = `Manter o plano "${pManter.codigo} — ${pManter.titulo}" e absorver/excluir o duplicado "${pDup.codigo} — ${pDup.titulo}"?` +
+                (novosItens.length ? ` • ${novosItens.length} item(ns) inédito(s) de checklist serão mesclados no plano mantido.` : '') +
+                (ordsDupConcl.length ? ` • ${ordsDupConcl.length} ordem(ns) concluída(s) terão o histórico vinculado ao plano mantido.` : '') +
+                (ordsDupPend.length ? ` • ${ordsDupPend.length} ordem(ns) pendente(s) serão migradas (ou removidas se já houver ordem na mesma data).` : '');
+
+            pedirConfirmacaoExclusao('Unificar Planos Duplicados (Admin Master)', msg, async () => {
+                const agoraIso = new Date().toISOString();
+                if (novosItens.length) {
+                    await updateDoc(doc(db, 'ag_manutencao', pManter.id), {
+                        checklist: [...chkBase, ...novosItens],
+                        atualizadoPor: usuarioLogado?.nome || 'Admin Master',
+                        atualizadoEm: agoraIso
+                    });
+                }
+                for (const ord of ordsDupConcl) {
+                    await updateDoc(doc(db, 'ag_manutencao', ord.id), {
+                        planoId: pManter.id,
+                        planoCodigo: pManter.codigo || ord.planoCodigo || '',
+                        atualizadoEm: agoraIso
+                    });
+                }
+                for (const ord of ordsDupPend) {
+                    if (ordsManterPendDatas.has(ord.data)) {
+                        await deleteDoc(doc(db, 'ag_manutencao', ord.id));
+                    } else {
+                        ordsManterPendDatas.add(ord.data);
+                        await updateDoc(doc(db, 'ag_manutencao', ord.id), {
+                            planoId: pManter.id,
+                            planoCodigo: pManter.codigo || ord.planoCodigo || '',
+                            titulo: pManter.titulo || ord.titulo || '',
+                            atualizadoEm: agoraIso
+                        });
+                    }
+                }
+                await deleteDoc(doc(db, 'ag_manutencao', pDup.id));
+                masterPrevSelecionados.delete(pDup.id);
+                showToast(`Plano ${pDup.codigo} unificado em ${pManter.codigo} e duplicidade removida!`, 'success');
+            });
+        };
+
+        let masterSaneamentoMostrarIgnorados = false;
+        window.toggleMostrarIgnoradosSaneamentoPlanos = () => {
+            masterSaneamentoMostrarIgnorados = !masterSaneamentoMostrarIgnorados;
+            renderMasterPrevView();
+        };
+
+        function renderSaneamentoPlanosMaster(listaEl) {
+            const busca = document.getElementById('masterPrevBusca')?.value || '';
+            const nivelMin = document.getElementById('masterPrevFiltroSimNivel')?.value || '';
+            const { grupos, totalIgnorados } = detectarGruposPlanosSimilares({
+                mostrarIgnorados: masterSaneamentoMostrarIgnorados,
+                nivelMin,
+                busca
+            });
+            const todasOrdens = getOrdensPreventiva();
+            const totalPlanosEnvolvidos = grupos.reduce((acc, g) => acc + g.planos.length, 0);
+
+            const headerBar = `
+                <div class="p-4 rounded-2xl border border-amber-200 bg-amber-50/70 flex flex-col lg:flex-row lg:items-center justify-between gap-3 text-xs">
+                    <div class="space-y-0.5">
+                        <div class="font-extrabold text-amber-950 flex flex-wrap items-center gap-2">
+                            <span>🔍 Auditoria de Duplicidade de Planos por Equipamento</span>
+                            <span class="px-2 py-0.5 rounded-full text-[10px] font-extrabold bg-amber-200/80 text-amber-950">${grupos.length} grupo(s) • ${totalPlanosEnvolvidos} plano(s)</span>
+                        </div>
+                        <p class="text-[11px] font-semibold text-amber-900/80">
+                            Compara apenas planos <strong>dentro da mesma Máquina/Linha e mesmo Equipamento</strong> (planos iguais em linhas diferentes são ignorados por serem normais). Você pode <strong>Editar</strong>, <strong>Unificar</strong> (mantendo o histórico e mesclando checklist), <strong>Excluir</strong> ou marcar como <strong>Não é duplicidade</strong>.
+                        </p>
+                    </div>
+                    <div class="flex flex-wrap items-center gap-2 shrink-0">
+                        <button type="button" onclick="toggleMostrarIgnoradosSaneamentoPlanos()" class="px-3 py-1.5 rounded-xl border text-[11px] font-extrabold ${masterSaneamentoMostrarIgnorados ? 'bg-slate-900 text-white border-slate-900' : 'bg-white text-slate-700 border-amber-300 hover:bg-amber-100/50'}">
+                            ${masterSaneamentoMostrarIgnorados ? '← Voltar aos Suspeitos Ativos' : `Revisados / Ignorados (${totalIgnorados})`}
+                        </button>
+                    </div>
+                </div>`;
+
+            if (!grupos.length) {
+                listaEl.innerHTML = headerBar + `
+                    <div class="p-10 rounded-2xl border border-dashed border-emerald-200 bg-emerald-50/40 text-center space-y-1.5">
+                        <div class="text-sm font-extrabold text-emerald-900">${masterSaneamentoMostrarIgnorados ? 'Nenhum grupo ignorado encontrado' : '✓ Nenhuma duplicidade suspeita detectada nos equipamentos!'}</div>
+                        <p class="text-xs font-semibold text-emerald-700">Todos os equipamentos possuem planos preventivos bem diferenciados com os filtros atuais.</p>
+                    </div>`;
+                return;
+            }
+
+            const cardsHtml = grupos.map((g, gIdx) => {
+                const badgeNivel = g.nivel === 'exata'
+                    ? 'bg-rose-600 text-white'
+                    : (g.nivel === 'alta' ? 'bg-amber-500 text-white' : 'bg-sky-100 text-sky-800 border border-sky-200');
+                const labelNivel = g.nivel === 'exata'
+                    ? `Duplicidade Exata / Crítica (${g.maxScore}%)`
+                    : (g.nivel === 'alta' ? `Alta Similaridade (${g.maxScore}%)` : `Similaridade Moderada (${g.maxScore}%)`);
+                const pPrincipal = g.planos[0];
+                const pairKeysAttr = escapeHtml(g.pairKeys.join(','));
+
+                const colsHtml = g.planos.map((p, idx) => {
+                    const checked = masterPrevSelecionados.has(p.id);
+                    const ordsPl = todasOrdens.filter(o => o.planoId === p.id);
+                    const pendCnt = ordsPl.filter(o => o.status !== 'concluido' && o.status !== 'cancelado').length;
+                    const concCnt = ordsPl.filter(o => o.status === 'concluido').length;
+                    const chkList = Array.isArray(p.checklist) ? p.checklist : [];
+                    const prio = getPrioridadePlanoDoc(p);
+                    const prioMeta = getPrioridadeMeta(prio);
+                    const ehSugerido = idx === 0;
+                    const outroAlvoUnificar = ehSugerido ? g.planos[1] : pPrincipal;
+
+                    return `
+                        <div class="p-3.5 rounded-2xl border-2 ${checked ? 'border-rose-400 bg-rose-50/40' : (ehSugerido ? 'border-emerald-300 bg-emerald-50/25' : 'border-slate-200 bg-white')} flex flex-col justify-between gap-3">
+                            <div class="space-y-2">
+                                <div class="flex flex-wrap items-center justify-between gap-1.5">
+                                    <label class="inline-flex items-center gap-2 cursor-pointer">
+                                        <input type="checkbox" ${checked ? 'checked' : ''} onchange="toggleSelMasterPrev('${p.id}', this.checked)" class="w-4 h-4 accent-rose-600">
+                                        <span class="font-mono text-[11px] font-extrabold px-2 py-0.5 rounded-lg bg-sky-50 text-sky-900 border border-sky-200">${escapeHtml(p.codigo || 'PM')} • ${escapeHtml(p.revisao || 'Rev.01')}</span>
+                                    </label>
+                                    <span class="px-2 py-0.5 rounded-full text-[9px] font-extrabold uppercase ${ehSugerido ? 'bg-emerald-600 text-white' : 'bg-amber-100 text-amber-900'}">
+                                        ${ehSugerido ? '★ Sugerido p/ Manter' : 'Possível Duplicata'}
+                                    </span>
+                                </div>
+
+                                <div class="text-xs font-extrabold text-slate-900 leading-snug">${escapeHtml(p.titulo || 'Sem título')}</div>
+
+                                <div class="grid grid-cols-2 gap-1.5 text-[10px] font-bold bg-slate-50/90 p-2.5 rounded-xl border border-slate-200/80">
+                                    <div><span class="text-slate-400 uppercase block text-[9px]">Conjunto</span><span class="text-slate-800">${escapeHtml(p.conjunto || '(Geral do Equip.)')}</span></div>
+                                    <div><span class="text-slate-400 uppercase block text-[9px]">Subconjunto</span><span class="text-slate-800">${escapeHtml(p.subconjunto || '—')}</span></div>
+                                    <div><span class="text-slate-400 uppercase block text-[9px]">Periodicidade / Disc.</span><span class="text-slate-800">${escapeHtml(p.periodicidade || 'Mensal')} • ${escapeHtml(p.disciplina || 'Mecânica')}</span></div>
+                                    <div><span class="text-slate-400 uppercase block text-[9px]">Ordens Vinculadas</span><span class="text-slate-800">${pendCnt} pend. • ${concCnt} concl.</span></div>
+                                </div>
+
+                                <div class="flex flex-wrap items-center gap-1.5 text-[10px] font-extrabold">
+                                    ${prio ? `<span class="px-2 py-0.5 rounded-full ${prioMeta.cls}">${escapeHtml(prioMeta.label)}</span>` : ''}
+                                    <span class="px-2 py-0.5 rounded-full bg-slate-100 text-slate-700">${formatDuracaoHH(p.duracaoEstimadaMin || 60)}</span>
+                                    <span class="px-2 py-0.5 rounded-full bg-indigo-50 text-indigo-800 border border-indigo-200">${chkList.length} item(ns) no checklist</span>
+                                </div>
+
+                                <div class="space-y-1 pt-1">
+                                    <div class="text-[9px] font-extrabold uppercase text-slate-400">Prévia do Checklist:</div>
+                                    ${chkList.length ? `<ul class="space-y-0.5 text-[11px] text-slate-600 font-medium pl-3.5 list-disc">
+                                        ${chkList.slice(0, 4).map(it => `<li class="truncate">${escapeHtml(it.tarefa || '')}${it.peca ? ` <span class="text-slate-400">(${escapeHtml(it.peca)})</span>` : ''}</li>`).join('')}
+                                        ${chkList.length > 4 ? `<li class="text-[10px] font-bold text-slate-400 list-none">+ ${chkList.length - 4} item(ns)...</li>` : ''}
+                                    </ul>` : `<div class="text-[11px] italic text-slate-400">Sem itens cadastrados</div>`}
+                                </div>
+                            </div>
+
+                            <div class="flex flex-wrap items-center gap-1.5 pt-2.5 border-t border-slate-200/80">
+                                <button type="button" onclick="abrirModalEditorPlano('${p.id}')" class="px-2.5 py-1.5 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-800 text-[11px] font-extrabold">✏️ Editar</button>
+                                ${!ehSugerido && pPrincipal ? `
+                                    <button type="button" onclick="unificarPlanosDuplicadosMaster('${pPrincipal.id}', '${p.id}')" title="Mescla checklist e ordens deste plano no plano ${escapeHtml(pPrincipal.codigo || '')} e exclui esta duplicata" class="px-2.5 py-1.5 rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white text-[11px] font-extrabold">
+                                        🔀 Unificar no ${escapeHtml(pPrincipal.codigo || 'Principal')}
+                                    </button>
+                                ` : (ehSugerido && outroAlvoUnificar ? `
+                                    <button type="button" onclick="unificarPlanosDuplicadosMaster('${p.id}', '${outroAlvoUnificar.id}')" title="Manter este plano (${escapeHtml(p.codigo || '')}) e absorver/excluir ${escapeHtml(outroAlvoUnificar.codigo || '')}" class="px-2.5 py-1.5 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white text-[11px] font-extrabold">
+                                        ★ Manter &amp; Absorver ${escapeHtml(outroAlvoUnificar.codigo || '')}
+                                    </button>
+                                ` : '')}
+                                <button type="button" onclick="excluirPlanoMasterComPendentes('${p.id}')" class="ml-auto px-2.5 py-1.5 rounded-xl bg-rose-600 hover:bg-rose-700 text-white text-[11px] font-extrabold">🗑️ Excluir + Pend. (${pendCnt})</button>
+                            </div>
+                        </div>`;
+                }).join('');
+
+                return `
+                    <div class="p-4 rounded-3xl border-2 border-slate-200 bg-slate-50/60 space-y-3">
+                        <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-2 pb-2 border-b border-slate-200">
+                            <div class="space-y-0.5 min-w-0">
+                                <div class="flex flex-wrap items-center gap-1.5">
+                                    <span class="px-2 py-0.5 rounded-full text-[10px] font-extrabold uppercase ${badgeNivel}">${escapeHtml(labelNivel)}</span>
+                                    <span class="text-[10px] font-extrabold uppercase text-slate-400">Grupo #${gIdx + 1} • ${g.planos.length} planos no mesmo equipamento</span>
+                                </div>
+                                <div class="text-sm font-extrabold text-slate-900 truncate">${escapeHtml(g.setor)} › ${escapeHtml(g.maquina)} › <span class="text-indigo-700">${escapeHtml(g.equipamento)}</span></div>
+                                <div class="text-[11px] font-semibold text-amber-800">${g.motivos.map(m => `• ${escapeHtml(m)}`).join(' &nbsp; ')}</div>
+                            </div>
+                            <div class="flex flex-wrap items-center gap-1.5 shrink-0">
+                                <button type="button" onclick="ignorarGrupoDuplicidadePlanoMaster('${pairKeysAttr}', ${g.ignorado ? 'true' : 'false'})" class="px-3 py-1.5 rounded-xl bg-white hover:bg-slate-100 border border-slate-300 text-slate-700 text-[11px] font-extrabold">
+                                    ${g.ignorado ? '↺ Restaurar Suspeita' : '✓ Não é Duplicidade'}
+                                </button>
+                            </div>
+                        </div>
+                        <div class="grid grid-cols-1 lg:grid-cols-2 gap-3">${colsHtml}</div>
+                    </div>`;
+            }).join('');
+
+            listaEl.innerHTML = headerBar + `<div class="space-y-4 pt-1">${cardsHtml}</div>`;
+        }
+
         window.setMasterPrevTab = (tab) => {
-            masterPrevTab = tab === 'planos' ? 'planos' : 'ordens';
+            masterPrevTab = (tab === 'planos' || tab === 'saneamento_planos') ? tab : 'ordens';
             masterPrevSelecionados.clear();
             const bOrd = document.getElementById('btnMasterPrevTabOrdens');
             const bPl = document.getElementById('btnMasterPrevTabPlanos');
+            const bSan = document.getElementById('btnMasterPrevTabSaneamento');
             if (bOrd) bOrd.className = `px-4 py-1.5 rounded-full text-xs font-extrabold ${masterPrevTab === 'ordens' ? 'bg-slate-900 text-white' : 'text-slate-600'}`;
             if (bPl) bPl.className = `px-4 py-1.5 rounded-full text-xs font-extrabold ${masterPrevTab === 'planos' ? 'bg-slate-900 text-white' : 'text-slate-600'}`;
+            if (bSan) bSan.className = `px-4 py-1.5 rounded-full text-xs font-extrabold inline-flex items-center gap-1.5 ${masterPrevTab === 'saneamento_planos' ? 'bg-amber-600 text-white shadow-sm' : 'text-amber-800 bg-amber-100/80 hover:bg-amber-200/80'}`;
             renderMasterPrevView();
         };
 
@@ -7376,6 +7848,18 @@
             const busca = normKey(document.getElementById('masterPrevBusca')?.value || '');
             const fStatus = document.getElementById('masterPrevFiltroStatus')?.value || '';
             const hojeStr = getHojeStr();
+
+            if (masterPrevTab === 'saneamento_planos') {
+                const nivelMin = document.getElementById('masterPrevFiltroSimNivel')?.value || '';
+                const { grupos } = detectarGruposPlanosSimilares({
+                    mostrarIgnorados: masterSaneamentoMostrarIgnorados,
+                    nivelMin,
+                    busca
+                });
+                const map = new Map();
+                grupos.forEach(g => g.planos.forEach(p => map.set(p.id, p)));
+                return [...map.values()];
+            }
 
             if (masterPrevTab === 'planos') {
                 return getPlanosPreventiva().filter(p => {
@@ -7412,7 +7896,7 @@
             if (cnt) cnt.innerText = String(n);
             if (bar) { bar.hidden = n === 0; bar.classList.toggle('hidden', n === 0); }
             if (cascWrap) {
-                const showCasc = masterPrevTab === 'planos';
+                const showCasc = (masterPrevTab === 'planos' || masterPrevTab === 'saneamento_planos');
                 cascWrap.hidden = !showCasc;
                 cascWrap.classList.toggle('hidden', !showCasc);
             }
@@ -7425,20 +7909,35 @@
             const todosPlanos = getPlanosPreventiva();
             const cOrd = document.getElementById('masterPrevCntOrdens');
             const cPl = document.getElementById('masterPrevCntPlanos');
+            const cSan = document.getElementById('masterPrevCntSaneamento');
             if (cOrd) cOrd.innerText = String(todasOrdens.length);
             if (cPl) cPl.innerText = String(todosPlanos.length);
+            if (cSan) {
+                const { grupos: gAtivos } = detectarGruposPlanosSimilares({ mostrarIgnorados: false });
+                cSan.innerText = String(gAtivos.length);
+            }
 
             const fStEl = document.getElementById('masterPrevFiltroStatus');
-            if (fStEl) fStEl.classList.toggle('hidden', masterPrevTab !== 'ordens');
+            if (fStEl) { fStEl.hidden = (masterPrevTab !== 'ordens'); fStEl.classList.toggle('hidden', masterPrevTab !== 'ordens'); }
+            const fSimEl = document.getElementById('masterPrevFiltroSimNivel');
+            if (fSimEl) { fSimEl.hidden = (masterPrevTab !== 'saneamento_planos'); fSimEl.classList.toggle('hidden', masterPrevTab !== 'saneamento_planos'); }
 
-            const validIds = new Set((masterPrevTab === 'planos' ? todosPlanos : todasOrdens).map(x => x.id));
+            const ehPlanosMode = (masterPrevTab === 'planos' || masterPrevTab === 'saneamento_planos');
+            const validIds = new Set((ehPlanosMode ? todosPlanos : todasOrdens).map(x => x.id));
             [...masterPrevSelecionados].forEach(id => { if (!validIds.has(id)) masterPrevSelecionados.delete(id); });
 
-            const itens = getItensVisiveisMasterPrev();
             const lista = document.getElementById('masterPrevLista');
+            if (!lista) return;
+
+            if (masterPrevTab === 'saneamento_planos') {
+                renderSaneamentoPlanosMaster(lista);
+                atualizarBarraLoteMasterPrev();
+                return;
+            }
+
+            const itens = getItensVisiveisMasterPrev();
             const hojeStr = getHojeStr();
 
-            if (!lista) return;
             if (!itens.length) {
                 lista.innerHTML = `<div class="py-10 text-center text-xs font-bold text-slate-400">Nenhum registro encontrado nesta aba com os filtros atuais.</div>`;
                 atualizarBarraLoteMasterPrev();
@@ -7605,7 +8104,7 @@
             const ids = [...masterPrevSelecionados];
             if (!ids.length) return;
 
-            if (masterPrevTab === 'planos') {
+            if (masterPrevTab === 'planos' || masterPrevTab === 'saneamento_planos') {
                 const cascata = Boolean(document.getElementById('masterPrevExcluirOrdensCascata')?.checked);
                 const pendVinc = cascata
                     ? getOrdensPreventiva().filter(o => ids.includes(o.planoId) && o.status !== 'concluido' && o.status !== 'cancelado')
