@@ -6,7 +6,7 @@
     <title>Controle de Preventivas — PCM Cepêra</title>
     <link rel="icon" type="image/png" href="CEPERA_LOGO.png">
     <script src="https://cdn.tailwindcss.com"></script>
-    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js" defer></script>
     <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
     <style>
         [hidden] { display: none !important; }
@@ -27,11 +27,9 @@
             -webkit-tap-highlight-color: transparent;
         }
         .frosted-shell {
-            background: rgba(255, 255, 255, 0.94);
-            backdrop-filter: blur(8px);
-            -webkit-backdrop-filter: blur(8px);
+            background: rgba(255, 255, 255, 0.97);
             border: 1px solid #e2e8f0;
-            box-shadow: 0 12px 32px -12px rgba(15, 23, 42, 0.06);
+            box-shadow: 0 8px 24px -10px rgba(15, 23, 42, 0.06);
         }
         .glass-card {
             background: #ffffff;
@@ -195,7 +193,8 @@
             background: #ffffff !important; border: 2px solid #000000 !important; box-shadow: none !important; backdrop-filter: none !important; color: #000000 !important;
         }
         body.high-contrast .input-clean, body.theme-contraste .input-clean { background: #ffffff !important; color: #000000 !important; border: 2px solid #000000 !important; }
-        body.tablet-mode *, body.tablet-mode *::before, body.tablet-mode *::after { backdrop-filter: none !important; transition: none !important; animation: none !important; box-shadow: none !important; }
+        body.tablet-mode *, body.tablet-mode *::before, body.tablet-mode *::after { backdrop-filter: none !important; -webkit-backdrop-filter: none !important; transition: none !important; animation: none !important; box-shadow: none !important; }
+        #planosListGrid > *, #ordensListBody > tr, #sem52MatrixBody > tr { content-visibility: auto; contain-intrinsic-size: auto 64px; }
         body.tablet-mode .btn-touch, body.tablet-mode .btn-pill-dark, body.tablet-mode .chk-btn, body.tablet-mode .input-clean { min-height: 46px !important; font-size: 0.92rem !important; }
         body.font-sm { font-size: 14px; }
         body.font-lg { font-size: 16.5px; }
@@ -566,7 +565,7 @@
                                 </div>
                             </div>
                             <div class="flex flex-wrap items-center gap-2 pt-1 border-t border-slate-200/70">
-                                <input type="text" id="sem52Busca" oninput="renderCalendario52Semanas()" placeholder="Buscar código, plano, TAG, responsável..." class="input-clean py-1.5 text-xs font-bold flex-1 min-w-[200px]">
+                                <input type="text" id="sem52Busca" oninput="debouncePrev('sem52', renderCalendario52Semanas, 200)" placeholder="Buscar código, plano, TAG, responsável..." class="input-clean py-1.5 text-xs font-bold flex-1 min-w-[200px]">
                                 <select id="sem52FiltroCrit" onchange="renderCalendario52Semanas()" class="input-clean py-1.5 text-xs font-bold w-auto">
                                     <option value="">Prioridade (Todas)</option>
                                     <option value="P1">P1 — Crítica</option>
@@ -630,7 +629,7 @@
                     <div class="glass-card p-4 sm:p-5 rounded-3xl space-y-3">
                         <div class="flex flex-col lg:flex-row lg:items-center justify-between gap-3">
                             <div class="flex flex-wrap items-center gap-2.5 flex-1">
-                                <input type="text" id="planosBusca" oninput="renderPlanos()" placeholder="Buscar plano por código, título, equipamento, TAG..." class="input-clean py-2 text-xs font-bold max-w-sm">
+                                <input type="text" id="planosBusca" oninput="debouncePrev('planos', renderPlanos, 180)" placeholder="Buscar plano por código, título, equipamento, TAG..." class="input-clean py-2 text-xs font-bold max-w-sm">
                                 <span id="planosResumoContagem" class="text-[11px] font-extrabold text-slate-500 bg-slate-100 px-3 py-1.5 rounded-full">0 plano(s)</span>
                                 <button type="button" onclick="limparFiltrosPlanos()" class="px-3 py-2 rounded-xl bg-white hover:bg-slate-100 text-slate-700 border border-slate-200 text-xs font-extrabold">Limpar Filtros</button>
                             </div>
@@ -692,7 +691,7 @@
                     <div class="glass-card p-4 sm:p-5 rounded-3xl space-y-3">
                         <div class="flex flex-col lg:flex-row lg:items-center justify-between gap-3">
                             <div class="flex flex-wrap items-center gap-2 flex-1">
-                                <input type="text" id="ordensBusca" oninput="renderOrdens()" placeholder="Buscar ordem, ativo, TAG, plano, responsável..." class="input-clean py-2 text-xs font-bold max-w-xs">
+                                <input type="text" id="ordensBusca" oninput="debouncePrev('ordens', renderOrdens, 180)" placeholder="Buscar ordem, ativo, TAG, plano, responsável..." class="input-clean py-2 text-xs font-bold max-w-xs">
                                 <select id="ordensFiltroStatus" onchange="renderOrdens()" class="input-clean py-2 text-xs font-bold w-auto">
                                     <option value="">Status (Todos)</option>
                                     <option value="atrasada">Atrasadas</option>
@@ -829,7 +828,7 @@
                                 <option value="concluido">Concluídas (Relatórios)</option>
                                 <option value="todas">Todas</option>
                             </select>
-                            <input type="text" id="tecBusca" oninput="renderTecnico()" placeholder="Filtrar equipamento / TAG..." class="input-clean py-2 text-xs font-bold w-48">
+                            <input type="text" id="tecBusca" oninput="debouncePrev('tec', renderTecnico, 180)" placeholder="Filtrar equipamento / TAG..." class="input-clean py-2 text-xs font-bold w-48">
                         </div>
                     </div>
 
@@ -3087,10 +3086,61 @@
         function getChavePrefsUsuarioPrev() {
             return (usuarioLogado && usuarioLogado.user) ? `cepera_prefs_${usuarioLogado.user}` : 'cepera_prefs_guest';
         }
+        const _debounceTimersPrev = {};
+        window.debouncePrev = (key, fn, wait = 180) => {
+            clearTimeout(_debounceTimersPrev[key]);
+            _debounceTimersPrev[key] = setTimeout(() => {
+                try { if (typeof fn === 'function') fn(); } catch (err) { console.error(err); }
+            }, wait);
+        };
+        let _timerRenderPrev = null;
+        function agendarRenderPreventivas() {
+            if (_timerRenderPrev) return;
+            _timerRenderPrev = setTimeout(() => {
+                _timerRenderPrev = null;
+                if (window.requestAnimationFrame) requestAnimationFrame(renderCurrentView);
+                else renderCurrentView();
+            }, 50);
+        }
+        function sincronizarPrefsSessaoCentralPrev() {
+            try {
+                const raw = safeStorage.get('cepera_central_session');
+                if (raw) {
+                    const sess = JSON.parse(raw);
+                    if (sess && typeof sess === 'object') {
+                        sess.preferencias = Object.assign({}, sess.preferencias || {}, { tabletMode: Boolean(userPrefs.tabletMode), tema: userPrefs.tema });
+                        safeStorage.set('cepera_central_session', JSON.stringify(sess));
+                    }
+                }
+            } catch (_) {}
+            try {
+                if (window.parent && window.parent !== window) {
+                    window.parent.postMessage({ type: 'CEPERA_PREFS_CHANGED', prefs: { tabletMode: Boolean(userPrefs.tabletMode), tema: userPrefs.tema } }, '*');
+                }
+            } catch (_) {}
+        }
+        function aplicarPrefsExternasPrev(prefs) {
+            if (!prefs || typeof prefs !== 'object') return;
+            if (typeof prefs.tabletMode === 'boolean' && prefs.tabletMode !== Boolean(userPrefs.tabletMode)) {
+                userPrefs.tabletMode = prefs.tabletMode;
+                aplicarPreferenciasVisuais();
+                safeStorage.set(getChavePrefsUsuarioPrev(), JSON.stringify(userPrefs));
+            }
+        }
+        window.addEventListener('message', (ev) => {
+            if (ev?.data?.type === 'CEPERA_PREFS_SYNC') aplicarPrefsExternasPrev(ev.data.prefs);
+        });
+        window.addEventListener('storage', (ev) => {
+            if (ev.key !== 'cepera_central_session' || !ev.newValue) return;
+            try { aplicarPrefsExternasPrev(JSON.parse(ev.newValue).preferencias); } catch (_) {}
+        });
+
         function carregarPreferenciasVisuais() {
             try {
                 const raw = safeStorage.get(getChavePrefsUsuarioPrev()) || safeStorage.get('cepera_prev_prefs') || safeStorage.get('cepera_prefs_guest');
                 if (raw) userPrefs = { ...userPrefs, ...JSON.parse(raw) };
+                const sessPrefs = (usuarioLogado && usuarioLogado.preferencias) || JSON.parse(safeStorage.get('cepera_central_session') || 'null')?.preferencias;
+                if (sessPrefs && typeof sessPrefs.tabletMode === 'boolean') userPrefs.tabletMode = sessPrefs.tabletMode;
             } catch (_) {}
             aplicarPreferenciasVisuais();
         }
@@ -3130,6 +3180,7 @@
             const payload = JSON.stringify(userPrefs);
             safeStorage.set(getChavePrefsUsuarioPrev(), payload);
             safeStorage.set('cepera_prev_prefs', payload);
+            sincronizarPrefsSessaoCentralPrev();
             aplicarPreferenciasVisuais();
         }
         window.abrirEspacoUsuario = () => { atualizarUIPreferencias(); abrirModal('modalEspacoUsuario'); };
@@ -7944,6 +7995,7 @@
                 sessao = lerSessaoCentral();
             }
             usuarioLogado = sessao;
+            if (usuarioLogado) carregarPreferenciasVisuais();
             if (!usuarioLogado) {
                 const den = document.getElementById('accessDeniedScreen');
                 den.hidden = false; den.classList.remove('hidden');
@@ -7968,7 +8020,7 @@
                     customMasterHashPrev = (data && data.pass_hash) ? String(data.pass_hash) : null;
                     if (usuarioLogado) {
                         atualizarBadgeMasterPrev();
-                        renderCurrentView();
+                        agendarRenderPreventivas();
                     }
                 }, () => {});
             } catch (_) {}
@@ -7978,7 +8030,7 @@
                 handoffPrevLoadedManut = true;
                 setSyncStatus(true, `Sincronizado (${getOrdensPreventiva().length} ordens)`);
                 popularSelectsGlobais();
-                renderCurrentView();
+                agendarRenderPreventivas();
                 tentarAplicarHandoffPreventiva();
             }, () => setSyncStatus(false, 'Erro de conexão Firestore'));
 
@@ -7987,7 +8039,7 @@
                 assetNodes = rawLinhasDocs.flatMap(docObj => expandirDocParaNodes(docObj.id, docObj));
                 handoffPrevLoadedLinhas = true;
                 popularSelectsGlobais();
-                renderCurrentView();
+                agendarRenderPreventivas();
                 tentarAplicarHandoffPreventiva();
             });
 

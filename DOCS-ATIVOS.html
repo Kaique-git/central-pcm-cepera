@@ -28,11 +28,9 @@
         }
 
         .frosted-shell {
-            background: rgba(255, 255, 255, 0.94);
-            backdrop-filter: blur(8px);
-            -webkit-backdrop-filter: blur(8px);
+            background: rgba(255, 255, 255, 0.97);
             border: 1px solid #e2e8f0;
-            box-shadow: 0 12px 32px -12px rgba(15, 23, 42, 0.06);
+            box-shadow: 0 8px 24px -10px rgba(15, 23, 42, 0.06);
         }
 
         .glass-card {
@@ -281,7 +279,8 @@
         body.high-contrast .glass-rail { background: #ffffff !important; border: 2px solid #000000 !important; box-shadow: none !important; backdrop-filter: none !important; }
         body.high-contrast .input-clean,
         body.high-contrast .doc-spotlight-wrap { border: 2px solid #000000 !important; color: #000000 !important; }
-        body.tablet-mode *, body.tablet-mode *::before, body.tablet-mode *::after { transition: none !important; animation: none !important; }
+        body.tablet-mode *, body.tablet-mode *::before, body.tablet-mode *::after { backdrop-filter: none !important; -webkit-backdrop-filter: none !important; box-shadow: none !important; transition: none !important; animation: none !important; }
+        #docCardsGrid > * { content-visibility: auto; contain-intrinsic-size: auto 180px; }
         body.tablet-mode .btn-touch, body.tablet-mode .btn-pill-dark, body.tablet-mode .input-clean, body.tablet-mode .mob-tab { min-height: 46px !important; font-size: 0.92rem !important; }
         body.tablet-mode .doc-spotlight-wrap { min-height: 56px !important; }
         body.tablet-mode .doc-spotlight-wrap input { font-size: 1.05rem !important; min-height: 42px !important; }
@@ -410,7 +409,7 @@
                             <div class="flex flex-col gap-3">
                                 <div class="doc-spotlight-wrap shadow-sm">
                                     <svg class="w-5 h-5 text-sky-600 shrink-0 pointer-events-none" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/></svg>
-                                    <input type="text" id="docSearchInput" oninput="onFiltroBibliotecaChange()" class="font-bold text-slate-900 placeholder:text-slate-400" placeholder="Busca rápida: código DOC-, título, inversor CFW11, rolamento, lubrificante, TAG, linha ou máquina...">
+                                    <input type="text" id="docSearchInput" oninput="debounceDocs('docSearch', onFiltroBibliotecaChange, 180)" class="font-bold text-slate-900 placeholder:text-slate-400" placeholder="Busca rápida: código DOC-, título, inversor CFW11, rolamento, lubrificante, TAG, linha ou máquina...">
                                     <button type="button" onclick="limparFiltrosBiblioteca()" class="shrink-0 px-3 py-1.5 rounded-xl bg-slate-100 hover:bg-slate-200 text-xs font-extrabold text-slate-700">Limpar</button>
                                 </div>
                                 <div class="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
@@ -3629,14 +3628,63 @@ match /config/{document=**} {
             if (userPrefs.fontLevel > 0) document.body.classList.add('font-lg');
             atualizarUIPreferencias();
         }
+        const _debounceTimersDocs = {};
+        window.debounceDocs = (key, fn, wait = 180) => {
+            clearTimeout(_debounceTimersDocs[key]);
+            _debounceTimersDocs[key] = setTimeout(() => {
+                try { if (typeof fn === 'function') fn(); } catch (err) { console.error(err); }
+            }, wait);
+        };
+        let _timerRenderDocs = null;
+        function agendarRenderDocs() {
+            if (_timerRenderDocs) return;
+            _timerRenderDocs = setTimeout(() => {
+                _timerRenderDocs = null;
+                if (window.requestAnimationFrame) requestAnimationFrame(renderCurrentView);
+                else renderCurrentView();
+            }, 50);
+        }
+        function sincronizarPrefsSessaoCentralDocs() {
+            try {
+                const raw = safeStorage.get('cepera_central_session');
+                if (raw) {
+                    const sess = JSON.parse(raw);
+                    if (sess && typeof sess === 'object') {
+                        sess.preferencias = Object.assign({}, sess.preferencias || {}, { tabletMode: Boolean(userPrefs.tabletMode), tema: userPrefs.tema });
+                        safeStorage.set('cepera_central_session', JSON.stringify(sess));
+                    }
+                }
+            } catch (_) {}
+            try {
+                if (window.parent && window.parent !== window) {
+                    window.parent.postMessage({ type: 'CEPERA_PREFS_CHANGED', prefs: { tabletMode: Boolean(userPrefs.tabletMode), tema: userPrefs.tema } }, '*');
+                }
+            } catch (_) {}
+        }
+        function aplicarPrefsExternasDocs(prefs) {
+            if (!prefs || typeof prefs !== 'object') return;
+            if (typeof prefs.tabletMode === 'boolean' && prefs.tabletMode !== Boolean(userPrefs.tabletMode)) {
+                userPrefs.tabletMode = prefs.tabletMode;
+                aplicarPreferenciasVisuais();
+                const k = (usuarioLogado && usuarioLogado.user) ? ('cepera_prefs_' + usuarioLogado.user) : 'cepera_prefs_guest';
+                safeStorage.set(k, JSON.stringify(userPrefs));
+            }
+        }
+        window.addEventListener('message', (ev) => {
+            if (ev?.data?.type === 'CEPERA_PREFS_SYNC') aplicarPrefsExternasDocs(ev.data.prefs);
+        });
+
         function persistirPrefsDocs() {
             const k = (usuarioLogado && usuarioLogado.user) ? ('cepera_prefs_' + usuarioLogado.user) : 'cepera_prefs_guest';
             safeStorage.set(k, JSON.stringify(userPrefs));
+            sincronizarPrefsSessaoCentralDocs();
         }
         function carregarPreferenciasUsuario(u) {
             try {
                 const raw = safeStorage.get(u ? ('cepera_prefs_' + u.user) : 'cepera_prefs_guest') || safeStorage.get('cepera_prefs_guest');
                 if (raw) userPrefs = { ...userPrefs, ...JSON.parse(raw) };
+                const sessPrefs = (u && u.preferencias) || JSON.parse(safeStorage.get('cepera_central_session') || 'null')?.preferencias;
+                if (sessPrefs && typeof sessPrefs.tabletMode === 'boolean') userPrefs.tabletMode = sessPrefs.tabletMode;
             } catch (_) {}
             aplicarPreferenciasVisuais();
         }
@@ -7215,7 +7263,7 @@ match /config/{document=**} {
                 document.getElementById('statusDot').className = 'w-2 h-2 rounded-full bg-emerald-500';
                 document.getElementById('statusText').innerText = `Ativos (${assetNodes.length})`;
                 popularFiltrosArvoreBiblioteca(true);
-                renderCurrentView();
+                agendarRenderDocs();
                 tentarAplicarHandoffDocs();
             }, () => {
                 document.getElementById('statusDot').className = 'w-2 h-2 rounded-full bg-rose-500';
@@ -7226,13 +7274,13 @@ match /config/{document=**} {
                 docsAtivos = snap.docs.map(d => ({ id: d.id, ...d.data() }));
                 handoffDocsLoaded = true;
                 popularDisciplinasSelectsDocs();
-                renderCurrentView();
+                agendarRenderDocs();
                 tentarAplicarHandoffDocs();
             });
 
             onSnapshot(refDocsRevisoes, (snap) => {
                 docsRevisoes = snap.docs.map(d => ({ id: d.id, ...d.data() }));
-                renderCurrentView();
+                agendarRenderDocs();
             });
 
             window.addEventListener('focus', () => {
@@ -7244,7 +7292,11 @@ match /config/{document=**} {
             window.addEventListener('storage', (ev) => {
                 if (!ev.key || ev.key === 'cepera_central_session' || ev.key === 'cepera_ir_user') {
                     usuarioLogado = lerSessaoCentral();
-                    if (usuarioLogado) { aplicarPerfilInterface(); renderCurrentView(); }
+                    if (usuarioLogado) {
+                        aplicarPrefsExternasDocs(usuarioLogado.preferencias);
+                        aplicarPerfilInterface();
+                        agendarRenderDocs();
+                    }
                 }
             });
         }

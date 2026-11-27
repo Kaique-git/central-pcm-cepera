@@ -5,6 +5,8 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0">
     <title>Central de Sistemas — PCM Cepêra</title>
     <link rel="icon" type="image/png" href="CEPERA_LOGO.png">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
     <style>
@@ -28,12 +30,12 @@
         }
 
         .frosted-shell {
-            background: rgba(255, 255, 255, 0.94);
-            backdrop-filter: blur(8px);
-            -webkit-backdrop-filter: blur(8px);
+            background: rgba(255, 255, 255, 0.97);
             border: 1px solid #e2e8f0;
-            box-shadow: 0 12px 32px -12px rgba(15, 23, 42, 0.06);
+            box-shadow: 0 8px 24px -10px rgba(15, 23, 42, 0.06);
         }
+        @keyframes ceperaWsSpin { to { transform: rotate(360deg); } }
+        .ws-spinner { animation: ceperaWsSpin 0.85s linear infinite !important; }
 
         .glass-card {
             background: #ffffff;
@@ -219,7 +221,7 @@
         <div class="frosted-shell rounded-[28px] w-full max-w-md p-7 sm:p-10 relative overflow-hidden">
             <div class="flex items-center justify-between mb-7">
                 <div class="flex items-center gap-2.5">
-                    <img src="CEPERA_LOGO.png" alt="Cepêra" class="h-10 w-auto object-contain rounded-lg shadow-sm bg-white px-1.5 py-0.5 border border-slate-200">
+                    <img src="CEPERA_LOGO.png" decoding="async" alt="Cepêra" class="h-10 w-auto object-contain rounded-lg shadow-sm bg-white px-1.5 py-0.5 border border-slate-200">
                     <span id="loginSyncBadge" class="text-[11px] font-bold text-amber-600 flex items-center gap-1.5">
                         <span class="w-2 h-2 rounded-full bg-amber-500 animate-pulse"></span> Conectando ao Firebase...
                     </span>
@@ -272,7 +274,7 @@
             <!-- HEADER SUPERIOR DO PORTAL -->
             <header class="px-5 sm:px-8 py-4 flex flex-wrap items-center justify-between gap-4 border-b border-slate-200/80 bg-white/60">
                 <div class="flex items-center gap-3.5">
-                    <img src="CEPERA_LOGO.png" alt="Cepêra" class="h-11 w-auto object-contain rounded-xl shadow-sm bg-white px-2 py-1 border border-slate-200 shrink-0">
+                    <img src="CEPERA_LOGO.png" decoding="async" alt="Cepêra" class="h-11 w-auto object-contain rounded-xl shadow-sm bg-white px-2 py-1 border border-slate-200 shrink-0">
                     <div>
                         <div class="flex items-center gap-2">
                             <span class="font-extrabold text-base sm:text-lg text-slate-900 tracking-tight">Central de Aplicativos PCM</span>
@@ -298,6 +300,11 @@
                             <span id="badgeCountUsers" class="px-1.5 py-0.2 rounded-full bg-slate-200 text-slate-800 text-[10px]">0</span>
                         </button>
                     </div>
+
+                    <button type="button" id="btnQuickModoLevePortal" onclick="toggleModoTablet()" class="px-3 py-2 rounded-full bg-white hover:bg-slate-50 border border-slate-200 text-xs font-extrabold text-slate-700 shadow-sm flex items-center gap-1.5" title="Ativar/Desativar Modo Leve de Alta Performance (Alt + T)">
+                        <span>⚡</span>
+                        <span id="lblQuickModoLevePortal">Modo Leve</span>
+                    </button>
 
                     <button type="button" onclick="abrirEspacoUsuario()" class="px-3.5 py-2 rounded-full bg-white hover:bg-slate-50 border border-slate-200 text-xs font-bold text-slate-700 shadow-sm flex items-center gap-1.5" title="Preferências & Modo Tela Leve (Alt + U)">
                         <svg class="w-4 h-4 text-sky-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6V4m0 2a2 2 0 100 4m0-4a2 2 0 110 4m-6 8a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4m6 6v10m6-2a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4"/></svg>
@@ -339,7 +346,7 @@
 
                         <div class="flex flex-wrap items-center gap-2.5">
                             <div class="relative w-full sm:w-64">
-                                <input type="text" id="inpBuscaApp" oninput="renderizarCardsApps()" placeholder="Buscar aplicativo..." class="input-clean py-2 pl-9 pr-3 text-xs font-semibold">
+                                <input type="text" id="inpBuscaApp" oninput="debounceCentral('appsBusca', renderizarCardsApps, 160)" placeholder="Buscar aplicativo..." class="input-clean py-2 pl-9 pr-3 text-xs font-semibold">
                                 <svg class="w-4 h-4 text-slate-400 absolute left-3 top-1/2 -translate-y-1/2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/></svg>
                             </div>
                             <span id="badgeAppsLiberados" class="px-3.5 py-2 rounded-xl bg-sky-50 border border-sky-200 text-sky-800 font-extrabold text-xs">
@@ -387,7 +394,7 @@
                         <div class="flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-3">
                             <div class="flex flex-wrap items-center gap-2.5 flex-1">
                                 <div class="relative flex-1 min-w-[220px] max-w-sm">
-                                    <input type="text" id="rbacFiltroBusca" oninput="renderizarMatrizRbac()" placeholder="Filtrar por nome ou login..." class="input-clean py-2 pl-9 pr-3 text-xs font-bold">
+                                    <input type="text" id="rbacFiltroBusca" oninput="debounceCentral('rbacBusca', renderizarMatrizRbac, 180)" placeholder="Filtrar por nome ou login..." class="input-clean py-2 pl-9 pr-3 text-xs font-bold">
                                     <svg class="w-4 h-4 text-slate-400 absolute left-3 top-1/2 -translate-y-1/2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/></svg>
                                 </div>
                                 <select id="rbacFiltroRole" onchange="renderizarMatrizRbac()" class="input-clean py-2 px-3 text-xs font-extrabold w-auto">
@@ -443,7 +450,7 @@
         <div id="workspaceTopBar" class="h-12 bg-slate-900 text-white px-3 sm:px-5 flex items-center justify-between gap-2 border-b border-slate-800 shrink-0">
             <div class="flex items-center gap-2 min-w-0">
                 <button type="button" onclick="fecharAppWorkspace()" title="Voltar ao Portal PCM" class="px-3 py-1 rounded-xl bg-slate-800 hover:bg-slate-700 text-white font-extrabold text-xs flex items-center gap-1.5 border border-slate-700 transition-colors shrink-0">
-                    <img src="CEPERA_LOGO.png" alt="Cepêra" class="h-4 w-auto object-contain rounded bg-white px-0.5">
+                    <img src="CEPERA_LOGO.png" decoding="async" alt="Cepêra" class="h-4 w-auto object-contain rounded bg-white px-0.5">
                     <span>Portal</span>
                 </button>
                 <div class="h-4 w-px bg-slate-700 mx-1 hidden sm:block"></div>
@@ -453,6 +460,10 @@
 
             <div class="flex items-center gap-2 shrink-0">
                 <span id="workspaceUserBadge" class="hidden md:inline-block text-[11px] font-bold text-slate-300 px-2.5 py-1 rounded-lg bg-slate-800/90 border border-slate-700"></span>
+                <button type="button" id="btnQuickModoLeveWorkspace" onclick="toggleModoTablet()" title="Alternar Modo Leve em tempo real no módulo aberto (Alt + T)" class="px-2.5 py-1.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-200 text-xs font-extrabold border border-slate-700 flex items-center gap-1">
+                    <span>⚡</span>
+                    <span id="lblQuickModoLeveWorkspace" class="hidden sm:inline">Leve</span>
+                </button>
                 <button type="button" onclick="recarregarAppWorkspace()" title="Forçar recarregamento da versão mais recente do módulo" class="px-2.5 py-1.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-sky-300 text-xs font-bold border border-slate-700 flex items-center gap-1">
                     <span>↻ Atualizar</span>
                 </button>
@@ -465,8 +476,17 @@
             </div>
         </div>
 
-        <!-- IFRAME DO SPA SELECIONADO -->
-        <iframe id="centralAppFrame" src="about:blank" class="flex-1 w-full border-0 bg-white" title="Aplicativo PCM Cepêra"></iframe>
+        <!-- CONTAINER DO SPA SELECIONADO COM OVERLAY DE CARREGAMENTO -->
+        <div class="relative flex-1 w-full bg-slate-100 overflow-hidden flex flex-col">
+            <div id="workspaceLoadingOverlay" class="hidden absolute inset-0 z-20 bg-slate-900/90 flex flex-col items-center justify-center gap-3 text-white p-6">
+                <div class="w-11 h-11 rounded-full border-4 border-sky-400/30 border-t-sky-400 ws-spinner"></div>
+                <div class="text-center space-y-1">
+                    <div id="workspaceLoadingTitle" class="text-sm font-extrabold tracking-tight">Carregando módulo...</div>
+                    <div id="workspaceLoadingSub" class="text-xs text-slate-300 font-medium">Preparando interface e sincronizando dados do PCM Cepêra</div>
+                </div>
+            </div>
+            <iframe id="centralAppFrame" src="about:blank" class="flex-1 w-full border-0 bg-white" title="Aplicativo PCM Cepêra"></iframe>
+        </div>
     </div>
 
     <!-- ==================== MODAL CRIAR / EDITAR USUÁRIO & ACESSOS RBAC ==================== -->
@@ -1101,6 +1121,26 @@
             atualizarUIPreferencias();
         }
 
+        const _debounceCentralTimers = {};
+        window.debounceCentral = (key, fn, wait = 180) => {
+            clearTimeout(_debounceCentralTimers[key]);
+            _debounceCentralTimers[key] = setTimeout(() => {
+                try { if (typeof fn === 'function') fn(); } catch (err) { console.error(err); }
+            }, wait);
+        };
+
+        function propagarPrefsParaIframe() {
+            const frame = document.getElementById('centralAppFrame');
+            if (frame && frame.contentWindow && appAtualWorkspace) {
+                try {
+                    frame.contentWindow.postMessage({
+                        type: 'CEPERA_PREFS_SYNC',
+                        prefs: { ...userPrefs }
+                    }, '*');
+                } catch (_) {}
+            }
+        }
+
         function atualizarUIPreferencias() {
             const btnTab = document.getElementById('btnToggleTabletMode');
             if (btnTab) {
@@ -1109,6 +1149,22 @@
                     ? 'px-4 py-2.5 rounded-xl font-extrabold text-xs bg-emerald-600 text-white shrink-0'
                     : 'px-4 py-2.5 rounded-xl font-extrabold text-xs bg-slate-200 text-slate-800 shrink-0';
             }
+            const btnP = document.getElementById('btnQuickModoLevePortal');
+            const lblP = document.getElementById('lblQuickModoLevePortal');
+            if (btnP) {
+                btnP.className = userPrefs.tabletMode
+                    ? 'px-3 py-2 rounded-full bg-emerald-600 hover:bg-emerald-700 border border-emerald-700 text-xs font-extrabold text-white shadow-sm flex items-center gap-1.5'
+                    : 'px-3 py-2 rounded-full bg-white hover:bg-slate-50 border border-slate-200 text-xs font-extrabold text-slate-700 shadow-sm flex items-center gap-1.5';
+            }
+            if (lblP) lblP.innerText = userPrefs.tabletMode ? 'Modo Leve ON' : 'Modo Leve';
+            const btnW = document.getElementById('btnQuickModoLeveWorkspace');
+            const lblW = document.getElementById('lblQuickModoLeveWorkspace');
+            if (btnW) {
+                btnW.className = userPrefs.tabletMode
+                    ? 'px-2.5 py-1.5 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-extrabold border border-emerald-500 flex items-center gap-1'
+                    : 'px-2.5 py-1.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-200 text-xs font-extrabold border border-slate-700 flex items-center gap-1';
+            }
+            if (lblW) lblW.innerText = userPrefs.tabletMode ? 'Leve ON' : 'Leve';
             ['padrao', 'solido', 'dark', 'contraste'].forEach(t => {
                 const b = document.getElementById('btnTema_' + t);
                 if (b) {
@@ -1125,6 +1181,7 @@
             safeStorage.set(chaveLocal, JSON.stringify(userPrefs));
             safeStorage.set('cepera_central_theme', userPrefs.tema === 'dark' ? 'dark' : 'light');
 
+            propagarPrefsParaIframe();
             if (usuarioLogado) {
                 usuarioLogado.preferencias = { ...userPrefs };
                 sincronizarSessaoSSO(usuarioLogado);
@@ -1401,6 +1458,7 @@
 
             document.getElementById('loginView').classList.add('hidden');
             document.getElementById('portalView').classList.remove('hidden');
+            agendarPrefetchModulos();
 
             atualizarHeaderUsuario();
             renderizarCardsApps();
@@ -1554,11 +1612,59 @@
         };
 
         // ================= WORKSPACE INTEGRADO (SSO + IFRAME) =================
-        let CENTRAL_RUNTIME_VER = String(Date.now());
+        // Versão estável permite cache HTTP do navegador nos SPAs (450KB-880KB), acelerando trocas de módulo.
+        // Só altera ao clicar explicitamente em "↻ Atualizar".
+        let CENTRAL_RUNTIME_VER = '2026.11.27-v3';
+        let _wsLoadSafetyTimer = null;
+        let _prefetchExecutado = false;
+
         function getAppUrlCacheBusted(file, forceNow = false) {
             const ver = forceNow ? String(Date.now()) : CENTRAL_RUNTIME_VER;
             const sep = String(file).includes('?') ? '&' : '?';
             return `${encodeURI(file)}${sep}v=${encodeURIComponent(ver)}`;
+        }
+
+        function mostrarOverlayWorkspace(titulo) {
+            const ov = document.getElementById('workspaceLoadingOverlay');
+            const tt = document.getElementById('workspaceLoadingTitle');
+            const sb = document.getElementById('workspaceLoadingSub');
+            if (tt) tt.innerText = titulo ? `Carregando ${titulo}...` : 'Carregando módulo...';
+            if (sb) sb.innerText = userPrefs.tabletMode
+                ? 'Modo Leve ativo — carregamento otimizado para máxima fluidez'
+                : 'Preparando interface e sincronizando dados do PCM Cepêra';
+            if (ov) ov.classList.remove('hidden');
+            clearTimeout(_wsLoadSafetyTimer);
+            _wsLoadSafetyTimer = setTimeout(ocultarOverlayWorkspace, 12000);
+        }
+
+        function ocultarOverlayWorkspace() {
+            clearTimeout(_wsLoadSafetyTimer);
+            const ov = document.getElementById('workspaceLoadingOverlay');
+            if (ov) ov.classList.add('hidden');
+        }
+
+        function agendarPrefetchModulos() {
+            if (_prefetchExecutado || !usuarioLogado) return;
+            _prefetchExecutado = true;
+            const run = () => {
+                try {
+                    const permitidos = getAppsPermitidosUsuario(usuarioLogado);
+                    APPS_CATALOG.filter(a => permitidos.includes(a.id)).slice(0, 6).forEach(a => {
+                        const href = getAppUrlCacheBusted(a.file, false);
+                        if (document.querySelector(`link[rel="prefetch"][href="${href}"]`)) return;
+                        const link = document.createElement('link');
+                        link.rel = 'prefetch';
+                        link.as = 'document';
+                        link.href = href;
+                        document.head.appendChild(link);
+                    });
+                } catch (_) {}
+            };
+            if (typeof window.requestIdleCallback === 'function') {
+                window.requestIdleCallback(run, { timeout: 2500 });
+            } else {
+                setTimeout(run, 1500);
+            }
         }
 
         window.abrirAppWorkspace = (appId, forceReload = false) => {
@@ -1574,17 +1680,29 @@
             appAtualWorkspace = appObj;
 
             renderizarBarraWorkspace();
+            mostrarOverlayWorkspace(appObj.shortTitle || appObj.title);
+
+            // Oculta o Portal em segundo plano enquanto o módulo está aberto (libera memória/compositing em PCs mais fracos)
+            document.getElementById('portalView')?.classList.add('hidden');
+            document.getElementById('workspaceView').classList.remove('hidden');
 
             const frame = document.getElementById('centralAppFrame');
+            frame.onload = () => {
+                ocultarOverlayWorkspace();
+                propagarPrefsParaIframe();
+            };
             frame.src = getAppUrlCacheBusted(appObj.file, forceReload);
-            document.getElementById('workspaceView').classList.remove('hidden');
         };
 
         window.recarregarAppWorkspace = () => {
             if (!appAtualWorkspace) return;
             CENTRAL_RUNTIME_VER = String(Date.now());
+            mostrarOverlayWorkspace(appAtualWorkspace.shortTitle || appAtualWorkspace.title);
             const frame = document.getElementById('centralAppFrame');
-            if (frame) frame.src = getAppUrlCacheBusted(appAtualWorkspace.file, true);
+            if (frame) {
+                frame.onload = () => { ocultarOverlayWorkspace(); propagarPrefsParaIframe(); };
+                frame.src = getAppUrlCacheBusted(appAtualWorkspace.file, true);
+            }
             showToast(`Atualizando "${appAtualWorkspace.shortTitle}"...`);
         };
 
@@ -1613,10 +1731,12 @@
         }
 
         window.fecharAppWorkspace = () => {
+            ocultarOverlayWorkspace();
             const frame = document.getElementById('centralAppFrame');
-            if (frame) frame.src = 'about:blank';
+            if (frame) { frame.onload = null; frame.src = 'about:blank'; }
             appAtualWorkspace = null;
             document.getElementById('workspaceView').classList.add('hidden');
+            if (usuarioLogado) document.getElementById('portalView')?.classList.remove('hidden');
             // Limpa query param ?app= se houver
             if (window.location.search.includes('app=')) {
                 window.history.replaceState({}, document.title, window.location.pathname);
@@ -2080,7 +2200,14 @@
                     return;
                 }
                 try { ev.source?.postMessage?.({ type: 'CEPERA_NAVEGAR_ACK', appId: targetId }, '*'); } catch (_) {}
-                abrirAppWorkspace(targetId, true);
+                abrirAppWorkspace(targetId, false);
+            } else if (ev.data.type === 'CEPERA_PREFS_CHANGED' && ev.data.prefs) {
+                if (typeof ev.data.prefs.tabletMode === 'boolean' && ev.data.prefs.tabletMode !== Boolean(userPrefs.tabletMode)) {
+                    userPrefs.tabletMode = ev.data.prefs.tabletMode;
+                    aplicarPreferenciasVisuais();
+                    const chaveLocal = usuarioLogado ? ('cepera_prefs_' + usuarioLogado.user) : 'cepera_prefs_guest';
+                    safeStorage.set(chaveLocal, JSON.stringify(userPrefs));
+                }
             }
         });
 

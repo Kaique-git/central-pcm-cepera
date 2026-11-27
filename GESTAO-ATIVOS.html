@@ -5,8 +5,11 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0">
     <title>Gestão de Ativos & Árvore Industrial — PCM Cepêra</title>
     <link rel="icon" type="image/png" href="CEPERA_LOGO.png">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link rel="preconnect" href="https://cdn.jsdelivr.net" crossorigin>
     <script src="https://cdn.tailwindcss.com"></script>
-    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js" defer></script>
     <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
     <style>
         [hidden] { display: none !important; }
@@ -29,11 +32,9 @@
         }
 
         .frosted-shell {
-            background: rgba(255, 255, 255, 0.94);
-            backdrop-filter: blur(8px);
-            -webkit-backdrop-filter: blur(8px);
+            background: rgba(255, 255, 255, 0.97);
             border: 1px solid #e2e8f0;
-            box-shadow: 0 12px 32px -12px rgba(15, 23, 42, 0.06);
+            box-shadow: 0 8px 24px -10px rgba(15, 23, 42, 0.06);
         }
 
         .glass-card {
@@ -274,9 +275,18 @@
         body.tablet-mode *::before,
         body.tablet-mode *::after {
             backdrop-filter: none !important;
+            -webkit-backdrop-filter: none !important;
             transition: none !important;
             animation: none !important;
             box-shadow: none !important;
+        }
+
+        /* VIRTUALIZAÇÃO CSS NATIVA P/ ÁRVORE, GRADE E SANEAMENTO */
+        #treeContainer > div,
+        #gradeTbody > tr,
+        #saneamentoContent > div {
+            content-visibility: auto;
+            contain-intrinsic-size: auto 64px;
         }
         body.tablet-mode .btn-touch,
         body.tablet-mode .btn-pill-dark,
@@ -439,7 +449,7 @@
                         <!-- BARRA DE FILTROS DA ÁRVORE -->
                         <div class="glass-card p-3.5 sm:p-4 rounded-3xl grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-6 gap-2.5 items-center">
                             <div class="relative sm:col-span-2">
-                                <input type="search" id="treeSearchInput" oninput="onTreeFilterChange()" class="input-clean py-2 pl-9 pr-3 text-xs font-bold" placeholder="Buscar setor, linha, equipamento, TAG, conjunto, subconjunto...">
+                                <input type="search" id="treeSearchInput" oninput="debounceAtivos('treeSearch', onTreeFilterChange, 180)" class="input-clean py-2 pl-9 pr-3 text-xs font-bold" placeholder="Buscar setor, linha, equipamento, TAG, conjunto, subconjunto...">
                                 <svg class="w-4 h-4 text-slate-400 absolute left-3 top-1/2 -translate-y-1/2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/></svg>
                             </div>
                             <select id="treeFilterCrit" onchange="onTreeFilterChange()" class="input-clean py-2 text-xs font-extrabold">
@@ -622,7 +632,7 @@
                         <!-- FILTROS DA GRADE -->
                         <div class="glass-card p-4 rounded-3xl flex flex-wrap items-center gap-2.5">
                             <div class="relative flex-1 min-w-[220px]">
-                                <input type="search" id="gradeSearch" oninput="renderGrade()" class="input-clean py-2 pl-9 pr-3 text-xs font-bold" placeholder="Filtrar tabela por qualquer campo...">
+                                <input type="search" id="gradeSearch" oninput="debounceAtivos('gradeSearch', () => { gradePaginaAtual = 1; renderGrade(); }, 180)" class="input-clean py-2 pl-9 pr-3 text-xs font-bold" placeholder="Filtrar tabela por qualquer campo...">
                                 <svg class="w-4 h-4 text-slate-400 absolute left-3 top-1/2 -translate-y-1/2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/></svg>
                             </div>
                             <select id="gradeFilterArea" onchange="renderGrade()" class="input-clean py-2 text-xs font-extrabold w-auto min-w-[150px]"></select>
@@ -742,6 +752,7 @@
                                     <tbody id="gradeTbody" class="divide-y divide-slate-100"></tbody>
                                 </table>
                             </div>
+                            <div id="gradePaginacaoBox" class="hidden p-3 bg-slate-50 border-t border-slate-200 flex flex-wrap items-center justify-between gap-2 text-xs"></div>
                         </div>
                     </section>
 
@@ -757,7 +768,7 @@
 
                         <div class="glass-card p-3.5 rounded-2xl flex flex-wrap items-center justify-between gap-2.5">
                             <div class="relative flex-1 min-w-[220px]">
-                                <input type="search" id="saneamentoSearchInput" oninput="setSaneamentoBusca(this.value)" class="input-clean py-2 pl-9 pr-3 text-xs font-bold" placeholder="Filtrar órfãos ou duplicidades por setor, linha, equipamento ou conjunto...">
+                                <input type="search" id="saneamentoSearchInput" oninput="debounceAtivos('saneBusca', () => setSaneamentoBusca(this.value), 200)" class="input-clean py-2 pl-9 pr-3 text-xs font-bold" placeholder="Filtrar órfãos ou duplicidades por setor, linha, equipamento ou conjunto...">
                                 <svg class="w-4 h-4 text-slate-400 absolute left-3 top-1/2 -translate-y-1/2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/></svg>
                             </div>
                             <button type="button" id="btnToggleSaneamentoArq" hidden onclick="toggleSaneamentoArquivados()" class="hidden px-3 py-2 rounded-xl border text-xs font-extrabold bg-white text-slate-700 border-slate-200 hover:bg-slate-50"></button>
@@ -930,7 +941,7 @@
                             <button type="button" onclick="limparSelecaoDestinosCloneAtivo()" class="px-2.5 py-1 rounded-lg bg-white hover:bg-rose-50 border border-slate-200 text-rose-700 font-extrabold text-[10px]">Limpar</button>
                         </div>
                     </div>
-                    <input type="text" id="clBuscaAtivoDestino" oninput="renderListaAtivosDestinoClone()" class="input-clean py-1.5 text-xs font-bold" placeholder="Filtrar ativo destino por equipamento, linha ou setor...">
+                    <input type="text" id="clBuscaAtivoDestino" oninput="debounceAtivos('cloneBusca', renderListaAtivosDestinoClone, 160)" class="input-clean py-1.5 text-xs font-bold" placeholder="Filtrar ativo destino por equipamento, linha ou setor...">
                     <div id="clListaAtivosExistentes" class="space-y-1.5 max-h-44 overflow-y-auto pr-1"></div>
                 </div>
 
@@ -1010,7 +1021,7 @@
                 </div>
                 <div>
                     <label class="block text-[10px] font-extrabold uppercase text-slate-500 mb-1">Ou cole os dados CSV aqui</label>
-                    <textarea id="csvPasteArea" rows="5" oninput="atualizarPreviewCsv()" class="input-clean py-2 text-xs font-mono" placeholder="Envase;Multipet 1;Sopradora;Transmissão;Moto-redutor Principal;ENV-MP1-01;A;Mensal;Mecânica;SEW;K47;SN123;Ativo"></textarea>
+                    <textarea id="csvPasteArea" rows="5" oninput="debounceAtivos('csvPrev', atualizarPreviewCsv, 220)" class="input-clean py-2 text-xs font-mono" placeholder="Envase;Multipet 1;Sopradora;Transmissão;Moto-redutor Principal;ENV-MP1-01;A;Mensal;Mecânica;SEW;K47;SN123;Ativo"></textarea>
                 </div>
                 <div id="csvPreviewBox" class="text-xs font-bold text-slate-500"></div>
                 <div class="flex justify-end gap-2 pt-3 border-t border-slate-100">
@@ -1874,9 +1885,15 @@
             }];
         }
 
+        let rawLinhasDocMap = new Map();
+        let criticidadePorMaquinaCache = new Map();
+        let cachedAllAtivosOptionsHtml = '';
+
         function reconstruirAssetNodes() {
+            rawLinhasDocMap = new Map();
             const list = [];
             rawLinhasDocs.forEach(d => {
+                rawLinhasDocMap.set(d.id, d.data || {});
                 list.push(...expandirDocParaNodes(d.id, d.data));
             });
             list.sort((a, b) =>
@@ -1886,6 +1903,43 @@
                 a.conjunto.localeCompare(b.conjunto) ||
                 (a.subconjunto || '').localeCompare(b.subconjunto || '')
             );
+            // Pré-calcula chaves normalizadas e criticidade por linha em O(N) (evita O(N^2) na árvore e saneamento)
+            const critMap = new Map();
+            for (let i = 0; i < list.length; i++) {
+                const n = list[i];
+                n._nArea = normKey(n.area);
+                n._nMaq = normKey(n.maquina);
+                n._nEq = normKey(n.equipamento);
+                n._nConj = normKey(n.conjunto);
+                n._nSub = normKey(n.subconjunto);
+                n._nFull = normKey(formatNomeConjuntoInsp(n));
+                n._searchNorm = normKey(`${n.area} ${n.maquina} ${n.equipamento} ${n.conjunto} ${n.subconjunto} ${n.tag} ${n.fabricante} ${n.modelo} ${n.serie} ${n.padrinho_mec} ${n.padrinho_ele}`);
+                const ck = `${n.area}|||${n.maquina}`;
+                let acc = critMap.get(ck);
+                if (!acc) {
+                    acc = { bestExp: '', pesoExp: 0, bestImp: '', pesoImp: 0, qtdNodes: 0 };
+                    critMap.set(ck, acc);
+                }
+                acc.qtdNodes++;
+                const pl = CRITICIDADES[n.criticidade_linha]?.peso || 0;
+                if (pl > acc.pesoExp) { acc.pesoExp = pl; acc.bestExp = n.criticidade_linha; }
+                const pa = CRITICIDADES[n.criticidade]?.peso || 0;
+                if (pa > acc.pesoImp) { acc.pesoImp = pa; acc.bestImp = n.criticidade; }
+            }
+            criticidadePorMaquinaCache = new Map();
+            critMap.forEach((acc, ck) => {
+                const cls = acc.bestExp || acc.bestImp || '';
+                criticidadePorMaquinaCache.set(ck, {
+                    classe: cls,
+                    explicita: Boolean(acc.bestExp),
+                    explicitaClasse: acc.bestExp,
+                    inferidaClasse: acc.bestImp,
+                    semDefinicao: !acc.bestExp,
+                    peso: CRITICIDADES[cls]?.peso || 0,
+                    qtdNodes: acc.qtdNodes
+                });
+            });
+            cachedAllAtivosOptionsHtml = '';
             assetNodes = list;
         }
 
@@ -1909,6 +1963,10 @@
         }
 
         function getInfoCriticidadeLinha(area, maquina, nodesOverride = null) {
+            if ((!nodesOverride || nodesOverride === assetNodes) && area) {
+                const cached = criticidadePorMaquinaCache.get(`${area}|||${maquina}`);
+                if (cached) return cached;
+            }
             const nodes = (nodesOverride || assetNodes).filter(n => (!area || n.area === area) && n.maquina === maquina);
             let bestExp = '';
             let pesoExp = 0;
@@ -2049,7 +2107,7 @@
             const m = maquina || rep.maquina || '';
             const eq = equipamento || rep.equipamento || '';
             const cj = conjunto || rep.conjunto || '';
-            const docMap = new Map(rawLinhasDocs.map(d => [d.id, d.data || {}]));
+            const docMap = rawLinhasDocMap.size ? rawLinhasDocMap : new Map(rawLinhasDocs.map(d => [d.id, d.data || {}]));
             const subsComNome = lista.filter(n => Boolean((n.subconjunto || '').trim()));
             const temSemSub = lista.some(n => !(n.subconjunto || '').trim());
             const hasSubconjuntos = subsComNome.length > 0 && !temSemSub;
@@ -2339,9 +2397,52 @@
             });
         }
 
+        const _debounceTimersAtivos = {};
+        window.debounceAtivos = (key, fn, wait = 180) => {
+            clearTimeout(_debounceTimersAtivos[key]);
+            _debounceTimersAtivos[key] = setTimeout(() => {
+                try { if (typeof fn === 'function') fn(); } catch (err) { console.error(err); }
+            }, wait);
+        };
+
+        function sincronizarPrefsSessaoCentralAtivos() {
+            try {
+                const raw = safeStorage.get('cepera_central_session');
+                if (raw) {
+                    const sess = JSON.parse(raw);
+                    if (sess && typeof sess === 'object') {
+                        sess.preferencias = Object.assign({}, sess.preferencias || {}, { tabletMode: Boolean(userPrefs.tabletMode), tema: userPrefs.tema });
+                        safeStorage.set('cepera_central_session', JSON.stringify(sess));
+                    }
+                }
+            } catch (_) {}
+            try {
+                if (window.parent && window.parent !== window) {
+                    window.parent.postMessage({ type: 'CEPERA_PREFS_CHANGED', prefs: { tabletMode: Boolean(userPrefs.tabletMode), tema: userPrefs.tema } }, '*');
+                }
+            } catch (_) {}
+        }
+        function aplicarPrefsExternasAtivos(prefs) {
+            if (!prefs || typeof prefs !== 'object') return;
+            if (typeof prefs.tabletMode === 'boolean' && prefs.tabletMode !== Boolean(userPrefs.tabletMode)) {
+                userPrefs.tabletMode = prefs.tabletMode;
+                aplicarPreferenciasVisuais();
+                const chaveLocal = usuarioLogado ? ('cepera_prefs_' + usuarioLogado.user) : 'cepera_prefs_guest';
+                safeStorage.set(chaveLocal, JSON.stringify(userPrefs));
+            }
+        }
+        window.addEventListener('message', (ev) => {
+            if (ev?.data?.type === 'CEPERA_PREFS_SYNC') aplicarPrefsExternasAtivos(ev.data.prefs);
+        });
+        window.addEventListener('storage', (ev) => {
+            if (ev.key !== 'cepera_central_session' || !ev.newValue) return;
+            try { aplicarPrefsExternasAtivos(JSON.parse(ev.newValue).preferencias); } catch (_) {}
+        });
+
         async function persistirPreferenciasUsuario() {
             const chaveLocal = usuarioLogado ? ('cepera_prefs_' + usuarioLogado.user) : 'cepera_prefs_guest';
             safeStorage.set(chaveLocal, JSON.stringify(userPrefs));
+            sincronizarPrefsSessaoCentralAtivos();
             if (usuarioLogado && usuarioLogado.id && usuarioLogado.id !== 'default_admin') {
                 try { await updateDoc(doc(db, "ir_funcionarios", usuarioLogado.id), { preferencias: userPrefs }); } catch (_) {}
             }
@@ -2353,10 +2454,12 @@
                 const salvoLocal = safeStorage.get(u ? ('cepera_prefs_' + u.user) : 'cepera_prefs_guest');
                 if (salvoLocal) { try { carregado = JSON.parse(salvoLocal); } catch (_) {} }
             }
+            let prefsPortal = null;
+            try { prefsPortal = JSON.parse(safeStorage.get('cepera_central_session') || 'null')?.preferencias || null; } catch (_) {}
             userPrefs = {
                 tema: (carregado && carregado.tema) || 'padrao',
                 accent: (carregado && carregado.accent) || '#0284c7',
-                tabletMode: Boolean(carregado && carregado.tabletMode),
+                tabletMode: (prefsPortal && typeof prefsPortal.tabletMode === 'boolean') ? prefsPortal.tabletMode : Boolean(carregado && carregado.tabletMode),
                 fontLevel: Number((carregado && carregado.fontLevel) || 0)
             };
             aplicarPreferenciasVisuais();
@@ -2425,7 +2528,7 @@
                     document.getElementById('statusDot').className = 'w-2 h-2 rounded-full bg-emerald-500 shrink-0';
                     const errB = document.getElementById('errBanner');
                     if (errB) { errB.hidden = true; errB.classList.add('hidden'); }
-                    atualizarTudo();
+                    agendarAtualizarTudo();
                 }, () => {
                     const errB = document.getElementById('errBanner');
                     if (errB) { errB.hidden = false; errB.classList.remove('hidden'); }
@@ -2494,7 +2597,7 @@
                     const data = (snapDoc && typeof snapDoc.exists === 'function' && snapDoc.exists()) ? snapDoc.data() : null;
                     customMasterHashAtivos = (data && data.pass_hash) ? String(data.pass_hash) : null;
                     atualizarBadgeMasterAtivos();
-                    atualizarTudo();
+                    agendarAtualizarTudo();
                 }, () => {});
             } catch (_) {
                 const errB = document.getElementById('errBanner');
@@ -2502,11 +2605,21 @@
             }
         }
 
+        let _timerDadosCruzados = null;
+        let _timerAtualizarTudo = null;
         function onDadosCruzadosUpdate() {
-            atualizarBadgesSaneamento();
-            if (currentView === 'arvore') renderDetailPanel();
-            else if (currentView === 'saneamento') renderSaneamento();
-            else if (currentView === 'dashboard') renderDashboard();
+            // Agrupa disparos simultâneos dos 7 listeners cruzados em 1 único render
+            if (_timerDadosCruzados) return;
+            _timerDadosCruzados = setTimeout(() => {
+                _timerDadosCruzados = null;
+                const run = () => {
+                    atualizarBadgesSaneamento();
+                    if (currentView === 'arvore') renderDetailPanel();
+                    else if (currentView === 'saneamento') renderSaneamento();
+                    else if (currentView === 'dashboard') renderDashboard();
+                };
+                if (window.requestAnimationFrame) requestAnimationFrame(run); else run();
+            }, 60);
         }
 
         function atualizarDatalists() {
@@ -2536,7 +2649,7 @@
             const semCrit = assetNodes.filter(n => !n.criticidade).length;
             const semPer = assetNodes.filter(n => !n.periodicidade_preventiva).length;
             const inconsistencias = detectarInconsistenciasGrafia().length;
-            const orfaos = detectarGruposOrfaos().filter(g => !g.ignorado).length;
+            const orfaos = detectarGruposOrfaos({ comSugestoes: false }).filter(g => !g.ignorado).length;
             const duplicados = detectarConjuntosDuplicados().length;
             return { legados, semCrit, semPer, inconsistencias, orfaos, duplicados, totalAlertas: orfaos + legados + inconsistencias + duplicados };
         }
@@ -2551,6 +2664,15 @@
                 el.hidden = qtd === 0;
                 el.classList.toggle('hidden', qtd === 0);
             });
+        }
+
+        function agendarAtualizarTudo() {
+            if (_timerAtualizarTudo) return;
+            _timerAtualizarTudo = setTimeout(() => {
+                _timerAtualizarTudo = null;
+                if (window.requestAnimationFrame) requestAnimationFrame(atualizarTudo);
+                else atualizarTudo();
+            }, 50);
         }
 
         function atualizarTudo() {
@@ -2628,7 +2750,7 @@
                     if (filtroLinhaModo === 'UNDEF' && lInfo.explicita) return false;
                 }
                 if (q) {
-                    const hay = normKey(`${n.area} ${n.maquina} ${n.equipamento} ${n.conjunto} ${n.subconjunto} ${n.tag} ${n.fabricante} ${n.modelo} ${n.serie} ${n.padrinho_mec} ${n.padrinho_ele}`);
+                    const hay = n._searchNorm || normKey(`${n.area} ${n.maquina} ${n.equipamento} ${n.conjunto} ${n.subconjunto} ${n.tag} ${n.fabricante} ${n.modelo} ${n.serie} ${n.padrinho_mec} ${n.padrinho_ele}`);
                     if (!hay.includes(q)) return false;
                 }
                 return true;
@@ -2698,13 +2820,29 @@
             renderTree(false);
         };
 
+        function getTreeSelKey(level, area, maq = '', eq = '', cj = '', nodeId = '') {
+            if (level === 'leaf') return `leaf|${nodeId}`;
+            return `${level}|${area}|${maq}|${eq}|${cj}`;
+        }
+
         window.selecionarAlvo = (level, area, maquina = '', equipamento = '', conjunto = '', nodeId = '') => {
             selectedTarget = { level, area, maquina, equipamento, conjunto, nodeId };
+            const prevSize = expandedKeys.size;
             if (area) expandedKeys.add(`A|${area}`);
             if (maquina) expandedKeys.add(`M|${area}|${maquina}`);
             if (equipamento) expandedKeys.add(`E|${area}|${maquina}|${equipamento}`);
             if (conjunto) expandedKeys.add(`C|${area}|${maquina}|${equipamento}|${conjunto}`);
-            renderTree(false);
+            const box = document.getElementById('treeContainer');
+            const selKey = getTreeSelKey(level, area, maquina, equipamento, conjunto, nodeId);
+            const targetRow = (box && expandedKeys.size === prevSize)
+                ? Array.from(box.querySelectorAll('.tree-row[data-tree-sel]')).find(el => el.dataset.treeSel === selKey)
+                : null;
+            if (targetRow) {
+                box.querySelectorAll('.tree-row.selected').forEach(el => el.classList.remove('selected'));
+                targetRow.classList.add('selected');
+            } else {
+                renderTree(false);
+            }
             renderDetailPanel();
         };
 
@@ -2763,7 +2901,7 @@
                 const aJs = JSON.stringify(area).replace(/"/g, '&quot;');
 
                 html += `<div>
-                    <div class="tree-row ${isSelected('area', area) ? 'selected' : ''}" onclick="selecionarAlvo('area', ${aJs})">
+                    <div class="tree-row ${isSelected('area', area) ? 'selected' : ''}" data-tree-sel="${escapeHtml(getTreeSelKey('area', area))}" onclick="selecionarAlvo('area', ${aJs})">
                         <div class="flex items-center gap-1.5 min-w-0">
                             <span class="tree-chevron ${openA ? 'open' : ''}" onclick="event.stopPropagation(); toggleBranch(${JSON.stringify(kA).replace(/"/g, '&quot;')})">${CHEVRON_SVG}</span>
                             <svg class="w-4 h-4 text-sky-600 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4"/></svg>
@@ -2791,7 +2929,7 @@
                         const mJs = JSON.stringify(maq).replace(/"/g, '&quot;');
 
                         html += `<div>
-                            <div class="tree-row ${linhaHighlightCls} ${isSelected('maquina', area, maq) ? 'selected' : ''}" onclick="selecionarAlvo('maquina', ${aJs}, ${mJs})">
+                            <div class="tree-row ${linhaHighlightCls} ${isSelected('maquina', area, maq) ? 'selected' : ''}" data-tree-sel="${escapeHtml(getTreeSelKey('maquina', area, maq))}" onclick="selecionarAlvo('maquina', ${aJs}, ${mJs})">
                                 <div class="flex items-center gap-1.5 min-w-0">
                                     <span class="tree-chevron ${openM ? 'open' : ''}" onclick="event.stopPropagation(); toggleBranch(${JSON.stringify(kM).replace(/"/g, '&quot;')})">${CHEVRON_SVG}</span>
                                     <svg class="w-3.5 h-3.5 ${iconCorCls} shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"/></svg>
@@ -2816,7 +2954,7 @@
                                 const eqJs = JSON.stringify(eq).replace(/"/g, '&quot;');
 
                                 html += `<div>
-                                    <div class="tree-row ${isSelected('equipamento', area, maq, eq) ? 'selected' : ''}" onclick="selecionarAlvo('equipamento', ${aJs}, ${mJs}, ${eqJs})">
+                                    <div class="tree-row ${isSelected('equipamento', area, maq, eq) ? 'selected' : ''}" data-tree-sel="${escapeHtml(getTreeSelKey('equipamento', area, maq, eq))}" onclick="selecionarAlvo('equipamento', ${aJs}, ${mJs}, ${eqJs})">
                                         <div class="flex items-center gap-1.5 min-w-0">
                                             <span class="tree-chevron ${openE ? 'open' : ''}" onclick="event.stopPropagation(); toggleBranch(${JSON.stringify(kE).replace(/"/g, '&quot;')})">${CHEVRON_SVG}</span>
                                             <svg class="w-3.5 h-3.5 text-emerald-600 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"/><circle cx="12" cy="12" r="3" stroke-width="2"/></svg>
@@ -2845,7 +2983,7 @@
                                         const cjJs = JSON.stringify(cj).replace(/"/g, '&quot;');
 
                                         html += `<div>
-                                            <div class="tree-row ${isSelected('conjunto', area, maq, eq, cj) ? 'selected' : ''}" onclick="selecionarAlvo('conjunto', ${aJs}, ${mJs}, ${eqJs}, ${cjJs})">
+                                            <div class="tree-row ${isSelected('conjunto', area, maq, eq, cj) ? 'selected' : ''}" data-tree-sel="${escapeHtml(getTreeSelKey('conjunto', area, maq, eq, cj))}" onclick="selecionarAlvo('conjunto', ${aJs}, ${mJs}, ${eqJs}, ${cjJs})">
                                                 <div class="flex items-center gap-1.5 min-w-0">
                                                     <span class="tree-chevron ${openC ? 'open' : ''}" onclick="event.stopPropagation(); toggleBranch(${JSON.stringify(kC).replace(/"/g, '&quot;')})">${CHEVRON_SVG}</span>
                                                     <svg class="w-3.5 h-3.5 text-amber-600 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4"/></svg>
@@ -2867,7 +3005,7 @@
                                                 const stDot = (STATUS_ATIVOS[leaf.status_ativo] || STATUS_ATIVOS['Ativo']).dot;
                                                 const nomeSub = leaf.subconjunto || '(Subconjunto não definido)';
                                                 const nJs = JSON.stringify(leaf.nodeId).replace(/"/g, '&quot;');
-                                                html += `<div class="tree-row ${isSelected('leaf', area, maq, eq, cj, leaf.nodeId) ? 'selected' : ''}" onclick="selecionarAlvo('leaf', ${aJs}, ${mJs}, ${eqJs}, ${cjJs}, ${nJs})">
+                                                html += `<div class="tree-row ${isSelected('leaf', area, maq, eq, cj, leaf.nodeId) ? 'selected' : ''}" data-tree-sel="${escapeHtml(getTreeSelKey('leaf', area, maq, eq, cj, leaf.nodeId))}" onclick="selecionarAlvo('leaf', ${aJs}, ${mJs}, ${eqJs}, ${cjJs}, ${nJs})">
                                                     <div class="flex items-center gap-1.5 min-w-0">
                                                         <span class="w-2 h-2 rounded-full ${stDot} shrink-0" title="${escapeHtml(leaf.status_ativo)}"></span>
                                                         <span class="text-[11px] font-semibold ${leaf.subconjunto ? 'text-slate-700' : 'text-slate-400 italic'} truncate">${escapeHtml(nomeSub)}</span>
@@ -4992,7 +5130,7 @@
             const cC = assetNodes.filter(n => n.criticidade === 'C').length;
             const cN = assetNodes.filter(n => !n.criticidade).length;
             const ctxCrit = document.getElementById('chartCriticidade')?.getContext('2d');
-            if (ctxCrit) {
+            if (ctxCrit && typeof window.Chart !== 'undefined') {
                 if (chartCritInstance) chartCritInstance.destroy();
                 chartCritInstance = new Chart(ctxCrit, {
                     type: 'doughnut',
@@ -5011,7 +5149,7 @@
                 : assetNodes.filter(n => n.periodicidade_preventiva === lbl).length
             );
             const ctxPer = document.getElementById('chartPeriodicidade')?.getContext('2d');
-            if (ctxPer) {
+            if (ctxPer && typeof window.Chart !== 'undefined') {
                 if (chartPerInstance) chartPerInstance.destroy();
                 chartPerInstance = new Chart(ctxPer, {
                     type: 'bar',
@@ -5150,18 +5288,50 @@
             renderGrade();
         };
 
+        const GRADE_PAGE_SIZE = 80;
+        let gradePaginaAtual = 1;
+        let gradeMostrarTodos = false;
+        window.irPaginaGrade = (p) => { gradeMostrarTodos = false; gradePaginaAtual = Math.max(1, p); renderGrade(); };
+        window.toggleMostrarTodosGrade = () => { gradeMostrarTodos = !gradeMostrarTodos; gradePaginaAtual = 1; renderGrade(); };
+
         window.renderGrade = () => {
             const tbody = document.getElementById('gradeTbody');
+            const pagBox = document.getElementById('gradePaginacaoBox');
             if (!tbody) return;
             const lista = getGradeFiltrados();
             atualizarBarraLote();
 
             if (!lista.length) {
                 tbody.innerHTML = `<tr><td colspan="9" class="py-8 text-center text-slate-400 font-bold">Nenhum ativo encontrado para este filtro.</td></tr>`;
+                if (pagBox) { pagBox.classList.add('hidden'); pagBox.innerHTML = ''; }
                 return;
             }
 
-            tbody.innerHTML = lista.map(n => `
+            const totalPag = Math.max(1, Math.ceil(lista.length / GRADE_PAGE_SIZE));
+            if (gradePaginaAtual > totalPag) gradePaginaAtual = totalPag;
+            const ini = gradeMostrarTodos ? 0 : (gradePaginaAtual - 1) * GRADE_PAGE_SIZE;
+            const visiveis = gradeMostrarTodos ? lista : lista.slice(ini, ini + GRADE_PAGE_SIZE);
+
+            if (pagBox) {
+                if (lista.length <= GRADE_PAGE_SIZE) {
+                    pagBox.classList.add('hidden');
+                    pagBox.innerHTML = '';
+                } else {
+                    pagBox.classList.remove('hidden');
+                    pagBox.innerHTML = `
+                        <span class="font-bold text-slate-500">Exibindo ${ini + 1}–${Math.min(ini + visiveis.length, lista.length)} de ${lista.length} ativo(s)</span>
+                        <div class="flex items-center gap-1.5">
+                            ${!gradeMostrarTodos ? `
+                                <button type="button" ${gradePaginaAtual <= 1 ? 'disabled' : ''} onclick="irPaginaGrade(${gradePaginaAtual - 1})" class="px-3 py-1 rounded-lg bg-white border border-slate-300 font-extrabold disabled:opacity-40">← Anterior</button>
+                                <span class="font-extrabold text-slate-700 px-1.5">${gradePaginaAtual} / ${totalPag}</span>
+                                <button type="button" ${gradePaginaAtual >= totalPag ? 'disabled' : ''} onclick="irPaginaGrade(${gradePaginaAtual + 1})" class="px-3 py-1 rounded-lg bg-white border border-slate-300 font-extrabold disabled:opacity-40">Próxima →</button>
+                            ` : ''}
+                            <button type="button" onclick="toggleMostrarTodosGrade()" class="px-3 py-1 rounded-lg bg-slate-200 hover:bg-slate-300 text-slate-800 font-extrabold">${gradeMostrarTodos ? 'Voltar à paginação' : 'Mostrar todos'}</button>
+                        </div>`;
+                }
+            }
+
+            tbody.innerHTML = visiveis.map(n => `
                 <tr class="hover:bg-slate-50/80 transition-colors">
                     <td class="py-2.5 px-3 text-center">
                         ${n.isLegacyArray
@@ -5728,7 +5898,8 @@
             return achados;
         }
 
-        function detectarGruposOrfaos() {
+        function detectarGruposOrfaos(opts = {}) {
+            const comSugestoes = opts.comSugestoes !== false;
             if (!rawLinhasDocs.length && !assetNodes.length) return [];
             const validIds = getValidObLinhasIdsSet();
             const agendaTextByNodeId = new Map();
@@ -5797,7 +5968,9 @@
                 const todos = [...g.rotas, ...g.planos, ...g.manutencoes, ...g.anomalias];
                 if (!todos.length) return;
                 const ignorado = todos.every(item => item.orphan_ignorado === true);
-                const match = sugerirDestinoAtivoParaOrfao(g);
+                const match = comSugestoes
+                    ? sugerirDestinoAtivoParaOrfao(g)
+                    : { bestNode: null, bestScore: 0, reason: '', topCandidates: [] };
                 list.push({
                     ...g,
                     oldIdsArr: [...g.oldIds],
@@ -5807,7 +5980,9 @@
                 });
             });
 
-            list.sort((a, b) => (b.sugestao.bestScore - a.sugestao.bestScore) || (b.totalRegistros - a.totalRegistros) || a.equipamento.localeCompare(b.equipamento));
+            if (comSugestoes) {
+                list.sort((a, b) => (b.sugestao.bestScore - a.sugestao.bestScore) || (b.totalRegistros - a.totalRegistros) || a.equipamento.localeCompare(b.equipamento));
+            }
             return list;
         }
 
@@ -5824,12 +5999,12 @@
             const scored = [];
 
             assetNodes.forEach(n => {
-                const nArea = normKey(n.area);
-                const nMaq = normKey(n.maquina);
-                const nEq = normKey(n.equipamento);
-                const nConj = normKey(n.conjunto);
-                const nSub = normKey(n.subconjunto);
-                const nFull = normKey(formatNomeConjuntoInsp(n));
+                const nArea = n._nArea ?? normKey(n.area);
+                const nMaq = n._nMaq ?? normKey(n.maquina);
+                const nEq = n._nEq ?? normKey(n.equipamento);
+                const nConj = n._nConj ?? normKey(n.conjunto);
+                const nSub = n._nSub ?? normKey(n.subconjunto);
+                const nFull = n._nFull ?? normKey(formatNomeConjuntoInsp(n));
 
                 const sameArea = Boolean(gArea && nArea && gArea === nArea);
                 const sameMaq = Boolean(gMaq && nMaq && gMaq === nMaq);
@@ -6268,7 +6443,7 @@
             renderSaneamento();
         };
 
-        function getOpcoesAtivosSelectHtml(preferidos = [], selectedId = '') {
+        function getOpcoesAtivosSelectHtml(preferidos = [], selectedId = '', incluirTodos = false) {
             const seen = new Set();
             const prefList = [];
             (preferidos || []).forEach(n => {
@@ -6277,7 +6452,10 @@
                     prefList.push(n);
                 }
             });
-            const outros = assetNodes.filter(n => !seen.has(n.nodeId));
+            if (selectedId && !seen.has(selectedId)) {
+                const nSel = assetNodes.find(x => x.nodeId === selectedId);
+                if (nSel) { seen.add(nSel.nodeId); prefList.unshift(nSel); }
+            }
             const mkOpt = (n) => {
                 const lbl = `${n.area} › ${n.maquina} › ${n.equipamento} › ${formatNomeConjuntoInsp(n)}${n.isLegacyArray ? ' [Legado]' : ''}`;
                 const sel = n.nodeId === selectedId ? ' selected' : '';
@@ -6288,11 +6466,25 @@
             if (prefList.length) {
                 html += `<optgroup label="Sugestões mais compatíveis">${prefList.map(mkOpt).join('')}</optgroup>`;
             }
-            if (outros.length) {
-                html += `<optgroup label="Todos os ativos cadastrados">${outros.map(mkOpt).join('')}</optgroup>`;
+            if (incluirTodos) {
+                const outros = assetNodes.filter(n => !seen.has(n.nodeId));
+                if (outros.length) {
+                    html += `<optgroup label="Todos os ativos cadastrados">${outros.map(mkOpt).join('')}</optgroup>`;
+                }
+            } else if (assetNodes.length > prefList.length) {
+                html += `<option disabled>── Clique para listar todos os ${assetNodes.length} ativos ──</option>`;
             }
             return html;
         }
+
+        window.popularSelectOrfaoCompleto = (selEl, idx) => {
+            if (!selEl || selEl.dataset.fullLoaded === '1') return;
+            const cur = selEl.value;
+            const grupo = cachedOrphanGroups[idx];
+            selEl.innerHTML = getOpcoesAtivosSelectHtml(grupo?.sugestao?.topCandidates || [], cur, true);
+            selEl.value = cur;
+            selEl.dataset.fullLoaded = '1';
+        };
 
         function renderSaneamento() {
             const box = document.getElementById('saneamentoContent');
@@ -6400,7 +6592,7 @@
 
                                 <div class="grid grid-cols-1 lg:grid-cols-12 gap-2 items-center pt-2 border-t border-slate-100 text-xs">
                                     <div class="lg:col-span-6">
-                                        <select id="selOrfaoDest_${origIdx}" class="input-clean py-2 text-xs font-bold">${optsHtml}</select>
+                                        <select id="selOrfaoDest_${origIdx}" onfocus="popularSelectOrfaoCompleto(this, ${origIdx})" onmousedown="popularSelectOrfaoCompleto(this, ${origIdx})" class="input-clean py-2 text-xs font-bold">${optsHtml}</select>
                                     </div>
                                     <div class="lg:col-span-6 flex flex-wrap items-center gap-2">
                                         <button type="button" onclick="vincularGrupoOrfao(${origIdx})" class="px-3 py-2 rounded-xl bg-slate-900 hover:bg-slate-800 text-white font-extrabold text-[11px]">
