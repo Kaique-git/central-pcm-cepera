@@ -7164,6 +7164,30 @@ match /config/{document=**} {
         }
 
         // ================= BOOT & FIREBASE =================
+        // Handshake de sincronização com o Portal Central (mantém tela de carregamento até o banco sincronizar)
+        const _syncPortalDone = new Set();
+        const _SYNC_PORTAL_REQ = ['linhas', 'docs', 'revisoes'];
+        let _syncPortalReadySent = false;
+        function _postPortalSync(msg) {
+            try { if (window.parent && window.parent !== window) window.parent.postMessage(msg, '*'); } catch (_) {}
+        }
+        function notificarPortalPronto() {
+            if (_syncPortalReadySent) return;
+            _syncPortalReadySent = true;
+            const fin = () => _postPortalSync({ type: 'CEPERA_APP_READY' });
+            if (window.requestAnimationFrame) requestAnimationFrame(() => requestAnimationFrame(fin));
+            else setTimeout(fin, 40);
+        }
+        function marcarSyncPortal(chave, rotulo, snap) {
+            if (_syncPortalReadySent) return;
+            if (snap && snap.metadata && snap.metadata.fromCache) return;
+            _syncPortalDone.add(chave);
+            const loaded = _SYNC_PORTAL_REQ.filter(k => _syncPortalDone.has(k)).length;
+            const total = _SYNC_PORTAL_REQ.length;
+            _postPortalSync({ type: 'CEPERA_APP_SYNC_STATUS', loaded, total, text: rotulo ? `Sincronizando ${rotulo} (${loaded}/${total})...` : `Sincronizando banco de dados (${loaded}/${total})...` });
+            if (loaded >= total) notificarPortalPronto();
+        }
+
         async function iniciarAplicacao() {
             usuarioLogado = lerSessaoCentral();
             carregarPreferenciasUsuario(usuarioLogado);
@@ -7265,9 +7289,11 @@ match /config/{document=**} {
                 popularFiltrosArvoreBiblioteca(true);
                 agendarRenderDocs();
                 tentarAplicarHandoffDocs();
+                marcarSyncPortal('linhas', 'Árvore de Ativos', snap);
             }, () => {
                 document.getElementById('statusDot').className = 'w-2 h-2 rounded-full bg-rose-500';
                 document.getElementById('statusText').innerText = 'Erro Firestore';
+                marcarSyncPortal('linhas', 'Árvore de Ativos');
             });
 
             onSnapshot(refDocsAtivos, (snap) => {
@@ -7276,12 +7302,14 @@ match /config/{document=**} {
                 popularDisciplinasSelectsDocs();
                 agendarRenderDocs();
                 tentarAplicarHandoffDocs();
-            });
+                marcarSyncPortal('docs', 'Biblioteca de Documentos', snap);
+            }, () => marcarSyncPortal('docs', 'Biblioteca de Documentos'));
 
             onSnapshot(refDocsRevisoes, (snap) => {
                 docsRevisoes = snap.docs.map(d => ({ id: d.id, ...d.data() }));
                 agendarRenderDocs();
-            });
+                marcarSyncPortal('revisoes', 'Revisões', snap);
+            }, () => marcarSyncPortal('revisoes', 'Revisões'));
 
             window.addEventListener('focus', () => {
                 if (usuarioLogado) {

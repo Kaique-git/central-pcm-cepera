@@ -3421,6 +3421,30 @@
         }
 
         // ================= INICIALIZAÇÃO SINCRONIZADA =================
+        // Handshake de sincronização com o Portal Central (mantém tela de carregamento até o banco sincronizar)
+        const _syncPortalDone = new Set();
+        const _SYNC_PORTAL_REQ = ['linhas', 'agenda', 'anomalias', 'checklists', 'func'];
+        let _syncPortalReadySent = false;
+        function _postPortalSync(msg) {
+            try { if (window.parent && window.parent !== window) window.parent.postMessage(msg, '*'); } catch (_) {}
+        }
+        function notificarPortalPronto() {
+            if (_syncPortalReadySent) return;
+            _syncPortalReadySent = true;
+            const fin = () => _postPortalSync({ type: 'CEPERA_APP_READY' });
+            if (window.requestAnimationFrame) requestAnimationFrame(() => requestAnimationFrame(fin));
+            else setTimeout(fin, 40);
+        }
+        function marcarSyncPortal(chave, rotulo, snap) {
+            if (_syncPortalReadySent) return;
+            if (snap && snap.metadata && snap.metadata.fromCache) return;
+            _syncPortalDone.add(chave);
+            const loaded = _SYNC_PORTAL_REQ.filter(k => _syncPortalDone.has(k)).length;
+            const total = _SYNC_PORTAL_REQ.length;
+            _postPortalSync({ type: 'CEPERA_APP_SYNC_STATUS', loaded, total, text: rotulo ? `Sincronizando ${rotulo} (${loaded}/${total})...` : `Sincronizando banco de dados (${loaded}/${total})...` });
+            if (loaded >= total) notificarPortalPronto();
+        }
+
         async function initApp() {
             verificarSessao();
 
@@ -3434,6 +3458,7 @@
             setTimeout(() => {
                 if (!bancoConectado) {
                     atualizarStatusConexao('erro', 'tempo esgotado / bloqueio de rede');
+                    notificarPortalPronto();
                 }
             }, 8000);
 
@@ -3466,8 +3491,10 @@
                     rotearTelas();
                     tentarAplicarHandoffInspecao();
                 }
+                marcarSyncPortal('linhas', 'Árvore de Ativos', snap);
             }, (err) => {
                 atualizarStatusConexao('erro', err?.code || 'permissão em ob_linhas');
+                marcarSyncPortal('linhas', 'Árvore de Ativos');
             });
 
             onSnapshot(refAgenda, (snap) => {
@@ -3479,7 +3506,8 @@
                     rotearTelas();
                     atualizarAnomaliasSalvasModal();
                 }
-            });
+                marcarSyncPortal('agenda', 'Agenda de Rotas', snap);
+            }, () => marcarSyncPortal('agenda', 'Agenda de Rotas'));
 
             onSnapshot(refAnomalias, (snap) => {
                 const temp = [];
@@ -3489,7 +3517,8 @@
                     rotearTelas();
                     atualizarAnomaliasSalvasModal();
                 }
-            });
+                marcarSyncPortal('anomalias', 'Anomalias', snap);
+            }, () => marcarSyncPortal('anomalias', 'Anomalias'));
 
             onSnapshot(refChecklists, (snap) => {
                 const temp = {};
@@ -3519,7 +3548,8 @@
                         renderMasterDbView();
                     }
                 }
-            });
+                marcarSyncPortal('checklists', 'Planos Cirúrgicos', snap);
+            }, () => marcarSyncPortal('checklists', 'Planos Cirúrgicos'));
 
             onSnapshot(refDocsAtivos, (snap) => {
                 listaDocsAtivos = snap.docs.map(d => ({ id: d.id, ...d.data() }));
@@ -3551,8 +3581,10 @@
                 } else {
                     verificarSessao();
                 }
+                marcarSyncPortal('func', 'Equipe & Permissões', snap);
             }, (err) => {
                 atualizarStatusConexao('erro', err?.code || 'permissão');
+                marcarSyncPortal('func', 'Equipe & Permissões');
             });
         }
 

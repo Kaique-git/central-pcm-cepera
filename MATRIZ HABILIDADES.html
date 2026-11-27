@@ -1315,6 +1315,30 @@
                 }
             }, 8000);
 
+            // Handshake de sincronização com o Portal Central (mantém tela de carregamento até o banco sincronizar)
+            const _syncPortalDone = new Set();
+            const _SYNC_PORTAL_REQ = ['linhas', 'func'];
+            let _syncPortalReadySent = false;
+            function _postPortalSync(msg) {
+                try { if (window.parent && window.parent !== window) window.parent.postMessage(msg, '*'); } catch (_) {}
+            }
+            function notificarPortalPronto() {
+                if (_syncPortalReadySent) return;
+                _syncPortalReadySent = true;
+                const fin = () => _postPortalSync({ type: 'CEPERA_APP_READY' });
+                if (window.requestAnimationFrame) requestAnimationFrame(() => requestAnimationFrame(fin));
+                else setTimeout(fin, 40);
+            }
+            function marcarSyncPortal(chave, rotulo, snap) {
+                if (_syncPortalReadySent) return;
+                if (snap && snap.metadata && snap.metadata.fromCache) return;
+                _syncPortalDone.add(chave);
+                const loaded = _SYNC_PORTAL_REQ.filter(k => _syncPortalDone.has(k)).length;
+                const total = _SYNC_PORTAL_REQ.length;
+                _postPortalSync({ type: 'CEPERA_APP_SYNC_STATUS', loaded, total, text: rotulo ? `Sincronizando ${rotulo} (${loaded}/${total})...` : `Sincronizando banco de dados (${loaded}/${total})...` });
+                if (loaded >= total) notificarPortalPronto();
+            }
+
             onSnapshot(refLinhas, function(snap) {
                 const temp = [];
                 snap.forEach(function(d) {
@@ -1329,8 +1353,10 @@
                 if (dl) {
                     dl.innerHTML = arvLinhas.map(function(a) { return '<option value="' + escapeHtml(a) + '">'; }).join('');
                 }
+                marcarSyncPortal('linhas', 'Ativos da Planta', snap);
             }, function(err) {
                 atualizarStatusConexao('erro', (err && err.code) || 'permissão em ob_linhas');
+                marcarSyncPortal('linhas', 'Ativos da Planta');
             });
 
             onSnapshot(refFunc, function(snap) {
@@ -1346,6 +1372,7 @@
                 } else {
                     verificarSessao();
                 }
+                marcarSyncPortal('func', 'Matriz de Habilidades', snap);
             }, function(err) {
                 atualizarStatusConexao('erro', (err && err.code) || 'permissão');
             });

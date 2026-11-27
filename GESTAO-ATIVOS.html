@@ -2509,8 +2509,32 @@
         };
 
         // ================= FIREBASE INIT =================
+        // Handshake de sincronização com o Portal Central (mantém tela de carregamento até o banco sincronizar)
+        const _syncPortalDone = new Set();
+        const _SYNC_PORTAL_REQ = ['linhas', 'func', 'anomalias', 'checklists', 'agenda', 'manutencao', 'docs'];
+        let _syncPortalReadySent = false;
+        function _postPortalSync(msg) {
+            try { if (window.parent && window.parent !== window) window.parent.postMessage(msg, '*'); } catch (_) {}
+        }
+        function notificarPortalPronto() {
+            if (_syncPortalReadySent) return;
+            _syncPortalReadySent = true;
+            const fin = () => _postPortalSync({ type: 'CEPERA_APP_READY' });
+            if (window.requestAnimationFrame) requestAnimationFrame(() => requestAnimationFrame(fin));
+            else setTimeout(fin, 40);
+        }
+        function marcarSyncPortal(chave, rotulo, snap) {
+            if (_syncPortalReadySent) return;
+            if (snap && snap.metadata && snap.metadata.fromCache) return;
+            _syncPortalDone.add(chave);
+            const loaded = _SYNC_PORTAL_REQ.filter(k => _syncPortalDone.has(k)).length;
+            const total = _SYNC_PORTAL_REQ.length;
+            _postPortalSync({ type: 'CEPERA_APP_SYNC_STATUS', loaded, total, text: rotulo ? `Sincronizando ${rotulo} (${loaded}/${total})...` : `Sincronizando banco de dados (${loaded}/${total})...` });
+            if (loaded >= total) notificarPortalPronto();
+        }
+
         async function initFirebase() {
-            if (!acessoAutorizado) return;
+            if (!acessoAutorizado) { notificarPortalPronto(); return; }
             try {
                 document.getElementById('statusText').innerText = 'Sincronizando...';
                 try {
@@ -2529,9 +2553,11 @@
                     const errB = document.getElementById('errBanner');
                     if (errB) { errB.hidden = true; errB.classList.add('hidden'); }
                     agendarAtualizarTudo();
+                    marcarSyncPortal('linhas', 'Árvore de Ativos', snap);
                 }, () => {
                     const errB = document.getElementById('errBanner');
                     if (errB) { errB.hidden = false; errB.classList.remove('hidden'); }
+                    marcarSyncPortal('linhas', 'Árvore de Ativos');
                 });
 
                 onSnapshot(refFunc, (snap) => {
@@ -2549,25 +2575,29 @@
                         }
                     }
                     if (currentView === 'arvore') renderDetailPanel();
-                });
+                    marcarSyncPortal('func', 'Equipe', snap);
+                }, () => marcarSyncPortal('func', 'Equipe'));
 
                 onSnapshot(refAnomalias, (snap) => {
                     listaAnomalias = [];
                     snap.forEach(d => listaAnomalias.push({ id: d.id, ...d.data() }));
                     onDadosCruzadosUpdate();
-                });
+                    marcarSyncPortal('anomalias', 'Anomalias', snap);
+                }, () => marcarSyncPortal('anomalias', 'Anomalias'));
 
                 onSnapshot(refChecklists, (snap) => {
                     listaChecklists = [];
                     snap.forEach(d => listaChecklists.push({ id: d.id, ...d.data() }));
                     onDadosCruzadosUpdate();
-                });
+                    marcarSyncPortal('checklists', 'Planos Cirúrgicos', snap);
+                }, () => marcarSyncPortal('checklists', 'Planos Cirúrgicos'));
 
                 onSnapshot(refAgenda, (snap) => {
                     listaAgenda = [];
                     snap.forEach(d => listaAgenda.push({ id: d.id, ...d.data() }));
                     onDadosCruzadosUpdate();
-                });
+                    marcarSyncPortal('agenda', 'Agenda de Rotas', snap);
+                }, () => marcarSyncPortal('agenda', 'Agenda de Rotas'));
 
                 onSnapshot(refObsPecas, (snap) => {
                     listaObsPecas = [];
@@ -2579,13 +2609,15 @@
                     listaManutencao = [];
                     snap.forEach(d => listaManutencao.push({ id: d.id, ...d.data() }));
                     onDadosCruzadosUpdate();
-                });
+                    marcarSyncPortal('manutencao', 'Preventivas', snap);
+                }, () => marcarSyncPortal('manutencao', 'Preventivas'));
 
                 onSnapshot(refDocsAtivos, (snap) => {
                     listaDocsAtivos = [];
                     snap.forEach(d => listaDocsAtivos.push({ id: d.id, ...d.data() }));
                     onDadosCruzadosUpdate();
-                });
+                    marcarSyncPortal('docs', 'Documentos Técnicos', snap);
+                }, () => marcarSyncPortal('docs', 'Documentos Técnicos'));
 
                 onSnapshot(refDocsRevisoes, (snap) => {
                     listaDocsRevisoes = [];
@@ -2602,6 +2634,7 @@
             } catch (_) {
                 const errB = document.getElementById('errBanner');
                 if (errB) { errB.hidden = false; errB.classList.remove('hidden'); }
+                notificarPortalPronto();
             }
         }
 

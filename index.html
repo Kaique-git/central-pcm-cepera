@@ -478,12 +478,24 @@
 
         <!-- CONTAINER DO SPA SELECIONADO COM OVERLAY DE CARREGAMENTO -->
         <div class="relative flex-1 w-full bg-slate-100 overflow-hidden flex flex-col">
-            <div id="workspaceLoadingOverlay" class="hidden absolute inset-0 z-20 bg-slate-900/90 flex flex-col items-center justify-center gap-3 text-white p-6">
-                <div class="w-11 h-11 rounded-full border-4 border-sky-400/30 border-t-sky-400 ws-spinner"></div>
-                <div class="text-center space-y-1">
-                    <div id="workspaceLoadingTitle" class="text-sm font-extrabold tracking-tight">Carregando módulo...</div>
-                    <div id="workspaceLoadingSub" class="text-xs text-slate-300 font-medium">Preparando interface e sincronizando dados do PCM Cepêra</div>
+            <div id="workspaceLoadingOverlay" class="hidden absolute inset-0 z-20 bg-slate-900/95 flex flex-col items-center justify-center gap-4 text-white p-6 select-none">
+                <div class="w-12 h-12 rounded-full border-4 border-sky-400/25 border-t-sky-400 ws-spinner"></div>
+                <div class="text-center space-y-1.5 max-w-md w-full">
+                    <div id="workspaceLoadingTitle" class="text-base font-extrabold tracking-tight">Carregando módulo...</div>
+                    <div id="workspaceLoadingSub" class="text-xs text-slate-300 font-semibold">Baixando interface e aguardando sincronização do banco de dados...</div>
+                    <div class="pt-2 space-y-1">
+                        <div class="h-2 w-full bg-slate-800 rounded-full overflow-hidden border border-slate-700">
+                            <div id="workspaceLoadingBar" class="h-full bg-sky-400 rounded-full transition-all duration-200" style="width:12%"></div>
+                        </div>
+                        <div class="flex items-center justify-between text-[10px] font-extrabold text-slate-400">
+                            <span>Aguarde a sincronização para evitar erros</span>
+                            <span id="workspaceLoadingPct">12%</span>
+                        </div>
+                    </div>
                 </div>
+                <button type="button" id="btnWorkspaceForceOpen" onclick="ocultarOverlayWorkspace()" class="hidden mt-1 px-4 py-1.5 rounded-xl bg-slate-800 hover:bg-slate-700 border border-slate-600 text-xs font-bold text-slate-200">
+                    Continuar mesmo assim
+                </button>
             </div>
             <iframe id="centralAppFrame" src="about:blank" class="flex-1 w-full border-0 bg-white" title="Aplicativo PCM Cepêra"></iframe>
         </div>
@@ -1614,8 +1626,10 @@
         // ================= WORKSPACE INTEGRADO (SSO + IFRAME) =================
         // Versão estável permite cache HTTP do navegador nos SPAs (450KB-880KB), acelerando trocas de módulo.
         // Só altera ao clicar explicitamente em "↻ Atualizar".
-        let CENTRAL_RUNTIME_VER = '2026.11.27-v3';
+        let CENTRAL_RUNTIME_VER = '2026.11.27-v4';
         let _wsLoadSafetyTimer = null;
+        let _wsForceBtnTimer = null;
+        let _wsAguardandoSync = false;
         let _prefetchExecutado = false;
 
         function getAppUrlCacheBusted(file, forceNow = false) {
@@ -1624,24 +1638,51 @@
             return `${encodeURI(file)}${sep}v=${encodeURIComponent(ver)}`;
         }
 
-        function mostrarOverlayWorkspace(titulo) {
-            const ov = document.getElementById('workspaceLoadingOverlay');
-            const tt = document.getElementById('workspaceLoadingTitle');
+        function atualizarProgressoOverlayWorkspace(pct, subText = null, titleText = null) {
+            const bar = document.getElementById('workspaceLoadingBar');
+            const lbl = document.getElementById('workspaceLoadingPct');
             const sb = document.getElementById('workspaceLoadingSub');
-            if (tt) tt.innerText = titulo ? `Carregando ${titulo}...` : 'Carregando módulo...';
-            if (sb) sb.innerText = userPrefs.tabletMode
-                ? 'Modo Leve ativo — carregamento otimizado para máxima fluidez'
-                : 'Preparando interface e sincronizando dados do PCM Cepêra';
-            if (ov) ov.classList.remove('hidden');
-            clearTimeout(_wsLoadSafetyTimer);
-            _wsLoadSafetyTimer = setTimeout(ocultarOverlayWorkspace, 12000);
+            const tt = document.getElementById('workspaceLoadingTitle');
+            const p = Math.max(0, Math.min(100, Math.round(Number(pct) || 0)));
+            if (bar) bar.style.width = `${p}%`;
+            if (lbl) lbl.innerText = `${p}%`;
+            if (subText && sb) sb.innerText = subText;
+            if (titleText && tt) tt.innerText = titleText;
         }
 
-        function ocultarOverlayWorkspace() {
+        function mostrarOverlayWorkspace(titulo) {
+            _wsAguardandoSync = true;
+            const ov = document.getElementById('workspaceLoadingOverlay');
+            const btnForce = document.getElementById('btnWorkspaceForceOpen');
+            if (btnForce) btnForce.classList.add('hidden');
+            atualizarProgressoOverlayWorkspace(
+                12,
+                userPrefs.tabletMode
+                    ? 'Modo Leve ativo — baixando interface e sincronizando banco de dados...'
+                    : 'Baixando interface e aguardando sincronização do banco de dados...',
+                titulo ? `Carregando ${titulo}...` : 'Carregando módulo...'
+            );
+            if (ov) ov.classList.remove('hidden');
+            clearTimeout(_wsForceBtnTimer);
+            clearTimeout(_wsLoadSafetyTimer);
+            // Após 12s, oferece botão discreto caso a rede esteja offline/bloqueada
+            _wsForceBtnTimer = setTimeout(() => {
+                if (_wsAguardandoSync) {
+                    document.getElementById('btnWorkspaceForceOpen')?.classList.remove('hidden');
+                    atualizarProgressoOverlayWorkspace(85, 'A sincronização está demorando mais que o normal (verifique sua conexão)...');
+                }
+            }, 12000);
+            // Timeout máximo de segurança (30s) para nunca prender indefinidamente
+            _wsLoadSafetyTimer = setTimeout(ocultarOverlayWorkspace, 30000);
+        }
+
+        window.ocultarOverlayWorkspace = () => {
+            _wsAguardandoSync = false;
+            clearTimeout(_wsForceBtnTimer);
             clearTimeout(_wsLoadSafetyTimer);
             const ov = document.getElementById('workspaceLoadingOverlay');
             if (ov) ov.classList.add('hidden');
-        }
+        };
 
         function agendarPrefetchModulos() {
             if (_prefetchExecutado || !usuarioLogado) return;
@@ -1686,11 +1727,18 @@
             document.getElementById('portalView')?.classList.add('hidden');
             document.getElementById('workspaceView').classList.remove('hidden');
 
-            const frame = document.getElementById('centralAppFrame');
-            frame.onload = () => {
-                ocultarOverlayWorkspace();
+            const onFrameLoaded = () => {
                 propagarPrefsParaIframe();
+                if (_wsAguardandoSync) {
+                    atualizarProgressoOverlayWorkspace(
+                        24,
+                        'Interface carregada • Sincronizando dados com o banco Firestore...',
+                        appAtualWorkspace ? `Sincronizando ${appAtualWorkspace.shortTitle || appAtualWorkspace.title}...` : 'Sincronizando módulo...'
+                    );
+                }
             };
+            const frame = document.getElementById('centralAppFrame');
+            frame.onload = onFrameLoaded;
             frame.src = getAppUrlCacheBusted(appObj.file, forceReload);
         };
 
@@ -1700,7 +1748,12 @@
             mostrarOverlayWorkspace(appAtualWorkspace.shortTitle || appAtualWorkspace.title);
             const frame = document.getElementById('centralAppFrame');
             if (frame) {
-                frame.onload = () => { ocultarOverlayWorkspace(); propagarPrefsParaIframe(); };
+                frame.onload = () => {
+                    propagarPrefsParaIframe();
+                    if (_wsAguardandoSync) {
+                        atualizarProgressoOverlayWorkspace(24, 'Interface recarregada • Sincronizando dados com o banco Firestore...');
+                    }
+                };
                 frame.src = getAppUrlCacheBusted(appAtualWorkspace.file, true);
             }
             showToast(`Atualizando "${appAtualWorkspace.shortTitle}"...`);
@@ -2201,6 +2254,20 @@
                 }
                 try { ev.source?.postMessage?.({ type: 'CEPERA_NAVEGAR_ACK', appId: targetId }, '*'); } catch (_) {}
                 abrirAppWorkspace(targetId, false);
+            } else if (ev.data.type === 'CEPERA_APP_SYNC_STATUS') {
+                const frame = document.getElementById('centralAppFrame');
+                if (frame && frame.contentWindow === ev.source && _wsAguardandoSync) {
+                    const loaded = Number(ev.data.loaded || 0);
+                    const total = Math.max(1, Number(ev.data.total || 1));
+                    const pct = 24 + Math.round((loaded / total) * 72);
+                    atualizarProgressoOverlayWorkspace(pct, ev.data.text || `Sincronizando banco de dados (${loaded}/${total})...`);
+                }
+            } else if (ev.data.type === 'CEPERA_APP_READY') {
+                const frame = document.getElementById('centralAppFrame');
+                if (!frame || frame.contentWindow === ev.source) {
+                    atualizarProgressoOverlayWorkspace(100, 'Banco de dados sincronizado!');
+                    setTimeout(ocultarOverlayWorkspace, 120);
+                }
             } else if (ev.data.type === 'CEPERA_PREFS_CHANGED' && ev.data.prefs) {
                 if (typeof ev.data.prefs.tabletMode === 'boolean' && ev.data.prefs.tabletMode !== Boolean(userPrefs.tabletMode)) {
                     userPrefs.tabletMode = ev.data.prefs.tabletMode;

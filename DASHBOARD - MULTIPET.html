@@ -1199,8 +1199,32 @@
             }
         }
 
+        // Handshake de sincronização com o Portal Central (mantém tela de carregamento até o banco sincronizar)
+        const _syncPortalDone = new Set();
+        const _SYNC_PORTAL_REQ = ['producao'];
+        let _syncPortalReadySent = false;
+        function _postPortalSync(msg) {
+            try { if (window.parent && window.parent !== window) window.parent.postMessage(msg, '*'); } catch (_) {}
+        }
+        function notificarPortalPronto() {
+            if (_syncPortalReadySent) return;
+            _syncPortalReadySent = true;
+            const fin = () => _postPortalSync({ type: 'CEPERA_APP_READY' });
+            if (window.requestAnimationFrame) requestAnimationFrame(() => requestAnimationFrame(fin));
+            else setTimeout(fin, 40);
+        }
+        function marcarSyncPortal(chave, rotulo, snap) {
+            if (_syncPortalReadySent) return;
+            if (snap && snap.metadata && snap.metadata.fromCache) return;
+            _syncPortalDone.add(chave);
+            const loaded = _SYNC_PORTAL_REQ.filter(k => _syncPortalDone.has(k)).length;
+            const total = _SYNC_PORTAL_REQ.length;
+            _postPortalSync({ type: 'CEPERA_APP_SYNC_STATUS', loaded, total, text: rotulo ? `Sincronizando ${rotulo} (${loaded}/${total})...` : `Sincronizando banco de dados (${loaded}/${total})...` });
+            if (loaded >= total) notificarPortalPronto();
+        }
+
         function startDataListener() {
-            if (!currentUser) return;
+            if (!currentUser) { notificarPortalPronto(); return; }
             const colRef = collection(db, 'mp_producao');
             onSnapshot(colRef, (snapshot) => {
                 const dot = document.getElementById('headerSyncDot');
@@ -1211,12 +1235,14 @@
                 const rawData = [];
                 snapshot.forEach(d => rawData.push({ id: d.id, ...d.data() }));
                 processAndRender(rawData);
+                marcarSyncPortal('producao', 'Produção Multipet', snapshot);
             }, (error) => {
                 const dot = document.getElementById('headerSyncDot');
                 const txt = document.getElementById('headerSyncText');
                 if (dot) dot.className = 'w-2 h-2 rounded-full bg-rose-500';
                 if (txt) txt.innerText = 'Sem Permissão (mp_producao)';
                 showToast('Permissão negada na coleção mp_producao.', 'error');
+                marcarSyncPortal('producao', 'Produção Multipet', snapshot);
             });
         }
 
