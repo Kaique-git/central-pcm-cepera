@@ -1638,9 +1638,9 @@
         };
 
         // ================= WORKSPACE INTEGRADO (SSO + IFRAME) =================
-        // Versão estável permite cache HTTP do navegador nos SPAs (450KB-880KB), acelerando trocas de módulo.
-        // Só altera ao clicar explicitamente em "↻ Atualizar".
-        let CENTRAL_RUNTIME_VER = '2026.11.27-v5';
+        // Versão única por carregamento do portal: mantém cache HTTP rápido ao trocar de módulo
+        // na mesma sessão e garante versão sempre atualizada após novos deploys (F5 no portal).
+        let CENTRAL_RUNTIME_VER = String(Date.now());
         let _wsLoadSafetyTimer = null;
         let _wsForceBtnTimer = null;
         let _wsTickInterval = null;
