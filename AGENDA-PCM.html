@@ -1795,6 +1795,30 @@
                 document.getElementById("statusText").innerText = "Sincronizando...";
                 await signInAnonymously(auth);
 
+                // Handshake de sincronização com o Portal Central (mantém tela de carregamento até o banco sincronizar)
+                const _syncPortalDone = new Set();
+                const _SYNC_PORTAL_REQ = ['manutencao', 'equipe', 'setores'];
+                let _syncPortalReadySent = false;
+                function _postPortalSync(msg) {
+                    try { if (window.parent && window.parent !== window) window.parent.postMessage(msg, '*'); } catch (_) {}
+                }
+                function notificarPortalPronto() {
+                    if (_syncPortalReadySent) return;
+                    _syncPortalReadySent = true;
+                    const fin = () => _postPortalSync({ type: 'CEPERA_APP_READY' });
+                    if (window.requestAnimationFrame) requestAnimationFrame(() => requestAnimationFrame(fin));
+                    else setTimeout(fin, 40);
+                }
+                function marcarSyncPortal(chave, rotulo, snap) {
+                    if (_syncPortalReadySent) return;
+                    if (snap && snap.metadata && snap.metadata.fromCache) return;
+                    _syncPortalDone.add(chave);
+                    const loaded = _SYNC_PORTAL_REQ.filter(k => _syncPortalDone.has(k)).length;
+                    const total = _SYNC_PORTAL_REQ.length;
+                    _postPortalSync({ type: 'CEPERA_APP_SYNC_STATUS', loaded, total, text: rotulo ? `Sincronizando ${rotulo} (${loaded}/${total})...` : `Sincronizando banco de dados (${loaded}/${total})...` });
+                    if (loaded >= total) notificarPortalPronto();
+                }
+
                 onSnapshot(colRef, (snapshot) => {
                     lancamentos = [];
                     snapshot.forEach(docSnap => lancamentos.push({ id: docSnap.id, ...docSnap.data() }));
@@ -1803,7 +1827,8 @@
                     document.getElementById("statusDot").className = "w-2 h-2 rounded-full bg-emerald-500";
                     atualizarTudo();
                     agendarVerificacaoAlertasAutomaticos();
-                }, () => { document.getElementById("errBanner").hidden = false; });
+                    marcarSyncPortal('manutencao', 'Agenda PCM', snapshot);
+                }, () => { document.getElementById("errBanner").hidden = false; marcarSyncPortal('manutencao', 'Agenda PCM', snapshot); });
 
                 onSnapshot(teamColRef, (snapshot) => {
                     equipeCadastrada = [];
@@ -1816,7 +1841,8 @@
                     reAplicarEquipeRespHandoff();
                     renderNotificationsTable();
                     agendarVerificacaoAlertasAutomaticos();
-                });
+                    marcarSyncPortal('equipe', 'Equipe PCM', snapshot);
+                }, () => marcarSyncPortal('equipe', 'Equipe PCM'));
 
                 onSnapshot(refNotifCfg, (snapDoc) => {
                     const d = (snapDoc && typeof snapDoc.exists === 'function' && snapDoc.exists()) ? snapDoc.data() : null;
@@ -1847,7 +1873,8 @@
                     snap.forEach(d => listaSetores.push({ id: d.id, ...d.data() }));
                     atualizarSelectsDominio();
                     renderListaSetores();
-                });
+                    marcarSyncPortal('setores', 'Setores', snap);
+                }, () => marcarSyncPortal('setores', 'Setores'));
 
                 onSnapshot(docsColRef, snap => {
                     docsAtivosAgenda = [];
@@ -1857,6 +1884,7 @@
 
             } catch (e) {
                 document.getElementById("errBanner").hidden = false;
+                if (typeof notificarPortalPronto === 'function') notificarPortalPronto();
             }
         }
 

@@ -13380,8 +13380,33 @@ Responda SOMENTE JSON Array: [{"ativo_erp":"...","tipo_ativo":"ATIVO_ARVORE"|"FE
                     if (currentView === "cacador" || currentView === "pipeline") {
                         renderCurrentView();
                     }
-                }, () => {});
+                    if (typeof marcarSyncPortal === 'function') marcarSyncPortal('estudos', 'Estudos AQF', snap);
+                }, () => { if (typeof marcarSyncPortal === 'function') marcarSyncPortal('estudos', 'Estudos AQF'); });
             } catch (_) {}
+
+            // Handshake de sincronização com o Portal Central (mantém tela de carregamento até o banco sincronizar)
+            const _syncPortalDone = new Set();
+            const _SYNC_PORTAL_REQ = ['linhas', 'docs', 'estudos'];
+            let _syncPortalReadySent = false;
+            function _postPortalSync(msg) {
+                try { if (window.parent && window.parent !== window) window.parent.postMessage(msg, '*'); } catch (_) {}
+            }
+            function notificarPortalPronto() {
+                if (_syncPortalReadySent) return;
+                _syncPortalReadySent = true;
+                const fin = () => _postPortalSync({ type: 'CEPERA_APP_READY' });
+                if (window.requestAnimationFrame) requestAnimationFrame(() => requestAnimationFrame(fin));
+                else setTimeout(fin, 40);
+            }
+            function marcarSyncPortal(chave, rotulo, snap) {
+                if (_syncPortalReadySent) return;
+                if (snap && snap.metadata && snap.metadata.fromCache) return;
+                _syncPortalDone.add(chave);
+                const loaded = _SYNC_PORTAL_REQ.filter(k => _syncPortalDone.has(k)).length;
+                const total = _SYNC_PORTAL_REQ.length;
+                _postPortalSync({ type: 'CEPERA_APP_SYNC_STATUS', loaded, total, text: rotulo ? `Sincronizando ${rotulo} (${loaded}/${total})...` : `Sincronizando banco de dados (${loaded}/${total})...` });
+                if (loaded >= total) notificarPortalPronto();
+            }
 
             onSnapshot(colLinhas, snap => {
                 rawLinhasDocs = snap.docs.map(d => ({ id: d.id, ...d.data() }));
@@ -13394,14 +13419,16 @@ Responda SOMENTE JSON Array: [{"ativo_erp":"...","tipo_ativo":"ATIVO_ARVORE"|"FE
                 if (!document.getElementById("modalPreProcessamentoErp")?.hidden) {
                     renderPreVooAtivos();
                 }
-            }, () => {});
+                marcarSyncPortal('linhas', 'Árvore de Ativos', snap);
+            }, () => marcarSyncPortal('linhas', 'Árvore de Ativos'));
 
             onSnapshot(colDocsAtivos, snap => {
                 docsAtivosList = snap.docs.map(d => ({ id: d.id, ...d.data() }));
                 atualizarBadgesFontesManuaisAqf();
                 recalcularNosPosAuditoria();
                 renderCurrentView();
-            }, () => {});
+                marcarSyncPortal('docs', 'Manuais Técnicos', snap);
+            }, () => marcarSyncPortal('docs', 'Manuais Técnicos'));
 
             onSnapshot(colAnomalias, snap => {
                 anomaliasRotaList = snap.docs.map(d => ({ id: d.id, ...d.data() }));

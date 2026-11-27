@@ -7964,6 +7964,30 @@
             showToast(`Calendário 52 Semanas filtrado para "${ativoNorm.conjunto || ativoNorm.equipamento}". Clique em qualquer semana para agendar.`);
         }
 
+        // Handshake de sincronização com o Portal Central (mantém tela de carregamento até o banco sincronizar)
+        const _syncPortalDone = new Set();
+        const _SYNC_PORTAL_REQ = ['manutencao', 'linhas', 'func'];
+        let _syncPortalReadySent = false;
+        function _postPortalSync(msg) {
+            try { if (window.parent && window.parent !== window) window.parent.postMessage(msg, '*'); } catch (_) {}
+        }
+        function notificarPortalPronto() {
+            if (_syncPortalReadySent) return;
+            _syncPortalReadySent = true;
+            const fin = () => _postPortalSync({ type: 'CEPERA_APP_READY' });
+            if (window.requestAnimationFrame) requestAnimationFrame(() => requestAnimationFrame(fin));
+            else setTimeout(fin, 40);
+        }
+        function marcarSyncPortal(chave, rotulo, snap) {
+            if (_syncPortalReadySent) return;
+            if (snap && snap.metadata && snap.metadata.fromCache) return;
+            _syncPortalDone.add(chave);
+            const loaded = _SYNC_PORTAL_REQ.filter(k => _syncPortalDone.has(k)).length;
+            const total = _SYNC_PORTAL_REQ.length;
+            _postPortalSync({ type: 'CEPERA_APP_SYNC_STATUS', loaded, total, text: rotulo ? `Sincronizando ${rotulo} (${loaded}/${total})...` : `Sincronizando banco de dados (${loaded}/${total})...` });
+            if (loaded >= total) notificarPortalPronto();
+        }
+
         async function iniciarAplicacao() {
             carregarPreferenciasVisuais();
             let sessao = lerSessaoCentral();
@@ -7999,6 +8023,7 @@
             if (!usuarioLogado) {
                 const den = document.getElementById('accessDeniedScreen');
                 den.hidden = false; den.classList.remove('hidden');
+                notificarPortalPronto();
                 return;
             }
             const main = document.getElementById('mainApp');
@@ -8032,7 +8057,8 @@
                 popularSelectsGlobais();
                 agendarRenderPreventivas();
                 tentarAplicarHandoffPreventiva();
-            }, () => setSyncStatus(false, 'Erro de conexão Firestore'));
+                marcarSyncPortal('manutencao', 'Ordens e Planos', snap);
+            }, () => { setSyncStatus(false, 'Erro de conexão Firestore'); marcarSyncPortal('manutencao', 'Ordens e Planos'); });
 
             onSnapshot(colLinhas, snap => {
                 rawLinhasDocs = snap.docs.map(d => ({ id: d.id, ...d.data() }));
@@ -8041,10 +8067,12 @@
                 popularSelectsGlobais();
                 agendarRenderPreventivas();
                 tentarAplicarHandoffPreventiva();
-            });
+                marcarSyncPortal('linhas', 'Árvore de Ativos', snap);
+            }, () => marcarSyncPortal('linhas', 'Árvore de Ativos'));
 
             onSnapshot(colFunc, snap => {
                 listaFunc = snap.docs.map(d => ({ id: d.id, ...d.data() }));
+                marcarSyncPortal('func', 'Equipe', snap);
                 if (usuarioLogado?.user && !usuarioLogado?.isMaster) {
                     const match = listaFunc.find(f => normKey(f.user) === normKey(usuarioLogado.user));
                     if (match && match.role && match.role !== usuarioLogado.role) {
