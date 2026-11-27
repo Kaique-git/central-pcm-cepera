@@ -1188,7 +1188,7 @@
                                         Fichas / Agenda (<span id="masterCntRotas">0</span>)
                                     </button>
                                     <button type="button" id="btnMasterTabNotif" onclick="setMasterDbTab('notificacoes')" class="px-4 py-1.5 rounded-full text-xs font-extrabold text-indigo-800 bg-indigo-100/80 hover:bg-indigo-200/80 inline-flex items-center gap-1.5">
-                                        <span>🔔 Central de Notificações</span>
+                                        <span><svg class="w-3.5 h-3.5 inline-block shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.2" d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9"/></svg>  Central de Notificações</span>
                                         <span id="masterCntNotif" class="px-1.5 py-0.2 rounded-full bg-indigo-600 text-white text-[10px]">4/5</span>
                                     </button>
                                 </div>
@@ -2035,7 +2035,7 @@
             <div id="modalPrevNotifRotaBody" class="p-4 overflow-y-auto bg-slate-200/60 flex-1"></div>
             <div class="p-4 sm:px-6 border-t border-slate-200 bg-slate-50 flex flex-wrap items-center justify-end gap-2 shrink-0">
                 <button type="button" onclick="fecharModal('modalPreviewNotifRota')" class="btn-touch bg-white border border-slate-300 text-slate-700 text-xs py-2 px-4">Fechar</button>
-                <button type="button" onclick="dispararPreviewNotifRotaModal()" class="btn-touch bg-indigo-600 hover:bg-indigo-700 text-white text-xs py-2 px-5 shadow-md">🚀 Disparar Este E-mail Agora</button>
+                <button type="button" onclick="dispararPreviewNotifRotaModal()" class="btn-touch bg-indigo-600 hover:bg-indigo-700 text-white text-xs py-2 px-5 shadow-md"><svg class="w-3.5 h-3.5 inline-block shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8"/></svg>  Disparar Este E-mail Agora</button>
             </div>
         </div>
     </div>
@@ -7125,13 +7125,13 @@
                                     </div>
                                     ${topDocs.length ? `<div class="flex flex-wrap gap-1.5">${topDocs.map(d => {
                                         if (d.fotoThumbB64 && !d.arquivoId) {
-                                            return `<button type="button" onclick="abrirZoomFotoDocInsp('${d.id}')" class="inline-flex items-center gap-1 px-2 py-0.5 rounded-lg bg-white border border-indigo-200 hover:bg-indigo-100 text-[10px] font-extrabold text-slate-700">📷 ${escapeHtml(d.codigo || 'Foto')}</button>`;
+                                            return `<button type="button" onclick="abrirZoomFotoDocInsp('${d.id}')" class="inline-flex items-center gap-1 px-2 py-0.5 rounded-lg bg-white border border-indigo-200 hover:bg-indigo-100 text-[10px] font-extrabold text-slate-700"><svg class="w-3.5 h-3.5 inline-block shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 9a2 2 0 012-2h.93a2 2 0 001.664-.89l.812-1.22A2 2 0 0110.07 4h3.86a2 2 0 011.664.89l.812 1.22A2 2 0 0018.07 7H19a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2V9z"/><circle cx="12" cy="13" r="3" stroke-width="2"/></svg>  ${escapeHtml(d.codigo || 'Foto')}</button>`;
                                         }
                                         if (d.arquivoId) {
-                                            return `<button type="button" onclick="abrirDocBibliotecaInsp('${d.id}')" class="inline-flex items-center gap-1 px-2 py-0.5 rounded-lg bg-white border border-indigo-200 hover:bg-indigo-100 text-[10px] font-extrabold text-indigo-800">📄 ${escapeHtml(d.codigo || 'Doc')} ↗</button>`;
+                                            return `<button type="button" onclick="abrirDocBibliotecaInsp('${d.id}')" class="inline-flex items-center gap-1 px-2 py-0.5 rounded-lg bg-white border border-indigo-200 hover:bg-indigo-100 text-[10px] font-extrabold text-indigo-800"><svg class="w-3.5 h-3.5 inline-block shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/></svg>  ${escapeHtml(d.codigo || 'Doc')} ↗</button>`;
                                         }
                                         return d.arquivoUrl
-                                            ? `<a href="${escapeHtml(d.arquivoUrl)}" target="_blank" rel="noopener noreferrer" class="inline-flex items-center gap-1 px-2 py-0.5 rounded-lg bg-white border border-indigo-200 hover:bg-indigo-100 text-[10px] font-extrabold text-indigo-800">📄 ${escapeHtml(d.codigo || 'Doc')} ↗</a>`
+                                            ? `<a href="${escapeHtml(d.arquivoUrl)}" target="_blank" rel="noopener noreferrer" class="inline-flex items-center gap-1 px-2 py-0.5 rounded-lg bg-white border border-indigo-200 hover:bg-indigo-100 text-[10px] font-extrabold text-indigo-800"><svg class="w-3.5 h-3.5 inline-block shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/></svg>  ${escapeHtml(d.codigo || 'Doc')} ↗</a>`
                                             : `<span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-lg bg-white border border-slate-200 text-[10px] font-bold text-slate-600">${escapeHtml(d.codigo || d.titulo)}</span>`;
                                     }).join('')}${todos.length > 3 ? `<span class="text-[10px] font-bold text-indigo-700 self-center">+${todos.length - 3}</span>` : ''}</div>` : `<div class="text-[10px] text-slate-500 font-semibold">Consulte manuais/desenhos ou envie foto de referência na Biblioteca.</div>`}
                                 </div>`;
@@ -10870,7 +10870,7 @@
                     <div class="grid grid-cols-3 gap-2 text-center">
                         <div><div class="text-base font-extrabold text-violet-700">${cob}%</div><div class="text-[9px] font-bold uppercase text-slate-400">Cobertura</div></div>
                         <div><div class="text-base font-extrabold ${corAd}">${ad === null ? '—' : ad + '%'}</div><div class="text-[9px] font-bold uppercase text-slate-400">Aderência</div></div>
-                        <div><div class="text-base font-extrabold ${s.ab ? 'text-rose-600' : 'text-emerald-600'}">${s.ab}</div><div class="text-[9px] font-bold uppercase text-slate-400">Abertas${s.alta ? ` (${s.alta}⚠)` : ''}</div></div>
+                        <div><div class="text-base font-extrabold ${s.ab ? 'text-rose-600' : 'text-emerald-600'}">${s.ab}</div><div class="text-[9px] font-bold uppercase text-slate-400">Abertas${s.alta ? ` (${s.alta} alta)` : ''}</div></div>
                     </div>
                     ${kpiBarra(cob, 'bg-violet-500')}
                     <div class="text-[10px] font-semibold text-slate-500">${s.plano}/${s.total} conjuntos com plano • ${s.exec}/${s.prog} rotas</div>
@@ -10919,7 +10919,7 @@
                     if (a.status === 'Concluída' && a.executado_por) ens(a.executado_por).exec++;
                 });
                 const top = Object.keys(pes).sort((a, b) => (pes[b].rotas * 2 + pes[b].anoms + pes[b].exec) - (pes[a].rotas * 2 + pes[a].anoms + pes[a].exec)).slice(0, 8);
-                const medal = ['🥇', '🥈', '🥉'];
+                const medal = ['<span class="px-1.5 py-0.5 rounded-md bg-amber-100 text-amber-800 border border-amber-300 text-[10px] font-extrabold">1º</span>', '<span class="px-1.5 py-0.5 rounded-md bg-slate-200 text-slate-700 border border-slate-300 text-[10px] font-extrabold">2º</span>', '<span class="px-1.5 py-0.5 rounded-md bg-orange-100 text-orange-800 border border-orange-300 text-[10px] font-extrabold">3º</span>'];
                 boxI.innerHTML = top.length ? top.map((n, i) => {
                     const p = pes[n];
                     return `
@@ -10989,7 +10989,7 @@
                         <td class="px-3 py-2 min-w-[200px] max-w-[300px]"><div class="line-clamp-2 font-semibold text-slate-700">${escapeHtml(a.descricao)}</div></td>
                         <td class="px-3 py-2 whitespace-nowrap"><span class="text-[10px] font-extrabold px-2 py-0.5 rounded-full ${direta ? 'bg-violet-100 text-violet-800' : 'bg-sky-100 text-sky-800'}">${direta ? 'Direta' : 'Via Rota'}</span></td>
                         <td class="px-3 py-2 text-[10px] font-bold text-slate-600 whitespace-nowrap">${escapeHtml(a.classificacao_os || '—')}</td>
-                        <td class="px-3 py-2 whitespace-nowrap">${kpiBadgeUrg(a.urgencia)}${a.risco_parada ? ' <span title="Risco de parada" class="text-rose-600 font-extrabold">⚠</span>' : ''}</td>
+                        <td class="px-3 py-2 whitespace-nowrap">${kpiBadgeUrg(a.urgencia)}${a.risco_parada ? ' <span title="Risco de parada" class="text-rose-600 font-extrabold"><svg class="w-3.5 h-3.5 inline-block shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"/></svg> </span>' : ''}</td>
                         <td class="px-3 py-2">${kpiBadgeStatus(isAnomaliaOficial(a) ? a.status : a.status_aprovacao)}</td>
                         <td class="px-3 py-2 font-bold text-slate-600 whitespace-nowrap">${escapeHtml(kpiEquipeAnom(a))}</td>
                         <td class="px-3 py-2 font-semibold text-slate-600 whitespace-nowrap">${escapeHtml(a.relator || '—')}</td>
@@ -11066,7 +11066,7 @@
             if (body) body.innerHTML = `
                 <div class="flex flex-wrap items-center gap-1.5">
                     ${kpiBadgeStatus(isAnomaliaOficial(a) ? a.status : a.status_aprovacao)} ${kpiBadgeUrg(a.urgencia)}
-                    ${a.risco_parada ? '<span class="text-[10px] font-extrabold px-2 py-0.5 rounded-full bg-rose-100 text-rose-700">⚠ Risco de Parada</span>' : ''}
+                    ${a.risco_parada ? '<span class="text-[10px] font-extrabold px-2 py-0.5 rounded-full bg-rose-100 text-rose-700"><svg class="w-3.5 h-3.5 inline-block shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"/></svg>  Risco de Parada</span>' : ''}
                     <span class="text-[10px] font-extrabold px-2 py-0.5 rounded-full ${direta ? 'bg-violet-100 text-violet-800' : 'bg-sky-100 text-sky-800'}">${direta ? 'Anomalia Direta' : 'Via Rota'}</span>
                     ${a.classificacao_os ? `<span class="text-[10px] font-extrabold px-2 py-0.5 rounded-full bg-slate-100 text-slate-700">${escapeHtml(a.classificacao_os)}</span>` : ''}
                 </div>
@@ -11214,7 +11214,7 @@
                 ${imgs.length ? `<h2>Gráficos</h2><div class="charts">${imgs.map(i => `<figure><figcaption>${esc(i.titulo)}</figcaption><img src="${i.src}"></figure>`).join('')}</div>` : ''}
                 <h2>Backlog prioritário (top ${topAb.length})</h2>
                 <table><thead><tr><th>Data</th><th>Ativo</th><th>Descrição</th><th>Urg.</th><th>Status</th><th>Equipe</th><th>Relator</th></tr></thead><tbody>
-                ${topAb.map(a => `<tr><td>${kpiFmtData(a.timestamp)}</td><td>${esc(a.area)} • ${esc(a.maquina)}<br><b>${esc(a.equipamento)}${a.conjunto ? ' › ' + esc(a.conjunto) : ''}</b></td><td>${esc(a.descricao)}</td><td class="${(a.urgencia || 'Média') === 'Alta' ? 'alta' : ''}">${esc(a.urgencia || 'Média')}${a.risco_parada ? ' ⚠' : ''}</td><td>${esc(a.status)}</td><td>${esc(kpiEquipeAnom(a))}</td><td>${esc(a.relator)}</td></tr>`).join('') || '<tr><td colspan="7" class="muted">Sem backlog aberto.</td></tr>'}
+                ${topAb.map(a => `<tr><td>${kpiFmtData(a.timestamp)}</td><td>${esc(a.area)} • ${esc(a.maquina)}<br><b>${esc(a.equipamento)}${a.conjunto ? ' › ' + esc(a.conjunto) : ''}</b></td><td>${esc(a.descricao)}</td><td class="${(a.urgencia || 'Média') === 'Alta' ? 'alta' : ''}">${esc(a.urgencia || 'Média')}${a.risco_parada ? ' <svg class="w-3.5 h-3.5 inline-block shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"/></svg> ' : ''}</td><td>${esc(a.status)}</td><td>${esc(kpiEquipeAnom(a))}</td><td>${esc(a.relator)}</td></tr>`).join('') || '<tr><td colspan="7" class="muted">Sem backlog aberto.</td></tr>'}
                 </tbody></table>
                 <h2>Rotas no período (${rotas.length})</h2>
                 <table><thead><tr><th>Sem.</th><th>Ativo</th><th>Técnico</th><th>Status</th><th>Conclusão</th></tr></thead><tbody>
@@ -11246,7 +11246,7 @@
                 id: 'rota_aprovacoes_pendentes',
                 titulo: 'Aviso de Aprovações & Triagem Pendentes (Supervisão / Diretas & Fichas)',
                 subtitulo: 'Cobra triagem de anomalias diretas, validações de reparos executados e visto em fichas concluídas.',
-                icone: '✅',
+                icone: 'check',
                 cor: 'indigo',
                 ativo: true,
                 intervaloDias: 2,
@@ -11262,7 +11262,7 @@
                 id: 'rota_resumo_anomalias',
                 titulo: 'Resumo de Anomalias & Backlog Crítico (Urgência Alta / Risco de Parada)',
                 subtitulo: 'Envia panorama completo do backlog aberto, anomalias críticas com risco de parada e top equipamentos ofensores.',
-                icone: '⚠️',
+                icone: 'alert',
                 cor: 'rose',
                 ativo: true,
                 intervaloDias: 3,
@@ -11278,7 +11278,7 @@
                 id: 'rota_relatorio_completo',
                 titulo: 'Relatório Executivo Completo de Inspeção de Rota (KPIs & Aderência)',
                 subtitulo: 'Relatório gerencial automático com Aderência Semanal vs Meta 90%, Saúde dos Pontos, Resolução e Cobertura por Setor.',
-                icone: '📊',
+                icone: 'chart',
                 cor: 'sky',
                 ativo: true,
                 intervaloDias: 7,
@@ -11294,7 +11294,7 @@
                 id: 'rota_atrasadas_semana',
                 titulo: 'Alerta de Rotas da Semana Pendentes / Não Executadas',
                 subtitulo: 'Lista as rotas programadas na semana vigente que ainda não foram concluídas pelos inspetores.',
-                icone: '🧭',
+                icone: 'route',
                 cor: 'amber',
                 ativo: true,
                 intervaloDias: 2,
@@ -11310,7 +11310,7 @@
                 id: 'rota_validacao_reparos',
                 titulo: 'Cobrança de Reparos Delegados Aguardando Baixa / Execução',
                 subtitulo: 'Monitora anomalias já delegadas aos técnicos que continuam pendentes ou em andamento.',
-                icone: '🔧',
+                icone: 'wrench',
                 cor: 'emerald',
                 ativo: false,
                 intervaloDias: 3,
@@ -11514,7 +11514,7 @@
         ${bannerStatus ? `
         <div style="background:${bannerStatus.bg};border:1px solid ${bannerStatus.border};border-radius:12px;padding:14px 16px;margin:18px 24px 0 24px;">
             <table style="width:100%;border-collapse:collapse;"><tr>
-                <td style="width:30px;vertical-align:middle;font-size:20px;">${bannerStatus.icone}</td>
+                <td style="width:28px;vertical-align:middle;font-size:14px;font-weight:900;">•</td>
                 <td style="vertical-align:middle;font-size:13px;font-weight:800;color:${bannerStatus.color};">
                     ${escapeHtml(bannerStatus.titulo)}
                     <div style="font-size:11px;font-weight:600;margin-top:2px;opacity:0.9;">${escapeHtml(bannerStatus.sub)}</div>
@@ -11576,7 +11576,7 @@
                 totalPendencias = diretasTriagem.length + anomVal.length + fichasPendSup.length;
                 const tudoCerto = totalPendencias === 0;
                 assunto = tudoCerto
-                    ? `[Inspeção de Rota • Tudo Certo ✅] Nenhuma aprovação pendente (S${currentWeekNumber})`
+                    ? `[Inspeção de Rota • Tudo Certo ✓] Nenhuma aprovação pendente (S${currentWeekNumber})`
                     : `[Inspeção de Rota • Aprovações Pendentes] ${totalPendencias} item(ns) aguardando Supervisão/PCM (S${currentWeekNumber})`;
                 corpoTexto = tudoCerto
                     ? `${regra.msgTudoCerto}\nSemana S${currentWeekNumber}: 0 anomalias diretas em triagem, 0 reparos aguardando validação e 0 fichas pendentes de visto.`
@@ -11601,8 +11601,8 @@
                     titulo: tudoCerto ? 'Tudo Certo! Nenhuma Aprovação Pendente' : 'Aviso de Aprovações & Triagem Pendentes',
                     subtitulo: `Monitoramento automático a cada ${regra.intervaloDias} dia(s) • Inspeção Sensitiva de Rota`,
                     bannerStatus: tudoCerto
-                        ? { bg: '#ecfdf5', border: '#6ee7b7', color: '#065f46', icone: '✅', titulo: regra.msgTudoCerto, sub: 'Todas as triagens de anomalias diretas, validações de reparos e fichas da semana estão em dia!' }
-                        : { bg: '#eef2ff', border: '#c7d2fe', color: '#3730a3', icone: '🔔', titulo: `${totalPendencias} item(ns) aguardam aprovação ou visto da Supervisão / PCM`, sub: 'Acesse o módulo Inspeção de Rota (abas Supervisão e Anomalias) para aprovar ou validar.' },
+                        ? { bg: '#ecfdf5', border: '#6ee7b7', color: '#065f46', icone: 'check', titulo: regra.msgTudoCerto, sub: 'Todas as triagens de anomalias diretas, validações de reparos e fichas da semana estão em dia!' }
+                        : { bg: '#eef2ff', border: '#c7d2fe', color: '#3730a3', icone: 'bell', titulo: `${totalPendencias} item(ns) aguardam aprovação ou visto da Supervisão / PCM`, sub: 'Acesse o módulo Inspeção de Rota (abas Supervisão e Anomalias) para aprovar ou validar.' },
                     kpis: [
                         { label: 'Triagem Diretas', valor: diretasTriagem.length, cor: diretasTriagem.length ? '#f59e0b' : '#10b981' },
                         { label: 'Validação Reparos', valor: anomVal.length, cor: anomVal.length ? '#6366f1' : '#10b981' },
@@ -11617,7 +11617,7 @@
                 totalPendencias = anomAb.length;
                 const tudoCerto = totalPendencias === 0;
                 assunto = tudoCerto
-                    ? `[Inspeção de Rota • Tudo Certo ✅] Zero anomalias abertas no backlog`
+                    ? `[Inspeção de Rota • Tudo Certo ✓] Zero anomalias abertas no backlog`
                     : `[Inspeção de Rota • Resumo de Anomalias] ${anomAb.length} aberta(s) (${anomAltas.length} Urgência Alta • ${anomRisco.length} Risco Parada)`;
                 corpoTexto = tudoCerto
                     ? `${regra.msgTudoCerto}\nBacklog oficial de anomalias está 100% concluído.`
@@ -11629,7 +11629,7 @@
                 }).slice(0, 15).map(a => [
                     `<strong>${escapeHtml(a.maquina || '—')}</strong><br>${escapeHtml(a.equipamento || '—')} › ${escapeHtml(a.conjunto || 'Geral')}`,
                     escapeHtml(a.descricao || '—'),
-                    `<strong style="color:${a.urgencia === 'Alta' ? '#e11d48' : '#d97706'}">${escapeHtml(a.urgencia || 'Média')}${a.risco_parada ? ' ⚠ PARADA' : ''}</strong>`,
+                    `<strong style="color:${a.urgencia === 'Alta' ? '#e11d48' : '#d97706'}">${escapeHtml(a.urgencia || 'Média')}${a.risco_parada ? ' • PARADA' : ''}</strong>`,
                     escapeHtml(a.equipe_responsavel || a.especialidade || 'Mecânica'),
                     escapeHtml(a.status || 'Pendente')
                 ]);
@@ -11640,8 +11640,8 @@
                     titulo: tudoCerto ? 'Tudo Certo! Backlog de Anomalias Zerado' : 'Resumo de Anomalias & Backlog Crítico',
                     subtitulo: `Panorama de anomalias oficiais detectadas em campo • Ciclo de ${regra.intervaloDias} dia(s)`,
                     bannerStatus: tudoCerto
-                        ? { bg: '#ecfdf5', border: '#6ee7b7', color: '#065f46', icone: '✅', titulo: regra.msgTudoCerto, sub: 'Todas as anomalias oficiais foram tratadas e validadas.' }
-                        : { bg: '#fff1f2', border: '#fecdd3', color: '#9f1239', icone: '⚠️', titulo: `${anomAb.length} anomalia(s) aberta(s) — ${anomAltas.length} de Urgência Alta e ${anomRisco.length} com Risco de Parada`, sub: 'Priorize a delegação e baixa das anomalias críticas listadas abaixo.' },
+                        ? { bg: '#ecfdf5', border: '#6ee7b7', color: '#065f46', icone: 'check', titulo: regra.msgTudoCerto, sub: 'Todas as anomalias oficiais foram tratadas e validadas.' }
+                        : { bg: '#fff1f2', border: '#fecdd3', color: '#9f1239', icone: 'alert', titulo: `${anomAb.length} anomalia(s) aberta(s) — ${anomAltas.length} de Urgência Alta e ${anomRisco.length} com Risco de Parada`, sub: 'Priorize a delegação e baixa das anomalias críticas listadas abaixo.' },
                     kpis: [
                         { label: 'Backlog Aberto', valor: anomAb.length, cor: '#e11d48' },
                         { label: 'Urgência Alta', valor: anomAltas.length, cor: '#dc2626' },
@@ -11657,7 +11657,7 @@
                 totalPendencias = rotSemPend.length;
                 const tudoCerto = totalPendencias === 0;
                 assunto = tudoCerto
-                    ? `[Inspeção de Rota • Tudo Certo ✅] 100% das rotas da Semana S${currentWeekNumber} concluídas!`
+                    ? `[Inspeção de Rota • Tudo Certo ✓] 100% das rotas da Semana S${currentWeekNumber} concluídas!`
                     : `[Inspeção de Rota • Rotas Pendentes S${currentWeekNumber}] ${rotSemPend.length} rota(s) aguardando execução (Aderência ${aderSem}%)`;
                 corpoTexto = tudoCerto
                     ? `${regra.msgTudoCerto} (${rotSemConc.length}/${rotSem.length} rotas concluídas na S${currentWeekNumber}).`
@@ -11676,8 +11676,8 @@
                     titulo: tudoCerto ? `Tudo Certo! Rotas da Semana S${currentWeekNumber} Concluídas` : `Alerta de Rotas Pendentes na Semana S${currentWeekNumber}`,
                     subtitulo: `Acompanhamento de aderência semanal vs Meta 90%`,
                     bannerStatus: tudoCerto
-                        ? { bg: '#ecfdf5', border: '#6ee7b7', color: '#065f46', icone: '✅', titulo: regra.msgTudoCerto, sub: `${rotSemConc.length} de ${rotSem.length} rotas executadas na semana vigente.` }
-                        : { bg: '#fffbeb', border: '#fde68a', color: '#92400e', icone: '🧭', titulo: `${rotSemPend.length} rota(s) programada(s) na Semana S${currentWeekNumber} ainda não foram concluídas`, sub: `Aderência atual em ${aderSem}% (${rotSemConc.length}/${rotSem.length} concluídas • Meta 90%).` },
+                        ? { bg: '#ecfdf5', border: '#6ee7b7', color: '#065f46', icone: 'check', titulo: regra.msgTudoCerto, sub: `${rotSemConc.length} de ${rotSem.length} rotas executadas na semana vigente.` }
+                        : { bg: '#fffbeb', border: '#fde68a', color: '#92400e', icone: 'route', titulo: `${rotSemPend.length} rota(s) programada(s) na Semana S${currentWeekNumber} ainda não foram concluídas`, sub: `Aderência atual em ${aderSem}% (${rotSemConc.length}/${rotSem.length} concluídas • Meta 90%).` },
                     kpis: [
                         { label: 'Programadas S' + currentWeekNumber, valor: rotSem.length, cor: '#64748b' },
                         { label: 'Concluídas', valor: rotSemConc.length, cor: '#10b981' },
@@ -11694,7 +11694,7 @@
                 totalPendencias = delegadasPend.length;
                 const tudoCerto = totalPendencias === 0;
                 assunto = tudoCerto
-                    ? `[Inspeção de Rota • Tudo Certo ✅] Todos os reparos delegados estão em dia`
+                    ? `[Inspeção de Rota • Tudo Certo ✓] Todos os reparos delegados estão em dia`
                     : `[Inspeção de Rota • Reparos Delegados] ${delegadasPend.length} anomalia(s) delegada(s) aguardando execução/baixa`;
                 corpoTexto = tudoCerto
                     ? regra.msgTudoCerto
@@ -11712,8 +11712,8 @@
                     titulo: tudoCerto ? 'Tudo Certo! Reparos Delegados em Dia' : 'Cobrança de Reparos Delegados Aguardando Baixa',
                     subtitulo: `Acompanhamento de execução das anomalias delegadas`,
                     bannerStatus: tudoCerto
-                        ? { bg: '#ecfdf5', border: '#6ee7b7', color: '#065f46', icone: '✅', titulo: regra.msgTudoCerto, sub: 'Nenhuma anomalia delegada pendente de baixa.' }
-                        : { bg: '#f0f9ff', border: '#bae6fd', color: '#075985', icone: '🔧', titulo: `${delegadasPend.length} reparo(s) delegado(s) aguardam conclusão ou baixa`, sub: 'Confira os técnicos responsáveis e prazos abaixo.' },
+                        ? { bg: '#ecfdf5', border: '#6ee7b7', color: '#065f46', icone: 'check', titulo: regra.msgTudoCerto, sub: 'Nenhuma anomalia delegada pendente de baixa.' }
+                        : { bg: '#f0f9ff', border: '#bae6fd', color: '#075985', icone: 'wrench', titulo: `${delegadasPend.length} reparo(s) delegado(s) aguardam conclusão ou baixa`, sub: 'Confira os técnicos responsáveis e prazos abaixo.' },
                     kpis: [
                         { label: 'Delegadas Abertas', valor: delegadasPend.length, cor: '#0284c7' },
                         { label: 'Em Validação', valor: anomVal.length, cor: '#6366f1' },
@@ -11754,7 +11754,7 @@
                         bg: aderSem >= 90 ? '#ecfdf5' : '#fffbeb',
                         border: aderSem >= 90 ? '#6ee7b7' : '#fde68a',
                         color: aderSem >= 90 ? '#065f46' : '#92400e',
-                        icone: '📊',
+                        icone: 'chart',
                         titulo: `Aderência da Semana S${currentWeekNumber}: ${aderSem}% (Meta 90%) • Taxa de Resolução: ${resolPct}%`,
                         sub: `${rotSemConc.length} de ${rotSem.length} rotas concluídas • ${anomAb.length} anomalias abertas (${anomAltas.length} urgência alta) • ${ diretasTriagem.length } em triagem.`
                     },
@@ -11796,7 +11796,7 @@
                 meta.innerHTML = `
                     <div class="flex flex-wrap items-center gap-2">
                         <span class="px-2.5 py-0.5 rounded-full text-[10px] font-extrabold uppercase ${mail.tudoCerto ? 'bg-emerald-100 text-emerald-800' : 'bg-amber-100 text-amber-900'}">
-                            ${mail.tudoCerto ? '✅ Modo Tudo Certo (0 pendências)' : `🔔 ${mail.totalPendencias} pendência(s) detectada(s)`}
+                            ${mail.tudoCerto ? '✓ Modo Tudo Certo (0 pendências)' : `<svg class="w-3.5 h-3.5 inline-block shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.2" d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9"/></svg>  ${mail.totalPendencias} pendência(s) detectada(s)`}
                         </span>
                         <span class="text-xs font-extrabold text-slate-800">${escapeHtml(mail.assunto)}</span>
                     </div>
@@ -12064,7 +12064,7 @@
                 titulo: 'Conexão Power Automate Ativa — Inspeção de Rota & Preventivas',
                 subtitulo: 'Teste disparado pela Central de Notificações do Menu Admin Master',
                 bannerStatus: {
-                    bg: '#ecfdf5', border: '#6ee7b7', color: '#065f46', icone: '🚀',
+                    bg: '#ecfdf5', border: '#6ee7b7', color: '#065f46', icone: 'send',
                     titulo: 'Tudo certo! Seu fluxo Power Automate está conectado à Central Master.',
                     sub: `Destinatários de teste: ${fb}`
                 },
@@ -12083,7 +12083,7 @@
                     body: JSON.stringify({
                         para: fb,
                         destinatarios: fb.split(';'),
-                        assunto: '[Teste Central Master • PCM Cepêra] Conexão Power Automate OK ✅',
+                        assunto: '[Teste Central Master • PCM Cepêra] Conexão Power Automate OK ✓',
                         corpoTexto: 'Teste de conexão Power Automate da Central de Notificações Master concluído com sucesso.',
                         corpoHtml: html,
                         origem: 'teste_central_notificacoes_rota'
@@ -12123,16 +12123,16 @@
                     <div class="space-y-1">
                         <div class="flex flex-wrap items-center gap-2">
                             <span class="px-2.5 py-0.5 rounded-full text-[10px] font-extrabold uppercase ${temHook ? 'bg-emerald-600 text-white' : 'bg-amber-500 text-white'}">
-                                ${temHook ? '✓ Power Automate Conectado' : '⚠ Power Automate Pendente'}
+                                ${temHook ? '✓ Power Automate Conectado' : '<svg class="w-3.5 h-3.5 inline-block shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"/></svg>  Power Automate Pendente'}
                             </span>
                             <span class="text-[11px] font-extrabold text-slate-600">${regrasAtivas} de ${centralNotifState.regrasRota.length} regra(s) ativa(s) • ${destAtivos.length} destinatário(s) habilitado(s)</span>
                         </div>
                         <div class="text-sm font-extrabold text-slate-900">Central Master de Notificações, Cobrança de Aprovações &amp; Relatórios Automáticos</div>
-                        <p class="text-xs font-semibold text-slate-500">Delegue relatórios completos, resumos de anomalias e alertas periódicos de aprovação (com envio automático de <strong>"Tudo certo! ✅"</strong> quando não houver pendências) para Supervisores, Gerente e PCM.</p>
+                        <p class="text-xs font-semibold text-slate-500">Delegue relatórios completos, resumos de anomalias e alertas periódicos de aprovação (com envio automático de <strong>"Tudo certo! ✓"</strong> quando não houver pendências) para Supervisores, Gerente e PCM.</p>
                     </div>
                     <div class="flex flex-wrap items-center gap-2 shrink-0">
                         <button type="button" onclick="verificarEDispararRegrasVencidasRota(true)" class="px-3.5 py-2 rounded-xl bg-slate-900 hover:bg-slate-800 text-white text-xs font-extrabold shadow-sm">
-                            ⚡ Verificar &amp; Disparar Ciclo Agora
+                            <svg class="w-3.5 h-3.5 inline-block shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.2" d="M13 10V3L4 14h7v7l9-11h-7z"/></svg>  Verificar &amp; Disparar Ciclo Agora
                         </button>
                     </div>
                 </div>
@@ -12140,13 +12140,13 @@
                 <div class="flex flex-wrap items-center justify-between gap-2 pt-1">
                     <div class="flex flex-wrap items-center gap-1.5 bg-slate-100 p-1 rounded-2xl">
                         <button type="button" onclick="setNotifMasterSubViewRota('regras')" class="px-3.5 py-1.5 rounded-xl text-xs font-extrabold ${notifMasterSubView === 'regras' ? 'bg-white text-slate-900 shadow-sm' : 'text-slate-600 hover:text-slate-900'}">
-                            📋 Regras &amp; Delegação (${centralNotifState.regrasRota.length})
+                            <svg class="w-3.5 h-3.5 inline-block shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"/></svg>  Regras &amp; Delegação (${centralNotifState.regrasRota.length})
                         </button>
                         <button type="button" onclick="setNotifMasterSubViewRota('destinatarios')" class="px-3.5 py-1.5 rounded-xl text-xs font-extrabold ${notifMasterSubView === 'destinatarios' ? 'bg-white text-slate-900 shadow-sm' : 'text-slate-600 hover:text-slate-900'}">
-                            👥 Destinatários: Supervisores, Gerente &amp; PCM (${centralNotifState.destinatarios.length})
+                            <svg class="w-3.5 h-3.5 inline-block shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0z"/></svg>  Destinatários: Supervisores, Gerente &amp; PCM (${centralNotifState.destinatarios.length})
                         </button>
                         <button type="button" onclick="setNotifMasterSubViewRota('automate')" class="px-3.5 py-1.5 rounded-xl text-xs font-extrabold ${notifMasterSubView === 'automate' ? 'bg-white text-slate-900 shadow-sm' : 'text-slate-600 hover:text-slate-900'}">
-                            ⚡ Chave Power Automate &amp; Histórico (${centralNotifState.historicoDisparos.length})
+                            <svg class="w-3.5 h-3.5 inline-block shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.2" d="M13 10V3L4 14h7v7l9-11h-7z"/></svg>  Chave Power Automate &amp; Histórico (${centralNotifState.historicoDisparos.length})
                         </button>
                     </div>
                 </div>`;
@@ -12158,11 +12158,11 @@
                     <form onsubmit="salvarDestinatarioNotifRota(event)" class="p-4 rounded-2xl border border-slate-200 bg-slate-50/70 space-y-3">
                         <div class="flex flex-wrap items-center justify-between gap-2">
                             <div>
-                                <div class="text-xs font-extrabold uppercase tracking-wider text-indigo-700">${editObj ? '✏️ Editando Destinatário' : '➕ Cadastrar Destinatário na Central (Compartilhado entre Rota & Preventivas)'}</div>
+                                <div class="text-xs font-extrabold uppercase tracking-wider text-indigo-700">${editObj ? '<svg class="w-3.5 h-3.5 inline-block shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/></svg>  Editando Destinatário' : '+ Cadastrar Destinatário na Central (Compartilhado entre Rota & Preventivas)'}</div>
                                 <p class="text-[11px] font-semibold text-slate-500">Cadastre Supervisores, Gerente e equipe PCM para vinculá-los por cargo ou individualmente em cada regra.</p>
                             </div>
                             <button type="button" onclick="importarGestoresEquipeNotifRota()" class="px-3 py-1.5 rounded-xl bg-indigo-50 hover:bg-indigo-100 border border-indigo-200 text-indigo-800 text-[11px] font-extrabold">
-                                📥 Importar Supervisores/Gestores da Equipe
+                                <svg class="w-3.5 h-3.5 inline-block shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"/></svg>  Importar Supervisores/Gestores da Equipe
                             </button>
                         </div>
                         <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-2.5 items-end">
@@ -12210,8 +12210,8 @@
                                         <button type="button" onclick="toggleAtivoDestinatarioNotifRota('${escapeHtml(d.id)}')" class="px-2.5 py-1 rounded-xl text-[10px] font-extrabold ${d.ativo !== false ? 'bg-emerald-100 text-emerald-800' : 'bg-slate-200 text-slate-600'}">
                                             ${d.ativo !== false ? '✓ Ativo' : 'Pausado'}
                                         </button>
-                                        <button type="button" onclick="editarDestinatarioNotifRota('${escapeHtml(d.id)}')" class="px-2.5 py-1 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-700 text-[10px] font-extrabold">✏️ Editar</button>
-                                        <button type="button" onclick="removerDestinatarioNotifRota('${escapeHtml(d.id)}')" class="px-2.5 py-1 rounded-xl bg-rose-50 hover:bg-rose-100 text-rose-700 text-[10px] font-extrabold">🗑️</button>
+                                        <button type="button" onclick="editarDestinatarioNotifRota('${escapeHtml(d.id)}')" class="px-2.5 py-1 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-700 text-[10px] font-extrabold"><svg class="w-3.5 h-3.5 inline-block shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/></svg>  Editar</button>
+                                        <button type="button" onclick="removerDestinatarioNotifRota('${escapeHtml(d.id)}')" class="px-2.5 py-1 rounded-xl bg-rose-50 hover:bg-rose-100 text-rose-700 text-[10px] font-extrabold"><svg class="w-3.5 h-3.5 inline-block shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/></svg> </button>
                                     </div>
                                 </div>`;
                             }).join('')}
@@ -12224,11 +12224,11 @@
                     <form onsubmit="salvarConfigPowerAutomateMasterRota(event)" class="p-4 rounded-2xl border border-slate-200 bg-slate-50/70 space-y-3">
                         <div class="flex flex-wrap items-center justify-between gap-2">
                             <div>
-                                <div class="text-xs font-extrabold uppercase tracking-wider text-sky-700">⚡ Conector Microsoft Power Automate (Gatilho HTTP POST)</div>
+                                <div class="text-xs font-extrabold uppercase tracking-wider text-sky-700"><svg class="w-3.5 h-3.5 inline-block shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.2" d="M13 10V3L4 14h7v7l9-11h-7z"/></svg>  Conector Microsoft Power Automate (Gatilho HTTP POST)</div>
                                 <p class="text-[11px] font-semibold text-slate-500">Usa a mesma chave/fluxo HTTP POST da Agenda PCM. Se você já salvou lá, ela é carregada automaticamente aqui.</p>
                             </div>
                             <button type="button" onclick="copiarEsquemaJsonPowerAutomateMasterRota()" class="px-3 py-1.5 rounded-xl bg-white hover:bg-slate-100 border border-slate-200 text-slate-700 text-[11px] font-extrabold">
-                                📋 Copiar Esquema JSON do Gatilho
+                                <svg class="w-3.5 h-3.5 inline-block shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"/></svg>  Copiar Esquema JSON do Gatilho
                             </button>
                         </div>
                         <div class="grid grid-cols-1 lg:grid-cols-3 gap-3">
@@ -12247,8 +12247,8 @@
                                 <span>Habilitar disparo automático em segundo plano quando o ciclo (dias) de uma regra ativa vencer</span>
                             </label>
                             <div class="flex flex-wrap items-center gap-2">
-                                <button type="button" onclick="testarConexaoPowerAutomateMasterRota()" class="px-3.5 py-2 rounded-xl bg-sky-600 hover:bg-sky-700 text-white text-xs font-extrabold">✉️ Enviar E-mail de Teste</button>
-                                <button type="submit" class="px-4 py-2 rounded-xl bg-slate-900 hover:bg-slate-800 text-white text-xs font-extrabold">💾 Salvar Chave &amp; Automação</button>
+                                <button type="button" onclick="testarConexaoPowerAutomateMasterRota()" class="px-3.5 py-2 rounded-xl bg-sky-600 hover:bg-sky-700 text-white text-xs font-extrabold"><svg class="w-3.5 h-3.5 inline-block shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"/></svg>  Enviar E-mail de Teste</button>
+                                <button type="submit" class="px-4 py-2 rounded-xl bg-slate-900 hover:bg-slate-800 text-white text-xs font-extrabold"><svg class="w-3.5 h-3.5 inline-block shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg>  Salvar Chave &amp; Automação</button>
                             </div>
                         </div>
                     </form>
@@ -12262,7 +12262,7 @@
                                     <div class="space-y-0.5 min-w-0">
                                         <div class="flex flex-wrap items-center gap-1.5">
                                             <span class="px-2 py-0.5 rounded-full text-[10px] font-extrabold bg-slate-900 text-white">${escapeHtml(h.modulo || 'Inspeção de Rota')}</span>
-                                            <span class="px-2 py-0.5 rounded-full text-[10px] font-extrabold ${h.tudoCerto ? 'bg-emerald-100 text-emerald-800' : 'bg-amber-100 text-amber-800'}">${h.tudoCerto ? '✅ Tudo Certo (0 pend.)' : `🔔 ${h.totalPendencias || 0} pendência(s)`}</span>
+                                            <span class="px-2 py-0.5 rounded-full text-[10px] font-extrabold ${h.tudoCerto ? 'bg-emerald-100 text-emerald-800' : 'bg-amber-100 text-amber-800'}">${h.tudoCerto ? '✓ Tudo Certo (0 pend.)' : `<svg class="w-3.5 h-3.5 inline-block shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.2" d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9"/></svg>  ${h.totalPendencias || 0} pendência(s)`}</span>
                                             <span class="font-extrabold text-slate-900 truncate">${escapeHtml(h.regraTitulo || '')}</span>
                                         </div>
                                         <div class="text-[11px] text-slate-500 font-semibold truncate">${escapeHtml(h.assunto || '')} • Para: <span class="font-mono text-sky-700">${escapeHtml(h.para || '')}</span></div>
@@ -12289,12 +12289,12 @@
                     <div class="p-4 rounded-3xl border-2 ${r.ativo ? 'border-slate-200 bg-white' : 'border-slate-200 bg-slate-50/70 opacity-75'} space-y-3">
                         <div class="flex flex-col lg:flex-row lg:items-start justify-between gap-3 pb-2.5 border-b border-slate-100">
                             <div class="flex items-start gap-3 min-w-0">
-                                <div class="w-10 h-10 rounded-2xl bg-slate-100 flex items-center justify-center text-lg shrink-0">${r.icone || '🔔'}</div>
+                                <div class="w-10 h-10 rounded-2xl bg-slate-100 flex items-center justify-center text-lg shrink-0">${r.id === 'rota_resumo_anomalias' ? `<svg class="w-3.5 h-3.5 inline-block shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"/></svg>` : r.id === 'rota_relatorio_completo' ? `<svg class="w-4 h-4 inline-block shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"/></svg>` : r.id === 'rota_atrasadas_semana' ? `<svg class="w-4 h-4 inline-block shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 20l-5.447-2.724A1 1 0 013 16.382V5.618a1 1 0 011.447-.894L9 7m0 13l6-3m-6 3V7m6 10l4.553 2.276A1 1 0 0021 18.382V7.618a1 1 0 00-.553-.894L15 4m0 13V4m0 0L9 7"/></svg>` : r.id === 'rota_validacao_reparos' ? `<svg class="w-4 h-4 inline-block shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"/><circle cx="12" cy="12" r="3" stroke-width="2"/></svg>` : `<svg class="w-3.5 h-3.5 inline-block shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>`}</div>
                                 <div class="space-y-0.5 min-w-0">
                                     <div class="flex flex-wrap items-center gap-2">
                                         <span class="text-sm font-extrabold text-slate-900">${escapeHtml(r.titulo)}</span>
                                         <span class="px-2 py-0.5 rounded-full text-[10px] font-extrabold ${mailPreview.tudoCerto ? 'bg-emerald-100 text-emerald-800' : 'bg-rose-100 text-rose-700'}">
-                                            Agora: ${mailPreview.tudoCerto ? '✅ Tudo Certo (0 pend.)' : `${mailPreview.totalPendencias} pendência(s)`}
+                                            Agora: ${mailPreview.tudoCerto ? '✓ Tudo Certo (0 pend.)' : `${mailPreview.totalPendencias} pendência(s)`}
                                         </span>
                                     </div>
                                     <p class="text-xs font-semibold text-slate-500">${escapeHtml(r.subtitulo)}</p>
@@ -12306,10 +12306,10 @@
                                     <span>${r.ativo ? 'Regra Ativa' : 'Pausada'}</span>
                                 </label>
                                 <button type="button" onclick="visualizarPreviaEmailNotifRota('${r.id}')" class="px-3 py-1.5 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-800 text-xs font-extrabold">
-                                    👁️ Ver Prévia do E-mail
+                                    <svg class="w-3.5 h-3.5 inline-block shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"/></svg>  Ver Prévia do E-mail
                                 </button>
                                 <button type="button" onclick="dispararRegraNotifRotaAgora('${r.id}', false)" class="px-3.5 py-1.5 rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white text-xs font-extrabold shadow-sm">
-                                    🚀 Disparar Agora
+                                    <svg class="w-3.5 h-3.5 inline-block shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8"/></svg>  Disparar Agora
                                 </button>
                             </div>
                         </div>
@@ -12325,7 +12325,7 @@
                                 </div>
                                 <label class="flex items-start gap-2 pt-1 cursor-pointer">
                                     <input type="checkbox" ${r.enviarTudoCerto ? 'checked' : ''} onchange="atualizarCampoRegraNotifRota('${r.id}', 'enviarTudoCerto', this.checked)" class="mt-0.5 w-4 h-4 accent-emerald-600 shrink-0">
-                                    <span class="text-[11px] font-bold text-slate-700 leading-snug">Enviar e-mail de <strong>"Tudo Certo! ✅"</strong> mesmo quando houver 0 pendências</span>
+                                    <span class="text-[11px] font-bold text-slate-700 leading-snug">Enviar e-mail de <strong>"Tudo Certo! ✓"</strong> mesmo quando houver 0 pendências</span>
                                 </label>
                                 <div>
                                     <label class="block text-[9px] font-extrabold uppercase text-slate-400 mb-0.5">Mensagem quando estiver zerado ("Tudo Certo"):</label>
@@ -12363,7 +12363,7 @@
                                             </label>`;
                                         }).join('')}
                                     </div>
-                                </div>` : `<div class="text-[11px] font-semibold text-amber-700">Dica: Cadastre os e-mails dos Supervisores, Gerente e PCM na aba <strong>"👥 Destinatários"</strong> acima.</div>`}
+                                </div>` : `<div class="text-[11px] font-semibold text-amber-700">Dica: Cadastre os e-mails dos Supervisores, Gerente e PCM na aba <strong>"<svg class="w-3.5 h-3.5 inline-block shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0z"/></svg>  Destinatários"</strong> acima.</div>`}
 
                                 <div class="grid grid-cols-1 sm:grid-cols-2 gap-2 pt-1">
                                     <div>
@@ -12372,7 +12372,7 @@
                                     </div>
                                     <div class="flex flex-col justify-end">
                                         <div class="text-[10px] font-bold text-slate-500 truncate" title="${escapeHtml(mailPreview.para)}">
-                                            ✉️ Destino atual (${mailPreview.destinatarios.length}): <span class="font-mono text-sky-700">${escapeHtml(mailPreview.para)}</span>
+                                            <svg class="w-3.5 h-3.5 inline-block shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"/></svg>  Destino atual (${mailPreview.destinatarios.length}): <span class="font-mono text-sky-700">${escapeHtml(mailPreview.para)}</span>
                                         </div>
                                     </div>
                                 </div>

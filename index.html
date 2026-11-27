@@ -311,7 +311,7 @@
                     </div>
 
                     <button type="button" id="btnQuickModoLevePortal" onclick="toggleModoTablet()" class="px-3 py-2 rounded-full bg-white hover:bg-slate-50 border border-slate-200 text-xs font-extrabold text-slate-700 shadow-sm flex items-center gap-1.5" title="Ativar/Desativar Modo Leve de Alta Performance (Alt + T)">
-                        <span>⚡</span>
+                        <span><svg class="w-3.5 h-3.5 inline-block shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.2" d="M13 10V3L4 14h7v7l9-11h-7z"/></svg> </span>
                         <span id="lblQuickModoLevePortal">Modo Leve</span>
                     </button>
 
@@ -470,7 +470,7 @@
             <div class="flex items-center gap-2 shrink-0">
                 <span id="workspaceUserBadge" class="hidden md:inline-block text-[11px] font-bold text-slate-300 px-2.5 py-1 rounded-lg bg-slate-800/90 border border-slate-700"></span>
                 <button type="button" id="btnQuickModoLeveWorkspace" onclick="toggleModoTablet()" title="Alternar Modo Leve em tempo real no módulo aberto (Alt + T)" class="px-2.5 py-1.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-200 text-xs font-extrabold border border-slate-700 flex items-center gap-1">
-                    <span>⚡</span>
+                    <span><svg class="w-3.5 h-3.5 inline-block shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.2" d="M13 10V3L4 14h7v7l9-11h-7z"/></svg> </span>
                     <span id="lblQuickModoLeveWorkspace" class="hidden sm:inline">Leve</span>
                 </button>
                 <button type="button" onclick="recarregarAppWorkspace()" title="Forçar recarregamento da versão mais recente do módulo" class="px-2.5 py-1.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-sky-300 text-xs font-bold border border-slate-700 flex items-center gap-1">
@@ -1947,7 +1947,7 @@
                                     <button type="button" onclick="definirTodosAppsUsuario('${u.id}', true)" title="Liberar todos os aplicativos disponíveis para este perfil" class="px-2 py-1 rounded-lg bg-emerald-50 hover:bg-emerald-100 text-emerald-700 font-extrabold text-[10px] border border-emerald-200">Todos</button>
                                     <button type="button" onclick="resetarAppsPadraoUsuario('${u.id}')" title="Restaurar apps padrão do cargo" class="px-2 py-1 rounded-lg bg-slate-100 hover:bg-slate-200 text-slate-600 font-extrabold text-[10px]">Padrão</button>
                                 ` : (!isDefaultAdmin ? `
-                                    <button type="button" onclick="abrirModalAdminMaster()" title="Desbloquear com Senha Master para editar as telas deste Admin/Gerente" class="px-2 py-1 rounded-lg bg-amber-50 hover:bg-amber-100 text-amber-800 font-extrabold text-[10px] border border-amber-200">🔒 Master</button>
+                                    <button type="button" onclick="abrirModalAdminMaster()" title="Desbloquear com Senha Master para editar as telas deste Admin/Gerente" class="px-2 py-1 rounded-lg bg-amber-50 hover:bg-amber-100 text-amber-800 font-extrabold text-[10px] border border-amber-200"><svg class="w-3.5 h-3.5 inline-block shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"/></svg>  Master</button>
                                 ` : '')}
                                 <button type="button" onclick="abrirModalEditarUsuarioRbac('${u.id}')" class="px-2.5 py-1 rounded-lg bg-sky-50 hover:bg-sky-100 text-sky-700 font-extrabold text-[11px] border border-sky-200">Editar</button>
                                 ${u.id !== 'default_admin' ? `
@@ -2079,10 +2079,10 @@
             const avisoAdminHtml = isAdminModal
                 ? (podeEditarAdminModal
                     ? `<div class="p-2.5 rounded-xl bg-rose-50 border border-rose-200 text-[11px] text-rose-900 font-semibold flex items-center justify-between gap-2">
-                           <span>🔓 <strong>Modo Master ativo:</strong> marque exatamente quais telas este perfil <strong>${escapeHtml(roleEfetiva)}</strong> poderá acessar (mantendo poderes de Admin nas telas liberadas).</span>
+                           <span><svg class="w-3.5 h-3.5 inline-block shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 11V7a4 4 0 118 0m-4 8v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2z"/></svg>  <strong>Modo Master ativo:</strong> marque exatamente quais telas este perfil <strong>${escapeHtml(roleEfetiva)}</strong> poderá acessar (mantendo poderes de Admin nas telas liberadas).</span>
                        </div>`
                     : `<div class="p-2.5 rounded-xl bg-amber-50 border border-amber-200 text-[11px] text-amber-900 font-semibold flex items-center justify-between gap-2">
-                           <span>🔒 Perfis <strong>Admin / Gerente</strong> só podem ter suas telas editadas com a <strong>Senha Master</strong>.</span>
+                           <span><svg class="w-3.5 h-3.5 inline-block shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"/></svg>  Perfis <strong>Admin / Gerente</strong> só podem ter suas telas editadas com a <strong>Senha Master</strong>.</span>
                            ${!isDefaultAdminModal ? `<button type="button" onclick="abrirModalAdminMaster()" class="px-2.5 py-1 rounded-lg bg-amber-600 hover:bg-amber-700 text-white font-extrabold text-[10px] shrink-0">Desbloquear Master</button>` : ''}
                        </div>`)
                 : '';
