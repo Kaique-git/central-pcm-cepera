@@ -533,7 +533,7 @@
                                 <span id="sem52ContagemFiltro" class="text-[11px] font-extrabold text-slate-500 bg-slate-100 px-3 py-1.5 rounded-full">0 linha(s)</span>
                                 <button type="button" onclick="limparFiltrosSem52()" class="px-3 py-2 rounded-xl bg-white hover:bg-slate-100 text-slate-700 border border-slate-200 text-xs font-extrabold">Limpar Filtros</button>
                                 <button type="button" onclick="abrirModalImprimirCronograma52()" class="btn-touch bg-slate-900 hover:bg-slate-800 text-white text-xs py-2 px-3.5 shadow-sm">
-                                    <span>🖨️ Imprimir Relatório / A4</span>
+                                    <span><svg class="w-4 h-4 inline-block shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z"/></svg>  Imprimir Relatório / A4</span>
                                 </button>
                             </div>
                         </div>
@@ -904,11 +904,11 @@
                                     Planos Preventivos (<span id="masterPrevCntPlanos">0</span>)
                                 </button>
                                 <button type="button" id="btnMasterPrevTabSaneamento" onclick="setMasterPrevTab('saneamento_planos')" class="px-4 py-1.5 rounded-full text-xs font-extrabold text-amber-800 bg-amber-100/80 hover:bg-amber-200/80 inline-flex items-center gap-1.5">
-                                    <span>🔍 Saneamento de Planos</span>
+                                    <span><svg class="w-3.5 h-3.5 inline-block shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.2" d="M21 21l-4.35-4.35M11 19a8 8 0 100-16 8 8 0 000 16z"/></svg>  Saneamento de Planos</span>
                                     <span id="masterPrevCntSaneamento" class="px-1.5 py-0.2 rounded-full bg-amber-600 text-white text-[10px]">0</span>
                                 </button>
                                 <button type="button" id="btnMasterPrevTabNotif" onclick="setMasterPrevTab('notificacoes')" class="px-4 py-1.5 rounded-full text-xs font-extrabold text-indigo-800 bg-indigo-100/80 hover:bg-indigo-200/80 inline-flex items-center gap-1.5">
-                                    <span>🔔 Central de Notificações</span>
+                                    <span><svg class="w-3.5 h-3.5 inline-block shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.2" d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9"/></svg>  Central de Notificações</span>
                                     <span id="masterPrevCntNotif" class="px-1.5 py-0.2 rounded-full bg-indigo-600 text-white text-[10px]">4/5</span>
                                 </button>
                             </div>
@@ -941,8 +941,8 @@
                                 </label>
                             </div>
                             <div class="flex flex-wrap items-center gap-2">
-                                <button type="button" id="btnMasterPrevReabrirLote" onclick="reabrirLoteMasterPrev()" class="hidden px-3.5 py-2 rounded-xl bg-amber-500 hover:bg-amber-600 text-white font-extrabold text-xs">🔓 Reabrir Selecionadas</button>
-                                <button type="button" id="btnMasterPrevExcluirLote" onclick="excluirLoteMasterPrev()" class="px-4 py-2 rounded-xl bg-rose-600 hover:bg-rose-700 text-white font-extrabold text-xs shadow-sm">🗑️ Excluir Selecionados</button>
+                                <button type="button" id="btnMasterPrevReabrirLote" onclick="reabrirLoteMasterPrev()" class="hidden px-3.5 py-2 rounded-xl bg-amber-500 hover:bg-amber-600 text-white font-extrabold text-xs"><svg class="w-3.5 h-3.5 inline-block shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 11V7a4 4 0 118 0m-4 8v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2z"/></svg>  Reabrir Selecionadas</button>
+                                <button type="button" id="btnMasterPrevExcluirLote" onclick="excluirLoteMasterPrev()" class="px-4 py-2 rounded-xl bg-rose-600 hover:bg-rose-700 text-white font-extrabold text-xs shadow-sm"><svg class="w-3.5 h-3.5 inline-block shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/></svg>  Excluir Selecionados</button>
                             </div>
                         </div>
 
@@ -1039,7 +1039,7 @@
                     <div id="boxCriarSubconjuntoNoPlano" hidden class="hidden p-3.5 rounded-2xl bg-emerald-50/85 border border-emerald-300 space-y-2.5">
                         <div class="flex flex-wrap items-center justify-between gap-2">
                             <div class="text-[11px] font-extrabold text-emerald-900 flex items-center gap-1.5">
-                                <span>🌱 Cadastrar Novo Conjunto / Subconjunto na Árvore de Ativos</span>
+                                <span><svg class="w-3.5 h-3.5 inline-block shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.4" d="M12 4v16m8-8H4"/></svg>  Cadastrar Novo Conjunto / Subconjunto na Árvore de Ativos</span>
                                 <span class="px-2 py-0.5 rounded-full bg-white border border-emerald-200 text-emerald-700 text-[9px] font-extrabold">Grava em ob_linhas e vincula ao plano</span>
                             </div>
                             <button type="button" onclick="fecharCriadorSubconjuntoInlinePlano()" class="text-[11px] font-extrabold text-slate-500 hover:text-rose-600">✕ Fechar</button>
@@ -1450,7 +1450,7 @@
             <div class="px-6 py-4 border-t border-slate-100 bg-slate-50 flex flex-wrap items-center justify-between gap-2">
                 <div class="flex flex-wrap items-center gap-2">
                     <button type="button" id="btnSem52AbrirExec" onclick="executarOrdemModalSem52()" class="hidden btn-touch bg-sky-50 hover:bg-sky-100 text-sky-700 border border-sky-200 text-xs">Abrir Checklist</button>
-                    <button type="button" id="btnSem52MasterEdit" onclick="editarMasterOrdemModalSem52()" class="hidden btn-touch bg-amber-50 hover:bg-amber-100 text-amber-800 border border-amber-300 text-xs">✏️ Edição Master</button>
+                    <button type="button" id="btnSem52MasterEdit" onclick="editarMasterOrdemModalSem52()" class="hidden btn-touch bg-amber-50 hover:bg-amber-100 text-amber-800 border border-amber-300 text-xs"><svg class="w-3.5 h-3.5 inline-block shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/></svg>  Edição Master</button>
                     <button type="button" id="btnSem52Excluir" onclick="excluirOrdemModalSem52()" class="hidden btn-touch bg-rose-50 hover:bg-rose-100 text-rose-700 border border-rose-200 text-xs">Excluir Ordem</button>
                 </div>
                 <div class="flex items-center gap-2 ml-auto">
@@ -1584,10 +1584,10 @@
                         Imprimir Relatório A4
                     </button>
                     <button type="button" id="btnExecMasterEdit" onclick="editarMasterOrdemAtualExec()" hidden class="hidden btn-touch bg-amber-50 hover:bg-amber-100 text-amber-800 border border-amber-300 text-xs py-2 px-3">
-                        ✏️ Edição Master
+                        <svg class="w-3.5 h-3.5 inline-block shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/></svg>  Edição Master
                     </button>
                     <button type="button" id="btnExecMasterReabrir" onclick="reabrirOrdemAtualExecMaster()" hidden class="hidden btn-touch bg-rose-50 hover:bg-rose-100 text-rose-700 border border-rose-200 text-xs py-2 px-3">
-                        🔓 Reabrir (Master)
+                        <svg class="w-3.5 h-3.5 inline-block shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 11V7a4 4 0 118 0m-4 8v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2z"/></svg>  Reabrir (Master)
                     </button>
                 </div>
                 <div class="flex flex-wrap items-center gap-2">
@@ -1959,6 +1959,7 @@
                             <option value="pendentes">Somente Programadas / Pendentes / Atrasadas</option>
                             <option value="concluidos">Somente Concluídas no Período</option>
                             <option value="todos_planos">Incluir Também Planos Sem Agendamento</option>
+                            <option value="sem_agendamento">Somente Planos Sem Agendamento no Período</option>
                         </select>
                     </div>
                 </div>
@@ -1972,7 +1973,7 @@
             </div>
             <div class="p-4 sm:px-6 border-t border-slate-200 bg-slate-50 flex flex-wrap items-center justify-end gap-2 shrink-0">
                 <button type="button" onclick="fecharModal('modalImprimirCronograma52')" class="btn-touch bg-white border border-slate-300 text-slate-700 text-xs py-2 px-4">Cancelar</button>
-                <button type="button" onclick="executarImpressaoCronograma52Filtrado()" class="btn-touch bg-slate-900 hover:bg-slate-800 text-white text-xs py-2 px-5 shadow-md">🖨️ Gerar &amp; Imprimir Relatório A4</button>
+                <button type="button" onclick="executarImpressaoCronograma52Filtrado()" class="btn-touch bg-slate-900 hover:bg-slate-800 text-white text-xs py-2 px-5 shadow-md"><svg class="w-4 h-4 inline-block shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z"/></svg>  Gerar &amp; Imprimir Relatório A4</button>
             </div>
         </div>
     </div>
@@ -1991,7 +1992,7 @@
             <div id="modalPrevNotifPrevBody" class="p-4 overflow-y-auto bg-slate-200/60 flex-1"></div>
             <div class="p-4 sm:px-6 border-t border-slate-200 bg-slate-50 flex flex-wrap items-center justify-end gap-2 shrink-0">
                 <button type="button" onclick="fecharModal('modalPreviewNotifPrev')" class="btn-touch bg-white border border-slate-300 text-slate-700 text-xs py-2 px-4">Fechar</button>
-                <button type="button" onclick="dispararPreviewNotifPrevModal()" class="btn-touch bg-indigo-600 hover:bg-indigo-700 text-white text-xs py-2 px-5 shadow-md">🚀 Disparar Este E-mail Agora</button>
+                <button type="button" onclick="dispararPreviewNotifPrevModal()" class="btn-touch bg-indigo-600 hover:bg-indigo-700 text-white text-xs py-2 px-5 shadow-md"><svg class="w-3.5 h-3.5 inline-block shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8"/></svg>  Disparar Este E-mail Agora</button>
             </div>
         </div>
     </div>
@@ -2167,10 +2168,10 @@
                 </label>
             </form>
             <div class="px-6 py-4 border-t border-slate-100 bg-slate-50 flex flex-wrap items-center justify-between gap-2">
-                <button type="button" onclick="excluirOrdemDoModalMaster()" class="btn-touch bg-rose-50 hover:bg-rose-100 text-rose-700 border border-rose-200 text-xs">🗑️ Excluir Ordem</button>
+                <button type="button" onclick="excluirOrdemDoModalMaster()" class="btn-touch bg-rose-50 hover:bg-rose-100 text-rose-700 border border-rose-200 text-xs"><svg class="w-3.5 h-3.5 inline-block shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/></svg>  Excluir Ordem</button>
                 <div class="flex items-center gap-2 ml-auto">
                     <button type="button" onclick="fecharModal('modalEdicaoMasterOrdem')" class="btn-touch bg-white border border-slate-200 text-slate-700 text-xs">Cancelar</button>
-                    <button type="submit" form="formEdicaoMasterOrdem" id="btnSalvarEdicaoMasterOrdem" class="btn-touch bg-rose-600 hover:bg-rose-700 text-white text-xs px-5 shadow-md">💾 Salvar Edição Master</button>
+                    <button type="submit" form="formEdicaoMasterOrdem" id="btnSalvarEdicaoMasterOrdem" class="btn-touch bg-rose-600 hover:bg-rose-700 text-white text-xs px-5 shadow-md"><svg class="w-3.5 h-3.5 inline-block shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg>  Salvar Edição Master</button>
                 </div>
             </div>
         </div>
@@ -3940,20 +3941,20 @@
             const totalMin = periodo.reduce((acc, o) => acc + (Number(o.duracaoEstimadaMin) || 60), 0);
 
             const linhas = [
-                `📋 *RESUMO DE PREVENTIVAS — PCM CEPÊRA*`,
-                `📅 Período: ${label}${fSetor ? ` | Setor: ${fSetor}` : ''}`,
-                `📊 Total: *${periodo.length}* preventiva(s) | Concluídas: *${periodo.filter(o => o.status === 'concluido').length}* | Atrasadas: *${atrasadas.length}* | Carga: *${formatDuracaoHH(totalMin)}*`,
+                `*RESUMO DE PREVENTIVAS — PCM CEPÊRA*`,
+                `Período: ${label}${fSetor ? ` | Setor: ${fSetor}` : ''}`,
+                `Total: *${periodo.length}* preventiva(s) | Concluídas: *${periodo.filter(o => o.status === 'concluido').length}* | Atrasadas: *${atrasadas.length}* | Carga: *${formatDuracaoHH(totalMin)}*`,
                 ''
             ];
             if (atrasadas.length) {
-                linhas.push(`🚨 *ATRASADAS (${atrasadas.length}):*`);
+                linhas.push(`*ATRASADAS (${atrasadas.length}):*`);
                 atrasadas.slice(0, 10).forEach(o => linhas.push(`• ${formatPeriodoDatasOrdemBR(o)} | ${o.setor || '-'} — ${o.titulo} (${o.responsavel || o.equipe || 'PCM'})`));
                 linhas.push('');
             }
-            linhas.push(`🗓️ *PROGRAMADAS NO PERÍODO:*`);
+            linhas.push(`*PROGRAMADAS NO PERÍODO:*`);
             if (!periodo.length) linhas.push('• Nenhuma preventiva agendada.');
             periodo.slice(0, 25).forEach(o => {
-                const ic = o.status === 'concluido' ? '✅' : (o.paradaNecessaria === 'sim' ? '🛑' : '🔧');
+                const ic = o.status === 'concluido' ? '[OK]' : (o.paradaNecessaria === 'sim' ? '[PARADA]' : '[PREV]');
                 linhas.push(`${ic} ${formatPeriodoDatasOrdemBR(o)} ${o.hora || ''} | ${o.setor || '-'} › ${o.equipamento || o.titulo} (${o.responsavel || o.equipe || '-'})`);
             });
             const texto = linhas.join('\n');
@@ -4100,7 +4101,7 @@
                             ${st === 'concluido' ? `<button type="button" onclick="imprimirRelatorioPreventivaA4('${o.id}')" class="px-3 py-1.5 rounded-xl bg-emerald-50 text-emerald-800 border border-emerald-200 text-[11px] font-extrabold">Relatório A4</button>` : ''}
                             ${isGestao ? `<button type="button" onclick="fecharModal('modalDiaCal'); abrirModalSemana52('${escapeHtml(o.planoId || '')}', ${isoW.week}, '${o.id}', ${isoW.isoYear})" class="px-3 py-1.5 rounded-xl bg-indigo-50 text-indigo-800 border border-indigo-200 text-[11px] font-extrabold">Dias na S${isoW.week}</button>` : ''}
                             ${isGestao ? `<button type="button" onclick="fecharModal('modalDiaCal'); abrirModalReprogramar('${o.id}')" class="px-3 py-1.5 rounded-xl bg-amber-50 text-amber-800 border border-amber-200 text-[11px] font-extrabold">Reprogramar</button>` : ''}
-                            ${isAdminMasterAtivo() ? `<button type="button" onclick="fecharModal('modalDiaCal'); abrirModalEdicaoMasterOrdem('${o.id}')" class="px-3 py-1.5 rounded-xl bg-rose-600 hover:bg-rose-700 text-white text-[11px] font-extrabold">✏️ Master</button>` : ''}
+                            ${isAdminMasterAtivo() ? `<button type="button" onclick="fecharModal('modalDiaCal'); abrirModalEdicaoMasterOrdem('${o.id}')" class="px-3 py-1.5 rounded-xl bg-rose-600 hover:bg-rose-700 text-white text-[11px] font-extrabold"><svg class="w-3.5 h-3.5 inline-block shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/></svg>  Master</button>` : ''}
                             ${isGestao ? `<button type="button" onclick="excluirOrdemPreventiva('${o.id}')" class="px-3 py-1.5 rounded-xl bg-rose-50 text-rose-700 border border-rose-200 text-[11px] font-extrabold ml-auto">Excluir</button>` : ''}
                         </div>
                     </div>`);
@@ -5055,57 +5056,100 @@
         };
 
         function coletarDadosImpressaoCronograma52() {
-            const ano = Number(document.getElementById('imp52Ano')?.value || sem52Ano);
-            const per = document.getElementById('imp52Periodo')?.value ?? (document.getElementById('sem52FiltroPeriodoMes')?.value || '');
-            const semIni = Number(document.getElementById('imp52SemIni')?.value || document.getElementById('sem52SemIni')?.value || 1);
-            const semFim = Number(document.getElementById('imp52SemFim')?.value || document.getElementById('sem52SemFim')?.value || getIsoWeeksInYear(ano));
-            const fSetor = document.getElementById('imp52Setor')?.value ?? (document.getElementById('sem52FiltroSetor')?.value || '');
-            const fMaq = document.getElementById('imp52Maquina')?.value ?? (document.getElementById('sem52FiltroMaquina')?.value || '');
-            const fEquip = document.getElementById('imp52Equipamento')?.value ?? (document.getElementById('sem52FiltroEquipamento')?.value || '');
-            const fDisc = document.getElementById('imp52Disc')?.value ?? (document.getElementById('sem52FiltroDisc')?.value || '');
-            const escopo = document.getElementById('imp52Escopo')?.value || 'agendados';
+            const modalEl = document.getElementById('modalImprimirCronograma52');
+            const modalAberto = Boolean(modalEl && !modalEl.classList.contains('hidden') && !modalEl.hidden);
+            const pickVal = (modalId, screenId, fallback = '') => {
+                if (modalAberto) {
+                    const el = document.getElementById(modalId);
+                    return el ? el.value : fallback;
+                }
+                const sEl = document.getElementById(screenId);
+                return sEl ? sEl.value : fallback;
+            };
+
+            const ano = Number(pickVal('imp52Ano', 'sem52AnoSelect', String(sem52Ano)) || sem52Ano);
+            const per = pickVal('imp52Periodo', 'sem52FiltroPeriodoMes', '');
+            const semIni = Number(pickVal('imp52SemIni', 'sem52SemIni', '1') || 1);
+            const semFim = Number(pickVal('imp52SemFim', 'sem52SemFim', String(getIsoWeeksInYear(ano))) || getIsoWeeksInYear(ano));
+            const fSetor = pickVal('imp52Setor', 'sem52FiltroSetor', '');
+            const fMaq = pickVal('imp52Maquina', 'sem52FiltroMaquina', '');
+            const fEquip = pickVal('imp52Equipamento', 'sem52FiltroEquipamento', '');
+            const fDisc = pickVal('imp52Disc', 'sem52FiltroDisc', '');
+            const fAgendaTela = document.getElementById('sem52FiltroAgenda')?.value || '';
+            const escopoPadraoTela = fAgendaTela === 'sem_agenda' ? 'sem_agendamento' : (fAgendaTela === 'com_pendentes' ? 'pendentes' : 'agendados');
+            const escopo = modalAberto ? (document.getElementById('imp52Escopo')?.value || 'agendados') : escopoPadraoTela;
             const incluirMatriz = document.getElementById('imp52IncluirMatriz') ? document.getElementById('imp52IncluirMatriz').checked : true;
 
             const periodoInfo = obterSemanasDoPeriodo52(ano, per, semIni, semFim);
             const weeksSet = new Set(periodoInfo.weeks);
             const hojeStr = getHojeStr();
             const planosTodos = getPlanosPreventiva().sort((a, b) => (a.codigo || '').localeCompare(b.codigo || ''));
+            const todasOrdens = getOrdensPreventiva().filter(o => o.status !== 'cancelado');
 
-            const ordensFiltradas = getOrdensPreventiva().filter(o => {
-                if (o.status === 'cancelado') return false;
-                const datasNoPeriodo = getDatasOrdem(o).filter(d => {
+            // Conjunto de todos os planos que possuem QUALQUER ordem agendada dentro das semanas do período
+            const planosComQualquerOrdemNoPeriodoIds = new Set();
+            todasOrdens.forEach(o => {
+                const temDataNoPeriodo = getDatasOrdem(o).some(d => {
                     const wi = getIsoWeekInfo(d);
                     return wi.isoYear === ano && weeksSet.has(wi.week);
                 });
-                if (!datasNoPeriodo.length) return false;
-                if (fSetor && (o.setor || '') !== fSetor) return false;
-                if (fMaq && (o.maquina || '') !== fMaq) return false;
-                if (fEquip && (o.equipamento || '') !== fEquip) return false;
-                if (fDisc && normKey(o.equipe || o.disciplina) !== normKey(fDisc)) return false;
-                const st = getStatusEfetivo(o, hojeStr);
-                if (escopo === 'pendentes' && st === 'concluido') return false;
-                if (escopo === 'concluidos' && st !== 'concluido') return false;
-                return true;
-            }).sort((a, b) => (a.data || '').localeCompare(b.data || ''));
-
-            const planosComOrdemIds = new Set();
-            ordensFiltradas.forEach(o => {
+                if (!temDataNoPeriodo) return;
                 const pid = getPlanoMatchIdParaOrdem(o, planosTodos);
-                if (pid) planosComOrdemIds.add(pid);
+                if (pid) planosComQualquerOrdemNoPeriodoIds.add(pid);
             });
 
-            const planosFiltrados = planosTodos.filter(p => {
+            const ordensFiltradas = escopo === 'sem_agendamento'
+                ? []
+                : todasOrdens.filter(o => {
+                    const datasNoPeriodo = getDatasOrdem(o).filter(d => {
+                        const wi = getIsoWeekInfo(d);
+                        return wi.isoYear === ano && weeksSet.has(wi.week);
+                    });
+                    if (!datasNoPeriodo.length) return false;
+                    if (fSetor && (o.setor || '') !== fSetor) return false;
+                    if (fMaq && (o.maquina || '') !== fMaq) return false;
+                    if (fEquip && (o.equipamento || '') !== fEquip) return false;
+                    if (fDisc && normKey(o.equipe || o.disciplina) !== normKey(fDisc)) return false;
+                    const st = getStatusEfetivo(o, hojeStr);
+                    if (escopo === 'pendentes' && st === 'concluido') return false;
+                    if (escopo === 'concluidos' && st !== 'concluido') return false;
+                    return true;
+                }).sort((a, b) => (a.data || '').localeCompare(b.data || ''));
+
+            const planosComOrdemFiltradaIds = new Set();
+            ordensFiltradas.forEach(o => {
+                const pid = getPlanoMatchIdParaOrdem(o, planosTodos);
+                if (pid) planosComOrdemFiltradaIds.add(pid);
+            });
+
+            const planosNoEscopoAtivo = planosTodos.filter(p => {
                 if (fSetor && (p.setor || '') !== fSetor) return false;
                 if (fMaq && (p.maquina || '') !== fMaq) return false;
                 if (fEquip && (p.equipamento || '') !== fEquip) return false;
                 if (fDisc && normKey(p.disciplina) !== normKey(fDisc)) return false;
-                if (escopo !== 'todos_planos' && !planosComOrdemIds.has(p.id)) return false;
                 return true;
             });
 
+            const planosAgendados = planosNoEscopoAtivo.filter(p => planosComOrdemFiltradaIds.has(p.id));
+            const planosSemAgendamento = planosNoEscopoAtivo.filter(p => !planosComQualquerOrdemNoPeriodoIds.has(p.id));
+
+            let planosFiltrados = [];
+            let planosSemAgendamentoIncluidos = [];
+            if (escopo === 'todos_planos') {
+                planosFiltrados = [...planosAgendados, ...planosSemAgendamento];
+                planosSemAgendamentoIncluidos = planosSemAgendamento;
+            } else if (escopo === 'sem_agendamento') {
+                planosFiltrados = [...planosSemAgendamento];
+                planosSemAgendamentoIncluidos = planosSemAgendamento;
+            } else {
+                planosFiltrados = [...planosAgendados];
+                planosSemAgendamentoIncluidos = [];
+            }
+
             return {
                 ano, per, periodoInfo, fSetor, fMaq, fEquip, fDisc, escopo, incluirMatriz,
-                ordensFiltradas, planosFiltrados, hojeStr
+                ordensFiltradas, planosFiltrados, planosAgendados, planosSemAgendamentoIncluidos,
+                planosComOrdemFiltradaIds, hojeStr
             };
         }
 
@@ -5147,6 +5191,13 @@
             onChangeImp52Filtros('maquina');
             if (document.getElementById('imp52Equipamento')) {
                 document.getElementById('imp52Equipamento').value = document.getElementById('sem52FiltroEquipamento')?.value || '';
+            }
+            const fAgTela = document.getElementById('sem52FiltroAgenda')?.value || '';
+            const selEscopo = document.getElementById('imp52Escopo');
+            if (selEscopo) {
+                selEscopo.value = fAgTela === 'sem_agenda'
+                    ? 'sem_agendamento'
+                    : (fAgTela === 'com_pendentes' ? 'pendentes' : 'agendados');
             }
             onChangeImp52Filtros();
             abrirModal('modalImprimirCronograma52');
@@ -5192,8 +5243,16 @@
             const dados = coletarDadosImpressaoCronograma52();
             const resBox = document.getElementById('imp52ResumoContagem');
             if (resBox) {
+                let textoResumo = '';
+                if (dados.escopo === 'todos_planos') {
+                    textoResumo = `<strong>${dados.ordensFiltradas.length}</strong> agendamento(s) em <strong>${dados.planosAgendados.length}</strong> plano(s) + <strong>${dados.planosSemAgendamentoIncluidos.length}</strong> plano(s) sem agendamento (Total: <strong>${dados.planosFiltrados.length}</strong> planos)`;
+                } else if (dados.escopo === 'sem_agendamento') {
+                    textoResumo = `<strong>${dados.planosSemAgendamentoIncluidos.length}</strong> plano(s) sem agendamento no período selecionado`;
+                } else {
+                    textoResumo = `<strong>${dados.ordensFiltradas.length}</strong> agendamento(s) em <strong>${dados.planosFiltrados.length}</strong> plano(s)`;
+                }
                 resBox.innerHTML = `
-                    <span>📋 <strong>${dados.ordensFiltradas.length}</strong> agendamento(s) em <strong>${dados.planosFiltrados.length}</strong> plano(s)</span>
+                    <span class="inline-flex items-center gap-1.5"><svg class="w-4 h-4 inline-block shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"/></svg><span>${textoResumo}</span></span>
                     <span class="px-2.5 py-0.5 rounded-full text-[10px] font-extrabold bg-emerald-600 text-white">${escapeHtml(dados.periodoInfo.label)}</span>`;
             }
         };
@@ -5209,40 +5268,58 @@
         };
 
         function gerarJanelaImpressaoCronograma52A4(d) {
-            const { ano, periodoInfo, fSetor, fMaq, fEquip, fDisc, incluirMatriz, ordensFiltradas, planosFiltrados, hojeStr } = d;
+            const {
+                ano, periodoInfo, fSetor, fMaq, fEquip, fDisc, escopo, incluirMatriz,
+                ordensFiltradas, planosFiltrados, planosAgendados = [], planosSemAgendamentoIncluidos = [], hojeStr
+            } = d;
             const weeks = periodoInfo.weeks;
+            const escopoLabels = {
+                agendados: 'Todos os Planos Agendados no Período',
+                pendentes: 'Somente Programadas / Pendentes / Atrasadas',
+                concluidos: 'Somente Concluídas no Período',
+                todos_planos: 'Planos Agendados + Planos Sem Agendamento',
+                sem_agendamento: 'Somente Planos Sem Agendamento no Período'
+            };
             const escopoMaqTxt = [
                 fSetor ? `Setor: ${fSetor}` : 'Todos os Setores',
                 fMaq ? `Máquina/Linha: ${fMaq}` : 'Todas as Máquinas (Geral)',
                 fEquip ? `Equip.: ${fEquip}` : '',
-                fDisc ? `Disciplina: ${fDisc}` : ''
+                fDisc ? `Disciplina: ${fDisc}` : '',
+                `Filtro: ${escopoLabels[escopo] || escopo}`
             ].filter(Boolean).join(' • ');
 
             let matrizHtml = '';
-            if (incluirMatriz && planosFiltrados.length > 0 && weeks.length <= 28) {
-                const headWeeks = weeks.map(w => `<th style="text-align:center;min-width:28px;">S${w}</th>`).join('');
+            if (incluirMatriz && planosFiltrados.length > 0) {
+                const compact = weeks.length > 20;
+                const cellPad = compact ? 'padding:2px 1px;font-size:7.5px;min-width:16px;' : 'padding:4px 3px;font-size:9px;min-width:26px;';
+                const headWeeks = weeks.map(w => `<th style="text-align:center;${cellPad}">S${w}</th>`).join('');
                 const bodyRows = planosFiltrados.map(p => {
                     const ordsPl = ordensFiltradas.filter(o => o.planoId === p.id || normKey(o.planoCodigo) === normKey(p.codigo));
+                    const temAg = ordsPl.length > 0;
                     const ativoLbl = [p.maquina, p.equipamento, getConjuntoLabelItem(p)].filter(Boolean).join(' › ');
+                    const badgeSt = temAg
+                        ? `<span style="display:inline-block;padding:1px 5px;border-radius:999px;background:#d1fae5;color:#065f46;font-weight:800;font-size:8px;margin-left:4px;">AGENDADO (${ordsPl.length})</span>`
+                        : `<span style="display:inline-block;padding:1px 5px;border-radius:999px;background:#fef3c7;color:#92400e;font-weight:800;font-size:8px;margin-left:4px;">SEM AGENDA</span>`;
                     const cols = weeks.map(w => {
                         const naSem = ordsPl.filter(o => getDatasOrdem(o).some(dt => { const wi = getIsoWeekInfo(dt); return wi.isoYear === ano && wi.week === w; }));
-                        if (!naSem.length) return `<td style="text-align:center;color:#cbd5e1;">·</td>`;
+                        if (!naSem.length) return `<td style="text-align:center;color:#cbd5e1;${cellPad}">·</td>`;
                         const pri = naSem[0];
                         const st = getStatusEfetivo(pri, hojeStr);
                         const bg = st === 'concluido' ? '#10b981' : (st === 'atrasada' ? '#e11d48' : '#0284c7');
                         const diasW = getDatasOrdem(pri).filter(dt => { const wi = getIsoWeekInfo(dt); return wi.isoYear === ano && wi.week === w; });
-                        return `<td style="text-align:center;background:${bg};color:#fff;font-weight:800;font-size:9px;">${escapeHtml(formatDiasOrdemCompacto(diasW) || '✓')}</td>`;
+                        const cellTxt = compact ? '✓' : (formatDiasOrdemCompacto(diasW) || '✓');
+                        return `<td style="text-align:center;background:${bg};color:#fff;font-weight:800;${cellPad}">${escapeHtml(cellTxt)}</td>`;
                     }).join('');
-                    return `<tr>
-                        <td><strong>${escapeHtml(p.codigo || 'PM')}</strong> — ${escapeHtml(p.titulo)}<br><small style="color:#475569">${escapeHtml(ativoLbl)} (${escapeHtml(p.periodicidade || 'Mensal')})</small></td>
+                    return `<tr style="${temAg ? '' : 'background:#fffbeb;'}">
+                        <td style="min-width:180px;"><strong>${escapeHtml(p.codigo || 'PM')}</strong> — ${escapeHtml(p.titulo)}${badgeSt}<br><small style="color:#475569">${escapeHtml(ativoLbl)} (${escapeHtml(p.periodicidade || 'Mensal')})</small></td>
                         ${cols}
                     </tr>`;
                 }).join('');
-                matrizHtml = `<h3 style="margin:14px 0 6px;font-size:12px;text-transform:uppercase;color:#0f172a;">1. Matriz de Semanas do Período (${escapeHtml(periodoInfo.label)})</h3>
+                matrizHtml = `<h3 style="margin:14px 0 6px;font-size:12px;text-transform:uppercase;color:#0f172a;">1. Matriz de Semanas do Período (${escapeHtml(periodoInfo.label)} • ${planosFiltrados.length} plano(s))</h3>
                     <table style="margin-bottom:16px;"><thead><tr><th>Plano / Máquina › Equipamento › Conjunto</th>${headWeeks}</tr></thead><tbody>${bodyRows}</tbody></table>`;
             }
 
-            const rowsHtml = ordensFiltradas.map(o => {
+            const rowsOrdensHtml = ordensFiltradas.map(o => {
                 const wi = getIsoWeekInfo(o.data);
                 const st = STATUS_META[getStatusEfetivo(o, hojeStr)]?.label || 'Programada';
                 const prio = getPrioridadePlanoDoc(o);
@@ -5250,18 +5327,47 @@
                 const lCrit = getClasseLinhaAtivo(o.setor, o.maquina).classe || '';
                 const conjLbl = getConjuntoLabelItem(o);
                 return `<tr>
-                    <td style="text-align:center;font-weight:800">S${wi.week}</td>
+                    <td style="text-align:center;font-weight:800;background:#ecfdf5;color:#065f46;">S${wi.week}</td>
                     <td>${formatPeriodoDatasOrdemBR(o)}</td>
                     <td><strong>${escapeHtml(o.planoCodigo ? o.planoCodigo + ' — ' : '')}${escapeHtml(o.titulo)}</strong><br><small>${escapeHtml(prioTxt)}${lCrit ? ` • Linha ${lCrit}` : ''} • ${escapeHtml(o.periodicidade || 'Mensal')}</small></td>
                     <td><strong>${escapeHtml([o.setor, o.maquina, o.equipamento].filter(Boolean).join(' › '))}</strong>${conjLbl ? `<br><span style="color:#0369a1;font-weight:700;">Conj./Subconj.: ${escapeHtml(conjLbl)}</span>` : ''}</td>
                     <td>${escapeHtml(o.responsavel || o.equipe || '-')}</td>
-                    <td>${escapeHtml(st)}</td>
+                    <td><span style="display:inline-block;padding:2px 7px;border-radius:999px;background:#e0f2fe;color:#075985;font-weight:800;font-size:9px;">${escapeHtml(st.toUpperCase())}</span></td>
                 </tr>`;
-            }).join('');
+            });
 
+            const rowsSemAgendaHtml = planosSemAgendamentoIncluidos.map(p => {
+                const prio = getPrioridadePlanoDoc(p);
+                const prioTxt = prio ? getPrioridadeMeta(prio).label : '-';
+                const lCrit = getClasseLinhaAtivo(p.setor, p.maquina).classe || normalizarCriticidade(p.criticidadeLinha) || '';
+                const conjLbl = getConjuntoLabelItem(p);
+                return `<tr style="background:#fffbeb;">
+                    <td style="text-align:center;font-weight:800;background:#fef3c7;color:#92400e;">—</td>
+                    <td style="color:#b45309;font-weight:700;">Sem agendamento no período</td>
+                    <td><strong>${escapeHtml((p.codigo ? p.codigo + ' — ' : '') + (p.titulo || 'Plano Preventivo'))}</strong><br><small>${escapeHtml(prioTxt)}${lCrit ? ` • Linha ${lCrit}` : ''} • ${escapeHtml(p.periodicidade || 'Mensal')}</small></td>
+                    <td><strong>${escapeHtml([p.setor, p.maquina, p.equipamento].filter(Boolean).join(' › '))}</strong>${conjLbl ? `<br><span style="color:#0369a1;font-weight:700;">Conj./Subconj.: ${escapeHtml(conjLbl)}</span>` : ''}</td>
+                    <td>${escapeHtml(p.disciplina || '-')}</td>
+                    <td><span style="display:inline-block;padding:2px 7px;border-radius:999px;background:#fef3c7;color:#92400e;font-weight:800;font-size:9px;">SEM AGENDAMENTO</span></td>
+                </tr>`;
+            });
+
+            const rowsHtml = [...rowsOrdensHtml, ...rowsSemAgendaHtml].join('');
+            const tituloSecao2 = escopo === 'todos_planos'
+                ? `Lista Detalhada: ${ordensFiltradas.length} Agendamento(s) + ${planosSemAgendamentoIncluidos.length} Plano(s) Sem Agendamento`
+                : (escopo === 'sem_agendamento'
+                    ? `Planos Sem Agendamento no Período (${planosSemAgendamentoIncluidos.length})`
+                    : `Lista Detalhada de Agendamentos no Período (${ordensFiltradas.length})`);
+            const resumoTopoDir = escopo === 'todos_planos'
+                ? `${ordensFiltradas.length} agendamento(s) • ${planosAgendados.length} plano(s) c/ agenda + ${planosSemAgendamentoIncluidos.length} s/ agenda`
+                : (escopo === 'sem_agendamento'
+                    ? `${planosSemAgendamentoIncluidos.length} plano(s) sem agendamento`
+                    : `${ordensFiltradas.length} agendamento(s) em ${planosFiltrados.length} plano(s)`);
+
+            const docHtml = `<!DOCTYPE html><html lang="pt-BR"><head><meta charset="UTF-8"><title>Relatório de Preventivas — ${escapeHtml(periodoInfo.label)} / ${ano}</title><style>@page{size:A4 landscape;margin:10mm}body{font-family:Arial,sans-serif;color:#0f172a;margin:10px;font-size:10.5px}header{display:flex;justify-content:space-between;align-items:center;border-bottom:3px solid #0284c7;padding-bottom:8px;margin-bottom:12px}table{width:100%;border-collapse:collapse}th,td{border:1px solid #cbd5e1;padding:5px 6px;text-align:left;vertical-align:top}th{background:#f1f5f9;font-size:9.5px;text-transform:uppercase}.kpis{display:flex;gap:10px;margin-bottom:12px}.kpi{border:1px solid #cbd5e1;border-radius:8px;padding:6px 10px;background:#f8fafc}</style></head><body><header><div style="display:flex;align-items:center;gap:12px"><img src="CEPERA_LOGO.png" style="height:36px"><div><h2 style="margin:0;font-size:15px;">Relatório de Preventivas — ${ano} • ${escapeHtml(periodoInfo.label)}</h2><div style="font-size:11px;color:#334155;margin-top:2px;">Escopo: <strong>${escapeHtml(escopoMaqTxt)}</strong></div></div></div><div style="text-align:right;font-weight:700;">Emitido em ${formatDateBR(hojeStr)}<br>${escapeHtml(resumoTopoDir)}</div></header>${matrizHtml}<h3 style="margin:10px 0 6px;font-size:12px;text-transform:uppercase;color:#0f172a;">${matrizHtml ? '2. ' : ''}${escapeHtml(tituloSecao2)}</h3><table><thead><tr><th style="width:48px;text-align:center">Sem.</th><th style="width:110px;">Dias Programados</th><th>Plano / Preventiva</th><th>Ativo (Setor › Máquina › Equipamento › Conjunto/Subconjunto)</th><th>Equipe / Resp.</th><th style="width:110px;">Status</th></tr></thead><tbody>${rowsHtml || '<tr><td colspan="6" style="text-align:center;padding:16px;">Nenhum registro encontrado para o período e máquina selecionados.</td></tr>'}</tbody></table><script>window.onload=()=>window.print();<\/script></body></html>`;
+            window._ultimoRelatorioCronograma52Html = docHtml;
             const w = window.open('', '_blank');
             if (!w) { showToast('Permita pop-ups para imprimir o relatório do cronograma.', 'error'); return; }
-            w.document.write(`<!DOCTYPE html><html lang="pt-BR"><head><meta charset="UTF-8"><title>Relatório de Preventivas — ${escapeHtml(periodoInfo.label)} / ${ano}</title><style>@page{size:A4 landscape;margin:10mm}body{font-family:Arial,sans-serif;color:#0f172a;margin:10px;font-size:10.5px}header{display:flex;justify-content:space-between;align-items:center;border-bottom:3px solid #0284c7;padding-bottom:8px;margin-bottom:12px}table{width:100%;border-collapse:collapse}th,td{border:1px solid #cbd5e1;padding:5px 6px;text-align:left;vertical-align:top}th{background:#f1f5f9;font-size:9.5px;text-transform:uppercase}.kpis{display:flex;gap:10px;margin-bottom:12px}.kpi{border:1px solid #cbd5e1;border-radius:8px;padding:6px 10px;background:#f8fafc}</style></head><body><header><div style="display:flex;align-items:center;gap:12px"><img src="CEPERA_LOGO.png" style="height:36px"><div><h2 style="margin:0;font-size:15px;">Relatório de Preventivas Agendadas — ${ano} • ${escapeHtml(periodoInfo.label)}</h2><div style="font-size:11px;color:#334155;margin-top:2px;">Escopo: <strong>${escapeHtml(escopoMaqTxt)}</strong></div></div></div><div style="text-align:right;font-weight:700;">Emitido em ${formatDateBR(hojeStr)}<br>${ordensFiltradas.length} agendamento(s)</div></header>${matrizHtml}<h3 style="margin:10px 0 6px;font-size:12px;text-transform:uppercase;color:#0f172a;">${matrizHtml ? '2. ' : ''}Lista Detalhada de Agendamentos no Período (${ordensFiltradas.length})</h3><table><thead><tr><th style="width:48px;text-align:center">Sem.</th><th style="width:110px;">Dias Programados</th><th>Plano / Preventiva</th><th>Ativo (Setor › Máquina › Equipamento › Conjunto/Subconjunto)</th><th>Equipe / Resp.</th><th style="width:90px;">Status</th></tr></thead><tbody>${rowsHtml || '<tr><td colspan="6" style="text-align:center;padding:16px;">Nenhuma preventiva agendada para o período e máquina selecionados.</td></tr>'}</tbody></table><script>window.onload=()=>window.print();<\/script></body></html>`);
+            w.document.write(docHtml);
             w.document.close();
         }
 
@@ -5356,8 +5462,8 @@
                             <button type="button" onclick="abrirModalClonarPlanoEquipamentos('${p.id}')" class="py-2 px-2.5 rounded-xl bg-indigo-50 hover:bg-indigo-100 border border-indigo-200 text-indigo-800 text-[11px] font-extrabold" title="Clonar e compartilhar este plano diretamente para outros equipamentos parecidos">Clonar / Compartilhar</button>
                             <button type="button" onclick="excluirPlano('${p.id}')" class="py-2 px-2.5 rounded-xl bg-rose-50 hover:bg-rose-100 text-rose-700 text-[11px] font-extrabold">✕</button>
                             ${masterAtivo ? `<div class="w-full flex items-center gap-1.5 pt-1">
-                                <button type="button" onclick="excluirOrdensFuturasPlanoMaster('${p.id}')" title="Admin Master: limpar todas as ordens pendentes/atrasadas vinculadas a este plano" class="flex-1 py-1.5 px-2.5 rounded-xl bg-amber-50 hover:bg-amber-100 border border-amber-200 text-amber-800 text-[10px] font-extrabold">🧹 Limpar Pendentes (${ordsPlanoPend.length})</button>
-                                <button type="button" onclick="excluirPlanoMasterComPendentes('${p.id}')" title="Admin Master: excluir plano e todas as ordens pendentes vinculadas" class="py-1.5 px-2.5 rounded-xl bg-rose-600 hover:bg-rose-700 text-white text-[10px] font-extrabold">🗑️ Master</button>
+                                <button type="button" onclick="excluirOrdensFuturasPlanoMaster('${p.id}')" title="Admin Master: limpar todas as ordens pendentes/atrasadas vinculadas a este plano" class="flex-1 py-1.5 px-2.5 rounded-xl bg-amber-50 hover:bg-amber-100 border border-amber-200 text-amber-800 text-[10px] font-extrabold"><svg class="w-3.5 h-3.5 inline-block shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"/></svg>  Limpar Pendentes (${ordsPlanoPend.length})</button>
+                                <button type="button" onclick="excluirPlanoMasterComPendentes('${p.id}')" title="Admin Master: excluir plano e todas as ordens pendentes vinculadas" class="py-1.5 px-2.5 rounded-xl bg-rose-600 hover:bg-rose-700 text-white text-[10px] font-extrabold"><svg class="w-3.5 h-3.5 inline-block shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/></svg>  Master</button>
                             </div>` : ''}
                         </div>
                     </div>`;
@@ -5659,7 +5765,7 @@
             const s = document.getElementById('plAtivoSetor').value;
             const m = document.getElementById('plAtivoMaquina').value;
             const e = document.getElementById('plAtivoEquipamento').value;
-            const optCriarConj = e ? { value: VAL_CRIAR_NOVO_CONJUNTO_PL, label: '➕ Criar novo Conjunto na Árvore...' } : null;
+            const optCriarConj = e ? { value: VAL_CRIAR_NOVO_CONJUNTO_PL, label: '+ Criar novo Conjunto na Árvore...' } : null;
             preencherOpcoesSelect('plAtivoConjunto', assetNodes.filter(n => (!s || n.area === s) && (!m || n.maquina === m) && (!e || n.equipamento === e)).map(n => n.conjunto), 'Conjunto (Opcional)', preset.conjunto || '', optCriarConj);
             atualizarDatalistConjuntosInlinePlano();
             onPlConjuntoChange(preset);
@@ -5674,7 +5780,7 @@
             const m = document.getElementById('plAtivoMaquina').value;
             const e = document.getElementById('plAtivoEquipamento').value;
             const c = document.getElementById('plAtivoConjunto').value;
-            const optCriarSub = e ? { value: VAL_CRIAR_NOVO_SUBCONJUNTO_PL, label: '➕ Criar novo Subconjunto na Árvore...' } : null;
+            const optCriarSub = e ? { value: VAL_CRIAR_NOVO_SUBCONJUNTO_PL, label: '+ Criar novo Subconjunto na Árvore...' } : null;
             preencherOpcoesSelect('plAtivoSubconjunto', assetNodes.filter(n => (!s || n.area === s) && (!m || n.maquina === m) && (!e || n.equipamento === e) && (!c || n.conjunto === c)).map(n => n.subconjunto), 'Subconjunto (Opcional)', preset.subconjunto || '', optCriarSub);
             const boxInline = document.getElementById('boxCriarSubconjuntoNoPlano');
             const inpCjInline = document.getElementById('plNovoConjuntoInp');
@@ -6950,7 +7056,7 @@
                 const fimSpan = durDias > 1 ? somarDiasIso(d, durDias - 1) : d;
                 const marcada = !progLoteDesmarcadas.has(d);
                 const conflito = planoJaTemOrdemNaSemanaIso(p.id, wi.isoYear, wi.week);
-                return `<button type="button" onclick="toggleDataLoteProg('${d}')" class="px-2 py-1 rounded-lg border font-mono text-[10px] font-bold transition-colors ${marcada ? (conflito ? 'bg-amber-50 border-amber-300 text-amber-900' : 'bg-white border-sky-300 text-slate-800') : 'bg-slate-100 border-slate-200 text-slate-400 line-through'}">${marcada ? '✓ ' : ''}S${wi.week}/${wi.isoYear} • ${durDias > 1 ? `${formatDateBR(d).slice(0, 5)}–${formatDateBR(fimSpan).slice(0, 5)}` : formatDateBR(d)}${conflito ? ' ⚠' : ''}</button>`;
+                return `<button type="button" onclick="toggleDataLoteProg('${d}')" class="px-2 py-1 rounded-lg border font-mono text-[10px] font-bold transition-colors ${marcada ? (conflito ? 'bg-amber-50 border-amber-300 text-amber-900' : 'bg-white border-sky-300 text-slate-800') : 'bg-slate-100 border-slate-200 text-slate-400 line-through'}">${marcada ? '✓ ' : ''}S${wi.week}/${wi.isoYear} • ${durDias > 1 ? `${formatDateBR(d).slice(0, 5)}–${formatDateBR(fimSpan).slice(0, 5)}` : formatDateBR(d)}${conflito ? ' <svg class="w-3.5 h-3.5 inline-block shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"/></svg> ' : ''}</button>`;
             }).join('')}${datasBrutas.length > 24 ? `<span class="text-[10px] font-bold text-slate-500">+${datasBrutas.length - 24} datas</span>` : ''}</div>`;
             const btn = document.getElementById('btnSalvarProgramacao');
             if (btn) btn.innerText = `Confirmar Programação (${datasAtivas.length})`;
@@ -7133,7 +7239,7 @@
                         </td>
                         <td class="py-3 px-3 text-center whitespace-nowrap">
                             <span class="px-2 py-0.5 rounded-lg bg-slate-100 text-slate-700 font-extrabold text-[10px]">${doneChk}/${chk.length} itens</span>
-                            <span class="ml-1 px-2 py-0.5 rounded-lg ${fotosQtd ? 'bg-sky-50 text-sky-700' : 'bg-slate-50 text-slate-400'} font-extrabold text-[10px]">📷 ${fotosQtd}</span>
+                            <span class="ml-1 px-2 py-0.5 rounded-lg ${fotosQtd ? 'bg-sky-50 text-sky-700' : 'bg-slate-50 text-slate-400'} font-extrabold text-[10px]"><svg class="w-3.5 h-3.5 inline-block shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 9a2 2 0 012-2h.93a2 2 0 001.664-.89l.812-1.22A2 2 0 0110.07 4h3.86a2 2 0 011.664.89l.812 1.22A2 2 0 0018.07 7H19a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2V9z"/><circle cx="12" cy="13" r="3" stroke-width="2"/></svg>  ${fotosQtd}</span>
                         </td>
                         <td class="py-3 px-3 text-center">
                             <span class="px-2.5 py-0.5 rounded-full text-[10px] font-extrabold ${stMeta.cls}">${stMeta.label}</span>
@@ -7143,8 +7249,8 @@
                             <button type="button" onclick="abrirModalSemana52('${escapeHtml(o.planoId || '')}', ${isoInfo.week}, '${o.id}', ${isoInfo.isoYear})" class="px-2 py-1 rounded-lg bg-indigo-50 hover:bg-indigo-100 text-indigo-700 border border-indigo-200 text-[11px] font-extrabold" title="Ajustar dias na S${isoInfo.week}">S${isoInfo.week}</button>
                             <button type="button" onclick="imprimirRelatorioPreventivaA4('${o.id}')" class="px-2 py-1 rounded-lg bg-emerald-50 hover:bg-emerald-100 text-emerald-800 border border-emerald-200 text-[11px] font-extrabold" title="Relatório A4">A4</button>
                             <button type="button" onclick="abrirModalReprogramar('${o.id}')" class="px-2 py-1 rounded-lg bg-amber-50 hover:bg-amber-100 text-amber-800 border border-amber-200 text-[11px] font-extrabold" title="Reprogramar">↻</button>
-                            ${masterAtivo ? `<button type="button" onclick="abrirModalEdicaoMasterOrdem('${o.id}')" class="px-2 py-1 rounded-lg bg-rose-600 hover:bg-rose-700 text-white text-[11px] font-extrabold" title="Edição Direta Admin Master">✏️ Master</button>` : ''}
-                            ${masterAtivo && (o.status === 'concluido' || o.status === 'cancelado') ? `<button type="button" onclick="reabrirOrdemMaster('${o.id}')" class="px-2 py-1 rounded-lg bg-amber-500 hover:bg-amber-600 text-white text-[11px] font-extrabold" title="Reabrir Ordem (Admin Master)">🔓</button>` : ''}
+                            ${masterAtivo ? `<button type="button" onclick="abrirModalEdicaoMasterOrdem('${o.id}')" class="px-2 py-1 rounded-lg bg-rose-600 hover:bg-rose-700 text-white text-[11px] font-extrabold" title="Edição Direta Admin Master"><svg class="w-3.5 h-3.5 inline-block shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/></svg>  Master</button>` : ''}
+                            ${masterAtivo && (o.status === 'concluido' || o.status === 'cancelado') ? `<button type="button" onclick="reabrirOrdemMaster('${o.id}')" class="px-2 py-1 rounded-lg bg-amber-500 hover:bg-amber-600 text-white text-[11px] font-extrabold" title="Reabrir Ordem (Admin Master)"><svg class="w-3.5 h-3.5 inline-block shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 11V7a4 4 0 118 0m-4 8v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2z"/></svg> </button>` : ''}
                             <button type="button" onclick="excluirOrdemPreventiva('${o.id}')" class="px-2 py-1 rounded-lg bg-rose-50 hover:bg-rose-100 text-rose-700 border border-rose-200 text-[11px] font-extrabold" title="Excluir">✕</button>
                         </td>
                     </tr>`;
@@ -7466,7 +7572,7 @@
                                 <span>Equipe: ${escapeHtml(o.equipe || '-')}</span>
                                 <span>• Resp: ${escapeHtml(o.responsavel || 'Equipe')}</span>
                                 <span>• ${formatDuracaoHH(o.duracaoEstimadaMin || 60)}</span>
-                                <span>• 📷 ${fotos} foto(s)</span>
+                                <span>• <svg class="w-3.5 h-3.5 inline-block shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 9a2 2 0 012-2h.93a2 2 0 001.664-.89l.812-1.22A2 2 0 0110.07 4h3.86a2 2 0 011.664.89l.812 1.22A2 2 0 0018.07 7H19a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2V9z"/><circle cx="12" cy="13" r="3" stroke-width="2"/></svg>  ${fotos} foto(s)</span>
                             </div>
                             ${o.epis ? `<div class="text-[11px] font-bold text-amber-800 bg-amber-50 px-2.5 py-1 rounded-xl border border-amber-200">EPIs/LOTO: ${escapeHtml(o.epis)}</div>` : ''}
                             <div class="space-y-1 pt-1">
@@ -7640,7 +7746,7 @@
                         </div>
                         <div class="flex flex-wrap items-center gap-1.5 shrink-0">
                             <button type="button" onclick="setItemExecStatus(${idx}, 'ok')" class="chk-btn ${it.status === 'ok' ? 'active-ok' : ''}">✓ OK</button>
-                            <button type="button" onclick="setItemExecStatus(${idx}, 'ajustado')" class="chk-btn ${it.status === 'ajustado' ? 'active-ajustado' : ''}">⚙ Ajustado</button>
+                            <button type="button" onclick="setItemExecStatus(${idx}, 'ajustado')" class="chk-btn ${it.status === 'ajustado' ? 'active-ajustado' : ''}"><svg class="w-4 h-4 inline-block shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"/><circle cx="12" cy="12" r="3" stroke-width="2"/></svg>  Ajustado</button>
                             <button type="button" onclick="setItemExecStatus(${idx}, 'nc')" class="chk-btn ${it.status === 'nc' ? 'active-nc' : ''}">✕ Não Conf.</button>
                             <button type="button" onclick="setItemExecStatus(${idx}, 'na')" class="chk-btn ${it.status === 'na' ? 'active-na' : ''}">N/A</button>
                         </div>
@@ -8352,7 +8458,7 @@
                 <div class="p-4 rounded-2xl border border-amber-200 bg-amber-50/70 flex flex-col lg:flex-row lg:items-center justify-between gap-3 text-xs">
                     <div class="space-y-0.5">
                         <div class="font-extrabold text-amber-950 flex flex-wrap items-center gap-2">
-                            <span>🔍 Auditoria de Duplicidade de Planos por Equipamento</span>
+                            <span><svg class="w-3.5 h-3.5 inline-block shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.2" d="M21 21l-4.35-4.35M11 19a8 8 0 100-16 8 8 0 000 16z"/></svg>  Auditoria de Duplicidade de Planos por Equipamento</span>
                             <span class="px-2 py-0.5 rounded-full text-[10px] font-extrabold bg-amber-200/80 text-amber-950">${grupos.length} grupo(s) • ${totalPlanosEnvolvidos} plano(s)</span>
                         </div>
                         <p class="text-[11px] font-semibold text-amber-900/80">
@@ -8434,17 +8540,17 @@
                             </div>
 
                             <div class="flex flex-wrap items-center gap-1.5 pt-2.5 border-t border-slate-200/80">
-                                <button type="button" onclick="abrirModalEditorPlano('${p.id}')" class="px-2.5 py-1.5 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-800 text-[11px] font-extrabold">✏️ Editar</button>
+                                <button type="button" onclick="abrirModalEditorPlano('${p.id}')" class="px-2.5 py-1.5 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-800 text-[11px] font-extrabold"><svg class="w-3.5 h-3.5 inline-block shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/></svg>  Editar</button>
                                 ${!ehSugerido && pPrincipal ? `
                                     <button type="button" onclick="unificarPlanosDuplicadosMaster('${pPrincipal.id}', '${p.id}')" title="Mescla checklist e ordens deste plano no plano ${escapeHtml(pPrincipal.codigo || '')} e exclui esta duplicata" class="px-2.5 py-1.5 rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white text-[11px] font-extrabold">
-                                        🔀 Unificar no ${escapeHtml(pPrincipal.codigo || 'Principal')}
+                                        <svg class="w-3.5 h-3.5 inline-block shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7h12m0 0l-4-4m4 4l-4 4m0 6H4m0 0l4 4m-4-4l4-4"/></svg>  Unificar no ${escapeHtml(pPrincipal.codigo || 'Principal')}
                                     </button>
                                 ` : (ehSugerido && outroAlvoUnificar ? `
                                     <button type="button" onclick="unificarPlanosDuplicadosMaster('${p.id}', '${outroAlvoUnificar.id}')" title="Manter este plano (${escapeHtml(p.codigo || '')}) e absorver/excluir ${escapeHtml(outroAlvoUnificar.codigo || '')}" class="px-2.5 py-1.5 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white text-[11px] font-extrabold">
                                         ★ Manter &amp; Absorver ${escapeHtml(outroAlvoUnificar.codigo || '')}
                                     </button>
                                 ` : '')}
-                                <button type="button" onclick="excluirPlanoMasterComPendentes('${p.id}')" class="ml-auto px-2.5 py-1.5 rounded-xl bg-rose-600 hover:bg-rose-700 text-white text-[11px] font-extrabold">🗑️ Excluir + Pend. (${pendCnt})</button>
+                                <button type="button" onclick="excluirPlanoMasterComPendentes('${p.id}')" class="ml-auto px-2.5 py-1.5 rounded-xl bg-rose-600 hover:bg-rose-700 text-white text-[11px] font-extrabold"><svg class="w-3.5 h-3.5 inline-block shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/></svg>  Excluir + Pend. (${pendCnt})</button>
                             </div>
                         </div>`;
                 }).join('');
@@ -8491,7 +8597,7 @@
                 id: 'prev_aprovacoes_revisoes',
                 titulo: 'Aviso de Revisões Pós-Execução, Reprogramações & Críticas P1',
                 subtitulo: 'Monitora preventivas concluídas com itens [NOK]/observação técnica, reprogramações e ordens P1 críticas.',
-                icone: '✅',
+                icone: 'check',
                 cor: 'indigo',
                 ativo: true,
                 intervaloDias: 2,
@@ -8507,7 +8613,7 @@
                 id: 'prev_ordens_atrasadas',
                 titulo: 'Alerta de Ordens Preventivas Atrasadas / Vencidas por Equipe',
                 subtitulo: 'Cobra execução das ordens preventivas vencidas com dias de atraso, ativo, prioridade e responsável.',
-                icone: '🚨',
+                icone: 'alert',
                 cor: 'rose',
                 ativo: true,
                 intervaloDias: 2,
@@ -8523,7 +8629,7 @@
                 id: 'prev_relatorio_completo',
                 titulo: 'Relatório Executivo Completo de Preventivas (KPIs, Aderência & Custos)',
                 subtitulo: 'Envia relatório completo com Aderência vs Meta 90%, Backlog, H/H Executado, Custos de Peças e Planos Ativos.',
-                icone: '📊',
+                icone: 'chart',
                 cor: 'sky',
                 ativo: true,
                 intervaloDias: 7,
@@ -8539,7 +8645,7 @@
                 id: 'prev_programacao_semana',
                 titulo: 'Cronograma de Preventivas da Semana (Visão Supervisores & PCM)',
                 subtitulo: 'Envia a programação completa de preventivas dos próximos 7 dias agrupada por equipe e necessidade de parada.',
-                icone: '📅',
+                icone: 'calendar',
                 cor: 'amber',
                 ativo: true,
                 intervaloDias: 7,
@@ -8555,7 +8661,7 @@
                 id: 'prev_anomalias_pecas',
                 titulo: 'Resumo de Anomalias em Checklists Preventivos & Peças Trocadas',
                 subtitulo: 'Consolida itens marcados como [NOK] durante preventivas e trocas de peças registradas.',
-                icone: '🔩',
+                icone: 'wrench',
                 cor: 'emerald',
                 ativo: false,
                 intervaloDias: 3,
@@ -8760,7 +8866,7 @@
         ${bannerStatus ? `
         <div style="background:${bannerStatus.bg};border:1px solid ${bannerStatus.border};border-radius:12px;padding:14px 16px;margin:18px 24px 0 24px;">
             <table style="width:100%;border-collapse:collapse;"><tr>
-                <td style="width:30px;vertical-align:middle;font-size:20px;">${bannerStatus.icone}</td>
+                <td style="width:28px;vertical-align:middle;font-size:14px;font-weight:900;">•</td>
                 <td style="vertical-align:middle;font-size:13px;font-weight:800;color:${bannerStatus.color};">
                     ${escapeHtml(bannerStatus.titulo)}
                     <div style="font-size:11px;font-weight:600;margin-top:2px;opacity:0.9;">${escapeHtml(bannerStatus.sub)}</div>
@@ -8824,7 +8930,7 @@
                 totalPendencias = ordensP1Atrasadas.length + ordensReprog.length + ordensComNok.slice(0, 10).length;
                 const tudoCerto = totalPendencias === 0;
                 assunto = tudoCerto
-                    ? `[Preventivas • Tudo Certo ✅] Nenhuma pendência crítica ou revisão pendente (S${wiHoje.week})`
+                    ? `[Preventivas • Tudo Certo ✓] Nenhuma pendência crítica ou revisão pendente (S${wiHoje.week})`
                     : `[Preventivas • Revisões & Críticas P1] ${totalPendencias} item(ns) para análise da Supervisão/PCM`;
                 corpoTexto = tudoCerto
                     ? `${regra.msgTudoCerto}\n0 preventivas P1 atrasadas, 0 reprogramações pendentes e 0 checklists com anomalia.`
@@ -8844,8 +8950,8 @@
                     titulo: tudoCerto ? 'Tudo Certo! Nenhuma Revisão ou Crítica Pendente' : 'Aviso de Revisões Pós-Execução, Reprogramações & Críticas P1',
                     subtitulo: `Monitoramento automático a cada ${regra.intervaloDias} dia(s) • Manutenção Preventiva`,
                     bannerStatus: tudoCerto
-                        ? { bg: '#ecfdf5', border: '#6ee7b7', color: '#065f46', icone: '✅', titulo: regra.msgTudoCerto, sub: 'Todas as ordens P1, reprogramações e revisões pós-execução estão em dia!' }
-                        : { bg: '#eef2ff', border: '#c7d2fe', color: '#3730a3', icone: '🔔', titulo: `${totalPendencias} item(ns) requerem atenção da Supervisão / PCM`, sub: 'Verifique abaixo as preventivas P1 vencidas, reprogramações e checklists com apontamento.' },
+                        ? { bg: '#ecfdf5', border: '#6ee7b7', color: '#065f46', icone: 'check', titulo: regra.msgTudoCerto, sub: 'Todas as ordens P1, reprogramações e revisões pós-execução estão em dia!' }
+                        : { bg: '#eef2ff', border: '#c7d2fe', color: '#3730a3', icone: 'bell', titulo: `${totalPendencias} item(ns) requerem atenção da Supervisão / PCM`, sub: 'Verifique abaixo as preventivas P1 vencidas, reprogramações e checklists com apontamento.' },
                     kpis: [
                         { label: 'P1 Atrasadas', valor: ordensP1Atrasadas.length, cor: ordensP1Atrasadas.length ? '#e11d48' : '#10b981' },
                         { label: 'Reprogramadas', valor: ordensReprog.length, cor: ordensReprog.length ? '#f59e0b' : '#10b981' },
@@ -8860,7 +8966,7 @@
                 totalPendencias = ordensAtrasadas.length;
                 const tudoCerto = totalPendencias === 0;
                 assunto = tudoCerto
-                    ? `[Preventivas • Tudo Certo ✅] Zero ordens preventivas atrasadas!`
+                    ? `[Preventivas • Tudo Certo ✓] Zero ordens preventivas atrasadas!`
                     : `[Preventivas • Alerta de Atraso] ${ordensAtrasadas.length} ordem(ns) preventiva(s) vencida(s)`;
                 corpoTexto = tudoCerto
                     ? regra.msgTudoCerto
@@ -8880,8 +8986,8 @@
                     titulo: tudoCerto ? 'Tudo Certo! Zero Preventivas Atrasadas' : 'Alerta de Ordens Preventivas Atrasadas / Vencidas',
                     subtitulo: `Controle de cumprimento de agenda preventiva • Ciclo de ${regra.intervaloDias} dia(s)`,
                     bannerStatus: tudoCerto
-                        ? { bg: '#ecfdf5', border: '#6ee7b7', color: '#065f46', icone: '✅', titulo: regra.msgTudoCerto, sub: '100% das preventivas vencidas até hoje foram concluídas ou tratadas.' }
-                        : { bg: '#fff1f2', border: '#fecdd3', color: '#9f1239', icone: '🚨', titulo: `${ordensAtrasadas.length} preventiva(s) estão com prazo vencido`, sub: 'Execute a baixa técnica ou registre a reprogramação justificada no módulo de Preventivas.' },
+                        ? { bg: '#ecfdf5', border: '#6ee7b7', color: '#065f46', icone: 'check', titulo: regra.msgTudoCerto, sub: '100% das preventivas vencidas até hoje foram concluídas ou tratadas.' }
+                        : { bg: '#fff1f2', border: '#fecdd3', color: '#9f1239', icone: 'alert', titulo: `${ordensAtrasadas.length} preventiva(s) estão com prazo vencido`, sub: 'Execute a baixa técnica ou registre a reprogramação justificada no módulo de Preventivas.' },
                     kpis: [
                         { label: 'Total Atrasadas', valor: ordensAtrasadas.length, cor: '#e11d48' },
                         { label: 'Críticas P1', valor: ordensP1Atrasadas.length, cor: '#dc2626' },
@@ -8915,8 +9021,8 @@
                     titulo: `Cronograma de Preventivas da Semana (S${wiHoje.week})`,
                     subtitulo: `Janela de ${formatDateBR(hojeStr)} a ${formatDateBR(lim7d)}`,
                     bannerStatus: tudoCerto
-                        ? { bg: '#ecfdf5', border: '#6ee7b7', color: '#065f46', icone: '✅', titulo: regra.msgTudoCerto, sub: 'Sem preventivas pendentes nesta janela de 7 dias.' }
-                        : { bg: '#f0f9ff', border: '#bae6fd', color: '#075985', icone: '📅', titulo: `${ordensJanela.length} ordem(ns) preventiva(s) programada(s) para os próximos 7 dias`, sub: 'Alinhe parada de máquina, peças sobressalentes e bloqueio LOTO com a Operação.' },
+                        ? { bg: '#ecfdf5', border: '#6ee7b7', color: '#065f46', icone: 'check', titulo: regra.msgTudoCerto, sub: 'Sem preventivas pendentes nesta janela de 7 dias.' }
+                        : { bg: '#f0f9ff', border: '#bae6fd', color: '#075985', icone: 'calendar', titulo: `${ordensJanela.length} ordem(ns) preventiva(s) programada(s) para os próximos 7 dias`, sub: 'Alinhe parada de máquina, peças sobressalentes e bloqueio LOTO com a Operação.' },
                     kpis: [
                         { label: 'Próx. 7 Dias', valor: ordensJanela.length, cor: '#0284c7' },
                         { label: 'Exigem Parada', valor: ordensJanela.filter(o => o.paradaNecessaria === 'sim').length, cor: '#f59e0b' },
@@ -8928,7 +9034,7 @@
                 totalPendencias = ordensComNok.length;
                 const tudoCerto = totalPendencias === 0;
                 assunto = tudoCerto
-                    ? `[Preventivas • Tudo Certo ✅] Nenhuma anomalia de checklist [NOK] registrada`
+                    ? `[Preventivas • Tudo Certo ✓] Nenhuma anomalia de checklist [NOK] registrada`
                     : `[Preventivas • Anomalias & Peças] ${ordensComNok.length} preventiva(s) com apontamento técnico [NOK]`;
                 corpoTexto = tudoCerto ? regra.msgTudoCerto : `${ordensComNok.length} ordem(ns) concluída(s) apresentaram itens [NOK] ou anomalias durante a preventiva.`;
                 const rowsNok = ordensComNok.slice(0, 15).map(o => [
@@ -8944,8 +9050,8 @@
                     titulo: tudoCerto ? 'Tudo Certo! Checklists Preventivos sem Anomalias' : 'Resumo de Anomalias em Checklists Preventivos & Peças',
                     subtitulo: `Rastreabilidade de não-conformidades detectadas durante preventivas`,
                     bannerStatus: tudoCerto
-                        ? { bg: '#ecfdf5', border: '#6ee7b7', color: '#065f46', icone: '✅', titulo: regra.msgTudoCerto, sub: 'Nenhum item [NOK] pendente de análise.' }
-                        : { bg: '#fffbeb', border: '#fde68a', color: '#92400e', icone: '🔩', titulo: `${ordensComNok.length} execução(ões) registraram itens [NOK] ou anomalias técnicas`, sub: 'Avalie a abertura de corretiva programada para os ativos abaixo.' },
+                        ? { bg: '#ecfdf5', border: '#6ee7b7', color: '#065f46', icone: 'check', titulo: regra.msgTudoCerto, sub: 'Nenhum item [NOK] pendente de análise.' }
+                        : { bg: '#fffbeb', border: '#fde68a', color: '#92400e', icone: 'wrench', titulo: `${ordensComNok.length} execução(ões) registraram itens [NOK] ou anomalias técnicas`, sub: 'Avalie a abertura de corretiva programada para os ativos abaixo.' },
                     kpis: [
                         { label: 'Ordens c/ NOK', valor: ordensComNok.length, cor: '#f59e0b' },
                         { label: 'Total Concluídas', valor: ordensConcl.length, cor: '#10b981' }
@@ -8984,7 +9090,7 @@
                         bg: aderPct >= 90 ? '#ecfdf5' : '#fffbeb',
                         border: aderPct >= 90 ? '#6ee7b7' : '#fde68a',
                         color: aderPct >= 90 ? '#065f46' : '#92400e',
-                        icone: '📊',
+                        icone: 'chart',
                         titulo: `Aderência Preventiva: ${aderPct}% (Meta 90%) • ${todosPlanos.length} Planos Mestres Cadastrados`,
                         sub: `${ordensConcl.length} concluída(s) • ${ordensAtrasadas.length} atrasada(s) • Esforço acumulado: ${Math.round(hhTotalMin / 60)}h • Custo peças: R$ ${custoTotal.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}`
                     },
@@ -9026,7 +9132,7 @@
                 meta.innerHTML = `
                     <div class="flex flex-wrap items-center gap-2">
                         <span class="px-2.5 py-0.5 rounded-full text-[10px] font-extrabold uppercase ${mail.tudoCerto ? 'bg-emerald-100 text-emerald-800' : 'bg-amber-100 text-amber-900'}">
-                            ${mail.tudoCerto ? '✅ Modo Tudo Certo (0 pendências)' : `🔔 ${mail.totalPendencias} pendência(s) detectada(s)`}
+                            ${mail.tudoCerto ? '✓ Modo Tudo Certo (0 pendências)' : `<svg class="w-3.5 h-3.5 inline-block shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.2" d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9"/></svg>  ${mail.totalPendencias} pendência(s) detectada(s)`}
                         </span>
                         <span class="text-xs font-extrabold text-slate-800">${escapeHtml(mail.assunto)}</span>
                     </div>
@@ -9294,7 +9400,7 @@
                 titulo: 'Conexão Power Automate Ativa — Preventivas & Inspeção de Rota',
                 subtitulo: 'Teste disparado pela Central de Notificações do Menu Admin Master',
                 bannerStatus: {
-                    bg: '#ecfdf5', border: '#6ee7b7', color: '#065f46', icone: '🚀',
+                    bg: '#ecfdf5', border: '#6ee7b7', color: '#065f46', icone: 'send',
                     titulo: 'Tudo certo! Seu fluxo Power Automate está conectado à Central Master.',
                     sub: `Destinatários de teste: ${fb}`
                 },
@@ -9313,7 +9419,7 @@
                     body: JSON.stringify({
                         para: fb,
                         destinatarios: fb.split(';'),
-                        assunto: '[Teste Central Master • Preventivas Cepêra] Conexão Power Automate OK ✅',
+                        assunto: '[Teste Central Master • Preventivas Cepêra] Conexão Power Automate OK ✓',
                         corpoTexto: 'Teste de conexão Power Automate da Central de Notificações Master concluído com sucesso.',
                         corpoHtml: html,
                         origem: 'teste_central_notificacoes_preventivas'
@@ -9353,16 +9459,16 @@
                     <div class="space-y-1">
                         <div class="flex flex-wrap items-center gap-2">
                             <span class="px-2.5 py-0.5 rounded-full text-[10px] font-extrabold uppercase ${temHook ? 'bg-emerald-600 text-white' : 'bg-amber-500 text-white'}">
-                                ${temHook ? '✓ Power Automate Conectado' : '⚠ Power Automate Pendente'}
+                                ${temHook ? '✓ Power Automate Conectado' : '<svg class="w-3.5 h-3.5 inline-block shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"/></svg>  Power Automate Pendente'}
                             </span>
                             <span class="text-[11px] font-extrabold text-slate-600">${regrasAtivas} de ${centralNotifPrevState.regrasPreventivas.length} regra(s) ativa(s) • ${destAtivos.length} destinatário(s) habilitado(s)</span>
                         </div>
                         <div class="text-sm font-extrabold text-slate-900">Central Master de Notificações, Cobrança de Atrasos &amp; Relatórios Automáticos</div>
-                        <p class="text-xs font-semibold text-slate-500">Delegue relatórios completos de preventivas, alertas de vencimento, cronograma semanal e avisos periódicos (com envio automático de <strong>"Tudo certo! ✅"</strong> quando zerado) para Supervisores, Gerente e PCM.</p>
+                        <p class="text-xs font-semibold text-slate-500">Delegue relatórios completos de preventivas, alertas de vencimento, cronograma semanal e avisos periódicos (com envio automático de <strong>"Tudo certo! ✓"</strong> quando zerado) para Supervisores, Gerente e PCM.</p>
                     </div>
                     <div class="flex flex-wrap items-center gap-2 shrink-0">
                         <button type="button" onclick="verificarEDispararRegrasVencidasPrev(true)" class="px-3.5 py-2 rounded-xl bg-slate-900 hover:bg-slate-800 text-white text-xs font-extrabold shadow-sm">
-                            ⚡ Verificar &amp; Disparar Ciclo Agora
+                            <svg class="w-3.5 h-3.5 inline-block shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.2" d="M13 10V3L4 14h7v7l9-11h-7z"/></svg>  Verificar &amp; Disparar Ciclo Agora
                         </button>
                     </div>
                 </div>
@@ -9370,13 +9476,13 @@
                 <div class="flex flex-wrap items-center justify-between gap-2 pt-1">
                     <div class="flex flex-wrap items-center gap-1.5 bg-slate-100 p-1 rounded-2xl">
                         <button type="button" onclick="setNotifMasterSubViewPrev('regras')" class="px-3.5 py-1.5 rounded-xl text-xs font-extrabold ${notifPrevSubView === 'regras' ? 'bg-white text-slate-900 shadow-sm' : 'text-slate-600 hover:text-slate-900'}">
-                            📋 Regras &amp; Delegação (${centralNotifPrevState.regrasPreventivas.length})
+                            <svg class="w-3.5 h-3.5 inline-block shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"/></svg>  Regras &amp; Delegação (${centralNotifPrevState.regrasPreventivas.length})
                         </button>
                         <button type="button" onclick="setNotifMasterSubViewPrev('destinatarios')" class="px-3.5 py-1.5 rounded-xl text-xs font-extrabold ${notifPrevSubView === 'destinatarios' ? 'bg-white text-slate-900 shadow-sm' : 'text-slate-600 hover:text-slate-900'}">
-                            👥 Destinatários: Supervisores, Gerente &amp; PCM (${centralNotifPrevState.destinatarios.length})
+                            <svg class="w-3.5 h-3.5 inline-block shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0z"/></svg>  Destinatários: Supervisores, Gerente &amp; PCM (${centralNotifPrevState.destinatarios.length})
                         </button>
                         <button type="button" onclick="setNotifMasterSubViewPrev('automate')" class="px-3.5 py-1.5 rounded-xl text-xs font-extrabold ${notifPrevSubView === 'automate' ? 'bg-white text-slate-900 shadow-sm' : 'text-slate-600 hover:text-slate-900'}">
-                            ⚡ Chave Power Automate &amp; Histórico (${centralNotifPrevState.historicoDisparos.length})
+                            <svg class="w-3.5 h-3.5 inline-block shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.2" d="M13 10V3L4 14h7v7l9-11h-7z"/></svg>  Chave Power Automate &amp; Histórico (${centralNotifPrevState.historicoDisparos.length})
                         </button>
                     </div>
                 </div>`;
@@ -9388,11 +9494,11 @@
                     <form onsubmit="salvarDestinatarioNotifPrev(event)" class="p-4 rounded-2xl border border-slate-200 bg-slate-50/70 space-y-3">
                         <div class="flex flex-wrap items-center justify-between gap-2">
                             <div>
-                                <div class="text-xs font-extrabold uppercase tracking-wider text-indigo-700">${editObj ? '✏️ Editando Destinatário' : '➕ Cadastrar Destinatário na Central (Compartilhado entre Preventivas & Rota)'}</div>
+                                <div class="text-xs font-extrabold uppercase tracking-wider text-indigo-700">${editObj ? '<svg class="w-3.5 h-3.5 inline-block shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/></svg>  Editando Destinatário' : '+ Cadastrar Destinatário na Central (Compartilhado entre Preventivas & Rota)'}</div>
                                 <p class="text-[11px] font-semibold text-slate-500">Cadastre Supervisores, Gerente e equipe PCM para vinculá-los por cargo ou individualmente em cada regra.</p>
                             </div>
                             <button type="button" onclick="importarGestoresEquipeNotifPrev()" class="px-3 py-1.5 rounded-xl bg-indigo-50 hover:bg-indigo-100 border border-indigo-200 text-indigo-800 text-[11px] font-extrabold">
-                                📥 Importar Supervisores/Gestores da Equipe
+                                <svg class="w-3.5 h-3.5 inline-block shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"/></svg>  Importar Supervisores/Gestores da Equipe
                             </button>
                         </div>
                         <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-2.5 items-end">
@@ -9440,8 +9546,8 @@
                                         <button type="button" onclick="toggleAtivoDestinatarioNotifPrev('${escapeHtml(d.id)}')" class="px-2.5 py-1 rounded-xl text-[10px] font-extrabold ${d.ativo !== false ? 'bg-emerald-100 text-emerald-800' : 'bg-slate-200 text-slate-600'}">
                                             ${d.ativo !== false ? '✓ Ativo' : 'Pausado'}
                                         </button>
-                                        <button type="button" onclick="editarDestinatarioNotifPrev('${escapeHtml(d.id)}')" class="px-2.5 py-1 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-700 text-[10px] font-extrabold">✏️ Editar</button>
-                                        <button type="button" onclick="removerDestinatarioNotifPrev('${escapeHtml(d.id)}')" class="px-2.5 py-1 rounded-xl bg-rose-50 hover:bg-rose-100 text-rose-700 text-[10px] font-extrabold">🗑️</button>
+                                        <button type="button" onclick="editarDestinatarioNotifPrev('${escapeHtml(d.id)}')" class="px-2.5 py-1 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-700 text-[10px] font-extrabold"><svg class="w-3.5 h-3.5 inline-block shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/></svg>  Editar</button>
+                                        <button type="button" onclick="removerDestinatarioNotifPrev('${escapeHtml(d.id)}')" class="px-2.5 py-1 rounded-xl bg-rose-50 hover:bg-rose-100 text-rose-700 text-[10px] font-extrabold"><svg class="w-3.5 h-3.5 inline-block shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/></svg> </button>
                                     </div>
                                 </div>`;
                             }).join('')}
@@ -9454,11 +9560,11 @@
                     <form onsubmit="salvarConfigPowerAutomateMasterPrev(event)" class="p-4 rounded-2xl border border-slate-200 bg-slate-50/70 space-y-3">
                         <div class="flex flex-wrap items-center justify-between gap-2">
                             <div>
-                                <div class="text-xs font-extrabold uppercase tracking-wider text-sky-700">⚡ Conector Microsoft Power Automate (Gatilho HTTP POST)</div>
+                                <div class="text-xs font-extrabold uppercase tracking-wider text-sky-700"><svg class="w-3.5 h-3.5 inline-block shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.2" d="M13 10V3L4 14h7v7l9-11h-7z"/></svg>  Conector Microsoft Power Automate (Gatilho HTTP POST)</div>
                                 <p class="text-[11px] font-semibold text-slate-500">Compartilha a mesma chave/fluxo HTTP POST com Inspeção de Rota e Agenda PCM.</p>
                             </div>
                             <button type="button" onclick="copiarEsquemaJsonPowerAutomateMasterPrev()" class="px-3 py-1.5 rounded-xl bg-white hover:bg-slate-100 border border-slate-200 text-slate-700 text-[11px] font-extrabold">
-                                📋 Copiar Esquema JSON do Gatilho
+                                <svg class="w-3.5 h-3.5 inline-block shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"/></svg>  Copiar Esquema JSON do Gatilho
                             </button>
                         </div>
                         <div class="grid grid-cols-1 lg:grid-cols-3 gap-3">
@@ -9477,8 +9583,8 @@
                                 <span>Habilitar disparo automático em segundo plano quando o ciclo (dias) de uma regra ativa vencer</span>
                             </label>
                             <div class="flex flex-wrap items-center gap-2">
-                                <button type="button" onclick="testarConexaoPowerAutomateMasterPrev()" class="px-3.5 py-2 rounded-xl bg-sky-600 hover:bg-sky-700 text-white text-xs font-extrabold">✉️ Enviar E-mail de Teste</button>
-                                <button type="submit" class="px-4 py-2 rounded-xl bg-slate-900 hover:bg-slate-800 text-white text-xs font-extrabold">💾 Salvar Chave &amp; Automação</button>
+                                <button type="button" onclick="testarConexaoPowerAutomateMasterPrev()" class="px-3.5 py-2 rounded-xl bg-sky-600 hover:bg-sky-700 text-white text-xs font-extrabold"><svg class="w-3.5 h-3.5 inline-block shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"/></svg>  Enviar E-mail de Teste</button>
+                                <button type="submit" class="px-4 py-2 rounded-xl bg-slate-900 hover:bg-slate-800 text-white text-xs font-extrabold"><svg class="w-3.5 h-3.5 inline-block shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg>  Salvar Chave &amp; Automação</button>
                             </div>
                         </div>
                     </form>
@@ -9492,7 +9598,7 @@
                                     <div class="space-y-0.5 min-w-0">
                                         <div class="flex flex-wrap items-center gap-1.5">
                                             <span class="px-2 py-0.5 rounded-full text-[10px] font-extrabold bg-slate-900 text-white">${escapeHtml(h.modulo || 'Preventivas')}</span>
-                                            <span class="px-2 py-0.5 rounded-full text-[10px] font-extrabold ${h.tudoCerto ? 'bg-emerald-100 text-emerald-800' : 'bg-amber-100 text-amber-800'}">${h.tudoCerto ? '✅ Tudo Certo (0 pend.)' : `🔔 ${h.totalPendencias || 0} pendência(s)`}</span>
+                                            <span class="px-2 py-0.5 rounded-full text-[10px] font-extrabold ${h.tudoCerto ? 'bg-emerald-100 text-emerald-800' : 'bg-amber-100 text-amber-800'}">${h.tudoCerto ? '✓ Tudo Certo (0 pend.)' : `<svg class="w-3.5 h-3.5 inline-block shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.2" d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9"/></svg>  ${h.totalPendencias || 0} pendência(s)`}</span>
                                             <span class="font-extrabold text-slate-900 truncate">${escapeHtml(h.regraTitulo || '')}</span>
                                         </div>
                                         <div class="text-[11px] text-slate-500 font-semibold truncate">${escapeHtml(h.assunto || '')} • Para: <span class="font-mono text-sky-700">${escapeHtml(h.para || '')}</span></div>
@@ -9518,12 +9624,12 @@
                     <div class="p-4 rounded-3xl border-2 ${r.ativo ? 'border-slate-200 bg-white' : 'border-slate-200 bg-slate-50/70 opacity-75'} space-y-3">
                         <div class="flex flex-col lg:flex-row lg:items-start justify-between gap-3 pb-2.5 border-b border-slate-100">
                             <div class="flex items-start gap-3 min-w-0">
-                                <div class="w-10 h-10 rounded-2xl bg-slate-100 flex items-center justify-center text-lg shrink-0">${r.icone || '🔔'}</div>
+                                <div class="w-10 h-10 rounded-2xl bg-slate-100 flex items-center justify-center text-lg shrink-0">${r.id === 'prev_ordens_atrasadas' ? `<svg class="w-3.5 h-3.5 inline-block shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"/></svg>` : r.id === 'prev_relatorio_completo' ? `<svg class="w-4 h-4 inline-block shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"/></svg>` : r.id === 'prev_programacao_semana' ? `<svg class="w-4 h-4 inline-block shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/></svg>` : r.id === 'prev_anomalias_pecas' ? `<svg class="w-4 h-4 inline-block shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"/><circle cx="12" cy="12" r="3" stroke-width="2"/></svg>` : `<svg class="w-3.5 h-3.5 inline-block shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>`}</div>
                                 <div class="space-y-0.5 min-w-0">
                                     <div class="flex flex-wrap items-center gap-2">
                                         <span class="text-sm font-extrabold text-slate-900">${escapeHtml(r.titulo)}</span>
                                         <span class="px-2 py-0.5 rounded-full text-[10px] font-extrabold ${mailPreview.tudoCerto ? 'bg-emerald-100 text-emerald-800' : 'bg-rose-100 text-rose-700'}">
-                                            Agora: ${mailPreview.tudoCerto ? '✅ Tudo Certo (0 pend.)' : `${mailPreview.totalPendencias} pendência(s)`}
+                                            Agora: ${mailPreview.tudoCerto ? '✓ Tudo Certo (0 pend.)' : `${mailPreview.totalPendencias} pendência(s)`}
                                         </span>
                                     </div>
                                     <p class="text-xs font-semibold text-slate-500">${escapeHtml(r.subtitulo)}</p>
@@ -9535,10 +9641,10 @@
                                     <span>${r.ativo ? 'Regra Ativa' : 'Pausada'}</span>
                                 </label>
                                 <button type="button" onclick="visualizarPreviaEmailNotifPrev('${r.id}')" class="px-3 py-1.5 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-800 text-xs font-extrabold">
-                                    👁️ Ver Prévia do E-mail
+                                    <svg class="w-3.5 h-3.5 inline-block shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"/></svg>  Ver Prévia do E-mail
                                 </button>
                                 <button type="button" onclick="dispararRegraNotifPrevAgora('${r.id}', false)" class="px-3.5 py-1.5 rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white text-xs font-extrabold shadow-sm">
-                                    🚀 Disparar Agora
+                                    <svg class="w-3.5 h-3.5 inline-block shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8"/></svg>  Disparar Agora
                                 </button>
                             </div>
                         </div>
@@ -9554,7 +9660,7 @@
                                 </div>
                                 <label class="flex items-start gap-2 pt-1 cursor-pointer">
                                     <input type="checkbox" ${r.enviarTudoCerto ? 'checked' : ''} onchange="atualizarCampoRegraNotifPrev('${r.id}', 'enviarTudoCerto', this.checked)" class="mt-0.5 w-4 h-4 accent-emerald-600 shrink-0">
-                                    <span class="text-[11px] font-bold text-slate-700 leading-snug">Enviar e-mail de <strong>"Tudo Certo! ✅"</strong> mesmo quando houver 0 pendências</span>
+                                    <span class="text-[11px] font-bold text-slate-700 leading-snug">Enviar e-mail de <strong>"Tudo Certo! ✓"</strong> mesmo quando houver 0 pendências</span>
                                 </label>
                                 <div>
                                     <label class="block text-[9px] font-extrabold uppercase text-slate-400 mb-0.5">Mensagem quando estiver zerado ("Tudo Certo"):</label>
@@ -9592,7 +9698,7 @@
                                             </label>`;
                                         }).join('')}
                                     </div>
-                                </div>` : `<div class="text-[11px] font-semibold text-amber-700">Dica: Cadastre os e-mails dos Supervisores, Gerente e PCM na aba <strong>"👥 Destinatários"</strong> acima.</div>`}
+                                </div>` : `<div class="text-[11px] font-semibold text-amber-700">Dica: Cadastre os e-mails dos Supervisores, Gerente e PCM na aba <strong>"<svg class="w-3.5 h-3.5 inline-block shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0z"/></svg>  Destinatários"</strong> acima.</div>`}
 
                                 <div class="grid grid-cols-1 sm:grid-cols-2 gap-2 pt-1">
                                     <div>
@@ -9601,7 +9707,7 @@
                                     </div>
                                     <div class="flex flex-col justify-end">
                                         <div class="text-[10px] font-bold text-slate-500 truncate" title="${escapeHtml(mailPreview.para)}">
-                                            ✉️ Destino atual (${mailPreview.destinatarios.length}): <span class="font-mono text-sky-700">${escapeHtml(mailPreview.para)}</span>
+                                            <svg class="w-3.5 h-3.5 inline-block shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"/></svg>  Destino atual (${mailPreview.destinatarios.length}): <span class="font-mono text-sky-700">${escapeHtml(mailPreview.para)}</span>
                                         </div>
                                     </div>
                                 </div>
@@ -9757,9 +9863,9 @@
                                 </div>
                             </label>
                             <div class="flex flex-wrap items-center gap-1.5 shrink-0">
-                                <button type="button" onclick="abrirModalEditorPlano('${p.id}')" class="px-3 py-1.5 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-800 text-[11px] font-extrabold">✏️ Editar Plano</button>
-                                <button type="button" onclick="excluirOrdensFuturasPlanoMaster('${p.id}')" class="px-3 py-1.5 rounded-xl bg-amber-50 hover:bg-amber-100 border border-amber-200 text-amber-800 text-[11px] font-extrabold">🧹 Limpar Pend. (${pendCnt})</button>
-                                <button type="button" onclick="excluirPlanoMasterComPendentes('${p.id}')" class="px-3 py-1.5 rounded-xl bg-rose-600 hover:bg-rose-700 text-white text-[11px] font-extrabold">🗑️ Excluir Plano</button>
+                                <button type="button" onclick="abrirModalEditorPlano('${p.id}')" class="px-3 py-1.5 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-800 text-[11px] font-extrabold"><svg class="w-3.5 h-3.5 inline-block shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/></svg>  Editar Plano</button>
+                                <button type="button" onclick="excluirOrdensFuturasPlanoMaster('${p.id}')" class="px-3 py-1.5 rounded-xl bg-amber-50 hover:bg-amber-100 border border-amber-200 text-amber-800 text-[11px] font-extrabold"><svg class="w-3.5 h-3.5 inline-block shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"/></svg>  Limpar Pend. (${pendCnt})</button>
+                                <button type="button" onclick="excluirPlanoMasterComPendentes('${p.id}')" class="px-3 py-1.5 rounded-xl bg-rose-600 hover:bg-rose-700 text-white text-[11px] font-extrabold"><svg class="w-3.5 h-3.5 inline-block shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/></svg>  Excluir Plano</button>
                             </div>
                         </div>`;
                 }).join('');
@@ -9790,12 +9896,12 @@
                                 </div>
                             </label>
                             <div class="flex flex-wrap items-center gap-1.5 shrink-0">
-                                <button type="button" onclick="abrirModalEdicaoMasterOrdem('${o.id}')" class="px-3 py-1.5 rounded-xl bg-rose-600 hover:bg-rose-700 text-white text-[11px] font-extrabold">✏️ Editar Master</button>
+                                <button type="button" onclick="abrirModalEdicaoMasterOrdem('${o.id}')" class="px-3 py-1.5 rounded-xl bg-rose-600 hover:bg-rose-700 text-white text-[11px] font-extrabold"><svg class="w-3.5 h-3.5 inline-block shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/></svg>  Editar Master</button>
                                 ${podeReabrir
-                                    ? `<button type="button" onclick="reabrirOrdemMaster('${o.id}')" class="px-3 py-1.5 rounded-xl bg-amber-500 hover:bg-amber-600 text-white text-[11px] font-extrabold">🔓 Reabrir</button>`
+                                    ? `<button type="button" onclick="reabrirOrdemMaster('${o.id}')" class="px-3 py-1.5 rounded-xl bg-amber-500 hover:bg-amber-600 text-white text-[11px] font-extrabold"><svg class="w-3.5 h-3.5 inline-block shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 11V7a4 4 0 118 0m-4 8v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2z"/></svg>  Reabrir</button>`
                                     : `<button type="button" onclick="concluirOrdemDiretoMaster('${o.id}')" class="px-3 py-1.5 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white text-[11px] font-extrabold">✓ Concluir</button>`
                                 }
-                                <button type="button" onclick="excluirOrdemPreventiva('${o.id}')" class="px-2.5 py-1.5 rounded-xl bg-rose-50 hover:bg-rose-100 text-rose-700 border border-rose-200 text-[11px] font-extrabold" title="Excluir ordem">🗑️</button>
+                                <button type="button" onclick="excluirOrdemPreventiva('${o.id}')" class="px-2.5 py-1.5 rounded-xl bg-rose-50 hover:bg-rose-100 text-rose-700 border border-rose-200 text-[11px] font-extrabold" title="Excluir ordem"><svg class="w-3.5 h-3.5 inline-block shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/></svg> </button>
                             </div>
                         </div>`;
                 }).join('');
@@ -10077,7 +10183,7 @@
             } catch (_) {
                 showToast('Erro ao salvar edição Master da ordem.', 'error');
             } finally {
-                if (btn) { btn.disabled = false; btn.innerText = '💾 Salvar Edição Master'; }
+                if (btn) { btn.disabled = false; btn.innerText = 'Salvar Edição Master'; }
             }
         };
 
