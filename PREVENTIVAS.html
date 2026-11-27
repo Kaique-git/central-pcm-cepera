@@ -532,7 +532,9 @@
                             <div class="flex flex-wrap items-center gap-2">
                                 <span id="sem52ContagemFiltro" class="text-[11px] font-extrabold text-slate-500 bg-slate-100 px-3 py-1.5 rounded-full">0 linha(s)</span>
                                 <button type="button" onclick="limparFiltrosSem52()" class="px-3 py-2 rounded-xl bg-white hover:bg-slate-100 text-slate-700 border border-slate-200 text-xs font-extrabold">Limpar Filtros</button>
-                                <button type="button" onclick="imprimirCronograma52SemanasA4()" class="btn-touch bg-slate-900 hover:bg-slate-800 text-white text-xs py-2 px-3.5">Imprimir A4</button>
+                                <button type="button" onclick="abrirModalImprimirCronograma52()" class="btn-touch bg-slate-900 hover:bg-slate-800 text-white text-xs py-2 px-3.5 shadow-sm">
+                                    <span>🖨️ Imprimir Relatório / A4</span>
+                                </button>
                             </div>
                         </div>
 
@@ -597,8 +599,42 @@
                                     <option value="Quadrienal">Quadrienal (48 meses)</option>
                                     <option value="Quinquenal">Quinquenal (60 meses)</option>
                                 </select>
+                                <select id="sem52FiltroPeriodoMes" onchange="onChangeSem52PeriodoMes()" class="input-clean py-1.5 text-xs font-extrabold text-indigo-900 border-indigo-200 bg-indigo-50/70 w-auto" title="Filtrar o calendário de 52 semanas por Mês, Trimestre, Semestre ou Faixa de Semanas">
+                                    <option value="">Período: Ano Completo (S1–S52)</option>
+                                    <option value="MES_ATUAL">Mês Atual</option>
+                                    <optgroup label="Meses do Ano" id="sem52OptGroupMeses">
+                                        <option value="MES_1">Janeiro</option>
+                                        <option value="MES_2">Fevereiro</option>
+                                        <option value="MES_3">Março</option>
+                                        <option value="MES_4">Abril</option>
+                                        <option value="MES_5">Maio</option>
+                                        <option value="MES_6">Junho</option>
+                                        <option value="MES_7">Julho</option>
+                                        <option value="MES_8">Agosto</option>
+                                        <option value="MES_9">Setembro</option>
+                                        <option value="MES_10">Outubro</option>
+                                        <option value="MES_11">Novembro</option>
+                                        <option value="MES_12">Dezembro</option>
+                                    </optgroup>
+                                    <optgroup label="Trimestres &amp; Semestres">
+                                        <option value="TRIM_1">1º Trimestre (Jan–Mar)</option>
+                                        <option value="TRIM_2">2º Trimestre (Abr–Jun)</option>
+                                        <option value="TRIM_3">3º Trimestre (Jul–Set)</option>
+                                        <option value="TRIM_4">4º Trimestre (Out–Dez)</option>
+                                        <option value="SEM_1">1º Semestre (Jan–Jun)</option>
+                                        <option value="SEM_2">2º Semestre (Jul–Dez)</option>
+                                    </optgroup>
+                                    <option value="CUSTOM">Faixa de Semanas (Personalizada)</option>
+                                </select>
+                                <div id="sem52CustomWeekRangeWrap" hidden class="hidden items-center gap-1 bg-white px-2 py-1 rounded-xl border border-indigo-200 text-xs font-extrabold text-indigo-900">
+                                    <span>De</span>
+                                    <select id="sem52SemIni" onchange="renderCalendario52Semanas()" class="bg-transparent font-extrabold focus:outline-none"></select>
+                                    <span>até</span>
+                                    <select id="sem52SemFim" onchange="renderCalendario52Semanas()" class="bg-transparent font-extrabold focus:outline-none"></select>
+                                </div>
                                 <select id="sem52FiltroAgenda" onchange="renderCalendario52Semanas()" class="input-clean py-1.5 text-xs font-extrabold text-sky-800 border-sky-200 bg-sky-50/60 w-auto">
-                                    <option value="">Exibição: Todos no Ano</option>
+                                    <option value="">Exibição: Todos os Planos</option>
+                                    <option value="com_agenda_periodo">Somente c/ Agendamento no Período</option>
                                     <option value="com_agenda">Somente c/ Agendamento no Ano</option>
                                     <option value="com_pendentes">Somente Atrasadas / Pendentes</option>
                                     <option value="sem_agenda">Sem Agendamento no Ano</option>
@@ -611,6 +647,7 @@
 
                     <div class="flex flex-wrap items-center justify-between gap-2 px-1">
                         <div class="flex flex-wrap items-center gap-3 text-[11px] font-bold text-slate-600">
+                            <span class="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full bg-emerald-100 text-emerald-800 border border-emerald-300 text-[10px] font-extrabold">✓ Plano em Verde = Possui Preventiva Agendada</span>
                             <span class="inline-flex items-center gap-1.5"><span class="w-2.5 h-2.5 rounded-full bg-rose-600"></span>Atrasada</span>
                             <span class="inline-flex items-center gap-1.5"><span class="w-2.5 h-2.5 rounded-full bg-sky-600"></span>Programada (mostra dias da semana)</span>
                             <span class="inline-flex items-center gap-1.5"><span class="w-2.5 h-2.5 rounded-full bg-amber-500"></span>Em Andamento</span>
@@ -1824,6 +1861,122 @@
     </div>
 
     <!-- ==================== MODAL ADMIN MASTER (SENHA OCULTA) ==================== -->
+    <!-- MODAL FILTRAR & IMPRIMIR RELATÓRIO DO CRONOGRAMA 52 SEMANAS (POR MÊS, PERÍODO, MÁQUINA OU GERAL) -->
+    <div id="modalImprimirCronograma52" role="dialog" aria-modal="true" hidden class="hidden fixed inset-0 bg-slate-900/70 backdrop-blur-sm z-[77] flex items-end sm:items-center justify-center p-0 sm:p-4">
+        <div class="bg-white w-full sm:max-w-2xl sm:rounded-3xl rounded-t-3xl max-h-[92vh] flex flex-col shadow-2xl overflow-hidden border border-slate-200">
+            <div class="p-4 sm:px-6 border-b border-slate-200 bg-slate-50 flex items-center justify-between gap-3 shrink-0">
+                <div>
+                    <span class="text-[10px] font-extrabold uppercase tracking-widest text-indigo-600">Relatório Executivo de Preventivas • Calendário 52 Semanas</span>
+                    <h2 class="text-base sm:text-lg font-extrabold text-slate-900">Filtrar &amp; Imprimir Relatório de Planos Agendados</h2>
+                </div>
+                <button type="button" onclick="fecharModal('modalImprimirCronograma52')" class="w-8 h-8 rounded-full bg-white border border-slate-200 text-slate-600 font-bold flex items-center justify-center">✕</button>
+            </div>
+            <div class="p-5 sm:p-6 overflow-y-auto space-y-4 text-xs">
+                <div class="p-3.5 rounded-2xl bg-indigo-50/70 border border-indigo-200 text-indigo-950 font-semibold leading-relaxed">
+                    Selecione abaixo o <strong>Mês / Período</strong> (ex.: Janeiro S1–S5, Trimestre, Semestre ou Ano Completo) e filtre por <strong>Máquina / Linha específica</strong> ou <strong>Geral</strong> para gerar o relatório A4 pronto para impressão ou PDF.
+                </div>
+
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                    <div>
+                        <label class="block text-[10px] font-extrabold uppercase text-slate-500 mb-1">Ano ISO</label>
+                        <select id="imp52Ano" onchange="onChangeImp52Filtros('ano')" class="input-clean py-2 text-xs font-extrabold"></select>
+                    </div>
+                    <div>
+                        <label class="block text-[10px] font-extrabold uppercase text-slate-500 mb-1">Mês / Período (Semanas)</label>
+                        <select id="imp52Periodo" onchange="onChangeImp52Filtros('periodo')" class="input-clean py-2 text-xs font-extrabold text-indigo-900 border-indigo-200 bg-indigo-50/50">
+                            <option value="">Ano Completo — Geral (Todas as Semanas)</option>
+                            <option value="MES_ATUAL">Mês Atual</option>
+                            <optgroup label="Meses do Ano" id="imp52OptGroupMeses">
+                                <option value="MES_1">Janeiro</option>
+                                <option value="MES_2">Fevereiro</option>
+                                <option value="MES_3">Março</option>
+                                <option value="MES_4">Abril</option>
+                                <option value="MES_5">Maio</option>
+                                <option value="MES_6">Junho</option>
+                                <option value="MES_7">Julho</option>
+                                <option value="MES_8">Agosto</option>
+                                <option value="MES_9">Setembro</option>
+                                <option value="MES_10">Outubro</option>
+                                <option value="MES_11">Novembro</option>
+                                <option value="MES_12">Dezembro</option>
+                            </optgroup>
+                            <optgroup label="Trimestres &amp; Semestres">
+                                <option value="TRIM_1">1º Trimestre (Jan–Mar)</option>
+                                <option value="TRIM_2">2º Trimestre (Abr–Jun)</option>
+                                <option value="TRIM_3">3º Trimestre (Jul–Set)</option>
+                                <option value="TRIM_4">4º Trimestre (Out–Dez)</option>
+                                <option value="SEM_1">1º Semestre (Jan–Jun)</option>
+                                <option value="SEM_2">2º Semestre (Jul–Dez)</option>
+                            </optgroup>
+                            <option value="CUSTOM">Faixa de Semanas Personalizada</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div id="imp52CustomRangeWrap" hidden class="hidden grid grid-cols-2 gap-3 p-3 rounded-2xl bg-slate-50 border border-slate-200">
+                    <div>
+                        <label class="block text-[10px] font-extrabold uppercase text-slate-500 mb-1">Semana Inicial</label>
+                        <select id="imp52SemIni" onchange="onChangeImp52Filtros()" class="input-clean py-1.5 text-xs font-extrabold"></select>
+                    </div>
+                    <div>
+                        <label class="block text-[10px] font-extrabold uppercase text-slate-500 mb-1">Semana Final</label>
+                        <select id="imp52SemFim" onchange="onChangeImp52Filtros()" class="input-clean py-1.5 text-xs font-extrabold"></select>
+                    </div>
+                </div>
+
+                <div class="grid grid-cols-1 sm:grid-cols-3 gap-3">
+                    <div>
+                        <label class="block text-[10px] font-extrabold uppercase text-slate-500 mb-1">Setor / Área</label>
+                        <select id="imp52Setor" onchange="onChangeImp52Filtros('setor')" class="input-clean py-2 text-xs font-bold">
+                            <option value="">Geral (Todos os Setores)</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label class="block text-[10px] font-extrabold uppercase text-slate-500 mb-1">Máquina / Linha</label>
+                        <select id="imp52Maquina" onchange="onChangeImp52Filtros('maquina')" class="input-clean py-2 text-xs font-bold">
+                            <option value="">Geral (Todas as Máquinas)</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label class="block text-[10px] font-extrabold uppercase text-slate-500 mb-1">Equipamento</label>
+                        <select id="imp52Equipamento" onchange="onChangeImp52Filtros()" class="input-clean py-2 text-xs font-bold">
+                            <option value="">Geral (Todos os Equipamentos)</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                    <div>
+                        <label class="block text-[10px] font-extrabold uppercase text-slate-500 mb-1">Disciplina / Equipe</label>
+                        <select id="imp52Disc" onchange="onChangeImp52Filtros()" class="input-clean py-2 text-xs font-bold">
+                            <option value="">Geral (Todas as Disciplinas)</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label class="block text-[10px] font-extrabold uppercase text-slate-500 mb-1">Escopo de Agendamentos</label>
+                        <select id="imp52Escopo" onchange="onChangeImp52Filtros()" class="input-clean py-2 text-xs font-bold">
+                            <option value="agendados">Todos os Planos Agendados no Período</option>
+                            <option value="pendentes">Somente Programadas / Pendentes / Atrasadas</option>
+                            <option value="concluidos">Somente Concluídas no Período</option>
+                            <option value="todos_planos">Incluir Também Planos Sem Agendamento</option>
+                        </select>
+                    </div>
+                </div>
+
+                <label class="flex items-center gap-2.5 p-3 rounded-2xl bg-slate-50 border border-slate-200 cursor-pointer">
+                    <input type="checkbox" id="imp52IncluirMatriz" checked onchange="onChangeImp52Filtros()" class="w-4 h-4 accent-indigo-600">
+                    <span class="font-extrabold text-slate-800">Incluir Matriz Visual das Semanas do Período (Plano × Semanas) no topo do relatório A4</span>
+                </label>
+
+                <div id="imp52ResumoContagem" class="p-3.5 rounded-2xl bg-emerald-50 border border-emerald-200 text-emerald-950 font-extrabold flex items-center justify-between gap-2"></div>
+            </div>
+            <div class="p-4 sm:px-6 border-t border-slate-200 bg-slate-50 flex flex-wrap items-center justify-end gap-2 shrink-0">
+                <button type="button" onclick="fecharModal('modalImprimirCronograma52')" class="btn-touch bg-white border border-slate-300 text-slate-700 text-xs py-2 px-4">Cancelar</button>
+                <button type="button" onclick="executarImpressaoCronograma52Filtrado()" class="btn-touch bg-slate-900 hover:bg-slate-800 text-white text-xs py-2 px-5 shadow-md">🖨️ Gerar &amp; Imprimir Relatório A4</button>
+            </div>
+        </div>
+    </div>
+
     <!-- MODAL PRÉVIA EXECUTIVA DE E-MAIL (CENTRAL DE NOTIFICAÇÕES MASTER — PREVENTIVAS) -->
     <div id="modalPreviewNotifPrev" role="dialog" aria-modal="true" hidden class="hidden fixed inset-0 bg-slate-900/70 backdrop-blur-sm z-[78] flex items-end sm:items-center justify-center p-0 sm:p-4">
         <div class="bg-white w-full sm:max-w-3xl sm:rounded-3xl rounded-t-3xl max-h-[92vh] flex flex-col shadow-2xl overflow-hidden border border-slate-200">
@@ -2873,7 +3026,82 @@
         }
 
         function getPlanosPreventiva() { return allAgendaDocs.filter(isPlanoDoc); }
-        function getOrdensPreventiva() { return allAgendaDocs.filter(isPreventivaOrdemDoc); }
+
+        function mesclarChecklistVivoOrdem(checklistPlano, checklistExecOrdem, statusOrdem) {
+            const baseExec = Array.isArray(checklistExecOrdem) ? checklistExecOrdem : [];
+            const basePlano = Array.isArray(checklistPlano) ? checklistPlano : [];
+            if (!basePlano.length) return baseExec;
+            if (statusOrdem === 'concluido') return baseExec.length ? baseExec : basePlano.map(it => ({ ...it, status: 'ok', obs: '' }));
+            const mapExecById = new Map();
+            const mapExecByTask = new Map();
+            baseExec.forEach(it => {
+                if (!it) return;
+                if (it.id) mapExecById.set(String(it.id), it);
+                const tk = normKey(it.tarefa || '');
+                if (tk) mapExecByTask.set(tk, it);
+            });
+            return basePlano.map(it => {
+                const prev = (it.id && mapExecById.get(String(it.id))) || mapExecByTask.get(normKey(it.tarefa || '')) || null;
+                return {
+                    id: it.id || prev?.id || '',
+                    tarefa: it.tarefa || prev?.tarefa || '',
+                    criterio: it.criterio ?? prev?.criterio ?? '',
+                    peca: it.peca ?? prev?.peca ?? '',
+                    critico: Boolean(it.critico ?? prev?.critico),
+                    status: prev?.status || '',
+                    obs: prev?.obs || ''
+                };
+            });
+        }
+
+        function hidratarOrdemComPlanoVivo(o, mapById, mapByCod) {
+            if (!o) return o;
+            const p = (o.planoId && mapById.get(o.planoId)) ||
+                      (o.planoCodigo && mapByCod.get(normKey(o.planoCodigo))) ||
+                      null;
+            if (!p) return o;
+            const naoConcluida = o.status !== 'concluido' && o.status !== 'cancelado';
+            const prioViva = normalizarPrioridadePlano(p.prioridade || p.criticidade) || o.prioridade || 'P3';
+            return {
+                ...o,
+                planoId: p.id,
+                planoCodigo: p.codigo || o.planoCodigo || '',
+                planoRevisao: p.revisao || o.planoRevisao || 'Rev. 01',
+                setor: p.setor || o.setor || '',
+                maquina: p.maquina || o.maquina || '',
+                equipamento: p.equipamento || o.equipamento || '',
+                conjunto: (p.conjunto !== undefined && p.conjunto !== '') ? p.conjunto : (o.conjunto || ''),
+                subconjunto: (p.subconjunto !== undefined && p.subconjunto !== '') ? p.subconjunto : (o.subconjunto || ''),
+                tag: p.tag || o.tag || '',
+                ativoId: p.ativoId || o.ativoId || '',
+                periodicidade: p.periodicidade || o.periodicidade || 'Mensal',
+                modoAgendamento: p.modoAgendamento || o.modoAgendamento || 'fixo',
+                prioridade: prioViva,
+                criticidade: prioViva,
+                criticidadeLinha: p.criticidadeLinha || o.criticidadeLinha || '',
+                disciplina: p.disciplina || o.disciplina || o.equipe || 'Mecânica',
+                documentosVinculados: Array.isArray(p.documentosVinculados) && p.documentosVinculados.length ? p.documentosVinculados : (o.documentosVinculados || []),
+                duracaoEstimadaMin: naoConcluida ? (Number(p.duracaoEstimadaMin) || Number(o.duracaoEstimadaMin) || 60) : (Number(o.duracaoEstimadaMin) || Number(p.duracaoEstimadaMin) || 60),
+                epis: naoConcluida ? (p.epis ?? o.epis ?? '') : (o.epis ?? p.epis ?? ''),
+                pecas: naoConcluida ? (p.pecas ?? o.pecas ?? '') : (o.pecas ?? p.pecas ?? ''),
+                anexoReferencia: naoConcluida ? (p.anexoReferencia ?? o.anexoReferencia ?? null) : (o.anexoReferencia ?? p.anexoReferencia ?? null),
+                checklistExec: naoConcluida ? mesclarChecklistVivoOrdem(p.checklist, o.checklistExec, o.status) : (o.checklistExec || [])
+            };
+        }
+
+        function getOrdensPreventiva() {
+            const planos = allAgendaDocs.filter(isPlanoDoc);
+            const mapById = new Map();
+            const mapByCod = new Map();
+            planos.forEach(p => {
+                mapById.set(p.id, p);
+                const ck = normKey(p.codigo || '');
+                if (ck) mapByCod.set(ck, p);
+            });
+            return allAgendaDocs
+                .filter(isPreventivaOrdemDoc)
+                .map(o => hidratarOrdemComPlanoVivo(o, mapById, mapByCod));
+        }
         function getOutrosEventosAgenda() { return allAgendaDocs.filter(isOutroEventoAgendaDoc); }
 
         function getStatusEfetivo(ordem, hojeStr = getHojeStr()) {
@@ -3362,10 +3590,12 @@
         };
 
         window.limparFiltrosSem52 = () => {
-            ['sem52Busca', 'sem52FiltroSetor', 'sem52FiltroMaquina', 'sem52FiltroEquipamento', 'sem52FiltroConjunto', 'sem52FiltroCrit', 'sem52FiltroLinhaCrit', 'sem52FiltroDisc', 'sem52FiltroPer', 'sem52FiltroAgenda'].forEach(id => {
+            ['sem52Busca', 'sem52FiltroSetor', 'sem52FiltroMaquina', 'sem52FiltroEquipamento', 'sem52FiltroConjunto', 'sem52FiltroCrit', 'sem52FiltroLinhaCrit', 'sem52FiltroDisc', 'sem52FiltroPer', 'sem52FiltroPeriodoMes', 'sem52FiltroAgenda'].forEach(id => {
                 const el = document.getElementById(id);
                 if (el) el.value = '';
             });
+            const wrapCustom = document.getElementById('sem52CustomWeekRangeWrap');
+            if (wrapCustom) { wrapCustom.hidden = true; wrapCustom.classList.add('hidden'); wrapCustom.classList.remove('inline-flex'); }
             atualizarOpcoesArvoreSem52();
             renderCalendario52Semanas();
         };
@@ -3942,6 +4172,95 @@
             abrirResumoSemana52(cur.isoYear, cur.week);
         };
 
+        const NOMES_MESES_PT = ['Janeiro', 'Fevereiro', 'Março', 'Abril', 'Maio', 'Junho', 'Julho', 'Agosto', 'Setembro', 'Outubro', 'Novembro', 'Dezembro'];
+
+        function obterSemanasDoPeriodo52(ano, codigoPeriodo = '', semIniCustom = 1, semFimCustom = null) {
+            const totalWeeks = getIsoWeeksInYear(ano);
+            const todas = Array.from({ length: totalWeeks }, (_, i) => i + 1);
+            if (!codigoPeriodo) {
+                return { weeks: todas, label: `Ano Completo (S1 a S${totalWeeks})`, isFiltered: false };
+            }
+            if (codigoPeriodo === 'CUSTOM') {
+                const ini = Math.max(1, Math.min(totalWeeks, Number(semIniCustom) || 1));
+                const fim = Math.max(ini, Math.min(totalWeeks, Number(semFimCustom) || totalWeeks));
+                const wks = [];
+                for (let w = ini; w <= fim; w++) wks.push(w);
+                return { weeks: wks, label: `Faixa S${ini} a S${fim}`, isFiltered: !(ini === 1 && fim === totalWeeks) };
+            }
+            let mIni = 1, mFim = 12, nomeBase = '';
+            if (codigoPeriodo === 'MES_ATUAL') {
+                const mAtual = new Date().getMonth() + 1;
+                mIni = mAtual; mFim = mAtual;
+                nomeBase = `${NOMES_MESES_PT[mAtual - 1]} (Mês Atual)`;
+            } else if (codigoPeriodo.startsWith('MES_')) {
+                const m = Math.max(1, Math.min(12, Number(codigoPeriodo.slice(4)) || 1));
+                mIni = m; mFim = m;
+                nomeBase = NOMES_MESES_PT[m - 1];
+            } else if (codigoPeriodo.startsWith('TRIM_')) {
+                const t = Math.max(1, Math.min(4, Number(codigoPeriodo.slice(5)) || 1));
+                mIni = (t - 1) * 3 + 1;
+                mFim = mIni + 2;
+                nomeBase = `${t}º Trimestre (${NOMES_MESES_PT[mIni - 1].slice(0, 3)}–${NOMES_MESES_PT[mFim - 1].slice(0, 3)})`;
+            } else if (codigoPeriodo.startsWith('SEM_')) {
+                const s = Math.max(1, Math.min(2, Number(codigoPeriodo.slice(4)) || 1));
+                mIni = s === 1 ? 1 : 7;
+                mFim = s === 1 ? 6 : 12;
+                nomeBase = `${s}º Semestre (${NOMES_MESES_PT[mIni - 1].slice(0, 3)}–${NOMES_MESES_PT[mFim - 1].slice(0, 3)})`;
+            }
+
+            const weeks = [];
+            for (let w = 1; w <= totalWeeks; w++) {
+                const dts = getDatesOfIsoWeek(ano, w);
+                const tocaPeriodo = dts.some(d => {
+                    const y = Number(d.iso.slice(0, 4));
+                    const m = Number(d.iso.slice(5, 7));
+                    return y === ano && m >= mIni && m <= mFim;
+                });
+                if (tocaPeriodo) weeks.push(w);
+            }
+            const wksFinal = weeks.length ? weeks : todas;
+            const rangeLbl = wksFinal.length ? `S${wksFinal[0]}–S${wksFinal[wksFinal.length - 1]}` : '';
+            return { weeks: wksFinal, label: `${nomeBase} (${rangeLbl})`, isFiltered: true };
+        }
+
+        function atualizarRotulosMesesSelect52(ano, optGroupId = 'sem52OptGroupMeses') {
+            const grp = document.getElementById(optGroupId);
+            if (!grp) return;
+            Array.from(grp.querySelectorAll('option')).forEach(opt => {
+                if (!opt.value.startsWith('MES_')) return;
+                const m = Number(opt.value.slice(4));
+                const info = obterSemanasDoPeriodo52(ano, opt.value);
+                opt.textContent = info.label;
+            });
+        }
+
+        function popularSelectsFaixaSemanas52(ano, iniId, fimId) {
+            const totalWeeks = getIsoWeeksInYear(ano);
+            const sIni = document.getElementById(iniId);
+            const sFim = document.getElementById(fimId);
+            if (!sIni || !sFim) return;
+            const prevIni = Number(sIni.value) || 1;
+            const prevFim = Number(sFim.value) || totalWeeks;
+            const opts = Array.from({ length: totalWeeks }, (_, i) => `<option value="${i + 1}">S${i + 1}</option>`).join('');
+            if (sIni.options.length !== totalWeeks) sIni.innerHTML = opts;
+            if (sFim.options.length !== totalWeeks) sFim.innerHTML = opts;
+            sIni.value = String(Math.max(1, Math.min(totalWeeks, prevIni)));
+            sFim.value = String(Math.max(Number(sIni.value), Math.min(totalWeeks, prevFim)));
+        }
+
+        window.onChangeSem52PeriodoMes = () => {
+            const val = document.getElementById('sem52FiltroPeriodoMes')?.value || '';
+            const wrap = document.getElementById('sem52CustomWeekRangeWrap');
+            if (wrap) {
+                const isCustom = val === 'CUSTOM';
+                wrap.hidden = !isCustom;
+                wrap.classList.toggle('hidden', !isCustom);
+                wrap.classList.toggle('inline-flex', isCustom);
+                if (isCustom) popularSelectsFaixaSemanas52(sem52Ano, 'sem52SemIni', 'sem52SemFim');
+            }
+            renderCalendario52Semanas();
+        };
+
         window.renderCalendario52Semanas = () => {
             const tbl = document.getElementById('sem52MatrixTable');
             if (!tbl) return;
@@ -3953,6 +4272,9 @@
             const curIso = getIsoWeekInfo(new Date());
             const hojeStr = getHojeStr();
 
+            atualizarRotulosMesesSelect52(ano, 'sem52OptGroupMeses');
+            popularSelectsFaixaSemanas52(ano, 'sem52SemIni', 'sem52SemFim');
+
             const busca = normKey(document.getElementById('sem52Busca')?.value || '');
             const fSetor = document.getElementById('sem52FiltroSetor')?.value || '';
             const fMaq = document.getElementById('sem52FiltroMaquina')?.value || '';
@@ -3962,6 +4284,12 @@
             const fLinhaCrit = document.getElementById('sem52FiltroLinhaCrit')?.value || '';
             const fDisc = document.getElementById('sem52FiltroDisc')?.value || '';
             const fPer = document.getElementById('sem52FiltroPer')?.value || '';
+            const fPeriodoMes = document.getElementById('sem52FiltroPeriodoMes')?.value || '';
+            const fSemIni = Number(document.getElementById('sem52SemIni')?.value || 1);
+            const fSemFim = Number(document.getElementById('sem52SemFim')?.value || totalWeeks);
+            const periodoInfo = obterSemanasDoPeriodo52(ano, fPeriodoMes, fSemIni, fSemFim);
+            const semanasVisiveis = periodoInfo.weeks;
+            const semanasVisiveisSet = new Set(semanasVisiveis);
             const fAgenda = document.getElementById('sem52FiltroAgenda')?.value || '';
 
             const planosTodos = getPlanosPreventiva().sort((a, b) => (a.codigo || '').localeCompare(b.codigo || ''));
@@ -4052,7 +4380,10 @@
 
             const baseRowKeys = new Set(baseRows.map(r => r.rowKey));
             const rowHasOrder = new Set();
+            const rowHasOrderPeriodo = new Set();
             const rowHasPend = new Set();
+            const rowOrderCountMap = new Map();
+            const rowWeeksMap = new Map();
 
             ordensAll.forEach(o => {
                 const matchId = getPlanoMatchIdParaOrdem(o, planosTodos);
@@ -4061,18 +4392,27 @@
                 const datasInYear = getDatasOrdem(o).filter(d => getIsoWeekInfo(d).isoYear === ano);
                 if (!datasInYear.length) return;
                 rowHasOrder.add(rKey);
+                rowOrderCountMap.set(rKey, (rowOrderCountMap.get(rKey) || 0) + 1);
+                if (!rowWeeksMap.has(rKey)) rowWeeksMap.set(rKey, new Set());
+                const wSet = rowWeeksMap.get(rKey);
+                datasInYear.forEach(d => {
+                    const wk = getIsoWeekInfo(d).week;
+                    wSet.add(wk);
+                    if (semanasVisiveisSet.has(wk)) rowHasOrderPeriodo.add(rKey);
+                });
                 const st = getStatusEfetivo(o, hojeStr);
                 if (st === 'atrasada' || st === 'pendente' || st === 'andamento') rowHasPend.add(rKey);
             });
 
             const rows = baseRows.filter(r => {
+                if (fAgenda === 'com_agenda_periodo') return rowHasOrderPeriodo.has(r.rowKey);
                 if (fAgenda === 'com_agenda') return rowHasOrder.has(r.rowKey);
                 if (fAgenda === 'sem_agenda') return !rowHasOrder.has(r.rowKey);
                 if (fAgenda === 'com_pendentes') return rowHasPend.has(r.rowKey);
                 return true;
             });
 
-            const temFiltroAtivo = Boolean(busca || fSetor || fMaq || fEquip || fConj || fCrit || fLinhaCrit || fDisc || fPer || fAgenda);
+            const temFiltroAtivo = Boolean(busca || fSetor || fMaq || fEquip || fConj || fCrit || fLinhaCrit || fDisc || fPer || fPeriodoMes || fAgenda);
             const cntBadge = document.getElementById('sem52ContagemFiltro');
             if (cntBadge) {
                 cntBadge.innerText = temFiltroAtivo ? `Exibindo ${rows.length} de ${totalGeral} linha(s)` : `${rows.length} linha(s)`;
@@ -4128,8 +4468,9 @@
                 ].map(c => `<div class="p-3 rounded-2xl border bg-white ${c.cls}"><div class="text-[10px] font-extrabold uppercase text-slate-500">${c.k}</div><div class="text-xl font-extrabold mt-0.5 ${c.vc}">${c.v}</div><div class="text-[10px] font-semibold text-slate-500 truncate">${c.sub}</div></div>`).join('');
             }
 
-            let thead = `<tr><th class="matrix-sticky-col p-3 text-left"><div class="text-[10px] font-extrabold uppercase tracking-wider text-slate-400">Plano / Equipamento</div><div class="text-xs font-extrabold text-slate-800">${rows.length} linha(s)</div></th>`;
-            for (let w = 1; w <= totalWeeks; w++) {
+            const qtdAgendadosVisiveis = rows.filter(r => rowHasOrder.has(r.rowKey)).length;
+            let thead = `<tr><th class="matrix-sticky-col p-3 text-left"><div class="text-[10px] font-extrabold uppercase tracking-wider text-slate-400">Plano / Equipamento • ${escapeHtml(periodoInfo.label)}</div><div class="text-xs font-extrabold text-slate-800">${rows.length} linha(s) • <span class="text-emerald-700">${qtdAgendadosVisiveis} c/ agenda</span></div></th>`;
+            for (const w of semanasVisiveis) {
                 const isAtual = curIso.isoYear === ano && curIso.week === w;
                 const dts = getDatesOfIsoWeek(ano, w);
                 const rng = `${dts[0].br} a ${dts[6].br}`;
@@ -4138,8 +4479,8 @@
             thead += `</tr>`;
 
             // Linha 2 do cabeçalho: QUANTIDADE DE PLANOS AGENDADOS POR SEMANA
-            thead += `<tr class="row-counts"><th class="matrix-sticky-col px-3 py-1.5 text-left text-[10px] font-extrabold uppercase tracking-wider text-slate-600">Qtd. Planos na Semana</th>`;
-            for (let w = 1; w <= totalWeeks; w++) {
+            thead += `<tr class="row-counts"><th class="matrix-sticky-col px-3 py-1.5 text-left text-[10px] font-extrabold uppercase tracking-wider text-slate-600">Qtd. Planos na Semana (${semanasVisiveis.length} sem.)</th>`;
+            for (const w of semanasVisiveis) {
                 const cnt = weekCounts[w];
                 const stW = weekStatusScore[w];
                 const pillCls = cnt === 0
@@ -4155,27 +4496,42 @@
 
             let tbody = '';
             if (!rows.length) {
-                tbody = `<tr><td colspan="${totalWeeks + 1}" class="p-10 text-center space-y-2"><div class="text-xs font-bold text-slate-400">${temFiltroAtivo ? 'Nenhum plano de preventiva encontrado com os filtros aplicados.' : 'Nenhum plano de preventiva cadastrado ainda. Crie um plano em "Planos & Checklists".'}</div>${temFiltroAtivo ? '<button type="button" onclick="limparFiltrosSem52()" class="px-3 py-1.5 rounded-xl bg-sky-600 text-white text-xs font-extrabold">Limpar Filtros</button>' : ''}</td></tr>`;
+                tbody = `<tr><td colspan="${semanasVisiveis.length + 1}" class="p-10 text-center space-y-2"><div class="text-xs font-bold text-slate-400">${temFiltroAtivo ? 'Nenhum plano de preventiva encontrado com os filtros aplicados.' : 'Nenhum plano de preventiva cadastrado ainda. Crie um plano em "Planos & Checklists".'}</div>${temFiltroAtivo ? '<button type="button" onclick="limparFiltrosSem52()" class="px-3 py-1.5 rounded-xl bg-sky-600 text-white text-xs font-extrabold">Limpar Filtros</button>' : ''}</td></tr>`;
             } else {
                 rows.forEach(r => {
                     const prioMeta = getPrioridadeMeta(r.criticidade);
                     const critLinhaCls = CRITICIDADES[r.criticidadeLinha]?.cls || 'crit-none';
+                    const qtdAgendadoPlano = rowOrderCountMap.get(r.rowKey) || 0;
+                    const semanasSetPlano = rowWeeksMap.get(r.rowKey);
+                    const semanasPlanoArr = semanasSetPlano ? [...semanasSetPlano].sort((a, b) => a - b) : [];
+                    const semanasPlanoTxt = semanasPlanoArr.map(wk => `S${wk}`).join(', ');
+                    const temAgendamento = qtdAgendadoPlano > 0;
+                    const stickyHighlightCls = temAgendamento
+                        ? 'border-l-4 !border-l-emerald-500 !bg-emerald-50/75'
+                        : '';
+                    const badgeAgendamentoHtml = temAgendamento
+                        ? `<span class="inline-flex items-center gap-0.5 px-2 py-0.5 rounded-full text-[9px] font-extrabold bg-emerald-600 text-white shadow-sm" title="Plano com ${qtdAgendadoPlano} agendamento(s) em ${ano}: ${escapeHtml(semanasPlanoTxt)}">✓ Agendado (${semanasPlanoArr.length <= 3 ? escapeHtml(semanasPlanoTxt) : qtdAgendadoPlano})</span>`
+                        : `<span class="inline-flex items-center gap-0.5 px-1.5 py-0.5 rounded-full text-[9px] font-bold bg-amber-100/80 text-amber-800 border border-amber-200" title="Ainda sem agendamento em ${ano}">○ Sem agenda</span>`;
+
                     const headRow = `
-                        <td class="matrix-sticky-col p-2.5 text-left align-top">
+                        <td class="matrix-sticky-col ${stickyHighlightCls} p-2.5 text-left align-top">
                             <div class="flex items-center justify-between gap-1 mb-0.5">
-                                <span class="font-mono text-[10px] font-extrabold ${r.isPlano ? 'text-sky-700 bg-sky-50 border-sky-200' : 'text-indigo-700 bg-indigo-50 border-indigo-200'} px-1.5 py-0.5 rounded border">${escapeHtml(r.codigo)}</span>
+                                <div class="flex items-center gap-1 min-w-0">
+                                    <span class="font-mono text-[10px] font-extrabold ${temAgendamento ? 'text-emerald-900 bg-emerald-100 border-emerald-300' : (r.isPlano ? 'text-sky-700 bg-sky-50 border-sky-200' : 'text-indigo-700 bg-indigo-50 border-indigo-200')} px-1.5 py-0.5 rounded border">${escapeHtml(r.codigo)}</span>
+                                    ${badgeAgendamentoHtml}
+                                </div>
                                 <div class="flex items-center gap-1 shrink-0">
                                     ${r.criticidade ? `<span class="px-1.5 py-0.5 rounded-full text-[9px] font-extrabold ${prioMeta.cls}" title="Prioridade do Plano: ${escapeHtml(prioMeta.full)}">${escapeHtml(prioMeta.label)}</span>` : ''}
                                     ${r.criticidadeLinha ? `<span class="px-1.5 py-0.5 rounded-full text-[9px] font-extrabold ${critLinhaCls}" title="Criticidade da Linha (${r.criticidadeLinhaExp ? 'definida na Árvore' : 'inferida'})">L-${r.criticidadeLinha}</span>` : ''}
                                     <span class="px-1.5 py-0.5 rounded bg-slate-100 text-slate-600 text-[9px] font-bold">${escapeHtml(r.periodicidade)}</span>
                                 </div>
                             </div>
-                            <div class="text-[11px] font-extrabold text-slate-900 truncate" title="${escapeHtml(r.titulo)}">${escapeHtml(r.titulo)}</div>
-                            <div class="text-[10px] font-semibold text-slate-500 truncate" title="${escapeHtml(r.subtitulo)}">${escapeHtml(r.subtitulo || r.disciplina)}</div>
+                            <div class="text-[11px] font-extrabold ${temAgendamento ? 'text-emerald-950' : 'text-slate-900'} truncate" title="${escapeHtml(r.titulo)}">${escapeHtml(r.titulo)}</div>
+                            <div class="text-[10px] font-semibold ${temAgendamento ? 'text-emerald-800' : 'text-slate-500'} truncate" title="${escapeHtml(r.subtitulo)}">${escapeHtml(r.subtitulo || r.disciplina)}</div>
                         </td>`;
 
                     let cellsHtml = '';
-                    for (let w = 1; w <= totalWeeks; w++) {
+                    for (const w of semanasVisiveis) {
                         const isAtual = curIso.isoYear === ano && curIso.week === w;
                         const ords = cellMap.get(`${r.rowKey}__W${w}`) || [];
                         if (!ords.length) {
@@ -4617,7 +4973,7 @@
                             pecas: p.pecas || '',
                             equipe,
                             responsavel,
-                            descricao: descExtra || `[Plano ${p.codigo || ''}] ${[p.maquina, p.equipamento, p.subconjunto].filter(Boolean).join(' › ')}`,
+                            descricao: descExtra || `[Plano ${p.codigo || ''}] ${[p.maquina, p.equipamento, p.conjunto, p.subconjunto].filter(Boolean).join(' › ')}`,
                             checklistExec,
                             fotos: [],
                             reprogramacoes: [],
@@ -4698,56 +5054,216 @@
             abrirModalSemana52('', resumoSem52Atual.semana, '', resumoSem52Atual.ano);
         };
 
-        window.imprimirCronograma52SemanasA4 = () => {
-            const ano = sem52Ano;
-            const totalWeeks = getIsoWeeksInYear(ano);
+        function coletarDadosImpressaoCronograma52() {
+            const ano = Number(document.getElementById('imp52Ano')?.value || sem52Ano);
+            const per = document.getElementById('imp52Periodo')?.value ?? (document.getElementById('sem52FiltroPeriodoMes')?.value || '');
+            const semIni = Number(document.getElementById('imp52SemIni')?.value || document.getElementById('sem52SemIni')?.value || 1);
+            const semFim = Number(document.getElementById('imp52SemFim')?.value || document.getElementById('sem52SemFim')?.value || getIsoWeeksInYear(ano));
+            const fSetor = document.getElementById('imp52Setor')?.value ?? (document.getElementById('sem52FiltroSetor')?.value || '');
+            const fMaq = document.getElementById('imp52Maquina')?.value ?? (document.getElementById('sem52FiltroMaquina')?.value || '');
+            const fEquip = document.getElementById('imp52Equipamento')?.value ?? (document.getElementById('sem52FiltroEquipamento')?.value || '');
+            const fDisc = document.getElementById('imp52Disc')?.value ?? (document.getElementById('sem52FiltroDisc')?.value || '');
+            const escopo = document.getElementById('imp52Escopo')?.value || 'agendados';
+            const incluirMatriz = document.getElementById('imp52IncluirMatriz') ? document.getElementById('imp52IncluirMatriz').checked : true;
+
+            const periodoInfo = obterSemanasDoPeriodo52(ano, per, semIni, semFim);
+            const weeksSet = new Set(periodoInfo.weeks);
             const hojeStr = getHojeStr();
-            const busca = normKey(document.getElementById('sem52Busca')?.value || '');
-            const fSetor = document.getElementById('sem52FiltroSetor')?.value || '';
-            const fMaq = document.getElementById('sem52FiltroMaquina')?.value || '';
-            const fEquip = document.getElementById('sem52FiltroEquipamento')?.value || '';
-            const fConj = document.getElementById('sem52FiltroConjunto')?.value || '';
-            const fCrit = document.getElementById('sem52FiltroCrit')?.value || '';
-            const fLinhaCrit = document.getElementById('sem52FiltroLinhaCrit')?.value || '';
-            const fDisc = document.getElementById('sem52FiltroDisc')?.value || '';
-            const fPer = document.getElementById('sem52FiltroPer')?.value || '';
+            const planosTodos = getPlanosPreventiva().sort((a, b) => (a.codigo || '').localeCompare(b.codigo || ''));
 
-            const rowsHtml = getOrdensPreventiva()
-                .filter(o => {
-                    if (o.status === 'cancelado') return false;
-                    if (!getDatasOrdem(o).some(d => getIsoWeekInfo(d).isoYear === ano)) return false;
-                    const prio = getPrioridadePlanoDoc(o);
-                    const lCrit = getClasseLinhaAtivo(o.setor, o.maquina).classe || normalizarCriticidade(o.criticidadeLinha);
-                    if (fSetor && (o.setor || '') !== fSetor) return false;
-                    if (fMaq && (o.maquina || '') !== fMaq) return false;
-                    if (fEquip && (o.equipamento || '') !== fEquip) return false;
-                    if (fConj && !correspondeFiltroConjunto(o, fConj)) return false;
-                    if (fCrit && prio !== fCrit) return false;
-                    if (fLinhaCrit && lCrit !== fLinhaCrit) return false;
-                    if (fDisc && normKey(o.equipe) !== normKey(fDisc)) return false;
-                    if (fPer && (o.periodicidade || '') !== fPer) return false;
-                    if (busca) {
-                        const hay = normKey([o.titulo, o.planoCodigo, o.setor, o.maquina, o.equipamento, o.conjunto, o.subconjunto, o.equipe, o.responsavel].join(' '));
-                        if (!hay.includes(busca)) return false;
-                    }
-                    return true;
-                })
-                .sort((a, b) => (a.data || '').localeCompare(b.data || ''))
-                .map(o => {
-                    const wi = getIsoWeekInfo(o.data);
-                    const st = STATUS_META[getStatusEfetivo(o, hojeStr)]?.label || o.status;
-                    const prio = getPrioridadePlanoDoc(o);
-                    const prioTxt = prio ? getPrioridadeMeta(prio).label : '-';
-                    const lCrit = getClasseLinhaAtivo(o.setor, o.maquina).classe || '';
-                    return `<tr><td style="text-align:center;font-weight:800">S${wi.week}</td><td>${formatPeriodoDatasOrdemBR(o)}</td><td><strong>${escapeHtml(o.titulo)}</strong><br><small>${escapeHtml(prioTxt)}${lCrit ? ` • Linha ${lCrit}` : ''}</small></td><td>${escapeHtml([o.setor, o.maquina, o.equipamento, getConjuntoLabelItem(o)].filter(Boolean).join(' › '))}</td><td>${escapeHtml(o.responsavel || o.equipe || '-')}</td><td>${escapeHtml(st)}</td></tr>`;
-                }).join('');
+            const ordensFiltradas = getOrdensPreventiva().filter(o => {
+                if (o.status === 'cancelado') return false;
+                const datasNoPeriodo = getDatasOrdem(o).filter(d => {
+                    const wi = getIsoWeekInfo(d);
+                    return wi.isoYear === ano && weeksSet.has(wi.week);
+                });
+                if (!datasNoPeriodo.length) return false;
+                if (fSetor && (o.setor || '') !== fSetor) return false;
+                if (fMaq && (o.maquina || '') !== fMaq) return false;
+                if (fEquip && (o.equipamento || '') !== fEquip) return false;
+                if (fDisc && normKey(o.equipe || o.disciplina) !== normKey(fDisc)) return false;
+                const st = getStatusEfetivo(o, hojeStr);
+                if (escopo === 'pendentes' && st === 'concluido') return false;
+                if (escopo === 'concluidos' && st !== 'concluido') return false;
+                return true;
+            }).sort((a, b) => (a.data || '').localeCompare(b.data || ''));
 
-            const filtroResumo = [fSetor, fMaq, fEquip, fConj, fCrit ? getPrioridadeMeta(fCrit).full : '', fLinhaCrit ? `Linha Classe ${fLinhaCrit}` : '', fDisc, fPer].filter(Boolean).join(' • ');
-            const w = window.open('', '_blank');
-            if (!w) { showToast('Permita pop-ups para imprimir o cronograma 52 semanas.', 'error'); return; }
-            w.document.write(`<!DOCTYPE html><html lang="pt-BR"><head><meta charset="UTF-8"><title>Cronograma Anual 52 Semanas — ${ano}</title><style>body{font-family:Arial,sans-serif;color:#0f172a;margin:18px;font-size:11px}header{display:flex;justify-content:space-between;align-items:center;border-bottom:2px solid #0284c7;padding-bottom:8px;margin-bottom:12px}table{width:100%;border-collapse:collapse}th,td{border:1px solid #cbd5e1;padding:6px;text-align:left}th{background:#f1f5f9;font-size:10px;text-transform:uppercase}</style></head><body><header><div style="display:flex;align-items:center;gap:12px"><img src="CEPERA_LOGO.png" style="height:36px"><div><h2 style="margin:0">Cronograma Anual de Preventivas — ${ano} (${totalWeeks} Semanas ISO)</h2><div>${filtroResumo ? `Filtro: <strong>${escapeHtml(filtroResumo)}</strong>` : 'Sincronizado com Agenda PCM Cepêra'}</div></div></div><div>Emitido em ${formatDateBR(hojeStr)}</div></header><table><thead><tr><th style="width:55px;text-align:center">Sem.</th><th>Dias Programados</th><th>Plano / Preventiva</th><th>Ativo</th><th>Equipe / Resp.</th><th>Status</th></tr></thead><tbody>${rowsHtml || '<tr><td colspan="6" style="text-align:center">Sem programações no ano para o filtro selecionado.</td></tr>'}</tbody></table><script>window.onload=()=>window.print();<\/script></body></html>`);
-            w.document.close();
+            const planosComOrdemIds = new Set();
+            ordensFiltradas.forEach(o => {
+                const pid = getPlanoMatchIdParaOrdem(o, planosTodos);
+                if (pid) planosComOrdemIds.add(pid);
+            });
+
+            const planosFiltrados = planosTodos.filter(p => {
+                if (fSetor && (p.setor || '') !== fSetor) return false;
+                if (fMaq && (p.maquina || '') !== fMaq) return false;
+                if (fEquip && (p.equipamento || '') !== fEquip) return false;
+                if (fDisc && normKey(p.disciplina) !== normKey(fDisc)) return false;
+                if (escopo !== 'todos_planos' && !planosComOrdemIds.has(p.id)) return false;
+                return true;
+            });
+
+            return {
+                ano, per, periodoInfo, fSetor, fMaq, fEquip, fDisc, escopo, incluirMatriz,
+                ordensFiltradas, planosFiltrados, hojeStr
+            };
+        }
+
+        window.abrirModalImprimirCronograma52 = () => {
+            const selAno = document.getElementById('imp52Ano');
+            const ano52 = Number(document.getElementById('sem52AnoSelect')?.value || sem52Ano);
+            if (selAno) {
+                selAno.innerHTML = document.getElementById('sem52AnoSelect')?.innerHTML || `<option value="${ano52}">${ano52}</option>`;
+                selAno.value = String(ano52);
+            }
+            atualizarRotulosMesesSelect52(ano52, 'imp52OptGroupMeses');
+            popularSelectsFaixaSemanas52(ano52, 'imp52SemIni', 'imp52SemFim');
+
+            const perTela = document.getElementById('sem52FiltroPeriodoMes')?.value || '';
+            const selPer = document.getElementById('imp52Periodo');
+            if (selPer) selPer.value = perTela;
+            const sIniTela = document.getElementById('sem52SemIni')?.value || '1';
+            const sFimTela = document.getElementById('sem52SemFim')?.value || String(getIsoWeeksInYear(ano52));
+            if (document.getElementById('imp52SemIni')) document.getElementById('imp52SemIni').value = sIniTela;
+            if (document.getElementById('imp52SemFim')) document.getElementById('imp52SemFim').value = sFimTela;
+
+            const setores = getSetoresUnicos();
+            const equipes = getEquipesUnicas();
+            const selSet = document.getElementById('imp52Setor');
+            if (selSet) {
+                selSet.innerHTML = `<option value="">Geral (Todos os Setores)</option>` + setores.map(s => `<option value="${escapeHtml(s)}">${escapeHtml(s)}</option>`).join('');
+                selSet.value = document.getElementById('sem52FiltroSetor')?.value || '';
+            }
+            const selDisc = document.getElementById('imp52Disc');
+            if (selDisc) {
+                selDisc.innerHTML = `<option value="">Geral (Todas as Disciplinas)</option>` + equipes.map(e => `<option value="${escapeHtml(e)}">${escapeHtml(e)}</option>`).join('');
+                selDisc.value = document.getElementById('sem52FiltroDisc')?.value || '';
+            }
+
+            onChangeImp52Filtros('setor');
+            if (document.getElementById('imp52Maquina')) {
+                document.getElementById('imp52Maquina').value = document.getElementById('sem52FiltroMaquina')?.value || '';
+            }
+            onChangeImp52Filtros('maquina');
+            if (document.getElementById('imp52Equipamento')) {
+                document.getElementById('imp52Equipamento').value = document.getElementById('sem52FiltroEquipamento')?.value || '';
+            }
+            onChangeImp52Filtros();
+            abrirModal('modalImprimirCronograma52');
         };
+
+        window.onChangeImp52Filtros = (changed = '') => {
+            const ano = Number(document.getElementById('imp52Ano')?.value || sem52Ano);
+            if (changed === 'ano') {
+                atualizarRotulosMesesSelect52(ano, 'imp52OptGroupMeses');
+                popularSelectsFaixaSemanas52(ano, 'imp52SemIni', 'imp52SemFim');
+            }
+            const per = document.getElementById('imp52Periodo')?.value || '';
+            const wrapCustom = document.getElementById('imp52CustomRangeWrap');
+            if (wrapCustom) {
+                const isCustom = per === 'CUSTOM';
+                wrapCustom.hidden = !isCustom;
+                wrapCustom.classList.toggle('hidden', !isCustom);
+            }
+
+            const fSetor = document.getElementById('imp52Setor')?.value || '';
+            const todosCatalogo = [...assetNodes.map(n => ({ setor: n.area, maquina: n.maquina, equipamento: n.equipamento })), ...getPlanosPreventiva(), ...getOrdensPreventiva()];
+
+            if (changed === 'setor') {
+                const maqs = [...new Set(todosCatalogo.filter(x => !fSetor || x.setor === fSetor).map(x => x.maquina).filter(Boolean))].sort((a, b) => a.localeCompare(b, 'pt-BR'));
+                const selMaq = document.getElementById('imp52Maquina');
+                if (selMaq) {
+                    const prev = selMaq.value;
+                    selMaq.innerHTML = `<option value="">Geral (Todas as Máquinas)</option>` + maqs.map(m => `<option value="${escapeHtml(m)}">${escapeHtml(m)}</option>`).join('');
+                    if (maqs.includes(prev)) selMaq.value = prev;
+                }
+            }
+            const fMaq = document.getElementById('imp52Maquina')?.value || '';
+            if (changed === 'setor' || changed === 'maquina') {
+                const equips = [...new Set(todosCatalogo.filter(x => (!fSetor || x.setor === fSetor) && (!fMaq || x.maquina === fMaq)).map(x => x.equipamento).filter(Boolean))].sort((a, b) => a.localeCompare(b, 'pt-BR'));
+                const selEq = document.getElementById('imp52Equipamento');
+                if (selEq) {
+                    const prev = selEq.value;
+                    selEq.innerHTML = `<option value="">Geral (Todos os Equipamentos)</option>` + equips.map(e => `<option value="${escapeHtml(e)}">${escapeHtml(e)}</option>`).join('');
+                    if (equips.includes(prev)) selEq.value = prev;
+                }
+            }
+
+            const dados = coletarDadosImpressaoCronograma52();
+            const resBox = document.getElementById('imp52ResumoContagem');
+            if (resBox) {
+                resBox.innerHTML = `
+                    <span>📋 <strong>${dados.ordensFiltradas.length}</strong> agendamento(s) em <strong>${dados.planosFiltrados.length}</strong> plano(s)</span>
+                    <span class="px-2.5 py-0.5 rounded-full text-[10px] font-extrabold bg-emerald-600 text-white">${escapeHtml(dados.periodoInfo.label)}</span>`;
+            }
+        };
+
+        window.executarImpressaoCronograma52Filtrado = () => {
+            const d = coletarDadosImpressaoCronograma52();
+            fecharModal('modalImprimirCronograma52');
+            gerarJanelaImpressaoCronograma52A4(d);
+        };
+
+        window.imprimirCronograma52SemanasA4 = () => {
+            gerarJanelaImpressaoCronograma52A4(coletarDadosImpressaoCronograma52());
+        };
+
+        function gerarJanelaImpressaoCronograma52A4(d) {
+            const { ano, periodoInfo, fSetor, fMaq, fEquip, fDisc, incluirMatriz, ordensFiltradas, planosFiltrados, hojeStr } = d;
+            const weeks = periodoInfo.weeks;
+            const escopoMaqTxt = [
+                fSetor ? `Setor: ${fSetor}` : 'Todos os Setores',
+                fMaq ? `Máquina/Linha: ${fMaq}` : 'Todas as Máquinas (Geral)',
+                fEquip ? `Equip.: ${fEquip}` : '',
+                fDisc ? `Disciplina: ${fDisc}` : ''
+            ].filter(Boolean).join(' • ');
+
+            let matrizHtml = '';
+            if (incluirMatriz && planosFiltrados.length > 0 && weeks.length <= 28) {
+                const headWeeks = weeks.map(w => `<th style="text-align:center;min-width:28px;">S${w}</th>`).join('');
+                const bodyRows = planosFiltrados.map(p => {
+                    const ordsPl = ordensFiltradas.filter(o => o.planoId === p.id || normKey(o.planoCodigo) === normKey(p.codigo));
+                    const ativoLbl = [p.maquina, p.equipamento, getConjuntoLabelItem(p)].filter(Boolean).join(' › ');
+                    const cols = weeks.map(w => {
+                        const naSem = ordsPl.filter(o => getDatasOrdem(o).some(dt => { const wi = getIsoWeekInfo(dt); return wi.isoYear === ano && wi.week === w; }));
+                        if (!naSem.length) return `<td style="text-align:center;color:#cbd5e1;">·</td>`;
+                        const pri = naSem[0];
+                        const st = getStatusEfetivo(pri, hojeStr);
+                        const bg = st === 'concluido' ? '#10b981' : (st === 'atrasada' ? '#e11d48' : '#0284c7');
+                        const diasW = getDatasOrdem(pri).filter(dt => { const wi = getIsoWeekInfo(dt); return wi.isoYear === ano && wi.week === w; });
+                        return `<td style="text-align:center;background:${bg};color:#fff;font-weight:800;font-size:9px;">${escapeHtml(formatDiasOrdemCompacto(diasW) || '✓')}</td>`;
+                    }).join('');
+                    return `<tr>
+                        <td><strong>${escapeHtml(p.codigo || 'PM')}</strong> — ${escapeHtml(p.titulo)}<br><small style="color:#475569">${escapeHtml(ativoLbl)} (${escapeHtml(p.periodicidade || 'Mensal')})</small></td>
+                        ${cols}
+                    </tr>`;
+                }).join('');
+                matrizHtml = `<h3 style="margin:14px 0 6px;font-size:12px;text-transform:uppercase;color:#0f172a;">1. Matriz de Semanas do Período (${escapeHtml(periodoInfo.label)})</h3>
+                    <table style="margin-bottom:16px;"><thead><tr><th>Plano / Máquina › Equipamento › Conjunto</th>${headWeeks}</tr></thead><tbody>${bodyRows}</tbody></table>`;
+            }
+
+            const rowsHtml = ordensFiltradas.map(o => {
+                const wi = getIsoWeekInfo(o.data);
+                const st = STATUS_META[getStatusEfetivo(o, hojeStr)]?.label || 'Programada';
+                const prio = getPrioridadePlanoDoc(o);
+                const prioTxt = prio ? getPrioridadeMeta(prio).label : '-';
+                const lCrit = getClasseLinhaAtivo(o.setor, o.maquina).classe || '';
+                const conjLbl = getConjuntoLabelItem(o);
+                return `<tr>
+                    <td style="text-align:center;font-weight:800">S${wi.week}</td>
+                    <td>${formatPeriodoDatasOrdemBR(o)}</td>
+                    <td><strong>${escapeHtml(o.planoCodigo ? o.planoCodigo + ' — ' : '')}${escapeHtml(o.titulo)}</strong><br><small>${escapeHtml(prioTxt)}${lCrit ? ` • Linha ${lCrit}` : ''} • ${escapeHtml(o.periodicidade || 'Mensal')}</small></td>
+                    <td><strong>${escapeHtml([o.setor, o.maquina, o.equipamento].filter(Boolean).join(' › '))}</strong>${conjLbl ? `<br><span style="color:#0369a1;font-weight:700;">Conj./Subconj.: ${escapeHtml(conjLbl)}</span>` : ''}</td>
+                    <td>${escapeHtml(o.responsavel || o.equipe || '-')}</td>
+                    <td>${escapeHtml(st)}</td>
+                </tr>`;
+            }).join('');
+
+            const w = window.open('', '_blank');
+            if (!w) { showToast('Permita pop-ups para imprimir o relatório do cronograma.', 'error'); return; }
+            w.document.write(`<!DOCTYPE html><html lang="pt-BR"><head><meta charset="UTF-8"><title>Relatório de Preventivas — ${escapeHtml(periodoInfo.label)} / ${ano}</title><style>@page{size:A4 landscape;margin:10mm}body{font-family:Arial,sans-serif;color:#0f172a;margin:10px;font-size:10.5px}header{display:flex;justify-content:space-between;align-items:center;border-bottom:3px solid #0284c7;padding-bottom:8px;margin-bottom:12px}table{width:100%;border-collapse:collapse}th,td{border:1px solid #cbd5e1;padding:5px 6px;text-align:left;vertical-align:top}th{background:#f1f5f9;font-size:9.5px;text-transform:uppercase}.kpis{display:flex;gap:10px;margin-bottom:12px}.kpi{border:1px solid #cbd5e1;border-radius:8px;padding:6px 10px;background:#f8fafc}</style></head><body><header><div style="display:flex;align-items:center;gap:12px"><img src="CEPERA_LOGO.png" style="height:36px"><div><h2 style="margin:0;font-size:15px;">Relatório de Preventivas Agendadas — ${ano} • ${escapeHtml(periodoInfo.label)}</h2><div style="font-size:11px;color:#334155;margin-top:2px;">Escopo: <strong>${escapeHtml(escopoMaqTxt)}</strong></div></div></div><div style="text-align:right;font-weight:700;">Emitido em ${formatDateBR(hojeStr)}<br>${ordensFiltradas.length} agendamento(s)</div></header>${matrizHtml}<h3 style="margin:10px 0 6px;font-size:12px;text-transform:uppercase;color:#0f172a;">${matrizHtml ? '2. ' : ''}Lista Detalhada de Agendamentos no Período (${ordensFiltradas.length})</h3><table><thead><tr><th style="width:48px;text-align:center">Sem.</th><th style="width:110px;">Dias Programados</th><th>Plano / Preventiva</th><th>Ativo (Setor › Máquina › Equipamento › Conjunto/Subconjunto)</th><th>Equipe / Resp.</th><th style="width:90px;">Status</th></tr></thead><tbody>${rowsHtml || '<tr><td colspan="6" style="text-align:center;padding:16px;">Nenhuma preventiva agendada para o período e máquina selecionados.</td></tr>'}</tbody></table><script>window.onload=()=>window.print();<\/script></body></html>`);
+            w.document.close();
+        }
 
         // ================= VIEW 3: PLANOS & CHECKLISTS (100% INTERNO + EXCEL) =================
         window.renderPlanos = () => {
@@ -5510,13 +6026,8 @@
 
                 if (editId) {
                     await updateDoc(doc(db, 'ag_manutencao', editId), payload);
-                    if (planoAnterior && normalizarCodigoPlanoKey(planoAnterior.codigo) !== normalizarCodigoPlanoKey(codigoLimpo)) {
-                        const ordensRelacionadas = getOrdensPreventiva().filter(o => o.planoId === editId);
-                        for (const o of ordensRelacionadas) {
-                            await updateDoc(doc(db, 'ag_manutencao', o.id), { planoCodigo: codigoLimpo });
-                        }
-                    }
-                    showToast(`Plano ${payload.codigo} atualizado com sucesso${criouSubInline ? ' (subconjunto gravado na Árvore)' : ''}!`, 'success');
+                    const qtdSync = await propagarAlteracoesPlanoVivoParaOrdens(editId, payload, planoAnterior);
+                    showToast(`Plano ${payload.codigo} atualizado${qtdSync ? ` e sincronizado em ${qtdSync} agendamento(s)` : ''}${criouSubInline ? ' (subconjunto gravado na Árvore)' : ''}!`, 'success');
                 } else {
                     payload.criadoPor = usuarioLogado?.nome || 'PCM';
                     payload.criadoEm = new Date().toISOString();
@@ -5530,6 +6041,113 @@
                 btn.disabled = false; btn.innerText = 'Salvar Plano Preventivo';
             }
         };
+
+        async function propagarAlteracoesPlanoVivoParaOrdens(planoId, payload, planoAnterior = null) {
+            const codAntKey = normalizarCodigoPlanoKey(planoAnterior?.codigo || '');
+            const codNovoKey = normalizarCodigoPlanoKey(payload?.codigo || '');
+            const ordensBrutas = allAgendaDocs.filter(isPreventivaOrdemDoc).filter(o => {
+                if (o.planoId === planoId) return true;
+                const oCod = normalizarCodigoPlanoKey(o.planoCodigo || '');
+                return Boolean(oCod && (oCod === codAntKey || oCod === codNovoKey));
+            });
+            if (!ordensBrutas.length) return 0;
+
+            const titPadraoAnt = planoAnterior ? `${planoAnterior.codigo ? planoAnterior.codigo + ' — ' : ''}${planoAnterior.titulo}` : '';
+            const titPadraoNovo = `${payload.codigo ? payload.codigo + ' — ' : ''}${payload.titulo}`;
+            const descPadraoNovo = `[Plano ${payload.codigo || ''}] ${[payload.maquina, payload.equipamento, payload.conjunto, payload.subconjunto].filter(Boolean).join(' › ')}`;
+            let atualizadas = 0;
+
+            for (const ord of ordensBrutas) {
+                const naoConcluida = ord.status !== 'concluido' && ord.status !== 'cancelado';
+                const patchOrd = {
+                    planoId,
+                    planoCodigo: payload.codigo,
+                    planoRevisao: payload.revisao,
+                    ativoId: payload.ativoId || '',
+                    tag: payload.tag || '',
+                    setor: payload.setor || '',
+                    maquina: payload.maquina || '',
+                    equipamento: payload.equipamento || '',
+                    conjunto: payload.conjunto || '',
+                    subconjunto: payload.subconjunto || '',
+                    periodicidade: payload.periodicidade || 'Mensal',
+                    modoAgendamento: payload.modoAgendamento || 'fixo',
+                    prioridade: payload.prioridade || 'P3',
+                    criticidade: payload.criticidade || 'P3',
+                    criticidadeLinha: payload.criticidadeLinha || '',
+                    disciplina: payload.disciplina || 'Mecânica',
+                    documentosVinculados: payload.documentosVinculados || [],
+                    atualizadoEm: payload.atualizadoEm
+                };
+                if (naoConcluida) {
+                    const titAtual = String(ord.titulo || '').trim();
+                    if (!titAtual || titAtual === titPadraoAnt || (planoAnterior && titAtual === planoAnterior.titulo) || titAtual.startsWith(`${planoAnterior?.codigo || payload.codigo} —`)) {
+                        patchOrd.titulo = titPadraoNovo;
+                    }
+                    if (!ord.descricao || String(ord.descricao).startsWith('[Plano ')) {
+                        patchOrd.descricao = descPadraoNovo;
+                    }
+                    patchOrd.duracaoEstimadaMin = payload.duracaoEstimadaMin;
+                    patchOrd.paradaNecessaria = payload.paradaNecessaria;
+                    patchOrd.epis = payload.epis || '';
+                    patchOrd.pecas = payload.pecas || '';
+                    patchOrd.anexoReferencia = payload.anexoReferencia || null;
+                    patchOrd.checklistExec = mesclarChecklistVivoOrdem(payload.checklist, ord.checklistExec, ord.status);
+                }
+                try {
+                    await updateDoc(doc(db, 'ag_manutencao', ord.id), patchOrd);
+                    atualizadas++;
+                } catch (_) {}
+            }
+            return atualizadas;
+        }
+
+        let _autoHealPlanosVivosRodou = false;
+        async function curarOrdensDesatualizadasComPlanosEmBackground() {
+            if (_autoHealPlanosVivosRodou) return;
+            const planos = allAgendaDocs.filter(isPlanoDoc);
+            const ordensBrutas = allAgendaDocs.filter(isPreventivaOrdemDoc);
+            if (!planos.length || !ordensBrutas.length) return;
+            _autoHealPlanosVivosRodou = true;
+
+            const mapById = new Map();
+            const mapByCod = new Map();
+            planos.forEach(p => {
+                mapById.set(p.id, p);
+                const ck = normalizarCodigoPlanoKey(p.codigo || '');
+                if (ck) mapByCod.set(ck, p);
+            });
+
+            for (const ord of ordensBrutas) {
+                const p = (ord.planoId && mapById.get(ord.planoId)) ||
+                          (ord.planoCodigo && mapByCod.get(normalizarCodigoPlanoKey(ord.planoCodigo))) ||
+                          null;
+                if (!p) continue;
+                const precisaSync =
+                    ord.planoId !== p.id ||
+                    (p.conjunto || '') !== (ord.conjunto || '') ||
+                    (p.subconjunto || '') !== (ord.subconjunto || '') ||
+                    (p.setor || '') !== (ord.setor || '') ||
+                    (p.maquina || '') !== (ord.maquina || '') ||
+                    (p.equipamento || '') !== (ord.equipamento || '') ||
+                    (p.tag || '') !== (ord.tag || '') ||
+                    (p.ativoId || '') !== (ord.ativoId || '');
+                if (!precisaSync) continue;
+                try {
+                    await updateDoc(doc(db, 'ag_manutencao', ord.id), {
+                        planoId: p.id,
+                        planoCodigo: p.codigo || ord.planoCodigo || '',
+                        setor: p.setor || ord.setor || '',
+                        maquina: p.maquina || ord.maquina || '',
+                        equipamento: p.equipamento || ord.equipamento || '',
+                        conjunto: p.conjunto || '',
+                        subconjunto: p.subconjunto || '',
+                        tag: p.tag || ord.tag || '',
+                        ativoId: p.ativoId || ord.ativoId || ''
+                    });
+                } catch (_) {}
+            }
+        }
 
         window.duplicarPlano = async (planoId) => {
             const p = getPlanosPreventiva().find(x => x.id === planoId);
@@ -9728,6 +10346,7 @@
                 popularSelectsGlobais();
                 agendarRenderPreventivas();
                 tentarAplicarHandoffPreventiva();
+                setTimeout(curarOrdensDesatualizadasComPlanosEmBackground, 1800);
                 marcarSyncPortal('manutencao', 'Ordens e Planos', snap);
             }, () => { setSyncStatus(false, 'Erro de conexão Firestore'); marcarSyncPortal('manutencao', 'Ordens e Planos'); });
 
