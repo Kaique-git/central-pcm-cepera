@@ -1187,6 +1187,10 @@
                                     <button type="button" id="btnMasterTabRotas" onclick="setMasterDbTab('rotas')" class="px-4 py-1.5 rounded-full text-xs font-extrabold text-slate-600">
                                         Fichas / Agenda (<span id="masterCntRotas">0</span>)
                                     </button>
+                                    <button type="button" id="btnMasterTabNotif" onclick="setMasterDbTab('notificacoes')" class="px-4 py-1.5 rounded-full text-xs font-extrabold text-indigo-800 bg-indigo-100/80 hover:bg-indigo-200/80 inline-flex items-center gap-1.5">
+                                        <span>🔔 Central de Notificações</span>
+                                        <span id="masterCntNotif" class="px-1.5 py-0.2 rounded-full bg-indigo-600 text-white text-[10px]">4/5</span>
+                                    </button>
                                 </div>
                                 <div class="flex flex-wrap items-center gap-2">
                                     <input type="text" id="masterDbBusca" oninput="debounceInsp('masterDbBusca', renderMasterDbView, 220)" class="input-clean py-2 text-xs w-64" placeholder="Buscar por ativo, conjunto, autor, ID...">
@@ -2017,6 +2021,25 @@
         </div>
     </div>
 
+    <!-- MODAL PRÉVIA EXECUTIVA DE E-MAIL (CENTRAL DE NOTIFICAÇÕES MASTER) -->
+    <div id="modalPreviewNotifRota" role="dialog" aria-modal="true" class="fixed inset-0 bg-slate-900/70 z-[70] hidden flex items-end sm:items-center justify-center p-0 sm:p-4">
+        <div class="bg-white w-full sm:max-w-3xl sm:rounded-3xl rounded-t-3xl max-h-[92vh] flex flex-col shadow-2xl overflow-hidden border border-slate-200">
+            <div class="p-4 sm:px-6 border-b border-slate-200 bg-slate-50 flex items-center justify-between gap-3 shrink-0">
+                <div>
+                    <span class="text-[10px] font-extrabold uppercase tracking-widest text-indigo-600">Prévia Real do E-mail HTML • Power Automate</span>
+                    <h2 id="modalPrevNotifRotaTitulo" class="text-base font-extrabold text-slate-900">Prévia da Notificação</h2>
+                </div>
+                <button type="button" onclick="fecharModal('modalPreviewNotifRota')" class="w-8 h-8 rounded-full bg-white border border-slate-200 text-slate-600 font-bold flex items-center justify-center">✕</button>
+            </div>
+            <div id="modalPrevNotifRotaMeta" class="px-5 py-3 bg-slate-100/80 border-b border-slate-200 space-y-1 text-xs shrink-0"></div>
+            <div id="modalPrevNotifRotaBody" class="p-4 overflow-y-auto bg-slate-200/60 flex-1"></div>
+            <div class="p-4 sm:px-6 border-t border-slate-200 bg-slate-50 flex flex-wrap items-center justify-end gap-2 shrink-0">
+                <button type="button" onclick="fecharModal('modalPreviewNotifRota')" class="btn-touch bg-white border border-slate-300 text-slate-700 text-xs py-2 px-4">Fechar</button>
+                <button type="button" onclick="dispararPreviewNotifRotaModal()" class="btn-touch bg-indigo-600 hover:bg-indigo-700 text-white text-xs py-2 px-5 shadow-md">🚀 Disparar Este E-mail Agora</button>
+            </div>
+        </div>
+    </div>
+
     <!-- MODAL DOSSIÊ COMPLETO DA ANOMALIA (INDICADORES KPI) -->
     <div id="modalDetalheAnomaliaKpi" role="dialog" aria-modal="true" class="fixed inset-0 bg-slate-900/65 z-50 hidden flex items-end sm:items-center justify-center p-0 sm:p-4">
         <div class="bg-white w-full sm:max-w-2xl sm:rounded-3xl rounded-t-3xl max-h-[92vh] flex flex-col shadow-2xl overflow-hidden border border-slate-200">
@@ -2548,6 +2571,12 @@
                     ? 'px-4 py-1.5 rounded-full text-xs font-extrabold bg-slate-900 text-white'
                     : 'px-4 py-1.5 rounded-full text-xs font-extrabold text-slate-600';
             });
+            const bNotif = document.getElementById('btnMasterTabNotif');
+            if (bNotif) {
+                bNotif.className = tab === 'notificacoes'
+                    ? 'px-4 py-1.5 rounded-full text-xs font-extrabold bg-indigo-600 text-white shadow-sm inline-flex items-center gap-1.5'
+                    : 'px-4 py-1.5 rounded-full text-xs font-extrabold text-indigo-800 bg-indigo-100/80 hover:bg-indigo-200/80 inline-flex items-center gap-1.5';
+            }
             renderMasterDbView();
         };
 
@@ -2601,6 +2630,13 @@
 
             const busca = normTextoControle(document.getElementById('masterDbBusca')?.value || '');
             let html = '';
+
+            if (currentMasterDbTab === 'notificacoes') {
+                listaEl.innerHTML = renderCentralNotificacoesMasterRotaHtml(busca);
+                const btnBatch = document.getElementById('btnMasterExcluirSelecionados');
+                if (btnBatch) btnBatch.classList.add('hidden');
+                return;
+            }
 
             if (currentMasterDbTab === 'anomalias') {
                 const items = [...listaAnomalias]
@@ -3323,7 +3359,7 @@
         // ATALHOS GLOBAIS DE TECLADO (Ctrl + ?, Alt + 1..7, Alt + T, Alt + C, Alt + U, Esc)
         document.addEventListener('keydown', (e) => {
             if (e.key === 'Escape') {
-                ['modalDetalheAnomaliaKpi', 'modalFunc', 'modalExecutarInsp', 'modalAgendaNode', 'modalZoomFoto', 'modalCopiarPlano', 'modalVisualizarFicha', 'modalEspacoUsuario', 'modalAtalhos', 'modalAdminMaster', 'modalConfirmMasterDelete', 'a11yPanel'].forEach(id => {
+                ['modalPreviewNotifRota', 'modalDetalheAnomaliaKpi', 'modalFunc', 'modalExecutarInsp', 'modalAgendaNode', 'modalZoomFoto', 'modalCopiarPlano', 'modalVisualizarFicha', 'modalEspacoUsuario', 'modalAtalhos', 'modalAdminMaster', 'modalConfirmMasterDelete', 'a11yPanel'].forEach(id => {
                     const el = document.getElementById(id);
                     if (el && !el.classList.contains('hidden')) el.classList.add('hidden');
                 });
@@ -11192,7 +11228,1164 @@
             setTimeout(() => { try { win.print(); } catch (_) {} }, 600);
         };
 
+        // ================= CENTRAL DE NOTIFICAÇÕES & RELATÓRIOS AUTOMÁTICOS (ADMIN MASTER — INSPEÇÃO DE ROTA) =================
+        const refCentralNotifMaster = doc(db, "pcm_config", "central_notificacoes");
+        const refNotifAgendaCompat = doc(db, "pcm_config", "notif_agenda");
+        const CEPERA_LOGO_EMAIL_URL = "https://raw.githubusercontent.com/Kaique-git/central-pcm-cepera/main/CEPERA_LOGO.png";
+
+        const CARGOS_NOTIF_CATALOG = [
+            { id: 'PCM', label: 'PCM (Planejamento e Controle)', badge: 'bg-sky-100 text-sky-800 border-sky-200' },
+            { id: 'Gerente', label: 'Gerente (Manutenção / Industrial)', badge: 'bg-emerald-100 text-emerald-800 border-emerald-200' },
+            { id: 'Supervisor Mecânica', label: 'Supervisor Mecânica', badge: 'bg-indigo-100 text-indigo-800 border-indigo-200' },
+            { id: 'Supervisor Elétrica', label: 'Supervisor Elétrica', badge: 'bg-amber-100 text-amber-800 border-amber-200' },
+            { id: 'Supervisor Geral', label: 'Supervisor Geral / Produção', badge: 'bg-violet-100 text-violet-800 border-violet-200' }
+        ];
+
+        const REGRAS_PADRAO_ROTA_MASTER = [
+            {
+                id: 'rota_aprovacoes_pendentes',
+                titulo: 'Aviso de Aprovações & Triagem Pendentes (Supervisão / Diretas & Fichas)',
+                subtitulo: 'Cobra triagem de anomalias diretas, validações de reparos executados e visto em fichas concluídas.',
+                icone: '✅',
+                cor: 'indigo',
+                ativo: true,
+                intervaloDias: 2,
+                enviarTudoCerto: true,
+                msgTudoCerto: 'Tudo certo! Nenhuma aprovação pendente de inspeção de rota no momento.',
+                cargosAlvo: ['PCM', 'Supervisor Mecânica', 'Supervisor Elétrica'],
+                destinatariosIds: [],
+                emailsExtras: '',
+                ultimoDisparoEm: 0,
+                ultimoStatus: ''
+            },
+            {
+                id: 'rota_resumo_anomalias',
+                titulo: 'Resumo de Anomalias & Backlog Crítico (Urgência Alta / Risco de Parada)',
+                subtitulo: 'Envia panorama completo do backlog aberto, anomalias críticas com risco de parada e top equipamentos ofensores.',
+                icone: '⚠️',
+                cor: 'rose',
+                ativo: true,
+                intervaloDias: 3,
+                enviarTudoCerto: true,
+                msgTudoCerto: 'Tudo certo! Nenhuma anomalia aberta ou crítica pendente na Inspeção de Rota.',
+                cargosAlvo: ['PCM', 'Gerente', 'Supervisor Mecânica', 'Supervisor Elétrica'],
+                destinatariosIds: [],
+                emailsExtras: '',
+                ultimoDisparoEm: 0,
+                ultimoStatus: ''
+            },
+            {
+                id: 'rota_relatorio_completo',
+                titulo: 'Relatório Executivo Completo de Inspeção de Rota (KPIs & Aderência)',
+                subtitulo: 'Relatório gerencial automático com Aderência Semanal vs Meta 90%, Saúde dos Pontos, Resolução e Cobertura por Setor.',
+                icone: '📊',
+                cor: 'sky',
+                ativo: true,
+                intervaloDias: 7,
+                enviarTudoCerto: true,
+                msgTudoCerto: 'Relatório executivo periódico de Inspeção de Rota consolidado com sucesso.',
+                cargosAlvo: ['PCM', 'Gerente', 'Supervisor Mecânica', 'Supervisor Elétrica'],
+                destinatariosIds: [],
+                emailsExtras: '',
+                ultimoDisparoEm: 0,
+                ultimoStatus: ''
+            },
+            {
+                id: 'rota_atrasadas_semana',
+                titulo: 'Alerta de Rotas da Semana Pendentes / Não Executadas',
+                subtitulo: 'Lista as rotas programadas na semana vigente que ainda não foram concluídas pelos inspetores.',
+                icone: '🧭',
+                cor: 'amber',
+                ativo: true,
+                intervaloDias: 2,
+                enviarTudoCerto: true,
+                msgTudoCerto: 'Tudo certo! 100% das rotas programadas para a semana vigente já foram concluídas.',
+                cargosAlvo: ['PCM', 'Supervisor Mecânica', 'Supervisor Elétrica'],
+                destinatariosIds: [],
+                emailsExtras: '',
+                ultimoDisparoEm: 0,
+                ultimoStatus: ''
+            },
+            {
+                id: 'rota_validacao_reparos',
+                titulo: 'Cobrança de Reparos Delegados Aguardando Baixa / Execução',
+                subtitulo: 'Monitora anomalias já delegadas aos técnicos que continuam pendentes ou em andamento.',
+                icone: '🔧',
+                cor: 'emerald',
+                ativo: false,
+                intervaloDias: 3,
+                enviarTudoCerto: true,
+                msgTudoCerto: 'Tudo certo! Todos os reparos delegados de inspeção de rota estão em dia.',
+                cargosAlvo: ['PCM', 'Supervisor Mecânica', 'Supervisor Elétrica'],
+                destinatariosIds: [],
+                emailsExtras: '',
+                ultimoDisparoEm: 0,
+                ultimoStatus: ''
+            }
+        ];
+
+        let centralNotifState = {
+            webhookUrl: '',
+            fallbackEmail: 'pcm@cepera.com.br',
+            autoDisparoAtivo: true,
+            destinatarios: [],
+            regrasRota: JSON.parse(JSON.stringify(REGRAS_PADRAO_ROTA_MASTER)),
+            regrasPreventivas: null,
+            historicoDisparos: []
+        };
+        let notifMasterSubView = 'regras';
+        let notifDestEditId = '';
+        let _notifAutoCheckDoneRota = false;
+        let _notifPreviewPayloadAtual = null;
+
+        function normalizarEmailsSemicolonNotif(raw) {
+            return [...new Set(
+                String(raw || '')
+                    .split(/[;,\s]+/)
+                    .map(s => s.trim().toLowerCase())
+                    .filter(s => /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(s))
+            )].join(';');
+        }
+
+        function mesclarRegrasRotaComPadrao(regrasSalvas) {
+            const mapSalvas = new Map((Array.isArray(regrasSalvas) ? regrasSalvas : []).map(r => [r.id, r]));
+            return REGRAS_PADRAO_ROTA_MASTER.map(pad => {
+                const s = mapSalvas.get(pad.id);
+                if (!s) return { ...pad };
+                return {
+                    ...pad,
+                    ...s,
+                    intervaloDias: Math.max(1, Math.min(90, Number(s.intervaloDias || pad.intervaloDias || 2))),
+                    enviarTudoCerto: s.enviarTudoCerto !== undefined ? Boolean(s.enviarTudoCerto) : pad.enviarTudoCerto,
+                    cargosAlvo: Array.isArray(s.cargosAlvo) ? s.cargosAlvo : [...pad.cargosAlvo],
+                    destinatariosIds: Array.isArray(s.destinatariosIds) ? s.destinatariosIds : []
+                };
+            });
+        }
+
+        function iniciarListenersCentralNotificacoesRota() {
+            try {
+                onSnapshot(refNotifAgendaCompat, (snapDoc) => {
+                    const d = snapDoc && snapDoc.exists() ? snapDoc.data() : null;
+                    if (d && d.webhookUrl && !centralNotifState.webhookUrl) {
+                        centralNotifState.webhookUrl = String(d.webhookUrl).trim();
+                        if (d.fallbackEmail && !centralNotifState.fallbackEmail) {
+                            centralNotifState.fallbackEmail = String(d.fallbackEmail).trim();
+                        }
+                        if (currentMasterDbTab === 'notificacoes' && viewVisivelInsp('master-db')) renderMasterDbView();
+                    }
+                }, () => {});
+            } catch (_) {}
+
+            try {
+                onSnapshot(refCentralNotifMaster, (snapDoc) => {
+                    const d = snapDoc && snapDoc.exists() ? snapDoc.data() : null;
+                    if (d) {
+                        centralNotifState.webhookUrl = String(d.webhookUrl || centralNotifState.webhookUrl || '').trim();
+                        centralNotifState.fallbackEmail = normalizarEmailsSemicolonNotif(d.fallbackEmail || 'pcm@cepera.com.br') || 'pcm@cepera.com.br';
+                        centralNotifState.autoDisparoAtivo = d.autoDisparoAtivo !== false;
+                        centralNotifState.destinatarios = Array.isArray(d.destinatarios) ? d.destinatarios : [];
+                        centralNotifState.regrasRota = mesclarRegrasRotaComPadrao(d.regrasRota);
+                        if (Array.isArray(d.regrasPreventivas)) centralNotifState.regrasPreventivas = d.regrasPreventivas;
+                        centralNotifState.historicoDisparos = Array.isArray(d.historicoDisparos) ? d.historicoDisparos.slice(0, 40) : [];
+                    }
+                    const badgeCnt = document.getElementById('masterCntNotif');
+                    if (badgeCnt) {
+                        const ativas = centralNotifState.regrasRota.filter(r => r.ativo).length;
+                        badgeCnt.innerText = `${ativas}/${centralNotifState.regrasRota.length}`;
+                    }
+                    if (currentMasterDbTab === 'notificacoes' && viewVisivelInsp('master-db')) {
+                        renderMasterDbView();
+                    }
+                    agendarVerificacaoNotificacoesAutoRota();
+                }, () => {});
+            } catch (_) {}
+        }
+
+        async function persistirCentralNotifMaster(toastMsg = '') {
+            const payload = {
+                webhookUrl: (centralNotifState.webhookUrl || '').trim(),
+                fallbackEmail: normalizarEmailsSemicolonNotif(centralNotifState.fallbackEmail || 'pcm@cepera.com.br') || 'pcm@cepera.com.br',
+                autoDisparoAtivo: centralNotifState.autoDisparoAtivo !== false,
+                destinatarios: centralNotifState.destinatarios,
+                regrasRota: centralNotifState.regrasRota,
+                historicoDisparos: (centralNotifState.historicoDisparos || []).slice(0, 40),
+                atualizadoEm: new Date().toISOString(),
+                atualizadoPor: usuarioLogado?.nome || 'Admin Master'
+            };
+            if (Array.isArray(centralNotifState.regrasPreventivas)) {
+                payload.regrasPreventivas = centralNotifState.regrasPreventivas;
+            }
+            await setDoc(refCentralNotifMaster, payload, { merge: true });
+            if (payload.webhookUrl) {
+                try {
+                    await setDoc(refNotifAgendaCompat, {
+                        webhookUrl: payload.webhookUrl,
+                        fallbackEmail: payload.fallbackEmail,
+                        autoDisparoAtivo: payload.autoDisparoAtivo,
+                        atualizadoEm: payload.atualizadoEm,
+                        atualizadoPor: payload.atualizadoPor
+                    }, { merge: true });
+                } catch (_) {}
+            }
+            if (toastMsg) showToast(toastMsg);
+        }
+
+        function resolverDestinatariosRegraNotif(regra) {
+            const ativos = (centralNotifState.destinatarios || []).filter(d => d && d.ativo !== false && d.email);
+            const cargosSet = new Set(Array.isArray(regra.cargosAlvo) ? regra.cargosAlvo : []);
+            const idsSet = new Set(Array.isArray(regra.destinatariosIds) ? regra.destinatariosIds : []);
+            const emails = [];
+            const nomes = [];
+
+            ativos.forEach(d => {
+                if (cargosSet.has(d.cargo) || idsSet.has(d.id)) {
+                    const em = normalizarEmailsSemicolonNotif(d.email);
+                    if (em && !emails.includes(em)) {
+                        emails.push(em);
+                        nomes.push(`${d.nome} (${d.cargo})`);
+                    }
+                }
+            });
+
+            const extras = normalizarEmailsSemicolonNotif(regra.emailsExtras || '');
+            if (extras) {
+                extras.split(';').forEach(em => {
+                    if (em && !emails.includes(em)) {
+                        emails.push(em);
+                        nomes.push(em);
+                    }
+                });
+            }
+
+            if (!emails.length) {
+                const fb = normalizarEmailsSemicolonNotif(centralNotifState.fallbackEmail || 'pcm@cepera.com.br') || 'pcm@cepera.com.br';
+                fb.split(';').forEach(em => { if (em) emails.push(em); });
+                nomes.push(`Fallback PCM (${fb})`);
+            }
+
+            return {
+                para: emails.join(';'),
+                destinatariosLista: emails,
+                nomesResumo: nomes
+            };
+        }
+
+        function montarEnvelopeHtmlEmailCepera({ badgeTopo, corBarra, titulo, subtitulo, bannerStatus, kpis = [], blocosHtml = '', rodapeExtra = '' }) {
+            const agoraStr = new Date().toLocaleString('pt-BR', { day: '2-digit', month: '2-digit', year: 'numeric', hour: '2-digit', minute: '2-digit' });
+            const kpisHtml = kpis.length ? `
+                <div style="margin:18px 24px 0 24px;">
+                    <table style="width:100%;border-collapse:separate;border-spacing:8px 0;">
+                        <tr>
+                            ${kpis.map(k => `
+                                <td style="background:#f8fafc;border:1px solid #e2e8f0;border-top:3px solid ${k.cor || '#0284c7'};border-radius:12px;padding:10px 12px;text-align:center;vertical-align:top;">
+                                    <div style="font-size:18px;font-weight:800;color:#0f172a;line-height:1.2;">${escapeHtml(String(k.valor))}</div>
+                                    <div style="font-size:10px;font-weight:800;color:#64748b;text-transform:uppercase;margin-top:3px;">${escapeHtml(k.label)}</div>
+                                </td>
+                            `).join('')}
+                        </tr>
+                    </table>
+                </div>` : '';
+
+            return `
+<div style="background-color:#f1f5f9;padding:24px 10px;font-family:'Segoe UI',-apple-system,BlinkMacSystemFont,Roboto,Helvetica,Arial,sans-serif;color:#0f172a;width:100%;box-sizing:border-box;">
+    <div style="max-width:660px;margin:0 auto;background:#ffffff;border-radius:18px;overflow:hidden;box-shadow:0 12px 30px rgba(15,23,42,0.08);border:1px solid #e2e8f0;">
+        <div style="background:#0f172a;background:linear-gradient(135deg,#0f172a 0%,#1e293b 100%);padding:24px 26px 20px 26px;border-bottom:4px solid ${corBarra || '#0284c7'};">
+            <table style="width:100%;border-collapse:collapse;">
+                <tr>
+                    <td style="vertical-align:middle;">
+                        <div style="background:#ffffff;padding:5px 12px;border-radius:10px;display:inline-block;vertical-align:middle;">
+                            <img src="${CEPERA_LOGO_EMAIL_URL}" alt="Cepêra" height="32" style="height:32px;max-height:32px;width:auto;display:block;border:0;">
+                        </div>
+                        <span style="color:#475569;margin:0 8px;vertical-align:middle;font-size:14px;">•</span>
+                        <span style="color:#38bdf8;font-size:11px;font-weight:800;letter-spacing:1px;text-transform:uppercase;vertical-align:middle;">INSPEÇÃO DE ROTA • PCM</span>
+                    </td>
+                    <td style="text-align:right;vertical-align:middle;">
+                        <span style="display:inline-block;background:${corBarra || '#0284c7'};color:#ffffff;font-size:10px;font-weight:800;padding:4px 10px;border-radius:20px;letter-spacing:0.5px;">
+                            ${escapeHtml(badgeTopo || 'NOTIFICAÇÃO AUTOMÁTICA')}
+                        </span>
+                    </td>
+                </tr>
+            </table>
+            <h1 style="margin:14px 0 4px 0;font-size:19px;font-weight:800;color:#ffffff;line-height:1.3;">${escapeHtml(titulo)}</h1>
+            <p style="margin:0;font-size:12px;color:#94a3b8;line-height:1.4;">${escapeHtml(subtitulo)}</p>
+        </div>
+
+        ${bannerStatus ? `
+        <div style="background:${bannerStatus.bg};border:1px solid ${bannerStatus.border};border-radius:12px;padding:14px 16px;margin:18px 24px 0 24px;">
+            <table style="width:100%;border-collapse:collapse;"><tr>
+                <td style="width:30px;vertical-align:middle;font-size:20px;">${bannerStatus.icone}</td>
+                <td style="vertical-align:middle;font-size:13px;font-weight:800;color:${bannerStatus.color};">
+                    ${escapeHtml(bannerStatus.titulo)}
+                    <div style="font-size:11px;font-weight:600;margin-top:2px;opacity:0.9;">${escapeHtml(bannerStatus.sub)}</div>
+                </td>
+            </tr></table>
+        </div>` : ''}
+
+        ${kpisHtml}
+
+        <div style="margin:18px 24px 0 24px;font-size:12px;line-height:1.55;color:#334155;">
+            ${blocosHtml}
+        </div>
+
+        <div style="background:#f8fafc;border-top:1px solid #e2e8f0;padding:18px 24px;margin-top:22px;text-align:center;font-size:11px;line-height:1.5;color:#64748b;">
+            <div style="font-weight:800;color:#0f172a;font-size:12px;margin-bottom:2px;">
+                Cepêra Alimentos S/A • Central de Notificações &amp; Confiabilidade PCM
+            </div>
+            <div>${escapeHtml(rodapeExtra || 'Disparo automatizado via Microsoft Power Automate • Separador de destinatários ";"')}</div>
+            <div style="margin-top:4px;font-size:10px;color:#94a3b8;">Emitido em: ${escapeHtml(agoraStr)} • Semana ISO S${currentWeekNumber}</div>
+        </div>
+    </div>
+</div>`;
+        }
+
+        function construirEmailRegraRota(regraId) {
+            const regra = centralNotifState.regrasRota.find(r => r.id === regraId) || REGRAS_PADRAO_ROTA_MASTER[0];
+            const dest = resolverDestinatariosRegraNotif(regra);
+            const rotSem = agendaRotas.filter(r => !r.orphan_ignorado && Number(r.semana) === Number(currentWeekNumber));
+            const rotSemConc = rotSem.filter(r => r.status === 'Concluído');
+            const rotSemPend = rotSem.filter(r => r.status !== 'Concluído');
+            const aderSem = rotSem.length ? Math.round((rotSemConc.length / rotSem.length) * 100) : 100;
+
+            const diretasTriagem = listaAnomalias.filter(a => a.status_aprovacao === 'Pendente Aprovação');
+            const oficiais = getAnomaliasOficiais();
+            const anomAb = oficiais.filter(a => a.status !== 'Concluída');
+            const anomVal = oficiais.filter(a => a.status === 'Aguardando Validação');
+            const anomAltas = anomAb.filter(a => (a.urgencia || 'Média') === 'Alta');
+            const anomRisco = anomAb.filter(a => a.risco_parada);
+            const fichasPendSup = rotSemConc.filter(r => r.status_supervisao !== 'Validado');
+
+            let totalPendencias = 0;
+            let assunto = '';
+            let corpoTexto = '';
+            let corpoHtml = '';
+
+            const renderTabelaItens = (headers, rows) => {
+                if (!rows.length) return '';
+                return `<table style="width:100%;border-collapse:collapse;margin-top:8px;font-size:11px;">
+                    <thead><tr style="background:#f1f5f9;color:#475569;text-transform:uppercase;font-size:9.5px;">
+                        ${headers.map(h => `<th style="border:1px solid #cbd5e1;padding:6px 8px;text-align:left;">${escapeHtml(h)}</th>`).join('')}
+                    </tr></thead>
+                    <tbody>
+                        ${rows.map(cols => `<tr>${cols.map(c => `<td style="border:1px solid #e2e8f0;padding:6px 8px;vertical-align:top;">${c}</td>`).join('')}</tr>`).join('')}
+                    </tbody>
+                </table>`;
+            };
+
+            if (regra.id === 'rota_aprovacoes_pendentes') {
+                totalPendencias = diretasTriagem.length + anomVal.length + fichasPendSup.length;
+                const tudoCerto = totalPendencias === 0;
+                assunto = tudoCerto
+                    ? `[Inspeção de Rota • Tudo Certo ✅] Nenhuma aprovação pendente (S${currentWeekNumber})`
+                    : `[Inspeção de Rota • Aprovações Pendentes] ${totalPendencias} item(ns) aguardando Supervisão/PCM (S${currentWeekNumber})`;
+                corpoTexto = tudoCerto
+                    ? `${regra.msgTudoCerto}\nSemana S${currentWeekNumber}: 0 anomalias diretas em triagem, 0 reparos aguardando validação e 0 fichas pendentes de visto.`
+                    : `Existem ${totalPendencias} aprovações pendentes na Inspeção de Rota:\n- Anomalias Diretas em Triagem: ${diretasTriagem.length}\n- Reparos Executados Aguardando Validação: ${anomVal.length}\n- Fichas Concluídas Aguardando Visto da Supervisão: ${fichasPendSup.length}`;
+
+                const rowsTriagem = diretasTriagem.slice(0, 12).map(a => [
+                    `<strong>${escapeHtml(a.area || '—')} › ${escapeHtml(a.maquina || '—')}</strong><br>${escapeHtml(a.equipamento || '—')}`,
+                    escapeHtml(a.descricao || '—'),
+                    escapeHtml(a.equipe_responsavel || a.especialidade || 'Mecânica'),
+                    escapeHtml(a.relator || '—')
+                ]);
+                const rowsVal = anomVal.slice(0, 12).map(a => [
+                    `<strong>${escapeHtml(a.maquina || '—')} › ${escapeHtml(a.equipamento || '—')}</strong>`,
+                    escapeHtml(a.descricao || '—'),
+                    escapeHtml(a.executado_por || '—'),
+                    escapeHtml(a.tempo_real || '—')
+                ]);
+
+                corpoHtml = montarEnvelopeHtmlEmailCepera({
+                    badgeTopo: tudoCerto ? '✓ TUDO CERTO • ZERO PENDÊNCIAS' : `${totalPendencias} APROVAÇÃO(ÕES) PENDENTE(S)`,
+                    corBarra: tudoCerto ? '#10b981' : '#6366f1',
+                    titulo: tudoCerto ? 'Tudo Certo! Nenhuma Aprovação Pendente' : 'Aviso de Aprovações & Triagem Pendentes',
+                    subtitulo: `Monitoramento automático a cada ${regra.intervaloDias} dia(s) • Inspeção Sensitiva de Rota`,
+                    bannerStatus: tudoCerto
+                        ? { bg: '#ecfdf5', border: '#6ee7b7', color: '#065f46', icone: '✅', titulo: regra.msgTudoCerto, sub: 'Todas as triagens de anomalias diretas, validações de reparos e fichas da semana estão em dia!' }
+                        : { bg: '#eef2ff', border: '#c7d2fe', color: '#3730a3', icone: '🔔', titulo: `${totalPendencias} item(ns) aguardam aprovação ou visto da Supervisão / PCM`, sub: 'Acesse o módulo Inspeção de Rota (abas Supervisão e Anomalias) para aprovar ou validar.' },
+                    kpis: [
+                        { label: 'Triagem Diretas', valor: diretasTriagem.length, cor: diretasTriagem.length ? '#f59e0b' : '#10b981' },
+                        { label: 'Validação Reparos', valor: anomVal.length, cor: anomVal.length ? '#6366f1' : '#10b981' },
+                        { label: 'Fichas s/ Visto S' + currentWeekNumber, valor: fichasPendSup.length, cor: fichasPendSup.length ? '#0284c7' : '#10b981' }
+                    ],
+                    blocosHtml: tudoCerto
+                        ? `<div style="padding:14px;background:#f8fafc;border-radius:12px;border:1px solid #e2e8f0;text-align:center;font-weight:700;color:#475569;">Nenhuma ação imediata necessária. Próxima verificação automática programada em ${regra.intervaloDias} dia(s).</div>`
+                        : `${rowsTriagem.length ? `<h3 style="margin:12px 0 4px;font-size:13px;color:#0f172a;">1. Anomalias Diretas Aguardando Triagem (${diretasTriagem.length})</h3>` + renderTabelaItens(['Ativo', 'Defeito Relatado', 'Disciplina', 'Relator'], rowsTriagem) : ''}
+                           ${rowsVal.length ? `<h3 style="margin:16px 0 4px;font-size:13px;color:#0f172a;">2. Reparos Concluídos Aguardando Validação (${anomVal.length})</h3>` + renderTabelaItens(['Ativo', 'Descrição', 'Executado por', 'Tempo Real'], rowsVal) : ''}`
+                });
+            } else if (regra.id === 'rota_resumo_anomalias') {
+                totalPendencias = anomAb.length;
+                const tudoCerto = totalPendencias === 0;
+                assunto = tudoCerto
+                    ? `[Inspeção de Rota • Tudo Certo ✅] Zero anomalias abertas no backlog`
+                    : `[Inspeção de Rota • Resumo de Anomalias] ${anomAb.length} aberta(s) (${anomAltas.length} Urgência Alta • ${anomRisco.length} Risco Parada)`;
+                corpoTexto = tudoCerto
+                    ? `${regra.msgTudoCerto}\nBacklog oficial de anomalias está 100% concluído.`
+                    : `Resumo de Anomalias Abertas: ${anomAb.length} no total | ${anomAltas.length} Urgência Alta | ${anomRisco.length} com Risco de Parada.`;
+
+                const topPrioritarias = [...anomAb].sort((a, b) => {
+                    const w = { 'Alta': 3, 'Média': 2, 'Baixa': 1 };
+                    return ((w[b.urgencia] || 2) + (b.risco_parada ? 2 : 0)) - ((w[a.urgencia] || 2) + (a.risco_parada ? 2 : 0));
+                }).slice(0, 15).map(a => [
+                    `<strong>${escapeHtml(a.maquina || '—')}</strong><br>${escapeHtml(a.equipamento || '—')} › ${escapeHtml(a.conjunto || 'Geral')}`,
+                    escapeHtml(a.descricao || '—'),
+                    `<strong style="color:${a.urgencia === 'Alta' ? '#e11d48' : '#d97706'}">${escapeHtml(a.urgencia || 'Média')}${a.risco_parada ? ' ⚠ PARADA' : ''}</strong>`,
+                    escapeHtml(a.equipe_responsavel || a.especialidade || 'Mecânica'),
+                    escapeHtml(a.status || 'Pendente')
+                ]);
+
+                corpoHtml = montarEnvelopeHtmlEmailCepera({
+                    badgeTopo: tudoCerto ? '✓ BACKLOG ZERADO' : `${anomAb.length} ANOMALIA(S) EM ABERTO`,
+                    corBarra: tudoCerto ? '#10b981' : '#e11d48',
+                    titulo: tudoCerto ? 'Tudo Certo! Backlog de Anomalias Zerado' : 'Resumo de Anomalias & Backlog Crítico',
+                    subtitulo: `Panorama de anomalias oficiais detectadas em campo • Ciclo de ${regra.intervaloDias} dia(s)`,
+                    bannerStatus: tudoCerto
+                        ? { bg: '#ecfdf5', border: '#6ee7b7', color: '#065f46', icone: '✅', titulo: regra.msgTudoCerto, sub: 'Todas as anomalias oficiais foram tratadas e validadas.' }
+                        : { bg: '#fff1f2', border: '#fecdd3', color: '#9f1239', icone: '⚠️', titulo: `${anomAb.length} anomalia(s) aberta(s) — ${anomAltas.length} de Urgência Alta e ${anomRisco.length} com Risco de Parada`, sub: 'Priorize a delegação e baixa das anomalias críticas listadas abaixo.' },
+                    kpis: [
+                        { label: 'Backlog Aberto', valor: anomAb.length, cor: '#e11d48' },
+                        { label: 'Urgência Alta', valor: anomAltas.length, cor: '#dc2626' },
+                        { label: 'Risco de Parada', valor: anomRisco.length, cor: '#f59e0b' },
+                        { label: 'Concluídas (Total)', valor: oficiais.length - anomAb.length, cor: '#10b981' }
+                    ],
+                    blocosHtml: topPrioritarias.length
+                        ? `<h3 style="margin:12px 0 4px;font-size:13px;color:#0f172a;">Top Anomalias Prioritárias Abertas (${topPrioritarias.length} de ${anomAb.length})</h3>` +
+                          renderTabelaItens(['Ativo / Conjunto', 'Descrição do Defeito', 'Criticidade', 'Equipe', 'Status'], topPrioritarias)
+                        : ''
+                });
+            } else if (regra.id === 'rota_atrasadas_semana') {
+                totalPendencias = rotSemPend.length;
+                const tudoCerto = totalPendencias === 0;
+                assunto = tudoCerto
+                    ? `[Inspeção de Rota • Tudo Certo ✅] 100% das rotas da Semana S${currentWeekNumber} concluídas!`
+                    : `[Inspeção de Rota • Rotas Pendentes S${currentWeekNumber}] ${rotSemPend.length} rota(s) aguardando execução (Aderência ${aderSem}%)`;
+                corpoTexto = tudoCerto
+                    ? `${regra.msgTudoCerto} (${rotSemConc.length}/${rotSem.length} rotas concluídas na S${currentWeekNumber}).`
+                    : `Semana S${currentWeekNumber}: ${rotSemPend.length} rota(s) ainda pendente(s) de ${rotSem.length} programadas (Aderência atual: ${aderSem}%).`;
+
+                const rowsPend = rotSemPend.slice(0, 18).map(r => [
+                    `<strong>${escapeHtml(r.area || '—')} › ${escapeHtml(r.maquina || '—')}</strong>`,
+                    `${escapeHtml(r.equipamento || '—')} › ${escapeHtml(r.conjunto || 'Geral')}`,
+                    escapeHtml(r.nome_tecnico || 'Não atribuído'),
+                    escapeHtml(r.role_tecnico || '—')
+                ]);
+
+                corpoHtml = montarEnvelopeHtmlEmailCepera({
+                    badgeTopo: tudoCerto ? `✓ S${currentWeekNumber} 100% CONCLUÍDA` : `S${currentWeekNumber} • ${aderSem}% ADERÊNCIA`,
+                    corBarra: tudoCerto ? '#10b981' : '#f59e0b',
+                    titulo: tudoCerto ? `Tudo Certo! Rotas da Semana S${currentWeekNumber} Concluídas` : `Alerta de Rotas Pendentes na Semana S${currentWeekNumber}`,
+                    subtitulo: `Acompanhamento de aderência semanal vs Meta 90%`,
+                    bannerStatus: tudoCerto
+                        ? { bg: '#ecfdf5', border: '#6ee7b7', color: '#065f46', icone: '✅', titulo: regra.msgTudoCerto, sub: `${rotSemConc.length} de ${rotSem.length} rotas executadas na semana vigente.` }
+                        : { bg: '#fffbeb', border: '#fde68a', color: '#92400e', icone: '🧭', titulo: `${rotSemPend.length} rota(s) programada(s) na Semana S${currentWeekNumber} ainda não foram concluídas`, sub: `Aderência atual em ${aderSem}% (${rotSemConc.length}/${rotSem.length} concluídas • Meta 90%).` },
+                    kpis: [
+                        { label: 'Programadas S' + currentWeekNumber, valor: rotSem.length, cor: '#64748b' },
+                        { label: 'Concluídas', valor: rotSemConc.length, cor: '#10b981' },
+                        { label: 'Pendentes', valor: rotSemPend.length, cor: '#f59e0b' },
+                        { label: 'Aderência', valor: aderSem + '%', cor: aderSem >= 90 ? '#10b981' : '#e11d48' }
+                    ],
+                    blocosHtml: rowsPend.length
+                        ? `<h3 style="margin:12px 0 4px;font-size:13px;color:#0f172a;">Rotas Pendentes na Semana S${currentWeekNumber}</h3>` +
+                          renderTabelaItens(['Setor / Linha', 'Equipamento / Conjunto', 'Inspetor', 'Disciplina'], rowsPend)
+                        : ''
+                });
+            } else if (regra.id === 'rota_validacao_reparos') {
+                const delegadasPend = anomAb.filter(a => (Array.isArray(a.tecnicos_nomes) && a.tecnicos_nomes.length > 0) || a.status === 'Em Andamento');
+                totalPendencias = delegadasPend.length;
+                const tudoCerto = totalPendencias === 0;
+                assunto = tudoCerto
+                    ? `[Inspeção de Rota • Tudo Certo ✅] Todos os reparos delegados estão em dia`
+                    : `[Inspeção de Rota • Reparos Delegados] ${delegadasPend.length} anomalia(s) delegada(s) aguardando execução/baixa`;
+                corpoTexto = tudoCerto
+                    ? regra.msgTudoCerto
+                    : `${delegadasPend.length} anomalia(s) delegada(s) aguardam execução ou baixa pelos técnicos.`;
+                const rowsDel = delegadasPend.slice(0, 15).map(a => [
+                    `<strong>${escapeHtml(a.maquina || '—')} › ${escapeHtml(a.equipamento || '—')}</strong>`,
+                    escapeHtml(a.descricao || '—'),
+                    escapeHtml((a.tecnicos_nomes || []).join(', ') || a.equipe_responsavel || 'Equipe'),
+                    escapeHtml(a.urgencia || 'Média'),
+                    escapeHtml(a.status || 'Em Andamento')
+                ]);
+                corpoHtml = montarEnvelopeHtmlEmailCepera({
+                    badgeTopo: tudoCerto ? '✓ REPAROS EM DIA' : `${delegadasPend.length} REPARO(S) DELEGADO(S)`,
+                    corBarra: tudoCerto ? '#10b981' : '#0284c7',
+                    titulo: tudoCerto ? 'Tudo Certo! Reparos Delegados em Dia' : 'Cobrança de Reparos Delegados Aguardando Baixa',
+                    subtitulo: `Acompanhamento de execução das anomalias delegadas`,
+                    bannerStatus: tudoCerto
+                        ? { bg: '#ecfdf5', border: '#6ee7b7', color: '#065f46', icone: '✅', titulo: regra.msgTudoCerto, sub: 'Nenhuma anomalia delegada pendente de baixa.' }
+                        : { bg: '#f0f9ff', border: '#bae6fd', color: '#075985', icone: '🔧', titulo: `${delegadasPend.length} reparo(s) delegado(s) aguardam conclusão ou baixa`, sub: 'Confira os técnicos responsáveis e prazos abaixo.' },
+                    kpis: [
+                        { label: 'Delegadas Abertas', valor: delegadasPend.length, cor: '#0284c7' },
+                        { label: 'Em Validação', valor: anomVal.length, cor: '#6366f1' },
+                        { label: 'Urgência Alta', valor: delegadasPend.filter(a => a.urgencia === 'Alta').length, cor: '#e11d48' }
+                    ],
+                    blocosHtml: rowsDel.length ? renderTabelaItens(['Ativo', 'Defeito', 'Técnico(s)', 'Urgência', 'Status'], rowsDel) : ''
+                });
+            } else {
+                // rota_relatorio_completo
+                const baseCob = getLinhasParaInspecao();
+                const comPlano = baseCob.filter(x => Boolean(mapaChecklists[`${x.id}_Mecânica`] || mapaChecklists[`${x.id}_Elétrica`])).length;
+                const cobPct = baseCob.length ? Math.round((comPlano / baseCob.length) * 100) : 0;
+                const resolPct = oficiais.length ? Math.round(((oficiais.length - anomAb.length) / oficiais.length) * 100) : 100;
+                totalPendencias = anomAb.length + rotSemPend.length;
+                assunto = `[Relatório Executivo • Inspeção de Rota] Semana S${currentWeekNumber} • Aderência ${aderSem}% | Backlog ${anomAb.length} anomalia(s)`;
+                corpoTexto = `Relatório Executivo de Inspeção de Rota (S${currentWeekNumber}):\n- Aderência Semanal: ${aderSem}% (${rotSemConc.length}/${rotSem.length})\n- Resolução de Anomalias: ${resolPct}% (${anomAb.length} abertas)\n- Cobertura de Planos Cirúrgicos: ${cobPct}% (${comPlano}/${baseCob.length})`;
+
+                const porSetor = {};
+                baseCob.forEach(x => {
+                    if (!x.area) return;
+                    if (!porSetor[x.area]) porSetor[x.area] = { tot: 0, pl: 0, ab: 0 };
+                    porSetor[x.area].tot++;
+                    if (mapaChecklists[`${x.id}_Mecânica`] || mapaChecklists[`${x.id}_Elétrica`]) porSetor[x.area].pl++;
+                });
+                anomAb.forEach(a => { if (a.area && porSetor[a.area]) porSetor[a.area].ab++; });
+                const rowsSetor = Object.keys(porSetor).sort().map(s => {
+                    const st = porSetor[s];
+                    const c = st.tot ? Math.round((st.pl / st.tot) * 100) : 0;
+                    return [`<strong>${escapeHtml(s)}</strong>`, `${st.pl}/${st.tot} (${c}%)`, `${st.ab} aberta(s)`];
+                });
+
+                corpoHtml = montarEnvelopeHtmlEmailCepera({
+                    badgeTopo: `RELATÓRIO EXECUTIVO • S${currentWeekNumber}`,
+                    corBarra: '#0284c7',
+                    titulo: `Relatório Executivo Completo — Inspeção de Rota (S${currentWeekNumber})`,
+                    subtitulo: `Síntese automática de Aderência, Confiabilidade, Anomalias e Cobertura Cirúrgica`,
+                    bannerStatus: {
+                        bg: aderSem >= 90 ? '#ecfdf5' : '#fffbeb',
+                        border: aderSem >= 90 ? '#6ee7b7' : '#fde68a',
+                        color: aderSem >= 90 ? '#065f46' : '#92400e',
+                        icone: '📊',
+                        titulo: `Aderência da Semana S${currentWeekNumber}: ${aderSem}% (Meta 90%) • Taxa de Resolução: ${resolPct}%`,
+                        sub: `${rotSemConc.length} de ${rotSem.length} rotas concluídas • ${anomAb.length} anomalias abertas (${anomAltas.length} urgência alta) • ${ diretasTriagem.length } em triagem.`
+                    },
+                    kpis: [
+                        { label: 'Aderência S' + currentWeekNumber, valor: aderSem + '%', cor: aderSem >= 90 ? '#10b981' : '#f59e0b' },
+                        { label: 'Resolução Anom.', valor: resolPct + '%', cor: '#6366f1' },
+                        { label: 'Backlog Aberto', valor: anomAb.length, cor: '#e11d48' },
+                        { label: 'Cobertura Planos', valor: cobPct + '%', cor: '#0284c7' }
+                    ],
+                    blocosHtml: rowsSetor.length
+                        ? `<h3 style="margin:12px 0 4px;font-size:13px;color:#0f172a;">Cobertura Cirúrgica &amp; Backlog por Setor</h3>` +
+                          renderTabelaItens(['Setor / Área', 'Conjuntos c/ Plano Cirúrgico', 'Anomalias Abertas'], rowsSetor)
+                        : ''
+                });
+            }
+
+            return {
+                regra,
+                para: dest.para,
+                destinatarios: dest.destinatariosLista,
+                nomesResumo: dest.nomesResumo,
+                assunto,
+                corpoTexto,
+                corpoHtml,
+                totalPendencias,
+                tudoCerto: totalPendencias === 0,
+                origem: `inspecao_rota_${regra.id}`
+            };
+        }
+
+        window.visualizarPreviaEmailNotifRota = (regraId) => {
+            const mail = construirEmailRegraRota(regraId);
+            _notifPreviewPayloadAtual = mail;
+            const tit = document.getElementById('modalPrevNotifRotaTitulo');
+            const meta = document.getElementById('modalPrevNotifRotaMeta');
+            const frame = document.getElementById('modalPrevNotifRotaBody');
+            if (tit) tit.innerText = mail.regra.titulo;
+            if (meta) {
+                meta.innerHTML = `
+                    <div class="flex flex-wrap items-center gap-2">
+                        <span class="px-2.5 py-0.5 rounded-full text-[10px] font-extrabold uppercase ${mail.tudoCerto ? 'bg-emerald-100 text-emerald-800' : 'bg-amber-100 text-amber-900'}">
+                            ${mail.tudoCerto ? '✅ Modo Tudo Certo (0 pendências)' : `🔔 ${mail.totalPendencias} pendência(s) detectada(s)`}
+                        </span>
+                        <span class="text-xs font-extrabold text-slate-800">${escapeHtml(mail.assunto)}</span>
+                    </div>
+                    <div class="text-[11px] text-slate-600 font-semibold">
+                        <strong>Para (${mail.destinatarios.length}):</strong> <span class="font-mono text-sky-700">${escapeHtml(mail.para)}</span>
+                        <span class="text-slate-400">(${escapeHtml(mail.nomesResumo.join(', '))})</span>
+                    </div>`;
+            }
+            if (frame) frame.innerHTML = mail.corpoHtml;
+            document.getElementById('modalPreviewNotifRota')?.classList.remove('hidden');
+        };
+
+        window.dispararRegraNotifRotaAgora = async (regraId, silencioso = false) => {
+            const url = (centralNotifState.webhookUrl || '').trim();
+            const mail = construirEmailRegraRota(regraId);
+            if (mail.tudoCerto && !mail.regra.enviarTudoCerto && silencioso) {
+                return { ok: false, ignoradoZero: true };
+            }
+            if (!url) {
+                if (!silencioso) {
+                    showToast('Cole e salve primeiro a URL do fluxo Power Automate na aba "Chave Power Automate"!', 'error');
+                    notifMasterSubView = 'automate';
+                    renderMasterDbView();
+                }
+                return { ok: false, motivo: 'sem_webhook' };
+            }
+            try {
+                if (!silencioso) showToast(`Disparando "${mail.regra.titulo}" via Power Automate...`);
+                const resp = await fetch(url, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        para: mail.para,
+                        destinatarios: mail.destinatarios,
+                        assunto: mail.assunto,
+                        corpoTexto: mail.corpoTexto,
+                        corpoHtml: mail.corpoHtml,
+                        origem: mail.origem
+                    })
+                });
+                if (!resp.ok) {
+                    if (!silencioso) showToast(`Power Automate respondeu HTTP ${resp.status}. Verifique o fluxo.`, 'error');
+                    return { ok: false, motivo: `HTTP ${resp.status}` };
+                }
+                const agoraMs = Date.now();
+                const rIdx = centralNotifState.regrasRota.findIndex(r => r.id === regraId);
+                if (rIdx >= 0) {
+                    centralNotifState.regrasRota[rIdx].ultimoDisparoEm = agoraMs;
+                    centralNotifState.regrasRota[rIdx].ultimoStatus = mail.tudoCerto ? 'Tudo Certo (0 pend.)' : `${mail.totalPendencias} pendência(s)`;
+                }
+                centralNotifState.historicoDisparos.unshift({
+                    id: 'disp_' + agoraMs,
+                    modulo: 'Inspeção de Rota',
+                    regraId: mail.regra.id,
+                    regraTitulo: mail.regra.titulo,
+                    para: mail.para,
+                    assunto: mail.assunto,
+                    tudoCerto: mail.tudoCerto,
+                    totalPendencias: mail.totalPendencias,
+                    timestamp: agoraMs,
+                    autor: silencioso ? 'Automático (Ciclo)' : (usuarioLogado?.nome || 'Admin Master')
+                });
+                centralNotifState.historicoDisparos = centralNotifState.historicoDisparos.slice(0, 40);
+                await persistirCentralNotifMaster();
+                if (!silencioso) {
+                    showToast(`E-mail enviado com sucesso para ${mail.destinatarios.length} destinatário(s)!`);
+                    if (currentMasterDbTab === 'notificacoes') renderMasterDbView();
+                }
+                return { ok: true };
+            } catch (err) {
+                if (!silencioso) showToast('Falha de rede ao acionar o webhook do Power Automate.', 'error');
+                return { ok: false, motivo: err?.message || 'erro_rede' };
+            }
+        };
+
+        window.dispararPreviewNotifRotaModal = async () => {
+            if (!_notifPreviewPayloadAtual) return;
+            await window.dispararRegraNotifRotaAgora(_notifPreviewPayloadAtual.regra.id, false);
+            fecharModal('modalPreviewNotifRota');
+        };
+
+        window.verificarEDispararRegrasVencidasRota = async (manual = false) => {
+            const url = (centralNotifState.webhookUrl || '').trim();
+            if (!url) {
+                if (manual) showToast('Configure primeiro a chave URL do Power Automate.', 'error');
+                return;
+            }
+            if (!manual && !centralNotifState.autoDisparoAtivo) return;
+            const agora = Date.now();
+            let enviados = 0;
+            for (const r of centralNotifState.regrasRota) {
+                if (!r.ativo) continue;
+                const intervMs = Math.max(1, Number(r.intervaloDias || 2)) * 86400000;
+                const vencida = !r.ultimoDisparoEm || (agora - Number(r.ultimoDisparoEm)) >= intervMs;
+                if (!vencida) continue;
+                const mail = construirEmailRegraRota(r.id);
+                if (mail.tudoCerto && !r.enviarTudoCerto) continue;
+                const res = await window.dispararRegraNotifRotaAgora(r.id, !manual);
+                if (res.ok) enviados++;
+            }
+            if (manual) {
+                showToast(enviados > 0
+                    ? `${enviados} notificação(ões) no prazo disparada(s) via Power Automate!`
+                    : 'Todas as regras ativas já foram disparadas dentro do ciclo de dias configurado.');
+                renderMasterDbView();
+            }
+        };
+
+        function agendarVerificacaoNotificacoesAutoRota() {
+            if (_notifAutoCheckDoneRota) return;
+            setTimeout(() => {
+                if (_notifAutoCheckDoneRota || !bancoConectado || !centralNotifState.webhookUrl || !centralNotifState.autoDisparoAtivo) return;
+                _notifAutoCheckDoneRota = true;
+                window.verificarEDispararRegrasVencidasRota(false);
+            }, 6500);
+        }
+
+        // ---------- AÇÕES DE CONFIGURAÇÃO DE REGRAS, DESTINATÁRIOS E WEBHOOK ----------
+        window.setNotifMasterSubViewRota = (sub) => {
+            notifMasterSubView = sub;
+            renderMasterDbView();
+        };
+
+        window.toggleRegraNotifRotaAtiva = async (regraId, checked) => {
+            const r = centralNotifState.regrasRota.find(x => x.id === regraId);
+            if (!r) return;
+            r.ativo = Boolean(checked);
+            await persistirCentralNotifMaster(`Regra "${r.titulo}" ${r.ativo ? 'ativada' : 'pausada'}.`);
+            renderMasterDbView();
+        };
+
+        window.atualizarCampoRegraNotifRota = async (regraId, campo, valor) => {
+            const r = centralNotifState.regrasRota.find(x => x.id === regraId);
+            if (!r) return;
+            if (campo === 'intervaloDias') r.intervaloDias = Math.max(1, Math.min(90, Number(valor) || 1));
+            else if (campo === 'enviarTudoCerto') r.enviarTudoCerto = Boolean(valor);
+            else if (campo === 'msgTudoCerto') r.msgTudoCerto = String(valor || '').trim() || 'Tudo certo! Nenhuma pendência no momento.';
+            else if (campo === 'emailsExtras') r.emailsExtras = normalizarEmailsSemicolonNotif(valor);
+            await persistirCentralNotifMaster('Configuração da regra atualizada!');
+        };
+
+        window.toggleCargoRegraNotifRota = async (regraId, cargoId, checked) => {
+            const r = centralNotifState.regrasRota.find(x => x.id === regraId);
+            if (!r) return;
+            const set = new Set(Array.isArray(r.cargosAlvo) ? r.cargosAlvo : []);
+            if (checked) set.add(cargoId); else set.delete(cargoId);
+            r.cargosAlvo = [...set];
+            await persistirCentralNotifMaster();
+            renderMasterDbView();
+        };
+
+        window.toggleDestIndividualRegraNotifRota = async (regraId, destId, checked) => {
+            const r = centralNotifState.regrasRota.find(x => x.id === regraId);
+            if (!r) return;
+            const set = new Set(Array.isArray(r.destinatariosIds) ? r.destinatariosIds : []);
+            if (checked) set.add(destId); else set.delete(destId);
+            r.destinatariosIds = [...set];
+            await persistirCentralNotifMaster();
+            renderMasterDbView();
+        };
+
+        window.salvarDestinatarioNotifRota = async (e) => {
+            if (e?.preventDefault) e.preventDefault();
+            const nome = (document.getElementById('notifDestNome')?.value || '').trim();
+            const email = normalizarEmailsSemicolonNotif(document.getElementById('notifDestEmail')?.value || '');
+            const cargo = document.getElementById('notifDestCargo')?.value || 'PCM';
+            const disciplina = document.getElementById('notifDestDisc')?.value || 'Todas';
+            if (!nome || !email) {
+                showToast('Informe o nome e um e-mail corporativo válido.', 'error');
+                return;
+            }
+            if (notifDestEditId) {
+                const idx = centralNotifState.destinatarios.findIndex(d => d.id === notifDestEditId);
+                if (idx >= 0) {
+                    centralNotifState.destinatarios[idx] = { ...centralNotifState.destinatarios[idx], nome, email, cargo, disciplina };
+                }
+                notifDestEditId = '';
+            } else {
+                centralNotifState.destinatarios.push({
+                    id: 'dest_' + Date.now() + '_' + Math.random().toString(36).slice(2, 6),
+                    nome,
+                    email,
+                    cargo,
+                    disciplina,
+                    ativo: true
+                });
+            }
+            await persistirCentralNotifMaster('Destinatário salvo na Central de Notificações!');
+            renderMasterDbView();
+        };
+
+        window.editarDestinatarioNotifRota = (id) => {
+            notifDestEditId = id;
+            renderMasterDbView();
+            setTimeout(() => document.getElementById('notifDestNome')?.focus(), 60);
+        };
+
+        window.toggleAtivoDestinatarioNotifRota = async (id) => {
+            const d = centralNotifState.destinatarios.find(x => x.id === id);
+            if (!d) return;
+            d.ativo = d.ativo === false ? true : false;
+            await persistirCentralNotifMaster();
+            renderMasterDbView();
+        };
+
+        window.removerDestinatarioNotifRota = async (id) => {
+            centralNotifState.destinatarios = centralNotifState.destinatarios.filter(x => x.id !== id);
+            centralNotifState.regrasRota.forEach(r => {
+                r.destinatariosIds = (r.destinatariosIds || []).filter(x => x !== id);
+            });
+            await persistirCentralNotifMaster('Destinatário removido.');
+            renderMasterDbView();
+        };
+
+        window.importarGestoresEquipeNotifRota = async () => {
+            const existentes = new Set(centralNotifState.destinatarios.map(d => (d.nome || '').toLowerCase().trim()));
+            let adicionados = 0;
+            (listaFunc || []).forEach(f => {
+                if (!f || !f.nome || (f.user || '').toLowerCase() === 'master') return;
+                const role = String(f.role || '');
+                if (!['Admin', 'Gerente', 'Supervisor Mecânica', 'Supervisor Elétrica'].includes(role) && !f.email) return;
+                if (existentes.has(f.nome.toLowerCase().trim())) return;
+                const cargoSug = role === 'Admin' ? 'PCM' : (role === 'Gerente' ? 'Gerente' : (role.includes('Elétrica') ? 'Supervisor Elétrica' : (role.includes('Mecânica') ? 'Supervisor Mecânica' : 'Supervisor Geral')));
+                const emailSug = normalizarEmailsSemicolonNotif(f.email || '') || `${String(f.user || f.nome.split(' ')[0]).toLowerCase().replace(/[^a-z0-9._-]/g, '')}@cepera.com.br`;
+                centralNotifState.destinatarios.push({
+                    id: 'dest_' + Date.now() + '_' + Math.random().toString(36).slice(2, 6),
+                    nome: f.nome,
+                    email: emailSug,
+                    cargo: cargoSug,
+                    disciplina: role.includes('Elétrica') ? 'Elétrica' : (role.includes('Mecânica') ? 'Mecânica' : 'Todas'),
+                    ativo: true
+                });
+                existentes.add(f.nome.toLowerCase().trim());
+                adicionados++;
+            });
+            if (!adicionados) {
+                showToast('Todos os gestores/supervisores da equipe já estão cadastrados na lista.');
+                return;
+            }
+            await persistirCentralNotifMaster(`${adicionados} colaborador(es) importado(s)! Confira os e-mails corporativos.`);
+            renderMasterDbView();
+        };
+
+        window.salvarConfigPowerAutomateMasterRota = async (e) => {
+            if (e?.preventDefault) e.preventDefault();
+            centralNotifState.webhookUrl = (document.getElementById('notifMasterWebhookUrl')?.value || '').trim();
+            centralNotifState.fallbackEmail = normalizarEmailsSemicolonNotif(document.getElementById('notifMasterFallbackEmail')?.value || 'pcm@cepera.com.br') || 'pcm@cepera.com.br';
+            centralNotifState.autoDisparoAtivo = document.getElementById('notifMasterAutoAtivo')?.checked !== false;
+            await persistirCentralNotifMaster('Chave Power Automate e configurações salvas para toda a Central!');
+            renderMasterDbView();
+        };
+
+        window.testarConexaoPowerAutomateMasterRota = async () => {
+            const url = (document.getElementById('notifMasterWebhookUrl')?.value || centralNotifState.webhookUrl || '').trim();
+            const fb = normalizarEmailsSemicolonNotif(document.getElementById('notifMasterFallbackEmail')?.value || centralNotifState.fallbackEmail || 'pcm@cepera.com.br') || 'pcm@cepera.com.br';
+            if (!url) {
+                showToast('Cole primeiro a URL HTTP POST do fluxo Power Automate.', 'error');
+                return;
+            }
+            centralNotifState.webhookUrl = url;
+            centralNotifState.fallbackEmail = fb;
+            const html = montarEnvelopeHtmlEmailCepera({
+                badgeTopo: '✓ TESTE DE CONEXÃO',
+                corBarra: '#10b981',
+                titulo: 'Conexão Power Automate Ativa — Inspeção de Rota & Preventivas',
+                subtitulo: 'Teste disparado pela Central de Notificações do Menu Admin Master',
+                bannerStatus: {
+                    bg: '#ecfdf5', border: '#6ee7b7', color: '#065f46', icone: '🚀',
+                    titulo: 'Tudo certo! Seu fluxo Power Automate está conectado à Central Master.',
+                    sub: `Destinatários de teste: ${fb}`
+                },
+                kpis: [
+                    { label: 'Regras Ativas', valor: centralNotifState.regrasRota.filter(r => r.ativo).length, cor: '#0284c7' },
+                    { label: 'Destinatários', valor: centralNotifState.destinatarios.filter(d => d.ativo !== false).length, cor: '#10b981' },
+                    { label: 'Semana Vigente', valor: 'S' + currentWeekNumber, cor: '#6366f1' }
+                ],
+                blocosHtml: `<p>A partir de agora, os relatórios executivos, avisos de aprovação (incluindo a confirmação de <strong>"Tudo certo! Nenhuma aprovação pendente"</strong>) e resumos de anomalias serão enviados automaticamente conforme a delegação configurada no Menu Master.</p>`
+            });
+            try {
+                showToast('Enviando e-mail de teste via Power Automate...');
+                const resp = await fetch(url, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        para: fb,
+                        destinatarios: fb.split(';'),
+                        assunto: '[Teste Central Master • PCM Cepêra] Conexão Power Automate OK ✅',
+                        corpoTexto: 'Teste de conexão Power Automate da Central de Notificações Master concluído com sucesso.',
+                        corpoHtml: html,
+                        origem: 'teste_central_notificacoes_rota'
+                    })
+                });
+                if (resp.ok) showToast(`E-mail de teste enviado com sucesso para ${fb}!`);
+                else showToast(`Power Automate retornou HTTP ${resp.status}.`, 'error');
+            } catch (_) {
+                showToast('Erro de rede ao chamar a URL do Power Automate.', 'error');
+            }
+        };
+
+        window.copiarEsquemaJsonPowerAutomateMasterRota = () => {
+            const schema = {
+                type: "object",
+                properties: {
+                    para: { type: "string" },
+                    destinatarios: { type: "array", items: { type: "string" } },
+                    assunto: { type: "string" },
+                    corpoTexto: { type: "string" },
+                    corpoHtml: { type: "string" },
+                    origem: { type: "string" }
+                }
+            };
+            navigator.clipboard.writeText(JSON.stringify(schema, null, 2)).then(() => {
+                showToast('Esquema JSON copiado! É o mesmo contrato já utilizado na Agenda PCM.');
+            });
+        };
+
+        function renderCentralNotificacoesMasterRotaHtml(busca = '') {
+            const temHook = Boolean((centralNotifState.webhookUrl || '').trim());
+            const destAtivos = (centralNotifState.destinatarios || []).filter(d => d.ativo !== false);
+            const regrasAtivas = centralNotifState.regrasRota.filter(r => r.ativo).length;
+
+            const topBar = `
+                <div class="p-4 rounded-3xl border-2 ${temHook ? 'border-emerald-200 bg-gradient-to-r from-emerald-50/70 via-white to-sky-50/60' : 'border-amber-200 bg-amber-50/70'} flex flex-col lg:flex-row lg:items-center justify-between gap-3">
+                    <div class="space-y-1">
+                        <div class="flex flex-wrap items-center gap-2">
+                            <span class="px-2.5 py-0.5 rounded-full text-[10px] font-extrabold uppercase ${temHook ? 'bg-emerald-600 text-white' : 'bg-amber-500 text-white'}">
+                                ${temHook ? '✓ Power Automate Conectado' : '⚠ Power Automate Pendente'}
+                            </span>
+                            <span class="text-[11px] font-extrabold text-slate-600">${regrasAtivas} de ${centralNotifState.regrasRota.length} regra(s) ativa(s) • ${destAtivos.length} destinatário(s) habilitado(s)</span>
+                        </div>
+                        <div class="text-sm font-extrabold text-slate-900">Central Master de Notificações, Cobrança de Aprovações &amp; Relatórios Automáticos</div>
+                        <p class="text-xs font-semibold text-slate-500">Delegue relatórios completos, resumos de anomalias e alertas periódicos de aprovação (com envio automático de <strong>"Tudo certo! ✅"</strong> quando não houver pendências) para Supervisores, Gerente e PCM.</p>
+                    </div>
+                    <div class="flex flex-wrap items-center gap-2 shrink-0">
+                        <button type="button" onclick="verificarEDispararRegrasVencidasRota(true)" class="px-3.5 py-2 rounded-xl bg-slate-900 hover:bg-slate-800 text-white text-xs font-extrabold shadow-sm">
+                            ⚡ Verificar &amp; Disparar Ciclo Agora
+                        </button>
+                    </div>
+                </div>
+
+                <div class="flex flex-wrap items-center justify-between gap-2 pt-1">
+                    <div class="flex flex-wrap items-center gap-1.5 bg-slate-100 p-1 rounded-2xl">
+                        <button type="button" onclick="setNotifMasterSubViewRota('regras')" class="px-3.5 py-1.5 rounded-xl text-xs font-extrabold ${notifMasterSubView === 'regras' ? 'bg-white text-slate-900 shadow-sm' : 'text-slate-600 hover:text-slate-900'}">
+                            📋 Regras &amp; Delegação (${centralNotifState.regrasRota.length})
+                        </button>
+                        <button type="button" onclick="setNotifMasterSubViewRota('destinatarios')" class="px-3.5 py-1.5 rounded-xl text-xs font-extrabold ${notifMasterSubView === 'destinatarios' ? 'bg-white text-slate-900 shadow-sm' : 'text-slate-600 hover:text-slate-900'}">
+                            👥 Destinatários: Supervisores, Gerente &amp; PCM (${centralNotifState.destinatarios.length})
+                        </button>
+                        <button type="button" onclick="setNotifMasterSubViewRota('automate')" class="px-3.5 py-1.5 rounded-xl text-xs font-extrabold ${notifMasterSubView === 'automate' ? 'bg-white text-slate-900 shadow-sm' : 'text-slate-600 hover:text-slate-900'}">
+                            ⚡ Chave Power Automate &amp; Histórico (${centralNotifState.historicoDisparos.length})
+                        </button>
+                    </div>
+                </div>`;
+
+            if (notifMasterSubView === 'destinatarios') {
+                const editObj = notifDestEditId ? centralNotifState.destinatarios.find(d => d.id === notifDestEditId) : null;
+                const listaDest = centralNotifState.destinatarios.filter(d => !busca || normTextoControle(`${d.nome} ${d.email} ${d.cargo} ${d.disciplina}`).includes(busca));
+                return `<div class="space-y-4">${topBar}
+                    <form onsubmit="salvarDestinatarioNotifRota(event)" class="p-4 rounded-2xl border border-slate-200 bg-slate-50/70 space-y-3">
+                        <div class="flex flex-wrap items-center justify-between gap-2">
+                            <div>
+                                <div class="text-xs font-extrabold uppercase tracking-wider text-indigo-700">${editObj ? '✏️ Editando Destinatário' : '➕ Cadastrar Destinatário na Central (Compartilhado entre Rota & Preventivas)'}</div>
+                                <p class="text-[11px] font-semibold text-slate-500">Cadastre Supervisores, Gerente e equipe PCM para vinculá-los por cargo ou individualmente em cada regra.</p>
+                            </div>
+                            <button type="button" onclick="importarGestoresEquipeNotifRota()" class="px-3 py-1.5 rounded-xl bg-indigo-50 hover:bg-indigo-100 border border-indigo-200 text-indigo-800 text-[11px] font-extrabold">
+                                📥 Importar Supervisores/Gestores da Equipe
+                            </button>
+                        </div>
+                        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-2.5 items-end">
+                            <div>
+                                <label class="block text-[10px] font-extrabold uppercase text-slate-500 mb-1">Nome *</label>
+                                <input type="text" id="notifDestNome" required value="${escapeHtml(editObj?.nome || '')}" placeholder="Ex: Carlos Silva" class="input-clean py-2 text-xs font-bold">
+                            </div>
+                            <div>
+                                <label class="block text-[10px] font-extrabold uppercase text-slate-500 mb-1">E-mail Corporativo *</label>
+                                <input type="text" id="notifDestEmail" required value="${escapeHtml(editObj?.email || '')}" placeholder="nome@cepera.com.br" class="input-clean py-2 text-xs font-mono font-bold">
+                            </div>
+                            <div>
+                                <label class="block text-[10px] font-extrabold uppercase text-slate-500 mb-1">Cargo / Grupo *</label>
+                                <select id="notifDestCargo" class="input-clean py-2 text-xs font-bold">
+                                    ${CARGOS_NOTIF_CATALOG.map(c => `<option value="${escapeHtml(c.id)}" ${editObj?.cargo === c.id ? 'selected' : ''}>${escapeHtml(c.label)}</option>`).join('')}
+                                </select>
+                            </div>
+                            <div>
+                                <label class="block text-[10px] font-extrabold uppercase text-slate-500 mb-1">Disciplina</label>
+                                <select id="notifDestDisc" class="input-clean py-2 text-xs font-bold">
+                                    ${['Todas', 'Mecânica', 'Elétrica', 'Automação', 'Produção'].map(d => `<option value="${d}" ${editObj?.disciplina === d ? 'selected' : ''}>${d}</option>`).join('')}
+                                </select>
+                            </div>
+                            <div class="flex items-center gap-1.5">
+                                <button type="submit" class="btn-touch bg-slate-900 hover:bg-slate-800 text-white py-2 px-4 text-xs flex-1">${editObj ? 'Salvar Alteração' : '+ Adicionar'}</button>
+                                ${editObj ? `<button type="button" onclick="editarDestinatarioNotifRota('')" class="px-3 py-2 rounded-xl bg-slate-200 text-slate-700 text-xs font-extrabold">Cancelar</button>` : ''}
+                            </div>
+                        </div>
+                    </form>
+
+                    <div class="space-y-2">
+                        ${listaDest.length === 0
+                            ? `<div class="p-8 text-center text-xs font-bold text-slate-400 border border-dashed border-slate-200 rounded-2xl">Nenhum destinatário cadastrado ainda. Adicione acima ou clique em "Importar Supervisores/Gestores da Equipe".</div>`
+                            : listaDest.map(d => {
+                                const cargoMeta = CARGOS_NOTIF_CATALOG.find(c => c.id === d.cargo) || CARGOS_NOTIF_CATALOG[0];
+                                return `
+                                <div class="p-3 rounded-2xl border ${d.ativo !== false ? 'border-slate-200 bg-white' : 'border-slate-200 bg-slate-100 opacity-60'} flex flex-col sm:flex-row sm:items-center justify-between gap-2.5">
+                                    <div class="flex flex-wrap items-center gap-2 min-w-0">
+                                        <span class="px-2.5 py-0.5 rounded-full text-[10px] font-extrabold border ${cargoMeta.badge}">${escapeHtml(d.cargo)}</span>
+                                        <span class="px-2 py-0.5 rounded-full text-[10px] font-bold bg-slate-100 text-slate-600">${escapeHtml(d.disciplina || 'Todas')}</span>
+                                        <span class="text-xs font-extrabold text-slate-900">${escapeHtml(d.nome)}</span>
+                                        <span class="text-xs font-mono font-bold text-sky-700">${escapeHtml(d.email)}</span>
+                                    </div>
+                                    <div class="flex items-center gap-1.5 shrink-0">
+                                        <button type="button" onclick="toggleAtivoDestinatarioNotifRota('${escapeHtml(d.id)}')" class="px-2.5 py-1 rounded-xl text-[10px] font-extrabold ${d.ativo !== false ? 'bg-emerald-100 text-emerald-800' : 'bg-slate-200 text-slate-600'}">
+                                            ${d.ativo !== false ? '✓ Ativo' : 'Pausado'}
+                                        </button>
+                                        <button type="button" onclick="editarDestinatarioNotifRota('${escapeHtml(d.id)}')" class="px-2.5 py-1 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-700 text-[10px] font-extrabold">✏️ Editar</button>
+                                        <button type="button" onclick="removerDestinatarioNotifRota('${escapeHtml(d.id)}')" class="px-2.5 py-1 rounded-xl bg-rose-50 hover:bg-rose-100 text-rose-700 text-[10px] font-extrabold">🗑️</button>
+                                    </div>
+                                </div>`;
+                            }).join('')}
+                    </div>
+                </div>`;
+            }
+
+            if (notifMasterSubView === 'automate') {
+                return `<div class="space-y-4">${topBar}
+                    <form onsubmit="salvarConfigPowerAutomateMasterRota(event)" class="p-4 rounded-2xl border border-slate-200 bg-slate-50/70 space-y-3">
+                        <div class="flex flex-wrap items-center justify-between gap-2">
+                            <div>
+                                <div class="text-xs font-extrabold uppercase tracking-wider text-sky-700">⚡ Conector Microsoft Power Automate (Gatilho HTTP POST)</div>
+                                <p class="text-[11px] font-semibold text-slate-500">Usa a mesma chave/fluxo HTTP POST da Agenda PCM. Se você já salvou lá, ela é carregada automaticamente aqui.</p>
+                            </div>
+                            <button type="button" onclick="copiarEsquemaJsonPowerAutomateMasterRota()" class="px-3 py-1.5 rounded-xl bg-white hover:bg-slate-100 border border-slate-200 text-slate-700 text-[11px] font-extrabold">
+                                📋 Copiar Esquema JSON do Gatilho
+                            </button>
+                        </div>
+                        <div class="grid grid-cols-1 lg:grid-cols-3 gap-3">
+                            <div class="lg:col-span-2">
+                                <label class="block text-[10px] font-extrabold uppercase text-slate-500 mb-1">URL HTTP POST do Fluxo Power Automate *</label>
+                                <input type="url" id="notifMasterWebhookUrl" value="${escapeHtml(centralNotifState.webhookUrl || '')}" placeholder="https://prod-xx.brazilsouth.logic.azure.com:443/workflows/..." class="input-clean py-2 text-xs font-mono font-bold">
+                            </div>
+                            <div>
+                                <label class="block text-[10px] font-extrabold uppercase text-slate-500 mb-1">E-mail Padrão / Fallback (separado por ";")</label>
+                                <input type="text" id="notifMasterFallbackEmail" value="${escapeHtml(centralNotifState.fallbackEmail || 'pcm@cepera.com.br')}" placeholder="pcm@cepera.com.br" class="input-clean py-2 text-xs font-mono font-bold">
+                            </div>
+                        </div>
+                        <div class="flex flex-wrap items-center justify-between gap-3 pt-1">
+                            <label class="inline-flex items-center gap-2 text-xs font-extrabold text-slate-800 cursor-pointer">
+                                <input type="checkbox" id="notifMasterAutoAtivo" ${centralNotifState.autoDisparoAtivo !== false ? 'checked' : ''} class="w-4 h-4 accent-emerald-600">
+                                <span>Habilitar disparo automático em segundo plano quando o ciclo (dias) de uma regra ativa vencer</span>
+                            </label>
+                            <div class="flex flex-wrap items-center gap-2">
+                                <button type="button" onclick="testarConexaoPowerAutomateMasterRota()" class="px-3.5 py-2 rounded-xl bg-sky-600 hover:bg-sky-700 text-white text-xs font-extrabold">✉️ Enviar E-mail de Teste</button>
+                                <button type="submit" class="px-4 py-2 rounded-xl bg-slate-900 hover:bg-slate-800 text-white text-xs font-extrabold">💾 Salvar Chave &amp; Automação</button>
+                            </div>
+                        </div>
+                    </form>
+
+                    <div class="space-y-2">
+                        <div class="text-xs font-extrabold uppercase tracking-wider text-slate-500">Histórico Recente de Disparos (${centralNotifState.historicoDisparos.length})</div>
+                        ${centralNotifState.historicoDisparos.length === 0
+                            ? `<div class="p-6 text-center text-xs font-bold text-slate-400 border border-dashed border-slate-200 rounded-2xl">Nenhum disparo registrado ainda.</div>`
+                            : centralNotifState.historicoDisparos.slice(0, 20).map(h => `
+                                <div class="p-3 rounded-2xl border border-slate-200 bg-white flex flex-col sm:flex-row sm:items-center justify-between gap-2 text-xs">
+                                    <div class="space-y-0.5 min-w-0">
+                                        <div class="flex flex-wrap items-center gap-1.5">
+                                            <span class="px-2 py-0.5 rounded-full text-[10px] font-extrabold bg-slate-900 text-white">${escapeHtml(h.modulo || 'Inspeção de Rota')}</span>
+                                            <span class="px-2 py-0.5 rounded-full text-[10px] font-extrabold ${h.tudoCerto ? 'bg-emerald-100 text-emerald-800' : 'bg-amber-100 text-amber-800'}">${h.tudoCerto ? '✅ Tudo Certo (0 pend.)' : `🔔 ${h.totalPendencias || 0} pendência(s)`}</span>
+                                            <span class="font-extrabold text-slate-900 truncate">${escapeHtml(h.regraTitulo || '')}</span>
+                                        </div>
+                                        <div class="text-[11px] text-slate-500 font-semibold truncate">${escapeHtml(h.assunto || '')} • Para: <span class="font-mono text-sky-700">${escapeHtml(h.para || '')}</span></div>
+                                    </div>
+                                    <div class="text-[10px] font-bold text-slate-400 shrink-0 text-right">
+                                        <div>${new Date(Number(h.timestamp || Date.now())).toLocaleString('pt-BR')}</div>
+                                        <div>Por: ${escapeHtml(h.autor || 'Sistema')}</div>
+                                    </div>
+                                </div>`).join('')}
+                    </div>
+                </div>`;
+            }
+
+            // Sub-view padrão: 'regras'
+            const cardsRegras = centralNotifState.regrasRota
+                .filter(r => !busca || normTextoControle(`${r.titulo} ${r.subtitulo} ${r.msgTudoCerto}`).includes(busca))
+                .map(r => {
+                    const mailPreview = construirEmailRegraRota(r.id);
+                    const ultStr = r.ultimoDisparoEm ? new Date(Number(r.ultimoDisparoEm)).toLocaleString('pt-BR') : 'Nunca disparado';
+                    const proxMs = r.ultimoDisparoEm ? (Number(r.ultimoDisparoEm) + Number(r.intervaloDias || 2) * 86400000) : 0;
+                    const vencida = !r.ultimoDisparoEm || Date.now() >= proxMs;
+
+                    return `
+                    <div class="p-4 rounded-3xl border-2 ${r.ativo ? 'border-slate-200 bg-white' : 'border-slate-200 bg-slate-50/70 opacity-75'} space-y-3">
+                        <div class="flex flex-col lg:flex-row lg:items-start justify-between gap-3 pb-2.5 border-b border-slate-100">
+                            <div class="flex items-start gap-3 min-w-0">
+                                <div class="w-10 h-10 rounded-2xl bg-slate-100 flex items-center justify-center text-lg shrink-0">${r.icone || '🔔'}</div>
+                                <div class="space-y-0.5 min-w-0">
+                                    <div class="flex flex-wrap items-center gap-2">
+                                        <span class="text-sm font-extrabold text-slate-900">${escapeHtml(r.titulo)}</span>
+                                        <span class="px-2 py-0.5 rounded-full text-[10px] font-extrabold ${mailPreview.tudoCerto ? 'bg-emerald-100 text-emerald-800' : 'bg-rose-100 text-rose-700'}">
+                                            Agora: ${mailPreview.tudoCerto ? '✅ Tudo Certo (0 pend.)' : `${mailPreview.totalPendencias} pendência(s)`}
+                                        </span>
+                                    </div>
+                                    <p class="text-xs font-semibold text-slate-500">${escapeHtml(r.subtitulo)}</p>
+                                </div>
+                            </div>
+                            <div class="flex flex-wrap items-center gap-2 shrink-0">
+                                <label class="inline-flex items-center gap-2 px-3 py-1.5 rounded-xl border ${r.ativo ? 'border-emerald-300 bg-emerald-50 text-emerald-900' : 'border-slate-300 bg-white text-slate-600'} text-xs font-extrabold cursor-pointer">
+                                    <input type="checkbox" ${r.ativo ? 'checked' : ''} onchange="toggleRegraNotifRotaAtiva('${r.id}', this.checked)" class="w-4 h-4 accent-emerald-600">
+                                    <span>${r.ativo ? 'Regra Ativa' : 'Pausada'}</span>
+                                </label>
+                                <button type="button" onclick="visualizarPreviaEmailNotifRota('${r.id}')" class="px-3 py-1.5 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-800 text-xs font-extrabold">
+                                    👁️ Ver Prévia do E-mail
+                                </button>
+                                <button type="button" onclick="dispararRegraNotifRotaAgora('${r.id}', false)" class="px-3.5 py-1.5 rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white text-xs font-extrabold shadow-sm">
+                                    🚀 Disparar Agora
+                                </button>
+                            </div>
+                        </div>
+
+                        <div class="grid grid-cols-1 lg:grid-cols-12 gap-3 text-xs">
+                            <div class="lg:col-span-4 space-y-2 bg-slate-50 p-3 rounded-2xl border border-slate-200/80">
+                                <div class="flex items-center justify-between gap-2">
+                                    <label class="text-[10px] font-extrabold uppercase text-slate-500">Frequência (A cada quantos dias)</label>
+                                    <div class="flex items-center gap-1">
+                                        <input type="number" min="1" max="90" value="${Number(r.intervaloDias || 2)}" onchange="atualizarCampoRegraNotifRota('${r.id}', 'intervaloDias', this.value)" class="input-clean py-1 px-2 text-xs font-extrabold w-16 text-center">
+                                        <span class="text-[11px] font-bold text-slate-600">dia(s)</span>
+                                    </div>
+                                </div>
+                                <label class="flex items-start gap-2 pt-1 cursor-pointer">
+                                    <input type="checkbox" ${r.enviarTudoCerto ? 'checked' : ''} onchange="atualizarCampoRegraNotifRota('${r.id}', 'enviarTudoCerto', this.checked)" class="mt-0.5 w-4 h-4 accent-emerald-600 shrink-0">
+                                    <span class="text-[11px] font-bold text-slate-700 leading-snug">Enviar e-mail de <strong>"Tudo Certo! ✅"</strong> mesmo quando houver 0 pendências</span>
+                                </label>
+                                <div>
+                                    <label class="block text-[9px] font-extrabold uppercase text-slate-400 mb-0.5">Mensagem quando estiver zerado ("Tudo Certo"):</label>
+                                    <input type="text" value="${escapeHtml(r.msgTudoCerto || '')}" onchange="atualizarCampoRegraNotifRota('${r.id}', 'msgTudoCerto', this.value)" class="input-clean py-1.5 text-[11px] font-semibold">
+                                </div>
+                                <div class="text-[10px] font-bold text-slate-400 pt-0.5">
+                                    Último envio: <strong class="text-slate-600">${escapeHtml(ultStr)}</strong> ${r.ultimoStatus ? `(${escapeHtml(r.ultimoStatus)})` : ''}
+                                    ${r.ativo && vencida ? `<span class="ml-1 text-amber-700">• Pronta p/ ciclo</span>` : ''}
+                                </div>
+                            </div>
+
+                            <div class="lg:col-span-8 space-y-2.5 bg-slate-50 p-3 rounded-2xl border border-slate-200/80">
+                                <div class="text-[10px] font-extrabold uppercase text-slate-500">Quem recebe esta notificação (Delegação por Cargo + Destinatários)</div>
+                                <div class="flex flex-wrap gap-1.5">
+                                    ${CARGOS_NOTIF_CATALOG.map(c => {
+                                        const marcado = Array.isArray(r.cargosAlvo) && r.cargosAlvo.includes(c.id);
+                                        return `
+                                        <label class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-xl border text-[11px] font-extrabold cursor-pointer transition-colors ${marcado ? c.badge + ' shadow-sm' : 'bg-white border-slate-200 text-slate-500'}">
+                                            <input type="checkbox" ${marcado ? 'checked' : ''} onchange="toggleCargoRegraNotifRota('${r.id}', '${escapeHtml(c.id)}', this.checked)" class="w-3.5 h-3.5 accent-slate-900">
+                                            <span>${escapeHtml(c.id)}</span>
+                                        </label>`;
+                                    }).join('')}
+                                </div>
+
+                                ${destAtivos.length ? `
+                                <div class="space-y-1">
+                                    <div class="text-[10px] font-bold text-slate-400">Ou marque destinatários específicos cadastrados:</div>
+                                    <div class="flex flex-wrap gap-1.5 max-h-24 overflow-y-auto">
+                                        ${destAtivos.map(d => {
+                                            const sel = Array.isArray(r.destinatariosIds) && r.destinatariosIds.includes(d.id);
+                                            return `
+                                            <label class="inline-flex items-center gap-1 px-2 py-0.5 rounded-lg border text-[10px] font-bold cursor-pointer ${sel ? 'bg-slate-900 text-white border-slate-900' : 'bg-white border-slate-200 text-slate-700'}">
+                                                <input type="checkbox" ${sel ? 'checked' : ''} onchange="toggleDestIndividualRegraNotifRota('${r.id}', '${escapeHtml(d.id)}', this.checked)" class="w-3 h-3">
+                                                <span>${escapeHtml(d.nome)} (${escapeHtml(d.cargo)})</span>
+                                            </label>`;
+                                        }).join('')}
+                                    </div>
+                                </div>` : `<div class="text-[11px] font-semibold text-amber-700">Dica: Cadastre os e-mails dos Supervisores, Gerente e PCM na aba <strong>"👥 Destinatários"</strong> acima.</div>`}
+
+                                <div class="grid grid-cols-1 sm:grid-cols-2 gap-2 pt-1">
+                                    <div>
+                                        <label class="block text-[9px] font-extrabold uppercase text-slate-400 mb-0.5">E-mails extras adicionais (separados por ";")</label>
+                                        <input type="text" value="${escapeHtml(r.emailsExtras || '')}" onchange="atualizarCampoRegraNotifRota('${r.id}', 'emailsExtras', this.value)" placeholder="opcional@cepera.com.br" class="input-clean py-1.5 text-[11px] font-mono">
+                                    </div>
+                                    <div class="flex flex-col justify-end">
+                                        <div class="text-[10px] font-bold text-slate-500 truncate" title="${escapeHtml(mailPreview.para)}">
+                                            ✉️ Destino atual (${mailPreview.destinatarios.length}): <span class="font-mono text-sky-700">${escapeHtml(mailPreview.para)}</span>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>`;
+                }).join('');
+
+            return `<div class="space-y-4">${topBar}<div class="space-y-3">${cardsRegras}</div></div>`;
+        }
+
         initApp();
+        iniciarListenersCentralNotificacoesRota();
     </script>
 </body>
 </html>
