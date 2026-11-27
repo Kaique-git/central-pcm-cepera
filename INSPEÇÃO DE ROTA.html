@@ -5,8 +5,11 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0">
     <title>Rotas & Inspeções — PCM Cepêra</title>
     <link rel="icon" type="image/png" href="CEPERA_LOGO.png">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link rel="preconnect" href="https://cdn.jsdelivr.net" crossorigin>
     <script src="https://cdn.tailwindcss.com"></script>
-    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js" defer></script>
     <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
     <style>
         :root {
@@ -24,20 +27,18 @@
             font-family: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, sans-serif;
             color: #0f172a;
             -webkit-tap-highlight-color: transparent;
-            background: linear-gradient(135deg, #f1f5f9 0%, #f8fafc 50%, #e2e8f0 100%);
+            background: #f1f5f9;
         }
 
         [hidden] {
             display: none !important;
         }
 
-        /* Tema Padrão Otimizado (Sem blur pesado para rodar liso em tablets) */
+        /* Tema Padrão Otimizado (Sem blur pesado de tela cheia para rodar liso em qualquer PC/tablet) */
         .frosted-shell {
-            background: rgba(255, 255, 255, 0.94);
-            backdrop-filter: blur(8px);
-            -webkit-backdrop-filter: blur(8px);
+            background: rgba(255, 255, 255, 0.98);
             border: 1px solid #e2e8f0;
-            box-shadow: 0 12px 32px -12px rgba(15, 23, 42, 0.06);
+            box-shadow: 0 8px 24px -12px rgba(15, 23, 42, 0.06);
         }
 
         .glass-card {
@@ -243,6 +244,15 @@
             width: 34px !important;
             height: 34px !important;
             font-size: 12px !important;
+        }
+
+        /* VIRTUALIZAÇÃO CSS NATIVA P/ LISTAS E MATRIZES GRANDES */
+        #listaAnomalias > div,
+        #listaFichasContainer > div,
+        #kpiRotaTabelaBody > tr,
+        .matrix-table tbody tr {
+            content-visibility: auto;
+            contain-intrinsic-size: auto 72px;
         }
 
         ::-webkit-scrollbar { width: 6px; height: 6px; }
@@ -605,7 +615,7 @@
                             <!-- Barra de Busca e Filtros -->
                             <div class="glass-card p-4 rounded-3xl grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
                                 <div class="relative">
-                                    <input type="text" id="rotaFiltroBusca" oninput="renderMinhaRota()" class="input-clean py-2 pl-9 pr-3 text-xs font-bold" placeholder="Buscar equipamento, máquina, conjunto ou técnico...">
+                                    <input type="text" id="rotaFiltroBusca" oninput="debounceInsp('rotaBusca', renderMinhaRota, 200)" class="input-clean py-2 pl-9 pr-3 text-xs font-bold" placeholder="Buscar equipamento, máquina, conjunto ou técnico...">
                                     <svg class="w-4 h-4 text-slate-400 absolute left-3 top-1/2 -translate-y-1/2 pointer-events-none" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/></svg>
                                 </div>
                                 <select id="rotaFiltroTecnico" onchange="renderMinhaRota()" class="input-clean py-2 text-xs font-bold">
@@ -809,7 +819,7 @@
                                     </div>
                                     <div>
                                         <label for="fichaBusca" class="block text-[11px] font-extrabold uppercase text-slate-500 mb-1">Busca Rápida</label>
-                                        <input type="text" id="fichaBusca" oninput="renderListaFichas()" class="input-clean py-2 text-sm" placeholder="Ex: Redutor, Seladora, S46...">
+                                        <input type="text" id="fichaBusca" oninput="debounceInsp('fichaBusca', renderListaFichas, 200)" class="input-clean py-2 text-sm" placeholder="Ex: Redutor, Seladora, S46...">
                                     </div>
                                 </div>
                             </div>
@@ -872,7 +882,7 @@
                                 </div>
                                 <div>
                                     <label for="chkCfgBusca" class="block text-[11px] font-extrabold uppercase text-slate-500 mb-1">Busca Rápida</label>
-                                    <input type="text" id="chkCfgBusca" oninput="renderArvoreConjuntosEditor()" class="input-clean py-2 text-sm" placeholder="Ex: Redutor, Seladora, Esteira...">
+                                    <input type="text" id="chkCfgBusca" oninput="debounceInsp('chkCfgBusca', renderArvoreConjuntosEditor, 220)" class="input-clean py-2 text-sm" placeholder="Ex: Redutor, Seladora, Esteira...">
                                 </div>
                             </div>
                         </div>
@@ -1021,7 +1031,7 @@
                             <div id="boxDiretasEmTriagem" class="hidden space-y-3"></div>
 
                             <div class="grid grid-cols-1 sm:grid-cols-3 gap-3">
-                                <input type="text" id="filtroAnomBusca" oninput="renderListaAnomalias()" class="input-clean py-2.5 text-sm" placeholder="Buscar por máquina, conjunto ou defeito...">
+                                <input type="text" id="filtroAnomBusca" oninput="debounceInsp('anomBusca', renderListaAnomalias, 200)" class="input-clean py-2.5 text-sm" placeholder="Buscar por máquina, conjunto ou defeito...">
                                 <select id="filtroAnomStatus" onchange="renderListaAnomalias()" class="input-clean py-2.5 text-sm font-bold">
                                     <option value="">Todos os Status</option>
                                     <option value="Pendente">Pendente</option>
@@ -1051,7 +1061,7 @@
                             </div>
 
                             <div class="grid grid-cols-1 sm:grid-cols-3 gap-3">
-                                <input type="text" id="filtroRepAnomBusca" oninput="renderBancoReprovadasAdmin()" class="input-clean py-2.5 text-sm" placeholder="Buscar por máquina, conjunto, autor ou motivo...">
+                                <input type="text" id="filtroRepAnomBusca" oninput="debounceInsp('repAnomBusca', renderBancoReprovadasAdmin, 200)" class="input-clean py-2.5 text-sm" placeholder="Buscar por máquina, conjunto, autor ou motivo...">
                                 <select id="filtroRepAnomEquipe" onchange="renderBancoReprovadasAdmin()" class="input-clean py-2.5 text-sm font-bold">
                                     <option value="">Todas as Equipes</option>
                                     <option value="Mecânica">Mecânica</option>
@@ -1179,13 +1189,218 @@
                                     </button>
                                 </div>
                                 <div class="flex flex-wrap items-center gap-2">
-                                    <input type="text" id="masterDbBusca" oninput="renderMasterDbView()" class="input-clean py-2 text-xs w-64" placeholder="Buscar por ativo, conjunto, autor, ID...">
+                                    <input type="text" id="masterDbBusca" oninput="debounceInsp('masterDbBusca', renderMasterDbView, 220)" class="input-clean py-2 text-xs w-64" placeholder="Buscar por ativo, conjunto, autor, ID...">
                                     <button type="button" id="btnMasterExcluirSelecionados" onclick="excluirLoteMaster()" class="hidden btn-touch bg-red-600 hover:bg-red-700 text-white py-2 px-4 text-xs shadow-sm">
                                         Excluir Selecionados (<span id="masterSelCount">0</span>)
                                     </button>
                                 </div>
                             </div>
                             <div id="masterDbLista" class="space-y-2.5 max-h-[60vh] overflow-y-auto pr-1"></div>
+                        </div>
+                    </section>
+
+                    <!-- ==================== VIEW: INDICADORES (KPIs) DE INSPEÇÃO DE ROTA & ANOMALIAS ==================== -->
+                    <section id="view-indicadores" class="hidden space-y-6">
+                        <!-- CABEÇALHO & FILTROS GLOBAIS DE KPI -->
+                        <div class="glass-card p-5 rounded-3xl space-y-4">
+                            <div class="flex flex-col lg:flex-row lg:items-center justify-between gap-4">
+                                <div>
+                                    <span class="text-[10px] font-extrabold uppercase tracking-widest text-indigo-600">Performance de Inspeção Sensitiva &amp; Confiabilidade de Campo</span>
+                                    <h1 class="text-lg sm:text-xl font-extrabold text-slate-900">Indicadores de Inspeção de Rota (KPIs)</h1>
+                                    <p class="text-xs font-semibold text-slate-500 mt-0.5">Aderência vs Meta 90%, Resolução de Anomalias, Urgências, Esforço H/H, Cobertura Cirúrgica e Registros Auditáveis</p>
+                                </div>
+                                <div class="flex flex-wrap items-center gap-2 shrink-0">
+                                    <button type="button" onclick="exportarIndicadoresAnomaliasCsv()" class="btn-touch bg-slate-900 hover:bg-slate-800 text-white text-xs py-2 px-3.5 shadow-sm">
+                                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"/></svg>
+                                        <span>Exportar Anomalias (.CSV)</span>
+                                    </button>
+                                    <button type="button" onclick="exportarIndicadoresRotasCsv()" class="btn-touch bg-sky-600 hover:bg-sky-700 text-white text-xs py-2 px-3.5 shadow-sm">
+                                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 17v-2m3 2v-4m3 4v-6m2 10H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/></svg>
+                                        <span>Exportar Rotas (.CSV)</span>
+                                    </button>
+                                    <button type="button" onclick="imprimirRelatorioIndicadoresRotaA4()" class="btn-touch bg-white hover:bg-slate-50 text-slate-800 border border-slate-300 text-xs py-2 px-3.5">
+                                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z"/></svg>
+                                        <span>Relatório Executivo A4</span>
+                                    </button>
+                                </div>
+                            </div>
+
+                            <!-- FAIXA DE FILTROS MULTIDIMENSIONAIS -->
+                            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 xl:grid-cols-7 gap-2.5 pt-3 border-t border-slate-100">
+                                <div>
+                                    <label class="block text-[10px] font-extrabold uppercase text-slate-500 mb-1">Período</label>
+                                    <select id="kpiRotaPeriodo" onchange="resetPaginacaoKpiRota(); renderIndicadoresRota()" class="input-clean py-2 text-xs font-bold">
+                                        <option value="semana_atual">Semana Vigente</option>
+                                        <option value="1">Últimos 30 dias</option>
+                                        <option value="3">Últimos 3 meses</option>
+                                        <option value="6" selected>Últimos 6 meses</option>
+                                        <option value="12">Últimos 12 meses</option>
+                                        <option value="todos">Todo o Histórico</option>
+                                    </select>
+                                </div>
+                                <div>
+                                    <label class="block text-[10px] font-extrabold uppercase text-slate-500 mb-1">Setor / Área</label>
+                                    <select id="kpiRotaSetor" onchange="onChangeKpiRotaSetor()" class="input-clean py-2 text-xs font-bold">
+                                        <option value="">Todos os Setores</option>
+                                    </select>
+                                </div>
+                                <div>
+                                    <label class="block text-[10px] font-extrabold uppercase text-slate-500 mb-1">Máquina / Linha</label>
+                                    <select id="kpiRotaMaquina" onchange="resetPaginacaoKpiRota(); renderIndicadoresRota()" class="input-clean py-2 text-xs font-bold">
+                                        <option value="">Todas as Linhas</option>
+                                    </select>
+                                </div>
+                                <div>
+                                    <label class="block text-[10px] font-extrabold uppercase text-slate-500 mb-1">Equipe / Disciplina</label>
+                                    <select id="kpiRotaEquipe" onchange="resetPaginacaoKpiRota(); renderIndicadoresRota()" class="input-clean py-2 text-xs font-bold">
+                                        <option value="">Todas as Equipes</option>
+                                    </select>
+                                </div>
+                                <div>
+                                    <label class="block text-[10px] font-extrabold uppercase text-slate-500 mb-1">Status Anomalia</label>
+                                    <select id="kpiRotaStatusAnom" onchange="resetPaginacaoKpiRota(); renderIndicadoresRota()" class="input-clean py-2 text-xs font-bold">
+                                        <option value="">Todos Oficiais</option>
+                                        <option value="ABERTAS">Abertas (Backlog)</option>
+                                        <option value="Pendente">Pendente</option>
+                                        <option value="Em Andamento">Em Andamento</option>
+                                        <option value="Aguardando Validação">Aguardando Validação</option>
+                                        <option value="Concluída">Concluída</option>
+                                        <option value="TRIAGEM_REPROVADAS">Em Triagem / Reprovadas</option>
+                                    </select>
+                                </div>
+                                <div>
+                                    <label class="block text-[10px] font-extrabold uppercase text-slate-500 mb-1">Urgência / Origem</label>
+                                    <select id="kpiRotaUrgencia" onchange="resetPaginacaoKpiRota(); renderIndicadoresRota()" class="input-clean py-2 text-xs font-bold">
+                                        <option value="">Todas</option>
+                                        <option value="URG_Alta">Urgência Alta (Crítica)</option>
+                                        <option value="URG_Média">Urgência Média</option>
+                                        <option value="URG_Baixa">Urgência Baixa</option>
+                                        <option value="RISCO_PARADA">Com Risco de Parada</option>
+                                        <option value="ORIG_ROTA">Origem: Via Rota</option>
+                                        <option value="ORIG_DIRETA">Origem: Anomalia Direta</option>
+                                    </select>
+                                </div>
+                                <div>
+                                    <label class="block text-[10px] font-extrabold uppercase text-slate-500 mb-1">Busca Rápida</label>
+                                    <div class="flex items-center gap-1">
+                                        <input type="text" id="kpiRotaBusca" oninput="debounceInsp('kpiBusca', () => { resetPaginacaoKpiRota(); renderIndicadoresRota(); }, 180)" class="input-clean py-2 text-xs font-semibold" placeholder="Ativo, defeito, autor...">
+                                        <button type="button" onclick="limparFiltrosIndicadoresRota()" title="Limpar filtros" class="px-2.5 py-2 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-600 text-xs font-extrabold shrink-0">↺</button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- 6 CARDS EXECUTIVOS DE KPI -->
+                        <div id="kpiRotaSummaryGrid" class="grid grid-cols-2 md:grid-cols-3 xl:grid-cols-6 gap-3.5"></div>
+
+                        <!-- 6 GRÁFICOS ANALÍTICOS CHART.JS -->
+                        <div class="grid grid-cols-1 lg:grid-cols-2 gap-5">
+                            <div class="glass-card p-5 rounded-3xl space-y-3">
+                                <div>
+                                    <span class="text-[10px] font-extrabold uppercase tracking-wider text-sky-700">Evolução de Aderência Semanal</span>
+                                    <h3 class="text-sm font-extrabold text-slate-900">Rotas Programadas vs Executadas vs Meta (90%)</h3>
+                                </div>
+                                <div class="h-64"><canvas id="chartKpiEvolucaoRotas"></canvas></div>
+                            </div>
+                            <div class="glass-card p-5 rounded-3xl space-y-3">
+                                <div>
+                                    <span class="text-[10px] font-extrabold uppercase tracking-wider text-indigo-700">Curva de Captação &amp; Baixa</span>
+                                    <h3 class="text-sm font-extrabold text-slate-900">Evolução Mensal de Anomalias (Detectadas vs Concluídas)</h3>
+                                </div>
+                                <div class="h-64"><canvas id="chartKpiEvolucaoAnomalias"></canvas></div>
+                            </div>
+                            <div class="glass-card p-5 rounded-3xl space-y-3">
+                                <div>
+                                    <span class="text-[10px] font-extrabold uppercase tracking-wider text-rose-700">Matriz de Criticidade &amp; Tratativa</span>
+                                    <h3 class="text-sm font-extrabold text-slate-900">Status de Resolução por Urgência &amp; Risco de Parada</h3>
+                                </div>
+                                <div class="h-64"><canvas id="chartKpiUrgenciaStatus"></canvas></div>
+                            </div>
+                            <div class="glass-card p-5 rounded-3xl space-y-3">
+                                <div class="flex items-center justify-between gap-2">
+                                    <div>
+                                        <span class="text-[10px] font-extrabold uppercase tracking-wider text-amber-700">Natureza das Falhas Detectadas</span>
+                                        <h3 class="text-sm font-extrabold text-slate-900">Distribuição por Classificação OS &amp; Origem</h3>
+                                    </div>
+                                    <div id="kpiRotaBadgesOrigem" class="flex flex-wrap gap-1 text-[10px] font-extrabold"></div>
+                                </div>
+                                <div class="h-64"><canvas id="chartKpiClassificacaoOrigem"></canvas></div>
+                            </div>
+                            <div class="glass-card p-5 rounded-3xl space-y-3">
+                                <div>
+                                    <span class="text-[10px] font-extrabold uppercase tracking-wider text-slate-600">Pareto de Linhas Críticas</span>
+                                    <h3 class="text-sm font-extrabold text-slate-900">Top 8 Máquinas / Linhas com Mais Anomalias (Abertas vs Concluídas)</h3>
+                                </div>
+                                <div class="h-64"><canvas id="chartKpiTopMaquinas"></canvas></div>
+                            </div>
+                            <div class="glass-card p-5 rounded-3xl space-y-3">
+                                <div>
+                                    <span class="text-[10px] font-extrabold uppercase tracking-wider text-emerald-700">Produtividade por Disciplina</span>
+                                    <h3 class="text-sm font-extrabold text-slate-900">Backlog vs Anomalias Resolvidas por Equipe Responsável</h3>
+                                </div>
+                                <div class="h-64"><canvas id="chartKpiDesempenhoEquipe"></canvas></div>
+                            </div>
+                        </div>
+
+                        <!-- COBERTURA & SAÚDE DE INSPEÇÃO POR SETOR (IGUAL PREVENTIVAS) -->
+                        <div class="glass-card p-5 rounded-3xl space-y-3">
+                            <div class="flex flex-wrap items-center justify-between gap-2">
+                                <div>
+                                    <span class="text-[10px] font-extrabold uppercase tracking-wider text-sky-700">Cobertura da Árvore de Ativos (`ob_linhas` + `ir_checklists`)</span>
+                                    <h3 class="text-sm font-extrabold text-slate-900">Cobertura de Planos Cirúrgicos, Aderência e Anomalias por Setor</h3>
+                                </div>
+                                <span class="text-[11px] font-bold text-slate-500">Clique em qualquer setor para filtrar indicadores e registros</span>
+                            </div>
+                            <div id="kpiRotaCoberturaSetores" class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-3"></div>
+                        </div>
+
+                        <!-- RANKINGS LADO A LADO: TOP EQUIPAMENTOS OFENSORES & DESEMPENHO DE INSPETORES -->
+                        <div class="grid grid-cols-1 lg:grid-cols-2 gap-5">
+                            <div class="glass-card p-5 rounded-3xl space-y-3">
+                                <div class="flex items-center justify-between gap-2">
+                                    <div>
+                                        <span class="text-[10px] font-extrabold uppercase tracking-wider text-rose-700">Foco de Confiabilidade</span>
+                                        <h3 class="text-sm font-extrabold text-slate-900">Top 8 Equipamentos / Conjuntos com Mais Anomalias</h3>
+                                    </div>
+                                    <span class="text-[10px] font-bold text-slate-400">Clique p/ filtrar</span>
+                                </div>
+                                <div id="kpiRotaTopAtivosList" class="space-y-2"></div>
+                            </div>
+                            <div class="glass-card p-5 rounded-3xl space-y-3">
+                                <div class="flex items-center justify-between gap-2">
+                                    <div>
+                                        <span class="text-[10px] font-extrabold uppercase tracking-wider text-emerald-700">Engajamento &amp; Execução</span>
+                                        <h3 class="text-sm font-extrabold text-slate-900">Ranking de Inspetores &amp; Relatores no Período</h3>
+                                    </div>
+                                    <span class="text-[10px] font-bold text-slate-400">Rotas + Anomalias</span>
+                                </div>
+                                <div id="kpiRotaTopInspetoresList" class="space-y-2"></div>
+                            </div>
+                        </div>
+
+                        <!-- REGISTROS COMPLETOS AUDITÁVEIS (ANOMALIAS + EXECUÇÕES DE ROTA) -->
+                        <div class="glass-card rounded-3xl overflow-hidden border border-slate-200">
+                            <div class="p-4 sm:p-5 border-b border-slate-200 bg-slate-50/70 flex flex-col md:flex-row md:items-center justify-between gap-3">
+                                <div class="space-y-0.5">
+                                    <span class="text-[10px] font-extrabold uppercase tracking-wider text-indigo-700">Rastreabilidade Total de Campo</span>
+                                    <h3 class="text-sm sm:text-base font-extrabold text-slate-900">Base Completa de Registros Filtrados</h3>
+                                </div>
+                                <div class="flex flex-wrap items-center gap-1.5 bg-white p-1 rounded-full border border-slate-200 w-fit">
+                                    <button type="button" id="btnKpiSubTabAnomalias" onclick="setSubTabRegistrosKpiRota('anomalias')" class="px-4 py-1.5 rounded-full text-xs font-extrabold bg-slate-900 text-white transition-colors">
+                                        Registros de Anomalias (<span id="kpiCntTabAnomalias">0</span>)
+                                    </button>
+                                    <button type="button" id="btnKpiSubTabRotas" onclick="setSubTabRegistrosKpiRota('rotas')" class="px-4 py-1.5 rounded-full text-xs font-extrabold text-slate-600 hover:text-slate-900 transition-colors">
+                                        Rotas &amp; Fichas Executadas (<span id="kpiCntTabRotas">0</span>)
+                                    </button>
+                                </div>
+                            </div>
+                            <div class="overflow-x-auto">
+                                <table class="w-full text-left border-collapse text-xs">
+                                    <thead id="kpiRotaTabelaHead"></thead>
+                                    <tbody id="kpiRotaTabelaBody" class="divide-y divide-slate-100"></tbody>
+                                </table>
+                            </div>
+                            <div id="kpiRotaPaginacaoBox" class="hidden p-3.5 bg-slate-50 border-t border-slate-200 flex items-center justify-between gap-3 text-xs"></div>
                         </div>
                     </section>
 
@@ -1799,6 +2014,21 @@
                 <button type="button" onclick="fecharModal('modalConfirmMasterDelete')" class="btn-touch bg-slate-100 hover:bg-slate-200 text-slate-700 flex-1 text-xs">Cancelar</button>
                 <button type="button" id="btnConfirmarExclusaoMaster" class="btn-touch bg-red-600 hover:bg-red-700 text-white flex-1 text-xs shadow-md">Excluir Permanentemente</button>
             </div>
+        </div>
+    </div>
+
+    <!-- MODAL DOSSIÊ COMPLETO DA ANOMALIA (INDICADORES KPI) -->
+    <div id="modalDetalheAnomaliaKpi" role="dialog" aria-modal="true" class="fixed inset-0 bg-slate-900/65 z-50 hidden flex items-end sm:items-center justify-center p-0 sm:p-4">
+        <div class="bg-white w-full sm:max-w-2xl sm:rounded-3xl rounded-t-3xl max-h-[92vh] flex flex-col shadow-2xl overflow-hidden border border-slate-200">
+            <div class="p-4 sm:px-6 border-b border-slate-200 bg-slate-50 flex items-center justify-between gap-3 shrink-0">
+                <div>
+                    <span class="text-[10px] font-extrabold uppercase tracking-widest text-indigo-600">Rastreabilidade Completa • Inspeção de Rota</span>
+                    <h2 id="modalDetAnomTitulo" class="text-base font-extrabold text-slate-900">Dossiê da Anomalia</h2>
+                </div>
+                <button type="button" onclick="fecharModal('modalDetalheAnomaliaKpi')" class="w-8 h-8 rounded-full bg-white border border-slate-200 text-slate-600 font-bold flex items-center justify-center">✕</button>
+            </div>
+            <div id="modalDetAnomBody" class="p-5 sm:p-6 overflow-y-auto space-y-4 text-xs"></div>
+            <div id="modalDetAnomFooter" class="p-4 sm:px-6 border-t border-slate-200 bg-slate-50 flex flex-wrap items-center justify-end gap-2 shrink-0"></div>
         </div>
     </div>
 
@@ -2964,9 +3194,45 @@
             });
         }
 
+        // Sincroniza preferências (Modo Leve / tema) com a sessão central do Portal
+        function sincronizarPrefsSessaoCentral() {
+            try {
+                const raw = localStorage.getItem('cepera_central_session');
+                if (!raw) return;
+                const sess = JSON.parse(raw);
+                if (!sess || typeof sess !== 'object') return;
+                sess.preferencias = Object.assign({}, sess.preferencias || {}, { tabletMode: Boolean(userPrefs.tabletMode), tema: userPrefs.tema });
+                localStorage.setItem('cepera_central_session', JSON.stringify(sess));
+            } catch (_) {}
+            try {
+                if (window.parent && window.parent !== window) {
+                    window.parent.postMessage({ type: 'CEPERA_PREFS_CHANGED', prefs: { tabletMode: Boolean(userPrefs.tabletMode), tema: userPrefs.tema } }, '*');
+                }
+            } catch (_) {}
+        }
+        function aplicarPrefsExternas(prefs) {
+            if (!prefs || typeof prefs !== 'object') return;
+            let mudou = false;
+            if (typeof prefs.tabletMode === 'boolean' && prefs.tabletMode !== Boolean(userPrefs.tabletMode)) { userPrefs.tabletMode = prefs.tabletMode; mudou = true; }
+            if (mudou) {
+                aplicarPreferenciasVisuais();
+                const chaveLocal = usuarioLogado ? `cepera_prefs_${usuarioLogado.user}` : 'cepera_prefs_guest';
+                safeStorage.set(chaveLocal, JSON.stringify(userPrefs));
+            }
+        }
+        window.addEventListener('message', (ev) => {
+            const d = ev && ev.data;
+            if (d && d.type === 'CEPERA_PREFS_SYNC') aplicarPrefsExternas(d.prefs);
+        });
+        window.addEventListener('storage', (ev) => {
+            if (ev.key !== 'cepera_central_session' || !ev.newValue) return;
+            try { aplicarPrefsExternas(JSON.parse(ev.newValue).preferencias); } catch (_) {}
+        });
+
         async function persistirPreferenciasUsuario() {
             const chaveLocal = usuarioLogado ? `cepera_prefs_${usuarioLogado.user}` : 'cepera_prefs_guest';
             safeStorage.set(chaveLocal, JSON.stringify(userPrefs));
+            sincronizarPrefsSessaoCentral();
             if (usuarioLogado && usuarioLogado.id && usuarioLogado.id !== 'default_admin' && usuarioLogado.id !== 'admin_master') {
                 try {
                     await updateDoc(doc(db, "ir_funcionarios", usuarioLogado.id), {
@@ -2986,10 +3252,13 @@
                     try { carregado = JSON.parse(salvoLocal); } catch (_) {}
                 }
             }
+            // Modo Leve definido no Portal (sessão central) tem prioridade, para manter tudo sincronizado
+            let prefsPortal = null;
+            try { prefsPortal = JSON.parse(localStorage.getItem('cepera_central_session') || 'null')?.preferencias || null; } catch (_) {}
             userPrefs = {
                 tema: carregado?.tema || 'padrao',
                 accent: carregado?.accent || '#0284c7',
-                tabletMode: Boolean(carregado?.tabletMode),
+                tabletMode: (prefsPortal && typeof prefsPortal.tabletMode === 'boolean') ? prefsPortal.tabletMode : Boolean(carregado?.tabletMode),
                 fontLevel: Number(carregado?.fontLevel || 0)
             };
             aplicarPreferenciasVisuais();
@@ -3054,7 +3323,7 @@
         // ATALHOS GLOBAIS DE TECLADO (Ctrl + ?, Alt + 1..7, Alt + T, Alt + C, Alt + U, Esc)
         document.addEventListener('keydown', (e) => {
             if (e.key === 'Escape') {
-                ['modalFunc', 'modalExecutarInsp', 'modalAgendaNode', 'modalZoomFoto', 'modalCopiarPlano', 'modalVisualizarFicha', 'modalEspacoUsuario', 'modalAtalhos', 'modalAdminMaster', 'modalConfirmMasterDelete', 'a11yPanel'].forEach(id => {
+                ['modalDetalheAnomaliaKpi', 'modalFunc', 'modalExecutarInsp', 'modalAgendaNode', 'modalZoomFoto', 'modalCopiarPlano', 'modalVisualizarFicha', 'modalEspacoUsuario', 'modalAtalhos', 'modalAdminMaster', 'modalConfirmMasterDelete', 'a11yPanel'].forEach(id => {
                     const el = document.getElementById(id);
                     if (el && !el.classList.contains('hidden')) el.classList.add('hidden');
                 });
@@ -3076,12 +3345,14 @@
                 if (k === 'c') { e.preventDefault(); toggleAltoContraste(); return; }
                 if (k === 'u') { e.preventDefault(); abrirEspacoUsuario(); return; }
 
-                if (usuarioLogado && ['1', '2', '3', '4', '5', '6', '7'].includes(k)) {
+                if (usuarioLogado && ['1', '2', '3', '4', '5', '6', '7', '8'].includes(k)) {
                     e.preventDefault();
                     const idx = parseInt(k, 10) - 1;
                     const abas = isPerfilAdmin(usuarioLogado.role)
-                        ? ['dashboard', 'minharota', 'planejamento', 'fichas', 'checklists', 'anomalias', 'equipe']
-                        : ['minharota', 'fichas', 'anomalias'];
+                        ? ['dashboard', 'minharota', 'planejamento', 'fichas', 'checklists', 'anomalias', 'equipe', 'indicadores']
+                        : isPerfilSupervisor(usuarioLogado.role)
+                            ? ['supervisao', 'minharota', 'anomalias', 'fichas', 'planejamento', 'indicadores']
+                            : ['minharota', 'fichas', 'anomalias'];
                     if (abas[idx]) switchTab(abas[idx]);
                 }
             }
@@ -3100,6 +3371,26 @@
         };
 
         window.fecharModal = (id) => document.getElementById(id).classList.add('hidden');
+
+        // ================= PERFORMANCE: DEBOUNCE & COALESCÊNCIA DE RENDERS =================
+        const _debounceTimersInsp = {};
+        window.debounceInsp = (key, fn, wait = 200) => {
+            clearTimeout(_debounceTimersInsp[key]);
+            _debounceTimersInsp[key] = setTimeout(() => {
+                try { if (typeof fn === 'function') fn(); } catch (err) { console.error(err); }
+            }, wait);
+        };
+        let _roteamentoAgendado = false;
+        function agendarRoteamentoTelas() {
+            if (_roteamentoAgendado) return;
+            _roteamentoAgendado = true;
+            const run = () => { _roteamentoAgendado = false; rotearTelasAgora(); };
+            setTimeout(() => (window.requestAnimationFrame ? requestAnimationFrame(run) : run()), 40);
+        }
+        function viewVisivelInsp(id) {
+            const el = document.getElementById(`view-${id}`);
+            return Boolean(el) && !el.classList.contains('hidden');
+        }
 
         window.toggleSenhaLogin = () => {
             const inp = document.getElementById('loginPass');
@@ -3158,10 +3449,15 @@
             onSnapshot(refLinhas, (snap) => {
                 rawDocsObLinhas = {};
                 const temp = [];
+                const mapPadrinhos = {};
                 snap.forEach(d => {
-                    const expandidos = expandirDocumentoArvore(d.id, d.data());
+                    const raw = d.data();
+                    mapPadrinhos[d.id] = { padrinho_mec: raw.padrinho_mec || '', padrinho_ele: raw.padrinho_ele || '' };
+                    const expandidos = expandirDocumentoArvore(d.id, raw);
                     temp.push(...expandidos);
                 });
+                // Padrinhos sincronizados no mesmo listener (antes havia um 2º onSnapshot duplicado em ob_linhas)
+                mapaPadrinhosLinhas = mapPadrinhos;
                 arvLinhas = construirArvoreComConjuntosInteiros(temp);
                 handoffInspLinhasOk = true;
                 atualizarStatusConexao('online');
@@ -3204,7 +3500,8 @@
                 atualizarBadgesArvore();
                 if (usuarioLogado) {
                     if (isPerfilAdmin(usuarioLogado.role)) {
-                        renderDashboard();
+                        if (viewVisivelInsp('dashboard')) renderDashboard();
+                        if (viewVisivelInsp('indicadores')) agendarRoteamentoTelas();
                         if (!document.getElementById('view-checklists').classList.contains('hidden')) {
                             renderArvoreConjuntosEditor();
                         }
@@ -3241,6 +3538,7 @@
                 snap.forEach(d => temp.push({ id: d.id, ...d.data() }));
                 listaFunc = temp.length > 0 ? temp : [DEFAULT_ADMIN];
                 atualizarStatusConexao('online');
+                setTimeout(() => { if (typeof sincronizarEscalasDaListaFunc === 'function') sincronizarEscalasDaListaFunc(); }, 150);
                 if (usuarioLogado) {
                     if (usuarioLogado.id === 'admin_master') {
                         atualizarBadgeMasterInsp();
@@ -3249,7 +3547,7 @@
                     }
                     const atualizado = listaFunc.find(x => x.user === usuarioLogado.user);
                     if (atualizado) usuarioLogado = atualizado;
-                    renderEquipe();
+                    if (viewVisivelInsp('equipe')) renderEquipe();
                 } else {
                     verificarSessao();
                 }
@@ -3708,6 +4006,10 @@
                         <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"/></svg>
                         <span>Anomalias</span>
                     </button>
+                    <button type="button" onclick="switchTab('indicadores')" id="rail-indicadores" class="rail-btn">
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"/></svg>
+                        <span>Indicadores (KPI)</span>
+                    </button>
                     <button type="button" onclick="switchTab('equipe')" id="rail-equipe" class="rail-btn">
                         <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0z"/></svg>
                         <span>Equipe</span>
@@ -3725,6 +4027,7 @@
                     <button type="button" onclick="switchTab('fichas')" id="mob-fichas" class="mob-tab">Fichas</button>
                     <button type="button" onclick="switchTab('checklists')" id="mob-checklists" class="mob-tab">Planos Cirúrgicos</button>
                     <button type="button" onclick="switchTab('anomalias')" id="mob-anomalias" class="mob-tab">Anomalias</button>
+                    <button type="button" onclick="switchTab('indicadores')" id="mob-indicadores" class="mob-tab">Indicadores (KPI)</button>
                     <button type="button" onclick="switchTab('equipe')" id="mob-equipe" class="mob-tab">Equipe</button>
                     <button type="button" onclick="switchTab('master-db')" id="mob-master-db" class="mob-tab ${masterAtivo ? '' : 'hidden'} !text-red-700">Limpeza Master</button>
                 `;
@@ -3751,6 +4054,10 @@
                         <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/></svg>
                         <span>52 Semanas</span>
                     </button>
+                    <button type="button" onclick="switchTab('indicadores')" id="rail-indicadores" class="rail-btn">
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"/></svg>
+                        <span>Indicadores (KPI)</span>
+                    </button>
                 `;
                 mob.innerHTML = `
                     <button type="button" onclick="switchTab('supervisao')" id="mob-supervisao" class="mob-tab active">Análise Supervisão</button>
@@ -3758,6 +4065,7 @@
                     <button type="button" onclick="switchTab('anomalias')" id="mob-anomalias" class="mob-tab">Delegar Anomalias</button>
                     <button type="button" onclick="switchTab('fichas')" id="mob-fichas" class="mob-tab">Fichas</button>
                     <button type="button" onclick="switchTab('planejamento')" id="mob-planejamento" class="mob-tab">52 Semanas</button>
+                    <button type="button" onclick="switchTab('indicadores')" id="mob-indicadores" class="mob-tab">Indicadores (KPI)</button>
                 `;
                 switchTab('supervisao');
             } else {
@@ -3798,7 +4106,11 @@
                 showToast('Desbloqueie o modo Admin Master para acessar a Limpeza Master.', 'error');
                 return;
             }
-            ['dashboard', 'supervisao', 'planejamento', 'fichas', 'checklists', 'anomalias', 'equipe', 'minharota', 'pendencias', 'master-db'].forEach(id => {
+            if (t === 'indicadores' && usuarioLogado && !isPerfilAdmin(usuarioLogado.role) && !isPerfilSupervisor(usuarioLogado.role)) {
+                showToast('Indicadores disponíveis apenas para Gestão e Supervisão.', 'error');
+                return;
+            }
+            ['dashboard', 'supervisao', 'planejamento', 'fichas', 'checklists', 'anomalias', 'equipe', 'minharota', 'pendencias', 'master-db', 'indicadores'].forEach(id => {
                 const el = document.getElementById(`view-${id}`);
                 if (el) el.classList.add('hidden');
                 const rb = document.getElementById(`rail-${id}`);
@@ -3822,12 +4134,22 @@
             if (t === 'minharota') renderMinhaRota();
             if (t === 'pendencias') renderMinhasPendencias();
             if (t === 'master-db') renderMasterDbView();
+            if (t === 'equipe') renderEquipe();
+            if (t === 'indicadores') renderIndicadoresRota();
         };
 
+        // Coalesce múltiplos onSnapshot em 1 único render por frame (evita tempestade de renders no boot)
         function rotearTelas() {
+            agendarRoteamentoTelas();
+        }
+
+        function rotearTelasAgora() {
             if (!usuarioLogado) return;
-            renderEquipe();
-            renderListaAnomalias();
+            // Renderiza somente as telas visíveis (telas ocultas são renderizadas ao abrir via switchTab)
+            if (viewVisivelInsp('equipe')) renderEquipe();
+            if (viewVisivelInsp('anomalias')) renderListaAnomalias();
+            else if (typeof renderBoxDiretasEmTriagem === 'function') renderBoxDiretasEmTriagem();
+            if (viewVisivelInsp('indicadores')) renderIndicadoresRota();
             if (!document.getElementById('view-supervisao')?.classList.contains('hidden')) {
                 renderSupervisaoView();
             }
@@ -3844,7 +4166,7 @@
                 renderMasterDbView();
             }
             if (isPerfilAdmin(usuarioLogado.role)) {
-                renderDashboard();
+                if (viewVisivelInsp('dashboard')) renderDashboard();
                 if (!document.getElementById('view-planejamento').classList.contains('hidden')) {
                     initPlanejamento();
                 }
@@ -4158,7 +4480,8 @@
 
             const ctx = document.getElementById('chartAnomalias');
             if (chartAnomInstance) chartAnomInstance.destroy();
-            chartAnomInstance = new Chart(ctx.getContext('2d'), {
+            chartAnomInstance = null;
+            if (ctx && typeof window.Chart !== 'undefined') chartAnomInstance = new Chart(ctx.getContext('2d'), {
                 type: 'doughnut',
                 data: {
                     labels: ['Abertas / Em Andamento', 'Concluídas'],
@@ -4202,21 +4525,8 @@
         let planEquipsSelecionados = [];
         let mapaPadrinhosLinhas = {};
 
-        // Mantém os padrinhos sincronizados direto da coleção ob_linhas no Firestore
-        onSnapshot(refLinhas, (snap) => {
-            const mapTemp = {};
-            snap.forEach(d => {
-                const raw = d.data();
-                mapTemp[d.id] = {
-                    padrinho_mec: raw.padrinho_mec || '',
-                    padrinho_ele: raw.padrinho_ele || ''
-                };
-            });
-            mapaPadrinhosLinhas = mapTemp;
-            if (!document.getElementById('view-planejamento')?.classList.contains('hidden')) {
-                renderMatrix52Semanas();
-            }
-        });
+        // Padrinhos (padrinho_mec / padrinho_ele) agora são populados no listener principal de ob_linhas em initApp()
+        // (removido o onSnapshot duplicado que baixava a coleção inteira 2x).
 
         // Fecha os menus de multi-seleção ao clicar fora
         document.addEventListener('click', () => {
@@ -9985,11 +10295,870 @@
             };
         }
 
-        onSnapshot(refFunc, function() {
-            setTimeout(sincronizarEscalasDaListaFunc, 150);
-        });
+        // sincronizarEscalasDaListaFunc agora é disparado pelo listener principal de ir_funcionarios (sem onSnapshot duplicado)
         setTimeout(renderizarTabelaEscalaPainel, 400);
     
+
+        // ================= INDICADORES (KPI) DE INSPEÇÃO DE ROTA & ANOMALIAS =================
+        const chartsKpiRota = {};
+        const KPI_ROTA_PAGE_SIZE = 50;
+        const KPI_ROTA_META_ADERENCIA = 90;
+        let kpiRotaSubTab = 'anomalias';
+        let kpiRotaPagina = 1;
+        let kpiRotaFiltrosPopulados = false;
+        let kpiRotaUltimo = { anomalias: [], rotas: [], rotasProgramadas: [] };
+
+        window.resetPaginacaoKpiRota = () => { kpiRotaPagina = 1; };
+
+        function kpiTempoParaMin(v) {
+            if (v === null || v === undefined || v === '') return 0;
+            if (typeof v === 'number') return isFinite(v) ? v : 0;
+            const s = String(v).trim();
+            const m = s.match(/^(\d{1,4}):(\d{1,2})/);
+            if (m) return Number(m[1]) * 60 + Number(m[2]);
+            const n = parseFloat(s.replace(',', '.'));
+            return isFinite(n) ? n * 60 : 0;
+        }
+        function kpiFmtHoras(min) {
+            const h = Math.floor((min || 0) / 60);
+            const mm = Math.round((min || 0) % 60);
+            return `${h}h${String(mm).padStart(2, '0')}`;
+        }
+        function kpiFmtData(ms, comHora = false) {
+            const n = Number(ms || 0);
+            if (!n) return '—';
+            const d = new Date(n);
+            return comHora ? d.toLocaleString('pt-BR', { day: '2-digit', month: '2-digit', year: '2-digit', hour: '2-digit', minute: '2-digit' }) : d.toLocaleDateString('pt-BR');
+        }
+        function kpiNorm(s) {
+            return String(s || '').normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase().trim();
+        }
+        function kpiEquipeAnom(a) { return a.equipe_responsavel || a.especialidade || 'Mecânica'; }
+        function kpiMondayOfIsoWeek(week, year) {
+            const simple = new Date(year, 0, 4);
+            const dow = simple.getDay() || 7;
+            const monday = new Date(simple);
+            monday.setDate(simple.getDate() - dow + 1 + (Number(week) - 1) * 7);
+            monday.setHours(0, 0, 0, 0);
+            return monday;
+        }
+        function kpiRefDataRota(r) {
+            const ano = r.timestamp ? new Date(Number(r.timestamp)).getFullYear() : new Date().getFullYear();
+            const sem = Number(r.semana || 0);
+            if (sem >= 1 && sem <= 53) return kpiMondayOfIsoWeek(sem, ano).getTime();
+            return Number(r.data_conclusao || r.timestamp || 0);
+        }
+        function kpiGetPeriodoInfo() {
+            const per = document.getElementById('kpiRotaPeriodo')?.value || '6';
+            const agora = Date.now();
+            if (per === 'semana_atual') {
+                const ini = kpiMondayOfIsoWeek(currentWeekNumber, new Date().getFullYear()).getTime();
+                return { per, ini, fim: ini + 7 * 86400000, semanas: 8, meses: 6, label: `Semana ${currentWeekNumber}` };
+            }
+            if (per === 'todos') return { per, ini: 0, fim: Infinity, semanas: Math.max(12, Math.min(52, currentWeekNumber)), meses: 12, label: 'Todo o histórico' };
+            const m = Number(per) || 6;
+            return {
+                per,
+                ini: agora - m * 30.44 * 86400000,
+                fim: Infinity,
+                semanas: Math.max(5, Math.min(52, Math.round(m * 4.35))),
+                meses: Math.max(6, m),
+                label: m === 1 ? 'Últimos 30 dias' : `Últimos ${m} meses`
+            };
+        }
+        function kpiStatusAberta(a) { return a.status !== 'Concluída'; }
+
+        function kpiGetFiltros() {
+            return {
+                setor: document.getElementById('kpiRotaSetor')?.value || '',
+                maquina: document.getElementById('kpiRotaMaquina')?.value || '',
+                equipe: document.getElementById('kpiRotaEquipe')?.value || '',
+                status: document.getElementById('kpiRotaStatusAnom')?.value || '',
+                urg: document.getElementById('kpiRotaUrgencia')?.value || '',
+                busca: kpiNorm(document.getElementById('kpiRotaBusca')?.value || '')
+            };
+        }
+
+        function popularFiltrosIndicadoresRota(forcar = false) {
+            const selSetor = document.getElementById('kpiRotaSetor');
+            const selEq = document.getElementById('kpiRotaEquipe');
+            if (!selSetor || !selEq) return;
+            const areas = new Set();
+            getLinhasParaInspecao().forEach(x => { if (x.area) areas.add(x.area); });
+            listaAnomalias.forEach(a => { if (a.area) areas.add(a.area); });
+            agendaRotas.forEach(r => { if (r.area) areas.add(r.area); });
+            const atualSetor = selSetor.value;
+            const listaAreas = [...areas].sort((a, b) => String(a).localeCompare(String(b)));
+            const htmlSetor = '<option value="">Todos os Setores</option>' + listaAreas.map(a => `<option value="${escapeHtml(a)}">${escapeHtml(a)}</option>`).join('');
+            if (forcar || selSetor.dataset.sig !== String(listaAreas.length)) {
+                selSetor.innerHTML = htmlSetor;
+                selSetor.dataset.sig = String(listaAreas.length);
+                if (listaAreas.includes(atualSetor)) selSetor.value = atualSetor;
+            }
+            const equipes = new Set(['Mecânica', 'Elétrica']);
+            listaAnomalias.forEach(a => { const e = kpiEquipeAnom(a); if (e) equipes.add(e); });
+            const atualEq = selEq.value;
+            const listaEq = [...equipes].sort((a, b) => a.localeCompare(b));
+            if (forcar || selEq.dataset.sig !== String(listaEq.length)) {
+                selEq.innerHTML = '<option value="">Todas as Equipes</option>' + listaEq.map(e => `<option value="${escapeHtml(e)}">${escapeHtml(e)}</option>`).join('');
+                selEq.dataset.sig = String(listaEq.length);
+                if (listaEq.includes(atualEq)) selEq.value = atualEq;
+            }
+            if (!kpiRotaFiltrosPopulados) {
+                kpiRotaFiltrosPopulados = true;
+                const espSup = typeof getEspecialidadeSupervisorLogado === 'function' ? getEspecialidadeSupervisorLogado() : '';
+                if (espSup && listaEq.includes(espSup)) selEq.value = espSup;
+            }
+            popularMaquinasKpiRota();
+        }
+
+        function popularMaquinasKpiRota() {
+            const selMaq = document.getElementById('kpiRotaMaquina');
+            if (!selMaq) return;
+            const setor = document.getElementById('kpiRotaSetor')?.value || '';
+            const maqs = new Set();
+            getLinhasParaInspecao().forEach(x => { if (x.maquina && (!setor || x.area === setor)) maqs.add(x.maquina); });
+            listaAnomalias.forEach(a => { if (a.maquina && (!setor || a.area === setor)) maqs.add(a.maquina); });
+            const atual = selMaq.value;
+            const lista = [...maqs].sort((a, b) => String(a).localeCompare(String(b)));
+            const sig = setor + '|' + lista.length;
+            if (selMaq.dataset.sig !== sig) {
+                selMaq.innerHTML = '<option value="">Todas as Linhas</option>' + lista.map(m => `<option value="${escapeHtml(m)}">${escapeHtml(m)}</option>`).join('');
+                selMaq.dataset.sig = sig;
+                selMaq.value = lista.includes(atual) ? atual : '';
+            }
+        }
+
+        window.onChangeKpiRotaSetor = () => {
+            const selMaq = document.getElementById('kpiRotaMaquina');
+            if (selMaq) selMaq.value = '';
+            popularMaquinasKpiRota();
+            kpiRotaPagina = 1;
+            renderIndicadoresRota();
+        };
+
+        window.limparFiltrosIndicadoresRota = () => {
+            const set = (id, v) => { const el = document.getElementById(id); if (el) el.value = v; };
+            set('kpiRotaPeriodo', '6'); set('kpiRotaSetor', ''); set('kpiRotaMaquina', '');
+            set('kpiRotaEquipe', ''); set('kpiRotaStatusAnom', ''); set('kpiRotaUrgencia', ''); set('kpiRotaBusca', '');
+            popularMaquinasKpiRota();
+            kpiRotaPagina = 1;
+            renderIndicadoresRota();
+        };
+
+        window.filtrarKpiPorSetor = (area) => {
+            const sel = document.getElementById('kpiRotaSetor');
+            if (!sel) return;
+            sel.value = sel.value === area ? '' : area;
+            window.onChangeKpiRotaSetor();
+            document.getElementById('kpiRotaSummaryGrid')?.scrollIntoView({ behavior: userPrefs.tabletMode ? 'auto' : 'smooth', block: 'start' });
+        };
+
+        window.filtrarKpiPorBusca = (termo) => {
+            const inp = document.getElementById('kpiRotaBusca');
+            if (!inp) return;
+            inp.value = termo || '';
+            kpiRotaPagina = 1;
+            renderIndicadoresRota();
+            setSubTabRegistrosKpiRota('anomalias');
+        };
+
+        function kpiFiltrarDados() {
+            const f = kpiGetFiltros();
+            const p = kpiGetPeriodoInfo();
+            const agoraLimite = Date.now() + 86400000;
+
+            // ---------- ANOMALIAS ----------
+            let anoms = f.status === 'TRIAGEM_REPROVADAS'
+                ? listaAnomalias.filter(a => !isAnomaliaOficial(a))
+                : getAnomaliasOficiais();
+            anoms = anoms.filter(a => {
+                const ts = Number(a.timestamp || 0);
+                if (p.ini && ts && ts < p.ini) return false;
+                if (ts && ts >= p.fim) return false;
+                if (f.setor && a.area !== f.setor) return false;
+                if (f.maquina && a.maquina !== f.maquina) return false;
+                if (f.equipe && !String(kpiEquipeAnom(a)).includes(f.equipe)) return false;
+                if (f.status === 'ABERTAS' && !kpiStatusAberta(a)) return false;
+                if (f.status && !['ABERTAS', 'TRIAGEM_REPROVADAS'].includes(f.status) && a.status !== f.status) return false;
+                if (f.urg) {
+                    if (f.urg.startsWith('URG_') && (a.urgencia || 'Média') !== f.urg.slice(4)) return false;
+                    if (f.urg === 'RISCO_PARADA' && !a.risco_parada) return false;
+                    if (f.urg === 'ORIG_ROTA' && (a.origem === 'Anomalia Direta' || a.id_agenda === 'DIRETA')) return false;
+                    if (f.urg === 'ORIG_DIRETA' && !(a.origem === 'Anomalia Direta' || a.id_agenda === 'DIRETA')) return false;
+                }
+                if (f.busca) {
+                    const alvo = kpiNorm([a.id, a.area, a.maquina, a.equipamento, a.conjunto, a.componente, a.descricao, a.relator, a.executado_por, a.classificacao_os, (a.tecnicos_nomes || []).join(' ')].join(' '));
+                    if (!alvo.includes(f.busca)) return false;
+                }
+                return true;
+            }).sort((a, b) => Number(b.timestamp || 0) - Number(a.timestamp || 0));
+
+            // ---------- ROTAS ----------
+            const rotas = agendaRotas.filter(r => {
+                if (r.orphan_ignorado) return false;
+                if (p.per === 'semana_atual') {
+                    if (Number(r.semana) !== Number(currentWeekNumber)) return false;
+                } else {
+                    const ref = kpiRefDataRota(r);
+                    if (p.ini && ref && ref < p.ini - 7 * 86400000) return false;
+                }
+                if (f.setor && r.area !== f.setor) return false;
+                if (f.maquina && r.maquina !== f.maquina) return false;
+                if (f.equipe && !String(r.role_tecnico || '').includes(f.equipe)) return false;
+                if (f.busca) {
+                    const alvo = kpiNorm([r.area, r.maquina, r.equipamento, r.conjunto, r.nome_tecnico, r.observacoes_gerais].join(' '));
+                    if (!alvo.includes(f.busca)) return false;
+                }
+                return true;
+            }).sort((a, b) => (Number(b.semana || 0) - Number(a.semana || 0)) || (Number(b.data_conclusao || 0) - Number(a.data_conclusao || 0)));
+
+            // Programadas = rotas cujo prazo (semana) já começou (exclui semanas futuras planejadas)
+            const rotasProgramadas = rotas.filter(r => {
+                if (r.status === 'Concluído') return true;
+                return kpiRefDataRota(r) <= agoraLimite;
+            });
+
+            return { f, p, anoms, rotas, rotasProgramadas };
+        }
+
+        function kpiCard(titulo, valor, sub, cor, extraHtml = '') {
+            return `
+            <div class="glass-card p-4 rounded-3xl border-l-4 ${cor.border} space-y-1.5 min-w-0">
+                <div class="text-[10px] font-extrabold uppercase tracking-wider ${cor.text} truncate">${titulo}</div>
+                <div class="text-2xl font-extrabold text-slate-900 leading-tight">${valor}</div>
+                <div class="text-[11px] font-semibold text-slate-500 leading-snug">${sub}</div>
+                ${extraHtml}
+            </div>`;
+        }
+        function kpiBarra(pct, corBg) {
+            const v = Math.max(0, Math.min(100, Number(pct) || 0));
+            return `<div class="h-1.5 w-full bg-slate-200 rounded-full overflow-hidden"><div class="h-full ${corBg} rounded-full" style="width:${v}%"></div></div>`;
+        }
+
+        function kpiChartBaseOptions(extra = {}) {
+            const dark = document.body.classList.contains('theme-dark');
+            const txt = dark ? '#e2e8f0' : '#334155';
+            const grid = dark ? 'rgba(148,163,184,0.15)' : 'rgba(148,163,184,0.25)';
+            const base = {
+                responsive: true,
+                maintainAspectRatio: false,
+                animation: userPrefs.tabletMode ? false : { duration: 350 },
+                plugins: {
+                    legend: { position: 'bottom', labels: { color: txt, boxWidth: 12, font: { family: 'Plus Jakarta Sans', weight: 'bold', size: 11 } } },
+                    tooltip: { mode: 'index', intersect: false }
+                },
+                scales: {
+                    x: { ticks: { color: txt, font: { size: 10, weight: 'bold' } }, grid: { color: grid } },
+                    y: { ticks: { color: txt, font: { size: 10, weight: 'bold' } }, grid: { color: grid }, beginAtZero: true }
+                }
+            };
+            return Object.assign(base, extra);
+        }
+        function kpiDesenharChart(id, config) {
+            const canvas = document.getElementById(id);
+            if (!canvas || typeof window.Chart === 'undefined') return;
+            if (chartsKpiRota[id]) { try { chartsKpiRota[id].destroy(); } catch (_) {} }
+            chartsKpiRota[id] = new window.Chart(canvas.getContext('2d'), config);
+        }
+
+        window.renderIndicadoresRota = () => {
+            const view = document.getElementById('view-indicadores');
+            if (!view || !usuarioLogado) return;
+            popularFiltrosIndicadoresRota();
+            const { p, anoms, rotas, rotasProgramadas } = kpiFiltrarDados();
+            kpiRotaUltimo = { anomalias: anoms, rotas, rotasProgramadas, periodo: p };
+            const f = kpiGetFiltros();
+
+            // ---------- CARDS ----------
+            const progN = rotasProgramadas.length;
+            const execN = rotasProgramadas.filter(r => r.status === 'Concluído').length;
+            const ader = progN ? Math.round((execN / progN) * 100) : 0;
+            const totalAn = anoms.length;
+            const concl = anoms.filter(a => a.status === 'Concluída').length;
+            const abertas = anoms.filter(kpiStatusAberta);
+            const resol = totalAn ? Math.round((concl / totalAn) * 100) : 0;
+            const altas = abertas.filter(a => (a.urgencia || 'Média') === 'Alta').length;
+            const riscos = abertas.filter(a => a.risco_parada).length;
+            let minEst = 0, minReal = 0, qtdComReal = 0;
+            anoms.forEach(a => {
+                minEst += kpiTempoParaMin(a.tempo_estimado) * Math.max(1, Number(a.qtd_tecnicos || 1));
+                const r = kpiTempoParaMin(a.tempo_real);
+                if (r > 0) { minReal += r; qtdComReal++; }
+            });
+            let ptsOk = 0, ptsAnom = 0, ptsNa = 0;
+            rotas.forEach(r => {
+                if (r.status !== 'Concluído' || !Array.isArray(r.checklist_respostas)) return;
+                r.checklist_respostas.forEach(c => {
+                    if (c.status === 'OK') ptsOk++;
+                    else if (c.status === 'Anomalia') ptsAnom++;
+                    else ptsNa++;
+                });
+            });
+            const saude = (ptsOk + ptsAnom) ? Math.round((ptsOk / (ptsOk + ptsAnom)) * 100) : 0;
+            const baseCob = getLinhasParaInspecao().filter(x => (!f.setor || x.area === f.setor) && (!f.maquina || x.maquina === f.maquina));
+            const temPlano = (x) => Boolean(mapaChecklists[`${x.id}_Mecânica`] || mapaChecklists[`${x.id}_Elétrica`]);
+            const comPlano = baseCob.filter(temPlano).length;
+            const cob = baseCob.length ? Math.round((comPlano / baseCob.length) * 100) : 0;
+
+            const corAder = ader >= KPI_ROTA_META_ADERENCIA ? { border: 'border-emerald-500', text: 'text-emerald-700', bg: 'bg-emerald-500' } : ader >= 70 ? { border: 'border-amber-500', text: 'text-amber-700', bg: 'bg-amber-500' } : { border: 'border-rose-500', text: 'text-rose-700', bg: 'bg-rose-500' };
+            const grid = document.getElementById('kpiRotaSummaryGrid');
+            if (grid) {
+                grid.innerHTML = [
+                    kpiCard('Aderência de Rotas', `${ader}%`, `${execN} de ${progN} rotas executadas • Meta ${KPI_ROTA_META_ADERENCIA}%`, corAder, kpiBarra(ader, corAder.bg)),
+                    kpiCard('Resolução de Anomalias', `${resol}%`, `${concl} concluídas de ${totalAn} registradas`, { border: 'border-indigo-500', text: 'text-indigo-700' }, kpiBarra(resol, 'bg-indigo-500')),
+                    kpiCard('Backlog Aberto', `${abertas.length}`, `<span class="text-rose-600 font-extrabold">${altas} urgência alta</span> • <span class="text-amber-600 font-extrabold">${riscos} risco de parada</span>`, { border: 'border-rose-500', text: 'text-rose-700' }),
+                    kpiCard('Esforço H/H', kpiFmtHoras(minReal), `Real executado (${qtdComReal} OS) vs <b>${kpiFmtHoras(minEst)}</b> estimado`, { border: 'border-sky-500', text: 'text-sky-700' }, kpiBarra(minEst ? (minReal / minEst) * 100 : 0, 'bg-sky-500')),
+                    kpiCard('Saúde dos Pontos', `${saude}%`, `${ptsOk} OK • ${ptsAnom} anomalia • ${ptsNa} N/A`, { border: 'border-emerald-500', text: 'text-emerald-700' }, kpiBarra(saude, 'bg-emerald-500')),
+                    kpiCard('Cobertura Cirúrgica', `${cob}%`, `${comPlano} de ${baseCob.length} conjuntos com plano`, { border: 'border-violet-500', text: 'text-violet-700' }, kpiBarra(cob, 'bg-violet-500'))
+                ].join('');
+            }
+
+            // ---------- GRÁFICOS ----------
+            if (typeof window.Chart === 'undefined') {
+                setTimeout(() => { if (!view.classList.contains('hidden')) renderIndicadoresRota(); }, 400);
+            } else {
+                kpiRenderGraficos(p, anoms, rotas, rotasProgramadas);
+            }
+
+            // ---------- COBERTURA POR SETOR ----------
+            kpiRenderCoberturaSetores(anoms, rotasProgramadas, temPlano);
+
+            // ---------- RANKINGS ----------
+            kpiRenderRankings(anoms, rotas);
+
+            // ---------- TABELA ----------
+            const cA = document.getElementById('kpiCntTabAnomalias'); if (cA) cA.innerText = anoms.length;
+            const cR = document.getElementById('kpiCntTabRotas'); if (cR) cR.innerText = rotas.length;
+            kpiRenderTabela();
+        };
+
+        function kpiRenderGraficos(p, anoms, rotas, rotasProgramadas) {
+            // 1) Evolução semanal de aderência (ignora o filtro de período; usa janela de semanas)
+            const nSem = p.semanas;
+            const semFim = Number(currentWeekNumber);
+            const semanas = [];
+            for (let i = nSem - 1; i >= 0; i--) { const s = semFim - i; if (s >= 1) semanas.push(s); }
+            const f = kpiGetFiltros();
+            const rotasJanela = agendaRotas.filter(r => !r.orphan_ignorado &&
+                (!f.setor || r.area === f.setor) && (!f.maquina || r.maquina === f.maquina) &&
+                (!f.equipe || String(r.role_tecnico || '').includes(f.equipe)));
+            const progS = semanas.map(s => rotasJanela.filter(r => Number(r.semana) === s).length);
+            const execS = semanas.map(s => rotasJanela.filter(r => Number(r.semana) === s && r.status === 'Concluído').length);
+            const aderS = semanas.map((s, i) => progS[i] ? Math.round((execS[i] / progS[i]) * 100) : null);
+            kpiDesenharChart('chartKpiEvolucaoRotas', {
+                type: 'bar',
+                data: {
+                    labels: semanas.map(s => `S${s}`),
+                    datasets: [
+                        { type: 'bar', label: 'Programadas', data: progS, backgroundColor: 'rgba(148,163,184,0.55)', borderRadius: 6, yAxisID: 'y' },
+                        { type: 'bar', label: 'Executadas', data: execS, backgroundColor: '#0284c7', borderRadius: 6, yAxisID: 'y' },
+                        { type: 'line', label: 'Aderência %', data: aderS, borderColor: '#10b981', backgroundColor: '#10b981', tension: 0.3, spanGaps: true, yAxisID: 'y1', pointRadius: 3 },
+                        { type: 'line', label: 'Meta 90%', data: semanas.map(() => KPI_ROTA_META_ADERENCIA), borderColor: '#e11d48', borderDash: [6, 4], pointRadius: 0, yAxisID: 'y1' }
+                    ]
+                },
+                options: (() => {
+                    const o = kpiChartBaseOptions();
+                    o.scales.y1 = { position: 'right', min: 0, max: 100, ticks: { color: o.scales.y.ticks.color, callback: v => v + '%' }, grid: { drawOnChartArea: false } };
+                    return o;
+                })()
+            });
+
+            // 2) Evolução mensal de anomalias
+            const meses = [];
+            const hoje = new Date();
+            for (let i = p.meses - 1; i >= 0; i--) {
+                const d = new Date(hoje.getFullYear(), hoje.getMonth() - i, 1);
+                meses.push({ y: d.getFullYear(), m: d.getMonth(), label: d.toLocaleDateString('pt-BR', { month: 'short', year: '2-digit' }) });
+            }
+            const baseMes = getAnomaliasOficiais().filter(a =>
+                (!f.setor || a.area === f.setor) && (!f.maquina || a.maquina === f.maquina) &&
+                (!f.equipe || String(kpiEquipeAnom(a)).includes(f.equipe)));
+            const det = meses.map(() => 0), con = meses.map(() => 0);
+            const idxMes = (ts) => { if (!ts) return -1; const d = new Date(Number(ts)); return meses.findIndex(x => x.y === d.getFullYear() && x.m === d.getMonth()); };
+            baseMes.forEach(a => {
+                const i = idxMes(a.timestamp); if (i >= 0) det[i]++;
+                if (a.status === 'Concluída') { const j = idxMes(a.data_validacao || a.data_execucao || a.timestamp); if (j >= 0) con[j]++; }
+            });
+            kpiDesenharChart('chartKpiEvolucaoAnomalias', {
+                type: 'line',
+                data: {
+                    labels: meses.map(x => x.label),
+                    datasets: [
+                        { label: 'Detectadas', data: det, borderColor: '#e11d48', backgroundColor: 'rgba(225,29,72,0.12)', fill: true, tension: 0.3 },
+                        { label: 'Concluídas', data: con, borderColor: '#10b981', backgroundColor: 'rgba(16,185,129,0.12)', fill: true, tension: 0.3 }
+                    ]
+                },
+                options: kpiChartBaseOptions()
+            });
+
+            // 3) Status por urgência & risco de parada (empilhado)
+            const grupos = ['Alta', 'Média', 'Baixa', 'Risco Parada'];
+            const statusList = [
+                { st: 'Pendente', cor: '#e11d48' },
+                { st: 'Em Andamento', cor: '#f59e0b' },
+                { st: 'Aguardando Validação', cor: '#6366f1' },
+                { st: 'Concluída', cor: '#10b981' }
+            ];
+            kpiDesenharChart('chartKpiUrgenciaStatus', {
+                type: 'bar',
+                data: {
+                    labels: grupos,
+                    datasets: statusList.map(s => ({
+                        label: s.st,
+                        backgroundColor: s.cor,
+                        borderRadius: 4,
+                        data: grupos.map(g => anoms.filter(a => (g === 'Risco Parada' ? a.risco_parada : (a.urgencia || 'Média') === g) && (a.status || 'Pendente') === s.st).length)
+                    }))
+                },
+                options: (() => { const o = kpiChartBaseOptions(); o.scales.x.stacked = true; o.scales.y.stacked = true; return o; })()
+            });
+
+            // 4) Classificação OS (doughnut) + badges origem
+            const classes = {};
+            anoms.forEach(a => { const c = a.classificacao_os || 'NÃO CLASSIFICADA'; classes[c] = (classes[c] || 0) + 1; });
+            const clsLabels = Object.keys(classes).sort((a, b) => classes[b] - classes[a]);
+            const palette = ['#e11d48', '#f59e0b', '#0284c7', '#10b981', '#8b5cf6', '#64748b', '#14b8a6', '#f97316'];
+            const oCls = kpiChartBaseOptions({ cutout: '62%' });
+            delete oCls.scales;
+            oCls.plugins.legend.position = 'right';
+            kpiDesenharChart('chartKpiClassificacaoOrigem', {
+                type: 'doughnut',
+                data: { labels: clsLabels, datasets: [{ data: clsLabels.map(c => classes[c]), backgroundColor: clsLabels.map((_, i) => palette[i % palette.length]), borderWidth: 0 }] },
+                options: oCls
+            });
+            const nDireta = anoms.filter(a => a.origem === 'Anomalia Direta' || a.id_agenda === 'DIRETA').length;
+            const bo = document.getElementById('kpiRotaBadgesOrigem');
+            if (bo) bo.innerHTML = `<span class="px-2 py-0.5 rounded-full bg-sky-100 text-sky-800">Via Rota: ${anoms.length - nDireta}</span><span class="px-2 py-0.5 rounded-full bg-violet-100 text-violet-800">Direta: ${nDireta}</span>`;
+
+            // 5) Top 8 máquinas
+            const porMaq = {};
+            anoms.forEach(a => {
+                const k = a.maquina || 'Sem máquina';
+                if (!porMaq[k]) porMaq[k] = { ab: 0, co: 0 };
+                if (a.status === 'Concluída') porMaq[k].co++; else porMaq[k].ab++;
+            });
+            const topM = Object.keys(porMaq).sort((a, b) => (porMaq[b].ab + porMaq[b].co) - (porMaq[a].ab + porMaq[a].co)).slice(0, 8);
+            kpiDesenharChart('chartKpiTopMaquinas', {
+                type: 'bar',
+                data: {
+                    labels: topM.map(m => m.length > 26 ? m.slice(0, 25) + '…' : m),
+                    datasets: [
+                        { label: 'Abertas', data: topM.map(m => porMaq[m].ab), backgroundColor: '#e11d48', borderRadius: 4 },
+                        { label: 'Concluídas', data: topM.map(m => porMaq[m].co), backgroundColor: '#10b981', borderRadius: 4 }
+                    ]
+                },
+                options: (() => { const o = kpiChartBaseOptions({ indexAxis: 'y' }); o.scales.x.stacked = true; o.scales.y.stacked = true; return o; })()
+            });
+
+            // 6) Backlog vs resolvidas por equipe
+            const porEq = {};
+            anoms.forEach(a => {
+                const k = kpiEquipeAnom(a);
+                if (!porEq[k]) porEq[k] = { ab: 0, co: 0, alta: 0 };
+                if (a.status === 'Concluída') porEq[k].co++; else { porEq[k].ab++; if ((a.urgencia || 'Média') === 'Alta') porEq[k].alta++; }
+            });
+            const eqs = Object.keys(porEq).sort();
+            kpiDesenharChart('chartKpiDesempenhoEquipe', {
+                type: 'bar',
+                data: {
+                    labels: eqs,
+                    datasets: [
+                        { label: 'Backlog', data: eqs.map(e => porEq[e].ab), backgroundColor: '#f59e0b', borderRadius: 6 },
+                        { label: 'Backlog Urg. Alta', data: eqs.map(e => porEq[e].alta), backgroundColor: '#e11d48', borderRadius: 6 },
+                        { label: 'Resolvidas', data: eqs.map(e => porEq[e].co), backgroundColor: '#10b981', borderRadius: 6 }
+                    ]
+                },
+                options: kpiChartBaseOptions()
+            });
+        }
+
+        function kpiRenderCoberturaSetores(anoms, rotasProgramadas, temPlano) {
+            const box = document.getElementById('kpiRotaCoberturaSetores');
+            if (!box) return;
+            const f = kpiGetFiltros();
+            const setores = {};
+            const ensure = (a) => { if (!setores[a]) setores[a] = { total: 0, plano: 0, prog: 0, exec: 0, ab: 0, alta: 0, maqs: new Set() }; return setores[a]; };
+            getLinhasParaInspecao().forEach(x => { if (!x.area) return; const s = ensure(x.area); s.total++; if (temPlano(x)) s.plano++; if (x.maquina) s.maqs.add(x.maquina); });
+            rotasProgramadas.forEach(r => { if (!r.area) return; const s = ensure(r.area); s.prog++; if (r.status === 'Concluído') s.exec++; });
+            anoms.forEach(a => { if (!a.area) return; const s = ensure(a.area); if (kpiStatusAberta(a)) { s.ab++; if ((a.urgencia || 'Média') === 'Alta') s.alta++; } });
+            const nomes = Object.keys(setores).sort((a, b) => a.localeCompare(b));
+            if (!nomes.length) {
+                box.innerHTML = `<div class="col-span-full p-6 text-center text-xs font-semibold text-slate-400 border border-dashed border-slate-200 rounded-2xl">Nenhum setor com dados no filtro atual.</div>`;
+                return;
+            }
+            box.innerHTML = nomes.map(n => {
+                const s = setores[n];
+                const cob = s.total ? Math.round((s.plano / s.total) * 100) : 0;
+                const ad = s.prog ? Math.round((s.exec / s.prog) * 100) : null;
+                const corAd = ad === null ? 'text-slate-400' : ad >= KPI_ROTA_META_ADERENCIA ? 'text-emerald-600' : ad >= 70 ? 'text-amber-600' : 'text-rose-600';
+                const ativo = f.setor === n;
+                return `
+                <button type="button" onclick="filtrarKpiPorSetor(${JSON.stringify(n).replace(/"/g, '&quot;')})" class="text-left p-4 rounded-2xl border ${ativo ? 'border-indigo-500 ring-2 ring-indigo-200 bg-indigo-50/60' : 'border-slate-200 bg-white/80 hover:border-indigo-300'} transition-colors space-y-2">
+                    <div class="flex items-center justify-between gap-2">
+                        <span class="text-xs font-extrabold text-slate-900 truncate">${escapeHtml(n)}</span>
+                        <span class="text-[10px] font-bold text-slate-400 shrink-0">${s.maqs.size} linha(s)</span>
+                    </div>
+                    <div class="grid grid-cols-3 gap-2 text-center">
+                        <div><div class="text-base font-extrabold text-violet-700">${cob}%</div><div class="text-[9px] font-bold uppercase text-slate-400">Cobertura</div></div>
+                        <div><div class="text-base font-extrabold ${corAd}">${ad === null ? '—' : ad + '%'}</div><div class="text-[9px] font-bold uppercase text-slate-400">Aderência</div></div>
+                        <div><div class="text-base font-extrabold ${s.ab ? 'text-rose-600' : 'text-emerald-600'}">${s.ab}</div><div class="text-[9px] font-bold uppercase text-slate-400">Abertas${s.alta ? ` (${s.alta}⚠)` : ''}</div></div>
+                    </div>
+                    ${kpiBarra(cob, 'bg-violet-500')}
+                    <div class="text-[10px] font-semibold text-slate-500">${s.plano}/${s.total} conjuntos com plano • ${s.exec}/${s.prog} rotas</div>
+                </button>`;
+            }).join('');
+        }
+
+        function kpiRenderRankings(anoms, rotas) {
+            const boxA = document.getElementById('kpiRotaTopAtivosList');
+            if (boxA) {
+                const grp = {};
+                anoms.forEach(a => {
+                    const k = [a.maquina || '—', a.equipamento || '—', a.conjunto || 'Geral do Equipamento'].join(' › ');
+                    if (!grp[k]) grp[k] = { total: 0, ab: 0, alta: 0, eq: a.equipamento || a.maquina || '', area: a.area || '' };
+                    grp[k].total++;
+                    if (kpiStatusAberta(a)) grp[k].ab++;
+                    if ((a.urgencia || 'Média') === 'Alta') grp[k].alta++;
+                });
+                const top = Object.keys(grp).sort((a, b) => grp[b].total - grp[a].total).slice(0, 8);
+                const max = top.length ? grp[top[0]].total : 1;
+                boxA.innerHTML = top.length ? top.map((k, i) => {
+                    const g = grp[k];
+                    return `
+                    <button type="button" onclick="filtrarKpiPorBusca(${JSON.stringify(g.eq).replace(/"/g, '&quot;')})" class="w-full text-left p-3 rounded-2xl bg-slate-50/90 border border-slate-200/70 hover:border-rose-300 space-y-1.5">
+                        <div class="flex items-center justify-between gap-2">
+                            <span class="text-[11px] font-extrabold text-slate-800 truncate"><span class="text-rose-600">#${i + 1}</span> ${escapeHtml(k)}</span>
+                            <span class="text-[10px] font-extrabold text-slate-600 shrink-0">${g.total} • <span class="text-rose-600">${g.ab} ab.</span>${g.alta ? ` • <span class="text-amber-600">${g.alta} alta</span>` : ''}</span>
+                        </div>
+                        ${kpiBarra((g.total / max) * 100, 'bg-rose-500')}
+                        <div class="text-[10px] font-semibold text-slate-400 truncate">${escapeHtml(g.area)}</div>
+                    </button>`;
+                }).join('') : `<div class="p-6 text-center text-xs font-semibold text-slate-400 border border-dashed border-slate-200 rounded-2xl">Sem anomalias no filtro atual.</div>`;
+            }
+            const boxI = document.getElementById('kpiRotaTopInspetoresList');
+            if (boxI) {
+                const pes = {};
+                const ens = (n) => { if (!pes[n]) pes[n] = { rotas: 0, anoms: 0, pontos: 0, exec: 0 }; return pes[n]; };
+                rotas.forEach(r => {
+                    if (r.status !== 'Concluído') return;
+                    const p = ens(r.nome_tecnico || 'Não atribuído');
+                    p.rotas++;
+                    p.pontos += Array.isArray(r.checklist_respostas) ? r.checklist_respostas.length : 0;
+                });
+                anoms.forEach(a => {
+                    if (a.relator) ens(a.relator).anoms++;
+                    if (a.status === 'Concluída' && a.executado_por) ens(a.executado_por).exec++;
+                });
+                const top = Object.keys(pes).sort((a, b) => (pes[b].rotas * 2 + pes[b].anoms + pes[b].exec) - (pes[a].rotas * 2 + pes[a].anoms + pes[a].exec)).slice(0, 8);
+                const medal = ['🥇', '🥈', '🥉'];
+                boxI.innerHTML = top.length ? top.map((n, i) => {
+                    const p = pes[n];
+                    return `
+                    <div class="p-3 rounded-2xl bg-slate-50/90 border border-slate-200/70 flex items-center justify-between gap-3">
+                        <div class="min-w-0 flex items-center gap-2">
+                            <span class="text-sm w-6 text-center shrink-0">${medal[i] || `<span class="text-[11px] font-extrabold text-slate-400">#${i + 1}</span>`}</span>
+                            <span class="text-xs font-extrabold text-slate-800 truncate">${escapeHtml(n)}</span>
+                        </div>
+                        <div class="flex flex-wrap justify-end gap-1 text-[10px] font-extrabold shrink-0">
+                            <span class="px-2 py-0.5 rounded-full bg-sky-100 text-sky-800">${p.rotas} rotas</span>
+                            <span class="px-2 py-0.5 rounded-full bg-slate-200 text-slate-700">${p.pontos} pts</span>
+                            <span class="px-2 py-0.5 rounded-full bg-rose-100 text-rose-700">${p.anoms} relatos</span>
+                            <span class="px-2 py-0.5 rounded-full bg-emerald-100 text-emerald-700">${p.exec} baixas</span>
+                        </div>
+                    </div>`;
+                }).join('') : `<div class="p-6 text-center text-xs font-semibold text-slate-400 border border-dashed border-slate-200 rounded-2xl">Sem execuções no período.</div>`;
+            }
+        }
+
+        function kpiBadgeStatus(st) {
+            const m = { 'Pendente': 'bg-rose-100 text-rose-700', 'Em Andamento': 'bg-amber-100 text-amber-800', 'Aguardando Validação': 'bg-indigo-100 text-indigo-700', 'Concluída': 'bg-emerald-100 text-emerald-700', 'Concluído': 'bg-emerald-100 text-emerald-700', 'Pendente Aprovação': 'bg-slate-200 text-slate-700', 'Rejeitada': 'bg-slate-800 text-white' };
+            return `<span class="inline-block text-[10px] font-extrabold uppercase px-2 py-0.5 rounded-full whitespace-nowrap ${m[st] || 'bg-slate-100 text-slate-600'}">${escapeHtml(st || '—')}</span>`;
+        }
+        function kpiBadgeUrg(u) {
+            const m = { 'Alta': 'bg-rose-600 text-white', 'Média': 'bg-amber-100 text-amber-800', 'Baixa': 'bg-slate-100 text-slate-600' };
+            return `<span class="inline-block text-[10px] font-extrabold px-2 py-0.5 rounded-full ${m[u] || m['Média']}">${escapeHtml(u || 'Média')}</span>`;
+        }
+
+        window.setSubTabRegistrosKpiRota = (tab) => {
+            kpiRotaSubTab = tab === 'rotas' ? 'rotas' : 'anomalias';
+            kpiRotaPagina = 1;
+            const on = 'px-4 py-1.5 rounded-full text-xs font-extrabold bg-slate-900 text-white transition-colors';
+            const off = 'px-4 py-1.5 rounded-full text-xs font-extrabold text-slate-600 hover:text-slate-900 transition-colors';
+            const bA = document.getElementById('btnKpiSubTabAnomalias');
+            const bR = document.getElementById('btnKpiSubTabRotas');
+            if (bA) bA.className = kpiRotaSubTab === 'anomalias' ? on : off;
+            if (bR) bR.className = kpiRotaSubTab === 'rotas' ? on : off;
+            kpiRenderTabela();
+        };
+
+        window.irPaginaKpiRota = (n) => { kpiRotaPagina = Math.max(1, n); kpiRenderTabela(); };
+
+        function kpiRenderTabela() {
+            const head = document.getElementById('kpiRotaTabelaHead');
+            const body = document.getElementById('kpiRotaTabelaBody');
+            const pag = document.getElementById('kpiRotaPaginacaoBox');
+            if (!head || !body) return;
+            const th = (t) => `<th class="px-3 py-2.5 text-[10px] font-extrabold uppercase tracking-wider text-slate-500 whitespace-nowrap">${t}</th>`;
+            const lista = kpiRotaSubTab === 'rotas' ? kpiRotaUltimo.rotas : kpiRotaUltimo.anomalias;
+            const totalPag = Math.max(1, Math.ceil(lista.length / KPI_ROTA_PAGE_SIZE));
+            if (kpiRotaPagina > totalPag) kpiRotaPagina = totalPag;
+            const ini = (kpiRotaPagina - 1) * KPI_ROTA_PAGE_SIZE;
+            const fatia = lista.slice(ini, ini + KPI_ROTA_PAGE_SIZE);
+            const vazio = (cols, msg) => `<tr><td colspan="${cols}" class="p-8 text-center text-xs font-semibold text-slate-400">${msg}</td></tr>`;
+
+            if (kpiRotaSubTab === 'anomalias') {
+                head.innerHTML = `<tr class="bg-slate-50 border-b border-slate-200">${['Data', 'Foto', 'Ativo', 'Descrição', 'Origem', 'Classificação', 'Urgência', 'Status', 'Equipe', 'Relator', 'Tempo Real', ''].map(th).join('')}</tr>`;
+                body.innerHTML = fatia.length ? fatia.map(a => {
+                    const idJs = JSON.stringify(String(a.id)).replace(/"/g, '&quot;');
+                    const direta = a.origem === 'Anomalia Direta' || a.id_agenda === 'DIRETA';
+                    const foto = a.fotoB64 ? `<img src="${a.fotoB64}" loading="lazy" decoding="async" alt="Foto" class="w-10 h-10 object-cover rounded-lg border border-slate-200 cursor-zoom-in" onclick="event.stopPropagation(); abrirZoomFoto(this.src)">` : '<span class="text-slate-300">—</span>';
+                    return `
+                    <tr class="hover:bg-slate-50/80 cursor-pointer" onclick="abrirModalDetalheAnomaliaKpi(${idJs})">
+                        <td class="px-3 py-2 font-bold text-slate-600 whitespace-nowrap">${kpiFmtData(a.timestamp)}</td>
+                        <td class="px-3 py-2">${foto}</td>
+                        <td class="px-3 py-2 min-w-[180px]"><div class="text-[10px] font-bold text-slate-400 uppercase truncate max-w-[220px]">${escapeHtml(a.area)} • ${escapeHtml(a.maquina)}</div><div class="font-extrabold text-slate-800 truncate max-w-[220px]">${escapeHtml(a.equipamento)}${a.conjunto ? ' › ' + escapeHtml(a.conjunto) : ''}</div></td>
+                        <td class="px-3 py-2 min-w-[200px] max-w-[300px]"><div class="line-clamp-2 font-semibold text-slate-700">${escapeHtml(a.descricao)}</div></td>
+                        <td class="px-3 py-2 whitespace-nowrap"><span class="text-[10px] font-extrabold px-2 py-0.5 rounded-full ${direta ? 'bg-violet-100 text-violet-800' : 'bg-sky-100 text-sky-800'}">${direta ? 'Direta' : 'Via Rota'}</span></td>
+                        <td class="px-3 py-2 text-[10px] font-bold text-slate-600 whitespace-nowrap">${escapeHtml(a.classificacao_os || '—')}</td>
+                        <td class="px-3 py-2 whitespace-nowrap">${kpiBadgeUrg(a.urgencia)}${a.risco_parada ? ' <span title="Risco de parada" class="text-rose-600 font-extrabold">⚠</span>' : ''}</td>
+                        <td class="px-3 py-2">${kpiBadgeStatus(isAnomaliaOficial(a) ? a.status : a.status_aprovacao)}</td>
+                        <td class="px-3 py-2 font-bold text-slate-600 whitespace-nowrap">${escapeHtml(kpiEquipeAnom(a))}</td>
+                        <td class="px-3 py-2 font-semibold text-slate-600 whitespace-nowrap">${escapeHtml(a.relator || '—')}</td>
+                        <td class="px-3 py-2 font-bold text-slate-700 whitespace-nowrap">${escapeHtml(a.tempo_real || '—')}</td>
+                        <td class="px-3 py-2 text-right"><span class="text-[11px] font-extrabold text-indigo-600 whitespace-nowrap">Dossiê →</span></td>
+                    </tr>`;
+                }).join('') : vazio(12, 'Nenhuma anomalia encontrada para os filtros selecionados.');
+            } else {
+                head.innerHTML = `<tr class="bg-slate-50 border-b border-slate-200">${['Semana', 'Conclusão', 'Ativo', 'Técnico', 'Equipe', 'Status', 'Pontos OK / Anom.', 'Supervisão', ''].map(th).join('')}</tr>`;
+                body.innerHTML = fatia.length ? fatia.map(r => {
+                    const resp = Array.isArray(r.checklist_respostas) ? r.checklist_respostas : [];
+                    const ok = resp.filter(c => c.status === 'OK').length;
+                    const an = resp.filter(c => c.status === 'Anomalia').length;
+                    const idJs = JSON.stringify(String(r.id)).replace(/"/g, '&quot;');
+                    const concl = r.status === 'Concluído';
+                    return `
+                    <tr class="hover:bg-slate-50/80">
+                        <td class="px-3 py-2 font-extrabold text-slate-700 whitespace-nowrap">S${escapeHtml(r.semana)}</td>
+                        <td class="px-3 py-2 font-bold text-slate-600 whitespace-nowrap">${concl ? kpiFmtData(r.data_conclusao, true) : '—'}</td>
+                        <td class="px-3 py-2 min-w-[180px]"><div class="text-[10px] font-bold text-slate-400 uppercase truncate max-w-[220px]">${escapeHtml(r.area)} • ${escapeHtml(r.maquina)}</div><div class="font-extrabold text-slate-800 truncate max-w-[240px]">${escapeHtml(r.equipamento)}${r.conjunto ? ' › ' + escapeHtml(r.conjunto) : ''}</div></td>
+                        <td class="px-3 py-2 font-semibold text-slate-700 whitespace-nowrap">${escapeHtml(r.nome_tecnico || 'Não atribuído')}</td>
+                        <td class="px-3 py-2 font-bold text-slate-500 whitespace-nowrap">${escapeHtml(r.role_tecnico || '—')}</td>
+                        <td class="px-3 py-2">${kpiBadgeStatus(r.status || 'Pendente')}</td>
+                        <td class="px-3 py-2 whitespace-nowrap font-extrabold"><span class="text-emerald-600">${ok}</span> / <span class="${an ? 'text-rose-600' : 'text-slate-400'}">${an}</span></td>
+                        <td class="px-3 py-2 text-[10px] font-bold text-slate-500 whitespace-nowrap">${escapeHtml(r.status_supervisao || '—')}</td>
+                        <td class="px-3 py-2 text-right">${concl ? `<button type="button" onclick="abrirModalVisualizarFicha(${idJs})" class="text-[11px] font-extrabold text-sky-600 hover:underline whitespace-nowrap">Ver Ficha →</button>` : ''}</td>
+                    </tr>`;
+                }).join('') : vazio(9, 'Nenhuma rota encontrada para os filtros selecionados.');
+            }
+
+            if (pag) {
+                if (lista.length <= KPI_ROTA_PAGE_SIZE) {
+                    pag.classList.add('hidden');
+                    pag.innerHTML = '';
+                } else {
+                    pag.classList.remove('hidden');
+                    pag.innerHTML = `
+                        <span class="font-bold text-slate-500">Exibindo ${ini + 1}–${Math.min(ini + KPI_ROTA_PAGE_SIZE, lista.length)} de ${lista.length}</span>
+                        <div class="flex items-center gap-1.5">
+                            <button type="button" ${kpiRotaPagina <= 1 ? 'disabled' : ''} onclick="irPaginaKpiRota(${kpiRotaPagina - 1})" class="px-3 py-1.5 rounded-lg bg-white border border-slate-300 font-extrabold disabled:opacity-40">← Anterior</button>
+                            <span class="font-extrabold text-slate-700 px-2">${kpiRotaPagina} / ${totalPag}</span>
+                            <button type="button" ${kpiRotaPagina >= totalPag ? 'disabled' : ''} onclick="irPaginaKpiRota(${kpiRotaPagina + 1})" class="px-3 py-1.5 rounded-lg bg-white border border-slate-300 font-extrabold disabled:opacity-40">Próxima →</button>
+                        </div>`;
+                }
+            }
+        }
+
+        window.abrirModalDetalheAnomaliaKpi = (id) => {
+            const a = listaAnomalias.find(x => String(x.id) === String(id));
+            if (!a) { showToast('Anomalia não encontrada.', 'error'); return; }
+            const direta = a.origem === 'Anomalia Direta' || a.id_agenda === 'DIRETA';
+            const tit = document.getElementById('modalDetAnomTitulo');
+            if (tit) tit.innerText = `${a.equipamento || a.maquina || 'Ativo'}${a.conjunto ? ' › ' + a.conjunto : ''}`;
+            const linha = (k, v) => `<div class="flex justify-between gap-3 py-1.5 border-b border-slate-100"><span class="font-bold text-slate-500">${k}</span><span class="font-extrabold text-slate-800 text-right">${v}</span></div>`;
+            const evento = (cor, titulo, quando, quem, texto = '') => `
+                <div class="relative pl-5">
+                    <span class="absolute left-0 top-1 w-2.5 h-2.5 rounded-full ${cor}"></span>
+                    <div class="font-extrabold text-slate-800">${titulo}</div>
+                    <div class="text-[10px] font-bold text-slate-400">${quando}${quem ? ' • ' + escapeHtml(quem) : ''}</div>
+                    ${texto ? `<div class="mt-1 text-slate-600 font-medium whitespace-pre-line">${escapeHtml(texto)}</div>` : ''}
+                </div>`;
+            const timeline = [
+                evento('bg-rose-500', `Anomalia relatada (${direta ? 'Direta' : 'Via Rota'})`, kpiFmtData(a.timestamp, true), a.relator, a.descricao),
+                a.status_aprovacao ? evento(a.status_aprovacao === 'Rejeitada' ? 'bg-slate-700' : 'bg-indigo-500', `Triagem: ${escapeHtml(a.status_aprovacao)}`, kpiFmtData(a.data_aprovacao || a.timestamp_aprovacao, true), a.aprovado_por || a.aprovador || '', a.motivo_rejeicao || '') : '',
+                (Array.isArray(a.tecnicos_nomes) && a.tecnicos_nomes.length) ? evento('bg-amber-500', 'Delegada à execução', kpiFmtData(a.data_delegacao, true), a.delegado_por || '', `Técnicos: ${a.tecnicos_nomes.join(', ')}`) : '',
+                a.data_execucao ? evento('bg-sky-500', 'Execução registrada', kpiFmtData(a.data_execucao, true), a.executado_por, a.relato_execucao || '') : '',
+                a.data_validacao ? evento('bg-emerald-500', 'Validada / Concluída', kpiFmtData(a.data_validacao, true), a.validado_por) : ''
+            ].filter(Boolean).join('');
+            const fotos = [
+                a.fotoB64 ? `<figure class="space-y-1"><img src="${a.fotoB64}" alt="Foto da anomalia" class="w-full h-40 object-cover rounded-2xl border border-slate-200 cursor-zoom-in" onclick="abrirZoomFoto(this.src)"><figcaption class="text-[10px] font-bold text-slate-500 text-center">Evidência do relato</figcaption></figure>` : '',
+                a.foto_execucaoB64 ? `<figure class="space-y-1"><img src="${a.foto_execucaoB64}" alt="Foto da execução" class="w-full h-40 object-cover rounded-2xl border border-slate-200 cursor-zoom-in" onclick="abrirZoomFoto(this.src)"><figcaption class="text-[10px] font-bold text-slate-500 text-center">Evidência da execução</figcaption></figure>` : ''
+            ].filter(Boolean).join('');
+            const body = document.getElementById('modalDetAnomBody');
+            if (body) body.innerHTML = `
+                <div class="flex flex-wrap items-center gap-1.5">
+                    ${kpiBadgeStatus(isAnomaliaOficial(a) ? a.status : a.status_aprovacao)} ${kpiBadgeUrg(a.urgencia)}
+                    ${a.risco_parada ? '<span class="text-[10px] font-extrabold px-2 py-0.5 rounded-full bg-rose-100 text-rose-700">⚠ Risco de Parada</span>' : ''}
+                    <span class="text-[10px] font-extrabold px-2 py-0.5 rounded-full ${direta ? 'bg-violet-100 text-violet-800' : 'bg-sky-100 text-sky-800'}">${direta ? 'Anomalia Direta' : 'Via Rota'}</span>
+                    ${a.classificacao_os ? `<span class="text-[10px] font-extrabold px-2 py-0.5 rounded-full bg-slate-100 text-slate-700">${escapeHtml(a.classificacao_os)}</span>` : ''}
+                </div>
+                ${fotos ? `<div class="grid grid-cols-1 sm:grid-cols-2 gap-3">${fotos}</div>` : ''}
+                <div class="p-4 rounded-2xl bg-slate-50 border border-slate-200">
+                    <div class="text-[10px] font-extrabold uppercase text-slate-400 mb-1">Descrição do defeito</div>
+                    <div class="text-sm font-semibold text-slate-800 whitespace-pre-line">${escapeHtml(a.descricao || '—')}</div>
+                </div>
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-x-6">
+                    <div>
+                        ${linha('Setor', escapeHtml(a.area || '—'))}
+                        ${linha('Máquina / Linha', escapeHtml(a.maquina || '—'))}
+                        ${linha('Equipamento', escapeHtml(a.equipamento || '—'))}
+                        ${linha('Conjunto', escapeHtml(a.conjunto || 'Geral do Equipamento'))}
+                        ${a.componente ? linha('Componente', escapeHtml(a.componente)) : ''}
+                    </div>
+                    <div>
+                        ${linha('Equipe', escapeHtml(kpiEquipeAnom(a)))}
+                        ${linha('Técnicos', String(a.qtd_tecnicos || '—'))}
+                        ${linha('Tempo estimado', escapeHtml(a.tempo_estimado || '—'))}
+                        ${linha('Tempo real', escapeHtml(a.tempo_real || '—'))}
+                        ${linha('ID', `<span class="font-mono text-[10px]">${escapeHtml(a.id)}</span>`)}
+                    </div>
+                </div>
+                <div class="space-y-3">
+                    <div class="text-[10px] font-extrabold uppercase text-slate-400">Linha do tempo</div>
+                    <div class="space-y-3 border-l-2 border-slate-100 ml-1 pl-1">${timeline}</div>
+                </div>`;
+            const foot = document.getElementById('modalDetAnomFooter');
+            const idJs = JSON.stringify(String(a.id)).replace(/"/g, '&quot;');
+            const btns = [];
+            if (!direta && a.id_agenda && agendaRotas.some(r => String(r.id) === String(a.id_agenda))) {
+                btns.push(`<button type="button" onclick="fecharModal('modalDetalheAnomaliaKpi'); abrirModalVisualizarFicha(${JSON.stringify(String(a.id_agenda)).replace(/"/g, '&quot;')})" class="btn-touch bg-white border border-slate-300 text-slate-800 text-xs py-2 px-3.5">Ver Ficha da Rota</button>`);
+            }
+            const gestor = usuarioLogado && (isPerfilGestor(usuarioLogado.role) || isPerfilSupervisor(usuarioLogado.role));
+            if (gestor && isAnomaliaOficial(a) && a.status !== 'Concluída' && typeof window.abrirModalDelegarAnomalia === 'function') {
+                btns.push(`<button type="button" onclick="fecharModal('modalDetalheAnomaliaKpi'); abrirModalDelegarAnomalia(${idJs})" class="btn-touch bg-amber-500 hover:bg-amber-600 text-white text-xs py-2 px-3.5">Delegar</button>`);
+            }
+            if (isAnomaliaOficial(a) && ['Pendente', 'Em Andamento'].includes(a.status) && typeof window.abrirModalBaixaPendencia === 'function') {
+                btns.push(`<button type="button" onclick="fecharModal('modalDetalheAnomaliaKpi'); abrirModalBaixaPendencia(${idJs})" class="btn-touch bg-emerald-600 hover:bg-emerald-700 text-white text-xs py-2 px-3.5">Dar Baixa</button>`);
+            }
+            btns.push(`<button type="button" onclick="fecharModal('modalDetalheAnomaliaKpi')" class="btn-touch bg-slate-900 hover:bg-slate-800 text-white text-xs py-2 px-3.5">Fechar</button>`);
+            if (foot) foot.innerHTML = btns.join('');
+            document.getElementById('modalDetalheAnomaliaKpi').classList.remove('hidden');
+        };
+
+        function kpiBaixarCsv(nome, linhas) {
+            const esc = (v) => {
+                const s = String(v === null || v === undefined ? '' : v).replace(/\r?\n/g, ' ');
+                return /[;"]/.test(s) ? `"${s.replace(/"/g, '""')}"` : s;
+            };
+            const csv = '\uFEFF' + linhas.map(l => l.map(esc).join(';')).join('\r\n');
+            const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+            const url = URL.createObjectURL(blob);
+            const aEl = document.createElement('a');
+            aEl.href = url;
+            aEl.download = nome;
+            document.body.appendChild(aEl);
+            aEl.click();
+            setTimeout(() => { URL.revokeObjectURL(url); aEl.remove(); }, 500);
+        }
+        function kpiGarantirDados() {
+            if (!kpiRotaUltimo.periodo) {
+                const r = kpiFiltrarDados();
+                kpiRotaUltimo = { anomalias: r.anoms, rotas: r.rotas, rotasProgramadas: r.rotasProgramadas, periodo: r.p };
+            }
+            return kpiRotaUltimo;
+        }
+        const kpiCarimbo = () => new Date().toISOString().slice(0, 10);
+
+        window.exportarIndicadoresAnomaliasCsv = () => {
+            const { anomalias } = kpiGarantirDados();
+            if (!anomalias.length) { showToast('Nenhuma anomalia para exportar no filtro atual.', 'error'); return; }
+            const linhas = [['ID', 'Data Relato', 'Origem', 'Setor', 'Máquina', 'Equipamento', 'Conjunto', 'Componente', 'Descrição', 'Classificação OS', 'Urgência', 'Risco Parada', 'Status', 'Status Aprovação', 'Equipe', 'Relator', 'Técnicos', 'Qtd Técnicos', 'Tempo Estimado', 'Tempo Real', 'Executado por', 'Data Execução', 'Validado por', 'Data Validação', 'Relato Execução']];
+            anomalias.forEach(a => linhas.push([
+                a.id, kpiFmtData(a.timestamp, true), (a.origem === 'Anomalia Direta' || a.id_agenda === 'DIRETA') ? 'Direta' : 'Via Rota',
+                a.area, a.maquina, a.equipamento, a.conjunto || 'Geral do Equipamento', a.componente, a.descricao, a.classificacao_os,
+                a.urgencia || 'Média', a.risco_parada ? 'Sim' : 'Não', a.status, a.status_aprovacao, kpiEquipeAnom(a), a.relator,
+                (a.tecnicos_nomes || []).join(', '), a.qtd_tecnicos, a.tempo_estimado, a.tempo_real, a.executado_por,
+                kpiFmtData(a.data_execucao, true), a.validado_por, kpiFmtData(a.data_validacao, true), a.relato_execucao
+            ]));
+            kpiBaixarCsv(`Anomalias_Inspecao_Rota_${kpiCarimbo()}.csv`, linhas);
+            showToast(`${anomalias.length} anomalia(s) exportada(s).`);
+        };
+
+        window.exportarIndicadoresRotasCsv = () => {
+            const { rotas } = kpiGarantirDados();
+            if (!rotas.length) { showToast('Nenhuma rota para exportar no filtro atual.', 'error'); return; }
+            const linhas = [['ID', 'Semana', 'Setor', 'Máquina', 'Equipamento', 'Conjunto', 'Técnico', 'Equipe', 'Status', 'Data Conclusão', 'Pontos Totais', 'Pontos OK', 'Pontos Anomalia', 'Pontos N/A', 'Status Supervisão', 'Observações']];
+            rotas.forEach(r => {
+                const resp = Array.isArray(r.checklist_respostas) ? r.checklist_respostas : [];
+                const ok = resp.filter(c => c.status === 'OK').length;
+                const an = resp.filter(c => c.status === 'Anomalia').length;
+                linhas.push([r.id, r.semana, r.area, r.maquina, r.equipamento, r.conjunto, r.nome_tecnico, r.role_tecnico, r.status || 'Pendente',
+                    r.status === 'Concluído' ? kpiFmtData(r.data_conclusao, true) : '', resp.length, ok, an, resp.length - ok - an, r.status_supervisao, r.observacoes_gerais]);
+            });
+            kpiBaixarCsv(`Rotas_Inspecao_${kpiCarimbo()}.csv`, linhas);
+            showToast(`${rotas.length} rota(s) exportada(s).`);
+        };
+
+        window.imprimirRelatorioIndicadoresRotaA4 = () => {
+            if (document.getElementById('view-indicadores')?.classList.contains('hidden')) renderIndicadoresRota();
+            const { anomalias, rotas, rotasProgramadas, periodo } = kpiGarantirDados();
+            const f = kpiGetFiltros();
+            const esc = (s) => escapeHtml(s === null || s === undefined ? '' : s);
+            const cardsHtml = document.getElementById('kpiRotaSummaryGrid')?.innerText.split('\n').filter(Boolean) || [];
+            const imgs = Object.keys(chartsKpiRota).map(id => {
+                try { return { id, src: chartsKpiRota[id].toBase64Image(), titulo: document.getElementById(id)?.closest('.glass-card')?.querySelector('h3')?.innerText || '' }; } catch (_) { return null; }
+            }).filter(Boolean);
+            const progN = rotasProgramadas.length;
+            const execN = rotasProgramadas.filter(r => r.status === 'Concluído').length;
+            const abertas = anomalias.filter(kpiStatusAberta);
+            const topAb = [...abertas].sort((a, b) => {
+                const w = { 'Alta': 3, 'Média': 2, 'Baixa': 1 };
+                return ((w[b.urgencia] || 2) + (b.risco_parada ? 2 : 0)) - ((w[a.urgencia] || 2) + (a.risco_parada ? 2 : 0)) || Number(a.timestamp || 0) - Number(b.timestamp || 0);
+            }).slice(0, 25);
+            const filtrosTxt = [f.setor && `Setor: ${f.setor}`, f.maquina && `Linha: ${f.maquina}`, f.equipe && `Equipe: ${f.equipe}`, f.status && `Status: ${f.status}`, f.urg && `Urgência/Origem: ${f.urg}`, f.busca && `Busca: ${f.busca}`].filter(Boolean).join(' • ') || 'Sem filtros adicionais';
+            const html = `<!DOCTYPE html><html lang="pt-BR"><head><meta charset="UTF-8"><title>Relatório de Indicadores - Inspeção de Rota</title>
+                <style>
+                    @page { size: A4; margin: 12mm; }
+                    body { font-family: Arial, Helvetica, sans-serif; color: #0f172a; font-size: 11px; }
+                    h1 { font-size: 17px; margin: 0; } h2 { font-size: 13px; margin: 18px 0 8px; border-bottom: 2px solid #0f172a; padding-bottom: 3px; }
+                    .head { display:flex; justify-content:space-between; align-items:center; border-bottom: 3px solid #0284c7; padding-bottom: 8px; }
+                    .kpis { display:grid; grid-template-columns: repeat(3, 1fr); gap: 8px; }
+                    .kpi { border:1px solid #cbd5e1; border-radius: 8px; padding: 8px; }
+                    .kpi b { display:block; font-size: 18px; }
+                    .charts { display:grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+                    .charts figure { margin:0; border:1px solid #e2e8f0; border-radius:8px; padding:6px; page-break-inside: avoid; }
+                    .charts img { width:100%; height:auto; } figcaption { font-weight:bold; font-size:10px; margin-bottom:4px; }
+                    table { width:100%; border-collapse: collapse; } th, td { border:1px solid #cbd5e1; padding: 4px 5px; text-align:left; vertical-align: top; }
+                    th { background:#f1f5f9; font-size:9.5px; text-transform: uppercase; } tr { page-break-inside: avoid; }
+                    .muted { color:#64748b; } .alta { color:#e11d48; font-weight:bold; }
+                </style></head><body>
+                <div class="head">
+                    <div style="display:flex;align-items:center;gap:10px;"><img src="CEPERA_LOGO.png" alt="Cepêra" style="height:36px;width:auto;"><div><h1>Relatório Executivo de Indicadores • Inspeção de Rota</h1><div class="muted">${esc(periodo?.label || '')} • ${esc(filtrosTxt)}</div></div></div>
+                    <div style="text-align:right;font-weight:bold;">Emissão: ${new Date().toLocaleString('pt-BR')}<br>Por: ${esc(usuarioLogado?.nome || '')}</div>
+                </div>
+                <h2>Resumo de KPIs</h2>
+                <div class="kpis">
+                    <div class="kpi">Aderência de Rotas<b>${progN ? Math.round(execN / progN * 100) : 0}%</b><span class="muted">${execN}/${progN} executadas • Meta ${KPI_ROTA_META_ADERENCIA}%</span></div>
+                    <div class="kpi">Anomalias no período<b>${anomalias.length}</b><span class="muted">${anomalias.length - abertas.length} concluídas • ${abertas.length} abertas</span></div>
+                    <div class="kpi">Backlog Crítico<b>${abertas.filter(a => (a.urgencia || 'Média') === 'Alta').length}</b><span class="muted">Urgência alta • ${abertas.filter(a => a.risco_parada).length} com risco de parada</span></div>
+                </div>
+                <p class="muted" style="margin-top:6px;">${esc(cardsHtml.join(' | '))}</p>
+                ${imgs.length ? `<h2>Gráficos</h2><div class="charts">${imgs.map(i => `<figure><figcaption>${esc(i.titulo)}</figcaption><img src="${i.src}"></figure>`).join('')}</div>` : ''}
+                <h2>Backlog prioritário (top ${topAb.length})</h2>
+                <table><thead><tr><th>Data</th><th>Ativo</th><th>Descrição</th><th>Urg.</th><th>Status</th><th>Equipe</th><th>Relator</th></tr></thead><tbody>
+                ${topAb.map(a => `<tr><td>${kpiFmtData(a.timestamp)}</td><td>${esc(a.area)} • ${esc(a.maquina)}<br><b>${esc(a.equipamento)}${a.conjunto ? ' › ' + esc(a.conjunto) : ''}</b></td><td>${esc(a.descricao)}</td><td class="${(a.urgencia || 'Média') === 'Alta' ? 'alta' : ''}">${esc(a.urgencia || 'Média')}${a.risco_parada ? ' ⚠' : ''}</td><td>${esc(a.status)}</td><td>${esc(kpiEquipeAnom(a))}</td><td>${esc(a.relator)}</td></tr>`).join('') || '<tr><td colspan="7" class="muted">Sem backlog aberto.</td></tr>'}
+                </tbody></table>
+                <h2>Rotas no período (${rotas.length})</h2>
+                <table><thead><tr><th>Sem.</th><th>Ativo</th><th>Técnico</th><th>Status</th><th>Conclusão</th></tr></thead><tbody>
+                ${rotas.slice(0, 60).map(r => `<tr><td>S${esc(r.semana)}</td><td>${esc(r.maquina)} • <b>${esc(r.equipamento)}${r.conjunto ? ' › ' + esc(r.conjunto) : ''}</b></td><td>${esc(r.nome_tecnico)}</td><td>${esc(r.status || 'Pendente')}</td><td>${r.status === 'Concluído' ? kpiFmtData(r.data_conclusao) : '—'}</td></tr>`).join('') || '<tr><td colspan="5" class="muted">Sem rotas.</td></tr>'}
+                </tbody></table>
+                ${rotas.length > 60 ? `<p class="muted">+ ${rotas.length - 60} rota(s) — exporte o CSV para a lista completa.</p>` : ''}
+                </body></html>`;
+            const win = window.open('', '_blank');
+            if (!win) { showToast('Permita pop-ups para gerar o relatório.', 'error'); return; }
+            win.document.write(html); win.document.close(); win.focus();
+            setTimeout(() => { try { win.print(); } catch (_) {} }, 600);
+        };
 
         initApp();
     </script>
