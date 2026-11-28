@@ -1323,6 +1323,139 @@
             'Sob Demanda': { semanas: 0, label: 'Sob Demanda' }
         };
 
+        // ================= SINCRONIZAÇÃO DE PERIODICIDADE COM PLANOS PREVENTIVOS =================
+        let _indicePlanosPerCache = null;
+        let _indicePlanosPerRef = null;
+        let _indicePlanosPerLen = -1;
+
+        function normalizarPeriodicidadeValida(raw) {
+            const s = String(raw || '').trim();
+            if (!s) return '';
+            if (PERIODICIDADES[s]) return s;
+            const n = normKey(s);
+            for (const k of Object.keys(PERIODICIDADES)) {
+                if (normKey(k) === n) return k;
+            }
+            return '';
+        }
+
+        function invalidarIndicePeriodicidadePlanos() {
+            _indicePlanosPerCache = null;
+        }
+
+        function obterIndicePeriodicidadePlanos() {
+            const lista = Array.isArray(listaManutencao) ? listaManutencao : [];
+            if (_indicePlanosPerCache && _indicePlanosPerRef === lista && _indicePlanosPerLen === lista.length) {
+                return _indicePlanosPerCache;
+            }
+            const byId = new Map();
+            const byEqKey = new Map();
+            const byEquip = new Map();
+            const pushMap = (map, key, item) => {
+                if (!key) return;
+                if (!map.has(key)) map.set(key, []);
+                map.get(key).push(item);
+            };
+            for (const d of lista) {
+                if (!d || d.kind === 'recado') continue;
+                const isPlano = d.kind === 'plano_preventiva';
+                if (isPlano && d.ativo === false) continue;
+                if (normKey(d.status) === 'cancelado') continue;
+                const per = normalizarPeriodicidadeValida(d.periodicidade || d.periodicidade_preventiva);
+                if (!per) continue;
+                const entry = {
+                    id: d.id || '',
+                    isPlano,
+                    codigo: d.codigo || '',
+                    titulo: d.titulo || '',
+                    periodicidade: per,
+                    disciplina: d.disciplina || '',
+                    areaN: normKey(d.setor || d.area),
+                    maqN: normKey(d.maquina),
+                    eqN: normKey(d.equipamento),
+                    conjN: normKey(d.conjunto),
+                    subN: normKey(d.subconjunto),
+                    ativoId: String(d.ativoId || d.id_node || '')
+                };
+                if (entry.ativoId) pushMap(byId, entry.ativoId, entry);
+                if (entry.maqN && entry.eqN) pushMap(byEqKey, `${entry.maqN}|${entry.eqN}`, entry);
+                else if (entry.eqN) pushMap(byEquip, entry.eqN, entry);
+            }
+            _indicePlanosPerCache = { byId, byEqKey, byEquip };
+            _indicePlanosPerRef = lista;
+            _indicePlanosPerLen = lista.length;
+            return _indicePlanosPerCache;
+        }
+
+        function getPeriodicidadeDoPlanoNode(node) {
+            if (!node) return { periodicidade: '', planos: [], origem: '' };
+            const idx = obterIndicePeriodicidadePlanos();
+            const areaN = normKey(node.area);
+            const maqN = normKey(node.maquina);
+            const eqN = normKey(node.equipamento);
+            const conjN = normKey(node.conjunto);
+            const subN = normKey(node.subconjunto);
+
+            const candidatos = [];
+            const seen = new Set();
+            const addCand = (arr, tier) => {
+                if (!arr) return;
+                for (const item of arr) {
+                    const key = `${item.id}|${item.periodicidade}|${item.isPlano ? 1 : 0}`;
+                    if (seen.has(key)) continue;
+                    seen.add(key);
+                    candidatos.push({ ...item, tier });
+                }
+            };
+
+            // 1. Match direto por ID do ativo
+            if (node.nodeId) addCand(idx.byId.get(String(node.nodeId)), 1);
+            if (node.docId && node.docId !== node.nodeId) addCand(idx.byId.get(String(node.docId)), 1);
+
+            // 2. Match por Máquina + Equipamento (+ Conjunto / Subconjunto)
+            const eqCandidates = (maqN && eqN ? (idx.byEqKey.get(`${maqN}|${eqN}`) || []) : [])
+                .concat(eqN ? (idx.byEquip.get(eqN) || []).filter(e => !e.areaN || !areaN || e.areaN === areaN) : []);
+
+            for (const item of eqCandidates) {
+                const conjGenerico = !item.conjN || item.conjN === 'conjunto geral';
+                const conjMatch = !conjGenerico && conjN && (item.conjN === conjN || item.conjN.startsWith(`${conjN} >`) || item.conjN.startsWith(`${conjN} ›`));
+                if (conjMatch) {
+                    if (item.subN && subN && item.subN === subN) addCand([item], 1);
+                    else if (!item.subN || !subN) addCand([item], 2);
+                } else if (conjGenerico) {
+                    addCand([item], 3);
+                }
+            }
+
+            if (!candidatos.length) return { periodicidade: '', planos: [], origem: '' };
+
+            // Prioriza planos preventivos (kind === 'plano_preventiva') sobre agendamentos avulsos
+            const planosPuros = candidatos.filter(c => c.isPlano);
+            const poolBase = planosPuros.length ? planosPuros : candidatos;
+            const melhorTier = Math.min(...poolBase.map(c => c.tier));
+            const melhores = poolBase.filter(c => c.tier === melhorTier);
+
+            // Se houver múltiplos planos no mesmo conjunto, destaca a menor periodicidade (mais frequente)
+            melhores.sort((a, b) => {
+                const sa = PERIODICIDADES[a.periodicidade]?.semanas ?? 9999;
+                const sb = PERIODICIDADES[b.periodicidade]?.semanas ?? 9999;
+                const pa = sa > 0 ? sa : 9999;
+                const pb = sb > 0 ? sb : 9999;
+                return pa - pb || String(a.codigo || a.titulo).localeCompare(String(b.codigo || b.titulo), 'pt-BR');
+            });
+
+            return {
+                periodicidade: melhores[0].periodicidade,
+                planos: melhores,
+                origem: planosPuros.length ? 'plano' : 'agendamento'
+            };
+        }
+
+        function getPeriodicidadeEfetivaNode(node) {
+            if (!node) return '';
+            return node.periodicidade_preventiva || getPeriodicidadeDoPlanoNode(node).periodicidade || '';
+        }
+
         const CRITICIDADES = {
             A: { nome: 'Classe A — Crítico', curta: 'Classe A', badge: 'crit-A', cor: '#e11d48', peso: 3 },
             B: { nome: 'Classe B — Importante', curta: 'Classe B', badge: 'crit-B', cor: '#f59e0b', peso: 2 },
@@ -2608,6 +2741,7 @@
                 onSnapshot(refManutencao, (snap) => {
                     listaManutencao = [];
                     snap.forEach(d => listaManutencao.push({ id: d.id, ...d.data() }));
+                    invalidarIndicePeriodicidadePlanos();
                     onDadosCruzadosUpdate();
                     marcarSyncPortal('manutencao', 'Preventivas', snap);
                 }, () => marcarSyncPortal('manutencao', 'Preventivas'));
@@ -2680,7 +2814,7 @@
         function contarPendenciasSaneamento() {
             const legados = rawLinhasDocs.filter(d => !pickField(d.data, ['conjunto']) && Array.isArray(d.data.conjuntos) && d.data.conjuntos.length > 0).length;
             const semCrit = assetNodes.filter(n => !n.criticidade).length;
-            const semPer = assetNodes.filter(n => !n.periodicidade_preventiva).length;
+            const semPer = assetNodes.filter(n => !getPeriodicidadeEfetivaNode(n)).length;
             const inconsistencias = detectarInconsistenciasGrafia().length;
             const orfaos = detectarGruposOrfaos({ comSugestoes: false }).filter(g => !g.ignorado).length;
             const duplicados = detectarConjuntosDuplicados().length;
@@ -3044,7 +3178,7 @@
                                                         <span class="text-[11px] font-semibold ${leaf.subconjunto ? 'text-slate-700' : 'text-slate-400 italic'} truncate">${escapeHtml(nomeSub)}</span>
                                                     </div>
                                                     <div class="flex items-center gap-1 shrink-0">
-                                                        ${leaf.periodicidade_preventiva ? `<span class="text-[9px] font-extrabold px-1.5 py-0.5 rounded-full bg-sky-50 text-sky-700 border border-sky-200">${escapeHtml(leaf.periodicidade_preventiva)}</span>` : ''}
+                                                        ${(() => { const pEf = getPeriodicidadeEfetivaNode(leaf); return pEf ? `<span class="text-[9px] font-extrabold px-1.5 py-0.5 rounded-full ${leaf.periodicidade_preventiva ? 'bg-sky-50 text-sky-700 border border-sky-200' : 'bg-emerald-50 text-emerald-700 border border-emerald-200'}" title="${leaf.periodicidade_preventiva ? 'Periodicidade cadastrada no ativo' : 'Periodicidade vinculada ao plano preventivo'}">${escapeHtml(pEf)}</span>` : ''; })()}
                                                         ${renderBadgeCrit(leaf.criticidade, 'xs')}
                                                         ${masterAtivo ? `<button type="button" title="Excluir Subconjunto (Master)" aria-label="Excluir subconjunto ${escapeHtml(nomeSub)}" onclick="event.stopPropagation(); solicitarExclusaoNode(${nJs})" class="w-5 h-5 rounded-md bg-rose-50 hover:bg-rose-600 text-rose-600 hover:text-white flex items-center justify-center transition-colors">${TRASH_TREE_SVG}</button>` : ''}
                                                     </div>
@@ -3848,6 +3982,11 @@
 
                 const critObj = node.criticidade_criterios || { seguranca: 2, parada: 2, custo: 2, redundancia: 2 };
                 const compPct = calcularCompletudeNode(node);
+                const infoPlanoDet = getPeriodicidadeDoPlanoNode(node);
+                const perEfetivaDet = node.periodicidade_preventiva || infoPlanoDet.periodicidade || '';
+                const planoRefLabelDet = infoPlanoDet.planos.length
+                    ? `${infoPlanoDet.planos[0].codigo || infoPlanoDet.planos[0].titulo || 'Plano'}${infoPlanoDet.planos.length > 1 ? ` (+${infoPlanoDet.planos.length - 1})` : ''}`
+                    : '';
 
                 panel.innerHTML = `
                 <div class="space-y-5">
@@ -3859,7 +3998,7 @@
                             <h2 class="text-xl font-extrabold text-slate-900 leading-tight">${escapeHtml(node.subconjunto || node.conjunto)}</h2>
                             <div class="flex flex-wrap items-center gap-1.5 pt-1">
                                 ${renderBadgeCrit(node.criticidade)}
-                                ${node.periodicidade_preventiva ? `<span class="px-2 py-0.5 rounded-full text-[10px] font-extrabold bg-sky-50 text-sky-700 border border-sky-200">${escapeHtml(node.periodicidade_preventiva)}</span>` : `<span class="px-2 py-0.5 rounded-full text-[10px] font-bold bg-slate-100 text-slate-500">Sem Periodicidade</span>`}
+                                ${perEfetivaDet ? `<span class="px-2 py-0.5 rounded-full text-[10px] font-extrabold ${node.periodicidade_preventiva ? 'bg-sky-50 text-sky-700 border border-sky-200' : 'bg-emerald-50 text-emerald-700 border border-emerald-200'}">${escapeHtml(perEfetivaDet)}${!node.periodicidade_preventiva && infoPlanoDet.periodicidade ? ' (Do Plano)' : ''}</span>` : `<span class="px-2 py-0.5 rounded-full text-[10px] font-bold bg-slate-100 text-slate-500">Sem Periodicidade</span>`}
                                 ${renderBadgeStatus(node.status_ativo)}
                                 <span class="px-2 py-0.5 rounded-full text-[10px] font-extrabold bg-slate-100 text-slate-700">Completude: ${compPct}%</span>
                             </div>
@@ -3921,8 +4060,15 @@
                                     <label class="block text-[10px] font-extrabold uppercase text-slate-500 mb-1">Periodicidade Preventiva</label>
                                     <select id="edPeriodicidade" class="input-clean py-2 text-xs font-extrabold">
                                         <option value="">Não definida</option>
-                                        ${Object.entries(PERIODICIDADES).map(([k, v]) => `<option value="${escapeHtml(k)}" ${node.periodicidade_preventiva === k ? 'selected' : ''}>${escapeHtml(v.label)}</option>`).join('')}
+                                        ${Object.entries(PERIODICIDADES).map(([k, v]) => `<option value="${escapeHtml(k)}" ${perEfetivaDet === k ? 'selected' : ''}>${escapeHtml(v.label)}</option>`).join('')}
                                     </select>
+                                    ${infoPlanoDet.periodicidade ? (!node.periodicidade_preventiva
+                                        ? `<div class="mt-1 inline-flex items-center gap-1 text-[10px] font-extrabold text-emerald-700"><svg class="w-3 h-3 shrink-0" fill="none" stroke="currentColor" stroke-width="2.2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M13.828 10.172a4 4 0 00-5.656 0l-4 4a4 4 0 105.656 5.656l1.102-1.101m-.758-4.899a4 4 0 005.656 0l4-4a4 4 0 00-5.656-5.656l-1.1 1.1"/></svg><span>Herdada do plano: ${escapeHtml(infoPlanoDet.periodicidade)} (${escapeHtml(planoRefLabelDet)})</span></div>`
+                                        : (node.periodicidade_preventiva !== infoPlanoDet.periodicidade
+                                            ? `<div class="mt-1 flex items-center justify-between gap-1 text-[10px] font-bold text-sky-700"><span>Plano ativo: <strong>${escapeHtml(infoPlanoDet.periodicidade)}</strong></span><button type="button" onclick="const s=document.getElementById('edPeriodicidade');if(s)s.value=${JSON.stringify(infoPlanoDet.periodicidade).replace(/"/g, '&quot;')};" class="underline font-extrabold hover:text-sky-900">Usar do plano</button></div>`
+                                            : `<div class="mt-1 text-[10px] font-bold text-emerald-700">Alinhada com ${escapeHtml(planoRefLabelDet)}</div>`
+                                        )
+                                    ) : ''}
                                 </div>
                                 <div>
                                     <label class="block text-[10px] font-extrabold uppercase text-slate-500 mb-1">Disciplina</label>
@@ -6532,12 +6678,13 @@
             const qGlobal = normKey(saneamentoBusca);
             const qLocal = normKey(saneEngFiltroTexto);
             return assetNodes.filter(n => {
-                if (n.criticidade && n.periodicidade_preventiva && n.subconjunto) return false;
+                const perEf = getPeriodicidadeEfetivaNode(n);
+                if (n.criticidade && perEf && n.subconjunto) return false;
                 if (saneEngFiltroArea && n.area !== saneEngFiltroArea) return false;
                 if (saneEngFiltroMaquina && n.maquina !== saneEngFiltroMaquina) return false;
                 if (saneEngFiltroPendencia === 'subconjunto' && n.subconjunto) return false;
                 if (saneEngFiltroPendencia === 'criticidade' && n.criticidade) return false;
-                if (saneEngFiltroPendencia === 'periodicidade' && n.periodicidade_preventiva) return false;
+                if (saneEngFiltroPendencia === 'periodicidade' && perEf) return false;
                 const hay = normKey(`${n.area} ${n.maquina} ${n.equipamento} ${n.conjunto} ${n.subconjunto} ${n.tag}`);
                 if (qGlobal && !hay.includes(qGlobal)) return false;
                 if (qLocal && !hay.includes(qLocal)) return false;
@@ -6561,19 +6708,56 @@
 
         function getValoresAtuaisLinhaSaneEng(node) {
             const draft = saneEngRascunhos.get(node.nodeId);
+            const infoPlano = getPeriodicidadeDoPlanoNode(node);
+            const perBase = node.periodicidade_preventiva || infoPlano.periodicidade || '';
             return {
                 subconjunto: draft ? draft.subconjunto : (node.subconjunto || ''),
                 criticidade: draft ? draft.criticidade : (node.criticidade || ''),
-                periodicidade_preventiva: draft ? draft.periodicidade_preventiva : (node.periodicidade_preventiva || ''),
+                periodicidade_preventiva: draft ? draft.periodicidade_preventiva : perBase,
                 disciplina: draft ? draft.disciplina : (node.disciplina || 'Mecânica'),
                 criticidade_criterios: draft && draft.criticidade_criterios !== undefined ? draft.criticidade_criterios : (node.criticidade_criterios || null)
             };
         }
 
+        window.aplicarPeriodicidadePlanoSaneEng = (nodeId, periodicidade) => {
+            const row = document.querySelector(`[data-sane-eng-row="${CSS.escape(nodeId)}"]`);
+            const sel = row?.querySelector('[data-sane-field="periodicidade"]');
+            if (!sel) return;
+            sel.value = periodicidade;
+            onChangeCampoSaneEng(nodeId);
+        };
+
+        window.sincronizarPeriodicidadesDosPlanosSaneEng = async () => {
+            const alvos = assetNodes.filter(n => !n.periodicidade_preventiva && getPeriodicidadeDoPlanoNode(n).periodicidade);
+            if (!alvos.length) return showToast("Todos os ativos com plano preventivo já estão sincronizados.");
+            const btn = document.getElementById('btnSaneEngSyncPlanos');
+            if (btn) btn.disabled = true;
+            let salvos = 0;
+            let erros = 0;
+            for (const node of alvos) {
+                const infoPlano = getPeriodicidadeDoPlanoNode(node);
+                if (!infoPlano.periodicidade) continue;
+                try {
+                    const vals = getValoresAtuaisLinhaSaneEng(node);
+                    vals.periodicidade_preventiva = infoPlano.periodicidade;
+                    await persistirEdicaoEngenhariaNode(node, vals);
+                    salvos++;
+                } catch (err) {
+                    console.error(err);
+                    erros++;
+                }
+            }
+            if (btn) btn.disabled = false;
+            if (erros === 0) showToast(`${salvos} ativo(s) sincronizado(s) com a periodicidade dos planos preventivos!`);
+            else showToast(`${salvos} sincronizado(s) e ${erros} com erro.`, "error");
+        };
+
         window.onChangeCampoSaneEng = (nodeId) => {
             const node = assetNodes.find(n => n.nodeId === nodeId);
             const row = document.querySelector(`[data-sane-eng-row="${CSS.escape(nodeId)}"]`);
             if (!node || !row) return;
+            const infoPlano = getPeriodicidadeDoPlanoNode(node);
+            const perBase = node.periodicidade_preventiva || infoPlano.periodicidade || '';
             const sub = (row.querySelector('[data-sane-field="subconjunto"]')?.value || '').trim();
             const crit = row.querySelector('[data-sane-field="criticidade"]')?.value || '';
             const per = row.querySelector('[data-sane-field="periodicidade"]')?.value || '';
@@ -6583,7 +6767,7 @@
 
             const dirty = sub !== (node.subconjunto || '')
                 || crit !== (node.criticidade || '')
-                || per !== (node.periodicidade_preventiva || '')
+                || per !== perBase
                 || disc !== (node.disciplina || 'Mecânica')
                 || critCriterios !== undefined;
 
@@ -6784,7 +6968,7 @@
             // Atualiza select de máquinas caso a área tenha mudado
             const selMaq = document.getElementById('saneEngSelMaquina');
             if (selMaq) {
-                const incompBase = assetNodes.filter(n => !n.criticidade || !n.periodicidade_preventiva || !n.subconjunto);
+                const incompBase = assetNodes.filter(n => !n.criticidade || !getPeriodicidadeEfetivaNode(n) || !n.subconjunto);
                 const maqs = [...new Set(incompBase.filter(n => !saneEngFiltroArea || n.area === saneEngFiltroArea).map(n => n.maquina).filter(Boolean))].sort((a, b) => a.localeCompare(b, 'pt-BR'));
                 selMaq.innerHTML = `<option value="">Todas as Máquinas</option>${maqs.map(m => `<option value="${escapeHtml(m)}" ${saneEngFiltroMaquina === m ? 'selected' : ''}>${escapeHtml(m)}</option>`).join('')}`;
             }
@@ -6807,6 +6991,10 @@
                 <div class="max-h-[34rem] overflow-y-auto divide-y divide-slate-200/80 rounded-2xl border border-slate-200 bg-white">
                     ${visiveis.map(n => {
                         const vals = getValoresAtuaisLinhaSaneEng(n);
+                        const infoPlano = getPeriodicidadeDoPlanoNode(n);
+                        const planoRefLabel = infoPlano.planos.length
+                            ? `${infoPlano.planos[0].codigo || infoPlano.planos[0].titulo || 'Plano'}${infoPlano.planos.length > 1 ? ` (+${infoPlano.planos.length - 1})` : ''}`
+                            : '';
                         const isDirty = saneEngRascunhos.has(n.nodeId);
                         const critObj = vals.criticidade_criterios || { seguranca: 2, parada: 2, custo: 2, redundancia: 2 };
                         const nidEsc = escapeHtml(n.nodeId);
@@ -6818,7 +7006,7 @@
                                         <div data-sane-badges class="flex flex-wrap gap-1 mt-1">
                                             ${!vals.subconjunto ? '<span class="px-2 py-0.5 rounded-full text-[10px] font-bold bg-slate-100 text-slate-600">Sem Subconjunto</span>' : ''}
                                             ${!vals.criticidade ? '<span class="px-2 py-0.5 rounded-full text-[10px] font-bold bg-rose-50 text-rose-700">Sem Criticidade</span>' : ''}
-                                            ${!vals.periodicidade_preventiva ? '<span class="px-2 py-0.5 rounded-full text-[10px] font-bold bg-amber-50 text-amber-700">Sem Periodicidade</span>' : ''}
+                                            ${!vals.periodicidade_preventiva ? '<span class="px-2 py-0.5 rounded-full text-[10px] font-bold bg-amber-50 text-amber-700">Sem Periodicidade</span>' : (infoPlano.periodicidade && !n.periodicidade_preventiva ? `<span class="px-2 py-0.5 rounded-full text-[10px] font-bold bg-emerald-50 text-emerald-700 border border-emerald-200">Do Plano: ${escapeHtml(infoPlano.periodicidade)}</span>` : '')}
                                             ${(vals.subconjunto && vals.criticidade && vals.periodicidade_preventiva) ? '<span class="px-2 py-0.5 rounded-full text-[10px] font-bold bg-emerald-50 text-emerald-700">Pronto para salvar</span>' : ''}
                                         </div>
                                     </div>
@@ -6854,11 +7042,18 @@
                                             </select>
                                         </div>
                                         <div>
-                                            <label class="block text-[10px] font-extrabold uppercase ${!vals.periodicidade_preventiva ? 'text-amber-700' : 'text-slate-500'} mb-1">Periodicidade Preventiva</label>
+                                            <label class="block text-[10px] font-extrabold uppercase ${!vals.periodicidade_preventiva ? 'text-amber-700' : (infoPlano.periodicidade ? 'text-emerald-700' : 'text-slate-500')} mb-1">Periodicidade Preventiva</label>
                                             <select data-sane-field="periodicidade" onchange="onChangeCampoSaneEng('${nidEsc}')" class="input-clean py-1.5 text-xs font-extrabold bg-white">
                                                 <option value="">Não definida</option>
                                                 ${periodOptsBase.map(([k, v]) => `<option value="${escapeHtml(k)}" ${vals.periodicidade_preventiva === k ? 'selected' : ''}>${escapeHtml(v.label)}</option>`).join('')}
                                             </select>
+                                            ${infoPlano.periodicidade ? (!n.periodicidade_preventiva
+                                                ? `<div class="mt-1 inline-flex items-center gap-1 text-[10px] font-extrabold text-emerald-700"><svg class="w-3 h-3 shrink-0" fill="none" stroke="currentColor" stroke-width="2.2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M13.828 10.172a4 4 0 00-5.656 0l-4 4a4 4 0 105.656 5.656l1.102-1.101m-.758-4.899a4 4 0 005.656 0l4-4a4 4 0 00-5.656-5.656l-1.1 1.1"/></svg><span>Do plano: ${escapeHtml(planoRefLabel)}</span></div>`
+                                                : (vals.periodicidade_preventiva !== infoPlano.periodicidade
+                                                    ? `<div class="mt-1 flex items-center justify-between gap-1 text-[10px] font-bold text-sky-700"><span>Plano: <strong>${escapeHtml(infoPlano.periodicidade)}</strong></span><button type="button" onclick="aplicarPeriodicidadePlanoSaneEng('${nidEsc}', ${JSON.stringify(infoPlano.periodicidade).replace(/"/g, '&quot;')})" class="underline font-extrabold hover:text-sky-900">Usar</button></div>`
+                                                    : `<div class="mt-1 text-[10px] font-bold text-emerald-700">Plano: ${escapeHtml(planoRefLabel)}</div>`
+                                                )
+                                            ) : ''}
                                         </div>
                                         <div>
                                             <label class="block text-[10px] font-extrabold uppercase text-slate-500 mb-1">Disciplina</label>
@@ -6949,7 +7144,8 @@
             const duplicadosVisiveis = q
                 ? duplicados.filter(d => normKey(`${d.area} ${d.maquina} ${d.equipamento} ${d.keep.conjunto} ${d.absorb.map(x => x.conjunto).join(' ')}`).includes(q))
                 : duplicados;
-            const incompletos = assetNodes.filter(n => !n.criticidade || !n.periodicidade_preventiva || !n.subconjunto);
+            const incompletos = assetNodes.filter(n => !n.criticidade || !getPeriodicidadeEfetivaNode(n) || !n.subconjunto);
+            const syncPlanosCount = assetNodes.filter(n => !n.periodicidade_preventiva && getPeriodicidadeDoPlanoNode(n).periodicidade).length;
 
             const allOptsMesclarHtml = getOpcoesAtivosSelectHtml([], '');
 
@@ -7157,6 +7353,10 @@
                             <p class="text-xs text-slate-500">Edite Subconjunto, Tipo de Criticidade, Periodicidade Preventiva e Disciplina diretamente aqui sem precisar voltar à Árvore um por um.</p>
                         </div>
                         <div class="flex flex-wrap items-center gap-2">
+                            ${syncPlanosCount > 0 ? `<button type="button" id="btnSaneEngSyncPlanos" onclick="sincronizarPeriodicidadesDosPlanosSaneEng()" class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-sky-50 hover:bg-sky-100 text-sky-800 border border-sky-200 font-extrabold text-xs transition" title="Grava automaticamente no cadastro do ativo a periodicidade já definida no plano preventivo">
+                                <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" stroke-width="2.2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"/></svg>
+                                <span>Sincronizar ${syncPlanosCount} do(s) Plano(s)</span>
+                            </button>` : ''}
                             <button type="button" id="btnSaneEngSalvarTodos" hidden onclick="salvarTodasPendenciasEngenhariaInline()" class="hidden inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white font-extrabold text-xs shadow-sm transition">
                                 <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" stroke-width="2.4" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"/></svg>
                                 <span data-sane-eng-batch-label>Salvar Alterações</span>
