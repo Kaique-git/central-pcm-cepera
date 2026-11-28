@@ -718,12 +718,12 @@
                         <div id="impObsKpiTotal" class="text-xl font-extrabold text-slate-900">0</div>
                     </div>
                     <div class="p-3 rounded-2xl bg-emerald-50/80 border border-emerald-200">
-                        <div class="text-[10px] font-extrabold uppercase text-emerald-700">Vinculadas Árvore</div>
+                        <div class="text-[10px] font-extrabold uppercase text-emerald-700">Já na Árvore</div>
                         <div id="impObsKpiVinc" class="text-xl font-extrabold text-emerald-700">0</div>
                     </div>
-                    <div class="p-3 rounded-2xl bg-amber-50/80 border border-amber-200">
-                        <div class="text-[10px] font-extrabold uppercase text-amber-700">Sem Vínculo</div>
-                        <div id="impObsKpiSemVinc" class="text-xl font-extrabold text-amber-700">0</div>
+                    <div class="p-3 rounded-2xl bg-sky-50/80 border border-sky-200">
+                        <div class="text-[10px] font-extrabold uppercase text-sky-700">Criar na Árvore</div>
+                        <div id="impObsKpiCriar" class="text-xl font-extrabold text-sky-700">0</div>
                     </div>
                     <div class="p-3 rounded-2xl bg-indigo-50/80 border border-indigo-200">
                         <div class="text-[10px] font-extrabold uppercase text-indigo-700">Já Cadastradas</div>
@@ -741,9 +741,9 @@
                             <input type="checkbox" id="impObsPularDup" checked onchange="atualizarResumoImportObs()" class="rounded border-slate-300 text-emerald-600 focus:ring-emerald-500">
                             <span>Pular duplicados já cadastrados</span>
                         </label>
-                        <label class="inline-flex items-center gap-2 font-bold text-slate-700 cursor-pointer">
-                            <input type="checkbox" id="impObsSomenteVinc" onchange="atualizarResumoImportObs()" class="rounded border-slate-300 text-emerald-600 focus:ring-emerald-500">
-                            <span>Importar somente peças encontradas na Árvore Oficial</span>
+                        <label class="inline-flex items-center gap-2 font-bold text-sky-800 cursor-pointer">
+                            <input type="checkbox" id="impObsCriarNaArvore" checked onchange="atualizarResumoImportObs()" class="rounded border-sky-300 text-sky-600 focus:ring-sky-500">
+                            <span>Criar automaticamente na Árvore Oficial (Conjuntos, Subconjuntos ou Ativos novos)</span>
                         </label>
                     </div>
                     <span id="impObsResumoProntas" class="font-extrabold text-emerald-700">0 item(ns) pronto(s) para importar</span>
@@ -753,8 +753,8 @@
                     <table class="w-full text-left text-[11px]">
                         <thead class="bg-slate-50 text-slate-500 uppercase font-extrabold text-[10px] sticky top-0 border-b border-slate-200">
                             <tr>
-                                <th class="py-2.5 px-3">Vínculo na Árvore</th>
-                                <th class="py-2.5 px-3">Ativo (Área › Máquina › Equipamento › Conjunto)</th>
+                                <th class="py-2.5 px-3">Ação na Árvore</th>
+                                <th class="py-2.5 px-3">Ativo (Área › Máquina › Equipamento › Conjunto › Subconjunto)</th>
                                 <th class="py-2.5 px-3">Componente / Ref / ERP</th>
                                 <th class="py-2.5 px-3 text-center">GUT</th>
                                 <th class="py-2.5 px-3 text-right">Custo</th>
@@ -796,31 +796,35 @@
                 <!-- SEÇÃO 1: HIERARQUIA (VINCULADA À ÁRVORE OFICIAL DE GESTÃO DE ATIVOS) -->
                 <div class="bg-slate-50 p-4 rounded-2xl border border-slate-200/80 space-y-3">
                     <div class="flex flex-wrap items-center justify-between gap-2">
-                        <h4 class="font-extrabold text-[11px] uppercase text-slate-600">1. Vínculo com a Árvore Oficial (Gestão de Ativos)</h4>
-                        <button type="button" onclick="abrirGestaoAtivosObs()" class="text-[11px] font-extrabold text-sky-700 hover:underline">Gerenciar equipamentos em Gestão de Ativos</button>
+                        <div class="flex flex-wrap items-center gap-2">
+                            <h4 class="font-extrabold text-[11px] uppercase text-slate-600">1. Vínculo com a Árvore Oficial (Gestão de Ativos)</h4>
+                            <span id="modalItemVinculoBadge" class="px-2 py-0.5 rounded-full text-[10px] font-extrabold bg-slate-200 text-slate-600">Selecione ou digite</span>
+                        </div>
+                        <button type="button" onclick="abrirGestaoAtivosObs()" class="text-[11px] font-extrabold text-sky-700 hover:underline">Abrir Gestão de Ativos</button>
                     </div>
                     <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-3">
                         <div>
                             <label class="block text-[10px] font-extrabold uppercase text-slate-500 mb-1">Setor / Área *</label>
-                            <select id="fArea" required class="input-clean py-2 text-xs font-bold bg-white" onchange="onChangeSelectArvoreForm('area')"></select>
+                            <input type="text" id="fArea" list="dlAreas" required placeholder="Ex: Envase" class="input-clean py-2 text-xs font-bold bg-white" oninput="onChangeArvoreFormObs('area')">
                         </div>
                         <div>
                             <label class="block text-[10px] font-extrabold uppercase text-slate-500 mb-1">Máquina / Linha *</label>
-                            <select id="fMaquina" required class="input-clean py-2 text-xs font-bold bg-white" onchange="onChangeSelectArvoreForm('maquina')"></select>
+                            <input type="text" id="fMaquina" list="dlMaquinas" required placeholder="Ex: BoaotoPack 1" class="input-clean py-2 text-xs font-bold bg-white" oninput="onChangeArvoreFormObs('maquina')">
                         </div>
                         <div>
                             <label class="block text-[10px] font-extrabold uppercase text-slate-500 mb-1">Equipamento *</label>
-                            <select id="fEquipamentoBusca" required class="input-clean py-2 text-xs font-bold bg-white" onchange="onChangeSelectArvoreForm('equipamento')"></select>
+                            <input type="text" id="fEquipamentoBusca" list="dlEquipamentos" required placeholder="Ex: Envasadora" class="input-clean py-2 text-xs font-bold bg-white" oninput="onChangeArvoreFormObs('equipamento')">
                         </div>
                         <div>
-                            <label class="block text-[10px] font-extrabold uppercase text-slate-500 mb-1">Conjunto (Opcional)</label>
-                            <select id="fConjunto" class="input-clean py-2 text-xs font-bold bg-white" onchange="onChangeSelectArvoreForm('conjunto')"></select>
+                            <label class="block text-[10px] font-extrabold uppercase text-slate-500 mb-1">Conjunto</label>
+                            <input type="text" id="fConjunto" list="dlConjuntos" placeholder="Escolha ou digite novo..." class="input-clean py-2 text-xs font-bold bg-white" oninput="onChangeArvoreFormObs('conjunto')">
                         </div>
                         <div>
-                            <label class="block text-[10px] font-extrabold uppercase text-slate-500 mb-1">Subconjunto (Opcional)</label>
-                            <select id="fSubconjunto" class="input-clean py-2 text-xs font-bold bg-white"></select>
+                            <label class="block text-[10px] font-extrabold uppercase text-slate-500 mb-1">Subconjunto</label>
+                            <input type="text" id="fSubconjunto" list="dlSubconjuntos" placeholder="Escolha ou digite novo..." class="input-clean py-2 text-xs font-bold bg-white" oninput="onChangeArvoreFormObs('subconjunto')">
                         </div>
                     </div>
+                    <p class="text-[10px] font-semibold text-slate-500">Se o Conjunto ou Subconjunto digitado ainda não existir na Árvore Oficial, ele será criado automaticamente em <strong>Gestão de Ativos</strong> ao salvar.</p>
                 </div>
 
                 <!-- SEÇÃO 2: DADOS COMUNS DA PEÇA -->
@@ -1006,7 +1010,7 @@
     <div id="toastStack" aria-live="polite" class="fixed bottom-4 right-4 z-[9999] space-y-2 pointer-events-none"></div>
 
     <!-- Datalists Global -->
-    <datalist id="dlAreas"></datalist><datalist id="dlMaquinas"></datalist><datalist id="dlEquipamentos"></datalist><datalist id="dlConjuntos"></datalist>
+    <datalist id="dlAreas"></datalist><datalist id="dlMaquinas"></datalist><datalist id="dlEquipamentos"></datalist><datalist id="dlConjuntos"></datalist><datalist id="dlSubconjuntos"></datalist>
 
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
@@ -1528,51 +1532,176 @@
             const cN = normKeyObs(rawCj);
             const sN = normKeyObs(rawSub);
 
-            // 1. Match exato por Area + Maquina + Equipamento + Conjunto (+ Subconjunto)
+            // 1. Match por Area + Maquina + Equipamento (com fallback Maquina + Equipamento)
             const eqMatches = ativosArvoreFlat.filter(n =>
                 (!aN || normKeyObs(n.area) === aN) &&
                 normKeyObs(n.maquina) === mN &&
                 normKeyObs(n.equipamento) === eN
             );
-
-            // Fallback: se Area veio com pequena diferença mas Maquina + Equipamento batem exatamente
             const pool = eqMatches.length ? eqMatches : ativosArvoreFlat.filter(n =>
                 mN && eN && normKeyObs(n.maquina) === mN && normKeyObs(n.equipamento) === eN
             );
 
             if (pool.length) {
+                const base = pool[0];
+                // Se informou Conjunto + Subconjunto: ambos precisam existir juntos
                 if (cN && sN) {
                     const hitSub = pool.find(n => normKeyObs(n.conjunto) === cN && normKeyObs(n.subconjunto) === sN);
                     if (hitSub) {
-                        return { status: 'exato', ativoId: hitSub.docId, area: hitSub.area, maquina: hitSub.maquina, equipamento: hitSub.equipamento, conjunto: hitSub.conjunto, subconjunto: hitSub.subconjunto };
+                        return { status: 'exato', precisaCriarNaArvore: false, ativoId: hitSub.docId, area: hitSub.area, maquina: hitSub.maquina, equipamento: hitSub.equipamento, conjunto: hitSub.conjunto, subconjunto: hitSub.subconjunto };
                     }
+                    const hitConj = pool.find(n => normKeyObs(n.conjunto) === cN);
+                    if (hitConj) {
+                        return {
+                            status: 'criar_subconjunto',
+                            precisaCriarNaArvore: true,
+                            ativoId: '',
+                            area: hitConj.area,
+                            maquina: hitConj.maquina,
+                            equipamento: hitConj.equipamento,
+                            conjunto: hitConj.conjunto,
+                            subconjunto: padronizarTexto(rawSub)
+                        };
+                    }
+                    return {
+                        status: 'criar_conjunto',
+                        precisaCriarNaArvore: true,
+                        ativoId: '',
+                        area: base.area,
+                        maquina: base.maquina,
+                        equipamento: base.equipamento,
+                        conjunto: padronizarTexto(rawCj),
+                        subconjunto: padronizarTexto(rawSub)
+                    };
                 }
+                // Se informou somente Conjunto
                 if (cN) {
                     const hitConj = pool.find(n => normKeyObs(n.conjunto) === cN);
                     if (hitConj) {
-                        return { status: 'exato', ativoId: hitConj.docId, area: hitConj.area, maquina: hitConj.maquina, equipamento: hitConj.equipamento, conjunto: hitConj.conjunto, subconjunto: rawSub ? padronizarTexto(rawSub) : '' };
+                        return { status: 'exato', precisaCriarNaArvore: false, ativoId: hitConj.docId, area: hitConj.area, maquina: hitConj.maquina, equipamento: hitConj.equipamento, conjunto: hitConj.conjunto, subconjunto: '' };
                     }
+                    return {
+                        status: 'criar_conjunto',
+                        precisaCriarNaArvore: true,
+                        ativoId: '',
+                        area: base.area,
+                        maquina: base.maquina,
+                        equipamento: base.equipamento,
+                        conjunto: padronizarTexto(rawCj),
+                        subconjunto: ''
+                    };
                 }
-                const first = pool[0];
-                return {
-                    status: cN ? 'equipamento' : 'exato',
-                    ativoId: first.docId,
-                    area: first.area,
-                    maquina: first.maquina,
-                    equipamento: first.equipamento,
-                    conjunto: rawCj ? padronizarTexto(rawCj) : '',
-                    subconjunto: rawSub ? padronizarTexto(rawSub) : ''
-                };
+                // Se informou somente Subconjunto sem Conjunto explícito
+                if (sN) {
+                    const hitSub = pool.find(n => normKeyObs(n.subconjunto) === sN);
+                    if (hitSub) {
+                        return { status: 'exato', precisaCriarNaArvore: false, ativoId: hitSub.docId, area: hitSub.area, maquina: hitSub.maquina, equipamento: hitSub.equipamento, conjunto: hitSub.conjunto, subconjunto: hitSub.subconjunto };
+                    }
+                    return {
+                        status: 'criar_subconjunto',
+                        precisaCriarNaArvore: true,
+                        ativoId: '',
+                        area: base.area,
+                        maquina: base.maquina,
+                        equipamento: base.equipamento,
+                        conjunto: base.conjunto || 'Conjunto Geral',
+                        subconjunto: padronizarTexto(rawSub)
+                    };
+                }
+                return { status: 'exato', precisaCriarNaArvore: false, ativoId: base.docId, area: base.area, maquina: base.maquina, equipamento: base.equipamento, conjunto: '', subconjunto: '' };
             }
 
+            // Equipamento ainda não existe na Árvore Oficial -> herda grafia canônica da Área/Máquina se já existirem
+            const areaRef = ativosArvoreFlat.find(n => aN && normKeyObs(n.area) === aN)?.area || padronizarTexto(rawArea);
+            const maqRef = ativosArvoreFlat.find(n => (!aN || normKeyObs(n.area) === aN) && mN && normKeyObs(n.maquina) === mN)?.maquina || padronizarTexto(rawMaq);
             return {
-                status: 'sem_vinculo',
+                status: 'criar_ativo',
+                precisaCriarNaArvore: true,
                 ativoId: '',
-                area: padronizarTexto(rawArea),
-                maquina: padronizarTexto(rawMaq),
+                area: areaRef,
+                maquina: maqRef,
                 equipamento: padronizarTexto(rawEq),
                 conjunto: rawCj ? padronizarTexto(rawCj) : '',
                 subconjunto: rawSub ? padronizarTexto(rawSub) : ''
+            };
+        }
+
+        async function garantirNoNaArvoreObs(vincEntrada, origem = 'obsolescencia') {
+            if (!vincEntrada || !vincEntrada.area || !vincEntrada.maquina || !vincEntrada.equipamento) {
+                return { ...vincEntrada, criadoNaArvore: false };
+            }
+            // Revalida contra o estado atual (garante que lotes não criem nós duplicados em ob_linhas)
+            const atual = resolverVinculoArvoreObs(vincEntrada.area, vincEntrada.maquina, vincEntrada.equipamento, vincEntrada.conjunto, vincEntrada.subconjunto);
+            if (!atual.precisaCriarNaArvore) {
+                return { ...atual, criadoNaArvore: false };
+            }
+
+            const conjFinal = atual.conjunto || 'Conjunto Geral';
+            const subFinal = atual.subconjunto || '';
+            const rawEquipRef = rawLinhasDocsObs.find(d =>
+                normKeyObs(d.area || d.setor) === normKeyObs(atual.area) &&
+                normKeyObs(d.maquina || d.linha) === normKeyObs(atual.maquina) &&
+                normKeyObs(d.equipamento) === normKeyObs(atual.equipamento)
+            );
+            const rawLinhaRef = rawEquipRef || rawLinhasDocsObs.find(d =>
+                normKeyObs(d.area || d.setor) === normKeyObs(atual.area) &&
+                normKeyObs(d.maquina || d.linha) === normKeyObs(atual.maquina) &&
+                d.criticidade_linha
+            );
+            const rawConjRef = rawLinhasDocsObs.find(d =>
+                normKeyObs(d.area || d.setor) === normKeyObs(atual.area) &&
+                normKeyObs(d.maquina || d.linha) === normKeyObs(atual.maquina) &&
+                normKeyObs(d.equipamento) === normKeyObs(atual.equipamento) &&
+                normKeyObs(d.conjunto) === normKeyObs(conjFinal)
+            );
+
+            const autor = (usuarioLogado && (usuarioLogado.nome || usuarioLogado.user)) || 'Admin';
+            const agora = new Date().toISOString();
+            const docPayload = {
+                setor: atual.area,
+                area: atual.area,
+                maquina: atual.maquina,
+                equipamento: atual.equipamento,
+                conjunto: conjFinal,
+                subconjunto: subFinal,
+                tag: '',
+                criticidade: rawConjRef?.criticidade || '',
+                criticidade_linha: rawLinhaRef?.criticidade_linha || '',
+                periodicidade_preventiva: rawConjRef?.periodicidade_preventiva || '',
+                periodicidade_semanas: Number(rawConjRef?.periodicidade_semanas || 0),
+                disciplina: rawConjRef?.disciplina || 'Mecânica',
+                fabricante: rawEquipRef?.fabricante || '',
+                modelo: rawEquipRef?.modelo || '',
+                serie: rawEquipRef?.serie || rawEquipRef?.numeroSerie || '',
+                numeroSerie: rawEquipRef?.numeroSerie || rawEquipRef?.serie || '',
+                status_ativo: 'Ativo',
+                inspecao_ativa: !Boolean(subFinal),
+                inspecao_conjunto_ativa: rawConjRef ? Boolean(rawConjRef.inspecao_conjunto_ativa) : true,
+                padrinho_mec: rawConjRef?.padrinho_mec || rawEquipRef?.padrinho_mec || '',
+                padrinho_ele: rawConjRef?.padrinho_ele || rawEquipRef?.padrinho_ele || '',
+                origem_cadastro: origem,
+                criado_em: agora,
+                atualizado_em: agora,
+                atualizado_por: autor,
+                timestamp: Date.now()
+            };
+
+            let novoId = `local_${Date.now()}_${Math.random().toString(36).slice(2, 7)}`;
+            if (isFirebaseConnected) {
+                const ref = await addDoc(linhasColRef, docPayload);
+                novoId = ref.id;
+            }
+            if (!rawLinhasDocsObs.some(d => d.id === novoId)) {
+                rawLinhasDocsObs.push({ id: novoId, ...docPayload });
+                estruturas = rebuildEstruturasAgrupadasObs(rawLinhasDocsObs);
+            }
+            return {
+                ...atual,
+                conjunto: conjFinal,
+                subconjunto: subFinal,
+                ativoId: novoId,
+                precisaCriarNaArvore: false,
+                criadoNaArvore: true
             };
         }
 
@@ -1601,71 +1730,78 @@
             }
         }
 
-        window.atualizarDatalistsDependentes = () => {
-            const a = document.getElementById('impPecaArea')?.value || '';
-            const m = document.getElementById('impPecaMaq')?.value || '';
-            const e = document.getElementById('impPecaEq')?.value || '';
+        window.atualizarDatalistsDependentes = (fonte = 'auto') => {
+            const modalItemAberto = !document.getElementById('modalItem')?.classList.contains('hidden');
+            const usarForm = fonte === 'form' || (fonte === 'auto' && modalItemAberto);
+            const a = (usarForm ? document.getElementById('fArea')?.value : document.getElementById('impPecaArea')?.value) || '';
+            const m = (usarForm ? document.getElementById('fMaquina')?.value : document.getElementById('impPecaMaq')?.value) || '';
+            const e = (usarForm ? document.getElementById('fEquipamentoBusca')?.value : document.getElementById('impPecaEq')?.value) || '';
+            const c = (usarForm ? document.getElementById('fConjunto')?.value : document.getElementById('impPecaCj')?.value) || '';
+
             const areas = [...new Set(estruturas.map(x => x.area))].filter(Boolean).sort((x, y) => x.localeCompare(y, 'pt-BR'));
             const dlA = document.getElementById('dlAreas');
             if (dlA) dlA.innerHTML = areas.map(x => `<option value="${escapeHtmlObs(x)}">`).join('');
+
             const maquinas = [...new Set(estruturas.filter(x => !a || normKeyObs(x.area) === normKeyObs(a)).map(x => x.maquina))].filter(Boolean).sort((x, y) => x.localeCompare(y, 'pt-BR'));
             const dlM = document.getElementById('dlMaquinas');
             if (dlM) dlM.innerHTML = maquinas.map(x => `<option value="${escapeHtmlObs(x)}">`).join('');
+
             const equips = [...new Set(estruturas.filter(x => (!a || normKeyObs(x.area) === normKeyObs(a)) && (!m || normKeyObs(x.maquina) === normKeyObs(m))).map(x => x.equipamento))].filter(Boolean).sort((x, y) => x.localeCompare(y, 'pt-BR'));
             const dlE = document.getElementById('dlEquipamentos');
             if (dlE) dlE.innerHTML = equips.map(x => `<option value="${escapeHtmlObs(x)}">`).join('');
+
             const obj = estruturas.find(x => normKeyObs(x.area) === normKeyObs(a) && normKeyObs(x.maquina) === normKeyObs(m) && normKeyObs(x.equipamento) === normKeyObs(e));
             const dlC = document.getElementById('dlConjuntos');
             if (dlC) dlC.innerHTML = obj && obj.conjuntos ? obj.conjuntos.map(x => `<option value="${escapeHtmlObs(x)}">`).join('') : '';
+
+            const subs = (obj && c && obj.subconjuntosPorConjunto) ? (obj.subconjuntosPorConjunto[normKeyObs(c)] || []) : [];
+            const dlS = document.getElementById('dlSubconjuntos');
+            if (dlS) dlS.innerHTML = subs.map(x => `<option value="${escapeHtmlObs(x)}">`).join('');
         };
 
-        // --- SELECTS EM CASCATA DA ÁRVORE OFICIAL (MODAL ITEM) ---
-        function preencherSelectOpcoesObs(selEl, lista, placeholder, selectedVal = '') {
-            if (!selEl) return '';
-            const unicos = [...new Set(lista.filter(Boolean))].sort((a, b) => a.localeCompare(b, 'pt-BR'));
-            let matched = '';
-            if (selectedVal) {
-                matched = unicos.find(x => normKeyObs(x) === normKeyObs(selectedVal)) || '';
+        function atualizarBadgeVinculoModalItem() {
+            const badge = document.getElementById('modalItemVinculoBadge');
+            if (!badge) return;
+            const a = (document.getElementById('fArea')?.value || '').trim();
+            const m = (document.getElementById('fMaquina')?.value || '').trim();
+            const e = (document.getElementById('fEquipamentoBusca')?.value || '').trim();
+            const c = (document.getElementById('fConjunto')?.value || '').trim();
+            const s = (document.getElementById('fSubconjunto')?.value || '').trim();
+            if (!a || !m || !e) {
+                badge.className = 'px-2 py-0.5 rounded-full text-[10px] font-extrabold bg-slate-200 text-slate-600';
+                badge.textContent = 'Selecione ou digite';
+                return;
             }
-            let opts = `<option value="">${escapeHtmlObs(placeholder)}</option>`;
-            opts += unicos.map(v => `<option value="${escapeHtmlObs(v)}" ${v === matched ? 'selected' : ''}>${escapeHtmlObs(v)}</option>`).join('');
-            if (selectedVal && !matched) {
-                opts += `<option value="${escapeHtmlObs(selectedVal)}" selected>${escapeHtmlObs(selectedVal)} (Cadastro anterior)</option>`;
-                matched = selectedVal;
+            const v = resolverVinculoArvoreObs(a, m, e, c, s);
+            if (!v.precisaCriarNaArvore) {
+                badge.className = 'px-2 py-0.5 rounded-full text-[10px] font-extrabold bg-emerald-100 text-emerald-700';
+                badge.textContent = 'Vinculado à Árvore Oficial';
+            } else if (v.status === 'criar_subconjunto') {
+                badge.className = 'px-2 py-0.5 rounded-full text-[10px] font-extrabold bg-sky-100 text-sky-800';
+                badge.textContent = 'Novo Subconjunto — criará na Árvore';
+            } else if (v.status === 'criar_conjunto') {
+                badge.className = 'px-2 py-0.5 rounded-full text-[10px] font-extrabold bg-sky-100 text-sky-800';
+                badge.textContent = s ? 'Novo Conjunto + Subconjunto — criará na Árvore' : 'Novo Conjunto — criará na Árvore';
+            } else {
+                badge.className = 'px-2 py-0.5 rounded-full text-[10px] font-extrabold bg-indigo-100 text-indigo-800';
+                badge.textContent = 'Novo Ativo — criará na Árvore Oficial';
             }
-            selEl.innerHTML = opts;
-            selEl.value = matched;
-            return matched;
         }
 
         function popularSelectsArvoreForm(vals = {}) {
-            const selA = document.getElementById('fArea');
-            const selM = document.getElementById('fMaquina');
-            const selE = document.getElementById('fEquipamentoBusca');
-            const selC = document.getElementById('fConjunto');
-            const selS = document.getElementById('fSubconjunto');
-            if (!selA || !selM || !selE || !selC || !selS) return;
-
-            const aSel = preencherSelectOpcoesObs(selA, estruturas.map(x => x.area), 'Selecione o Setor...', vals.area || '');
-            const maqs = aSel ? estruturas.filter(x => normKeyObs(x.area) === normKeyObs(aSel)).map(x => x.maquina) : [];
-            const mSel = preencherSelectOpcoesObs(selM, maqs, 'Selecione a Máquina...', vals.maquina || '');
-            const eqs = (aSel && mSel) ? estruturas.filter(x => normKeyObs(x.area) === normKeyObs(aSel) && normKeyObs(x.maquina) === normKeyObs(mSel)).map(x => x.equipamento) : [];
-            const eSel = preencherSelectOpcoesObs(selE, eqs, 'Selecione o Equipamento...', vals.equipamento || '');
-            const obj = (aSel && mSel && eSel) ? estruturas.find(x => normKeyObs(x.area) === normKeyObs(aSel) && normKeyObs(x.maquina) === normKeyObs(mSel) && normKeyObs(x.equipamento) === normKeyObs(eSel)) : null;
-            const cSel = preencherSelectOpcoesObs(selC, obj ? obj.conjuntos : [], 'Geral / Opcional', vals.conjunto || '');
-            const subs = (obj && cSel && obj.subconjuntosPorConjunto) ? (obj.subconjuntosPorConjunto[normKeyObs(cSel)] || []) : [];
-            preencherSelectOpcoesObs(selS, subs, 'Opcional', vals.subconjunto || '');
+            const setVal = (id, v) => { const el = document.getElementById(id); if (el) el.value = v || ''; };
+            setVal('fArea', vals.area || '');
+            setVal('fMaquina', vals.maquina || '');
+            setVal('fEquipamentoBusca', vals.equipamento || '');
+            setVal('fConjunto', vals.conjunto || '');
+            setVal('fSubconjunto', vals.subconjunto || '');
+            atualizarDatalistsDependentes('form');
+            atualizarBadgeVinculoModalItem();
         }
 
-        window.onChangeSelectArvoreForm = (nivel) => {
-            const a = document.getElementById('fArea')?.value || '';
-            const m = document.getElementById('fMaquina')?.value || '';
-            const e = document.getElementById('fEquipamentoBusca')?.value || '';
-            const c = document.getElementById('fConjunto')?.value || '';
-            if (nivel === 'area') popularSelectsArvoreForm({ area: a });
-            else if (nivel === 'maquina') popularSelectsArvoreForm({ area: a, maquina: m });
-            else if (nivel === 'equipamento') popularSelectsArvoreForm({ area: a, maquina: m, equipamento: e });
-            else if (nivel === 'conjunto') popularSelectsArvoreForm({ area: a, maquina: m, equipamento: e, conjunto: c });
+        window.onChangeArvoreFormObs = () => {
+            atualizarDatalistsDependentes('form');
+            atualizarBadgeVinculoModalItem();
         };
 
         // --- RENDERIZADORES DE ÁRVORE ---
@@ -1770,40 +1906,54 @@
             btn.disabled = true;
             btn.innerText = "Processando...";
 
-            const vinc = resolverVinculoArvoreObs(rawArea, rawMaq, rawEq, rawCj, rawSub);
-
-            let data = {
-                area: vinc.area,
-                maquina: vinc.maquina,
-                equipamento: vinc.equipamento,
-                conjunto: vinc.conjunto,
-                subconjunto: vinc.subconjunto,
-                ativoId: vinc.ativoId || '',
-                tipoPeca: tipo,
-                componente: padronizarTexto(document.getElementById('fComponente').value),
-                fabricante: document.getElementById('fFabricante').value.trim(),
-                codigoSistema: document.getElementById('fCodigoSistema').value.trim(),
-                custoEstimado: Number(document.getElementById('fCusto').value) || 0,
-                timestamp: Date.now()
-            };
-
-            if (tipo === 'Obsolescencia') {
-                const g = parseInt(document.getElementById('sliderG').value), u = parseInt(document.getElementById('sliderU').value), t = parseInt(document.getElementById('sliderT').value);
-                data.gravidade = g; data.urgencia = u; data.tendencia = t; data.gutScore = g * u * t;
-                data.statusCicloVida = document.getElementById('fStatusCiclo').value.trim() || '-';
-                data.acaoProposta = document.getElementById('fAcaoProposta').value.trim();
-                data.statusAcao = id ? (items.find(x => x.id === id)?.statusAcao || 'Pendente') : 'Pendente';
-            } else {
-                data.gravidade = 0; data.urgencia = 0; data.tendencia = 0; data.gutScore = 0;
-                data.qtdAplicada = document.getElementById('fPrevQtd').value.trim() || '1';
-                data.gatilhoVidaUtil = document.getElementById('fPrevVida').value.trim();
-            }
-
             try {
-                if (id) { if (isFirebaseConnected) await updateDoc(doc(db, "ob_equipamentos", id), data); showToast("Peça Atualizada!"); }
-                else { if (isFirebaseConnected) await addDoc(colRef, data); showToast("Peça vinculada à Árvore Oficial!"); }
+                const vincBase = resolverVinculoArvoreObs(rawArea, rawMaq, rawEq, rawCj, rawSub);
+                const vinc = vincBase.precisaCriarNaArvore
+                    ? await garantirNoNaArvoreObs(vincBase, 'obsolescencia_manual')
+                    : { ...vincBase, criadoNaArvore: false };
+
+                let data = {
+                    area: vinc.area,
+                    maquina: vinc.maquina,
+                    equipamento: vinc.equipamento,
+                    conjunto: vinc.conjunto,
+                    subconjunto: vinc.subconjunto,
+                    ativoId: vinc.ativoId || '',
+                    tipoPeca: tipo,
+                    componente: padronizarTexto(document.getElementById('fComponente').value),
+                    fabricante: document.getElementById('fFabricante').value.trim(),
+                    codigoSistema: document.getElementById('fCodigoSistema').value.trim(),
+                    custoEstimado: Number(document.getElementById('fCusto').value) || 0,
+                    timestamp: Date.now()
+                };
+
+                if (tipo === 'Obsolescencia') {
+                    const g = parseInt(document.getElementById('sliderG').value), u = parseInt(document.getElementById('sliderU').value), t = parseInt(document.getElementById('sliderT').value);
+                    data.gravidade = g; data.urgencia = u; data.tendencia = t; data.gutScore = g * u * t;
+                    data.statusCicloVida = document.getElementById('fStatusCiclo').value.trim() || '-';
+                    data.acaoProposta = document.getElementById('fAcaoProposta').value.trim();
+                    data.statusAcao = id ? (items.find(x => x.id === id)?.statusAcao || 'Pendente') : 'Pendente';
+                } else {
+                    data.gravidade = 0; data.urgencia = 0; data.tendencia = 0; data.gutScore = 0;
+                    data.qtdAplicada = document.getElementById('fPrevQtd').value.trim() || '1';
+                    data.gatilhoVidaUtil = document.getElementById('fPrevVida').value.trim();
+                }
+
+                if (id) {
+                    if (isFirebaseConnected) await updateDoc(doc(db, "ob_equipamentos", id), data);
+                    showToast(vinc.criadoNaArvore ? "Peça atualizada e novo nó criado na Árvore Oficial!" : "Peça Atualizada!");
+                } else {
+                    if (isFirebaseConnected) await addDoc(colRef, data);
+                    showToast(vinc.criadoNaArvore ? "Peça salva e novo nó criado automaticamente na Árvore Oficial!" : "Peça vinculada à Árvore Oficial!");
+                }
                 closeModal('modalItem');
-            } catch (err) { showToast("Erro ao salvar.", "error"); } finally { btn.disabled = false; btn.innerText = "Salvar Registro"; }
+            } catch (err) {
+                console.error(err);
+                showToast("Erro ao salvar.", "error");
+            } finally {
+                btn.disabled = false;
+                btn.innerText = "Salvar Registro";
+            }
         };
 
         window.editItem = (id, tipoOriginal) => {
@@ -2410,28 +2560,28 @@
 
         window.atualizarResumoImportObs = () => {
             const pularDup = document.getElementById('impObsPularDup')?.checked !== false;
-            const somenteVinc = document.getElementById('impObsSomenteVinc')?.checked === true;
+            const criarNaArvore = document.getElementById('impObsCriarNaArvore')?.checked !== false;
 
             const total = impObsParsedRows.length;
-            const vinculados = impObsParsedRows.filter(r => !r.erros.length && (r.vinc.status === 'exato' || r.vinc.status === 'equipamento')).length;
-            const semVinc = impObsParsedRows.filter(r => !r.erros.length && r.vinc.status === 'sem_vinculo').length;
+            const jaNaArvore = impObsParsedRows.filter(r => !r.erros.length && !r.vinc.precisaCriarNaArvore).length;
+            const criarArvore = impObsParsedRows.filter(r => !r.erros.length && r.vinc.precisaCriarNaArvore).length;
             const dup = impObsParsedRows.filter(r => r.duplicado).length;
             const err = impObsParsedRows.filter(r => r.erros.length > 0).length;
 
             const prontas = impObsParsedRows.filter(r => {
                 if (r.erros.length) return false;
                 if (pularDup && r.duplicado) return false;
-                if (somenteVinc && r.vinc.status === 'sem_vinculo') return false;
                 return true;
             });
 
             const setTxt = (id, v) => { const el = document.getElementById(id); if (el) el.textContent = String(v); };
             setTxt('impObsKpiTotal', total);
-            setTxt('impObsKpiVinc', vinculados);
-            setTxt('impObsKpiSemVinc', semVinc);
+            setTxt('impObsKpiVinc', jaNaArvore);
+            setTxt('impObsKpiCriar', criarArvore);
             setTxt('impObsKpiDup', dup);
             setTxt('impObsKpiErr', err);
-            setTxt('impObsResumoProntas', `${prontas.length} item(ns) pronto(s) para importar`);
+            const novasArvProntas = criarNaArvore ? prontas.filter(r => r.vinc.precisaCriarNaArvore).length : 0;
+            setTxt('impObsResumoProntas', `${prontas.length} peça(s) pronta(s)${novasArvProntas > 0 ? ` • ${novasArvProntas} novo(s) nó(s) na Árvore` : ''}`);
 
             const btn = document.getElementById('btnExecImportObs');
             if (btn) {
@@ -2449,17 +2599,22 @@
                     badge = `<span class="px-2 py-0.5 rounded-full text-[10px] font-extrabold bg-rose-100 text-rose-700">Erro: ${escapeHtmlObs(r.erros.join(', '))}</span>`;
                 } else if (r.duplicado && pularDup) {
                     badge = `<span class="px-2 py-0.5 rounded-full text-[10px] font-extrabold bg-indigo-100 text-indigo-700">Duplicado (Pular)</span>`;
-                } else if (r.vinc.status === 'exato') {
-                    badge = `<span class="px-2 py-0.5 rounded-full text-[10px] font-extrabold bg-emerald-100 text-emerald-700">Vinculado à Árvore</span>`;
-                } else if (r.vinc.status === 'equipamento') {
-                    badge = `<span class="px-2 py-0.5 rounded-full text-[10px] font-extrabold bg-sky-100 text-sky-700">Equip. Vinculado</span>`;
+                } else if (!r.vinc.precisaCriarNaArvore) {
+                    badge = `<span class="px-2 py-0.5 rounded-full text-[10px] font-extrabold bg-emerald-100 text-emerald-700">Já na Árvore</span>`;
+                } else if (criarNaArvore) {
+                    const tipoNovo = r.vinc.status === 'criar_subconjunto'
+                        ? 'Criar Subconjunto na Árvore'
+                        : (r.vinc.status === 'criar_conjunto'
+                            ? (p.subconjunto ? 'Criar Conj. + Sub. na Árvore' : 'Criar Conjunto na Árvore')
+                            : 'Criar Ativo na Árvore');
+                    badge = `<span class="px-2 py-0.5 rounded-full text-[10px] font-extrabold bg-sky-100 text-sky-800">${tipoNovo}</span>`;
                 } else {
-                    badge = `<span class="px-2 py-0.5 rounded-full text-[10px] font-extrabold bg-amber-100 text-amber-800">${somenteVinc ? 'Ignorado (Sem Vínculo)' : 'Fora da Árvore'}</span>`;
+                    badge = `<span class="px-2 py-0.5 rounded-full text-[10px] font-extrabold bg-amber-100 text-amber-800">Sem Criar na Árvore</span>`;
                 }
                 const s = p.gutScore || 0;
                 const gutCls = s >= 80 ? 'badge-critico' : s >= 45 ? 'badge-alto' : s >= 18 ? 'badge-medio' : 'badge-baixo';
                 const path = [p.area, p.maquina, p.equipamento, p.conjunto, p.subconjunto].filter(Boolean).join(' › ');
-                return `<tr class="${r.erros.length || (r.duplicado && pularDup) || (somenteVinc && r.vinc.status === 'sem_vinculo') ? 'opacity-55 bg-slate-50/70' : ''}">
+                return `<tr class="${r.erros.length || (r.duplicado && pularDup) ? 'opacity-55 bg-slate-50/70' : ''}">
                     <td class="py-2 px-3 whitespace-nowrap">${badge}</td>
                     <td class="py-2 px-3 font-bold text-slate-700">${escapeHtmlObs(path || '—')}</td>
                     <td class="py-2 px-3">
@@ -2474,11 +2629,10 @@
 
         window.executarImportacaoObsCsv = async () => {
             const pularDup = document.getElementById('impObsPularDup')?.checked !== false;
-            const somenteVinc = document.getElementById('impObsSomenteVinc')?.checked === true;
+            const criarNaArvore = document.getElementById('impObsCriarNaArvore')?.checked !== false;
             const prontas = impObsParsedRows.filter(r => {
                 if (r.erros.length) return false;
                 if (pularDup && r.duplicado) return false;
-                if (somenteVinc && r.vinc.status === 'sem_vinculo') return false;
                 return true;
             });
             if (!prontas.length) return showToast('Nenhum item válido pronto para importar.', 'error');
@@ -2487,13 +2641,29 @@
             const prog = document.getElementById('impObsProgressText');
             if (btn) btn.disabled = true;
             let salvos = 0;
+            let nosCriados = 0;
             let erros = 0;
             const baseTs = Date.now();
             try {
                 for (let i = 0; i < prontas.length; i++) {
                     if (prog) prog.textContent = `Importando ${i + 1} de ${prontas.length}...`;
-                    const docData = { ...prontas[i].payload, timestamp: baseTs + i };
+                    const row = prontas[i];
                     try {
+                        let vincFinal = row.vinc;
+                        if (criarNaArvore) {
+                            vincFinal = await garantirNoNaArvoreObs(row.vinc, 'obsolescencia_csv');
+                            if (vincFinal.criadoNaArvore) nosCriados++;
+                        }
+                        const docData = {
+                            ...row.payload,
+                            area: vincFinal.area,
+                            maquina: vincFinal.maquina,
+                            equipamento: vincFinal.equipamento,
+                            conjunto: vincFinal.conjunto,
+                            subconjunto: vincFinal.subconjunto,
+                            ativoId: vincFinal.ativoId || '',
+                            timestamp: baseTs + i
+                        };
                         if (isFirebaseConnected) await addDoc(colRef, docData);
                         salvos++;
                     } catch (e) {
@@ -2502,15 +2672,16 @@
                     }
                 }
                 if (erros === 0) {
-                    showToast(`${salvos} peça(s) de obsolescência importada(s) com sucesso!`);
+                    const msgArv = nosCriados > 0 ? ` e ${nosCriados} novo(s) nó(s) criado(s) na Árvore Oficial` : '';
+                    showToast(`${salvos} peça(s) importada(s)${msgArv}!`);
                     limparImportObs();
                     closeModal('modalImportObs');
                 } else {
-                    showToast(`${salvos} importada(s) e ${erros} com erro ao gravar.`, 'error');
+                    showToast(`${salvos} importada(s), ${nosCriados} nó(s) criado(s) e ${erros} erro(s).`, 'error');
                 }
             } finally {
                 if (btn) btn.disabled = false;
-                if (prog) prog.textContent = `${salvos} importada(s) • ${erros} erro(s).`;
+                if (prog) prog.textContent = `${salvos} importada(s) • ${nosCriados} nó(s) na Árvore • ${erros} erro(s).`;
             }
         };
 
@@ -2526,10 +2697,14 @@
             btn.disabled = true;
             btn.innerText = "Processando...";
 
-            const vinc = resolverVinculoArvoreObs(a, m, e, c, '');
+            const vincBase = resolverVinculoArvoreObs(a, m, e, c, '');
             const rows = text.split('\n');
             let count = 0;
             try {
+                const vinc = vincBase.precisaCriarNaArvore
+                    ? await garantirNoNaArvoreObs(vincBase, 'obsolescencia_prev_import')
+                    : { ...vincBase, criadoNaArvore: false };
+
                 for (let r of rows) {
                     if (!r.trim()) continue;
                     const cols = r.split('\t').map(x => x.trim());
@@ -2555,7 +2730,7 @@
                     if (isFirebaseConnected) await addDoc(colRef, dataPeca);
                     count++;
                 }
-                showToast(`${count} peças importadas com sucesso!`);
+                showToast(`${count} peças importadas com sucesso${vinc.criadoNaArvore ? ' e novo nó criado na Árvore Oficial' : ''}!`);
                 document.getElementById('importPecasText').value = '';
                 closeModal('modalImportPecas');
             } catch (err) { showToast("Erro ao importar peças.", "error"); } finally { btn.disabled = false; btn.innerText = "Importar Peças"; }
