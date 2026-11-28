@@ -504,7 +504,7 @@
                 <div class="min-w-0">
                     <div class="flex items-center gap-2">
                         <span class="text-[10px] font-extrabold uppercase tracking-widest text-sky-700">Governança &amp; Confiabilidade PCM • Norma EN 13306</span>
-                        <span id="hdrEconomiaBadge" class="px-2 py-0.5 rounded-full bg-emerald-50 text-emerald-800 border border-emerald-200 text-[10px] font-extrabold">Referência Set/Out</span>
+                        <span id="hdrEconomiaBadge" class="px-2 py-0.5 rounded-full bg-emerald-50 text-emerald-800 border border-emerald-200 text-[10px] font-extrabold">Comparativo Mensal</span>
                     </div>
                     <h2 id="headerTitle" class="text-base sm:text-lg font-extrabold text-slate-900 truncate">Orquestração Técnica — Auditoria &amp; Confiabilidade</h2>
                     <p id="headerSubtitle" class="text-xs font-semibold text-slate-500 truncate">Triagem ERP › Regras Locais R$ 0 › Auditoria EN 13306 › Roteamento › Conferência › Biblioteca › Confiabilidade › AQF › Planejador</p>
@@ -556,8 +556,8 @@
                         </div>
                         <div class="flex flex-wrap items-center gap-2 shrink-0">
                             <select id="selectEscopoHistoricoOms" onchange="alterarEscopoVisualizacaoOms(this.value)" class="input-clean py-2 text-xs font-extrabold w-52 bg-emerald-50/60 border-emerald-200 text-emerald-950" title="Alterne entre o histórico consolidado da planta, último lote ou mês específico">
-                                <option value="lote_atual">📄 Visão: Lote Vigente</option>
-                                <option value="historico_total">📦 Banco Histórico Acumulado (0 OMs)</option>
+                                <option value="lote_atual">Visão: Lote Vigente</option>
+                                <option value="historico_total">Banco Histórico Acumulado (0 OMs)</option>
                             </select>
                             <input type="text" id="inputPeriodoRodada" placeholder="Mês / Ciclo (ex: Nov/2026)" value="Nov/2026" class="input-clean py-2 text-xs font-extrabold w-36" title="Nome do ciclo/mês para comparação histórica">
                             <input type="file" id="inputUploadPlanilhaErp" accept=".csv,.xlsx,.json,.jsonl" onchange="processarArquivoUploadErp(event)" class="hidden">
@@ -565,13 +565,9 @@
                                 <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 7v10a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2h-6l-2-2H5a2 2 0 00-2 2z"/></svg>
                                 <span>Selecionar Planilha (.CSV / .XLSX)</span>
                             </button>
-                            <button type="button" onclick="simularLoteNovembroTeste()" class="btn-touch bg-sky-600 hover:bg-sky-700 text-white text-xs py-2.5 px-3.5" title="Executar simulação realista de Novembro para acompanhar o fluxo ordem a ordem">
+                            <button type="button" onclick="simularLoteNovembroTeste()" class="btn-touch bg-sky-600 hover:bg-sky-700 text-white text-xs py-2.5 px-3.5" title="Executar simulação realista para acompanhar o fluxo ordem a ordem">
                                 <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"/></svg>
                                 <span>Simular Lote Teste</span>
-                            </button>
-                            <button type="button" onclick="inspecionarHistoricoSetOut()" class="btn-touch bg-white hover:bg-slate-50 border border-slate-200 text-slate-700 text-xs py-2.5 px-3" title="Abrir a base de referência de Set/Out (1.234 OMs) para consulta">
-                                <svg class="w-4 h-4 text-sky-700" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253"/></svg>
-                                <span>Base Set/Out</span>
                             </button>
                             <button type="button" onclick="limparRodadaVigente()" class="btn-touch bg-white hover:bg-rose-50 border border-slate-200 text-slate-600 hover:text-rose-700 text-xs py-2.5 px-3" title="Limpar visualização do lote atual (o banco histórico em nuvem permanece intacto)">
                                 <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"/></svg>
@@ -733,15 +729,15 @@
                                         </div>
                                         <div class="mt-2.5 h-1.5 rounded-full bg-slate-100 overflow-hidden"><div id="pBar_no1" class="h-full bg-sky-600 transition-all duration-300" style="width:0%"></div></div>
                                     </div>
-                                    <div id="pNode_hist_base" data-neural-id="hist_base" onclick="inspecionarHistoricoSetOut()" class="perceptron-node is-done">
+                                    <div id="pNode_hist_base" data-neural-id="hist_base" onclick="inspecionarMemoriaCalibradaNo()" class="perceptron-node is-done">
                                         <div class="flex items-center gap-2.5">
                                             <span class="perceptron-core">
                                                 <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 7v10c0 2.21 3.582 4 8 4s8-1.79 8-4V7M4 7c0 2.21 3.582 4 8 4s8-1.79 8-4M4 7c0-2.21 3.582-4 8-4s8 1.79 8 4"/></svg>
                                             </span>
                                             <div class="min-w-0 flex-1">
-                                                <div class="text-[9px] font-mono font-bold text-slate-500">HISTÓRICO BASE</div>
-                                                <div class="text-xs font-extrabold text-slate-900 leading-tight">Base Set/Out</div>
-                                                <div class="text-[10px] font-semibold text-emerald-700 truncate mt-0.5">1.234 OMs • Calibrado</div>
+                                                <div class="text-[9px] font-mono font-bold text-slate-500">MOTOR INTERNO</div>
+                                                <div class="text-xs font-extrabold text-slate-900 leading-tight">Memória Calibrada</div>
+                                                <div class="text-[10px] font-semibold text-emerald-700 truncate mt-0.5">Operando em 2º plano</div>
                                             </div>
                                         </div>
                                     </div>
@@ -972,19 +968,19 @@
                         </div>
                     </div>
 
-                    <!-- ==================== PAINEL DE CONTROLE HISTÓRICO: MELHORAMOS OU PIORAMOS? ==================== -->
+                    <!-- ==================== PAINEL DE CONTROLE HISTÓRICO: EVOLUÇÃO MÊS A MÊS ==================== -->
                     <div id="comparativoHistoricoCard" class="glass-card p-5 rounded-3xl border border-indigo-200 space-y-4">
                         <div class="flex flex-col lg:flex-row lg:items-center justify-between gap-3">
                             <div>
                                 <div class="flex flex-wrap items-center gap-2">
                                     <span class="px-2.5 py-0.5 rounded-full bg-indigo-600 text-white text-[10px] font-extrabold uppercase tracking-wider">Controle de Evolução PCM</span>
-                                    <span class="text-[11px] font-extrabold text-indigo-900">Comparativo Mês a Mês vs. Histórico de Treinamento</span>
+                                    <span id="compSubtitleBadge" class="text-[11px] font-extrabold text-indigo-900">Comparativo Mês a Mês da Planta</span>
                                 </div>
                                 <h3 class="text-base sm:text-lg font-extrabold text-slate-900 mt-1">Evolução da Planta: Melhoramos ou Pioramos?</h3>
                             </div>
                             <div class="flex flex-wrap items-center gap-2">
-                                <label for="compSelectBaseline" class="text-[11px] font-extrabold text-slate-600">Comparar Vigente contra:</label>
-                                <select id="compSelectBaseline" onchange="renderComparativoHistorico()" class="input-clean py-1.5 text-xs font-extrabold w-auto"></select>
+                                <label for="compSelectBaseline" class="text-[11px] font-extrabold text-slate-600">Comparar Ciclo Atual contra:</label>
+                                <select id="compSelectBaseline" onchange="onChangeComparativoBaseline()" class="input-clean py-1.5 text-xs font-extrabold w-auto"></select>
                                 <button type="button" onclick="salvarRodadaAtualNoHistorico(true)" class="btn-touch bg-indigo-600 hover:bg-indigo-700 text-white text-xs py-2 px-3.5">
                                     <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7H5a2 2 0 00-2 2v9a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2h-3m-1 4l-3 3m0 0l-3-3m3 3V4"/></svg>
                                     <span>Arquivar Ciclo no Histórico</span>
@@ -998,12 +994,12 @@
                         <!-- RECOMENDAÇÕES DO MAESTRO PARA O MOMENTO ATUAL -->
                         <div id="comparativoRecomendacoesBox" class="p-4 rounded-2xl bg-slate-50 border border-slate-200 space-y-2"></div>
 
-                        <!-- LINHA DO TEMPO DOS CICLOS ARQUIVADOS -->
+                        <!-- LINHA DO TEMPO DOS CICLOS MENSAIS -->
                         <div class="overflow-x-auto">
                             <table class="w-full text-left border-collapse text-xs">
                                 <thead>
                                     <tr class="border-b border-slate-200 text-[10px] font-extrabold uppercase text-slate-500">
-                                        <th class="py-2 px-2">Período / Lote</th>
+                                        <th class="py-2 px-2">Mês / Ciclo</th>
                                         <th class="py-2 px-2 text-right">OMs</th>
                                         <th class="py-2 px-2 text-right">Quebras</th>
                                         <th class="py-2 px-2 text-right">Graves</th>
@@ -1034,19 +1030,26 @@
                         <div id="pipelineNodesGrid" class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-3.5"></div>
                     </div>
 
-                    <!-- COMPARATIVO DE DISTRIBUIÇÃO POR CATEGORIA VS GABARITO -->
+                    <!-- COMPARATIVO MENSAL DE DISTRIBUIÇÃO POR CATEGORIA & SEVERIDADE EN 13306 -->
                     <div class="grid grid-cols-1 lg:grid-cols-2 gap-4">
                         <div class="glass-card p-5 rounded-3xl space-y-3">
-                            <div class="flex items-center justify-between">
-                                <h3 class="text-sm font-extrabold text-slate-900">Distribuição das 11 Categorias vs. Treino Set/Out</h3>
-                                <span class="text-[10px] font-extrabold text-slate-500">Calibração Equilíbrio Técnico</span>
+                            <div class="flex flex-wrap items-center justify-between gap-2">
+                                <div>
+                                    <h3 class="text-sm font-extrabold text-slate-900">Distribuição das 11 Categorias — Comparativo Mensal</h3>
+                                    <p class="text-[11px] font-semibold text-slate-500">Clique em qualquer categoria para auditar todas as OMs correspondentes com transparência total.</p>
+                                </div>
+                                <span id="pipelineDistBadge" class="px-2.5 py-0.5 rounded-full bg-sky-50 text-sky-800 border border-sky-200 text-[10px] font-extrabold">Comparativo Mensal</span>
                             </div>
                             <div id="pipelineTabelaDistribuicao" class="overflow-x-auto"></div>
+                            <div id="pipelineQuebrasTransparencia" class="hidden pt-2 border-t border-slate-100"></div>
                         </div>
                         <div class="glass-card p-5 rounded-3xl space-y-3">
-                            <div class="flex items-center justify-between">
-                                <h3 class="text-sm font-extrabold text-slate-900">Escada de Severidade EN 13306 &amp; Matriz B×C</h3>
-                                <span class="text-[10px] font-extrabold text-sky-700">Régua Base Set/Out: 51,7% / 28,5% / 19,8%</span>
+                            <div class="flex flex-wrap items-center justify-between gap-2">
+                                <div>
+                                    <h3 class="text-sm font-extrabold text-slate-900">Escada de Severidade EN 13306 &amp; Matriz B×C</h3>
+                                    <p class="text-[11px] font-semibold text-slate-500">Reconciliação transparente das Quebras por severidade (Leve, Moderada e Grave).</p>
+                                </div>
+                                <span id="pipelineSevBadge" class="px-2.5 py-0.5 rounded-full bg-slate-100 text-slate-700 border border-slate-200 text-[10px] font-extrabold">Norma EN 13306</span>
                             </div>
                             <div id="pipelineEscadaSeveridade" class="space-y-3"></div>
                         </div>
@@ -1090,11 +1093,13 @@
                             </select>
                             <select id="audFiltroOrigem" onchange="renderAuditoriaView()" class="input-clean py-2 font-bold">
                                 <option value="">Origem da Decisão (Todas)</option>
+                                <option value="SUPERVISOR">Validado por Supervisor</option>
+                                <option value="FAST_PATH_ZERO">Todo Custo Zero (Fast-Path + Memória + Hist.)</option>
                                 <option value="FAST_PATH_R0">Fast-Path R$ 0,00</option>
                                 <option value="BIBLIOTECA_MEMORIA">Memória Bibliotecário R$ 0</option>
                                 <option value="DEDUP_RODADA">Deduplicação R$ 0</option>
+                                <option value="HISTORICO_EXISTENTE">Histórico Nuvem R$ 0</option>
                                 <option value="IA_LOTE20">Gemini Flash (Lote 20)</option>
-                                <option value="SUPERVISOR">Validado por Supervisor</option>
                             </select>
                         </div>
                         <div id="audResumoContadores" class="flex flex-wrap gap-1.5 text-[11px] font-extrabold"></div>
@@ -1420,6 +1425,30 @@
                                 <button type="button" onclick="salvarCofreIaMaster()" class="btn-touch bg-emerald-600 hover:bg-emerald-700 text-white text-xs">
                                     <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7H5a2 2 0 00-2 2v9a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2h-3m-1 4l-3 3m0 0l-3-3m3 3V4"/></svg>
                                     <span>Salvar Configuração do Cofre</span>
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- BASE DE TREINAMENTO (SET/OUT 2026) — CONTROLE ADMINISTRATIVO OCULTO -->
+                    <div class="glass-card p-5 rounded-3xl border border-indigo-200 bg-indigo-50/35 space-y-3">
+                        <div class="flex flex-col lg:flex-row lg:items-center justify-between gap-3">
+                            <div class="space-y-1">
+                                <div class="flex flex-wrap items-center gap-2">
+                                    <span class="px-2.5 py-0.5 rounded-full bg-indigo-700 text-white text-[10px] font-extrabold uppercase tracking-wider">Acesso Administrativo • Calibração Interna</span>
+                                    <span id="masterTreinoSetOutBadge" class="px-2.5 py-0.5 rounded-full bg-slate-100 text-slate-600 border border-slate-200 text-[10px] font-extrabold">Oculta para Gestores (2º plano)</span>
+                                </div>
+                                <h4 class="text-sm font-extrabold text-slate-900">Base Histórica de Treinamento (Set/Out 2026 • 1.234 OMs)</h4>
+                                <p class="text-[11px] font-semibold text-slate-600">Esta base continua operando em segundo plano para calibração do motor Fast-Path, mas permanece oculta dos painéis gerenciais (que exibem apenas comparativos reais mês a mês). Ative abaixo somente quando desejar comparar ou auditar contra o treino.</p>
+                            </div>
+                            <div class="flex flex-wrap items-center gap-2 shrink-0">
+                                <button type="button" id="btnToggleTreinoSetOutMaster" onclick="toggleCompararTreinoSetOutAdmin()" class="btn-touch bg-white hover:bg-indigo-50 border border-indigo-300 text-indigo-800 text-xs py-2 px-3.5">
+                                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"/></svg>
+                                    <span>Exibir Treino Set/Out nos Comparativos: OFF</span>
+                                </button>
+                                <button type="button" onclick="inspecionarHistoricoSetOut()" class="btn-touch bg-slate-900 hover:bg-slate-800 text-white text-xs py-2 px-3.5">
+                                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253"/></svg>
+                                    <span>Inspecionar Base Set/Out (1.234 OMs)</span>
                                 </button>
                             </div>
                         </div>
@@ -2319,9 +2348,14 @@
             qualidade_media: 74.8,
             custo_brl: 1.48,
             custo_sem_otimizacao_brl: 30.60,
+            categorias_pct: { ...DIST_REFERENCIA, REVISAR_MANUAL: 0 },
+            severidades_pct: { ...REGUA_OFICIAL },
             top_ofensores: ["MULTIPET 1 - SOPRADORA 5000", "BOATOPACK 1 - ENVASADORA", "COZINHA 3"],
             salvo_em: "2026-10-31T23:59:00"
         };
+
+        let adminExibirTreinoSetOut = false;
+        window.isTreinoSetOutVisivel = () => Boolean(typeof isAdminMasterAtivo === "function" && isAdminMasterAtivo() && adminExibirTreinoSetOut);
 
         const PARADAS_BIB = new Set([
             "para", "com", "sem", "dos", "das", "que", "foi", "pela", "pelo",
@@ -2744,11 +2778,55 @@ service cloud.firestore {
 
         window.travarAdminMasterMaestri = () => {
             setAdminMasterSessao(false);
+            adminExibirTreinoSetOut = false;
             masterSelecionadasOms.clear();
+            atualizarUITreinoSetOutMaster();
             renderModalAdminMasterMaestri();
             fecharModal("modalAdminMasterMaestri");
             renderCurrentView();
             showToast("Modo Admin Master bloqueado.");
+        };
+
+        window.atualizarUITreinoSetOutMaster = () => {
+            const ativo = isTreinoSetOutVisivel();
+            const badge = document.getElementById("masterTreinoSetOutBadge");
+            const btn = document.getElementById("btnToggleTreinoSetOutMaster");
+            if (badge) {
+                badge.textContent = ativo ? "Visível nos comparativos (sessão Admin)" : "Oculta para Gestores (2º plano)";
+                badge.className = ativo
+                    ? "px-2.5 py-0.5 rounded-full bg-indigo-100 text-indigo-900 border border-indigo-300 text-[10px] font-extrabold"
+                    : "px-2.5 py-0.5 rounded-full bg-slate-100 text-slate-600 border border-slate-200 text-[10px] font-extrabold";
+            }
+            if (btn) {
+                const sp = btn.querySelector("span");
+                if (sp) sp.textContent = ativo ? "Exibir Treino Set/Out nos Comparativos: ON" : "Exibir Treino Set/Out nos Comparativos: OFF";
+                btn.className = ativo
+                    ? "btn-touch bg-indigo-600 hover:bg-indigo-700 text-white text-xs py-2 px-3.5"
+                    : "btn-touch bg-white hover:bg-indigo-50 border border-indigo-300 text-indigo-800 text-xs py-2 px-3.5";
+            }
+        };
+
+        window.toggleCompararTreinoSetOutAdmin = () => {
+            if (!isAdminMasterAtivo()) {
+                showToast("Desbloqueie o modo Admin Master para comparar com a base de treinamento.", "error");
+                return;
+            }
+            adminExibirTreinoSetOut = !adminExibirTreinoSetOut;
+            atualizarUITreinoSetOutMaster();
+            if (typeof renderPipelineView === "function") renderPipelineView();
+            showToast(
+                adminExibirTreinoSetOut
+                    ? "Base de Treinamento Set/Out habilitada nos comparativos (apenas sua sessão Admin)."
+                    : "Base de Treinamento Set/Out ocultada novamente (modo gerencial Mês a Mês).",
+                "info"
+            );
+        };
+
+        window.inspecionarMemoriaCalibradaNo = () => {
+            if (isAdminMasterAtivo()) {
+                return inspecionarHistoricoSetOut();
+            }
+            showToast("Memória calibrada operando em segundo plano. Inspeção da base de treinamento restrita ao painel Admin Master.", "info");
         };
 
         window.salvarNovaSenhaMasterMaestri = async () => {
@@ -3612,6 +3690,9 @@ service cloud.firestore {
             let naoAtivosOms = 0;
             let ferramentaisOms = 0;
             let compartilhadosOms = 0;
+            let quebrasForaAtivos = 0;
+            let quebrasPendentesSev = 0;
+            const quebrasPorOrigem = { supervisor: 0, fast_path: 0, ia_lote: 0, historico: 0, outros: 0 };
 
             omsAuditadas.forEach(o => {
                 catCount[o.categoria] = (catCount[o.categoria] || 0) + 1;
@@ -3619,12 +3700,24 @@ service cloud.firestore {
                 else if (o.tipo_ativo === "FERRAMENTAL") ferramentaisOms++;
                 else if (o.tipo_ativo === "COMPARTILHADO") compartilhadosOms++;
 
-                if (isOmForaEstudosAqf(o)) return;
+                if (o.categoria === "QUEBRA") {
+                    if (o.origem === "SUPERVISOR") quebrasPorOrigem.supervisor++;
+                    else if (o.origem === "HISTORICO_EXISTENTE") quebrasPorOrigem.historico++;
+                    else if (["FAST_PATH_R0", "BIBLIOTECA_MEMORIA", "DEDUP_RODADA"].includes(o.origem)) quebrasPorOrigem.fast_path++;
+                    else if (o.origem === "IA_LOTE20") quebrasPorOrigem.ia_lote++;
+                    else quebrasPorOrigem.outros++;
+                }
+
+                if (isOmForaEstudosAqf(o)) {
+                    if (o.categoria === "QUEBRA") quebrasForaAtivos++;
+                    return;
+                }
 
                 if (!porAtivo[o.ativo]) porAtivo[o.ativo] = [];
                 porAtivo[o.ativo].push(o);
                 if (o.categoria === "QUEBRA") {
                     if (sevCount[o.severidade] !== undefined) sevCount[o.severidade]++;
+                    else quebrasPendentesSev++;
                     if (o.b && o.c) {
                         const k = `B${o.b}×C${o.c}`;
                         bcCount[k] = (bcCount[k] || 0) + 1;
@@ -3684,6 +3777,10 @@ service cloud.firestore {
             confiabilidadeData = {
                 total_oms: omsAuditadas.length,
                 total_quebras: sevCount.LEVE + sevCount.MODERADA + sevCount.GRAVE,
+                total_quebras_geral: catCount["QUEBRA"] || 0,
+                quebras_pendentes_sev: quebrasPendentesSev,
+                quebras_fora_ativos: quebrasForaAtivos,
+                quebras_por_origem: quebrasPorOrigem,
                 nao_ativos_oms: naoAtivosOms,
                 ferramentais_oms: ferramentaisOms,
                 compartilhados_oms: compartilhadosOms,
@@ -5452,6 +5549,27 @@ RETORNE EXCLUSIVAMENTE UM OBJETO JSON VÁLIDO (sem texto fora do JSON) COM A SEG
             return `${NOMES_MESES_PT[d.getMonth()]}/${d.getFullYear()}`;
         }
 
+        function formatarLabelMesKey(mesKey) {
+            const m = String(mesKey || "").match(/^(\d{4})-(\d{2})$/);
+            if (!m) return String(mesKey || "");
+            const mesIdx = Math.max(0, Math.min(11, Number(m[2]) - 1));
+            return `${NOMES_MESES_PT[mesIdx]}/${m[1]}`;
+        }
+
+        function extrairMesKeyDeLabel(label) {
+            const s = String(label || "").trim();
+            const mIso = s.match(/(20\d{2})[-/](\d{1,2})/);
+            if (mIso) return `${mIso[1]}-${String(Number(mIso[2])).padStart(2, "0")}`;
+            const norm = normKey(s);
+            for (let i = 0; i < NOMES_MESES_PT.length; i++) {
+                const nm = normKey(NOMES_MESES_PT[i]);
+                const rx = new RegExp(`\\b${nm}\\s*[\\/\\-\\s]\\s*(20\\d{2})\\b`);
+                const hit = norm.match(rx);
+                if (hit) return `${hit[1]}-${String(i + 1).padStart(2, "0")}`;
+            }
+            return "";
+        }
+
         function detectarPeriodoDoLote(oms, fallbackNomeArquivo = "") {
             const contagemMes = {};
             (oms || []).forEach(o => {
@@ -5468,10 +5586,7 @@ RETORNE EXCLUSIVAMENTE UM OBJETO JSON VÁLIDO (sem texto fora do JSON) COM A SEG
             });
             const ordenados = Object.entries(contagemMes).sort((a, b) => b[1] - a[1]);
             if (ordenados.length) {
-                const [ano, mesStr] = ordenados[0][0].split("-");
-                const mesIdx = Math.max(0, Math.min(11, Number(mesStr) - 1));
-                if (ano === "2026" && (mesIdx === 8 || mesIdx === 9)) return "Set/Out 2026 (Histórico ERP)";
-                return `${NOMES_MESES_PT[mesIdx]}/${ano}`;
+                return formatarLabelMesKey(ordenados[0][0]);
             }
             const inpVal = (document.getElementById("inputPeriodoRodada")?.value || "").trim();
             if (inpVal) return inpVal;
@@ -5479,12 +5594,14 @@ RETORNE EXCLUSIVAMENTE UM OBJETO JSON VÁLIDO (sem texto fora do JSON) COM A SEG
             return getPeriodoAtualPadrao();
         }
 
-        function gerarResumoMetricasRodada(periodoLabel, omsList, tipo = "VIGENTE") {
+        function gerarResumoMetricasRodada(periodoLabel, omsList, tipo = "VIGENTE", mesKeyArg = "") {
             const tot = omsList.length || 0;
             const safeTot = tot || 1;
-            const fastCnt = omsList.filter(o => ["FAST_PATH_R0", "BIBLIOTECA_MEMORIA", "DEDUP_RODADA"].includes(o.origem)).length;
+            const fastCnt = omsList.filter(o => ["FAST_PATH_R0", "BIBLIOTECA_MEMORIA", "DEDUP_RODADA", "HISTORICO_EXISTENTE"].includes(o.origem)).length;
             const quebras = omsList.filter(o => o.categoria === "QUEBRA");
             const graves = quebras.filter(o => o.severidade === "GRAVE");
+            const moderadas = quebras.filter(o => o.severidade === "MODERADA");
+            const leves = quebras.filter(o => o.severidade === "LEVE");
             const ajustes = omsList.filter(o => o.categoria === "AJUSTE");
             const progPrev = omsList.filter(o => o.categoria === "MANUTENCAO PROGRAMADA" || o.categoria === "PREVENTIVA" || o.categoria === "INSPECAO DE ROTAS");
             const falhaOp = omsList.filter(o => o.categoria === "FALHA OPERACIONAL");
@@ -5492,14 +5609,45 @@ RETORNE EXCLUSIVAMENTE UM OBJETO JSON VÁLIDO (sem texto fora do JSON) COM A SEG
                 ? Math.round((quebras.reduce((a, x) => a + Number(x.tempo_min || 0), 0) / quebras.length) * 10) / 10
                 : 0;
             const qualMedia = tot
-                ? Math.round((omsList.reduce((a, x) => a + Number(x.qualidade_score || 60), 0) / tot) * 10) / 10
+                ? Math.round((omsList.reduce((a, x) => a + Number(x.qualidade_score ?? x.score_qualidade ?? 60), 0) / tot) * 10) / 10
                 : 0;
-            const idSlug = `hist_${normKey(periodoLabel).replace(/\s+/g, "_").slice(0, 28) || "vigente"}`;
+
+            const categoriasQtd = {};
+            const categoriasPct = {};
+            CATEGORIAS_OFICIAIS.concat(["REVISAR_MANUAL"]).forEach(c => {
+                const q = omsList.filter(o => o.categoria === c).length;
+                categoriasQtd[c] = q;
+                categoriasPct[c] = tot ? Math.round((q / safeTot) * 1000) / 10 : 0;
+            });
+
+            const totSev = leves.length + moderadas.length + graves.length;
+            const severidadesQtd = { LEVE: leves.length, MODERADA: moderadas.length, GRAVE: graves.length };
+            const severidadesPct = {
+                LEVE: totSev ? Math.round((leves.length / totSev) * 1000) / 10 : 0,
+                MODERADA: totSev ? Math.round((moderadas.length / totSev) * 1000) / 10 : 0,
+                GRAVE: totSev ? Math.round((graves.length / totSev) * 1000) / 10 : 0
+            };
+
+            let mesKey = mesKeyArg || extrairMesKeyDeLabel(periodoLabel);
+            if (!mesKey && omsList.length) {
+                const cntM = {};
+                omsList.forEach(o => {
+                    const mk = extrairChaveMesOm(o);
+                    if (mk) cntM[mk] = (cntM[mk] || 0) + 1;
+                });
+                const topM = Object.entries(cntM).sort((a, b) => b[1] - a[1])[0];
+                if (topM) mesKey = topM[0];
+            }
+
+            const idSlug = mesKey
+                ? `mes_${mesKey.replace("-", "_")}`
+                : `hist_${normKey(periodoLabel).replace(/\s+/g, "_").slice(0, 28) || "vigente"}`;
 
             return {
                 id: idSlug,
+                mes_key: mesKey || "",
                 periodo: periodoLabel,
-                curto: periodoLabel,
+                curto: mesKey ? formatarLabelMesKey(mesKey) : periodoLabel,
                 tipo,
                 imutavel: false,
                 total_oms: tot,
@@ -5517,11 +5665,62 @@ RETORNE EXCLUSIVAMENTE UM OBJETO JSON VÁLIDO (sem texto fora do JSON) COM A SEG
                 falha_op_pct: tot ? Math.round((falhaOp.length / safeTot) * 1000) / 10 : 0,
                 mttr_min: mttrMin,
                 qualidade_media: qualMedia,
+                categorias_qtd: categoriasQtd,
+                categorias_pct: categoriasPct,
+                severidades_qtd: severidadesQtd,
+                severidades_pct: severidadesPct,
                 custo_brl: Number(custoRodada.custo_brl || 0),
                 custo_sem_otimizacao_brl: Number(custoRodada.custo_sem_otimizacao_brl || 0),
                 top_ofensores: (confiabilidadeData.top_ofensores || []).slice(0, 3).map(x => x.ativo),
                 salvo_em: new Date().toISOString()
             };
+        }
+
+        function construirCiclosMensaisComparaveis() {
+            const mapa = new Map();
+
+            // 1. Ciclos mensais reais derivados automaticamente do Banco Histórico Nuvem (OM a OM por mês)
+            const porMes = new Map();
+            bancoHistoricoOmsMap.forEach(o => {
+                const mk = extrairChaveMesOm(o);
+                if (!mk) return;
+                if (!porMes.has(mk)) porMes.set(mk, []);
+                porMes.get(mk).push(o);
+            });
+            [...porMes.keys()].sort().forEach(mk => {
+                const listaMes = aplicarRevisoesSalvasNaAuditoria(porMes.get(mk));
+                const lbl = formatarLabelMesKey(mk);
+                const snap = gerarResumoMetricasRodada(lbl, listaMes, "MENSAL_REAL", mk);
+                mapa.set(snap.id, snap);
+            });
+
+            // 2. Ciclos arquivados manualmente no histórico (excluindo sempre BASELINE_SET_OUT_2026)
+            historicoRodadas.forEach(h => {
+                if (!h || !h.id || h.id === BASELINE_SET_OUT_2026.id || h.tipo === "TREINO_BASE") return;
+                const mk = h.mes_key || extrairMesKeyDeLabel(h.periodo || h.curto);
+                const keyMes = mk ? `mes_${mk.replace("-", "_")}` : h.id;
+                if (!mapa.has(keyMes)) {
+                    mapa.set(keyMes, {
+                        ...h,
+                        id: keyMes,
+                        mes_key: mk || "",
+                        curto: mk ? formatarLabelMesKey(mk) : (h.curto || h.periodo)
+                    });
+                }
+            });
+
+            const listaOrdenada = [...mapa.values()].sort((a, b) => {
+                const ka = a.mes_key || a.salvo_em || a.periodo || "";
+                const kb = b.mes_key || b.salvo_em || b.periodo || "";
+                return String(ka).localeCompare(String(kb));
+            });
+
+            // 3. Base de Treinamento Set/Out fica oculta nos bastidores — só aparece quando o Admin Master ativa explicitamente
+            if (isTreinoSetOutVisivel()) {
+                listaOrdenada.push({ ...BASELINE_SET_OUT_2026 });
+            }
+
+            return listaOrdenada;
         }
 
         function calcularAssinaturaDataset(lista = []) {
@@ -5755,6 +5954,7 @@ RETORNE EXCLUSIVAMENTE UM OBJETO JSON VÁLIDO (sem texto fora do JSON) COM A SEG
             ];
             salvarEstadoPersistidoMaestri();
             renderComparativoHistorico();
+            renderDistribuicaoESeveridadePipeline();
             try {
                 await setDoc(doc(colMaestriRodadas, snap.id), snap);
             } catch (_) {}
@@ -5856,7 +6056,7 @@ RETORNE EXCLUSIVAMENTE UM OBJETO JSON VÁLIDO (sem texto fora do JSON) COM A SEG
             omsBrutasCarregadas = [];
             omsAuditadas = [];
             qualidadeEquipes = {};
-            confiabilidadeData = { total_oms: 0, total_quebras: 0, categorias: {}, severidades: { LEVE: 0, MODERADA: 0, GRAVE: 0 }, matriz_bc: {}, top_ofensores: [] };
+            confiabilidadeData = { total_oms: 0, total_quebras: 0, total_quebras_geral: 0, quebras_pendentes_sev: 0, quebras_fora_ativos: 0, quebras_por_origem: { supervisor: 0, fast_path: 0, ia_lote: 0, historico: 0, outros: 0 }, categorias: {}, severidades: { LEVE: 0, MODERADA: 0, GRAVE: 0 }, matriz_bc: {}, top_ofensores: [] };
             propostasPlanejador = estudosAqf.flatMap(e => Array.isArray(e.plano_acao) ? e.plano_acao : []);
             rodadaVigenteInfo = {
                 periodo: getPeriodoAtualPadrao(),
@@ -5875,8 +6075,8 @@ RETORNE EXCLUSIVAMENTE UM OBJETO JSON VÁLIDO (sem texto fora do JSON) COM A SEG
                 hora: agoraHMS(),
                 origem: "MAESTRO",
                 destino: "N1/N2",
-                titulo: "Base histórica Set/Out carregada em prontidão",
-                retorno: `1.234 OMs na memória de treino • ${bibliotecaCorrecoes.filter(b => b.status !== "REVERTIDO").length} regras ativas R$ 0,00. Aguardando CSV de ${rodadaVigenteInfo.periodo}.`,
+                titulo: "Motor calibrado carregado em prontidão",
+                retorno: `${bibliotecaCorrecoes.filter(b => b.status !== "REVERTIDO").length} regras ativas R$ 0,00 em 2º plano. Aguardando CSV de ${rodadaVigenteInfo.periodo}.`,
                 status: "pronto",
                 om: ""
             }];
@@ -6809,7 +7009,7 @@ OMs:\n${JSON.stringify(listaPrompt)}`;
         const NOMES_EXIBICAO_NO = {
             maestro: "Coordenação do Fluxo",
             input_erp: "Planilha Vigente ERP",
-            hist_base: "Base Histórica Set/Out",
+            hist_base: "Memória Calibrada (2º plano)",
             no1: "Nó 1 — Coletor & Filtro",
             no2: "Nó 2 — Fast-Path R$ 0",
             no3: "Nó 3 — Auditor Lote 20",
@@ -7329,7 +7529,7 @@ OMs:\n${JSON.stringify(listaPrompt)}`;
                 },
                 {
                     id: "end-n2", hora: hh, origem: "N1", destino: "N2", status: "r0",
-                    titulo: `Fast-Path + Base Set/Out interceptaram ${fast} OMs (${pctF}%)`,
+                    titulo: `Fast-Path + Memória Calibrada interceptaram ${fast} OMs (${pctF}%)`,
                     retorno: `Decisão local a R$ 0,00 • Economia de ${custoRodada.economia_pct}%`
                 },
                 {
@@ -7343,7 +7543,7 @@ OMs:\n${JSON.stringify(listaPrompt)}`;
         function aplicarEstadoFinalRedeNeural(stats = {}) {
             if (!omsAuditadas.length) { resetarVisualRedeNeuralAguardando(); return; }
             const tot = stats.total || omsAuditadas.length;
-            const fast = stats.fastCnt !== undefined ? stats.fastCnt : omsAuditadas.filter(o => ["FAST_PATH_R0", "BIBLIOTECA_MEMORIA", "DEDUP_RODADA"].includes(o.origem)).length;
+            const fast = stats.fastCnt !== undefined ? stats.fastCnt : omsAuditadas.filter(o => ["FAST_PATH_R0", "BIBLIOTECA_MEMORIA", "DEDUP_RODADA", "HISTORICO_EXISTENTE"].includes(o.origem)).length;
             const lote = stats.loteCnt !== undefined ? stats.loteCnt : Math.max(0, tot - fast);
             const pctF = tot ? Math.round((fast / tot) * 100) : 0;
             const pend = omsAuditadas.filter(o => o.fila === "CONFERIR" || o.fila === "REVISAO").length;
@@ -7378,7 +7578,7 @@ OMs:\n${JSON.stringify(listaPrompt)}`;
             if (cu) cu.innerText = `R$ ${custoRodada.custo_brl.toFixed(2)}`;
 
             setEstadoPerceptronUI("input_erp", "is-done", 100, rodadaVigenteInfo.arquivoNome || `${tot} OMs carregadas`);
-            setEstadoPerceptronUI("hist_base", "is-done", 100, "1.234 OMs • Calibrado");
+            setEstadoPerceptronUI("hist_base", "is-done", 100, "Operando em 2º plano");
             setEstadoPerceptronUI("no1", "is-done", 100, `${tot} OMs validadas`);
             setEstadoPerceptronUI("no2", "is-done", 100, `${fast} OMs (${pctF}%) a R$ 0,00`);
             setEstadoPerceptronUI("no3", "is-done", 100, `${lote} casos • ${custoRodada.chamadas_ia} lote(s)`);
@@ -7486,7 +7686,7 @@ OMs:\n${JSON.stringify(listaPrompt)}`;
                     wait: 220,
                     run: () => {
                         setEstadoPerceptronUI("no1", "is-done", 100, `${tot} OMs higienizadas`);
-                        setEstadoPerceptronUI("no2", "is-working", 15, `Avaliando regra a regra (Set/Out + Planta)...`);
+                        setEstadoPerceptronUI("no2", "is-working", 15, `Avaliando regra a regra (Memória + Planta)...`);
                         renderNeuralSvgTopology(new Set(["s_n1_n2", "s_hist_n2", "s_m_n2"]), new Set(["s_in_n1"]));
                         registrarInteracaoNeural({
                             origem: "N1", destino: "N2", status: "concluido",
@@ -9225,25 +9425,90 @@ Responda SOMENTE JSON Array: [{"ativo_erp":"...","tipo_ativo":"ATIVO_ARVORE"|"FE
             renderCurrentView();
         };
 
-        window.renderComparativoHistorico = () => {
-            const selBase = document.getElementById("compSelectBaseline");
-            if (selBase) {
-                const prev = selBase.value || BASELINE_SET_OUT_2026.id;
-                selBase.innerHTML = historicoRodadas
-                    .filter(h => h.id !== (omsAuditadas.length ? gerarResumoMetricasRodada(rodadaVigenteInfo.periodo, omsAuditadas).id : ""))
-                    .concat(historicoRodadas.some(h => h.id === BASELINE_SET_OUT_2026.id) ? [] : [BASELINE_SET_OUT_2026])
-                    .filter((h, idx, arr) => arr.findIndex(x => x.id === h.id) === idx)
-                    .map(h => `<option value="${escapeHtml(h.id)}">${escapeHtml(h.periodo)}</option>`)
-                    .join("");
-                if ([...selBase.options].some(o => o.value === prev)) selBase.value = prev;
-                else if (selBase.options.length) selBase.value = BASELINE_SET_OUT_2026.id;
-            }
+        let ultimoRefComparativoSelecionado = null;
 
-            const refId = selBase?.value || BASELINE_SET_OUT_2026.id;
-            const ref = historicoRodadas.find(h => h.id === refId) || BASELINE_SET_OUT_2026;
+        window.onChangeComparativoBaseline = () => {
+            renderComparativoHistorico();
+            renderDistribuicaoESeveridadePipeline();
+        };
+
+        window.abrirAuditoriaFiltrada = (filtros = {}) => {
+            const selCat = document.getElementById("audFiltroCategoria");
+            if (selCat && selCat.options.length <= 1) {
+                selCat.innerHTML = `<option value="">Categoria (Todas as 11)</option>` +
+                    CATEGORIAS_OFICIAIS.concat(["REVISAR_MANUAL"]).map(c => `<option value="${c}">${c}</option>`).join("");
+            }
+            const setVal = (id, v) => { const el = document.getElementById(id); if (el) el.value = v || ""; };
+            setVal("audBusca", filtros.busca || "");
+            setVal("audFiltroCategoria", filtros.categoria || "");
+            setVal("audFiltroEquipe", filtros.equipe || "");
+            setVal("audFiltroSeveridade", filtros.severidade || "");
+            setVal("audFiltroOrigem", filtros.origem || "");
+            switchView("auditoria");
+        };
+
+        window.limparFiltrosAuditoria = () => {
+            ["audBusca", "audFiltroCategoria", "audFiltroEquipe", "audFiltroSeveridade", "audFiltroOrigem"].forEach(id => {
+                const el = document.getElementById(id);
+                if (el) el.value = "";
+            });
+            renderAuditoriaView();
+        };
+
+        window.renderComparativoHistorico = () => {
+            const ciclos = construirCiclosMensaisComparaveis();
             const atual = omsAuditadas.length
                 ? gerarResumoMetricasRodada(rodadaVigenteInfo.periodo, omsAuditadas, rodadaVigenteInfo.tipo)
                 : null;
+            const atualId = atual ? atual.id : "";
+
+            const opcoesComparacao = ciclos.filter(c => c.id !== atualId);
+            // Ordena opções mais recentes primeiro, deixando Treino Base (quando Admin ativa) por último
+            const opcoesOrdenadas = [...opcoesComparacao].sort((a, b) => {
+                const aBase = a.id === BASELINE_SET_OUT_2026.id ? 1 : 0;
+                const bBase = b.id === BASELINE_SET_OUT_2026.id ? 1 : 0;
+                if (aBase !== bBase) return aBase - bBase;
+                const ka = a.mes_key || a.salvo_em || a.periodo || "";
+                const kb = b.mes_key || b.salvo_em || b.periodo || "";
+                return String(kb).localeCompare(String(ka));
+            });
+
+            const selBase = document.getElementById("compSelectBaseline");
+            if (selBase) {
+                const prev = selBase.value;
+                if (!opcoesOrdenadas.length) {
+                    selBase.innerHTML = `<option value="">Sem mês anterior registrado</option>`;
+                    selBase.value = "";
+                } else {
+                    selBase.innerHTML = opcoesOrdenadas
+                        .map(h => {
+                            const tagAdmin = h.id === BASELINE_SET_OUT_2026.id ? " [Admin • Treino]" : "";
+                            return `<option value="${escapeHtml(h.id)}">${escapeHtml(h.curto || h.periodo)}${tagAdmin} (${h.total_oms} OMs)</option>`;
+                        })
+                        .join("");
+                    if (prev && opcoesOrdenadas.some(o => o.id === prev)) {
+                        selBase.value = prev;
+                    } else {
+                        selBase.value = opcoesOrdenadas[0].id;
+                    }
+                }
+            }
+
+            const refId = selBase?.value || "";
+            const ref = opcoesOrdenadas.find(h => h.id === refId) || null;
+            ultimoRefComparativoSelecionado = ref;
+
+            const subBadge = document.getElementById("compSubtitleBadge");
+            if (subBadge) {
+                if (atual && ref) {
+                    const extra = ref.id === BASELINE_SET_OUT_2026.id ? " (Treino Admin)" : "";
+                    subBadge.textContent = `Comparativo Mês a Mês: ${atual.curto || atual.periodo} vs. ${ref.curto || ref.periodo}${extra}`;
+                } else if (atual) {
+                    subBadge.textContent = `Ciclo Atual: ${atual.curto || atual.periodo} • Aguardando próximo mês para comparativo`;
+                } else {
+                    subBadge.textContent = "Comparativo Mês a Mês da Planta";
+                }
+            }
 
             const metricsConfig = [
                 { k: "Taxa de Quebras", key: "quebras_pct", unit: "%", menorMelhor: true },
@@ -9260,16 +9525,28 @@ Responda SOMENTE JSON Array: [{"ativo_erp":"...","tipo_ativo":"ATIVO_ARVORE"|"FE
             const msgsRec = [];
 
             document.getElementById("comparativoDeltaGrid").innerHTML = metricsConfig.map(m => {
-                const refVal = Number(ref[m.key] ?? 0);
                 if (!atual) {
+                    const refHint = ref ? `vs ${Number(ref[m.key] ?? 0)}${m.unit}` : "";
                     return `
                         <div class="p-3 rounded-2xl bg-slate-50 border border-slate-200 space-y-1">
                             <div class="text-[10px] font-extrabold uppercase text-slate-500">${m.k}</div>
-                            <div class="text-lg font-extrabold text-slate-400">— <span class="text-[10px]">vs ${refVal}${m.unit}</span></div>
+                            <div class="text-lg font-extrabold text-slate-400">— <span class="text-[10px]">${refHint}</span></div>
                             <div class="inline-block px-2 py-0.5 rounded-full bg-slate-200 text-slate-600 text-[10px] font-extrabold">Aguardando Lote</div>
                         </div>`;
                 }
                 const curVal = Number(atual[m.key] ?? 0);
+                if (!ref) {
+                    return `
+                        <div class="p-3 rounded-2xl bg-white border border-slate-200 space-y-1">
+                            <div class="text-[10px] font-extrabold uppercase text-slate-500">${m.k}</div>
+                            <div class="text-lg font-extrabold text-slate-900">${curVal}${m.unit}</div>
+                            <div class="text-[10px] font-semibold text-slate-400">${escapeHtml(atual.curto || atual.periodo)}</div>
+                            <span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-extrabold bg-sky-50 text-sky-700 border border-sky-200">1º Mês Consolidado</span>
+                        </div>`;
+                }
+
+                const refVal = Number(ref[m.key] ?? 0);
+                const refLbl = ref.id === BASELINE_SET_OUT_2026.id ? "Treino Set/Out" : (ref.curto || ref.periodo);
                 const diff = Math.round((curVal - refVal) * 10) / 10;
                 const estavel = Math.abs(diff) < 0.2;
                 const melhorou = !estavel && (m.menorMelhor ? diff < 0 : diff > 0);
@@ -9285,20 +9562,20 @@ Responda SOMENTE JSON Array: [{"ativo_erp":"...","tipo_ativo":"ATIVO_ARVORE"|"FE
                     : (melhorou ? `${SVG_ICO.check} Melhorou (${sinal}${m.unit})` : `${SVG_ICO.alert} Piorou (${sinal}${m.unit})`);
 
                 if (!estavel && !melhorou && m.key === "quebras_pct") {
-                    msgsRec.push(`A taxa de quebras em <strong>${escapeHtml(atual.periodo)}</strong> subiu de ${refVal}% para ${curVal}%. Acione o <strong>Caçador AQF (Nó 8)</strong> nos top ofensores abaixo.`);
+                    msgsRec.push(`A taxa de quebras em <strong>${escapeHtml(atual.curto || atual.periodo)}</strong> subiu de ${refVal}% (${escapeHtml(refLbl)}) para ${curVal}%. Acione o <strong>Caçador AQF (Nó 8)</strong> nos top ofensores.`);
                 }
                 if (!estavel && !melhorou && m.key === "mttr_min") {
-                    msgsRec.push(`O MTTR subiu +${Math.abs(diff)} min vs ${escapeHtml(ref.curto || ref.periodo)}. Verifique falta de peças ou manuais em <strong>DOCS-ATIVOS</strong>.`);
+                    msgsRec.push(`O MTTR subiu +${Math.abs(diff)} min em relação a <strong>${escapeHtml(refLbl)}</strong>. Verifique falta de peças ou manuais em <strong>DOCS-ATIVOS</strong>.`);
                 }
                 if (!estavel && !melhorou && m.key === "qualidade_media") {
-                    msgsRec.push(`A qualidade de descrição dos mecânicos/eletricistas caiu (${curVal}/100 vs ${refVal}/100). Cobre detalhamento de componente trocado.`);
+                    msgsRec.push(`A qualidade de apontamento caiu (${curVal}/100 vs ${refVal}/100 em ${escapeHtml(refLbl)}). Cobre detalhamento do componente trocado.`);
                 }
 
                 return `
                     <div class="p-3 rounded-2xl bg-white border ${estavel ? "border-slate-200" : (melhorou ? "border-emerald-200 bg-emerald-50/30" : "border-rose-200 bg-rose-50/30")} space-y-1">
                         <div class="text-[10px] font-extrabold uppercase text-slate-500">${m.k}</div>
                         <div class="text-lg font-extrabold text-slate-900">${curVal}${m.unit}</div>
-                        <div class="text-[10px] font-semibold text-slate-500">Treino: ${refVal}${m.unit}</div>
+                        <div class="text-[10px] font-semibold text-slate-500">${escapeHtml(refLbl)}: ${refVal}${m.unit}</div>
                         <span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-extrabold ${badgeCls}">${badgeTxt}</span>
                     </div>`;
             }).join("");
@@ -9308,21 +9585,26 @@ Responda SOMENTE JSON Array: [{"ativo_erp":"...","tipo_ativo":"ATIVO_ARVORE"|"FE
                 if (!atual) {
                     recBox.innerHTML = `
                         <div class="flex flex-wrap items-center justify-between gap-2">
-                            <div class="text-xs font-extrabold text-indigo-900 inline-flex items-center gap-1.5">${SVG_ICO.cpu} Maestro • Proposta de Uso para Agora (${escapeHtml(rodadaVigenteInfo.periodo)})</div>
-                            <span class="px-2.5 py-0.5 rounded-full bg-indigo-100 text-indigo-800 text-[10px] font-extrabold">Memória Treinada em Set/Out Ativa</span>
+                            <div class="text-xs font-extrabold text-indigo-900 inline-flex items-center gap-1.5">${SVG_ICO.cpu} Maestro • Pronto para Auditoria Mensal (${escapeHtml(rodadaVigenteInfo.periodo)})</div>
+                            <span class="px-2.5 py-0.5 rounded-full bg-emerald-100 text-emerald-800 text-[10px] font-extrabold">Motor Calibrado em 2º Plano</span>
                         </div>
-                        <p class="text-xs font-semibold text-slate-600">Os dados de <strong>Set/Out (1.234 OMs • Quebras: 13,9% • MTTR: 54,7 min • Fast-Path R$ 0: 63,2%)</strong> já foram consolidados como linha de base. Assim que você arrastar o arquivo do ERP de Novembro, o sistema mostrará automaticamente onde melhoramos e quais máquinas exigem AQF e Preventiva imediata.</p>`;
+                        <p class="text-xs font-semibold text-slate-600">Arraste a planilha do ERP do mês atual para auditar as ordens de manutenção. Conforme os meses entram no Banco Histórico Nuvem, este painel compara automaticamente a evolução real da planta mês a mês.</p>`;
                 } else {
                     const top1 = (confiabilidadeData.top_ofensores || []).find(x => x.quebras > 0);
                     if (top1) {
-                        msgsRec.unshift(`${SVG_ICO.target} <strong>Prioridade Imediata (${escapeHtml(atual.periodo)}):</strong> O ativo <strong>${escapeHtml(top1.ativo)}</strong> lidera o Pareto atual (${top1.quebras} quebra(s), MTBF ${top1.mtbf_h}h). Use o <strong>Planejador 1-Clique</strong> no Nó 9 para agendar a preventiva/rota agora.`);
+                        msgsRec.unshift(`${SVG_ICO.target} <strong>Prioridade Imediata (${escapeHtml(atual.curto || atual.periodo)}):</strong> O ativo <strong>${escapeHtml(top1.ativo)}</strong> lidera o Pareto atual (${top1.quebras} quebra(s), MTBF ${top1.mtbf_h}h). Use o <strong>Planejador 1-Clique</strong> no Nó 9 para agendar a preventiva/rota.`);
                     }
-                    if (melhorouCount > piorouCount && !msgsRec.some(m => m.includes("melhorou"))) {
-                        msgsRec.push(`${SVG_ICO.bolt} <strong>Saldo Positivo:</strong> ${melhorouCount} indicador(es) melhoraram em relação a <strong>${escapeHtml(ref.periodo)}</strong>!`);
+                    if (!ref) {
+                        msgsRec.push(`<strong>Referência mensal em formação:</strong> assim que houver OMs de outro mês no banco em nuvem (ou arquivadas no histórico), a comparação mês a mês será exibida automaticamente aqui.`);
+                    } else if (melhorouCount > piorouCount && !msgsRec.some(m => m.includes("melhorou"))) {
+                        msgsRec.push(`${SVG_ICO.bolt} <strong>Saldo Positivo:</strong> ${melhorouCount} indicador(es) melhoraram em relação a <strong>${escapeHtml(ref.curto || ref.periodo)}</strong>.`);
                     }
+                    const resumoHeader = ref
+                        ? `Veredicto do Maestro para ${escapeHtml(atual.curto || atual.periodo)} vs. ${escapeHtml(ref.curto || ref.periodo)} (${melhorouCount} Melhorias • ${piorouCount} Alertas)`
+                        : `Resumo do Maestro para ${escapeHtml(atual.curto || atual.periodo)} (${atual.total_oms} OMs auditadas)`;
                     recBox.innerHTML = `
                         <div class="flex flex-wrap items-center justify-between gap-2">
-                            <div class="text-xs font-extrabold text-slate-900 inline-flex items-center gap-1.5">${SVG_ICO.cpu} Veredicto do Maestro para ${escapeHtml(atual.periodo)} (${melhorouCount} Melhorias • ${piorouCount} Alertas)</div>
+                            <div class="text-xs font-extrabold text-slate-900 inline-flex items-center gap-1.5">${SVG_ICO.cpu} ${resumoHeader}</div>
                             <button type="button" onclick="switchView('cacador')" class="inline-flex items-center gap-1.5 px-3 py-1 rounded-xl bg-sky-600 hover:bg-sky-700 text-white text-[11px] font-extrabold">${SVG_ICO.target} Abrir Propostas do Caçador AQF →</button>
                         </div>
                         <ul class="text-xs font-semibold text-slate-700 space-y-1 list-disc pl-4">
@@ -9331,35 +9613,187 @@ Responda SOMENTE JSON Array: [{"ativo_erp":"...","tipo_ativo":"ATIVO_ARVORE"|"FE
                 }
             }
 
-            // Tabela linha do tempo histórica
-            const linhasHist = [...historicoRodadas];
+            // Tabela linha do tempo histórica (apenas meses reais; Treino Base só se Admin Master ativar)
+            const linhasHist = [...ciclos];
             if (atual && !linhasHist.some(h => h.id === atual.id)) {
                 linhasHist.push(atual);
             }
-            document.getElementById("comparativoHistoricoTable").innerHTML = linhasHist.map(h => {
-                const isBase = h.id === BASELINE_SET_OUT_2026.id;
-                const badge = isBase
-                    ? `<span class="px-2 py-0.5 rounded bg-indigo-100 text-indigo-800 text-[9px] font-extrabold ml-1">TREINO BASE</span>`
-                    : `<span class="px-2 py-0.5 rounded bg-emerald-100 text-emerald-800 text-[9px] font-extrabold ml-1">VIGENTE</span>`;
-                return `
-                    <tr class="hover:bg-slate-50/80 ${isBase ? "bg-indigo-50/25" : "font-semibold"}">
-                        <td class="py-2 px-2 font-extrabold text-slate-900">${escapeHtml(h.periodo)}${badge}</td>
-                        <td class="py-2 px-2 text-right font-mono">${h.total_oms}</td>
-                        <td class="py-2 px-2 text-right font-mono text-rose-700 font-bold">${h.quebras_pct}% (${h.quebras_qtd})</td>
-                        <td class="py-2 px-2 text-right font-mono">${h.graves_qtd} (${h.graves_pct_quebra}%)</td>
-                        <td class="py-2 px-2 text-right font-mono">${h.ajuste_pct}%</td>
-                        <td class="py-2 px-2 text-right font-mono text-sky-700 font-bold">${h.prog_prev_pct}%</td>
-                        <td class="py-2 px-2 text-right font-mono">${h.mttr_min} min</td>
-                        <td class="py-2 px-2 text-right font-mono text-emerald-700 font-bold">${h.fast_path_pct}%</td>
-                        <td class="py-2 px-2 text-right font-mono">${h.qualidade_media}/100</td>
-                    </tr>`;
-            }).join("");
+            const tbodyHist = document.getElementById("comparativoHistoricoTable");
+            if (tbodyHist) {
+                if (!linhasHist.length) {
+                    tbodyHist.innerHTML = `<tr><td colspan="9" class="py-6 text-center text-slate-400 font-bold">Nenhum ciclo mensal consolidado ainda. Importe a planilha do ERP para iniciar o histórico mês a mês.</td></tr>`;
+                } else {
+                    tbodyHist.innerHTML = linhasHist.map(h => {
+                        const isBase = h.id === BASELINE_SET_OUT_2026.id;
+                        const isVigente = atual && h.id === atual.id;
+                        const isRefSel = ref && h.id === ref.id;
+                        const badge = isBase
+                            ? `<span class="px-2 py-0.5 rounded bg-indigo-100 text-indigo-800 text-[9px] font-extrabold ml-1">TREINO ADMIN</span>`
+                            : isVigente
+                                ? `<span class="px-2 py-0.5 rounded bg-emerald-100 text-emerald-800 text-[9px] font-extrabold ml-1">ATUAL</span>`
+                                : isRefSel
+                                    ? `<span class="px-2 py-0.5 rounded bg-sky-100 text-sky-800 text-[9px] font-extrabold ml-1">COMPARANDO</span>`
+                                    : `<span class="px-2 py-0.5 rounded bg-slate-100 text-slate-600 text-[9px] font-extrabold ml-1">MÊS</span>`;
+                        return `
+                            <tr class="hover:bg-slate-50/80 ${isBase ? "bg-indigo-50/25" : (isVigente ? "bg-emerald-50/25 font-semibold" : "")}">
+                                <td class="py-2 px-2 font-extrabold text-slate-900">${escapeHtml(h.curto || h.periodo)}${badge}</td>
+                                <td class="py-2 px-2 text-right font-mono">${h.total_oms}</td>
+                                <td class="py-2 px-2 text-right font-mono text-rose-700 font-bold">${h.quebras_pct}% (${h.quebras_qtd})</td>
+                                <td class="py-2 px-2 text-right font-mono">${h.graves_qtd} (${h.graves_pct_quebra}%)</td>
+                                <td class="py-2 px-2 text-right font-mono">${h.ajuste_pct}%</td>
+                                <td class="py-2 px-2 text-right font-mono text-sky-700 font-bold">${h.prog_prev_pct}%</td>
+                                <td class="py-2 px-2 text-right font-mono">${h.mttr_min} min</td>
+                                <td class="py-2 px-2 text-right font-mono text-emerald-700 font-bold">${h.fast_path_pct}%</td>
+                                <td class="py-2 px-2 text-right font-mono">${h.qualidade_media}/100</td>
+                            </tr>`;
+                    }).join("");
+                }
+            }
         };
+
+        function renderDistribuicaoESeveridadePipeline() {
+            const tot = omsAuditadas.length;
+            const totDiv = tot || 1;
+            const cats = confiabilidadeData.categorias || {};
+            const ref = ultimoRefComparativoSelecionado;
+            const refCatsPct = ref && ref.categorias_pct ? ref.categorias_pct : null;
+            const refLbl = ref ? (ref.id === BASELINE_SET_OUT_2026.id ? "Treino Set/Out" : (ref.curto || ref.periodo)) : "";
+            const periodoCurto = extrairMesKeyDeLabel(rodadaVigenteInfo.periodo) ? formatarLabelMesKey(extrairMesKeyDeLabel(rodadaVigenteInfo.periodo)) : rodadaVigenteInfo.periodo;
+
+            const distBadge = document.getElementById("pipelineDistBadge");
+            if (distBadge) {
+                distBadge.textContent = ref
+                    ? `${periodoCurto} vs. ${refLbl}`
+                    : `Ciclo Atual • ${periodoCurto}`;
+            }
+
+            const menorMelhorCats = new Set(["QUEBRA", "FALHA OPERACIONAL", "AJUSTE", "AJUSTE POS SETUP", "REVISAR_MANUAL"]);
+            const maiorMelhorCats = new Set(["MANUTENCAO PROGRAMADA", "PREVENTIVA", "INSPECAO DE ROTAS", "MELHORIAS"]);
+
+            document.getElementById("pipelineTabelaDistribuicao").innerHTML = `
+                <table class="w-full text-left text-xs border-collapse">
+                    <thead>
+                        <tr class="border-b border-slate-200 text-[10px] font-extrabold uppercase text-slate-500">
+                            <th class="py-2">Categoria Oficial</th>
+                            <th class="py-2 text-right">Qtd (${escapeHtml(periodoCurto)})</th>
+                            <th class="py-2 text-right">% Atual</th>
+                            ${refCatsPct ? `<th class="py-2 text-right">% ${escapeHtml(refLbl)}</th><th class="py-2 text-right">Δ p.p.</th>` : `<th class="py-2 text-right">Auditar</th>`}
+                        </tr>
+                    </thead>
+                    <tbody class="divide-y divide-slate-100">
+                        ${CATEGORIAS_OFICIAIS.concat(["REVISAR_MANUAL"]).map(c => {
+                            const q = cats[c] || 0;
+                            const pctNum = tot ? Math.round((q / totDiv) * 1000) / 10 : 0;
+                            const pct = pctNum.toFixed(1);
+                            let colComparacao = `<td class="py-1.5 text-right"><span class="text-[10px] font-extrabold text-sky-700">${q > 0 ? "Ver OMs →" : "—"}</span></td>`;
+                            if (refCatsPct) {
+                                const refVal = Number(refCatsPct[c] ?? 0);
+                                const diff = Math.round((pctNum - refVal) * 10) / 10;
+                                const sinal = diff > 0 ? `+${diff.toFixed(1)}` : diff.toFixed(1);
+                                let diffCls = "text-slate-400";
+                                if (Math.abs(diff) >= 0.2) {
+                                    if (menorMelhorCats.has(c)) diffCls = diff < 0 ? "text-emerald-700 font-extrabold" : "text-rose-700 font-extrabold";
+                                    else if (maiorMelhorCats.has(c)) diffCls = diff > 0 ? "text-emerald-700 font-extrabold" : "text-amber-700 font-extrabold";
+                                    else diffCls = "text-slate-700 font-bold";
+                                }
+                                colComparacao = `
+                                    <td class="py-1.5 text-right font-mono text-slate-500">${refVal.toFixed(1)}%</td>
+                                    <td class="py-1.5 text-right font-mono text-[11px] ${diffCls}">${sinal}</td>`;
+                            }
+                            const destaqueQuebra = c === "QUEBRA" && q > 0 ? "bg-rose-50/40" : "";
+                            return `<tr onclick="abrirAuditoriaFiltrada({ categoria: '${escapeHtml(c)}' })" class="hover:bg-sky-50/60 cursor-pointer transition-colors ${destaqueQuebra}" title="Clique para ver todas as ${q} OMs desta categoria em Auditoria">
+                                <td class="py-1.5 font-extrabold text-slate-800">${escapeHtml(c)}</td>
+                                <td class="py-1.5 text-right font-mono font-bold text-slate-900">${q}</td>
+                                <td class="py-1.5 text-right font-mono font-extrabold text-sky-700">${pct}%</td>
+                                ${colComparacao}
+                            </tr>`;
+                        }).join("")}
+                    </tbody>
+                </table>`;
+
+            // Faixa de transparência total das Quebras (reconcilia 100% com a aba Auditoria!)
+            const boxTransp = document.getElementById("pipelineQuebrasTransparencia");
+            const totQuebrasGeral = Number(confiabilidadeData.total_quebras_geral ?? cats["QUEBRA"] ?? 0);
+            const qOrig = confiabilidadeData.quebras_por_origem || { supervisor: 0, fast_path: 0, ia_lote: 0, historico: 0, outros: 0 };
+            if (boxTransp) {
+                if (totQuebrasGeral > 0) {
+                    const pills = [];
+                    if (qOrig.supervisor > 0) pills.push(`<button type="button" onclick="abrirAuditoriaFiltrada({ categoria: 'QUEBRA', origem: 'SUPERVISOR' })" class="px-2 py-0.5 rounded-full bg-indigo-50 hover:bg-indigo-100 text-indigo-800 border border-indigo-200 font-extrabold">${qOrig.supervisor} Validado Supervisor</button>`);
+                    if (qOrig.fast_path > 0) pills.push(`<button type="button" onclick="abrirAuditoriaFiltrada({ categoria: 'QUEBRA', origem: 'FAST_PATH_ZERO' })" class="px-2 py-0.5 rounded-full bg-emerald-50 hover:bg-emerald-100 text-emerald-800 border border-emerald-200 font-extrabold">${qOrig.fast_path} Fast-Path / Memória R$ 0</button>`);
+                    if (qOrig.ia_lote > 0) pills.push(`<button type="button" onclick="abrirAuditoriaFiltrada({ categoria: 'QUEBRA', origem: 'IA_LOTE20' })" class="px-2 py-0.5 rounded-full bg-sky-50 hover:bg-sky-100 text-sky-800 border border-sky-200 font-extrabold">${qOrig.ia_lote} Gemini Lote 20</button>`);
+                    if (qOrig.historico > 0) pills.push(`<button type="button" onclick="abrirAuditoriaFiltrada({ categoria: 'QUEBRA', origem: 'HISTORICO_EXISTENTE' })" class="px-2 py-0.5 rounded-full bg-slate-100 hover:bg-slate-200 text-slate-700 border border-slate-200 font-extrabold">${qOrig.historico} Histórico Nuvem</button>`);
+                    if (qOrig.outros > 0) pills.push(`<button type="button" onclick="abrirAuditoriaFiltrada({ categoria: 'QUEBRA' })" class="px-2 py-0.5 rounded-full bg-amber-50 text-amber-800 border border-amber-200 font-extrabold">${qOrig.outros} Outras</button>`);
+                    boxTransp.classList.remove("hidden");
+                    boxTransp.innerHTML = `
+                        <div class="flex flex-wrap items-center justify-between gap-2 text-[10px]">
+                            <span class="font-extrabold uppercase tracking-wider text-rose-700">Composição transparente das ${totQuebrasGeral} Quebras:</span>
+                            <button type="button" onclick="abrirAuditoriaFiltrada({ categoria: 'QUEBRA' })" class="font-extrabold text-sky-700 hover:underline">Ver todas (${totQuebrasGeral}) →</button>
+                        </div>
+                        <div class="flex flex-wrap gap-1.5 mt-1.5 text-[10px]">${pills.join("")}</div>`;
+                } else {
+                    boxTransp.classList.add("hidden");
+                    boxTransp.innerHTML = "";
+                }
+            }
+
+            // Escada de severidade EN 13306 (comparando com mês anterior, sem expor Set/Out a gestores)
+            const sevs = confiabilidadeData.severidades || { LEVE: 0, MODERADA: 0, GRAVE: 0 };
+            const somaSev = (sevs.LEVE || 0) + (sevs.MODERADA || 0) + (sevs.GRAVE || 0);
+            const totQ = Math.max(1, somaSev);
+            const refSevsPct = ref && ref.severidades_pct ? ref.severidades_pct : null;
+
+            const sevBadge = document.getElementById("pipelineSevBadge");
+            if (sevBadge) {
+                sevBadge.textContent = refSevsPct
+                    ? `EN 13306 • vs. ${refLbl}`
+                    : `EN 13306 • ${somaSev} classificada(s)`;
+            }
+
+            const qPendSev = Number(confiabilidadeData.quebras_pendentes_sev || 0);
+            const qForaAtv = Number(confiabilidadeData.quebras_fora_ativos || 0);
+
+            const barsHtml = ["LEVE", "MODERADA", "GRAVE"].map(nv => {
+                const q = sevs[nv] || 0;
+                const pct = somaSev ? Math.round((q / totQ) * 1000) / 10 : 0;
+                const barCls = nv === "GRAVE" ? "bg-rose-600" : (nv === "MODERADA" ? "bg-amber-500" : "bg-emerald-500");
+                let refTxt = "";
+                if (refSevsPct && refSevsPct[nv] !== undefined) {
+                    const rVal = Number(refSevsPct[nv]);
+                    const d = Math.round((pct - rVal) * 10) / 10;
+                    const s = d > 0 ? `+${d.toFixed(1)}` : d.toFixed(1);
+                    refTxt = ` <span class="text-slate-400 font-normal">(${escapeHtml(refLbl)}: ${rVal.toFixed(1)}% • ${s} p.p.)</span>`;
+                }
+                return `
+                    <div onclick="abrirAuditoriaFiltrada({ categoria: 'QUEBRA', severidade: '${nv}' })" class="p-3 rounded-2xl bg-slate-50 hover:bg-slate-100/80 border border-slate-200 space-y-1.5 cursor-pointer transition-colors" title="Clique para ver as ${q} Quebras ${nv} em Auditoria">
+                        <div class="flex flex-wrap items-center justify-between gap-1 text-xs font-extrabold">
+                            <span>QUEBRA ${nv} (${q} OMs)</span>
+                            <span>${pct}%${refTxt}</span>
+                        </div>
+                        <div class="w-full h-2.5 rounded-full bg-slate-200 overflow-hidden">
+                            <div class="h-full ${barCls}" style="width:${Math.min(100, pct)}%"></div>
+                        </div>
+                    </div>`;
+            }).join("");
+
+            const reconcHtml = (totQuebrasGeral > 0 && (qPendSev > 0 || qForaAtv > 0))
+                ? `<div class="p-3 rounded-2xl bg-amber-50/70 border border-amber-200 text-[11px] font-semibold text-amber-950 flex flex-wrap items-center justify-between gap-2">
+                    <span><strong>Reconciliação total (${totQuebrasGeral} Quebras):</strong> ${somaSev} em ativos produtivos com B×C${qPendSev > 0 ? ` + ${qPendSev} aguardando B×C` : ""}${qForaAtv > 0 ? ` + ${qForaAtv} em Não-Ativos/Ferramentais` : ""}.</span>
+                    ${qPendSev > 0 ? `<button type="button" onclick="abrirAuditoriaFiltrada({ categoria: 'QUEBRA', severidade: 'PENDENTE' })" class="font-extrabold text-amber-900 underline">Ver Pendentes →</button>` : ""}
+                </div>`
+                : (totQuebrasGeral > 0
+                    ? `<div class="px-3 py-2 rounded-xl bg-emerald-50/70 border border-emerald-200 text-[11px] font-bold text-emerald-900 flex items-center justify-between">
+                        <span>100% reconciliado: ${somaSev} de ${totQuebrasGeral} Quebra(s) classificadas com severidade EN 13306.</span>
+                        <button type="button" onclick="abrirAuditoriaFiltrada({ categoria: 'QUEBRA' })" class="font-extrabold text-emerald-800 hover:underline">Auditar →</button>
+                    </div>`
+                    : "");
+
+            document.getElementById("pipelineEscadaSeveridade").innerHTML = barsHtml + reconcHtml;
+        }
 
         // VIEW 1: PIPELINE VISUAL DE 9 NÓS
         window.renderPipelineView = () => {
             const tot = omsAuditadas.length;
-            const fastCnt = omsAuditadas.filter(o => ["FAST_PATH_R0", "BIBLIOTECA_MEMORIA", "DEDUP_RODADA"].includes(o.origem)).length;
+            const fastCnt = omsAuditadas.filter(o => ["FAST_PATH_R0", "BIBLIOTECA_MEMORIA", "DEDUP_RODADA", "HISTORICO_EXISTENTE"].includes(o.origem)).length;
             const pctFast = tot ? Math.round((fastCnt / tot) * 100) : 0;
             const pendSup = omsAuditadas.filter(o => o.fila === "CONFERIR" || o.fila === "REVISAO").length;
 
@@ -9377,7 +9811,7 @@ Responda SOMENTE JSON Array: [{"ativo_erp":"...","tipo_ativo":"ATIVO_ARVORE"|"FE
             }
 
             document.getElementById("pipelineKpiGrid").innerHTML = [
-                { k: `Ciclo Atual (${rodadaVigenteInfo.periodo})`, v: tot ? `${tot} OMs` : "Aguardando CSV", sub: tot ? (rodadaVigenteInfo.arquivoNome || "Planilha ERP processada") : "Treino Base Set/Out (1.234 OMs) salvo", vc: tot ? "text-slate-900" : "text-sky-700" },
+                { k: `Ciclo Atual (${rodadaVigenteInfo.periodo})`, v: tot ? `${tot} OMs` : "Aguardando CSV", sub: tot ? (rodadaVigenteInfo.arquivoNome || "Planilha ERP processada") : "Motor calibrado • pronto para importar", vc: tot ? "text-slate-900" : "text-sky-700" },
                 { k: "Custo do Lote", v: `R$ ${custoRodada.custo_brl.toFixed(2)}`, sub: tot ? `Sem otimização: R$ ${custoRodada.custo_sem_otimizacao_brl.toFixed(2)} (−${custoRodada.economia_pct}%)` : "Fast-Path + Lote 20 prontos", vc: "text-emerald-600" },
                 { k: "Decididas a R$ 0 (Nó 2)", v: `${pctFast}%`, sub: tot ? `${fastCnt} de ${tot} OMs sem API` : `${bibliotecaCorrecoes.filter(b => b.status !== "REVERTIDO").length} regras aprendidas prontas`, vc: "text-sky-700" },
                 { k: "Fila Supervisores (Nó 5)", v: `${pendSup}`, sub: tot ? `${tot - pendSup} liberadas automaticamente` : "0 pendências no momento", vc: "text-amber-600" },
@@ -9419,54 +9853,7 @@ Responda SOMENTE JSON Array: [{"ativo_erp":"...","tipo_ativo":"ATIVO_ARVORE"|"FE
             atualizarBannerLoteAuditado();
 
             renderComparativoHistorico();
-
-            // Tabela distribuição vs Treino Set/Out
-            const totDiv = tot || 1;
-            const cats = confiabilidadeData.categorias || {};
-            document.getElementById("pipelineTabelaDistribuicao").innerHTML = `
-                <table class="w-full text-left text-xs border-collapse">
-                    <thead>
-                        <tr class="border-b border-slate-200 text-[10px] font-extrabold uppercase text-slate-500">
-                            <th class="py-2">Categoria Oficial</th>
-                            <th class="py-2 text-right">Qtd (${escapeHtml(rodadaVigenteInfo.periodo)})</th>
-                            <th class="py-2 text-right">% Atual</th>
-                            <th class="py-2 text-right">% Set/Out</th>
-                        </tr>
-                    </thead>
-                    <tbody class="divide-y divide-slate-100">
-                        ${CATEGORIAS_OFICIAIS.concat(["REVISAR_MANUAL"]).map(c => {
-                            const q = cats[c] || 0;
-                            const pct = tot ? ((q / totDiv) * 100).toFixed(1) : "0.0";
-                            const ref = DIST_REFERENCIA[c] !== undefined ? `${DIST_REFERENCIA[c].toFixed(1)}%` : "0.0%";
-                            return `<tr>
-                                <td class="py-1.5 font-extrabold text-slate-800">${escapeHtml(c)}</td>
-                                <td class="py-1.5 text-right font-mono font-bold">${q}</td>
-                                <td class="py-1.5 text-right font-mono font-extrabold text-sky-700">${pct}%</td>
-                                <td class="py-1.5 text-right font-mono text-slate-400">${ref}</td>
-                            </tr>`;
-                        }).join("")}
-                    </tbody>
-                </table>`;
-
-            // Escada de severidade
-            const sevs = confiabilidadeData.severidades || { LEVE: 0, MODERADA: 0, GRAVE: 0 };
-            const totQ = Math.max(1, (sevs.LEVE || 0) + (sevs.MODERADA || 0) + (sevs.GRAVE || 0));
-            document.getElementById("pipelineEscadaSeveridade").innerHTML = ["LEVE", "MODERADA", "GRAVE"].map(nv => {
-                const q = sevs[nv] || 0;
-                const pct = (sevs.LEVE || sevs.MODERADA || sevs.GRAVE) ? Math.round((q / totQ) * 1000) / 10 : 0;
-                const reg = REGUA_OFICIAL[nv];
-                const barCls = nv === "GRAVE" ? "bg-rose-600" : (nv === "MODERADA" ? "bg-amber-500" : "bg-emerald-500");
-                return `
-                    <div class="p-3 rounded-2xl bg-slate-50 border border-slate-200 space-y-1.5">
-                        <div class="flex items-center justify-between text-xs font-extrabold">
-                            <span>QUEBRA ${nv} (${q} OMs)</span>
-                            <span>${pct}% <span class="text-slate-400 font-normal">(Base Set/Out: ${reg}%)</span></span>
-                        </div>
-                        <div class="w-full h-2.5 rounded-full bg-slate-200 overflow-hidden">
-                            <div class="h-full ${barCls}" style="width:${Math.min(100, pct)}%"></div>
-                        </div>
-                    </div>`;
-            }).join("");
+            renderDistribuicaoESeveridadePipeline();
         };
 
         // VIEW 2: AUDITORIA DE OMS & QUALIDADE DE APONTAMENTO
@@ -9482,12 +9869,17 @@ Responda SOMENTE JSON Array: [{"ativo_erp":"...","tipo_ativo":"ATIVO_ARVORE"|"FE
             const fEq = document.getElementById("audFiltroEquipe")?.value || "";
             const fSev = document.getElementById("audFiltroSeveridade")?.value || "";
             const fOrig = document.getElementById("audFiltroOrigem")?.value || "";
+            const isCustoZeroOrig = (orig) => ["FAST_PATH_R0", "BIBLIOTECA_MEMORIA", "DEDUP_RODADA", "HISTORICO_EXISTENTE"].includes(orig);
 
             const filtradas = omsAuditadas.filter(o => {
                 if (fCat && o.categoria !== fCat) return false;
                 if (fEq && o.equipe !== fEq) return false;
                 if (fSev && o.severidade !== fSev) return false;
-                if (fOrig && o.origem !== fOrig) return false;
+                if (fOrig === "FAST_PATH_ZERO") {
+                    if (!isCustoZeroOrig(o.origem)) return false;
+                } else if (fOrig && o.origem !== fOrig) {
+                    return false;
+                }
                 if (busca) {
                     const h = normKey(`${o.om} ${o.ativo} ${o.ativo_erp || ""} ${o.setor} ${o.problema} ${o.servico} ${o.categoria} ${o.justificativa}`);
                     if (!h.includes(busca)) return false;
@@ -9495,14 +9887,23 @@ Responda SOMENTE JSON Array: [{"ativo_erp":"...","tipo_ativo":"ATIVO_ARVORE"|"FE
                 return true;
             });
 
+            const temFiltroAtivo = Boolean(busca || fCat || fEq || fSev || fOrig);
+            const totalQuebrasCiclo = omsAuditadas.filter(x => x.categoria === "QUEBRA").length;
+            const filtradasQuebras = filtradas.filter(x => x.categoria === "QUEBRA").length;
+            const quebrasOcultasPorFiltro = (fCat === "QUEBRA" && filtradasQuebras < totalQuebrasCiclo) ? (totalQuebrasCiclo - filtradasQuebras) : 0;
+            const origSelLabel = document.getElementById("audFiltroOrigem")?.selectedOptions?.[0]?.textContent || fOrig;
+
             const revManTotal = omsAuditadas.filter(x => x.categoria === "REVISAR_MANUAL").length;
             const revManProntas = omsAuditadas.filter(x => x.categoria === "REVISAR_MANUAL" && !isServicoInsuficiente(x.servico)).length;
 
             document.getElementById("audResumoContadores").innerHTML = `
-                <span class="px-2.5 py-1 rounded-full bg-slate-100 text-slate-800">${filtradas.length} exibida(s)</span>
-                <span class="px-2.5 py-1 rounded-full bg-emerald-50 text-emerald-800 border border-emerald-200">${filtradas.filter(x => x.origem === "FAST_PATH_R0" || x.origem === "BIBLIOTECA_MEMORIA").length} Fast-Path / Memória R$ 0</span>
-                <span class="px-2.5 py-1 rounded-full bg-rose-50 text-rose-800 border border-rose-200">${filtradas.filter(x => x.categoria === "QUEBRA").length} Quebra(s)</span>
+                <span class="px-2.5 py-1 rounded-full bg-slate-100 text-slate-800">${filtradas.length} exibida(s)${temFiltroAtivo ? ` de ${omsAuditadas.length} no ciclo` : ""}</span>
+                <span class="px-2.5 py-1 rounded-full bg-emerald-50 text-emerald-800 border border-emerald-200">${filtradas.filter(x => isCustoZeroOrig(x.origem)).length} Custo Zero R$ 0</span>
+                <span class="px-2.5 py-1 rounded-full bg-indigo-50 text-indigo-800 border border-indigo-200">${filtradas.filter(x => x.origem === "SUPERVISOR").length} Validada(s) Supervisor</span>
+                <span class="px-2.5 py-1 rounded-full bg-rose-50 text-rose-800 border border-rose-200">${filtradasQuebras}${fCat === "QUEBRA" && quebrasOcultasPorFiltro > 0 ? ` de ${totalQuebrasCiclo}` : ""} Quebra(s)</span>
+                ${quebrasOcultasPorFiltro > 0 ? `<span class="px-2.5 py-1 rounded-full bg-amber-50 text-amber-900 border border-amber-300" title="Há outras ${quebrasOcultasPorFiltro} Quebras no ciclo com outra origem/filtro">${quebrasOcultasPorFiltro} outra(s) Quebra(s) oculta(s) pelo filtro "${escapeHtml(origSelLabel)}"</span>` : ""}
                 <span class="px-2.5 py-1 rounded-full bg-amber-50 text-amber-800 border border-amber-200">${filtradas.filter(x => x.categoria === "FALHA OPERACIONAL").length} Falha(s) Operacional(is)</span>
+                ${temFiltroAtivo ? `<button type="button" onclick="limparFiltrosAuditoria()" class="inline-flex items-center gap-1 px-2.5 py-1 rounded-full bg-white hover:bg-slate-100 text-slate-700 border border-slate-300 transition-colors">Limpar filtros</button>` : ""}
                 ${revManTotal > 0 ? `<button type="button" onclick="irParaRevisarManualConferente()" class="inline-flex items-center gap-1 px-2.5 py-1 rounded-full bg-slate-900 hover:bg-slate-800 text-white transition-colors">${SVG_ICO.edit} ${revManTotal} REVISAR_MANUAL → Digitar Serviço na Mesa</button>` : ""}
                 ${revManProntas > 0 ? `<button type="button" onclick="analisarRevisarManualPreenchidasComGemini()" class="inline-flex items-center gap-1 px-2.5 py-1 rounded-full bg-indigo-600 hover:bg-indigo-700 text-white transition-colors">${SVG_ICO.sparkle} Analisar ${revManProntas} Preenchida(s) c/ Gemini</button>` : ""}`;
 
@@ -12834,6 +13235,7 @@ Responda SOMENTE JSON Array: [{"ativo_erp":"...","tipo_ativo":"ATIVO_ARVORE"|"FE
         window.renderMasterMaestriView = () => {
             if (!isAdminMasterAtivo()) return;
             carregarCofreIaLocal();
+            atualizarUITreinoSetOutMaster();
             atualizarBadgesFontesManuaisAqf();
             sincronizarFormAprovadoresAqfMasterUI();
             atualizarUIBancoHistoricoOms();
@@ -13461,6 +13863,7 @@ Responda SOMENTE JSON Array: [{"ativo_erp":"...","tipo_ativo":"ATIVO_ARVORE"|"FE
                         remoteH.forEach(h => { merged.set(h.id, h); });
                         historicoRodadas = [...merged.values()];
                         renderComparativoHistorico();
+                        renderDistribuicaoESeveridadePipeline();
                     }
                 }, () => {});
             } catch (_) {}
