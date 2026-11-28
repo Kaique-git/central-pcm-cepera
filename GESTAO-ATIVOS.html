@@ -6683,10 +6683,9 @@
             const qLocal = normKey(saneEngFiltroTexto);
             return assetNodes.filter(n => {
                 const perEf = getPeriodicidadeEfetivaNode(n);
-                if (n.criticidade && perEf && n.subconjunto) return false;
+                if (n.criticidade && perEf) return false;
                 if (saneEngFiltroArea && n.area !== saneEngFiltroArea) return false;
                 if (saneEngFiltroMaquina && n.maquina !== saneEngFiltroMaquina) return false;
-                if (saneEngFiltroPendencia === 'subconjunto' && n.subconjunto) return false;
                 if (saneEngFiltroPendencia === 'criticidade' && n.criticidade) return false;
                 if (saneEngFiltroPendencia === 'periodicidade' && perEf) return false;
                 const hay = normKey(`${n.area} ${n.maquina} ${n.equipamento} ${n.conjunto} ${n.subconjunto} ${n.tag}`);
@@ -6796,10 +6795,9 @@
             const badgesEl = row.querySelector('[data-sane-badges]');
             if (badgesEl) {
                 badgesEl.innerHTML = [
-                    !sub ? '<span class="px-2 py-0.5 rounded-full text-[10px] font-bold bg-slate-100 text-slate-600">Sem Subconjunto</span>' : '',
                     !crit ? '<span class="px-2 py-0.5 rounded-full text-[10px] font-bold bg-rose-50 text-rose-700">Sem Criticidade</span>' : '',
                     !per ? '<span class="px-2 py-0.5 rounded-full text-[10px] font-bold bg-amber-50 text-amber-700">Sem Periodicidade</span>' : '',
-                    (sub && crit && per) ? '<span class="px-2 py-0.5 rounded-full text-[10px] font-bold bg-emerald-50 text-emerald-700">Pronto para salvar</span>' : ''
+                    (crit && per) ? '<span class="px-2 py-0.5 rounded-full text-[10px] font-bold bg-emerald-50 text-emerald-700">Pronto para salvar</span>' : ''
                 ].filter(Boolean).join('');
             }
             atualizarBotaoSalvarLoteSaneEng();
@@ -6972,7 +6970,7 @@
             // Atualiza select de máquinas caso a área tenha mudado
             const selMaq = document.getElementById('saneEngSelMaquina');
             if (selMaq) {
-                const incompBase = assetNodes.filter(n => !n.criticidade || !getPeriodicidadeEfetivaNode(n) || !n.subconjunto);
+                const incompBase = assetNodes.filter(n => !n.criticidade || !getPeriodicidadeEfetivaNode(n));
                 const maqs = [...new Set(incompBase.filter(n => !saneEngFiltroArea || n.area === saneEngFiltroArea).map(n => n.maquina).filter(Boolean))].sort((a, b) => a.localeCompare(b, 'pt-BR'));
                 selMaq.innerHTML = `<option value="">Todas as Máquinas</option>${maqs.map(m => `<option value="${escapeHtml(m)}" ${saneEngFiltroMaquina === m ? 'selected' : ''}>${escapeHtml(m)}</option>`).join('')}`;
             }
@@ -7008,10 +7006,9 @@
                                     <div class="min-w-0 flex-1">
                                         <div class="font-extrabold text-slate-900 leading-snug">${escapeHtml(n.area)} › ${escapeHtml(n.maquina)} › ${escapeHtml(n.equipamento)} › ${escapeHtml(n.conjunto)}</div>
                                         <div data-sane-badges class="flex flex-wrap gap-1 mt-1">
-                                            ${!vals.subconjunto ? '<span class="px-2 py-0.5 rounded-full text-[10px] font-bold bg-slate-100 text-slate-600">Sem Subconjunto</span>' : ''}
                                             ${!vals.criticidade ? '<span class="px-2 py-0.5 rounded-full text-[10px] font-bold bg-rose-50 text-rose-700">Sem Criticidade</span>' : ''}
                                             ${!vals.periodicidade_preventiva ? '<span class="px-2 py-0.5 rounded-full text-[10px] font-bold bg-amber-50 text-amber-700">Sem Periodicidade</span>' : (infoPlano.periodicidade && !n.periodicidade_preventiva ? `<span class="px-2 py-0.5 rounded-full text-[10px] font-bold bg-emerald-50 text-emerald-700 border border-emerald-200">Do Plano: ${escapeHtml(infoPlano.periodicidade)}</span>` : '')}
-                                            ${(vals.subconjunto && vals.criticidade && vals.periodicidade_preventiva) ? '<span class="px-2 py-0.5 rounded-full text-[10px] font-bold bg-emerald-50 text-emerald-700">Pronto para salvar</span>' : ''}
+                                            ${(vals.criticidade && vals.periodicidade_preventiva) ? '<span class="px-2 py-0.5 rounded-full text-[10px] font-bold bg-emerald-50 text-emerald-700">Pronto para salvar</span>' : ''}
                                         </div>
                                     </div>
                                     <div class="flex flex-wrap items-center gap-1.5 shrink-0">
@@ -7033,8 +7030,8 @@
                                 <div class="p-3 rounded-2xl bg-slate-50/90 border border-slate-200/80 space-y-2.5">
                                     <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-2.5">
                                         <div>
-                                            <label class="block text-[10px] font-extrabold uppercase ${!vals.subconjunto ? 'text-sky-700' : 'text-slate-500'} mb-1">Subconjunto</label>
-                                            <input type="text" data-sane-field="subconjunto" value="${escapeHtml(vals.subconjunto)}" oninput="onChangeCampoSaneEng('${nidEsc}')" placeholder="Ex: Moto-redutor, Inversor..." class="input-clean py-1.5 text-xs font-bold bg-white">
+                                            <label class="block text-[10px] font-extrabold uppercase text-slate-500 mb-1">Subconjunto (Opcional)</label>
+                                            <input type="text" data-sane-field="subconjunto" value="${escapeHtml(vals.subconjunto)}" oninput="onChangeCampoSaneEng('${nidEsc}')" placeholder="Opcional — Ex: Moto-redutor..." class="input-clean py-1.5 text-xs font-bold bg-white">
                                         </div>
                                         <div>
                                             <label class="block text-[10px] font-extrabold uppercase ${!vals.criticidade ? 'text-rose-600' : 'text-slate-500'} mb-1">Tipo de Criticidade</label>
@@ -7148,7 +7145,7 @@
             const duplicadosVisiveis = q
                 ? duplicados.filter(d => normKey(`${d.area} ${d.maquina} ${d.equipamento} ${d.keep.conjunto} ${d.absorb.map(x => x.conjunto).join(' ')}`).includes(q))
                 : duplicados;
-            const incompletos = assetNodes.filter(n => !n.criticidade || !getPeriodicidadeEfetivaNode(n) || !n.subconjunto);
+            const incompletos = assetNodes.filter(n => !n.criticidade || !getPeriodicidadeEfetivaNode(n));
             const syncPlanosCount = assetNodes.filter(n => !n.periodicidade_preventiva && getPeriodicidadeDoPlanoNode(n).periodicidade).length;
 
             const allOptsMesclarHtml = getOpcoesAtivosSelectHtml([], '');
@@ -7185,7 +7182,7 @@
                     <div class="glass-card p-4 rounded-3xl border-l-4 ${incompletos.length ? 'border-l-rose-500' : 'border-l-emerald-500'}">
                         <div class="text-[10px] font-extrabold uppercase text-slate-400">Pendências Engenharia</div>
                         <div class="text-2xl font-extrabold ${incompletos.length ? 'text-rose-600' : 'text-emerald-600'} mt-0.5">${incompletos.length}</div>
-                        <div class="text-[11px] font-semibold text-slate-500">Subconj. / Crit. / Per.</div>
+                        <div class="text-[11px] font-semibold text-slate-500">Criticidade / Periodicidade</div>
                     </div>
                 </div>
 
@@ -7353,8 +7350,8 @@
                 <div class="glass-card p-5 sm:p-6 rounded-3xl space-y-4">
                     <div class="flex flex-wrap items-center justify-between gap-2">
                         <div>
-                            <h3 class="text-sm font-extrabold text-slate-900">4. Pendências de Engenharia (Subconjunto, Criticidade ou Periodicidade)</h3>
-                            <p class="text-xs text-slate-500">Edite Subconjunto, Tipo de Criticidade, Periodicidade Preventiva e Disciplina diretamente aqui sem precisar voltar à Árvore um por um.</p>
+                            <h3 class="text-sm font-extrabold text-slate-900">4. Pendências de Engenharia (Criticidade ou Periodicidade)</h3>
+                            <p class="text-xs text-slate-500">Edite Tipo de Criticidade, Periodicidade Preventiva, Disciplina e Subconjunto (opcional) diretamente aqui sem precisar voltar à Árvore um por um.</p>
                         </div>
                         <div class="flex flex-wrap items-center gap-2">
                             ${syncPlanosCount > 0 ? `<button type="button" id="btnSaneEngSyncPlanos" onclick="sincronizarPeriodicidadesDosPlanosSaneEng()" class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-sky-50 hover:bg-sky-100 text-sky-800 border border-sky-200 font-extrabold text-xs transition" title="Grava automaticamente no cadastro do ativo a periodicidade já definida no plano preventivo">
@@ -7384,7 +7381,6 @@
                             </select>
                             <select id="saneEngSelPendencia" onchange="atualizarFiltroSaneEng('pendencia', this.value)" class="input-clean py-2 text-xs font-bold">
                                 <option value="todas" ${saneEngFiltroPendencia === 'todas' ? 'selected' : ''}>Todas as Pendências</option>
-                                <option value="subconjunto" ${saneEngFiltroPendencia === 'subconjunto' ? 'selected' : ''}>Sem Subconjunto</option>
                                 <option value="criticidade" ${saneEngFiltroPendencia === 'criticidade' ? 'selected' : ''}>Sem Criticidade</option>
                                 <option value="periodicidade" ${saneEngFiltroPendencia === 'periodicidade' ? 'selected' : ''}>Sem Periodicidade</option>
                             </select>
@@ -7394,7 +7390,7 @@
                             <span>Altere quantos itens quiser e salve individualmente ou em lote.</span>
                         </div>
                         <div id="saneEngTabelaContainer"></div>`;
-                    })() : `<div class="text-xs font-bold text-emerald-700 bg-emerald-50 border border-emerald-200 p-3.5 rounded-2xl">Parabéns! 100% dos ativos possuem Subconjunto, Criticidade e Periodicidade definidos.</div>`}
+                    })() : `<div class="text-xs font-bold text-emerald-700 bg-emerald-50 border border-emerald-200 p-3.5 rounded-2xl">Parabéns! 100% dos ativos possuem Criticidade e Periodicidade definidos.</div>`}
                 </div>
 
                 <!-- BLOCO 5: GOVERNANÇA DOCUMENTAL & BIBLIOTECA SHAREPOINT -->
