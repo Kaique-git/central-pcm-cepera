@@ -308,10 +308,6 @@
                             <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4"/></svg>
                             <span>Ações</span>
                         </button>
-                        <button type="button" onclick="switchTab('cadastros')" id="rail-cadastros" class="rail-btn">
-                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10"/></svg>
-                            <span>Árvore</span>
-                        </button>
                     </nav>
                 </div>
                 <div class="flex flex-col items-center gap-2 w-full">
@@ -342,7 +338,7 @@
                         <div class="flex items-center gap-2 text-xs font-bold text-slate-500">
                             <span id="statusDot" class="w-2 h-2 rounded-full bg-amber-500 animate-pulse"></span>
                             <span id="statusText">Conectando...</span>
-                            <span class="hidden sm:inline">• Gestão de Ativos & Obsolescência</span>
+                            <span class="hidden sm:inline">• Controle de Obsolescência</span>
                         </div>
                     </div>
 
@@ -373,7 +369,6 @@
                     <button type="button" onclick="switchTab('obs')" id="tabBtn-obs" class="mob-tab">Obsolescência</button>
                     <button type="button" onclick="switchTab('prev')" id="tabBtn-prev" class="mob-tab">Preventiva & Desgaste</button>
                     <button type="button" onclick="switchTab('acoes')" id="tabBtn-acoes" class="mob-tab">Planos de Ação</button>
-                    <button type="button" onclick="switchTab('cadastros')" id="tabBtn-cadastros" class="mob-tab">Árvore & Estrutura</button>
                 </div>
 
                 <!-- CONTAINER DAS PÁGINAS -->
@@ -385,13 +380,13 @@
                             <div>
                                 <p class="text-xs font-bold uppercase tracking-widest text-sky-600 mb-1">PCM • Engenharia & Confiabilidade</p>
                                 <h1 class="text-2xl sm:text-3xl font-extrabold text-slate-900 tracking-tight leading-tight">
-                                    Olá, <span id="dashGreetingName">Gestor</span>. Central de Obsolescência & Ativos
+                                    Olá, <span id="dashGreetingName">Gestor</span>. Central de Obsolescência
                                 </h1>
                             </div>
                             <div class="flex flex-wrap gap-2.5">
-                                <button type="button" onclick="openModal('modalImportLinhas')" class="btn-touch bg-indigo-600 hover:bg-indigo-700 text-white rounded-full px-5 py-2.5 text-xs shadow-md">
-                                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16m-7 6h7"/></svg>
-                                    <span>Importar Árvore</span>
+                                <button type="button" onclick="openModalImportObs()" class="btn-touch bg-emerald-600 hover:bg-emerald-700 text-white rounded-full px-5 py-2.5 text-xs shadow-md">
+                                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12"/></svg>
+                                    <span>Importar Obsolescência (CSV)</span>
                                 </button>
                                 <button type="button" onclick="openModal('modalItem', 'Preventiva')" class="btn-touch bg-sky-600 hover:bg-sky-700 text-white rounded-full px-5 py-2.5 text-xs shadow-md">
                                     <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6"/></svg>
@@ -463,20 +458,46 @@
 
                     <!-- ================= TAB 2: OBSOLESCÊNCIA ================= -->
                     <section id="view-obs" class="hidden space-y-5 max-w-7xl mx-auto">
-                        <div class="glass-card p-6 rounded-3xl flex flex-col lg:flex-row lg:items-center justify-between gap-4">
-                            <div>
-                                <p class="text-xs font-bold uppercase tracking-widest text-rose-600 mb-1">Engenharia de Confiabilidade • Matriz GUT</p>
-                                <h2 class="text-xl sm:text-2xl font-extrabold text-slate-900">Mapeamento de Obsolescência</h2>
-                                <p class="text-xs text-slate-500 mt-0.5">Árvore de peças avaliadas pela matriz GUT para mitigação de risco de parada.</p>
+                        <div class="glass-card p-6 rounded-3xl space-y-4">
+                            <div class="flex flex-col lg:flex-row lg:items-center justify-between gap-4">
+                                <div>
+                                    <p class="text-xs font-bold uppercase tracking-widest text-rose-600 mb-1">Engenharia de Confiabilidade • Matriz GUT</p>
+                                    <h2 class="text-xl sm:text-2xl font-extrabold text-slate-900">Mapeamento de Obsolescência</h2>
+                                    <p class="text-xs text-slate-500 mt-0.5">Peças avaliadas pela matriz GUT vinculadas diretamente à Árvore Oficial do módulo <strong>Gestão de Ativos</strong>.</p>
+                                </div>
+                                <div class="flex flex-wrap items-center gap-2">
+                                    <button type="button" onclick="baixarModeloCsvObsolescencia()" class="btn-touch bg-white hover:bg-slate-50 border border-slate-200 text-slate-700 text-xs py-2.5 px-3.5 shadow-sm">
+                                        <svg class="w-4 h-4 text-emerald-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"/></svg>
+                                        <span>Baixar Modelo CSV</span>
+                                    </button>
+                                    <button type="button" onclick="openModalImportObs()" class="btn-touch bg-emerald-600 hover:bg-emerald-700 text-white text-xs py-2.5 px-4 shadow-sm">
+                                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12"/></svg>
+                                        <span>Importar CSV / Excel</span>
+                                    </button>
+                                    <button type="button" onclick="openModalFiltroRelatorio('obs')" class="btn-touch bg-slate-100 hover:bg-slate-200 text-slate-800 text-xs py-2.5 px-3.5">
+                                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z"/></svg>
+                                        <span>Relatório A4</span>
+                                    </button>
+                                    <button type="button" onclick="openModal('modalItem', 'Obsolescencia')" class="btn-pill-dark !bg-rose-600 text-xs">
+                                        <span>+ Adicionar Risco</span>
+                                    </button>
+                                </div>
                             </div>
-                            <div class="flex flex-wrap items-center gap-2.5">
-                                <button type="button" onclick="openModalFiltroRelatorio('obs')" class="btn-touch bg-slate-100 hover:bg-slate-200 text-slate-800 text-xs py-2.5 px-4">
-                                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z"/></svg>
-                                    <span>Gerar Relatório A4</span>
-                                </button>
-                                <button type="button" onclick="openModal('modalItem', 'Obsolescencia')" class="btn-pill-dark !bg-rose-600 text-xs">
-                                    <span>+ Adicionar Risco</span>
-                                </button>
+                            <div class="flex flex-wrap items-center justify-between gap-2 pt-3 border-t border-slate-100 text-[11px]">
+                                <div class="flex items-center gap-2 text-slate-600 font-semibold">
+                                    <svg class="w-4 h-4 text-sky-600 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13.828 10.172a4 4 0 00-5.656 0l-4 4a4 4 0 105.656 5.656l1.102-1.101m-.758-4.899a4 4 0 005.656 0l4-4a4 4 0 00-5.656-5.656l-1.1 1.1"/></svg>
+                                    <span id="obsSyncArvoreInfo">Árvore sincronizada com Gestão de Ativos (carregando...)</span>
+                                </div>
+                                <div class="flex flex-wrap items-center gap-2">
+                                    <button type="button" onclick="baixarArvoreReferenciaCsvObs()" class="inline-flex items-center gap-1 px-2.5 py-1 rounded-lg bg-slate-50 hover:bg-slate-100 border border-slate-200 text-slate-700 font-bold transition">
+                                        <svg class="w-3.5 h-3.5 text-slate-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/></svg>
+                                        <span>Exportar Lista de Equipamentos</span>
+                                    </button>
+                                    <button type="button" onclick="abrirGestaoAtivosObs()" class="inline-flex items-center gap-1 px-2.5 py-1 rounded-lg bg-sky-50 hover:bg-sky-100 border border-sky-200 text-sky-700 font-extrabold transition">
+                                        <span>Gerenciar Árvore em Gestão de Ativos</span>
+                                        <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"/></svg>
+                                    </button>
+                                </div>
                             </div>
                         </div>
                         <div id="treeContainerObs" class="space-y-6 pb-8"></div>
@@ -533,44 +554,6 @@
                                     </thead>
                                     <tbody id="tbodyAcoes" class="divide-y divide-slate-100 bg-white"></tbody>
                                 </table>
-                            </div>
-                        </div>
-                    </section>
-
-                    <!-- ================= TAB 5: ATRIBUTOS (ESTRUTURA) ================= -->
-                    <section id="view-cadastros" class="hidden space-y-5 max-w-7xl mx-auto pb-8">
-                        <div class="glass-card rounded-3xl p-6 space-y-5">
-                            <div class="flex flex-col md:flex-row md:items-center justify-between gap-4">
-                                <div>
-                                    <p class="text-xs font-bold uppercase tracking-widest text-indigo-600 mb-1">Inventário Físico • ob_linhas</p>
-                                    <h2 class="text-xl sm:text-2xl font-extrabold text-slate-900">Gerenciador de Estrutura & Atributos</h2>
-                                    <p class="text-xs text-slate-500 mt-0.5">A árvore é sincronizada com o app de Inspeção de Rotas. Gerencie aqui Modelos e Número de Série (SN) das máquinas.</p>
-                                </div>
-                                <div class="flex gap-2.5 flex-wrap">
-                                    <button type="button" onclick="openModalFiltroRelatorio('arvore')" class="btn-touch bg-slate-100 hover:bg-slate-200 text-slate-800 text-xs py-2.5 px-4">
-                                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z"/></svg>
-                                        <span>Imprimir Inventário A4</span>
-                                    </button>
-                                    <button type="button" onclick="openModal('modalImportLinhas')" class="btn-pill-dark text-xs">
-                                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12"/></svg>
-                                        <span>Importar Árvore</span>
-                                    </button>
-                                </div>
-                            </div>
-
-                            <div class="bg-slate-50 p-4 rounded-2xl border border-slate-200/80 grid grid-cols-1 sm:grid-cols-2 gap-4">
-                                <div>
-                                    <label class="block text-[10px] font-extrabold uppercase text-slate-500 mb-1">1. Filtrar Setor / Área</label>
-                                    <select id="exploraArea" class="input-clean py-2 text-xs font-bold" onchange="renderExploradorMaquinas()"></select>
-                                </div>
-                                <div>
-                                    <label class="block text-[10px] font-extrabold uppercase text-slate-500 mb-1">2. Filtrar Máquina / Linha</label>
-                                    <select id="exploraMaquina" class="input-clean py-2 text-xs font-bold" onchange="renderExploradorCards()"></select>
-                                </div>
-                            </div>
-
-                            <div id="estruturaCardsContainer" class="grid grid-cols-1 lg:grid-cols-2 gap-4">
-                                <div class="p-8 text-center text-slate-400 text-sm font-bold">Selecione o Setor e a Máquina acima.</div>
                             </div>
                         </div>
                     </section>
@@ -657,28 +640,140 @@
         </div>
     </div>
 
-    <!-- ================= MODAL IMPORTAR ESTRUTURA (ARVORE) ================= -->
-    <div id="modalImportLinhas" role="dialog" aria-modal="true" class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-50 hidden flex items-end sm:items-center justify-center p-0 sm:p-4">
-        <div class="bg-white w-full max-w-2xl rounded-t-3xl sm:rounded-3xl p-6 sm:p-8 space-y-5 shadow-2xl border border-slate-200">
-            <div class="flex justify-between items-center border-b border-slate-100 pb-4">
+    <!-- ================= MODAL IMPORTADOR RÁPIDO DE OBSOLESCÊNCIA (CSV / EXCEL) ================= -->
+    <div id="modalImportObs" role="dialog" aria-modal="true" class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-50 hidden flex items-end sm:items-center justify-center p-0 sm:p-4 overflow-y-auto">
+        <div class="bg-white w-full max-w-5xl rounded-t-3xl sm:rounded-3xl p-6 sm:p-7 my-auto space-y-5 shadow-2xl border border-slate-200 max-h-[94vh] overflow-y-auto">
+            <div class="flex flex-wrap justify-between items-start gap-3 border-b border-slate-100 pb-4">
                 <div>
-                    <span class="text-[10px] font-extrabold uppercase tracking-widest text-indigo-600">Hierarquia Corporativa • ob_linhas</span>
-                    <h3 class="text-lg sm:text-xl font-extrabold text-slate-900">Importar Árvore em Massa</h3>
+                    <span class="text-[10px] font-extrabold uppercase tracking-widest text-emerald-600">Importação em Massa • Vinculada à Árvore de Ativos</span>
+                    <h3 class="text-lg sm:text-xl font-extrabold text-slate-900">Importador Rápido de Obsolescência (CSV / Excel)</h3>
+                    <p class="text-xs text-slate-500 mt-0.5">Envie o arquivo CSV preenchido ou cole direto do Excel. O sistema valida e vincula automaticamente cada peça à Árvore Oficial de <strong>Gestão de Ativos</strong>.</p>
                 </div>
-                <button type="button" onclick="closeModal('modalImportLinhas')" class="w-8 h-8 rounded-full bg-slate-100 text-slate-600 font-bold">✕</button>
+                <button type="button" onclick="closeModal('modalImportObs')" class="w-8 h-8 rounded-full bg-slate-100 hover:bg-slate-200 text-slate-600 font-bold flex items-center justify-center">
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2.2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"/></svg>
+                </button>
             </div>
-            <div class="bg-slate-50 p-4 rounded-2xl text-xs border border-slate-200 leading-relaxed">
-                Cole a hierarquia respeitando as colunas (separadas por tabulação/Excel):<br>
-                <span class="font-mono font-bold bg-white px-3 py-1.5 rounded-xl block mt-2 shadow-sm border border-slate-200">
-                    SETOR (Área) | LINHA (Máquina) | EQUIPAMENTO | CONJUNTO
-                </span>
+
+            <!-- PASSO 1: MODELO E PADRÃO DE COLUNAS -->
+            <div class="p-4 rounded-2xl bg-slate-50 border border-slate-200/90 space-y-3 text-xs">
+                <div class="flex flex-wrap items-center justify-between gap-2">
+                    <div class="font-extrabold text-slate-800 uppercase text-[11px] tracking-wider">1. Padrão de Colunas &amp; Planilha Modelo</div>
+                    <div class="flex flex-wrap items-center gap-2">
+                        <button type="button" onclick="baixarModeloCsvObsolescencia()" class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white font-extrabold text-[11px] shadow-sm transition">
+                            <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" stroke-width="2.2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"/></svg>
+                            <span>Baixar Modelo CSV (Excel)</span>
+                        </button>
+                        <button type="button" onclick="baixarArvoreReferenciaCsvObs()" class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-white hover:bg-slate-100 text-slate-700 border border-slate-200 font-extrabold text-[11px] transition">
+                            <svg class="w-3.5 h-3.5 text-sky-600" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/></svg>
+                            <span>Baixar Lista da Árvore Atual</span>
+                        </button>
+                    </div>
+                </div>
+                <div class="overflow-x-auto">
+                    <div class="font-mono text-[10px] font-bold bg-white px-3 py-2 rounded-xl border border-slate-200 text-slate-700 whitespace-nowrap">
+                        Area* ; Maquina* ; Equipamento* ; Conjunto ; Subconjunto ; Componente* ; Fabricante_Referencia ; Codigo_ERP ; Status_Ciclo_Vida ; Acao_Proposta ; Status_Acao ; Gravidade_G ; Urgencia_U ; Tendencia_T ; Custo_Estimado
+                    </div>
+                </div>
+                <div class="flex flex-wrap gap-x-4 gap-y-1 text-[11px] text-slate-500">
+                    <span><strong class="text-slate-700">Obrigatórias (*):</strong> Area, Maquina, Equipamento, Componente</span>
+                    <span><strong class="text-slate-700">G / U / T:</strong> 1 a 5 (padrão 3)</span>
+                    <span><strong class="text-slate-700">Status_Acao:</strong> Pendente, Em Andamento ou Concluído</span>
+                    <span><strong class="text-slate-700">Separadores aceitos:</strong> ponto e vírgula (;), vírgula (,) ou TAB do Excel</span>
+                </div>
             </div>
-            <div>
-                <textarea id="importLinhasText" rows="6" class="input-clean font-mono text-xs leading-tight whitespace-pre" placeholder="Ex:&#10;Sopro	Multipet 1	Sopradora	Cambotador"></textarea>
+
+            <!-- PASSO 2: UPLOAD OU COLAR DO EXCEL -->
+            <div class="grid grid-cols-1 lg:grid-cols-12 gap-4 text-xs">
+                <div class="lg:col-span-4 flex flex-col justify-between p-4 rounded-2xl border-2 border-dashed border-emerald-200 bg-emerald-50/40 space-y-3">
+                    <div class="space-y-1.5">
+                        <div class="w-10 h-10 rounded-2xl bg-emerald-100 text-emerald-700 flex items-center justify-center">
+                            <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12"/></svg>
+                        </div>
+                        <div class="font-extrabold text-slate-900 text-sm">Carregar arquivo .CSV</div>
+                        <p class="text-[11px] text-slate-500">No Excel, salve como <strong>CSV (separado por ponto e vírgula)</strong> ou <strong>CSV UTF-8</strong> e selecione o arquivo abaixo.</p>
+                    </div>
+                    <div class="space-y-2">
+                        <input type="file" id="impObsFileInput" accept=".csv,.txt,text/csv,text/plain" onchange="lerArquivoCsvObs(this)" class="hidden">
+                        <button type="button" onclick="document.getElementById('impObsFileInput').click()" class="w-full btn-touch bg-white hover:bg-emerald-50 border border-emerald-300 text-emerald-800 text-xs py-2.5 justify-center shadow-sm">
+                            <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12"/></svg>
+                            <span>Selecionar Arquivo CSV</span>
+                        </button>
+                        <div id="impObsFileName" class="text-[11px] font-bold text-slate-500 truncate text-center">Nenhum arquivo selecionado</div>
+                    </div>
+                </div>
+                <div class="lg:col-span-8 space-y-1.5">
+                    <div class="flex items-center justify-between gap-2">
+                        <label for="impObsText" class="font-extrabold text-[11px] uppercase text-slate-700">Ou cole os dados diretamente do Excel (com ou sem cabeçalho)</label>
+                        <button type="button" onclick="limparImportObs()" class="text-[11px] font-extrabold text-slate-400 hover:text-rose-600">Limpar</button>
+                    </div>
+                    <textarea id="impObsText" rows="6" oninput="analisarTextoImportObs()" class="input-clean font-mono text-[11px] leading-relaxed whitespace-pre" placeholder="Area;Maquina;Equipamento;Conjunto;Subconjunto;Componente;Fabricante_Referencia;Codigo_ERP;Status_Ciclo_Vida;Acao_Proposta;Status_Acao;Gravidade_G;Urgencia_U;Tendencia_T;Custo_Estimado&#10;Envase;Boaotopack 1;Envasadora;Dosador;Inversor Principal;Inversor Micromaster MM440;Siemens - MM440;819203;Obsoleto sem Estoque;Retrofit para Sinamics G120;Pendente;5;4;5;15000"></textarea>
+                </div>
             </div>
-            <div class="flex justify-end gap-2.5 pt-3 border-t border-slate-100">
-                <button type="button" onclick="closeModal('modalImportLinhas')" class="btn-touch bg-slate-100 text-slate-700 text-xs">Cancelar</button>
-                <button type="button" onclick="processarImportacaoPlanilha()" id="btnProcessImportArv" class="btn-pill-dark text-xs">Processar Hierarquia</button>
+
+            <!-- PASSO 3: PRÉVIA & VALIDAÇÃO COM A ÁRVORE -->
+            <div id="impObsPreviewWrap" class="hidden space-y-3 text-xs">
+                <div class="grid grid-cols-2 sm:grid-cols-5 gap-2.5">
+                    <div class="p-3 rounded-2xl bg-slate-50 border border-slate-200">
+                        <div class="text-[10px] font-extrabold uppercase text-slate-400">Linhas Lidas</div>
+                        <div id="impObsKpiTotal" class="text-xl font-extrabold text-slate-900">0</div>
+                    </div>
+                    <div class="p-3 rounded-2xl bg-emerald-50/80 border border-emerald-200">
+                        <div class="text-[10px] font-extrabold uppercase text-emerald-700">Vinculadas Árvore</div>
+                        <div id="impObsKpiVinc" class="text-xl font-extrabold text-emerald-700">0</div>
+                    </div>
+                    <div class="p-3 rounded-2xl bg-amber-50/80 border border-amber-200">
+                        <div class="text-[10px] font-extrabold uppercase text-amber-700">Sem Vínculo</div>
+                        <div id="impObsKpiSemVinc" class="text-xl font-extrabold text-amber-700">0</div>
+                    </div>
+                    <div class="p-3 rounded-2xl bg-indigo-50/80 border border-indigo-200">
+                        <div class="text-[10px] font-extrabold uppercase text-indigo-700">Já Cadastradas</div>
+                        <div id="impObsKpiDup" class="text-xl font-extrabold text-indigo-700">0</div>
+                    </div>
+                    <div class="p-3 rounded-2xl bg-rose-50/80 border border-rose-200">
+                        <div class="text-[10px] font-extrabold uppercase text-rose-700">Com Erro</div>
+                        <div id="impObsKpiErr" class="text-xl font-extrabold text-rose-700">0</div>
+                    </div>
+                </div>
+
+                <div class="flex flex-wrap items-center justify-between gap-3 px-3.5 py-2.5 rounded-2xl bg-slate-50 border border-slate-200">
+                    <div class="flex flex-wrap items-center gap-4">
+                        <label class="inline-flex items-center gap-2 font-bold text-slate-700 cursor-pointer">
+                            <input type="checkbox" id="impObsPularDup" checked onchange="atualizarResumoImportObs()" class="rounded border-slate-300 text-emerald-600 focus:ring-emerald-500">
+                            <span>Pular duplicados já cadastrados</span>
+                        </label>
+                        <label class="inline-flex items-center gap-2 font-bold text-slate-700 cursor-pointer">
+                            <input type="checkbox" id="impObsSomenteVinc" onchange="atualizarResumoImportObs()" class="rounded border-slate-300 text-emerald-600 focus:ring-emerald-500">
+                            <span>Importar somente peças encontradas na Árvore Oficial</span>
+                        </label>
+                    </div>
+                    <span id="impObsResumoProntas" class="font-extrabold text-emerald-700">0 item(ns) pronto(s) para importar</span>
+                </div>
+
+                <div class="max-h-64 overflow-y-auto rounded-2xl border border-slate-200">
+                    <table class="w-full text-left text-[11px]">
+                        <thead class="bg-slate-50 text-slate-500 uppercase font-extrabold text-[10px] sticky top-0 border-b border-slate-200">
+                            <tr>
+                                <th class="py-2.5 px-3">Vínculo na Árvore</th>
+                                <th class="py-2.5 px-3">Ativo (Área › Máquina › Equipamento › Conjunto)</th>
+                                <th class="py-2.5 px-3">Componente / Ref / ERP</th>
+                                <th class="py-2.5 px-3 text-center">GUT</th>
+                                <th class="py-2.5 px-3 text-right">Custo</th>
+                            </tr>
+                        </thead>
+                        <tbody id="impObsPreviewBody" class="divide-y divide-slate-100 bg-white"></tbody>
+                    </table>
+                </div>
+            </div>
+
+            <div class="flex flex-wrap items-center justify-between gap-3 pt-3 border-t border-slate-100">
+                <span id="impObsProgressText" class="text-[11px] font-bold text-slate-500">Pronto para carregar sua planilha do Excel.</span>
+                <div class="flex items-center gap-2.5">
+                    <button type="button" onclick="closeModal('modalImportObs')" class="btn-touch bg-slate-100 text-slate-700 text-xs">Cancelar</button>
+                    <button type="button" id="btnExecImportObs" disabled onclick="executarImportacaoObsCsv()" class="btn-pill-dark !bg-emerald-600 disabled:opacity-40 disabled:cursor-not-allowed text-xs">
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2.2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"/></svg>
+                        <span>Importar Peças</span>
+                    </button>
+                </div>
             </div>
         </div>
     </div>
@@ -698,25 +793,32 @@
                 <input type="hidden" id="itemId">
                 <input type="hidden" id="formTipoPeca">
 
-                <!-- SEÇÃO 1: HIERARQUIA -->
-                <div class="bg-slate-50 p-4 rounded-2xl border border-slate-200/80">
-                    <h4 class="font-extrabold text-[11px] uppercase text-slate-500 mb-3">1. Árvore do Ativo</h4>
-                    <div class="grid grid-cols-1 md:grid-cols-4 gap-3">
+                <!-- SEÇÃO 1: HIERARQUIA (VINCULADA À ÁRVORE OFICIAL DE GESTÃO DE ATIVOS) -->
+                <div class="bg-slate-50 p-4 rounded-2xl border border-slate-200/80 space-y-3">
+                    <div class="flex flex-wrap items-center justify-between gap-2">
+                        <h4 class="font-extrabold text-[11px] uppercase text-slate-600">1. Vínculo com a Árvore Oficial (Gestão de Ativos)</h4>
+                        <button type="button" onclick="abrirGestaoAtivosObs()" class="text-[11px] font-extrabold text-sky-700 hover:underline">Gerenciar equipamentos em Gestão de Ativos</button>
+                    </div>
+                    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-3">
                         <div>
                             <label class="block text-[10px] font-extrabold uppercase text-slate-500 mb-1">Setor / Área *</label>
-                            <input type="text" id="fArea" list="dlAreas" required placeholder="Ex: Envase" class="input-clean py-2 text-xs font-bold" onblur="atualizarDatalistsDependentes()">
+                            <select id="fArea" required class="input-clean py-2 text-xs font-bold bg-white" onchange="onChangeSelectArvoreForm('area')"></select>
                         </div>
                         <div>
                             <label class="block text-[10px] font-extrabold uppercase text-slate-500 mb-1">Máquina / Linha *</label>
-                            <input type="text" id="fMaquina" list="dlMaquinas" required placeholder="Ex: Boatopack 1" class="input-clean py-2 text-xs font-bold" onblur="atualizarDatalistsDependentes()">
+                            <select id="fMaquina" required class="input-clean py-2 text-xs font-bold bg-white" onchange="onChangeSelectArvoreForm('maquina')"></select>
                         </div>
                         <div>
                             <label class="block text-[10px] font-extrabold uppercase text-slate-500 mb-1">Equipamento *</label>
-                            <input type="text" id="fEquipamentoBusca" list="dlEquipamentos" required placeholder="Ex: Envasadora" class="input-clean py-2 text-xs font-bold" onblur="atualizarDatalistsDependentes()">
+                            <select id="fEquipamentoBusca" required class="input-clean py-2 text-xs font-bold bg-white" onchange="onChangeSelectArvoreForm('equipamento')"></select>
                         </div>
                         <div>
                             <label class="block text-[10px] font-extrabold uppercase text-slate-500 mb-1">Conjunto (Opcional)</label>
-                            <input type="text" id="fConjunto" list="dlConjuntos" placeholder="Ex: Dosador" class="input-clean py-2 text-xs font-bold">
+                            <select id="fConjunto" class="input-clean py-2 text-xs font-bold bg-white" onchange="onChangeSelectArvoreForm('conjunto')"></select>
+                        </div>
+                        <div>
+                            <label class="block text-[10px] font-extrabold uppercase text-slate-500 mb-1">Subconjunto (Opcional)</label>
+                            <select id="fSubconjunto" class="input-clean py-2 text-xs font-bold bg-white"></select>
                         </div>
                     </div>
                 </div>
@@ -877,7 +979,7 @@
                 <div class="flex justify-between py-2 border-b border-slate-100"><span>Abrir Central de Atalhos</span><kbd class="px-2 py-0.5 bg-slate-100 border border-slate-300 rounded font-mono font-bold">Ctrl + ?</kbd></div>
                 <div class="flex justify-between py-2 border-b border-slate-100"><span>Abrir Espaço do Usuário</span><kbd class="px-2 py-0.5 bg-slate-100 border border-slate-300 rounded font-mono font-bold">Alt + U</kbd></div>
                 <div class="flex justify-between py-2 border-b border-slate-100"><span>Alternar Modo Tablet</span><kbd class="px-2 py-0.5 bg-slate-100 border border-slate-300 rounded font-mono font-bold">Alt + T</kbd></div>
-                <div class="flex justify-between py-2 border-b border-slate-100"><span>Alternar entre Abas do Menu</span><kbd class="px-2 py-0.5 bg-slate-100 border border-slate-300 rounded font-mono font-bold">Alt + 1 até Alt + 5</kbd></div>
+                <div class="flex justify-between py-2 border-b border-slate-100"><span>Alternar entre Abas do Menu</span><kbd class="px-2 py-0.5 bg-slate-100 border border-slate-300 rounded font-mono font-bold">Alt + 1 até Alt + 4</kbd></div>
                 <div class="flex justify-between py-2"><span>Fechar qualquer modal</span><kbd class="px-2 py-0.5 bg-slate-100 border border-slate-300 rounded font-mono font-bold">Esc</kbd></div>
             </div>
         </div>
@@ -931,10 +1033,11 @@
         let items = [];
         let rawLinhasDocsObs = [];
         let estruturas = [];
+        let ativosArvoreFlat = [];
+        let impObsParsedRows = [];
         let docsAtivosObs = [];
         let usuarioLogado = null;
         let itemToDeleteId = null;
-        let isDeletingLinha = false;
         let chartRankInstance = null;
         let chartPieInstance = null;
         let isFirebaseConnected = false;
@@ -1115,14 +1218,22 @@
         }
 
         window.switchTab = (t) => {
-            ['dashboard', 'obs', 'prev', 'acoes', 'cadastros'].forEach(id => {
-                document.getElementById(`view-${id}`)?.classList.toggle('hidden', id !== t);
+            const target = ['dashboard', 'obs', 'prev', 'acoes'].includes(t) ? t : 'dashboard';
+            ['dashboard', 'obs', 'prev', 'acoes'].forEach(id => {
+                document.getElementById(`view-${id}`)?.classList.toggle('hidden', id !== target);
                 const b = document.getElementById(`tabBtn-${id}`);
-                if (b) b.classList.toggle('active', id === t);
+                if (b) b.classList.toggle('active', id === target);
                 const r = document.getElementById(`rail-${id}`);
-                if (r) r.classList.toggle('active', id === t);
+                if (r) r.classList.toggle('active', id === target);
             });
-            if (t === 'cadastros') renderExploradorAreas();
+        };
+
+        window.abrirGestaoAtivosObs = () => {
+            if (window.parent && window.parent !== window) {
+                window.parent.postMessage({ type: 'CEPERA_NAVEGAR_APP', appId: 'gestao_ativos' }, '*');
+            } else {
+                window.location.href = 'GESTAO-ATIVOS.html';
+            }
         };
 
         // ================= ESPAÇO DO USUÁRIO & ATALHOS =================
@@ -1201,7 +1312,7 @@
 
         document.addEventListener('keydown', function(e) {
             if (e.key === 'Escape') {
-                ['modalFiltroRelatorio', 'modalImportPecas', 'modalImportLinhas', 'modalItem', 'modalDelete', 'modalEspacoUsuario', 'modalAtalhos'].forEach(id => closeModal(id));
+                ['modalFiltroRelatorio', 'modalImportPecas', 'modalImportObs', 'modalItem', 'modalDelete', 'modalEspacoUsuario', 'modalAtalhos', 'modalDocsObs'].forEach(id => closeModal(id));
                 return;
             }
             if ((e.ctrlKey || e.metaKey) && (e.key === '?' || e.key === '/')) {
@@ -1215,7 +1326,7 @@
                 const k = e.key.toLowerCase();
                 if (k === 't') { e.preventDefault(); toggleModoTablet(); return; }
                 if (k === 'u') { e.preventDefault(); abrirEspacoUsuario(); return; }
-                const tabs = ['dashboard', 'obs', 'prev', 'acoes', 'cadastros'];
+                const tabs = ['dashboard', 'obs', 'prev', 'acoes'];
                 const idx = parseInt(k, 10) - 1;
                 if (idx >= 0 && idx < tabs.length) { e.preventDefault(); switchTab(tabs[idx]); }
             }
@@ -1248,6 +1359,7 @@
                     document.getElementById('sliderU').value = 5;
                     document.getElementById('sliderT').value = 5;
                     updateGutCalc();
+                    popularSelectsArvoreForm({});
                 }
                 document.getElementById('formTipoPeca').value = tipoForm;
                 const btnSave = document.getElementById('btnSaveItem');
@@ -1269,7 +1381,6 @@
                     document.getElementById('prevFields_Vida').classList.add('hidden');
                     btnSave.className = "btn-pill-dark !bg-rose-600 text-xs";
                 }
-                atualizarDatalistsDependentes();
             }
             document.getElementById(id)?.classList.remove('hidden');
         };
@@ -1348,13 +1459,25 @@
             return String(val || '').normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase().trim().replace(/\s+/g, ' ');
         }
 
+        function escapeHtmlObs(val) {
+            return String(val ?? '')
+                .replace(/&/g, '&amp;')
+                .replace(/</g, '&lt;')
+                .replace(/>/g, '&gt;')
+                .replace(/"/g, '&quot;')
+                .replace(/'/g, '&#39;');
+        }
+
         function rebuildEstruturasAgrupadasObs(docs) {
             const mapa = new Map();
+            const flat = [];
             (docs || []).forEach(d => {
                 const area = String(d.area || d.setor || '').trim();
                 const maq = String(d.maquina || d.linha || '').trim();
                 const eq = String(d.equipamento || '').trim();
                 if (!area && !maq && !eq) return;
+                const modelo = String(d.modelo || '').trim();
+                const sn = String(d.numeroSerie || d.serie || d.n_serie || '').trim();
                 const k = `${normKeyObs(area)}|${normKeyObs(maq)}|${normKeyObs(eq)}`;
                 if (!mapa.has(k)) {
                     mapa.set(k, {
@@ -1363,132 +1486,186 @@
                         area,
                         maquina: maq,
                         equipamento: eq,
-                        modelo: String(d.modelo || '').trim(),
-                        numeroSerie: String(d.numeroSerie || d.serie || d.n_serie || '').trim(),
-                        conjuntos: []
+                        modelo,
+                        numeroSerie: sn,
+                        conjuntos: [],
+                        subconjuntosPorConjunto: {}
                     });
                 }
                 const grp = mapa.get(k);
                 grp.docIds.push(d.id);
-                if (!grp.modelo && d.modelo) grp.modelo = String(d.modelo).trim();
-                const sn = String(d.numeroSerie || d.serie || d.n_serie || '').trim();
+                if (!grp.modelo && modelo) grp.modelo = modelo;
                 if (!grp.numeroSerie && sn) grp.numeroSerie = sn;
 
                 const conjFlat = String(d.conjunto || '').trim();
+                const subFlat = String(d.subconjunto || '').trim();
                 if (conjFlat) {
                     if (!grp.conjuntos.some(x => normKeyObs(x) === normKeyObs(conjFlat))) grp.conjuntos.push(conjFlat);
-                } else if (Array.isArray(d.conjuntos)) {
+                    const cjKey = normKeyObs(conjFlat);
+                    if (!grp.subconjuntosPorConjunto[cjKey]) grp.subconjuntosPorConjunto[cjKey] = [];
+                    if (subFlat && !grp.subconjuntosPorConjunto[cjKey].some(x => normKeyObs(x) === normKeyObs(subFlat))) {
+                        grp.subconjuntosPorConjunto[cjKey].push(subFlat);
+                    }
+                    flat.push({ docId: d.id, area, maquina: maq, equipamento: eq, conjunto: conjFlat, subconjunto: subFlat, modelo, numeroSerie: sn });
+                } else if (Array.isArray(d.conjuntos) && d.conjuntos.length) {
                     d.conjuntos.forEach(c => {
                         const nome = typeof c === 'object' ? String(c?.conjunto || c?.nome || '').trim() : String(c || '').trim();
                         if (nome && !grp.conjuntos.some(x => normKeyObs(x) === normKeyObs(nome))) grp.conjuntos.push(nome);
+                        if (nome) flat.push({ docId: d.id, area, maquina: maq, equipamento: eq, conjunto: nome, subconjunto: '', modelo, numeroSerie: sn });
                     });
+                } else {
+                    flat.push({ docId: d.id, area, maquina: maq, equipamento: eq, conjunto: '', subconjunto: subFlat, modelo, numeroSerie: sn });
                 }
             });
+            ativosArvoreFlat = flat;
             return [...mapa.values()];
         }
 
+        function resolverVinculoArvoreObs(rawArea, rawMaq, rawEq, rawCj = '', rawSub = '') {
+            const aN = normKeyObs(rawArea);
+            const mN = normKeyObs(rawMaq);
+            const eN = normKeyObs(rawEq);
+            const cN = normKeyObs(rawCj);
+            const sN = normKeyObs(rawSub);
+
+            // 1. Match exato por Area + Maquina + Equipamento + Conjunto (+ Subconjunto)
+            const eqMatches = ativosArvoreFlat.filter(n =>
+                (!aN || normKeyObs(n.area) === aN) &&
+                normKeyObs(n.maquina) === mN &&
+                normKeyObs(n.equipamento) === eN
+            );
+
+            // Fallback: se Area veio com pequena diferença mas Maquina + Equipamento batem exatamente
+            const pool = eqMatches.length ? eqMatches : ativosArvoreFlat.filter(n =>
+                mN && eN && normKeyObs(n.maquina) === mN && normKeyObs(n.equipamento) === eN
+            );
+
+            if (pool.length) {
+                if (cN && sN) {
+                    const hitSub = pool.find(n => normKeyObs(n.conjunto) === cN && normKeyObs(n.subconjunto) === sN);
+                    if (hitSub) {
+                        return { status: 'exato', ativoId: hitSub.docId, area: hitSub.area, maquina: hitSub.maquina, equipamento: hitSub.equipamento, conjunto: hitSub.conjunto, subconjunto: hitSub.subconjunto };
+                    }
+                }
+                if (cN) {
+                    const hitConj = pool.find(n => normKeyObs(n.conjunto) === cN);
+                    if (hitConj) {
+                        return { status: 'exato', ativoId: hitConj.docId, area: hitConj.area, maquina: hitConj.maquina, equipamento: hitConj.equipamento, conjunto: hitConj.conjunto, subconjunto: rawSub ? padronizarTexto(rawSub) : '' };
+                    }
+                }
+                const first = pool[0];
+                return {
+                    status: cN ? 'equipamento' : 'exato',
+                    ativoId: first.docId,
+                    area: first.area,
+                    maquina: first.maquina,
+                    equipamento: first.equipamento,
+                    conjunto: rawCj ? padronizarTexto(rawCj) : '',
+                    subconjunto: rawSub ? padronizarTexto(rawSub) : ''
+                };
+            }
+
+            return {
+                status: 'sem_vinculo',
+                ativoId: '',
+                area: padronizarTexto(rawArea),
+                maquina: padronizarTexto(rawMaq),
+                equipamento: padronizarTexto(rawEq),
+                conjunto: rawCj ? padronizarTexto(rawCj) : '',
+                subconjunto: rawSub ? padronizarTexto(rawSub) : ''
+            };
+        }
+
+        function atualizarInfoSyncArvoreObs() {
+            const el = document.getElementById('obsSyncArvoreInfo');
+            if (!el) return;
+            const totalEq = estruturas.length;
+            const totalNos = ativosArvoreFlat.length;
+            if (totalEq === 0) {
+                el.innerHTML = 'Nenhum equipamento encontrado em <strong>Gestão de Ativos</strong> ainda.';
+            } else {
+                el.innerHTML = `Árvore sincronizada com <strong>Gestão de Ativos</strong> (${totalEq} equipamento(s) • ${totalNos} nó(s) oficiais).`;
+            }
+        }
+
         function renderAll() {
+            atualizarInfoSyncArvoreObs();
             atualizarDatalistsDependentes();
             renderKPIs();
             renderCharts();
             renderArvore('Obsolescencia', 'treeContainerObs');
             renderArvore('Preventiva', 'treeContainerPrev');
             renderTabelaAcoes();
-            if (!document.getElementById('view-cadastros').classList.contains('hidden')) renderExploradorAreas();
+            if (!document.getElementById('modalImportObs')?.classList.contains('hidden') && (document.getElementById('impObsText')?.value || '').trim()) {
+                analisarTextoImportObs();
+            }
         }
 
         window.atualizarDatalistsDependentes = () => {
-            const a = document.getElementById('fArea')?.value || '', m = document.getElementById('fMaquina')?.value || '', e = document.getElementById('fEquipamentoBusca')?.value || '';
-            const areas = [...new Set(estruturas.map(x => x.area))].filter(Boolean).sort();
-            document.getElementById('dlAreas').innerHTML = areas.map(x => `<option value="${x}">`).join('');
-            const maquinas = [...new Set(estruturas.filter(x => !a || x.area === a).map(x => x.maquina))].filter(Boolean).sort();
-            document.getElementById('dlMaquinas').innerHTML = maquinas.map(x => `<option value="${x}">`).join('');
-            const equips = [...new Set(estruturas.filter(x => (!a || x.area === a) && (!m || x.maquina === m)).map(x => x.equipamento))].filter(Boolean).sort();
-            document.getElementById('dlEquipamentos').innerHTML = equips.map(x => `<option value="${x}">`).join('');
+            const a = document.getElementById('impPecaArea')?.value || '';
+            const m = document.getElementById('impPecaMaq')?.value || '';
+            const e = document.getElementById('impPecaEq')?.value || '';
+            const areas = [...new Set(estruturas.map(x => x.area))].filter(Boolean).sort((x, y) => x.localeCompare(y, 'pt-BR'));
+            const dlA = document.getElementById('dlAreas');
+            if (dlA) dlA.innerHTML = areas.map(x => `<option value="${escapeHtmlObs(x)}">`).join('');
+            const maquinas = [...new Set(estruturas.filter(x => !a || normKeyObs(x.area) === normKeyObs(a)).map(x => x.maquina))].filter(Boolean).sort((x, y) => x.localeCompare(y, 'pt-BR'));
+            const dlM = document.getElementById('dlMaquinas');
+            if (dlM) dlM.innerHTML = maquinas.map(x => `<option value="${escapeHtmlObs(x)}">`).join('');
+            const equips = [...new Set(estruturas.filter(x => (!a || normKeyObs(x.area) === normKeyObs(a)) && (!m || normKeyObs(x.maquina) === normKeyObs(m))).map(x => x.equipamento))].filter(Boolean).sort((x, y) => x.localeCompare(y, 'pt-BR'));
+            const dlE = document.getElementById('dlEquipamentos');
+            if (dlE) dlE.innerHTML = equips.map(x => `<option value="${escapeHtmlObs(x)}">`).join('');
             const obj = estruturas.find(x => normKeyObs(x.area) === normKeyObs(a) && normKeyObs(x.maquina) === normKeyObs(m) && normKeyObs(x.equipamento) === normKeyObs(e));
-            if (obj && obj.conjuntos) document.getElementById('dlConjuntos').innerHTML = obj.conjuntos.map(x => `<option value="${x}">`).join('');
-            else document.getElementById('dlConjuntos').innerHTML = '';
+            const dlC = document.getElementById('dlConjuntos');
+            if (dlC) dlC.innerHTML = obj && obj.conjuntos ? obj.conjuntos.map(x => `<option value="${escapeHtmlObs(x)}">`).join('') : '';
         };
 
-        // --- ABA 5: EXPLORADOR ---
-        window.renderExploradorAreas = () => {
-            const sel = document.getElementById('exploraArea');
-            const val = sel.value;
-            const areas = [...new Set(estruturas.map(e => e.area))].filter(Boolean).sort();
-            sel.innerHTML = '<option value="">-- Setor --</option>' + areas.map(a => `<option value="${a}">${a}</option>`).join('');
-            if (val && areas.includes(val)) sel.value = val;
-            else if (areas.length > 0) sel.value = areas[0];
-            renderExploradorMaquinas();
-        };
-
-        window.renderExploradorMaquinas = () => {
-            const area = document.getElementById('exploraArea').value;
-            const sel = document.getElementById('exploraMaquina');
-            const val = sel.value;
-            const maquinas = [...new Set(estruturas.filter(e => e.area === area).map(e => e.maquina))].filter(Boolean).sort();
-            sel.innerHTML = '<option value="">-- Máquina --</option>' + maquinas.map(m => `<option value="${m}">${m}</option>`).join('');
-            if (val && maquinas.includes(val)) sel.value = val;
-            else if (maquinas.length > 0) sel.value = maquinas[0];
-            renderExploradorCards();
-        };
-
-        window.renderExploradorCards = () => {
-            const area = document.getElementById('exploraArea').value, maq = document.getElementById('exploraMaquina').value;
-            const container = document.getElementById('estruturaCardsContainer');
-            if (!area || !maq) {
-                container.innerHTML = `<div class="col-span-2 p-8 text-center text-slate-400 text-xs font-bold bg-slate-50 rounded-2xl border border-slate-200">Selecione o Setor e a Máquina para visualizar os ativos.</div>`;
-                return;
+        // --- SELECTS EM CASCATA DA ÁRVORE OFICIAL (MODAL ITEM) ---
+        function preencherSelectOpcoesObs(selEl, lista, placeholder, selectedVal = '') {
+            if (!selEl) return '';
+            const unicos = [...new Set(lista.filter(Boolean))].sort((a, b) => a.localeCompare(b, 'pt-BR'));
+            let matched = '';
+            if (selectedVal) {
+                matched = unicos.find(x => normKeyObs(x) === normKeyObs(selectedVal)) || '';
             }
-
-            const equips = estruturas.filter(e => e.area === area && e.maquina === maq).sort((a, b) => (a.equipamento || '').localeCompare(b.equipamento || ''));
-            if (equips.length === 0) {
-                container.innerHTML = `<div class="col-span-2 p-8 text-center text-slate-400 text-xs font-bold">Nenhum equipamento cadastrado neste setor/linha.</div>`;
-                return;
+            let opts = `<option value="">${escapeHtmlObs(placeholder)}</option>`;
+            opts += unicos.map(v => `<option value="${escapeHtmlObs(v)}" ${v === matched ? 'selected' : ''}>${escapeHtmlObs(v)}</option>`).join('');
+            if (selectedVal && !matched) {
+                opts += `<option value="${escapeHtmlObs(selectedVal)}" selected>${escapeHtmlObs(selectedVal)} (Cadastro anterior)</option>`;
+                matched = selectedVal;
             }
+            selEl.innerHTML = opts;
+            selEl.value = matched;
+            return matched;
+        }
 
-            container.innerHTML = equips.map(e => `
-                <div class="glass-card glass-card-hover rounded-2xl p-5 relative">
-                    <button type="button" onclick="askDeleteLinha('${e.id}')" class="absolute top-3.5 right-3.5 p-1.5 text-rose-500 hover:bg-rose-50 rounded-xl transition-colors" title="Remover equipamento">
-                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/></svg>
-                    </button>
-                    <div class="flex flex-wrap items-center justify-between gap-2 mb-3 pr-8">
-                        <h4 class="font-extrabold text-sm text-slate-900">${e.equipamento}</h4>
-                        ${renderDocBadgeObs(area, maq, e.equipamento)}
-                    </div>
-                    <div class="grid grid-cols-2 gap-3 mb-3">
-                        <div>
-                            <label class="block text-[9px] font-extrabold uppercase text-slate-400 mb-1">Modelo</label>
-                            <input type="text" value="${e.modelo || ''}" onblur="salvarAtributoRapido('${e.id}', 'modelo', this.value)" placeholder="Clique para informar" class="input-clean py-1.5 px-2.5 text-xs font-bold">
-                        </div>
-                        <div>
-                            <label class="block text-[9px] font-extrabold uppercase text-slate-400 mb-1">SN (Número de Série)</label>
-                            <input type="text" value="${e.numeroSerie || ''}" onblur="salvarAtributoRapido('${e.id}', 'numeroSerie', this.value)" placeholder="Clique para informar" class="input-clean py-1.5 px-2.5 text-xs font-mono font-bold">
-                        </div>
-                    </div>
-                    <div>
-                        <label class="block text-[9px] font-extrabold uppercase text-slate-400 mb-1.5">Conjuntos Vinculados</label>
-                        <div class="flex flex-wrap gap-1.5">
-                            ${e.conjuntos && e.conjuntos.length ? e.conjuntos.map(c => `<span class="bg-slate-100 border border-slate-200 px-2.5 py-0.5 rounded-full text-[10px] font-bold text-slate-700">${c}</span>`).join('') : '<span class="text-[10px] text-slate-400 italic">Sem conjuntos cadastrados.</span>'}
-                        </div>
-                    </div>
-                </div>
-            `).join('');
-        };
+        function popularSelectsArvoreForm(vals = {}) {
+            const selA = document.getElementById('fArea');
+            const selM = document.getElementById('fMaquina');
+            const selE = document.getElementById('fEquipamentoBusca');
+            const selC = document.getElementById('fConjunto');
+            const selS = document.getElementById('fSubconjunto');
+            if (!selA || !selM || !selE || !selC || !selS) return;
 
-        window.salvarAtributoRapido = async (id, campo, valor) => {
-            if (!isFirebaseConnected) return;
-            const obj = estruturas.find(x => x.id === id);
-            if (!obj) return;
-            const vTrim = valor.trim();
-            if (obj[campo] === vTrim) return;
-            const ids = Array.isArray(obj.docIds) && obj.docIds.length ? obj.docIds : [id];
-            const patch = campo === 'numeroSerie' ? { numeroSerie: vTrim, serie: vTrim } : { [campo]: vTrim };
-            try {
-                for (const dId of ids) {
-                    await updateDoc(doc(db, "ob_linhas", dId), patch);
-                }
-                showToast("Atributo atualizado!");
-            } catch (e) { showToast("Erro ao salvar atributo", "error"); }
+            const aSel = preencherSelectOpcoesObs(selA, estruturas.map(x => x.area), 'Selecione o Setor...', vals.area || '');
+            const maqs = aSel ? estruturas.filter(x => normKeyObs(x.area) === normKeyObs(aSel)).map(x => x.maquina) : [];
+            const mSel = preencherSelectOpcoesObs(selM, maqs, 'Selecione a Máquina...', vals.maquina || '');
+            const eqs = (aSel && mSel) ? estruturas.filter(x => normKeyObs(x.area) === normKeyObs(aSel) && normKeyObs(x.maquina) === normKeyObs(mSel)).map(x => x.equipamento) : [];
+            const eSel = preencherSelectOpcoesObs(selE, eqs, 'Selecione o Equipamento...', vals.equipamento || '');
+            const obj = (aSel && mSel && eSel) ? estruturas.find(x => normKeyObs(x.area) === normKeyObs(aSel) && normKeyObs(x.maquina) === normKeyObs(mSel) && normKeyObs(x.equipamento) === normKeyObs(eSel)) : null;
+            const cSel = preencherSelectOpcoesObs(selC, obj ? obj.conjuntos : [], 'Geral / Opcional', vals.conjunto || '');
+            const subs = (obj && cSel && obj.subconjuntosPorConjunto) ? (obj.subconjuntosPorConjunto[normKeyObs(cSel)] || []) : [];
+            preencherSelectOpcoesObs(selS, subs, 'Opcional', vals.subconjunto || '');
+        }
+
+        window.onChangeSelectArvoreForm = (nivel) => {
+            const a = document.getElementById('fArea')?.value || '';
+            const m = document.getElementById('fMaquina')?.value || '';
+            const e = document.getElementById('fEquipamentoBusca')?.value || '';
+            const c = document.getElementById('fConjunto')?.value || '';
+            if (nivel === 'area') popularSelectsArvoreForm({ area: a });
+            else if (nivel === 'maquina') popularSelectsArvoreForm({ area: a, maquina: m });
+            else if (nivel === 'equipamento') popularSelectsArvoreForm({ area: a, maquina: m, equipamento: e });
+            else if (nivel === 'conjunto') popularSelectsArvoreForm({ area: a, maquina: m, equipamento: e, conjunto: c });
         };
 
         // --- RENDERIZADORES DE ÁRVORE ---
@@ -1525,20 +1702,25 @@
                 Object.keys(arv[area]).sort().forEach(maq => {
                     h += `<div class="tree-machine"><h3 class="text-sm font-extrabold uppercase tracking-wider text-${mainColor}-600 border-b border-slate-100 pb-2.5 mb-2.5 flex items-center gap-2"><svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4"/></svg> ${maq}</h3>`;
                     Object.keys(arv[area][maq]).sort().forEach(eq => {
-                        const eqData = estruturas.find(x => x.area === area && x.maquina === maq && x.equipamento === eq);
-                        const sub = eqData && (eqData.modelo || eqData.numeroSerie) ? `<span class="text-[10px] bg-slate-100 text-slate-600 px-2 py-0.5 rounded-full border border-slate-200 ml-2 font-mono font-bold">Mod: ${eqData.modelo || '-'} | SN: ${eqData.numeroSerie || '-'}</span>` : '';
+                        const eqData = estruturas.find(x => normKeyObs(x.area) === normKeyObs(area) && normKeyObs(x.maquina) === normKeyObs(maq) && normKeyObs(x.equipamento) === normKeyObs(eq));
+                        const sub = eqData
+                            ? (eqData.modelo || eqData.numeroSerie
+                                ? `<span class="text-[10px] bg-slate-100 text-slate-600 px-2 py-0.5 rounded-full border border-slate-200 ml-1 font-mono font-bold">Mod: ${escapeHtmlObs(eqData.modelo || '-')} | SN: ${escapeHtmlObs(eqData.numeroSerie || '-')}</span>`
+                                : `<span class="text-[10px] bg-emerald-50 text-emerald-700 px-2 py-0.5 rounded-full border border-emerald-200 ml-1 font-bold">Vinculado à Árvore</span>`)
+                            : `<span class="text-[10px] bg-amber-50 text-amber-700 px-2 py-0.5 rounded-full border border-amber-200 ml-1 font-bold" title="Equipamento não encontrado na Árvore Oficial de Gestão de Ativos">Fora da Árvore Oficial</span>`;
 
-                        h += `<div class="tree-equip text-slate-800"><h4 class="font-extrabold text-xs uppercase mb-1.5 flex flex-wrap items-center gap-1.5"><svg class="w-3.5 h-3.5 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"/><circle cx="12" cy="12" r="3" stroke-width="2"/></svg> ${eq} ${sub} ${renderDocBadgeObs(area, maq, eq)}</h4>`;
+                        h += `<div class="tree-equip text-slate-800"><h4 class="font-extrabold text-xs uppercase mb-1.5 flex flex-wrap items-center gap-1.5"><svg class="w-3.5 h-3.5 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"/><circle cx="12" cy="12" r="3" stroke-width="2"/></svg> ${escapeHtmlObs(eq)} ${sub} ${renderDocBadgeObs(area, maq, eq)}</h4>`;
                         Object.keys(arv[area][maq][eq]).sort().forEach(cj => {
-                            h += `<div class="tree-assembly"><h5 class="font-extrabold text-[10px] text-slate-400 uppercase tracking-wider mb-2 flex items-center gap-1"><svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10"/></svg> Conjunto: ${cj}</h5>`;
+                            h += `<div class="tree-assembly"><h5 class="font-extrabold text-[10px] text-slate-400 uppercase tracking-wider mb-2 flex items-center gap-1"><svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10"/></svg> Conjunto: ${escapeHtmlObs(cj)}</h5>`;
 
                             arv[area][maq][eq][cj].sort((a, b) => (b.gutScore || 0) - (a.gutScore || 0)).forEach(item => {
                                 const s = item.gutScore || 0;
                                 const extraInfo = isObs
-                                    ? `Status: ${item.statusCicloVida || '-'}`
-                                    : `Gatilho: ${item.gatilhoVidaUtil || '-'} | Qtd: ${item.qtdAplicada || 1}`;
+                                    ? `Status: ${escapeHtmlObs(item.statusCicloVida || '-')}`
+                                    : `Gatilho: ${escapeHtmlObs(item.gatilhoVidaUtil || '-')} | Qtd: ${escapeHtmlObs(item.qtdAplicada || 1)}`;
 
-                                const spanCodigo = item.codigoSistema ? `<span class="bg-sky-50 text-sky-700 px-2 py-0.5 rounded-full border border-sky-200 font-mono font-bold text-[10px] mr-1.5">Cod: ${item.codigoSistema}</span>` : '';
+                                const spanCodigo = item.codigoSistema ? `<span class="bg-sky-50 text-sky-700 px-2 py-0.5 rounded-full border border-sky-200 font-mono font-bold text-[10px] mr-1.5">Cod: ${escapeHtmlObs(item.codigoSistema)}</span>` : '';
+                                const spanSubconj = item.subconjunto ? `<span class="bg-indigo-50 text-indigo-700 px-2 py-0.5 rounded-full border border-indigo-200 font-bold text-[10px] mr-1.5">Sub: ${escapeHtmlObs(item.subconjunto)}</span>` : '';
 
                                 const classeBadge = s >= 80 ? 'badge-critico' : s >= 45 ? 'badge-alto' : s >= 18 ? 'badge-medio' : 'badge-baixo';
                                 const gutBlock = isObs
@@ -1547,14 +1729,14 @@
 
                                 h += `<div class="tree-component">
                                         <div class="flex-1 min-w-[200px]">
-                                            <div class="font-extrabold text-sm mb-1 text-slate-900">${item._nome}</div>
-                                            <div class="text-[11px] text-slate-500 font-semibold">${spanCodigo} Ref: ${item.fabricante || '-'} • ${extraInfo}</div>
+                                            <div class="font-extrabold text-sm mb-1 text-slate-900">${escapeHtmlObs(item._nome)}</div>
+                                            <div class="text-[11px] text-slate-500 font-semibold">${spanCodigo}${spanSubconj}Ref: ${escapeHtmlObs(item.fabricante || '-')} • ${extraInfo}</div>
                                         </div>
                                         <div class="flex items-center">
                                             ${gutBlock}
                                             <div class="flex gap-1.5">
-                                                <button type="button" onclick="editItem('${item.id}', '${tipoDesejado}')" class="p-2 bg-white border border-slate-200 text-slate-700 hover:bg-slate-100 rounded-xl transition-colors" title="Editar"><svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z"/></svg></button>
-                                                <button type="button" onclick="askDelete('${item.id}')" class="p-2 bg-rose-50 border border-rose-200 text-rose-600 hover:bg-rose-100 rounded-xl transition-colors" title="Excluir"><svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/></svg></button>
+                                                <button type="button" onclick="editItem('${escapeHtmlObs(item.id)}', '${tipoDesejado}')" class="p-2 bg-white border border-slate-200 text-slate-700 hover:bg-slate-100 rounded-xl transition-colors" title="Editar"><svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z"/></svg></button>
+                                                <button type="button" onclick="askDelete('${escapeHtmlObs(item.id)}')" class="p-2 bg-rose-50 border border-rose-200 text-rose-600 hover:bg-rose-100 rounded-xl transition-colors" title="Excluir"><svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/></svg></button>
                                             </div>
                                         </div>
                                      </div>`;
@@ -1575,40 +1757,29 @@
             const id = document.getElementById('itemId').value;
             const tipo = document.getElementById('formTipoPeca').value;
 
+            const rawArea = document.getElementById('fArea').value;
+            const rawMaq = document.getElementById('fMaquina').value;
+            const rawEq = document.getElementById('fEquipamentoBusca').value;
+            const rawCj = document.getElementById('fConjunto').value;
+            const rawSub = document.getElementById('fSubconjunto')?.value || '';
+            if (!rawArea || !rawMaq || !rawEq) {
+                return showToast("Selecione Setor, Máquina e Equipamento da Árvore Oficial.", "error");
+            }
+
             const btn = document.getElementById('btnSaveItem');
             btn.disabled = true;
             btn.innerText = "Processando...";
 
-            const area = padronizarTexto(document.getElementById('fArea').value);
-            const maq = padronizarTexto(document.getElementById('fMaquina').value);
-            const eq = padronizarTexto(document.getElementById('fEquipamentoBusca').value);
-            const cj = padronizarTexto(document.getElementById('fConjunto').value);
-
-            if (isFirebaseConnected) {
-                const node = estruturas.find(x => normKeyObs(x.area) === normKeyObs(area) && normKeyObs(x.maquina) === normKeyObs(maq) && normKeyObs(x.equipamento) === normKeyObs(eq));
-                const cjAlvo = cj || 'Conjunto Geral';
-                const jaExiste = node && Array.isArray(node.conjuntos) && node.conjuntos.some(x => normKeyObs(x) === normKeyObs(cjAlvo));
-                if (!jaExiste) {
-                    await addDoc(linhasColRef, {
-                        setor: area,
-                        area,
-                        maquina: maq,
-                        equipamento: eq,
-                        conjunto: cjAlvo,
-                        subconjunto: '',
-                        modelo: node?.modelo || '',
-                        serie: node?.numeroSerie || '',
-                        numeroSerie: node?.numeroSerie || '',
-                        status_ativo: 'Ativo',
-                        inspecao_ativa: true,
-                        origem_cadastro: 'obsolescencia',
-                        timestamp: Date.now()
-                    });
-                }
-            }
+            const vinc = resolverVinculoArvoreObs(rawArea, rawMaq, rawEq, rawCj, rawSub);
 
             let data = {
-                area, maquina: maq, equipamento: eq, conjunto: cj, tipoPeca: tipo,
+                area: vinc.area,
+                maquina: vinc.maquina,
+                equipamento: vinc.equipamento,
+                conjunto: vinc.conjunto,
+                subconjunto: vinc.subconjunto,
+                ativoId: vinc.ativoId || '',
+                tipoPeca: tipo,
                 componente: padronizarTexto(document.getElementById('fComponente').value),
                 fabricante: document.getElementById('fFabricante').value.trim(),
                 codigoSistema: document.getElementById('fCodigoSistema').value.trim(),
@@ -1630,7 +1801,7 @@
 
             try {
                 if (id) { if (isFirebaseConnected) await updateDoc(doc(db, "ob_equipamentos", id), data); showToast("Peça Atualizada!"); }
-                else { if (isFirebaseConnected) await addDoc(colRef, data); showToast("Cadastrado na Árvore!"); }
+                else { if (isFirebaseConnected) await addDoc(colRef, data); showToast("Peça vinculada à Árvore Oficial!"); }
                 closeModal('modalItem');
             } catch (err) { showToast("Erro ao salvar.", "error"); } finally { btn.disabled = false; btn.innerText = "Salvar Registro"; }
         };
@@ -1639,10 +1810,13 @@
             const i = items.find(x => x.id === id);
             if (!i) return;
             document.getElementById('itemId').value = i.id;
-            document.getElementById('fArea').value = i.area || '';
-            document.getElementById('fMaquina').value = i.maquina || '';
-            document.getElementById('fEquipamentoBusca').value = i.equipamento || '';
-            document.getElementById('fConjunto').value = i.conjunto || '';
+            popularSelectsArvoreForm({
+                area: i.area || '',
+                maquina: i.maquina || '',
+                equipamento: i.equipamento || '',
+                conjunto: i.conjunto || '',
+                subconjunto: i.subconjunto || ''
+            });
             document.getElementById('fComponente').value = i.componente || '';
             document.getElementById('fFabricante').value = i.fabricante || '';
             document.getElementById('fCodigoSistema').value = i.codigoSistema || '';
@@ -1672,34 +1846,26 @@
                 return;
             }
             tbody.innerHTML = obsItems.map(i => {
-                const badgeCod = i.codigoSistema ? `<span class="bg-sky-50 text-sky-700 px-2 py-0.5 rounded-full border border-sky-200 font-mono text-[10px] ml-2">Cod: ${i.codigoSistema}</span>` : '';
+                const badgeCod = i.codigoSistema ? `<span class="bg-sky-50 text-sky-700 px-2 py-0.5 rounded-full border border-sky-200 font-mono text-[10px] ml-2">Cod: ${escapeHtmlObs(i.codigoSistema)}</span>` : '';
                 return `<tr class="hover:bg-slate-50/80 transition-colors">
-                    <td class="py-3.5 px-5"><div class="font-extrabold text-sm text-slate-900">${i.componente} ${badgeCod}</div><div class="text-[10px] text-slate-400 font-bold uppercase mt-0.5">${i.area || 'Geral'} › ${i.maquina || ''} › ${i.equipamento || ''} ${i.conjunto ? '› ' + i.conjunto : ''}</div></td>
-                    <td class="py-3.5 px-5 text-xs text-slate-600 font-semibold whitespace-normal max-w-xs">${i.acaoProposta || '<span class="text-slate-300 italic">Não definida</span>'}</td>
+                    <td class="py-3.5 px-5"><div class="font-extrabold text-sm text-slate-900">${escapeHtmlObs(i.componente)} ${badgeCod}</div><div class="text-[10px] text-slate-400 font-bold uppercase mt-0.5">${escapeHtmlObs(i.area || 'Geral')} › ${escapeHtmlObs(i.maquina || '')} › ${escapeHtmlObs(i.equipamento || '')} ${i.conjunto ? '› ' + escapeHtmlObs(i.conjunto) : ''}${i.subconjunto ? ' › ' + escapeHtmlObs(i.subconjunto) : ''}</div></td>
+                    <td class="py-3.5 px-5 text-xs text-slate-600 font-semibold whitespace-normal max-w-xs">${i.acaoProposta ? escapeHtmlObs(i.acaoProposta) : '<span class="text-slate-300 italic">Não definida</span>'}</td>
                     <td class="py-3.5 px-5 text-sm font-extrabold text-amber-600">R$ ${(Number(i.custoEstimado) || 0).toLocaleString('pt-BR')}</td>
-                    <td class="py-3.5 px-5 text-center"><select onchange="updateStatusAcao('${i.id}', this.value)" class="input-clean text-xs py-1.5 px-3 font-extrabold"><option value="Pendente" ${i.statusAcao === 'Pendente' ? 'selected' : ''}>Pendente</option><option value="Em Andamento" ${i.statusAcao === 'Em Andamento' ? 'selected' : ''}>Em Andamento</option><option value="Concluído" ${i.statusAcao === 'Concluído' ? 'selected' : ''}>Concluído</option></select></td>
+                    <td class="py-3.5 px-5 text-center"><select onchange="updateStatusAcao('${escapeHtmlObs(i.id)}', this.value)" class="input-clean text-xs py-1.5 px-3 font-extrabold"><option value="Pendente" ${i.statusAcao === 'Pendente' ? 'selected' : ''}>Pendente</option><option value="Em Andamento" ${i.statusAcao === 'Em Andamento' ? 'selected' : ''}>Em Andamento</option><option value="Concluído" ${i.statusAcao === 'Concluído' ? 'selected' : ''}>Concluído</option></select></td>
                 </tr>`;
             }).join('');
         }
         window.updateStatusAcao = async (id, ns) => { if (isFirebaseConnected) { await updateDoc(doc(db, "ob_equipamentos", id), { statusAcao: ns }); showToast("Status atualizado!"); } };
 
-        window.askDeleteLinha = (id) => { itemToDeleteId = id; isDeletingLinha = true; document.getElementById('modalDelete').classList.remove('hidden'); };
-        window.askDelete = (id) => { itemToDeleteId = id; isDeletingLinha = false; document.getElementById('modalDelete').classList.remove('hidden'); };
+        window.askDelete = (id) => { itemToDeleteId = id; document.getElementById('modalDelete').classList.remove('hidden'); };
         window.confirmDelete = async () => {
             if (!itemToDeleteId) return;
             const btn = document.getElementById('btnConfirmDeleteExec');
             btn.innerText = "Excluindo...";
             btn.disabled = true;
             try {
-                if (isDeletingLinha) {
-                    if (isFirebaseConnected) {
-                        const grp = estruturas.find(x => x.id === itemToDeleteId);
-                        const ids = (grp && Array.isArray(grp.docIds) && grp.docIds.length) ? grp.docIds : [itemToDeleteId];
-                        for (const dId of ids) await deleteDoc(doc(db, "ob_linhas", dId));
-                    }
-                    showToast("Estrutura removida.");
-                }
-                else { if (isFirebaseConnected) await deleteDoc(doc(db, "ob_equipamentos", itemToDeleteId)); showToast("Peça excluída."); }
+                if (isFirebaseConnected) await deleteDoc(doc(db, "ob_equipamentos", itemToDeleteId));
+                showToast("Peça excluída.");
                 closeModal('modalDelete');
             } catch (e) { showToast("Erro ao excluir.", "error"); closeModal('modalDelete'); } finally { btn.innerText = "Confirmar"; btn.disabled = false; }
         };
@@ -1897,35 +2063,6 @@
                     </tr>`;
                 });
                 conteudoHTML += `</tbody></table>`;
-            } else if (tipo === 'arvore') {
-                titulo = "Inventário Estrutural Físico (Ativos)"; corTema = "#475569";
-                let dados = [...estruturas];
-                if (fa !== 'ALL') dados = dados.filter(i => i.area === fa);
-                if (fm !== 'ALL') dados = dados.filter(i => i.maquina === fm);
-                if (fe !== 'ALL') dados = dados.filter(i => i.equipamento === fe);
-                if (fc !== 'ALL') dados = dados.filter(i => i.conjuntos && i.conjuntos.includes(fc));
-
-                dados.sort((a, b) => (a.area || '').localeCompare(b.area || '') || (a.maquina || '').localeCompare(b.maquina || ''));
-                totalItens = dados.length;
-
-                infoKpi = `<div class="kpis">
-                    <div class="kpi"><span>Escopo do Filtro</span>${txtFiltro}</div>
-                    <div class="kpi"><span>Equipamentos</span>${totalItens} registros estruturais</div>
-                </div>`;
-
-                conteudoHTML = `<table><thead><tr><th>Área / Setor</th><th>Máquina / Linha</th><th>Equipamento</th><th>Modelo</th><th>Número de Série (SN)</th><th>Conjuntos Subordinados</th></tr></thead><tbody>`;
-                dados.forEach(i => {
-                    const cjTexto = i.conjuntos && i.conjuntos.length ? i.conjuntos.join(', ') : '-';
-                    conteudoHTML += `<tr>
-                        <td style="text-transform:uppercase; font-size:10px; font-weight:bold; color:#64748b;">${i.area}</td>
-                        <td><strong>${i.maquina}</strong></td>
-                        <td style="color:#0f172a; font-weight:bold;">${i.equipamento}</td>
-                        <td>${i.modelo || '-'}</td>
-                        <td style="font-family:monospace; font-size:11px;">${i.numeroSerie || '-'}</td>
-                        <td style="font-size:10px; color:#64748b;">${cjTexto}</td>
-                    </tr>`;
-                });
-                conteudoHTML += `</tbody></table>`;
             }
 
             const html = `<!DOCTYPE html><html lang="pt-BR"><head><meta charset="UTF-8"><title>${titulo}</title>
@@ -1966,41 +2103,415 @@
             }
         };
 
-        // --- IMPORTADORES EM MASSA ---
-        window.processarImportacaoPlanilha = async () => {
-            const text = document.getElementById('importLinhasText').value;
-            if (!text.trim()) return;
-            const btn = document.getElementById('btnProcessImportArv');
-            btn.disabled = true;
-            btn.innerText = "Processando...";
-            const rows = text.split('\n');
-            try {
-                for (let r of rows) {
-                    if (!r.trim()) continue;
-                    const cols = r.split('\t').map(x => padronizarTexto(x));
-                    if (cols.length < 3) continue;
-                    const area = cols[0], maq = cols[1], eq = cols[2], cj = cols[3] || 'Conjunto Geral';
+        // --- IMPORTADOR RÁPIDO DE OBSOLESCÊNCIA (CSV / EXCEL) + MODELO PARA DOWNLOAD ---
+        const OBS_CSV_COLUNAS = [
+            'Area',
+            'Maquina',
+            'Equipamento',
+            'Conjunto',
+            'Subconjunto',
+            'Componente',
+            'Fabricante_Referencia',
+            'Codigo_ERP',
+            'Status_Ciclo_Vida',
+            'Acao_Proposta',
+            'Status_Acao',
+            'Gravidade_G',
+            'Urgencia_U',
+            'Tendencia_T',
+            'Custo_Estimado'
+        ];
 
-                    let node = estruturas.find(l => normKeyObs(l.area) === normKeyObs(area) && normKeyObs(l.maquina) === normKeyObs(maq) && normKeyObs(l.equipamento) === normKeyObs(eq));
-                    const jaTem = node && Array.isArray(node.conjuntos) && node.conjuntos.some(x => normKeyObs(x) === normKeyObs(cj));
-                    if (!jaTem) {
-                        const docPlano = {
-                            setor: area, area, maquina: maq, equipamento: eq, conjunto: cj, subconjunto: '',
-                            modelo: node?.modelo || '', serie: node?.numeroSerie || '', numeroSerie: node?.numeroSerie || '',
-                            status_ativo: 'Ativo', inspecao_ativa: true, origem_cadastro: 'obsolescencia_import', timestamp: Date.now()
-                        };
-                        if (isFirebaseConnected) {
-                            await addDoc(linhasColRef, docPlano);
-                        } else {
-                            if (node) node.conjuntos.push(cj);
-                            else estruturas.push({ area, maquina: maq, equipamento: eq, modelo: '', numeroSerie: '', conjuntos: [cj] });
-                        }
+        function csvEscapeCellObs(val) {
+            const s = String(val ?? '').replace(/\r?\n/g, ' ');
+            if (s.includes(';') || s.includes('"') || s.includes(',')) {
+                return `"${s.replace(/"/g, '""')}"`;
+            }
+            return s;
+        }
+
+        function dispararDownloadCsvObs(nomeArquivo, linhasMatriz) {
+            const conteudo = '\uFEFF' + linhasMatriz.map(row => row.map(csvEscapeCellObs).join(';')).join('\r\n');
+            const blob = new Blob([conteudo], { type: 'text/csv;charset=utf-8;' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = nomeArquivo;
+            document.body.appendChild(a);
+            a.click();
+            a.remove();
+            setTimeout(() => URL.revokeObjectURL(url), 1000);
+        }
+
+        window.baixarModeloCsvObsolescencia = () => {
+            const ex1 = ativosArvoreFlat[0] || { area: 'Envase', maquina: 'Boaotopack 1', equipamento: 'Envasadora', conjunto: 'Dosador', subconjunto: 'Inversor Principal' };
+            const ex2 = ativosArvoreFlat[1] || { area: 'Envase', maquina: 'Boaotopack 1', equipamento: 'Seladora', conjunto: 'Cabeçote de Selagem', subconjunto: '' };
+            const linhas = [
+                OBS_CSV_COLUNAS,
+                [ex1.area, ex1.maquina, ex1.equipamento, ex1.conjunto || '', ex1.subconjunto || '', 'Inversor Micromaster MM440', 'Siemens - 6SE6440', '819203', 'Obsoleto sem Estoque', 'Realizar retrofit para Sinamics G120', 'Pendente', '5', '4', '5', '15000'],
+                [ex2.area, ex2.maquina, ex2.equipamento, ex2.conjunto || '', ex2.subconjunto || '', 'CLP CPU S7-200', 'Siemens - CPU 224', '904112', 'Descontinuado (Fim de Vida)', 'Migrar lógica para S7-1200', 'Em Andamento', '4', '3', '4', '12500']
+            ];
+            dispararDownloadCsvObs('modelo_obsolescencia_cepera.csv', linhas);
+            showToast('Modelo CSV baixado! Preencha no Excel e importe aqui.');
+        };
+
+        window.baixarArvoreReferenciaCsvObs = () => {
+            if (!ativosArvoreFlat.length) {
+                return showToast('Nenhum equipamento carregado da Árvore Oficial ainda.', 'error');
+            }
+            const ordenados = [...ativosArvoreFlat].sort((a, b) =>
+                a.area.localeCompare(b.area, 'pt-BR') ||
+                a.maquina.localeCompare(b.maquina, 'pt-BR') ||
+                a.equipamento.localeCompare(b.equipamento, 'pt-BR') ||
+                (a.conjunto || '').localeCompare(b.conjunto || '', 'pt-BR')
+            );
+            const linhas = [['Area', 'Maquina', 'Equipamento', 'Conjunto', 'Subconjunto', 'Modelo', 'Numero_Serie']];
+            const vistos = new Set();
+            for (const n of ordenados) {
+                const k = `${normKeyObs(n.area)}|${normKeyObs(n.maquina)}|${normKeyObs(n.equipamento)}|${normKeyObs(n.conjunto)}|${normKeyObs(n.subconjunto)}`;
+                if (vistos.has(k)) continue;
+                vistos.add(k);
+                linhas.push([n.area, n.maquina, n.equipamento, n.conjunto || '', n.subconjunto || '', n.modelo || '', n.numeroSerie || '']);
+            }
+            dispararDownloadCsvObs('arvore_ativos_referencia_cepera.csv', linhas);
+            showToast(`Lista da Árvore Oficial exportada (${linhas.length - 1} registro(s))!`);
+        };
+
+        window.openModalImportObs = () => {
+            document.getElementById('modalImportObs')?.classList.remove('hidden');
+            if ((document.getElementById('impObsText')?.value || '').trim()) {
+                analisarTextoImportObs();
+            }
+        };
+
+        window.limparImportObs = () => {
+            const ta = document.getElementById('impObsText');
+            const fi = document.getElementById('impObsFileInput');
+            const fn = document.getElementById('impObsFileName');
+            if (ta) ta.value = '';
+            if (fi) fi.value = '';
+            if (fn) fn.textContent = 'Nenhum arquivo selecionado';
+            impObsParsedRows = [];
+            document.getElementById('impObsPreviewWrap')?.classList.add('hidden');
+            const btn = document.getElementById('btnExecImportObs');
+            if (btn) btn.disabled = true;
+            const prog = document.getElementById('impObsProgressText');
+            if (prog) prog.textContent = 'Pronto para carregar sua planilha do Excel.';
+        };
+
+        window.lerArquivoCsvObs = (input) => {
+            const file = input?.files?.[0];
+            if (!file) return;
+            const fn = document.getElementById('impObsFileName');
+            if (fn) fn.textContent = file.name;
+            const reader = new FileReader();
+            reader.onload = () => {
+                const buf = reader.result;
+                let txt = new TextDecoder('utf-8').decode(buf);
+                if (txt.includes('\uFFFD')) {
+                    try { txt = new TextDecoder('windows-1252').decode(buf); } catch (_) {}
+                }
+                txt = txt.replace(/^\uFEFF/, '');
+                const ta = document.getElementById('impObsText');
+                if (ta) ta.value = txt;
+                analisarTextoImportObs();
+            };
+            reader.onerror = () => showToast('Não foi possível ler o arquivo selecionado.', 'error');
+            reader.readAsArrayBuffer(file);
+        };
+
+        function detectarSeparadorCsvObs(primeiraLinha) {
+            const cntTab = (primeiraLinha.match(/\t/g) || []).length;
+            const cntSemi = (primeiraLinha.match(/;/g) || []).length;
+            const cntComma = (primeiraLinha.match(/,/g) || []).length;
+            if (cntTab >= cntSemi && cntTab >= cntComma && cntTab > 0) return '\t';
+            if (cntSemi >= cntComma && cntSemi > 0) return ';';
+            if (cntComma > 0) return ',';
+            return ';';
+        }
+
+        function parseCsvLinhaObs(line, sep) {
+            if (sep === '\t') return line.split('\t').map(v => v.trim());
+            const out = [];
+            let cur = '';
+            let inQuotes = false;
+            for (let i = 0; i < line.length; i++) {
+                const ch = line[i];
+                if (inQuotes) {
+                    if (ch === '"' && line[i + 1] === '"') { cur += '"'; i++; }
+                    else if (ch === '"') inQuotes = false;
+                    else cur += ch;
+                } else {
+                    if (ch === '"') inQuotes = true;
+                    else if (ch === sep) { out.push(cur.trim()); cur = ''; }
+                    else cur += ch;
+                }
+            }
+            out.push(cur.trim());
+            return out;
+        }
+
+        function parseNumeroBrObs(raw) {
+            const s = String(raw || '').replace(/R\$/gi, '').replace(/\s+/g, '').trim();
+            if (!s) return 0;
+            if (s.includes(',') && s.includes('.')) {
+                const lastComma = s.lastIndexOf(',');
+                const lastDot = s.lastIndexOf('.');
+                const norm = lastComma > lastDot ? s.replace(/\./g, '').replace(',', '.') : s.replace(/,/g, '');
+                return Number(norm) || 0;
+            }
+            if (s.includes(',')) return Number(s.replace(',', '.')) || 0;
+            return Number(s) || 0;
+        }
+
+        function parseGutValObs(raw) {
+            const n = parseInt(String(raw || '').trim(), 10);
+            if (!Number.isFinite(n)) return 3;
+            return Math.max(1, Math.min(5, n));
+        }
+
+        function normalizarStatusAcaoObs(raw) {
+            const n = normKeyObs(raw);
+            if (n.includes('conclu')) return 'Concluído';
+            if (n.includes('andamento') || n.includes('execu')) return 'Em Andamento';
+            return 'Pendente';
+        }
+
+        function mapearCabecalhoImportObs(cols) {
+            const map = {};
+            const regras = [
+                ['area', ['area', 'setor', 'area setor', 'setor area']],
+                ['maquina', ['maquina', 'linha', 'maquina linha', 'linha maquina']],
+                ['equipamento', ['equipamento', 'ativo', 'equip']],
+                ['conjunto', ['conjunto']],
+                ['subconjunto', ['subconjunto', 'sub conjunto']],
+                ['componente', ['componente', 'peca', 'nome componente', 'nome da peca', 'item', 'descricao']],
+                ['fabricante', ['fabricante', 'referencia', 'fabricante referencia', 'marca', 'modelo ref']],
+                ['codigoSistema', ['codigo erp', 'codigo sistema', 'codigo', 'cod erp', 'erp', 'sku', 'material']],
+                ['statusCicloVida', ['status ciclo vida', 'ciclo de vida', 'ciclo vida', 'ciclo', 'status mercado', 'obsolescencia']],
+                ['acaoProposta', ['acao proposta', 'plano de mitigacao', 'mitigacao', 'acao', 'plano de acao']],
+                ['statusAcao', ['status acao', 'status da acao', 'status execucao']],
+                ['gravidade', ['gravidade g', 'gravidade', 'g']],
+                ['urgencia', ['urgencia u', 'urgencia', 'u']],
+                ['tendencia', ['tendencia t', 'tendencia', 't']],
+                ['custoEstimado', ['custo estimado', 'custo', 'valor', 'custo r$', 'preco']]
+            ];
+            let hits = 0;
+            cols.forEach((rawCol, idx) => {
+                const h = normKeyObs(rawCol).replace(/[_\-\/*()]/g, ' ').replace(/\s+/g, ' ').trim();
+                for (const [campo, aliases] of regras) {
+                    if (map[campo] !== undefined) continue;
+                    if (aliases.includes(h)) {
+                        map[campo] = idx;
+                        hits++;
+                        break;
                     }
                 }
-                showToast("Árvore de equipamentos importada!");
-                document.getElementById('importLinhasText').value = '';
-                closeModal('modalImportLinhas');
-            } catch (e) { showToast("Erro ao importar.", "error"); } finally { btn.disabled = false; btn.innerText = "Processar Hierarquia"; }
+            });
+            return hits >= 3 ? map : null;
+        }
+
+        window.analisarTextoImportObs = () => {
+            const rawText = (document.getElementById('impObsText')?.value || '').replace(/^\uFEFF/, '');
+            const wrap = document.getElementById('impObsPreviewWrap');
+            const lines = rawText.split(/\r?\n/).filter(l => l.trim().length > 0);
+            if (!lines.length) {
+                impObsParsedRows = [];
+                wrap?.classList.add('hidden');
+                const btn = document.getElementById('btnExecImportObs');
+                if (btn) btn.disabled = true;
+                return;
+            }
+
+            const sep = detectarSeparadorCsvObs(lines[0]);
+            const firstCols = parseCsvLinhaObs(lines[0], sep);
+            const headerMap = mapearCabecalhoImportObs(firstCols);
+            const startIdx = headerMap ? 1 : 0;
+
+            const getCol = (cols, campo, fallbackIdx) => {
+                const i = headerMap ? headerMap[campo] : fallbackIdx;
+                return (i !== undefined && i >= 0 && i < cols.length) ? cols[i].trim() : '';
+            };
+
+            const existentesKeys = new Set(
+                items
+                    .filter(i => i.tipoPeca === 'Obsolescencia' || i.tipoPeca === 'Obsolescência' || !i.tipoPeca)
+                    .map(i => `${normKeyObs(i.area)}|${normKeyObs(i.maquina)}|${normKeyObs(i.equipamento)}|${normKeyObs(i.conjunto)}|${normKeyObs(i.componente)}`)
+            );
+
+            const parsed = [];
+            const batchSeen = new Set();
+
+            for (let idx = startIdx; idx < lines.length; idx++) {
+                const cols = parseCsvLinhaObs(lines[idx], sep);
+                if (cols.every(c => !c)) continue;
+
+                const rawArea = getCol(cols, 'area', 0);
+                const rawMaq = getCol(cols, 'maquina', 1);
+                const rawEq = getCol(cols, 'equipamento', 2);
+                const rawCj = getCol(cols, 'conjunto', 3);
+                const rawSub = getCol(cols, 'subconjunto', 4);
+                const rawComp = getCol(cols, 'componente', 5);
+                const fabricante = getCol(cols, 'fabricante', 6);
+                const codigoSistema = getCol(cols, 'codigoSistema', 7);
+                const statusCicloVida = getCol(cols, 'statusCicloVida', 8) || '-';
+                const acaoProposta = getCol(cols, 'acaoProposta', 9);
+                const statusAcao = normalizarStatusAcaoObs(getCol(cols, 'statusAcao', 10));
+                const g = parseGutValObs(getCol(cols, 'gravidade', 11));
+                const u = parseGutValObs(getCol(cols, 'urgencia', 12));
+                const t = parseGutValObs(getCol(cols, 'tendencia', 13));
+                const custoEstimado = parseNumeroBrObs(getCol(cols, 'custoEstimado', 14));
+
+                const erros = [];
+                if (!rawArea) erros.push('Sem Área');
+                if (!rawMaq) erros.push('Sem Máquina');
+                if (!rawEq) erros.push('Sem Equipamento');
+                if (!rawComp) erros.push('Sem Componente');
+
+                const vinc = erros.length ? { status: 'erro', ativoId: '', area: rawArea, maquina: rawMaq, equipamento: rawEq, conjunto: rawCj, subconjunto: rawSub } : resolverVinculoArvoreObs(rawArea, rawMaq, rawEq, rawCj, rawSub);
+                const componente = rawComp ? padronizarTexto(rawComp) : '';
+                const dupKey = `${normKeyObs(vinc.area)}|${normKeyObs(vinc.maquina)}|${normKeyObs(vinc.equipamento)}|${normKeyObs(vinc.conjunto)}|${normKeyObs(componente)}`;
+                const duplicado = !erros.length && (existentesKeys.has(dupKey) || batchSeen.has(dupKey));
+                if (!erros.length) batchSeen.add(dupKey);
+
+                parsed.push({
+                    linhaNum: idx + 1,
+                    erros,
+                    duplicado,
+                    vinc,
+                    payload: {
+                        area: vinc.area,
+                        maquina: vinc.maquina,
+                        equipamento: vinc.equipamento,
+                        conjunto: vinc.conjunto,
+                        subconjunto: vinc.subconjunto,
+                        ativoId: vinc.ativoId || '',
+                        tipoPeca: 'Obsolescencia',
+                        componente,
+                        fabricante,
+                        codigoSistema,
+                        statusCicloVida,
+                        acaoProposta,
+                        statusAcao,
+                        gravidade: g,
+                        urgencia: u,
+                        tendencia: t,
+                        gutScore: g * u * t,
+                        custoEstimado,
+                        origem_cadastro: 'obsolescencia_csv'
+                    }
+                });
+            }
+
+            impObsParsedRows = parsed;
+            wrap?.classList.remove('hidden');
+            atualizarResumoImportObs();
+        };
+
+        window.atualizarResumoImportObs = () => {
+            const pularDup = document.getElementById('impObsPularDup')?.checked !== false;
+            const somenteVinc = document.getElementById('impObsSomenteVinc')?.checked === true;
+
+            const total = impObsParsedRows.length;
+            const vinculados = impObsParsedRows.filter(r => !r.erros.length && (r.vinc.status === 'exato' || r.vinc.status === 'equipamento')).length;
+            const semVinc = impObsParsedRows.filter(r => !r.erros.length && r.vinc.status === 'sem_vinculo').length;
+            const dup = impObsParsedRows.filter(r => r.duplicado).length;
+            const err = impObsParsedRows.filter(r => r.erros.length > 0).length;
+
+            const prontas = impObsParsedRows.filter(r => {
+                if (r.erros.length) return false;
+                if (pularDup && r.duplicado) return false;
+                if (somenteVinc && r.vinc.status === 'sem_vinculo') return false;
+                return true;
+            });
+
+            const setTxt = (id, v) => { const el = document.getElementById(id); if (el) el.textContent = String(v); };
+            setTxt('impObsKpiTotal', total);
+            setTxt('impObsKpiVinc', vinculados);
+            setTxt('impObsKpiSemVinc', semVinc);
+            setTxt('impObsKpiDup', dup);
+            setTxt('impObsKpiErr', err);
+            setTxt('impObsResumoProntas', `${prontas.length} item(ns) pronto(s) para importar`);
+
+            const btn = document.getElementById('btnExecImportObs');
+            if (btn) {
+                btn.disabled = prontas.length === 0;
+                const sp = btn.querySelector('span');
+                if (sp) sp.textContent = prontas.length > 0 ? `Importar ${prontas.length} Peça${prontas.length > 1 ? 's' : ''}` : 'Importar Peças';
+            }
+
+            const tbody = document.getElementById('impObsPreviewBody');
+            if (!tbody) return;
+            tbody.innerHTML = impObsParsedRows.slice(0, 120).map(r => {
+                const p = r.payload;
+                let badge = '';
+                if (r.erros.length) {
+                    badge = `<span class="px-2 py-0.5 rounded-full text-[10px] font-extrabold bg-rose-100 text-rose-700">Erro: ${escapeHtmlObs(r.erros.join(', '))}</span>`;
+                } else if (r.duplicado && pularDup) {
+                    badge = `<span class="px-2 py-0.5 rounded-full text-[10px] font-extrabold bg-indigo-100 text-indigo-700">Duplicado (Pular)</span>`;
+                } else if (r.vinc.status === 'exato') {
+                    badge = `<span class="px-2 py-0.5 rounded-full text-[10px] font-extrabold bg-emerald-100 text-emerald-700">Vinculado à Árvore</span>`;
+                } else if (r.vinc.status === 'equipamento') {
+                    badge = `<span class="px-2 py-0.5 rounded-full text-[10px] font-extrabold bg-sky-100 text-sky-700">Equip. Vinculado</span>`;
+                } else {
+                    badge = `<span class="px-2 py-0.5 rounded-full text-[10px] font-extrabold bg-amber-100 text-amber-800">${somenteVinc ? 'Ignorado (Sem Vínculo)' : 'Fora da Árvore'}</span>`;
+                }
+                const s = p.gutScore || 0;
+                const gutCls = s >= 80 ? 'badge-critico' : s >= 45 ? 'badge-alto' : s >= 18 ? 'badge-medio' : 'badge-baixo';
+                const path = [p.area, p.maquina, p.equipamento, p.conjunto, p.subconjunto].filter(Boolean).join(' › ');
+                return `<tr class="${r.erros.length || (r.duplicado && pularDup) || (somenteVinc && r.vinc.status === 'sem_vinculo') ? 'opacity-55 bg-slate-50/70' : ''}">
+                    <td class="py-2 px-3 whitespace-nowrap">${badge}</td>
+                    <td class="py-2 px-3 font-bold text-slate-700">${escapeHtmlObs(path || '—')}</td>
+                    <td class="py-2 px-3">
+                        <div class="font-extrabold text-slate-900">${escapeHtmlObs(p.componente || '—')}</div>
+                        <div class="text-[10px] text-slate-500">${p.codigoSistema ? 'ERP: ' + escapeHtmlObs(p.codigoSistema) + ' • ' : ''}${escapeHtmlObs(p.fabricante || '-')}</div>
+                    </td>
+                    <td class="py-2 px-3 text-center"><span class="px-2 py-0.5 rounded-full text-[10px] font-extrabold ${gutCls}">${s}</span></td>
+                    <td class="py-2 px-3 text-right font-extrabold text-slate-700 whitespace-nowrap">R$ ${(p.custoEstimado || 0).toLocaleString('pt-BR')}</td>
+                </tr>`;
+            }).join('') + (impObsParsedRows.length > 120 ? `<tr><td colspan="5" class="py-2 px-3 text-center text-[10px] font-bold text-slate-400">Mostrando 120 de ${impObsParsedRows.length} linhas na prévia. Todas as linhas válidas serão importadas.</td></tr>` : '');
+        };
+
+        window.executarImportacaoObsCsv = async () => {
+            const pularDup = document.getElementById('impObsPularDup')?.checked !== false;
+            const somenteVinc = document.getElementById('impObsSomenteVinc')?.checked === true;
+            const prontas = impObsParsedRows.filter(r => {
+                if (r.erros.length) return false;
+                if (pularDup && r.duplicado) return false;
+                if (somenteVinc && r.vinc.status === 'sem_vinculo') return false;
+                return true;
+            });
+            if (!prontas.length) return showToast('Nenhum item válido pronto para importar.', 'error');
+
+            const btn = document.getElementById('btnExecImportObs');
+            const prog = document.getElementById('impObsProgressText');
+            if (btn) btn.disabled = true;
+            let salvos = 0;
+            let erros = 0;
+            const baseTs = Date.now();
+            try {
+                for (let i = 0; i < prontas.length; i++) {
+                    if (prog) prog.textContent = `Importando ${i + 1} de ${prontas.length}...`;
+                    const docData = { ...prontas[i].payload, timestamp: baseTs + i };
+                    try {
+                        if (isFirebaseConnected) await addDoc(colRef, docData);
+                        salvos++;
+                    } catch (e) {
+                        console.error(e);
+                        erros++;
+                    }
+                }
+                if (erros === 0) {
+                    showToast(`${salvos} peça(s) de obsolescência importada(s) com sucesso!`);
+                    limparImportObs();
+                    closeModal('modalImportObs');
+                } else {
+                    showToast(`${salvos} importada(s) e ${erros} com erro ao gravar.`, 'error');
+                }
+            } finally {
+                if (btn) btn.disabled = false;
+                if (prog) prog.textContent = `${salvos} importada(s) • ${erros} erro(s).`;
+            }
         };
 
         window.processarImportacaoPecas = async () => {
@@ -2015,19 +2526,7 @@
             btn.disabled = true;
             btn.innerText = "Processando...";
 
-            if (isFirebaseConnected) {
-                const node = estruturas.find(x => normKeyObs(x.area) === normKeyObs(a) && normKeyObs(x.maquina) === normKeyObs(m) && normKeyObs(x.equipamento) === normKeyObs(e));
-                const cjAlvo = c || 'Conjunto Geral';
-                const jaTem = node && Array.isArray(node.conjuntos) && node.conjuntos.some(x => normKeyObs(x) === normKeyObs(cjAlvo));
-                if (!jaTem) {
-                    await addDoc(linhasColRef, {
-                        setor: a, area: a, maquina: m, equipamento: e, conjunto: cjAlvo, subconjunto: '',
-                        modelo: node?.modelo || '', serie: node?.numeroSerie || '', numeroSerie: node?.numeroSerie || '',
-                        status_ativo: 'Ativo', inspecao_ativa: true, origem_cadastro: 'obsolescencia_import', timestamp: Date.now()
-                    });
-                }
-            }
-
+            const vinc = resolverVinculoArvoreObs(a, m, e, c, '');
             const rows = text.split('\n');
             let count = 0;
             try {
@@ -2037,12 +2536,18 @@
                     if (!cols[0]) continue;
 
                     const dataPeca = {
-                        area: a, maquina: m, equipamento: e, conjunto: c, tipoPeca: 'Preventiva',
+                        area: vinc.area,
+                        maquina: vinc.maquina,
+                        equipamento: vinc.equipamento,
+                        conjunto: vinc.conjunto,
+                        subconjunto: vinc.subconjunto || '',
+                        ativoId: vinc.ativoId || '',
+                        tipoPeca: 'Preventiva',
                         componente: padronizarTexto(cols[0]),
                         fabricante: cols[1] || '',
                         qtdAplicada: cols[2] || '1',
                         gatilhoVidaUtil: cols[3] || '',
-                        custoEstimado: Number(cols[4]) || 0,
+                        custoEstimado: parseNumeroBrObs(cols[4]),
                         codigoSistema: cols[5] || '',
                         gravidade: 0, urgencia: 0, tendencia: 0, gutScore: 0, timestamp: Date.now() + count
                     };

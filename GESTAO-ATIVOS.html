@@ -3580,7 +3580,11 @@
                 return matchIdRef(c.id_node);
             });
 
-            const pecasObs = listaObsPecas.filter(p => matchEquipFallback(p));
+            const pecasObs = listaObsPecas.filter(p => {
+                if (!p) return false;
+                if (p.ativoId && matchIdRef(p.ativoId)) return matchConjValue(p.conjunto);
+                return matchEquipFallback(p);
+            });
 
             const documentosTodos = listaDocsAtivos.filter(d => {
                 if (!d || !podeVerDocGa(d)) return false;
